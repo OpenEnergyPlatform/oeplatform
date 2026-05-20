@@ -14,42 +14,78 @@ build time — no bind mounts are used.
 
 ## Prerequisites
 
-- [Podman](https://podman.io/getting-started/installation) ≥ 4.0
+- [Podman](https://podman.io/getting-started/installation) ≥ 3.4
 - [podman-compose](https://github.com/containers/podman-compose) ≥ 1.0
 - Rootless Podman configured (`/etc/subuid` and `/etc/subgid` entries for your
   user)
+- `dnsmasq` installed (required by the CNI dnsname plugin for inter-container
+  DNS resolution)
 
-Install podman-compose (if not already installed):
+Install podman-compose via pip (the apt package on Ubuntu 22.04 is too old):
 
 ```sh
 pip install podman-compose
-# or via your distro's package manager, e.g.:
-# dnf install podman-compose   (Fedora/RHEL)
-# apt install podman-compose   (Debian/Ubuntu)
 ```
+
+## Platform Notes
+
+### Ubuntu 22.04 — CNI plugin version mismatch
+
+Ubuntu 22.04 ships `containernetworking-plugins 0.9.1`, which only supports CNI
+spec `0.4.0`. Podman 3.x creates new networks with `cniVersion: 1.0.0`, causing
+the `firewall` CNI plugin to reject the config and silently break
+inter-container networking. Fix it by installing updated plugin binaries into a
+user directory and pointing Podman at them:
+
+```sh
+# Download CNI plugins v1.9.1 (or later)
+curl -LO https://github.com/containernetworking/plugins/releases/download/v1.9.1/cni-plugins-linux-amd64-v1.9.1.tgz
+mkdir -p ~/.config/cni/plugins
+tar -xzf cni-plugins-linux-amd64-v1.9.1.tgz -C ~/.config/cni/plugins
+rm cni-plugins-linux-amd64-v1.9.1.tgz
+
+# Tell Podman to search the user directory first
+mkdir -p ~/.config/containers
+cat >> ~/.config/containers/containers.conf << 'EOF'
+[network]
+cni_plugin_dirs = ["/home/<your-user>/.config/cni/plugins", "/usr/lib/cni", "/opt/cni/bin"]
+EOF
+```
+
+Replace `<your-user>` with your actual username or use `$HOME`.
+
+### Ubuntu 22.04 — podman-compose does not pass `--network` to podman run
+
+`podman-compose` 1.5.0 with Podman 3.4.x has a bug where the `networks:` service
+assignment is ignored and all containers land on the default `podman` network,
+which has no DNS. The workaround is to pre-create the `oep` network and make it
+the default:
+
+```sh
+podman network create oep
+
+cat >> ~/.config/containers/containers.conf << 'EOF'
+default_network = "oep"
+EOF
+```
+
+This makes the `oep` network — which has the dnsname plugin — the network all
+containers use unless explicitly overridden.
+
+> **Note:** This issue does not affect Podman 4.x (Netavark backend, native DNS)
+> or the Quadlets deployment path (see below), which attach containers to the
+> network via explicit `Network=oep.network` directives in the unit files.
 
 ## First-time Setup
 
 ### 1. Create your environment file
 
 ```sh
-cp podman/.env.example .env
-# edit .env and fill in all values — this file must never be committed
+cp podman/.env.example podman/.env
+# edit podman/.env and fill in all values — this file must never be committed
 ```
 
-`podman-compose` automatically loads `.env` from the repository root when run
-from there. The `.gitignore` already excludes `.env` files.
-
-### 2. Build the images
-
-```sh
-podman-compose -f podman/podman-compose.yaml build
-```
-
-The build runs the Vite frontend build and the Django `collectstatic` /
-`compress` steps inside the container — no local Node.js or Python needed.
-
-### 3. Start the stack
+### 2. Start the stack
 
 See [Start the Stack](#start-the-stack) below.
 
@@ -70,13 +106,13 @@ See [Start the Stack](#start-the-stack) below.
 Run all commands from the **repository root**.
 
 ```sh
-podman-compose -f podman/podman-compose.yaml up -d
+podman-compose --env-file podman/.env -f podman/podman-compose.yaml up -d
 ```
 
 ## Stop the Stack
 
 ```sh
-podman-compose -f podman/podman-compose.yaml down
+podman-compose --env-file podman/.env -f podman/podman-compose.yaml down
 ```
 
 ## Override Ports
@@ -91,7 +127,9 @@ export OEP_PORT_POSTGRES=5433
 ## View Logs
 
 ```sh
-podman-compose -f podman/podman-compose.yaml logs -f oeplatform
+podman-compose --env-file podman/.env -f podman/podman-compose.yaml logs -f oeplatform
+# or directly:
+podman logs -f oeplatform
 ```
 
 ## Open a Shell
@@ -103,24 +141,50 @@ podman exec -it oeplatform bash
 ## Reset Database
 
 ```sh
-podman-compose -f podman/podman-compose.yaml down
+podman-compose --env-file podman/.env -f podman/podman-compose.yaml down
 podman volume rm podman_pgdata   # check exact name with: podman volume ls
-podman-compose -f podman/podman-compose.yaml up -d
+podman-compose --env-file podman/.env -f podman/podman-compose.yaml up -d
 ```
 
 The postgres container recreates all tables on a fresh volume automatically.
 
 ## Deploy a New Release
 
-Checkout the release branch/tag, rebuild the image, and restart the stack. All
-release steps run automatically — no manual server commands needed.
+Pull the latest production images and restart — all release steps run inside the
+container automatically (migrations, static files, etc.).
 
 ```sh
-git checkout master   # or the release tag, e.g. git checkout v1.8.0
 git pull
+podman pull ghcr.io/openenergyplatform/oeplatform-production:latest
+podman pull ghcr.io/openenergyplatform/oeplatform-ontop:latest
+podman-compose --env-file podman/.env -f podman/podman-compose.yaml up -d
+```
 
-podman-compose -f podman/podman-compose.yaml build
-podman-compose -f podman/podman-compose.yaml up -d
+## Quadlets (systemd) Alternative
+
+The `quadlets/` directory contains systemd Quadlet unit files as an alternative
+to podman-compose. Quadlets are better suited for long-running production
+servers because systemd manages restarts, dependencies, and logging.
+
+**Why Quadlets are simpler on Podman 3.x:** Each `.container` file declares
+`Network=oep.network` explicitly. Systemd creates the network via the
+`oep.network` unit and attaches every container before it starts. This bypasses
+the podman-compose network assignment bug entirely — no `default_network`
+workaround needed.
+
+You still need the CNI plugin fix from the
+[Ubuntu 22.04 section](#ubuntu-2204--cni-plugin-version-mismatch) if running on
+Ubuntu 22.04.
+
+```sh
+bash podman/quadlets/install.sh
+systemctl --user enable --now oep-postgres oep-fuseki oep-oeplatform oep-ontop oep-lookup
+```
+
+View logs via journald:
+
+```sh
+journalctl --user -u oep-oeplatform -f
 ```
 
 ### What runs where
