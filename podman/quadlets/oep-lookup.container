@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# NOTE: The Volume= paths below must point to your actual repo checkout.
+#       Update /opt/oeplatform to match your deployment path, or symlink it:
+#         sudo ln -s /your/repo/path /opt/oeplatform
+
+[Unit]
+Description=OEPlatform DBpedia Lookup service
+After=network-online.target
+
+[Container]
+Image=dbpedia/lookup:dev
+ContainerName=lookup
+Volume=/opt/oeplatform/docker/data/index:/index:ro
+Volume=/opt/oeplatform/docker/serviceConfigs/lookup/config.yaml:/resources/config.yml:ro
+PublishPort=3004:8082
+Network=oep.network
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
