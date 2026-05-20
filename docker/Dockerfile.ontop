@@ -1,5 +1,5 @@
 # Use the official Ontop image as the base
-FROM ontop/ontop:latest
+FROM docker.io/ontop/ontop:latest
 
 # Copy the PostgreSQL JDBC driver into Ontop's lib directory
 COPY serviceConfigs/ontop/postgresql.jar /opt/ontop/lib/postgresql.jar

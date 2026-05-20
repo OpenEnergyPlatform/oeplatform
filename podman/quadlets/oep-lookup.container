@@ -11,7 +11,7 @@ Description=OEPlatform DBpedia Lookup service
 After=network-online.target
 
 [Container]
-Image=dbpedia/lookup:dev
+Image=docker.io/dbpedia/lookup:dev
 ContainerName=lookup
 Volume=/opt/oeplatform/docker/data/index:/index:ro
 Volume=/opt/oeplatform/docker/serviceConfigs/lookup/config.yaml:/resources/config.yml:ro

@@ -6,15 +6,21 @@
 # Run from the repository root:
 #   podman-compose -f podman/podman-compose.yaml up -d
 
+networks:
+  oep:
+    external: true
+
 volumes:
   pgdata:
   fuseki_databases:
   oeplatform_ontologies:
   oeplatform_media:
+  lookup_index:
 
 services:
   postgres:
     image: ghcr.io/openenergyplatform/oeplatform-postgres:latest
+    container_name: postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -22,11 +28,13 @@ services:
       - pgdata:/var/lib/postgresql/data
     ports:
       - "${OEP_PORT_POSTGRES:-5432}:5432"
+    networks:
+      - oep
 
   # TODO: load oeo_ext.owl into Fuseki as a named graph so it is queryable via
   # SPARQL alongside the base OEO. See GitHub issue #<TBD>.
   fuseki:
-    image: stain/jena-fuseki:5.1.0
+    image: docker.io/stain/jena-fuseki:5.1.0
     container_name: fuseki
     environment:
       ADMIN_PASSWORD: ${FUSEKI_ADMIN_PASSWORD}
@@ -36,6 +44,8 @@ services:
     restart: unless-stopped
     ports:
       - "${OEP_PORT_FUSEKI:-3030}:3030"
+    networks:
+      - oep
 
   oeplatform:
     image: ghcr.io/openenergyplatform/oeplatform-production:latest
@@ -56,6 +66,8 @@ services:
       - oeplatform_media:/app/media
     depends_on:
       - postgres
+    networks:
+      - oep
 
   ontop:
     image: ghcr.io/openenergyplatform/oeplatform-ontop:latest
@@ -70,13 +82,17 @@ services:
       - ./serviceConfigs/ontop:/opt/ontop-config
     depends_on:
       - postgres
+    networks:
+      - oep
 
   lookup:
     restart: unless-stopped
-    image: dbpedia/lookup:dev
+    image: docker.io/dbpedia/lookup:dev
     container_name: loep_lookup
     ports:
       - "${OEP_PORT_LOOKUP:-3004}:8082"
     volumes:
-      - ../docker/data/index/:/index
-      - ../docker/serviceConfigs/lookup/config.yaml:/resources/config.yml
+      - lookup_index:/index
+      - ./serviceConfigs/lookup/config.yaml:/resources/config.yml
+    networks:
+      - oep

@@ -7,7 +7,7 @@ Description=OEPlatform Apache Jena Fuseki triple store
 After=network-online.target
 
 [Container]
-Image=stain/jena-fuseki:5.1.0
+Image=docker.io/stain/jena-fuseki:5.1.0
 ContainerName=fuseki
 EnvironmentFile=%h/.config/oeplatform/oep.env
 Volume=fuseki-databases.volume:/home/fuseki/databases
