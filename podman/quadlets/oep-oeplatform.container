@@ -2,15 +2,12 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 #
-# Build the image before enabling this unit:
-#   podman build -t localhost/oeplatform:latest -f podman/Dockerfile .
-
 [Unit]
 Description=OEPlatform web application
 After=oep-postgres.service oep-fuseki.service
 
 [Container]
-Image=localhost/oeplatform:latest
+Image=ghcr.io/openenergyplatform/oeplatform-production:latest
 ContainerName=oeplatform
 EnvironmentFile=%h/.config/oeplatform/oep.env
 Volume=oeplatform-ontologies.volume:/app/ontologies

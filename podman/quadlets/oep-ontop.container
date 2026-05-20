@@ -2,9 +2,6 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 #
-# Build the image before enabling this unit:
-#   podman build -t localhost/oep-ontop:latest -f docker/Dockerfile.ontop docker/
-#
 # NOTE: The Volume= path below must point to your actual repo checkout.
 #       Update /opt/oeplatform to match your deployment path, or symlink it:
 #         sudo ln -s /your/actual/repo/path /opt/oeplatform
@@ -14,7 +11,7 @@ Description=OEPlatform Ontop SPARQL endpoint
 After=oep-postgres.service
 
 [Container]
-Image=localhost/oep-ontop:latest
+Image=ghcr.io/openenergyplatform/oeplatform-ontop:latest
 ContainerName=ontop
 Volume=/opt/oeplatform/podman/serviceConfigs/ontop:/opt/ontop-config:ro
 Environment=ONTOP_MAPPING_FILE=/opt/ontop-config/mapping.obda

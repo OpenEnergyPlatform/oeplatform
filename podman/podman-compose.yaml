@@ -38,9 +38,7 @@ services:
       - "${OEP_PORT_FUSEKI:-3030}:3030"
 
   oeplatform:
-    build:
-      context: ..
-      dockerfile: podman/Dockerfile
+    image: ghcr.io/openenergyplatform/oeplatform-production:latest
     container_name: oeplatform
     ports:
       - "${OEP_PORT_WEB:-8080}:80"
@@ -60,9 +58,7 @@ services:
       - postgres
 
   ontop:
-    build:
-      context: ../docker
-      dockerfile: Dockerfile.ontop
+    image: ghcr.io/openenergyplatform/oeplatform-ontop:latest
     container_name: ontop
     ports:
       - "${OEP_PORT_ONTOP:-8081}:8080"
