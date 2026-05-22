@@ -82,7 +82,34 @@ containers use unless explicitly overridden.
 
 ```sh
 cp podman/.env.example podman/.env
-# edit podman/.env and fill in all values — this file must never be committed
+```
+
+Edit `podman/.env` and fill in all values. The file is read by `podman-compose`
+at startup and must never be committed (it is gitignored).
+
+| Variable                | Description                                                          |
+| ----------------------- | -------------------------------------------------------------------- |
+| `POSTGRES_USER`         | PostgreSQL superuser name                                            |
+| `POSTGRES_PASSWORD`     | PostgreSQL superuser password                                        |
+| `OEP_DJANGO_USER`       | DB user Django connects as (usually same as `POSTGRES_USER`)         |
+| `OEP_DB_PW`             | Password for `OEP_DJANGO_USER`                                       |
+| `OEP_DJANGO_HOST`       | Hostname of the postgres container — keep as `postgres`              |
+| `OEP_DJANGO_NAME`       | Django database name — keep as `oep_django`                          |
+| `LOCAL_DB_USER`         | User for the local (oedb) database — usually same as `POSTGRES_USER` |
+| `LOCAL_DB_PASSWORD`     | Password for `LOCAL_DB_USER`                                         |
+| `LOCAL_DB_NAME`         | Local database name — keep as `oedb`                                 |
+| `LOCAL_DB_HOST`         | Hostname of the postgres container — keep as `postgres`              |
+| `FUSEKI_ADMIN_PASSWORD` | Fuseki web UI admin password                                         |
+| `FUSEKI_DATASET_1`      | Fuseki dataset name — keep as `ds`                                   |
+
+Optional port overrides (defaults shown):
+
+```sh
+OEP_PORT_WEB=8080
+OEP_PORT_POSTGRES=5432
+OEP_PORT_FUSEKI=3030
+OEP_PORT_ONTOP=8081
+OEP_PORT_LOOKUP=3004
 ```
 
 ### 2. Start the stack

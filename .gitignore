@@ -84,6 +84,8 @@ venv*/
 /envs
 /node_env
 .env*
+!.env.example
+!**/oep.env.example
 /fuseki
 apache*
 /oep-django-5
