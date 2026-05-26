@@ -195,10 +195,11 @@ export default function OeoViewerPage() {
 
   const hierarchyComponent = (
     <TssHierarchy
-      iri=""
+      iri={selectedEntity.iri}
       keepExpansionStates={true}
       onNavigateToEntity={handleHierarchyClick}
       onNavigateToOntology={handleNavigateToOntology}
+      showSiblingsOnInit={true}
     />
   );
 
@@ -288,7 +289,7 @@ export default function OeoViewerPage() {
                       <EuiText size="s">
                         <h3 style={{ marginTop: 0 }}>Ontology Hierarchy</h3>
                       </EuiText>
-                        <EuiSpacer size="m" />
+                      <EuiSpacer size="m" />
                       {hierarchyComponent}
                     </EuiPanel>
                   </div>

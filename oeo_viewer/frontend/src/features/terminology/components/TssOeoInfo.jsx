@@ -25,7 +25,7 @@ export default function TssOeoInfo({
   parameter = "",
   hasTitle = true,
   showBadges = true,
-  useLegacy = true,
+  useLegacy = false,
 }) {
   const { apiBase, ontology, lang } = useTssConfig();
 

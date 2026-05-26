@@ -1,0 +1,12 @@
+<div id="field_{{ item.field|default:'undefined' }}"
+     class="field review__item"
+     data-fieldkey="{{ item.field|default:'' }}"
+     data-fieldvalue="{{ item.value|default:'' }}"
+     data-category="{{ category }}">
+  <p class="review__item-content">
+    <span class="key">{{ item.display_field|default:item.field }}</span>
+    <span class="value">{{ item.newValue|default:item.value }}</span>
+    <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
+    <span class="comment">{{ item.suggestion_comment }}</span>
+  </p>
+</div>

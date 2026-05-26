@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 // SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -11,7 +12,7 @@ export default function TssMetadata({
   ontologyId,         // optional explicit override; else comes from config.ontology
   entityType = "class",
   parameter = "",
-  useLegacy = true,
+  useLegacy = false,
 
   // Optional compact tab overrides: { altNames?, crossRef?, graphView?, hierarchy?, termDepiction?, terminologyInfo? }
   tabs,
@@ -71,8 +72,10 @@ export default function TssMetadata({
       entityType={entityType}
       iri={iri}
       parameter={mergedParameter}
-      useLegacy={useLegacy}
       termLink=""
+      initialSelectedTab="graphview"
+      enableComparisonMode={true}
+      rootWalk={true}
       {...finalTabs}
       {...callbackProps}
     />
