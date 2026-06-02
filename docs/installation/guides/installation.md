@@ -231,6 +231,10 @@ system like GitHub.
 - copy the file `securitysettings.py.default` and rename it to
   `securitysettings.py`
 
+!!! danger
+
+    You must remove or fill placeholder in SOCIALACCOUNT_PROVIDERS in order to avoid an error due to empty provider ID when trying to login.
+
 ??? note "How to configure securitysettings.py"
 
     The security settings provide information to django to connect to your databases, relevant for step 5, below. You can provide the access credentials directly in the script or import them using environment variables. For detailed instructions see section [3. of the manual database setup guide](./manual-db-setup.md#3-connect-database-to-the-django-project).

@@ -186,7 +186,7 @@
         $("#group_field").autocomplete({
           source: function (request, response) {
             $.ajax({
-              url: "{% url 'api:usrprop' %}",
+              url: "{% url 'api:groupprop' %}",
               dataType: "json",
               data: { name: request.term },
               success: function (data) {

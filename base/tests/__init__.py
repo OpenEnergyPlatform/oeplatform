@@ -13,7 +13,7 @@ from django.test import TestCase
 from django.urls import URLPattern, URLResolver, get_resolver, reverse
 from django.urls.resolvers import RegexPattern, RoutePattern
 
-from login.models import GroupMembership, UserGroup
+from login.models import Membership, Organization
 from login.models import myuser as User
 from oeplatform.settings import IS_TEST
 
@@ -78,13 +78,13 @@ class TestViewsTestCase(TestCase):
         cls.user = User.objects.create_user(  # type: ignore
             name="test", email="test@test.test", affiliation="test"
         )
-        cls.group = UserGroup.objects.create()
-        GroupMembership.objects.create(user=cls.user, group=cls.group)
+        cls.organization = Organization.objects.create()
+        Membership.objects.create(user=cls.user, group=cls.organization)
 
     @classmethod
     def tearDownClass(cls):
         cls.user.delete()
-        cls.group.delete()
+        cls.organization.delete()
         super(TestViewsTestCase, cls).tearDownClass()
 
     def get(

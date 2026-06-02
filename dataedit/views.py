@@ -925,7 +925,7 @@ class TablePermissionView(View):
             # Return an HTTP 400 Bad Request response
             return HttpResponseBadRequest("Group name is required.")
 
-        group = get_object_or_404(login_models.UserGroup, name=group_name)
+        group = get_object_or_404(login_models.Group, name=group_name)
 
         p, _ = login_models.GroupPermission.objects.get_or_create(
             holder=group, table=table_obj
@@ -939,7 +939,7 @@ class TablePermissionView(View):
             # Return an HTTP 400 Bad Request response
             return HttpResponseBadRequest("Group id is required.")
 
-        group = get_object_or_404(login_models.UserGroup, id=group_id)
+        group = get_object_or_404(login_models.Group, id=group_id)
 
         p = get_object_or_404(
             login_models.GroupPermission, holder=group, table=table_obj
@@ -954,7 +954,7 @@ class TablePermissionView(View):
             # Return an HTTP 400 Bad Request response
             return HttpResponseBadRequest("Group id is required.")
 
-        group = get_object_or_404(login_models.UserGroup, id=group_id)
+        group = get_object_or_404(login_models.Group, id=group_id)
 
         p = get_object_or_404(
             login_models.GroupPermission, holder=group, table=table_obj

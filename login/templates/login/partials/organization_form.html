@@ -1,0 +1,47 @@
+<!--
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2026 Hendrik Huyskens <https://github.com/henhuy> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+{% load django_bootstrap5 %}
+<section class="profile-category htmxFormComponent">
+  {% if organization %}
+    <h2 class="header">Edit {{ organization }}</h2>
+  {% else %}
+    <h2 class="header">Create Group</h2>
+  {% endif %}
+  <h2 class="profile-category__heading profile-category__heading--border-btm">
+    Details
+  </h2>
+  {% if organization %}
+    {% if organization.image %}
+      <div class="profile-category__image">
+        <img src="{{ organization.image }}" alt="Image of organization">
+      </div>
+    {% endif %}
+    <form id="organization-form"
+          hx-post="{% url 'login:organization-edit' organization_id=organization.id %}"
+          hx-target=".htmxFormComponent">
+      {% csrf_token %}
+      {% bootstrap_form form %}
+    </form>
+  {% else %}
+    <form id="organization-form"
+          hx-post="{% url 'login:organization-create' %}"
+          hx-trigger="submit"
+          hx-target=".htmxFormComponent">
+      {% csrf_token %}
+      {% bootstrap_form form %}
+    </form>
+  {% endif %}
+  <div class="profile-category__btns">
+    <button form="organization-form"
+            type="submit"
+            value="Submit"
+            class="profile-category__btn  profile-category__btn--save">
+      Save
+    </button>
+  </div>
+</section>
