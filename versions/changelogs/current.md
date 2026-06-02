@@ -2,6 +2,7 @@
 SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
 SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2026 Vismaya Jochem <https://github.com/vismayajochem> © Reiner Lemoine Institut
 
 SPDX-License-Identifier: CC0-1.0
 -->
@@ -69,6 +70,10 @@ SPDX-License-Identifier: CC0-1.0
   `valueReference` entries and added unwanted properties when the users submits
   the Editor form
   [(#2290)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2290)
+
+- Fix navigation box during the OPR; show proper information and jump to next
+  field that needs review. Hide start button for OPR if metadata is empty.
+  [(#2310)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2310)
 
 ## Documentation updates
 
