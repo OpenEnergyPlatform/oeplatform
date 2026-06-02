@@ -20,7 +20,6 @@ from django.http import HttpRequest, JsonResponse
 import api.parser
 from api.actions import (
     describe_columns,
-    describe_constraints,
     get_column_changes,
     get_constraints_changes,
     set_table_metadata,
@@ -49,9 +48,9 @@ def merge_field_reviews(current_json, new_json):
 
     Note:
         If the same key is present in both the contributor's and
-            reviewer's reviews, the function will merge the field
-            evaluations. Otherwise, it will create a new entry in
-            the Review-Dict.
+        reviewer's reviews, the function will merge the field
+        evaluations. Otherwise, it will create a new entry in
+        the Review-Dict.
     """
     merged_json = new_json.copy()
     review_dict = {}
@@ -88,18 +87,7 @@ def merge_field_reviews(current_json, new_json):
 
 
 def get_review_for_key(key, review_data):
-    """
-    Retrieve the review for a specific key from the review data.
-
-    Args:
-        key (str): The key for which to retrieve the review.
-            review_data (dict): The review data containing
-            reviews for various keys.
-
-    Returns:
-        Any: The new value associated with the specified key
-            in the review data, or None if the key is not found.
-    """
+    """Retrieve the review for a specific key from the review data."""
 
     for review in review_data["reviewData"]["reviews"]:
         if review["key"] == key:
@@ -108,20 +96,9 @@ def get_review_for_key(key, review_data):
 
 
 def recursive_update(metadata, review_data):
-    """
-    Recursively updates metadata with new values from review_data,
-    skipping or removing fields with status 'rejected'.
+    """Recursively updates metadata with new values from review_data.
 
-    Args:
-    metadata (dict): The original metadata dictionary to update.
-    review_data (dict): The review data containing the new values
-    for various keys.
-
-    Note:
-    The function iterates through the review data and for each key
-    updates the corresponding value in metadata if the new value is
-    present and is not an empty string, and if the field status is
-    not 'rejected'.
+    Skips or removes fields with status 'rejected'.
     """
 
     def delete_nested_field(data: list | dict | None, keys: list[str]):
@@ -189,18 +166,7 @@ def recursive_update(metadata, review_data):
 
 
 def set_nested_value(metadata, keys, value):
-    """
-    Set a nested value in a dictionary given a sequence of keys.
-
-    Args:
-        metadata (dict): The dictionary in which to set the value.
-        keys (list): A list of keys representing the path to the nested value.
-        value (Any): The value to set.
-
-    Note:
-        The function navigates through the dictionary using the keys
-        and sets the value at the position indicated by the last key in the list.
-    """
+    """Set a nested value in a dictionary given a sequence of keys."""
 
     for key in keys[:-1]:
         if key.isdigit():
@@ -213,73 +179,93 @@ def set_nested_value(metadata, keys, value):
 
 
 def process_review_data(review_data, metadata, categories):
-    state_dict = {}
+    """Attach reviewer fields (suggestions/comments/newValue) to metadata items.
 
-    # Initialize fields
+    The `metadata[category]` structures may be nested (dict/list) and can contain
+    non-dict leaf values (e.g. strings). We therefore walk the structure
+    recursively and only mutate leaf dicts that represent a field item.
+    """
+
+    state_dict: dict[str, str | None] = {}
+
+    def iter_field_items(node):
+        """Yield all leaf field-item dicts inside nested list/dict structures.
+
+        A leaf field item is a dict with a string key `field`.
+        """
+        if isinstance(node, list):
+            for el in node:
+                yield from iter_field_items(el)
+        elif isinstance(node, dict):
+            if isinstance(node.get("field"), str):
+                yield node
+            else:
+                for v in node.values():
+                    yield from iter_field_items(v)
+        # Ignore other node types (e.g. str/int/None)
+
+    # Initialize fields safely
     for category in categories:
-        for item in metadata[category]:
-            item["reviewer_suggestion"] = ""
-            item["suggestion_comment"] = ""
-            item["additional_comment"] = ""
-            item["newValue"] = ""
+        cat_node = metadata.get(category)
+        if cat_node is None:
+            continue
+        for item in iter_field_items(cat_node):
+            item.setdefault("reviewer_suggestion", "")
+            item.setdefault("suggestion_comment", "")
+            item.setdefault("additional_comment", "")
+            item.setdefault("newValue", "")
 
-    for review in review_data:
+    # Apply review values
+    for review in review_data or []:
         field_key = review.get("key")
         field_review = review.get("fieldReview")
-        category = review.get("category")  # Get the category from the review
+        category = review.get("category")
+
+        state = None
+        reviewer_suggestion = ""
+        reviewer_suggestion_comment = ""
+        newValue = ""
+        additional_comment = ""
 
         if isinstance(field_review, list):
-            # Sort and get the latest field review
             sorted_field_review = sorted(
-                field_review, key=lambda x: x.get("timestamp"), reverse=True
+                field_review,
+                key=lambda x: (x.get("timestamp") or 0) if isinstance(x, dict) else 0,
+                reverse=True,
             )
-            latest_field_review = (
-                sorted_field_review[0] if sorted_field_review else None
-            )
+            latest = sorted_field_review[0] if sorted_field_review else None
+            if isinstance(latest, dict):
+                state = latest.get("state")
+                reviewer_suggestion = latest.get("reviewerSuggestion") or ""
+                reviewer_suggestion_comment = latest.get("comment") or ""
+                newValue = latest.get("newValue") or ""
+                additional_comment = latest.get("additionalComment") or ""
 
-            if latest_field_review:
-                state = latest_field_review.get("state")
-                reviewer_suggestion = latest_field_review.get("reviewerSuggestion")
-                reviewer_suggestion_comment = latest_field_review.get("comment")
-                newValue = latest_field_review.get("newValue")
-                additional_comment = latest_field_review.get("additionalComment")
-            else:
-                state = None
-                reviewer_suggestion = ""
-                reviewer_suggestion_comment = ""
-                newValue = ""
-                additional_comment = ""
-        else:
+        elif isinstance(field_review, dict):
             state = field_review.get("state")
-            reviewer_suggestion = field_review.get("reviewerSuggestion")
-            reviewer_suggestion_comment = field_review.get("comment")
-            newValue = field_review.get("newValue")
-            additional_comment = field_review.get("additionalComment")
+            reviewer_suggestion = field_review.get("reviewerSuggestion") or ""
+            reviewer_suggestion_comment = field_review.get("comment") or ""
+            newValue = field_review.get("newValue") or ""
+            additional_comment = field_review.get("additionalComment") or ""
 
-        # Update the item in the correct category
-        if category in metadata:
-            for item in metadata[category]:
-                if item["field"] == field_key:
-                    item["reviewer_suggestion"] = reviewer_suggestion or ""
-                    item["suggestion_comment"] = reviewer_suggestion_comment or ""
-                    item["additional_comment"] = additional_comment or ""
-                    item["newValue"] = newValue or ""
+        # Update the matching item in metadata for this category
+        if category in metadata and field_key:
+            for item in iter_field_items(metadata.get(category)):
+                if item.get("field") == field_key:
+                    item["reviewer_suggestion"] = reviewer_suggestion
+                    item["suggestion_comment"] = reviewer_suggestion_comment
+                    item["additional_comment"] = additional_comment
+                    item["newValue"] = newValue
                     break
 
-        state_dict[field_key] = state
+        if field_key:
+            state_dict[field_key] = state
 
     return state_dict
 
 
 def delete_peer_review(review_id):
-    """
-    Remove Peer Review by review_id.
-    Args:
-        review_id (int): ID review.
-
-    Returns:
-        JsonResponse: JSON response about successful deletion or error.
-    """
+    """Remove Peer Review by review_id."""
     if review_id:
         peer_review = PeerReview.objects.filter(id=review_id).first()
         if peer_review:
@@ -518,91 +504,6 @@ def update_keywords_from_tags(table: Table) -> None:
     metadata["resources"][0]["keywords"] = keywords
 
     set_table_metadata(table=table.name, metadata=metadata)
-
-
-def get_column_description(table_obj: Table):
-    """Return list of column descriptions:
-    [{
-       "name": str,
-       "data_type": str,
-       "is_nullable': bool,
-       "is_pk": bool
-    }]
-
-    """
-
-    def get_datatype_str(column_def):
-        """get single string sql type definition.
-
-        We want the data type definition to be a simple string, e.g. decimal(10, 6)
-        or varchar(128), so we need to combine the various fields
-        (type, numeric_precision, numeric_scale, ...)
-        """
-        # for reverse validation, see also api.parser.parse_type(dt_string)
-        dt = column_def["data_type"].lower()
-        precisions = None
-        if dt.startswith("character"):
-            if dt == "character varying":
-                dt = "varchar"
-            else:
-                dt = "char"
-            precisions = [column_def["character_maximum_length"]]
-        elif dt.endswith(" without time zone"):  # this is the default
-            dt = dt.replace(" without time zone", "")
-        elif re.match("(numeric|decimal)", dt):
-            precisions = [column_def["numeric_precision"], column_def["numeric_scale"]]
-        elif dt == "interval":
-            precisions = [column_def["interval_precision"]]
-        elif re.match(".*int", dt) and re.match(
-            "nextval", column_def.get("column_default") or ""
-        ):
-            # dt = dt.replace('int', 'serial')
-            pass
-        elif dt.startswith("double"):
-            dt = "float"
-        if precisions:  # remove None
-            precisions = [x for x in precisions if x is not None]
-        if precisions:
-            dt += "(%s)" % ", ".join(str(x) for x in precisions)
-        return dt
-
-    def get_pk_fields(constraints):
-        """Get the column names that make up the primary key
-        from the constraints definitions.
-
-        NOTE: Currently, the wizard to create tables only supports
-            single fields primary keys (which is advisable anyways)
-        """
-        pk_fields = []
-        for _name, constraint in constraints.items():
-            if constraint.get("constraint_type") == "PRIMARY KEY":
-                m = re.match(
-                    r"PRIMARY KEY[ ]*\(([^)]+)", constraint.get("definition") or ""
-                )
-                if m:
-                    # "f1, f2" -> ["f1", "f2"]
-                    pk_fields = [x.strip() for x in m.groups()[0].split(",")]
-        return pk_fields
-
-    _columns = describe_columns(table_obj)
-    _constraints = describe_constraints(table_obj)
-    pk_fields = get_pk_fields(_constraints)
-    # order by ordinal_position
-    columns = []
-    for name, col in sorted(
-        _columns.items(), key=lambda kv: int(kv[1]["ordinal_position"])
-    ):
-        columns.append(
-            {
-                "name": name,
-                "data_type": get_datatype_str(col),
-                "is_nullable": col["is_nullable"],
-                "is_pk": name in pk_fields,
-                "unit": None,
-                "description": None,
-            }
-        )
-    return columns
 
 
 def get_cancle_state(request):

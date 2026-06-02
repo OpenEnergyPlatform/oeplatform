@@ -24,7 +24,7 @@ class EnergymodelForm(ModelForm):
                 self.fields[key].required = False
             else:
                 f = [not f.null for f in Energymodel._meta.fields if f.name == key][0]
-                cls_name = self.fields[key].widget.__class__.__name__  # type:ignore
+                cls_name = self.fields[key].widget.__class__.__name__  # type: ignore
                 self.fields[key].required = f and cls_name != "CheckboxInput"
 
     class Meta:
@@ -42,7 +42,7 @@ class EnergyframeworkForm(ModelForm):
                 f = [not f.null for f in Energyframework._meta.fields if f.name == key][
                     0
                 ]
-                cls_name = self.fields[key].widget.__class__.__name__  # type:ignore
+                cls_name = self.fields[key].widget.__class__.__name__  # type: ignore
                 self.fields[key].required = f and cls_name != "CheckboxInput"
             if "help_text" in self.fields[key].__dict__:
                 self.fields[key].help_text = self.fields[key].help_text.replace(

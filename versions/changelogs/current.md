@@ -14,6 +14,7 @@ SPDX-License-Identifier: CC0-1.0
 - Reviewer&Contributor page: calculation of percentage of progress of reviewed
   fields takes into account empty fields
   [(#1386)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1386)
+
 - Refactor user groups into organizations; add fields to the organization model;
   refactor HTMX for organization management pages
   [(#2261)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2261)

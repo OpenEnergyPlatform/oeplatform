@@ -241,7 +241,7 @@ class myuser(AbstractBaseUser, PermissionHolder):
     ]  # related_name, for static type checking
 
     USERNAME_FIELD = "name"
-    REQUIRED_FIELDS = [name]  # type:ignore TODO: why do we need this?
+    REQUIRED_FIELDS = [name]  # type: ignore TODO: why do we need this?
 
     objects = OEPUserManager()
 
