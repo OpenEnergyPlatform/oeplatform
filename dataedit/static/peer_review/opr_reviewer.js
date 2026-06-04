@@ -151,24 +151,18 @@ function click_field(fieldKey, fieldValue, category) {
   setselectedFieldValue(fieldValue);
   setSelectedCategory(category);
 
-  // Build the lookup key for field_descriptions_json.
-  // The fieldKey from the HTML has resources.N. stripped already,
-  // e.g. "spatial.extent.name". The schema stores it under
-  // "resources.spatial.extent.name". So we try both, plus
-  // a version with numeric indices removed.
   const cleanedFieldKey = fieldKey.replace(/\.\d+/g, '');
   
-  // Try to find description using multiple key variants
   const candidateKeys = [
-  `resources.${category}.${fieldKey}`,         // resources.spatial.extent.name
-  `resources.${category}.${cleanedFieldKey}`,  // resources.spatial.extent.name
-  `resources.${fieldKey}`,                     // fallback
-  `resources.${cleanedFieldKey}`,              // fallback
-  fieldKey,
-  cleanedFieldKey,
-];
+    `resources.${category}.${fieldKey}`,
+    `resources.${category}.${cleanedFieldKey}`,
+    `resources.${fieldKey}`,
+    `resources.${cleanedFieldKey}`,
+    fieldKey,
+    cleanedFieldKey,
+  ];
 
-  let resolvedKey = cleanedFieldKey; // default fallback
+  let resolvedKey = cleanedFieldKey;
   if (typeof fieldDescriptionsData !== 'undefined' && fieldDescriptionsData) {
     for (const candidate of candidateKeys) {
       if (fieldDescriptionsData[candidate]) {
@@ -199,11 +193,34 @@ function click_field(fieldKey, fieldValue, category) {
     if (valueEl) valueEl.style.color = '';
   }
 
+  // Always start fresh visually
   clearInputFields();
   hideReviewerOptions();
   hideReviewerCommentsOptions();
-}
 
+  // --- NEW: Restore previous review entry if it exists ---
+  const existingReview = current_review.reviews.find(r => r.key === fieldKey);
+  if (existingReview && existingReview.fieldReview) {
+    const fr = existingReview.fieldReview;
+    const previousState = fr.state;
+
+    // Simulate clicking the correct state button to show the right UI
+    if (previousState === 'suggestion') {
+      showReviewerOptions();
+      hideReviewerCommentsOptions();
+      const valuearea = document.getElementById('valuearea');
+      const commentarea = document.getElementById('commentarea');
+      if (valuearea) valuearea.value = fr.newValue || '';
+      if (commentarea) commentarea.value = fr.comment || '';
+    } else if (previousState === 'rejected') {
+      hideReviewerOptions();
+      showReviewerCommentsOptions();
+      const comments = document.getElementById('comments');
+      if (comments) comments.value = fr.additionalComment || '';
+    }
+    // For 'ok', no extra UI needed, fields stay hidden
+  }
+}
 function updateFieldColor(fieldKey, state) {
   const safeId = '#field_' + fieldKey.replace(/\./g, "\\.");
   $(safeId).removeClass('field-ok field-suggestion field-rejected');
