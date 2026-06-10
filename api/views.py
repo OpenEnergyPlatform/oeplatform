@@ -40,25 +40,15 @@ import itertools
 import json
 import re
 from copy import deepcopy
-from decimal import Decimal
 
 import geoalchemy2  # noqa:F401 Although this import seems unused is has to be here
 import requests
 import zipstream
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import TrigramSimilarity
-from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
-from django.http import (
-    Http404,
-    HttpResponse,
-    HttpResponseBadRequest,
-    HttpResponseServerError,
-    JsonResponse,
-    StreamingHttpResponse,
-)
+from django.http import Http404, HttpRequest, JsonResponse
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from oemetadata.latest.example import OEMETADATA_LATEST_EXAMPLE
@@ -184,11 +174,7 @@ from api.validators.column import validate_column_names
 from api.validators.identifier import (
     assert_valid_table_name,
 )
-from dataedit.models import Dataset, Embargo
-from dataedit.models import Table
-from dataedit.models import Table as DBTable
-from dataedit.models import Topic
-from dataedit.views import get_tag_keywords_synchronized_metadata, schema_whitelist
+from dataedit.models import Dataset, Table
 from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
 from modelview.models import Energyframework, Energymodel
 from oekg.utils import (
@@ -211,7 +197,7 @@ DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL_WO_QUERY = strip_query(
 )
 
 
-class MetadataAPIView(APIView):
+class TableMetadataAPIView(APIView):
     """
     Important note:
     oemetadata v2 introduces datasets which are not relevant on a table level
@@ -254,20 +240,6 @@ class MetadataAPIView(APIView):
             metadata["resources"][0]["keywords"] = update_tags_from_keywords(
                 table=table_obj.name, keywords=keywords
             )
-            # oemetadata v2 introduces datasets which are not relevant on a table level
-            # always query for metadata["resources"][0]
-            metadata["resources"][0]["keywords"] = _metadata["resources"][0]["keywords"]
-
-            # Write oemetadata json to dataedit.models.tables
-            actions.set_table_metadata(
-                table=table, schema=schema, metadata=metadata, cursor=cursor
-            )
-            _metadata = get_tag_keywords_synchronized_metadata(
-                table=table, schema=schema, keywords_new=keywords
-            )
-            # oemetadata v2 introduces datasets which are not relevant on a table level
-            # always query for metadata["resources"][0]
-            metadata["resources"][0]["keywords"] = _metadata["resources"][0]["keywords"]
 
             # make sure extra metadata is removed
             metadata.pop("connection_id", None)
@@ -357,10 +329,10 @@ class AssignDatasetTables(APIView):
 
         for table_ref in table_refs:
             try:
-                table = DBTable.load(table_ref["schema"], table_ref["name"])
+                table = Table.load(table_ref["schema"], table_ref["name"])
                 dataset.tables.add(table)
                 added_tables.append(table.name)
-            except DBTable.DoesNotExist:
+            except Table.DoesNotExist:
                 missing.append(table_ref)
 
         dataset.update_resources_from_tables()
@@ -538,7 +510,6 @@ class TableAPIView(APIView):
             # Set basic resource info
             resource = {
                 "name": table,
-                "topics": [schema],
             }
 
             # Update the first resource - there will only be one resource.
@@ -559,9 +530,7 @@ class TableAPIView(APIView):
             # Replace the fields list entirely
             metadata["resources"][0]["schema"]["fields"] = fields
 
-            actions.set_table_metadata(
-                table=table, schema=schema, metadata=metadata, cursor=None
-            )
+            set_table_metadata(table=table, metadata=metadata)
 
         return JsonResponse({}, status=status.HTTP_201_CREATED)
 
