@@ -63,8 +63,8 @@ class DatasetAPITests(APITestCase):
         payload = {
             "dataset_name": "test_dataset",
             "tables": [
-                {"schema": "test_schema", "name": "t1"},
-                {"schema": "test_schema", "name": "t2"},
+                {"name": "t1"},
+                {"name": "t2"},
             ],
         }
 
@@ -101,7 +101,7 @@ class DatasetAPITests(APITestCase):
 
         payload = {
             "dataset_name": "ds_missing",
-            "tables": [{"schema": "nonexistent", "name": "missing"}],
+            "tables": [{"name": "missing"}],
         }
 
         response = self.client.post(
