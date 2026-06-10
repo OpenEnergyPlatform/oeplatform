@@ -182,7 +182,6 @@ from api.utils import (
 )
 from api.validators.column import validate_column_names
 from api.validators.identifier import (
-    _assert_valid_identifier_name,
     assert_valid_table_name,
 )
 from dataedit.models import Dataset, Embargo
