@@ -49,13 +49,9 @@ class DatasetAPITests(APITestCase):
         self.assertEqual(len(response.data), 2)
 
     def test_assign_tables_to_dataset(self):
-        schema = Topic.objects.create(name="test_schema")
-        Table.objects.create(
-            name="t1", topics=schema, oemetadata=self.setUpResourceMetadata("t1")
-        )
-        Table.objects.create(
-            name="t2", topics=schema, oemetadata=self.setUpResourceMetadata("t2")
-        )
+        # schema = Topic.objects.create(name="test_schema")
+        Table.objects.create(name="t1", oemetadata=self.setUpResourceMetadata("t1"))
+        Table.objects.create(name="t2", oemetadata=self.setUpResourceMetadata("t2"))
         dataset = Dataset.objects.create(
             name="test_dataset", metadata={"name": "test_dataset"}
         )
