@@ -329,7 +329,7 @@ class AssignDatasetTables(APIView):
 
         for table_ref in table_refs:
             try:
-                table = Table.load(table_ref["schema"], table_ref["name"])
+                table = Table.load(table_ref["name"])
                 dataset.tables.add(table)
                 added_tables.append(table.name)
             except Table.DoesNotExist:

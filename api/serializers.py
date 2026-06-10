@@ -186,10 +186,8 @@ class DatasetAssignTablesSerializer(serializers.Serializer):
 
     def validate_tables(self, value):
         for item in value:
-            if "schema" not in item or "name" not in item:
-                raise serializers.ValidationError(
-                    "Each table must have 'schema' and 'name'."
-                )
+            if "name" not in item:
+                raise serializers.ValidationError("Each table must have 'name'.")
         return value
 
 
