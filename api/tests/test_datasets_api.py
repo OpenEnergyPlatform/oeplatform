@@ -8,7 +8,7 @@ from oemetadata.latest.template import OEMETADATA_LATEST_TEMPLATE
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from dataedit.models import Dataset, Schema, Table
+from dataedit.models import Dataset, Table, Topic
 
 
 class DatasetAPITests(APITestCase):
@@ -49,7 +49,7 @@ class DatasetAPITests(APITestCase):
         self.assertEqual(len(response.data), 2)
 
     def test_assign_tables_to_dataset(self):
-        schema = Schema.objects.create(name="test_schema")
+        schema = Topic.objects.create(name="test_schema")
         Table.objects.create(
             name="t1", schema=schema, oemetadata=self.setUpResourceMetadata("t1")
         )
@@ -77,7 +77,7 @@ class DatasetAPITests(APITestCase):
         self.assertEqual(len(dataset.metadata["resources"]), 2)
 
     def test_list_resources_for_dataset(self):
-        schema = Schema.objects.create(name="test_schema")
+        schema = Topic.objects.create(name="test_schema")
         table = Table.objects.create(
             name="t1", schema=schema, oemetadata=self.setUpResourceMetadata("t1")
         )
