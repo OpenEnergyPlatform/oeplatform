@@ -12,7 +12,7 @@ export default function TssMetadata({
   ontologyId,         // optional explicit override; else comes from config.ontology
   entityType = "class",
   parameter = "",
-  useLegacy = true,
+  useLegacy = false,
 
   // Optional compact tab overrides: { altNames?, crossRef?, graphView?, hierarchy?, termDepiction?, terminologyInfo? }
   tabs,
@@ -75,6 +75,7 @@ export default function TssMetadata({
       termLink=""
       initialSelectedTab="graphview"
       enableComparisonMode={true}
+      rootWalk={true}
       {...finalTabs}
       {...callbackProps}
     />
