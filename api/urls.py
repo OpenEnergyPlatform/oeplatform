@@ -292,22 +292,22 @@ urlpatterns_v0 = [
         name="add-scenario-datasets",
     ),
     path(
-        "v0/datasets/",
+        "datasets/",
         DatasetsListCreate.as_view(),
         name="dataset-list-create",
     ),
     path(
-        "v0/datasets/<str:dataset_name>/assign-tables/",
+        "datasets/<str:dataset_name>/assign-tables/",
         AssignDatasetTables.as_view(),
         name="dataset-assign-tables",
     ),
     path(
-        "v0/datasets/<str:dataset_name>/",
+        "datasets/<str:dataset_name>/",
         DatasetManager.as_view(),
         name="dataset",
     ),
     path(
-        "v0/datasets/<str:dataset_name>/resources/",
+        "datasets/<str:dataset_name>/resources/",
         DatasetsListResources.as_view(),
         name="dataset-resources",
     ),

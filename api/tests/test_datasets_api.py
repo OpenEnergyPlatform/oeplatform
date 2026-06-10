@@ -75,8 +75,9 @@ class DatasetAPITests(APITestCase):
     def test_list_resources_for_dataset(self):
         schema = Topic.objects.create(name="test_schema")
         table = Table.objects.create(
-            name="t1", topics=schema, oemetadata=self.setUpResourceMetadata("t1")
+            name="t1", oemetadata=self.setUpResourceMetadata("t1")
         )
+        table.topics.add(schema)
         dataset = Dataset.objects.create(
             name="test_dataset", metadata=self.setUpDatasetMetadata("test_dataset")
         )
