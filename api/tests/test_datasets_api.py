@@ -51,10 +51,10 @@ class DatasetAPITests(APITestCase):
     def test_assign_tables_to_dataset(self):
         schema = Topic.objects.create(name="test_schema")
         Table.objects.create(
-            name="t1", schema=schema, oemetadata=self.setUpResourceMetadata("t1")
+            name="t1", topics=schema, oemetadata=self.setUpResourceMetadata("t1")
         )
         Table.objects.create(
-            name="t2", schema=schema, oemetadata=self.setUpResourceMetadata("t2")
+            name="t2", topics=schema, oemetadata=self.setUpResourceMetadata("t2")
         )
         dataset = Dataset.objects.create(
             name="test_dataset", metadata={"name": "test_dataset"}
@@ -79,7 +79,7 @@ class DatasetAPITests(APITestCase):
     def test_list_resources_for_dataset(self):
         schema = Topic.objects.create(name="test_schema")
         table = Table.objects.create(
-            name="t1", schema=schema, oemetadata=self.setUpResourceMetadata("t1")
+            name="t1", topics=schema, oemetadata=self.setUpResourceMetadata("t1")
         )
         dataset = Dataset.objects.create(
             name="test_dataset", metadata=self.setUpDatasetMetadata("test_dataset")
