@@ -68,16 +68,17 @@ systemctl --user enable --now \
 Services start in dependency order. `oep-oeplatform` and `oep-ontop` wait for
 `oep-postgres` before starting.
 
-## Serving over HTTPS (port 443) with nginx
+## Serving over HTTPS with nginx (TLS terminated upstream)
 
 The `oep-oeplatform.container` publishes the app on **`127.0.0.1:8080`** only —
-it is not reachable from outside the server. A reverse proxy on the host handles
-the public port 443 and TLS.
+it is not reachable from outside the server. An nginx reverse proxy on the host
+listens on plain HTTP and forwards to the container.
 
-> **Why a host proxy?** Rootless Podman (`systemctl --user`) cannot bind
-> privileged ports < 1024, and the container's Apache only speaks plain HTTP.
-> nginx runs as a normal system service (root), so binding 443 is fine, and it
-> terminates TLS before proxying to the container on 8080.
+> **Where is TLS?** HTTPS is terminated by an **upstream proxy / load balancer**
+> in front of this host. That upstream forwards already-decrypted HTTP to the
+> server, so this nginx holds no certificates. It exists to (a) keep the
+> rootless container bound to localhost and (b) forward the original request
+> headers (notably `X-Forwarded-Proto`) so Django knows the client used HTTPS.
 
 ### 1. Install nginx and the site config
 
@@ -88,30 +89,13 @@ sudo ln -s /etc/nginx/sites-available/oeplatform /etc/nginx/sites-enabled/oeplat
 sudo rm -f /etc/nginx/sites-enabled/default
 ```
 
-Edit `/etc/nginx/sites-available/oeplatform` and replace
-`openenergyplatform.example.org` with your real domain.
+Edit `/etc/nginx/sites-available/oeplatform`:
 
-### 2. Provide a TLS certificate (no certbot)
+- Replace `openenergyplatform.example.org` with your real domain.
+- If the upstream proxy forwards to a port other than `80`, adjust the `listen`
+  directive to match.
 
-Place your certificate chain and private key at the paths referenced in the
-config:
-
-```text
-/etc/nginx/ssl/oeplatform/fullchain.pem
-/etc/nginx/ssl/oeplatform/privkey.pem
-```
-
-To generate a self-signed certificate for testing:
-
-```sh
-sudo mkdir -p /etc/nginx/ssl/oeplatform
-sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-  -keyout /etc/nginx/ssl/oeplatform/privkey.pem \
-  -out    /etc/nginx/ssl/oeplatform/fullchain.pem \
-  -subj "/CN=openenergyplatform.example.org"
-```
-
-### 3. Tell Django it runs behind HTTPS
+### 2. Tell Django it runs behind HTTPS
 
 In `~/.config/oeplatform/oep.env` set the production block (see
 `oep.env.example`):
@@ -124,20 +108,22 @@ OEP_BEHIND_TLS_PROXY=True
 OEP_CSRF_TRUSTED_ORIGINS=https://your-domain.org
 ```
 
-Then restart the app so it picks up the new environment file:
+`OEP_BEHIND_TLS_PROXY=True` makes Django trust the `X-Forwarded-Proto` header
+that the upstream sets and this nginx forwards. Then restart the app so it picks
+up the new environment file:
 
 ```sh
 systemctl --user restart oep-oeplatform
 ```
 
-### 4. Enable nginx
+### 3. Enable nginx
 
 ```sh
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
-The platform is now served on `https://your-domain.org`. Plain HTTP on port 80
-is redirected to HTTPS.
+The platform is now served over HTTPS via the upstream proxy. No certificates
+are configured on this host.
 
 ## Managing Services
 
