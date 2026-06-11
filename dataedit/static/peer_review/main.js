@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: 2025 Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2026 Vismaya Jochem <https://github.com/vismayajochem> © Reiner Lemoine Institut
 // SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
 // SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import * as common from "./peer_review.js";
 import { selectState } from './peer_review.js';
-import { selectNextField, selectPreviousField } from './navigation.js';
+import { selectNextField, selectPreviousField, selectFirstReviewableField } from './navigation.js';
 import { setGetFieldState } from './state_current_review.js';
 
 // Static imports avoid the "Failed to fetch" dynamic import errors
@@ -36,6 +37,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
   if (oprPage === 'reviewer') {
     initReviewer();
+    
+    // Auto-select first reviewable field after all initialization is complete
+    // Use a longer timeout to ensure all accordions, tabs, and state are ready
+    setTimeout(() => {
+      selectFirstReviewableField();
+    }, 600);
+    
   } else if (oprPage === 'contributor') {
     initContributor();
   } else {

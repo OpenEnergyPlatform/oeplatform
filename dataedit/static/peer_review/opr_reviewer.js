@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: 2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 // SPDX-FileCopyrightText: 2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut
 // SPDX-FileCopyrightText: 2024 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
+// SPDX-FileCopyrightText: 2026 Vismaya Jochem <https://github.com/vismayajochem> © Reiner Lemoine Institut
 // // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import {
@@ -140,38 +141,52 @@ function deletePeerReview() {
 
 function click_field(fieldKey, fieldValue, category) {
   const isEmpty = isEffectivelyEmpty(fieldKey, fieldValue);
-  const cleanedFieldKey = fieldKey.replace(/\.\d+/g, '');
 
-    if (isEmpty) {
-    return; // Exit early, don't allow interaction
+  if (isEmpty) {
+    return;
   }
+  
   switchCategoryTab(category);
   setSelectedField(fieldKey);
   setselectedFieldValue(fieldValue);
   setSelectedCategory(category);
 
-  updateFieldDescription(cleanedFieldKey, fieldValue);
+  // Build the lookup key for field_descriptions_json.
+  // The fieldKey from the HTML has resources.N. stripped already,
+  // e.g. "spatial.extent.name". The schema stores it under
+  // "resources.spatial.extent.name". So we try both, plus
+  // a version with numeric indices removed.
+  const cleanedFieldKey = fieldKey.replace(/\.\d+/g, '');
+  
+  // Try to find description using multiple key variants
+  const candidateKeys = [
+  `resources.${category}.${fieldKey}`,         // resources.spatial.extent.name
+  `resources.${category}.${cleanedFieldKey}`,  // resources.spatial.extent.name
+  `resources.${fieldKey}`,                     // fallback
+  `resources.${cleanedFieldKey}`,              // fallback
+  fieldKey,
+  cleanedFieldKey,
+];
+
+  let resolvedKey = cleanedFieldKey; // default fallback
+  if (typeof fieldDescriptionsData !== 'undefined' && fieldDescriptionsData) {
+    for (const candidate of candidateKeys) {
+      if (fieldDescriptionsData[candidate]) {
+        resolvedKey = candidate;
+        break;
+      }
+    }
+  }
+
+  updateFieldDescription(resolvedKey, fieldValue);
   highlightSelectedField(fieldKey);
 
-  const fieldState = getFieldState(fieldKey);
-  
-  // Enable/Disable buttons based on state
-    // 2. Logic to Enable/Disable buttons
-  // If it's empty, buttons MUST be disabled, regardless of previous state (unless you want to allow un-reviewing, but generally empty = no action)
   const buttons = ["ok-button", "rejected-button", "suggestion-button"];
-  
-    buttons.forEach(btn => {
+  buttons.forEach(btn => {
     const el = document.getElementById(btn);
-    el.disabled = false; // Enable buttons since we know field is not empty
+    el.disabled = false;
   });
 
-  // 3. Handle empty field messages
-  // We need to escape the selector for jQuery/querySelector because keys can have dots
-  const safeFieldKey = CSS.escape(fieldKey); // Native JS escape
-  // Or manually if you prefer: fieldKey.replace(/(:|\.|\[|\]|,|=|@)/g, "\\$1");
-  
-
-  // Handle empty field messages
   const fieldElementForMsg = document.querySelector(`.field[data-fieldkey="${fieldKey}"]`);
   if (fieldElementForMsg) {
     const safeKey = fieldKey.replace(/[^a-zA-Z0-9_-]/g, '_');
@@ -179,24 +194,11 @@ function click_field(fieldKey, fieldValue, category) {
     const labelEl = fieldElementForMsg.querySelector('.key');
     const valueEl = fieldElementForMsg.querySelector('.value');
 
-    if (isEmpty) {
-      if (!explanationElement) {
-        explanationElement = document.createElement('p');
-        explanationElement.id = `explanation_${safeKey}`;
-        explanationElement.classList.add('explanation', 'text-muted', 'mt-1');
-        explanationElement.innerText = 'Field is empty. Reviewing is not possible.';
-        fieldElementForMsg.appendChild(explanationElement);
-      }
-      if(labelEl) labelEl.style.color = '#6c757d';
-      if(valueEl) valueEl.style.color = '#6c757d';
-    } else {
-      if (explanationElement) explanationElement.remove();
-      if(labelEl) labelEl.style.color = '';
-      if(valueEl) valueEl.style.color = '';
-    }
+    if (explanationElement) explanationElement.remove();
+    if (labelEl) labelEl.style.color = '';
+    if (valueEl) valueEl.style.color = '';
   }
 
-  // Reset UI state for new selection
   clearInputFields();
   hideReviewerOptions();
   hideReviewerCommentsOptions();

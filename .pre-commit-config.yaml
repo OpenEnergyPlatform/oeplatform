@@ -7,7 +7,7 @@ repos:
       - id: end-of-file-fixer
       - id: trailing-whitespace
   - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 26.5.0
+    rev: 26.5.1
     hooks:
       - id: black
   - repo: https://github.com/pycqa/isort
@@ -21,7 +21,7 @@ repos:
       - id: flake8
         args: ["--max-line-length=88", "--ignore=E20,W503"] # black compatible
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v10.4.0
+    rev: v10.4.1
     hooks:
       - id: eslint
         additional_dependencies:
@@ -40,7 +40,7 @@ repos:
         files: .*\.(json|md|yaml|yml)$
   - repo: https://github.com/djlint/djLint
     # see https://djlint.com/docs/integrations/
-    rev: v1.36.4
+    rev: v1.39.0
     hooks:
       - id: djlint-reformat-django
         files: .*templates/.*\.html$

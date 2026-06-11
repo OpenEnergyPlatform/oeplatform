@@ -249,29 +249,49 @@ export function checkReviewComplete() {
   }
 }
 
-export function updateFieldDescription(cleanedFieldKey, fieldValue) {
+
+export function updateFieldDescription(resolvedKey, fieldValue) {
   const fieldDescriptionsElement = document.getElementById("field-descriptions");
   const selectedName = document.querySelector("#review-field-name");
 
-  const rawKey = window.selectedField || cleanedFieldKey;
-  const normalizedKey = normalizeFieldKey(rawKey);
+  // Use the resolvedKey directly - it has already been matched
+  // against fieldDescriptionsData in click_field
+  const fieldInfo = (typeof fieldDescriptionsData !== 'undefined' && fieldDescriptionsData)
+    ? fieldDescriptionsData[resolvedKey] || null
+    : null;
 
-  const fieldInfo = (fieldDescriptionsData && (fieldDescriptionsData[rawKey] || fieldDescriptionsData[cleanedFieldKey] || fieldDescriptionsData[normalizedKey])) || null;
-
-  const titleText = fieldInfo?.title || getFallbackTitle(rawKey) || cleanedFieldKey;
+  const rawKey = window.selectedField || resolvedKey;
+  const titleText = fieldInfo?.title || getFallbackTitle(rawKey) || resolvedKey;
+  
   selectedName.textContent = `${titleText}${fieldValue ? ' — ' + fieldValue : ''}`;
+  selectedName.style.display = 'block';
 
   let html = '<div class="reviewer-item">';
-  html += `<div class="reviewer-item__row"><h2 class="reviewer-item__title">${escapeHtml(fieldInfo?.title || titleText)}</h2></div>`;
-  
+  html += `<div class="reviewer-item__row">
+    <h2 class="reviewer-item__title">${escapeHtml(titleText)}</h2>
+  </div>`;
+
   const desc = fieldInfo?.description || getFallbackDescription(rawKey) || 'No description available.';
-  html += `<div class="reviewer-item__row"><div class="reviewer-item__key">Description:</div><div class="reviewer-item__value">${escapeHtml(desc)}</div></div>`;
-  
-  if (fieldInfo?.example) {
-      html += `<div class="reviewer-item__row"><div class="reviewer-item__key">Example:</div><div class="reviewer-item__value">${fieldInfo.example}</div></div>`;
+  html += `<div class="reviewer-item__row">
+    <div class="reviewer-item__key">Description:</div>
+    <div class="reviewer-item__value">${escapeHtml(desc)}</div>
+  </div>`;
+
+  if (fieldInfo?.example !== undefined) {
+    html += `<div class="reviewer-item__row">
+      <div class="reviewer-item__key">Example:</div>
+      <div class="reviewer-item__value">${escapeHtml(String(fieldInfo.example))}</div>
+    </div>`;
   }
+
+  if (fieldInfo?.badge) {
+    html += `<div class="reviewer-item__row">
+      <div class="reviewer-item__key">Badge:</div>
+      <div class="reviewer-item__value">${escapeHtml(fieldInfo.badge)}</div>
+    </div>`;
+  }
+
   html += '</div>';
-  
   fieldDescriptionsElement.innerHTML = html;
 }
 

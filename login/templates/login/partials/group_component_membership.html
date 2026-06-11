@@ -35,9 +35,7 @@
           <div class="profile-category__profile-name">{{ membership.user.name }}</div>
           <div class="profile-category__member-status">
             {% for value, choice in choices %}
-              <div>
-                {% if membership.level == value %}{{ choice }}{% endif %}
-              </div>
+              <div>{% if membership.level == value %}{{ choice }}{% endif %}</div>
             {% endfor %}
           </div>
         </div>

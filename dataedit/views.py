@@ -10,17 +10,12 @@ SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  ©
 SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 Kirann Bhavaraju <https://github.com/KirannBhavaraju> © Otto-von-Guericke-Universität Magdeburg
 SPDX-FileCopyrightText: 2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut
-SPDX-FileCopyrightText: 2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
 SPDX-FileCopyrightText: 2025 Tom Heimbrodt <https://github.com/tom-heimbrodt>
-SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
 SPDX-FileCopyrightText: 2025 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut
-SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 shara <https://github.com/SharanyaMohan-30> © Otto-von-Guericke-Universität Magdeburg
 SPDX-FileCopyrightText: 2025 Stephan Uller <https://github.com/steull> © Reiner Lemoine Institut
-SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut
-SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-
+SPDX-FileCopyrightText: 2025 Vismaya Jochem <https://github.com/vismayajochem> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
@@ -83,7 +78,11 @@ from dataedit.helper import (
     recursive_update,
     update_keywords_from_tags,
 )
-from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
+from dataedit.metadata import (
+    has_valid_filled_metadata,
+    load_metadata_from_db,
+    save_metadata_to_db,
+)
 from dataedit.metadata.widget import MetaDataWidget
 from dataedit.models import Embargo
 from dataedit.models import Filter as DBFilter
@@ -718,12 +717,13 @@ class TableDataView(View):
         opr_manager = PeerReviewManager()
         reviews = opr_manager.filter_opr_by_table(table=table)
 
+        # Check if metadata has any valid (non-empty) fields
+        has_metadata = has_valid_filled_metadata(metadata)
+
         opr_context = {
             "contributor": PeerReviewManager.load_contributor(table=table),
             "reviewer": PeerReviewManager.load_reviewer(table=table),
-            "opr_enabled": True,
-            # oemetadata
-            # is not None,  # check if the table has the metadata
+            "opr_enabled": has_metadata,  # Only enable if metadata exists
         }
 
         opr_result_context = {}
@@ -783,6 +783,7 @@ class TableDataView(View):
             "opr": opr_context,
             "opr_result": opr_result_context,
             "embargo_time_left": embargo_time_left,
+            "has_metadata": has_metadata,
         }
 
         return render(request, "dataedit/dataview.html", context=context_dict)

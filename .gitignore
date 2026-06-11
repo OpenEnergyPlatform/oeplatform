@@ -127,3 +127,6 @@ patches/
 oedialect/
 oep-client/
 saio/
+
+# local docs symlink
+.claude-docs
