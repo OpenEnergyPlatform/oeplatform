@@ -68,6 +68,77 @@ systemctl --user enable --now \
 Services start in dependency order. `oep-oeplatform` and `oep-ontop` wait for
 `oep-postgres` before starting.
 
+## Serving over HTTPS (port 443) with nginx
+
+The `oep-oeplatform.container` publishes the app on **`127.0.0.1:8080`** only —
+it is not reachable from outside the server. A reverse proxy on the host handles
+the public port 443 and TLS.
+
+> **Why a host proxy?** Rootless Podman (`systemctl --user`) cannot bind
+> privileged ports < 1024, and the container's Apache only speaks plain HTTP.
+> nginx runs as a normal system service (root), so binding 443 is fine, and it
+> terminates TLS before proxying to the container on 8080.
+
+### 1. Install nginx and the site config
+
+```sh
+sudo apt install nginx
+sudo cp podman/nginx/oeplatform.conf /etc/nginx/sites-available/oeplatform
+sudo ln -s /etc/nginx/sites-available/oeplatform /etc/nginx/sites-enabled/oeplatform
+sudo rm -f /etc/nginx/sites-enabled/default
+```
+
+Edit `/etc/nginx/sites-available/oeplatform` and replace
+`openenergyplatform.example.org` with your real domain.
+
+### 2. Provide a TLS certificate (no certbot)
+
+Place your certificate chain and private key at the paths referenced in the
+config:
+
+```text
+/etc/nginx/ssl/oeplatform/fullchain.pem
+/etc/nginx/ssl/oeplatform/privkey.pem
+```
+
+To generate a self-signed certificate for testing:
+
+```sh
+sudo mkdir -p /etc/nginx/ssl/oeplatform
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout /etc/nginx/ssl/oeplatform/privkey.pem \
+  -out    /etc/nginx/ssl/oeplatform/fullchain.pem \
+  -subj "/CN=openenergyplatform.example.org"
+```
+
+### 3. Tell Django it runs behind HTTPS
+
+In `~/.config/oeplatform/oep.env` set the production block (see
+`oep.env.example`):
+
+```sh
+OEP_DEBUG=False
+OEP_URL=your-domain.org
+OEP_ALLOWED_HOSTS=your-domain.org
+OEP_BEHIND_TLS_PROXY=True
+OEP_CSRF_TRUSTED_ORIGINS=https://your-domain.org
+```
+
+Then restart the app so it picks up the new environment file:
+
+```sh
+systemctl --user restart oep-oeplatform
+```
+
+### 4. Enable nginx
+
+```sh
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+The platform is now served on `https://your-domain.org`. Plain HTTP on port 80
+is redirected to HTTPS.
+
 ## Managing Services
 
 ```sh

@@ -33,6 +33,7 @@ SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
+import os
 import sys
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -119,6 +120,32 @@ __all__ = [  # mark imports as "used"
     "dbport",
     "dbuser",
 ]
+
+
+# ── Reverse proxy / HTTPS ─────────────────────────────────────────────────────
+# When the platform runs behind a TLS-terminating reverse proxy (e.g. nginx on
+# the production server), the proxy speaks HTTPS to the client and plain HTTP to
+# the container. These settings let Django recognise the original HTTPS request.
+# Enable by setting OEP_BEHIND_TLS_PROXY=True on the server.
+if os.environ.get("OEP_BEHIND_TLS_PROXY", "False").strip().lower() in (
+    "true",
+    "1",
+    "yes",
+):
+    # The proxy must send this header
+    # (nginx: proxy_set_header X-Forwarded-Proto $scheme;)
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+# Comma-separated list of trusted origins for CSRF checks under HTTPS, e.g.
+# OEP_CSRF_TRUSTED_ORIGINS="https://openenergyplatform.org,https://www.openenergyplatform.org".
+# Required by Django for unsafe (POST/PUT/…) requests served over HTTPS.
+_csrf_trusted_origins = os.environ.get("OEP_CSRF_TRUSTED_ORIGINS", "").strip()
+if _csrf_trusted_origins:
+    CSRF_TRUSTED_ORIGINS = [
+        o.strip() for o in _csrf_trusted_origins.split(",") if o.strip()
+    ]
 
 
 # Quick-start development settings - unsuitable for production
