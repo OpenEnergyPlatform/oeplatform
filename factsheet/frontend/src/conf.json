@@ -1,5 +1,6 @@
 {
   "toep": "/",
   "obdi": "/api/oevkg-query",
-  "oekgQueryFilter": "oekg/filter-by-criteria/"
+  "oekgQueryFilter": "oekg/filter-by-criteria/",
+  "dimensionRegistry": "/oekg/registry/"
 }
