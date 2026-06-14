@@ -7,6 +7,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 from django.urls import path
 
 from oekg.views import (
+    dimension_registry_view,
     filter_oekg_by_scenario_bundles_attributes_view,
     main_view,
     sparql_endpoint_view,
@@ -18,6 +19,7 @@ urlpatterns = [
     path("gui/", main_view, name="main"),
     path("sparql/", sparql_endpoint_view, name="sparql_endpoint"),
     path("sparql_info/", sparql_metadata_view, name="sparql_endpoint_info"),
+    path("registry/", dimension_registry_view, name="dimension_registry"),
     path(
         "filter-by-criteria/",
         filter_oekg_by_scenario_bundles_attributes_view,
