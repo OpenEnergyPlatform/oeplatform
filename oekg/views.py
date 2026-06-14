@@ -13,6 +13,7 @@ from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_GET, require_POST
 
+from oekg.registry.loader import load_registry
 from oekg.utils import execute_filter_sparql_query, execute_sparql_query
 from oeplatform.settings import DOCUMENTATION_LINKS
 
@@ -24,6 +25,17 @@ def main_view(request):
     )
     response["Content-Type"] = "text/html; charset=utf-8"
     return response
+
+
+@require_GET
+def dimension_registry_view(request):
+    """Serve the Dimension Property Registry contract (registry.json).
+
+    The single shared vocabulary consumed by the comparison frontend (to build
+    dynamic SPARQL + filter UI) and by the mapping generator (passed as a dict).
+    Source of truth: oekg/registry/dimension_property_registry.yaml.
+    """
+    return JsonResponse(load_registry(), safe=False)
 
 
 @require_POST
