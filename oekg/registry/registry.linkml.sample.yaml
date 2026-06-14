@@ -1,0 +1,91 @@
+# =============================================================================
+# SAMPLE — Dimension Property Registry expressed as a LinkML schema
+# -----------------------------------------------------------------------------
+# A 3-dimension excerpt to evaluate LinkML as the registry format (Philipp's
+# mapping generator already uses LinkML). Shows how the registry's two core
+# concepts map onto NATIVE LinkML constructs:
+#   * dimension -> predicate    == a slot's `slot_uri`
+#   * code -> ontology IRI      == an enum `permissible_values[...].meaning`
+#   * object_kind / datatype    == the slot's `range` (enum => IRI; double/int => literal)
+#   * generic `is about` + typed refinement == slot `is_a` hierarchy (=> rdfs:subPropertyOf)
+#
+# From this ONE file, LinkML generates what each consumer needs:
+#   gen-owl  -> RDF/OWL (KG bridge)   gen-shacl -> validation shapes
+#   gen-json-schema -> UI / validation   gen-pydantic -> classes for the generator
+#
+# NOT the source of truth yet — the live registry is dimension_property_registry.yaml.
+# =============================================================================
+id: https://openenergyplatform.org/oekg/scenario-comparison-registry
+name: scenario_comparison_registry
+title: Scenario Comparison Dimension Property Registry (sample)
+description: >-
+  Harmonized dimensions for cross-dataset scenario comparison. Each slot's
+  slot_uri is the predicate; enums carry code -> ontology IRI via `meaning`.
+license: AGPL-3.0
+default_range: string
+default_prefix: oekg
+imports:
+  - linkml:types
+
+prefixes:
+  linkml: https://w3id.org/linkml/
+  oekg: https://openenergyplatform.org/ontology/oeo/oekg/
+  oeo: https://openenergyplatform.org/ontology/oeo/ # base for ALL terms (OEO_*, IAO_*, UO_*)
+  llc: https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/
+
+# -----------------------------------------------------------------------------
+classes:
+  ScenarioObservation:
+    description: One harmonized data point (maps to one source table row).
+    class_uri: oeo:IAO_0000027 # data item  == registry row_anchor.class
+    tree_root: true
+    slots:
+      - spatial_region # controlled-vocab dimension (IRI object)
+      - quantity_value # measurement (literal)
+      - technology # IAMC token dimension (IRI object, interim is-about)
+
+# -----------------------------------------------------------------------------
+slots:
+  # Abstract generic relation. Specific dimension slots are `is_a` this, so
+  # gen-owl emits their predicate as rdfs:subPropertyOf `is about`.
+  is_about:
+    abstract: true
+    slot_uri: oeo:IAO_0000136 # "is about"
+    description:
+      Generic annotation relation; super-property of the typed dimensions.
+
+  spatial_region:
+    slot_uri: oeo:OEO_00020221 # "has considered region"  (dimension -> predicate)
+    range: RegionEnum # enum range => object is an IRI
+    multivalued: false
+
+  quantity_value:
+    slot_uri: oeo:OEO_00140178 # quantity/emission value
+    range: double # primitive range => literal object (xsd:double)
+
+  technology:
+    is_a: is_about # refine later: set slot_uri to oeo:hasTechnology
+    slot_uri: oeo:IAO_0000136 # INTERIM: generic "is about" (decision 2026-06-12)
+    range: TechnologyEnum
+
+# -----------------------------------------------------------------------------
+enums:
+  RegionEnum:
+    description: ISO-3166-1 alpha-2 code -> LCC country IRI.
+    permissible_values:
+      AT: { meaning: "llc:Austria" }
+      DE: { meaning: "llc:Germany" }
+      "NO":
+        {
+          meaning: "llc:Norway",
+          description: "quoted: bare NO is YAML boolean",
+        }
+
+  TechnologyEnum:
+    description: IAMC powertrain tokens -> OEO IRIs (TS-resolved).
+    permissible_values:
+      bev: { meaning: "oeo:OEO_00010024", title: battery electric vehicle }
+      fcev: { meaning: "oeo:OEO_00010025", title: fuel cell electric vehicle }
+      ice: { meaning: "oeo:OEO_00000240", title: internal combustion vehicle }
+      phev:
+        { meaning: "oeo:OEO_00010030", title: plug-in hybrid electric vehicle }
