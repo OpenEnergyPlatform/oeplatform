@@ -19,6 +19,7 @@ import BreadcrumbsNavGrid from "../styles/oep-theme/components/breadcrumbsNaviga
 // Import our new sub-components
 import QualitativeView from "./comparison/qualitativeView.jsx";
 import QuantitativeView from "./comparison/quantitativeView.jsx";
+import RegistryComparison from "./comparison/RegistryComparison.jsx";
 
 const ComparisonBoardMain = ({ params }) => {
   const [scenarios, setScenarios] = useState([]);
@@ -93,6 +94,9 @@ const ComparisonBoardMain = ({ params }) => {
                   <ToggleButton style={{ width: "250px" }} value="Quantitative">
                     <EqualizerIcon /> Quantitative
                   </ToggleButton>
+                  <ToggleButton style={{ width: "250px" }} value="Registry">
+                    <EqualizerIcon /> Registry (beta)
+                  </ToggleButton>
                 </ToggleButtonGroup>
               </Grid>
               <Grid item xs={2}></Grid>
@@ -106,6 +110,7 @@ const ComparisonBoardMain = ({ params }) => {
           {alignment === "Quantitative" && (
             <QuantitativeView scenarios={scenarios} />
           )}
+          {alignment === "Registry" && <RegistryComparison />}
         </Container>
       </Grid>
     )
