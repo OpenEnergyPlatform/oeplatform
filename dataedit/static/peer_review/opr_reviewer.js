@@ -139,6 +139,78 @@ function deletePeerReview() {
     });
 }
 
+/**
+ * Expands all ancestor accordion panels containing the field element,
+ * then scrolls the field into view once they are open.
+ */
+function expandAccordionsAndScrollToField(fieldKey) {
+  const fieldElement = document.querySelector(`.field[data-fieldkey="${fieldKey}"]`);
+  if (!fieldElement) return;
+
+  // Collect all collapsed accordion-collapse ancestors
+  const collapsedAncestors = [];
+  let parent = fieldElement.parentElement;
+
+  while (parent) {
+    if (
+      parent.classList.contains('accordion-collapse') &&
+      !parent.classList.contains('show')
+    ) {
+      collapsedAncestors.push(parent);
+    }
+    parent = parent.parentElement;
+  }
+
+  if (collapsedAncestors.length === 0) {
+    // No accordions to open, scroll immediately
+    scrollToField(fieldElement);
+    return;
+  }
+
+  // Reverse so we open outermost first, then inner
+  collapsedAncestors.reverse();
+
+  // Open each accordion in sequence, waiting for each transition to finish
+  function openNext(index) {
+    if (index >= collapsedAncestors.length) {
+      // All open, now scroll
+      scrollToField(fieldElement);
+      return;
+    }
+
+    const collapseEl = collapsedAncestors[index];
+
+    // Find the toggle button for this accordion panel
+    const toggleButton = document.querySelector(
+      `[data-bs-target="#${collapseEl.id}"]`
+    );
+
+    if (!toggleButton) {
+      // No button found, try next
+      openNext(index + 1);
+      return;
+    }
+
+    // Listen for when this panel finishes opening
+    collapseEl.addEventListener('shown.bs.collapse', function handler() {
+      collapseEl.removeEventListener('shown.bs.collapse', handler);
+      openNext(index + 1);
+    });
+
+    // Click the toggle to open it
+    toggleButton.click();
+  }
+
+  openNext(0);
+}
+
+/**
+ * Scrolls the field element into view smoothly, centered vertically.
+ */
+function scrollToField(fieldElement) {
+  fieldElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
 function click_field(fieldKey, fieldValue, category) {
   const isEmpty = isEffectivelyEmpty(fieldKey, fieldValue);
 
@@ -220,6 +292,7 @@ function click_field(fieldKey, fieldValue, category) {
     }
     // For 'ok', no extra UI needed, fields stay hidden
   }
+    expandAccordionsAndScrollToField(fieldKey);
 }
 function updateFieldColor(fieldKey, state) {
   const safeId = '#field_' + fieldKey.replace(/\./g, "\\.");
