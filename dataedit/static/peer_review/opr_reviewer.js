@@ -284,15 +284,22 @@ function saveEntrancesForReviewer() {
         updateClientStateDict(currentKey, selectedState);
         
         // Update DOM suggestions immediately
-        const fieldElement = document.getElementById("field_" + currentKey);
-        if (fieldElement) {
-            const suggEl = fieldElement.querySelector('.suggestion--highlight');
-            if (suggEl) suggEl.innerText = reviewObj.reviewerSuggestion;
-            
-            const commEl = fieldElement.querySelector('.suggestion--additional-comment');
-            if (commEl) commEl.innerText = reviewObj.additionalComment;
-        }
+      const fieldElement = document.getElementById("field_" + currentKey);
+      if (fieldElement) {
+          const suggEl = fieldElement.querySelector('.suggestion--highlight');
+          if (suggEl) suggEl.innerText = reviewObj.reviewerSuggestion;
+          
+          // ADD THIS: show the comment under the suggested value
+          const suggCommentEl = fieldElement.querySelector('.suggestion--comment');
+          if (suggCommentEl) {
+              suggCommentEl.innerText = (selectedState === 'suggestion') ? reviewObj.comment : '';
+          }
+          
+          const commEl = fieldElement.querySelector('.suggestion--additional-comment');
+          if (commEl) commEl.innerText = reviewObj.additionalComment;
+      }
     }
+
 
     document.getElementById("comments").value = "";
     checkReviewComplete();

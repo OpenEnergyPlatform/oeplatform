@@ -18,7 +18,7 @@ export function renderSummaryPageFields() {
 
   const processedFields = new Set();
 
-  if (window.state_dict && Object.keys(window.state_dict).length > 0) {
+ if (window.state_dict && Object.keys(window.state_dict).length > 0) {
     const fields = document.querySelectorAll(".field");
     for (let field of fields) {
       let field_id = field.id.slice(6);
@@ -34,11 +34,19 @@ export function renderSummaryPageFields() {
           .querySelector(".suggestion.suggestion--highlight")
           ?.textContent.trim() || "";
 
-      // remove the numbers and replace the dots with spaces
+      // ADD THIS: read comment from DOM just like fieldSuggestion
+      const fieldComment =
+        field
+          .querySelector(".suggestion--comment")
+          ?.textContent.trim() ||
+        field
+          .querySelector(".suggestion--additional-comment")
+          ?.textContent.trim() || "";
+
       let fieldName = field_id.replace(/\./g, " ");
 
       if (fieldCategory !== "general") {
-        fieldName = fieldName.split(" ").slice(1).join(" "); // remove first word
+        fieldName = fieldName.split(" ").slice(1).join(" ");
       }
 
       const uniqueFieldIdentifier = `${fieldName}-${fieldCategory}`;
@@ -49,6 +57,7 @@ export function renderSummaryPageFields() {
           fieldValue,
           fieldCategory,
           fieldSuggestion,
+          fieldComment,   // now defined
         });
       } else if (fieldState === "ok") {
         acceptedFields.push({
@@ -56,6 +65,7 @@ export function renderSummaryPageFields() {
           fieldValue,
           fieldCategory,
           fieldSuggestion,
+          fieldComment,   // now defined
         });
         processedFields.add(uniqueFieldIdentifier);
       }
@@ -70,6 +80,7 @@ export function renderSummaryPageFields() {
         const fieldCategory = review.category;
         const field_id = field.id.slice(6);
         const fieldSuggestion = review.fieldReview.reviewerSuggestion || "";
+        const fieldComment = review.fieldReview.comment || review.fieldReview.additionalComment || "";
 
         let fieldName = review.key.replace(/\./g, " ");
 
@@ -89,6 +100,7 @@ export function renderSummaryPageFields() {
             fieldValue,
             fieldCategory,
             fieldSuggestion,
+            fieldComment, 
           });
         } else if (fieldState === "ok") {
           acceptedFields.push({
@@ -96,6 +108,7 @@ export function renderSummaryPageFields() {
             fieldValue,
             fieldCategory,
             fieldSuggestion,
+            fieldComment, 
           });
         } else if (fieldState === "suggestion") {
           suggestingFields.push({
@@ -103,6 +116,7 @@ export function renderSummaryPageFields() {
             fieldValue,
             fieldCategory,
             fieldSuggestion,
+            fieldComment, 
           });
         } else if (fieldState === "rejected") {
           rejectedFields.push({
@@ -110,6 +124,7 @@ export function renderSummaryPageFields() {
             fieldValue,
             fieldCategory,
             fieldSuggestion,
+            fieldComment,
           });
         }
 
@@ -144,6 +159,14 @@ export function renderSummaryPageFields() {
           .querySelector(".suggestion.suggestion--highlight")
           ?.textContent.trim() || "";
 
+      const fieldComment =
+        field
+          .querySelector(".suggestion--comment")
+          ?.textContent.trim() ||
+        field
+          .querySelector(".suggestion--additional-comment")
+          ?.textContent.trim() || "";
+
       let fieldName = field_id.replace(/\./g, " ");
 
       if (fieldCategory !== "general") {
@@ -163,6 +186,7 @@ export function renderSummaryPageFields() {
           fieldValue,
           fieldCategory,
           fieldSuggestion,
+          fieldComment,
         });
         processedFields.add(uniqueFieldIdentifier);
       }
@@ -271,6 +295,7 @@ export function renderSummaryPageFields() {
             <th>Field Name</th>
             <th>Field Value</th>
             <th>Field Suggestion</th>
+            <th>Comment</th>
           </tr>
         </thead>
         <tbody>
@@ -281,7 +306,10 @@ export function renderSummaryPageFields() {
               <td class="status ${f.fieldStatus.toLowerCase()}">${f.fieldStatus}</td>
               <td>${f.fieldName}</td>
               <td>${f.fieldValue}</td>
-              <td>${f.fieldSuggestion || ""}</td>
+              <td>
+              ${f.fieldSuggestion ? `<div>${f.fieldSuggestion}</div>` : ""}
+              ${f.fieldComment ? `<div class="text-muted small mt-1">${f.fieldComment}</div>` : ""}
+</td>
             </tr>
           `
             )
@@ -316,6 +344,7 @@ export function renderSummaryPageFields() {
                   <th>Field Name</th>
                   <th>Field Value</th>
                   <th>Field Suggestion</th>
+                  <th>Comment</th>
                 </tr>
               </thead>
               <tbody>
@@ -326,7 +355,10 @@ export function renderSummaryPageFields() {
                     <td class="status ${f.fieldStatus.toLowerCase()}">${f.fieldStatus}</td>
                     <td>${f.fieldName}</td>
                     <td>${f.fieldValue}</td>
-                    <td>${f.fieldSuggestion || ""}</td>
+                    <td>
+                    ${f.fieldSuggestion ? `<div>${f.fieldSuggestion}</div>` : ""}
+                    ${f.fieldComment ? `<div class="text-muted small mt-1">${f.fieldComment}</div>` : ""}
+</td>
                   </tr>
                 `
                   )
@@ -365,6 +397,7 @@ export function renderSummaryPageFields() {
                           <th>Field Name</th>
                           <th>Field Value</th>
                           <th>Field Suggestion</th>
+                          <th>Comment</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -375,7 +408,10 @@ export function renderSummaryPageFields() {
                             <td class="status ${f.fieldStatus.toLowerCase()}">${f.fieldStatus}</td>
                             <td>${f.fieldName}</td>
                             <td>${f.fieldValue}</td>
-                            <td>${f.fieldSuggestion || ""}</td>
+                            <td>
+                            ${f.fieldSuggestion ? `<div>${f.fieldSuggestion}</div>` : ""}
+                            ${f.fieldComment ? `<div class="text-muted small mt-1">${f.fieldComment}</div>` : ""}
+</td>
                           </tr>
                         `
                           )
@@ -438,6 +474,7 @@ export function renderSummaryPageFields() {
           <th>Field Name</th>
           <th>Field Value</th>
           <th>Field Suggestion</th>
+          <th>Comment</th>
         </tr>
       </thead>
       <tbody>
@@ -449,7 +486,10 @@ export function renderSummaryPageFields() {
             <td>${f.fieldCategory}</td>
             <td>${f.fieldName}</td>
             <td>${f.fieldValue}</td>
-            <td>${f.fieldSuggestion || ""}</td>
+            <td>
+            ${f.fieldSuggestion ? `<div>${f.fieldSuggestion}</div>` : ""}
+            ${f.fieldComment ? `<div class="text-muted small mt-1">${f.fieldComment}</div>` : ""}
+</td>
           </tr>
         `
           )
