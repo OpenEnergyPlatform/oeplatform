@@ -7,29 +7,34 @@
 import { getCategoryToTabIdMapping, makeFieldList, selectField } from "./peer_review.js";
 import { isEmptyValue, isEffectivelyEmpty, sendJson } from "./utilities.js";
 
+
 export function updateTabProgress() {
   const allFields = document.querySelectorAll('.review__item');
-  const total = allFields.length;
-  let completed = 0;
+  let total = 0;
+  let accepted = 0;
 
   allFields.forEach(field => {
-    // Check for any of the completed states (ok, rejected, suggestion)
-    if (field.classList.contains('field-ok') || 
-        field.classList.contains('field-rejected') || 
-        field.classList.contains('field-suggestion')) {
-      completed++;
+    const fieldKey = field.dataset.fieldkey;
+    const fieldValue = field.dataset.fieldvalue;
+
+    // Only count fields that actually need review (not effectively empty)
+    if (!isEffectivelyEmpty(fieldKey, fieldValue)) {
+      total++;
+
+      // Only count accepted (ok) fields as progress
+      if (field.classList.contains('field-ok')) {
+        accepted++;
+      }
     }
   });
 
-  const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
+  const percentage = total === 0 ? 0 : Math.round((accepted / total) * 100);
 
-  // Update the circular progress bar
   const circle = document.getElementById('okProgressCircle');
   const text = document.getElementById('okPercentageText');
-  
+
   if (circle && text) {
-    // 326.72 is 2*PI*r where r=52 (from your SVG)
-    const circumference = 326.72; 
+    const circumference = 326.72;
     const offset = circumference - (percentage / 100) * circumference;
     circle.style.strokeDashoffset = offset;
     text.textContent = `${percentage}%`;

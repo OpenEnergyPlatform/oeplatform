@@ -55,19 +55,19 @@
     </div>
     <div class="content content-finish-review">
       <style>
-      .ok-progress-wrapper { display: flex; justify-content: center; margin-top: 20px; }
-      .ok-progress-circle { width: 130px; height: 130px; position: relative; }
-      .ok-progress-circle svg { width: 130px; height: 130px; transform: rotate(-90deg); }
-      .ok-progress-circle circle { fill: none; stroke-width: 10; r: 52; cx: 65; cy: 65; }
-      .ok-progress-circle circle.bg { stroke: #e6e6e6; }
-      .ok-progress-circle circle.progress { stroke: #4caf50; stroke-linecap: round; stroke-dasharray: 326.72; stroke-dashoffset: 326.72; transition: stroke-dashoffset 0.4s ease; }
-      .percentage-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 22px; font-weight: bold; }
+  .ok-progress-wrapper { display: flex; justify-content: center; margin-top: 20px; }
+  .ok-progress-circle { width: 130px; height: 130px; position: relative; }
+  .ok-progress-circle svg { width: 130px; height: 130px; transform: rotate(-90deg); }
+  .ok-progress-circle circle { fill: none; stroke-width: 10; }
+  .ok-progress-circle circle.bg { stroke: #e6e6e6; }
+  .ok-progress-circle circle.progress { stroke: #4caf50; stroke-linecap: round; stroke-dasharray: 326.72; stroke-dashoffset: 326.72; transition: stroke-dashoffset 0.4s ease; }
+  .percentage-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 22px; font-weight: bold; }
       </style>
       <div class="ok-progress-wrapper">
         <div class="ok-progress-circle">
-          <svg>
-            <circle class="bg"></circle>
-            <circle class="progress" id="okProgressCircle"></circle>
+          <svg viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg">
+            <circle class="bg" cx="65" cy="65" r="52"></circle>
+            <circle class="progress" id="okProgressCircle" cx="65" cy="65" r="52"></circle>
           </svg>
           <div class="percentage-text" id="okPercentageText">0%</div>
         </div>
@@ -236,8 +236,7 @@
                                     <span id="reviewerSuggestion_{{ item.field }}"
                                           class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                                     <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                                    <br>
-                                    <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
+                                    <span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span>
                                   </p>
                                 </div>
                               {% endfor %}
@@ -273,8 +272,7 @@
                                                 <span id="reviewerSuggestion_{{ item.field }}"
                                                       class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                                                 <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                                                <br>
-                                                <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
+                                                <span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span>
                                               </p>
                                             </div>
                                           {% endfor %}
@@ -304,8 +302,7 @@
                             <span id="reviewerSuggestion_{{ item.field }}"
                                   class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                             <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                            <br>
-                            <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
+                            <span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span>
                           </p>
                         </div>
                       {% endfor %}
@@ -323,8 +320,7 @@
                             <span id="reviewerSuggestion_{{ item.field }}"
                                   class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                             <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                            <br>
-                            <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
+                            <span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span>
                           </p>
                         </div>
                       {% endfor %}
@@ -351,8 +347,7 @@
                         <span id="reviewerSuggestion_{{ item.field }}"
                               class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                         <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                        <br>
-                        <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
+                        <span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span>
                       </p>
                     </div>
                   {% endfor %}
@@ -385,8 +380,7 @@
                                   <span id="reviewerSuggestion_{{ item.field }}"
                                         class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                                   <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                                  <br>
-                                  <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
+                                  <span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span>
                                 </p>
                               </div>
                             {% endfor %}
@@ -419,8 +413,7 @@
                                               <span class="value">{{ item.newValue|default:item.value }}</span>
                                               <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                                               <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                                              <br>
-                                              <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
+                                              <span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span>
                                             </p>
                                           </div>
                                         {% endfor %}
@@ -449,8 +442,7 @@
                         <span id="reviewerSuggestion_{{ item.field }}"
                               class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                         <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                        <br>
-                        <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
+                        <span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span>
                       </p>
                     </div>
                   {% endfor %}
@@ -483,8 +475,7 @@
                                   <span id="reviewerSuggestion_{{ item.field }}"
                                         class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                                   <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                                  <br>
-                                  <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
+                                  <span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span>
                                 </p>
                               </div>
                             {% endfor %}
@@ -517,8 +508,7 @@
                                               <span class="value">{{ item.newValue|default:item.value }}</span>
                                               <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                                               <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                                              <br>
-                                              <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
+                                              <span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span>
                                             </p>
                                           </div>
                                         {% endfor %}
@@ -554,8 +544,7 @@
                         <span id="reviewerSuggestion_{{ item.field }}"
                               class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                         <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                        <br>
-                        <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
+                        <span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span>
                       </p>
                     </div>
                   {% endfor %}
@@ -574,8 +563,7 @@
                           <span id="reviewerSuggestion_{{ item.field }}"
                                 class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                           <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                          <br>
-                          <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
+                          <span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span>
                         </p>
                       </div>
                     {% endfor %}
@@ -609,8 +597,7 @@
                                       <span class="value">{{ item.newValue|default:item.value }}</span>
                                       <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                                       <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                                      <br>
-                                      <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
+                                      <span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span>
                                     </p>
                                   </div>
                                 {% endfor %}
@@ -643,8 +630,7 @@
                       <span id="reviewerSuggestion_{{ item.field }}"
                             class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                       <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                      <br>
-                      <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
+                      <span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span>
                     </p>
                   </div>
                 {% endfor %}
@@ -663,8 +649,7 @@
                         <span id="reviewerSuggestion_{{ item.field }}"
                               class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                         <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                        <br>
-                        <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
+                        <span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span>
                       </p>
                     </div>
                   {% endfor %}
@@ -698,8 +683,7 @@
                                     <span class="value">{{ item.newValue|default:item.value }}</span>
                                     <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                                     <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                                    <br>
-                                    <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
+                                    <span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span>
                                   </p>
                                 </div>
                               {% endfor %}

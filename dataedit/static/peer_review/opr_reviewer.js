@@ -139,6 +139,78 @@ function deletePeerReview() {
     });
 }
 
+/**
+ * Expands all ancestor accordion panels containing the field element,
+ * then scrolls the field into view once they are open.
+ */
+function expandAccordionsAndScrollToField(fieldKey) {
+  const fieldElement = document.querySelector(`.field[data-fieldkey="${fieldKey}"]`);
+  if (!fieldElement) return;
+
+  // Collect all collapsed accordion-collapse ancestors
+  const collapsedAncestors = [];
+  let parent = fieldElement.parentElement;
+
+  while (parent) {
+    if (
+      parent.classList.contains('accordion-collapse') &&
+      !parent.classList.contains('show')
+    ) {
+      collapsedAncestors.push(parent);
+    }
+    parent = parent.parentElement;
+  }
+
+  if (collapsedAncestors.length === 0) {
+    // No accordions to open, scroll immediately
+    scrollToField(fieldElement);
+    return;
+  }
+
+  // Reverse so we open outermost first, then inner
+  collapsedAncestors.reverse();
+
+  // Open each accordion in sequence, waiting for each transition to finish
+  function openNext(index) {
+    if (index >= collapsedAncestors.length) {
+      // All open, now scroll
+      scrollToField(fieldElement);
+      return;
+    }
+
+    const collapseEl = collapsedAncestors[index];
+
+    // Find the toggle button for this accordion panel
+    const toggleButton = document.querySelector(
+      `[data-bs-target="#${collapseEl.id}"]`
+    );
+
+    if (!toggleButton) {
+      // No button found, try next
+      openNext(index + 1);
+      return;
+    }
+
+    // Listen for when this panel finishes opening
+    collapseEl.addEventListener('shown.bs.collapse', function handler() {
+      collapseEl.removeEventListener('shown.bs.collapse', handler);
+      openNext(index + 1);
+    });
+
+    // Click the toggle to open it
+    toggleButton.click();
+  }
+
+  openNext(0);
+}
+
+/**
+ * Scrolls the field element into view smoothly, centered vertically.
+ */
+function scrollToField(fieldElement) {
+  fieldElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
 function click_field(fieldKey, fieldValue, category) {
   const isEmpty = isEffectivelyEmpty(fieldKey, fieldValue);
 
@@ -151,24 +223,18 @@ function click_field(fieldKey, fieldValue, category) {
   setselectedFieldValue(fieldValue);
   setSelectedCategory(category);
 
-  // Build the lookup key for field_descriptions_json.
-  // The fieldKey from the HTML has resources.N. stripped already,
-  // e.g. "spatial.extent.name". The schema stores it under
-  // "resources.spatial.extent.name". So we try both, plus
-  // a version with numeric indices removed.
   const cleanedFieldKey = fieldKey.replace(/\.\d+/g, '');
   
-  // Try to find description using multiple key variants
   const candidateKeys = [
-  `resources.${category}.${fieldKey}`,         // resources.spatial.extent.name
-  `resources.${category}.${cleanedFieldKey}`,  // resources.spatial.extent.name
-  `resources.${fieldKey}`,                     // fallback
-  `resources.${cleanedFieldKey}`,              // fallback
-  fieldKey,
-  cleanedFieldKey,
-];
+    `resources.${category}.${fieldKey}`,
+    `resources.${category}.${cleanedFieldKey}`,
+    `resources.${fieldKey}`,
+    `resources.${cleanedFieldKey}`,
+    fieldKey,
+    cleanedFieldKey,
+  ];
 
-  let resolvedKey = cleanedFieldKey; // default fallback
+  let resolvedKey = cleanedFieldKey;
   if (typeof fieldDescriptionsData !== 'undefined' && fieldDescriptionsData) {
     for (const candidate of candidateKeys) {
       if (fieldDescriptionsData[candidate]) {
@@ -199,11 +265,35 @@ function click_field(fieldKey, fieldValue, category) {
     if (valueEl) valueEl.style.color = '';
   }
 
+  // Always start fresh visually
   clearInputFields();
   hideReviewerOptions();
   hideReviewerCommentsOptions();
-}
 
+  // --- NEW: Restore previous review entry if it exists ---
+  const existingReview = current_review.reviews.find(r => r.key === fieldKey);
+  if (existingReview && existingReview.fieldReview) {
+    const fr = existingReview.fieldReview;
+    const previousState = fr.state;
+
+    // Simulate clicking the correct state button to show the right UI
+    if (previousState === 'suggestion') {
+      showReviewerOptions();
+      hideReviewerCommentsOptions();
+      const valuearea = document.getElementById('valuearea');
+      const commentarea = document.getElementById('commentarea');
+      if (valuearea) valuearea.value = fr.newValue || '';
+      if (commentarea) commentarea.value = fr.comment || '';
+    } else if (previousState === 'rejected') {
+      hideReviewerOptions();
+      showReviewerCommentsOptions();
+      const comments = document.getElementById('comments');
+      if (comments) comments.value = fr.additionalComment || '';
+    }
+    // For 'ok', no extra UI needed, fields stay hidden
+  }
+    expandAccordionsAndScrollToField(fieldKey);
+}
 function updateFieldColor(fieldKey, state) {
   const safeId = '#field_' + fieldKey.replace(/\./g, "\\.");
   $(safeId).removeClass('field-ok field-suggestion field-rejected');
@@ -267,15 +357,22 @@ function saveEntrancesForReviewer() {
         updateClientStateDict(currentKey, selectedState);
         
         // Update DOM suggestions immediately
-        const fieldElement = document.getElementById("field_" + currentKey);
-        if (fieldElement) {
-            const suggEl = fieldElement.querySelector('.suggestion--highlight');
-            if (suggEl) suggEl.innerText = reviewObj.reviewerSuggestion;
-            
-            const commEl = fieldElement.querySelector('.suggestion--additional-comment');
-            if (commEl) commEl.innerText = reviewObj.additionalComment;
-        }
+      const fieldElement = document.getElementById("field_" + currentKey);
+      if (fieldElement) {
+          const suggEl = fieldElement.querySelector('.suggestion--highlight');
+          if (suggEl) suggEl.innerText = reviewObj.reviewerSuggestion;
+          
+          // ADD THIS: show the comment under the suggested value
+          const suggCommentEl = fieldElement.querySelector('.suggestion--comment');
+          if (suggCommentEl) {
+              suggCommentEl.innerText = (selectedState === 'suggestion') ? reviewObj.comment : '';
+          }
+          
+          const commEl = fieldElement.querySelector('.suggestion--additional-comment');
+          if (commEl) commEl.innerText = reviewObj.additionalComment;
+      }
     }
+
 
     document.getElementById("comments").value = "";
     checkReviewComplete();

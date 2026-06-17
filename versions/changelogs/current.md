@@ -19,6 +19,10 @@ SPDX-License-Identifier: CC0-1.0
   field that needs review. Hide start button for OPR if metadata is empty.
   [(#2310)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2310)
 
+- Show comment in field when going to next field during OPR. Fix progress
+  percentage and auto-select and -scroll to next field.
+  [(#2342)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2342)
+
 ## Documentation updates
 
 ## Code Quality
