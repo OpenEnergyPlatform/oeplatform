@@ -7,7 +7,6 @@ SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
-import os
 from pathlib import Path
 
 from owlready2 import get_ontology
@@ -23,19 +22,10 @@ from oeplatform.settings import (
     RDF_DATABASES,
     USE_DOCKER,
 )
+from ontology.utils import get_ontology_version
 
 onto_base_path = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
-
-# Only consider real version directories (e.g. "2.0.0"). This filters out
-# entries like macOS' ".DS_Store" that would otherwise break the int() parse
-# below (".DS_Store".split(".") -> ['', 'DS_Store'] -> int('')).
-versions = [
-    d
-    for d in os.listdir(onto_base_path)
-    if (onto_base_path / d).is_dir() and all(part.isdigit() for part in d.split("."))
-]
-
-version = max(versions, key=lambda d: [int(x) for x in d.split(".")])
+version = get_ontology_version(onto_base_path)
 path = onto_base_path / version  # TODO bad - windows dev will get path error
 file = "oeo-full.owl"  # TODO- set in settings
 

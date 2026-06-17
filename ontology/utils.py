@@ -24,11 +24,16 @@ def get_ontology_version(path, version=None):
     if not path.exists():
         raise Http404
 
-    versions = os.listdir(path)
+    # Only consider real version directories (e.g. "2.0.0"). This filters out
+    # entries like macOS' ".DS_Store" that would otherwise break the int()
+    # parse below (".DS_Store".split(".") -> ['', 'DS_Store'] -> int('')).
+    versions = [
+        d
+        for d in os.listdir(path)
+        if (Path(path) / d).is_dir() and all(part.isdigit() for part in d.split("."))
+    ]
     if not version:
-        version = max(
-            (d for d in versions), key=lambda d: [int(x) for x in d.split(".")]
-        )
+        version = max(versions, key=lambda d: [int(x) for x in d.split(".")])
 
     return version
 
