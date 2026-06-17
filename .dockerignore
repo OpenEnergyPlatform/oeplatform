@@ -1,5 +1,28 @@
+# Python virtualenvs (note: "venv*" does NOT match ".venv" — list both)
 venv*
 env*
+.venv/
+.env/
+
+# local secrets / generated config
 oeplatform/securitysettings.py
 
+# node deps (installed inside the image / named volume)
 node_modules/
+
+# VCS + large runtime data that is bind-mounted, never needed at build time
+.git/
+.gitignore
+ontologies/
+media/
+static/
+data/
+
+# editor / OS / build noise
+.vscode/
+.idea/
+__pycache__/
+*.pyc
+*.bak
+*.bak-*
+podman/
