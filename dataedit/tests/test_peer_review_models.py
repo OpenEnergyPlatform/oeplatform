@@ -111,15 +111,19 @@ class TestPeerReviewSaveUpdate(_OprTestBase):
         # turn starts on the reviewer
         self.assertEqual(pm.current_reviewer, Reviewer.REVIEWER.value)
 
-    def test_save_creates_a_new_manager_on_every_call_duplicate_risk(self):
-        # CHARACTERIZATION of a latent bug: PeerReview.save() unconditionally
-        # creates a NEW PeerReviewManager. Calling it twice leaves two managers
-        # for one review, which later breaks PeerReviewManager.load (uses .get
-        # and would raise MultipleObjectsReturned). The refactor should use the
-        # update() path or get_or_create.
+    def test_save_keeps_exactly_one_manager_per_review(self):
+        # Regression for the former duplicate-manager bug: PeerReview.save()
+        # used to create a NEW PeerReviewManager on every call (two saves -> two
+        # managers -> PeerReviewManager.load raised MultipleObjectsReturned).
+        # It now uses get_or_create, so a review keeps exactly one manager and
+        # PeerReviewManager.load works.
         opr = self._make_opr(table="t_dup", review_type="save")
         opr.save(review_type="save")
-        self.assertEqual(PeerReviewManager.objects.filter(opr=opr).count(), 2)
+        self.assertEqual(PeerReviewManager.objects.filter(opr=opr).count(), 1)
+        # the canonical loader no longer raises
+        self.assertEqual(
+            PeerReviewManager.load(opr=opr).status, ReviewDataStatus.SAVED.value
+        )
 
     def test_save_raises_when_contributor_equals_reviewer(self):
         opr = PeerReview(
