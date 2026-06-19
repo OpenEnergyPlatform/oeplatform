@@ -25,4 +25,7 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Documentation updates
 
+- Updated the OE Family Steering Committee
+  [#2332](https://github.com/OpenEnergyPlatform/oeplatform/pull/2332)
+
 ## Code Quality
