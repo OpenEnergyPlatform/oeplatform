@@ -5,12 +5,12 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import {
   current_review,
-  getAllFieldsAndValues,
   getErrorMsg,
   showToast,
+  snapshotReviewState,
 } from "./peer_review.js";
-import { isEmptyValue, isEffectivelyEmpty, sendJson } from "./utilities.js";
-import { getFieldState } from "./state_current_review.js";
+import { sendJson } from "./utilities.js";
+import { isReviewerComplete, reviewerHasChanges } from "./selectors.js";
 export function finishPeerReview() {
   $("#peer_review-submitting").removeClass("d-none");
 
@@ -124,35 +124,13 @@ function hideFinishUI() {
 }
 
 // True if any non-empty field is suggested or rejected (i.e. there is something
-// the contributor needs to respond to).
+// the contributor needs to respond to). Now via the tested selector.
 function reviewHasChanges() {
-  const allFields = getAllFieldsAndValues();
-  for (const { fieldName, fieldValue } of allFields) {
-    if (!isEffectivelyEmpty(fieldName, fieldValue)) {
-      const fieldState = getFieldState(fieldName);
-      if (fieldState === "rejected" || fieldState === "suggestion") {
-        return true;
-      }
-    }
-  }
-  return false;
+  return reviewerHasChanges(snapshotReviewState());
 }
 
+// True when every non-empty field has a review state. Now via the tested
+// selector (was a duplicated DOM loop).
 export function checkFieldStates() {
-  const allFields = getAllFieldsAndValues();
-  for (const { fieldName, fieldValue } of allFields) {
-    console.log(fieldName, fieldValue);
-    if (!isEffectivelyEmpty(fieldName, fieldValue)) {
-      const fieldState = getFieldState(fieldName);
-
-      if (
-        fieldState !== "ok" &&
-        fieldState !== "rejected" &&
-        fieldState !== "suggestion"
-      ) {
-        return false;
-      }
-    }
-  }
-  return true;
+  return isReviewerComplete(snapshotReviewState());
 }

@@ -9,6 +9,7 @@ import { renderSummaryPageFields, updateSubmitButtonColor, updateTabProgressIndi
 import { selectNextField, updatePercentageDisplay } from "./navigation.js";
 import {isEmptyValue, isEffectivelyEmpty, sendJson, getCookie, getErrorMsg} from "./utilities.js";
 import { getFieldState, updateClientStateDict } from "./state_current_review.js";
+import { isReviewerComplete, reviewerHasChanges } from "./selectors.js";
 
 // Re-export utilities for other modules
 export { getCookie, sendJson, getErrorMsg };
@@ -138,6 +139,17 @@ export function getAllFieldsAndValues() {
   return fieldList;
 }
 
+// Snapshot the current field inventory + states into the shape the pure
+// selectors expect. Bridges the legacy DOM/global state to selectors.js while
+// the full store migration is in progress (Phase 3).
+export function snapshotReviewState() {
+  const fields = getAllFieldsAndValues().map(({ fieldName, fieldValue }) => ({
+    key: fieldName,
+    isEmpty: isEffectivelyEmpty(fieldName, fieldValue),
+  }));
+  return { fields, fieldState: window.state_dict || {} };
+}
+
 export function makeFieldList() {
   var fieldElements = [];
   $(".field").each(function() {
@@ -224,21 +236,12 @@ export function cancelPeerReview() {
 }
 
 export function checkReviewComplete() {
-  const fields = getAllFieldsAndValues();
-  let allComplete = true;
-
-  for (let field of fields) {
-    const fieldState = getFieldState(field.fieldName);
-    const isEmpty = isEffectivelyEmpty(field.fieldName, field.fieldValue);
-
-    if (!isEmpty && fieldState !== 'ok' && fieldState !== 'rejected' && fieldState !== 'suggestion') {
-      allComplete = false;
-      break;
-    }
-  }
+  // "All non-empty fields reviewed" — now via the tested selector instead of a
+  // duplicated DOM loop (Phase 3 step B).
+  const allComplete = isReviewerComplete(snapshotReviewState());
 
   const submitButton = $('#submit_summary');
-  
+
   if (allComplete) {
     submitButton.removeClass('disabled');
     if (!window.clientSideReviewFinished) {
