@@ -134,13 +134,30 @@ def cumulative_tier_strategy(metadata, schema) -> PeerReviewBadge:
 DEFAULT_BADGE_STRATEGY: BadgeStrategy = cumulative_tier_strategy
 
 
+def badge_label(badge: PeerReviewBadge) -> str:
+    """Human-readable badge label (e.g. ``"Bronze"``). ``Table`` and the
+    profile/dataview cards upper-case it when matching, so case is not critical."""
+    return badge.name.capitalize()
+
+
 def apply_badge_to_metadata(metadata: dict, badge: PeerReviewBadge) -> dict:
     """Persist the badge under ``metadata["review"]["badge"]`` in the form
     ``Table.get_review_badge_from_table_metadata`` expects (it upper-cases and
     matches the enum name)."""
     review = metadata.setdefault("review", {})
-    review["badge"] = badge.name.capitalize()
+    review["badge"] = badge_label(badge)
     return metadata
+
+
+def apply_badge_to_review(review: dict, badge: PeerReviewBadge) -> dict:
+    """Persist the badge onto the review datamodel. The dataview "Latest review
+    completed" card reads ``PeerReview.review["badge"]`` (see views.py), so the
+    award must land here too — not only in the table metadata."""
+    review = review or {}
+    label = badge_label(badge)
+    review["badge"] = label
+    review["grantedBadge"] = label
+    return review
 
 
 class BadgeService:
