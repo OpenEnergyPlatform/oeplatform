@@ -14,6 +14,7 @@ from django.test import SimpleTestCase
 from dataedit.peer_review.badges import (
     BadgeService,
     apply_badge_to_metadata,
+    apply_badge_to_review,
     cumulative_tier_strategy,
     field_is_present,
     is_filled,
@@ -138,3 +139,14 @@ class TestBadgeService(SimpleTestCase):
         md = {}
         apply_badge_to_metadata(md, PeerReviewBadge.SILVER)
         self.assertEqual(md["review"]["badge"], "Silver")
+
+    def test_apply_badge_to_review_sets_badge_and_granted_badge(self):
+        # the dataview card reads PeerReview.review["badge"]
+        review = {"reviews": []}
+        apply_badge_to_review(review, PeerReviewBadge.GOLD)
+        self.assertEqual(review["badge"], "Gold")
+        self.assertEqual(review["grantedBadge"], "Gold")
+
+    def test_apply_badge_to_review_tolerates_none(self):
+        result = apply_badge_to_review(None, PeerReviewBadge.BRONZE)
+        self.assertEqual(result["badge"], "Bronze")
