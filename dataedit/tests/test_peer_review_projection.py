@@ -14,6 +14,7 @@ from django.test import SimpleTestCase
 from dataedit.peer_review.projection import (
     build_reviews_from_rounds,
     compute_round_delta,
+    field_history,
     project_review,
     reconstruct_rounds_from_review,
 )
@@ -212,3 +213,30 @@ class TestReconstructRoundsFromReview(SimpleTestCase):
         self.assertEqual(reconstruct_rounds_from_review(None), [])
         self.assertEqual(reconstruct_rounds_from_review({}), [])
         self.assertEqual(reconstruct_rounds_from_review({"reviews": []}), [])
+
+
+class TestFieldHistory(SimpleTestCase):
+    def test_orders_contributions_by_timestamp(self):
+        reviews = [
+            {
+                "key": "title",
+                "category": "general",
+                "fieldReview": [
+                    {"role": "contributor", "state": "ok", "timestamp": 20},
+                    {"role": "reviewer", "state": "suggestion", "timestamp": 10},
+                ],
+            }
+        ]
+        history = field_history(reviews)
+        self.assertEqual(
+            [c["role"] for c in history["title"]], ["reviewer", "contributor"]
+        )
+
+    def test_single_dict_field_review_becomes_one_element(self):
+        reviews = [{"key": "a", "category": "general", "fieldReview": {"state": "ok"}}]
+        history = field_history(reviews)
+        self.assertEqual(len(history["a"]), 1)
+
+    def test_empty_or_none_yields_empty_history(self):
+        self.assertEqual(field_history([]), {})
+        self.assertEqual(field_history(None), {})
