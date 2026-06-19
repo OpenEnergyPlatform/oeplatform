@@ -56,4 +56,10 @@ document.addEventListener('DOMContentLoaded', function () {
   } else {
     console.warn('OPR page marker not found or invalid; skipping role-specific initialization');
   }
+
+  // A finished review is read-only for both roles: it can be inspected
+  // (states, comments, per-field history) but not edited.
+  if (typeof config !== 'undefined' && config.review_finished) {
+    common.applyReadOnlyMode();
+  }
 });
