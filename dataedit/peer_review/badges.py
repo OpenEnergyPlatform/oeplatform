@@ -144,7 +144,16 @@ def apply_badge_to_metadata(metadata: dict, badge: PeerReviewBadge) -> dict:
     """Persist the badge under ``metadata["review"]["badge"]`` in the form
     ``Table.get_review_badge_from_table_metadata`` expects (it upper-cases and
     matches the enum name)."""
-    review = metadata.setdefault("review", {})
+
+    # Safely get the existing review data
+    review = metadata.get("review")
+
+    # If it doesn't exist, OR if it exists but is a string/other type, reset it
+    # to an empty dict
+    if not isinstance(review, dict):
+        review = {}
+        metadata["review"] = review
+
     review["badge"] = badge_label(badge)
     return metadata
 
