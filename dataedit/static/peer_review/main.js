@@ -6,7 +6,7 @@
 
 import * as common from "./peer_review.js";
 import { selectState } from './peer_review.js';
-import { selectNextField, selectPreviousField, selectFirstReviewableField } from './navigation.js';
+import { selectNextField, selectPreviousField, selectFirstReviewableField, selectFirstContributorField } from './navigation.js';
 import { setGetFieldState } from './state_current_review.js';
 
 // Static imports avoid the "Failed to fetch" dynamic import errors
@@ -46,6 +46,13 @@ document.addEventListener('DOMContentLoaded', function () {
     
   } else if (oprPage === 'contributor') {
     initContributor();
+
+    // Auto-select the first field the reviewer flagged (suggested/denied), once
+    // accordions, tabs and state are ready.
+    setTimeout(() => {
+      selectFirstContributorField();
+    }, 600);
+
   } else {
     console.warn('OPR page marker not found or invalid; skipping role-specific initialization');
   }
