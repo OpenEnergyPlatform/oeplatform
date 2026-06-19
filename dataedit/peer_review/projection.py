@@ -174,6 +174,41 @@ def build_reviews_from_rounds(rounds):
     return [by_key[identity] for identity in appearance_order]
 
 
+def field_history(reviews):
+    """Per-field ordered contribution history (the reviewer/contributor ping-pong).
+
+    Args:
+        reviews: the ``review["reviews"]`` list — entries of
+            ``{key, category, fieldReview: dict | list}``.
+
+    Returns:
+        dict: ``{key: [fieldReview dict, ...]}`` with each field's contributions
+            ordered by ``timestamp`` (oldest first). A single-round field yields a
+            one-element list; multi-round discussions yield the full exchange. The
+            UI renders this as the per-field history.
+    """
+
+    def _ts(contribution):
+        if isinstance(contribution, dict):
+            return contribution.get("timestamp") or 0
+        return 0
+
+    history = {}
+    for entry in reviews or []:
+        key = entry.get("key")
+        if key is None:
+            continue
+        field_review = entry.get("fieldReview")
+        if isinstance(field_review, list):
+            contributions = [c for c in field_review if isinstance(c, dict)]
+        elif isinstance(field_review, dict):
+            contributions = [field_review]
+        else:
+            contributions = []
+        history[key] = sorted(contributions, key=_ts)
+    return history
+
+
 def project_review(base, rounds):
     """Rebuild a full review datamodel from rounds, preserving header fields.
 
