@@ -85,7 +85,12 @@ from dataedit.peer_review.metadata_serializer import (
     get_all_field_descriptions,
     sort_in_category,
 )
-from dataedit.peer_review.service import ContributorNotFoundError, ReviewService
+from dataedit.peer_review.projection import field_history
+from dataedit.peer_review.service import (
+    ContributorNotFoundError,
+    ReviewFinishedError,
+    ReviewService,
+)
 from login import models as login_models
 from oeplatform.settings import (
     DOCUMENTATION_LINKS,
@@ -1149,6 +1154,7 @@ class TablePeerReviewView(LoginRequiredMixin, View):
             state_dict = process_review_data(
                 review_data=existing_review, metadata=metadata, categories=categories
             )
+            field_history_data = field_history(existing_review)
         else:
             url_peer_review = reverse(
                 "dataedit:peer_review_create",
@@ -1157,6 +1163,7 @@ class TablePeerReviewView(LoginRequiredMixin, View):
             # existing_review={}
             state_dict = None
             review_finished = None
+            field_history_data = {}
 
         config_data = {
             "can_add": can_add,
@@ -1177,6 +1184,7 @@ class TablePeerReviewView(LoginRequiredMixin, View):
             "json_schema": json_schema,
             "field_descriptions_json": json.dumps(field_descriptions),
             "state_dict": json.dumps(state_dict),
+            "field_history_json": json.dumps(field_history_data),
             "review_finished": review_finished,
             "review_id": review_id,
         }
@@ -1237,6 +1245,8 @@ class TablePeerReviewView(LoginRequiredMixin, View):
             service.submit_reviewer_review(review_data, review_id=review_id)
         except ContributorNotFoundError as exc:
             return JsonResponse({"error": str(exc)}, status=400)
+        except ReviewFinishedError as exc:
+            return JsonResponse({"error": str(exc)}, status=409)
 
         return JsonResponse({"status": "success"}, status=200)
 
@@ -1287,6 +1297,7 @@ class TablePeerReviewContributorView(TablePeerReviewView):
         state_dict = process_review_data(
             review_data=review_data, metadata=metadata, categories=categories
         )
+        review_finished = peer_review.is_finished
         context_meta = {
             "config": json.dumps(
                 {
@@ -1303,6 +1314,8 @@ class TablePeerReviewContributorView(TablePeerReviewView):
                     ),
                     # "topic": table_obj.topics,
                     "table": table_obj.name,
+                    "review_finished": review_finished,
+                    "review_id": review_id,
                 }
             ),
             "table": table_obj.name,
@@ -1311,6 +1324,8 @@ class TablePeerReviewContributorView(TablePeerReviewView):
             "json_schema": json_schema,
             "field_descriptions_json": json.dumps(field_descriptions),
             "state_dict": json.dumps(state_dict),
+            "field_history_json": json.dumps(field_history(review_data)),
+            "review_finished": review_finished,
         }
         return render(request, "dataedit/opr_contributor.html", context=context_meta)
 
@@ -1330,5 +1345,8 @@ class TablePeerReviewContributorView(TablePeerReviewView):
         """
         review_data = json.loads(request.body)
         service = ReviewService(table_name=table, actor=request.user)
-        service.submit_contributor_review(review_data, review_id=review_id)
+        try:
+            service.submit_contributor_review(review_data, review_id=review_id)
+        except ReviewFinishedError as exc:
+            return JsonResponse({"error": str(exc)}, status=409)
         return JsonResponse({"status": "success"}, status=200)
