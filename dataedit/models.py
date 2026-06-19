@@ -556,8 +556,7 @@ class PeerReview(models.Model):
     oemetadata = JSONField(null=False, default=dict)
 
     review_id: QuerySet["PeerReviewManager"]  # related_name, for static type checking
-    prev_review: QuerySet["PeerReviewManager"]  # related_name, for static type checking
-    next_review: QuerySet["PeerReviewManager"]  # related_name, for static type checking
+    rounds: QuerySet["ReviewRound"]  # related_name, for static type checking
 
     # laden
     @classmethod
@@ -761,8 +760,6 @@ class PeerReviewManager(models.Model):
         current_reviewer (CharField): The current reviewer.
         status (CharField): The current status of the review.
         is_open_since (CharField): How long the review has been open.
-        prev_review (ForeignKey): The previous review in the process.
-        next_review (ForeignKey): The next review in the process.
     """
 
     REVIEW_STATUS = [(status.value, status.name) for status in ReviewDataStatus]
@@ -778,20 +775,9 @@ class PeerReviewManager(models.Model):
         choices=REVIEW_STATUS, max_length=10, default=ReviewDataStatus.SAVED.value
     )
     is_open_since = models.CharField(null=True, max_length=10)
-    prev_review = ForeignKey(
-        PeerReview,
-        on_delete=models.CASCADE,
-        related_name="prev_review",
-        null=True,
-        default=None,
-    )  # TODO: add logic
-    next_review = ForeignKey(
-        PeerReview,
-        on_delete=models.CASCADE,
-        related_name="next_review",
-        null=True,
-        default=None,
-    )  # TODO: add logic
+
+    # Review history (the ping-pong of turns) is modelled by ReviewRound, not by
+    # prev/next FKs on the manager — those were unused and have been removed.
 
     @classmethod
     def load(cls, opr):
