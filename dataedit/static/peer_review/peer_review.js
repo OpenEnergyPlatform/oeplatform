@@ -307,6 +307,77 @@ export function highlightSelectedField(fieldKey, highlightColor = '#F6F9FB') {
   if (selectedDiv && !selectedDiv.classList.contains('field-ok')) {
     selectedDiv.style.backgroundColor = highlightColor;
   }
+
+  // Show the per-field reviewer/contributor history (the ping-pong) whenever a
+  // field is selected. No-op if there is no history for this field.
+  renderFieldHistory(fieldKey);
+}
+
+// --- Per-field review history (the ping-pong between reviewer & contributor) ---
+function ensureHistoryContainer() {
+  let el = document.getElementById('field-review-history');
+  if (!el) {
+    const host =
+      document.getElementById('review-window') ||
+      document.getElementById('field-descriptions');
+    if (!host) return null;
+    el = document.createElement('div');
+    el.id = 'field-review-history';
+    el.className = 'opr-history';
+    host.appendChild(el);
+  }
+  return el;
+}
+
+export function renderFieldHistory(fieldKey) {
+  const container = ensureHistoryContainer();
+  if (!container) return;
+
+  const all = window.field_history || {};
+  const history = all[fieldKey] || [];
+
+  // A single round (e.g. accepted immediately) is not worth a timeline.
+  if (history.length <= 1) {
+    container.innerHTML = '';
+    return;
+  }
+
+  const items = history
+    .map(c => {
+      const role = c.role || 'unknown';
+      const state = c.state || '';
+      const when = c.timestamp ? new Date(c.timestamp).toLocaleString() : '';
+      const value = c.newValue || c.reviewerSuggestion || '';
+      const comment = c.comment || c.additionalComment || '';
+      return (
+        `<li class="opr-history__item opr-history__item--${escapeHtml(state)}">` +
+        `<span class="opr-history__role">${escapeHtml(role)}</span> ` +
+        `<span class="opr-history__state">${escapeHtml(state)}</span>` +
+        (value ? `<div class="opr-history__value">${escapeHtml(value)}</div>` : '') +
+        (comment ? `<div class="opr-history__comment">${escapeHtml(comment)}</div>` : '') +
+        (when ? `<span class="opr-history__time">${escapeHtml(when)}</span>` : '') +
+        `</li>`
+      );
+    })
+    .join('');
+
+  container.innerHTML =
+    `<h4 class="opr-history__title">Review history (${history.length} rounds)</h4>` +
+    `<ul class="opr-history__list">${items}</ul>`;
+}
+
+// --- Read-only mode for finished reviews ---
+// Hide every editing affordance so a finished review can be inspected (states,
+// comments, history) but not changed. The backend also rejects edits to a
+// finished review (ReviewFinishedError) as defense in depth.
+export function applyReadOnlyMode() {
+  $('#ok-button, #suggestion-button, #rejected-button').prop('disabled', true);
+  $('.review__btns').hide();
+  $('#reviewer_remarks, #reviewer_comments').addClass('d-none');
+  $('#submit_summary, #peer_review-save, #peer_review-delete').hide();
+  $('#submitButton, #submitCommentButton').hide();
+  $('.content-finish-review').hide();
+  document.body.classList.add('opr-readonly');
 }
 
 export function getCategoryToTabIdMapping() {
