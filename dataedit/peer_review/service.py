@@ -32,6 +32,7 @@ from dataedit.models import (
     ReviewRound,
     Table,
 )
+from dataedit.peer_review.badges import BadgeService, apply_badge_to_metadata
 from dataedit.peer_review.projection import compute_round_delta, project_review
 
 
@@ -138,7 +139,7 @@ class ReviewService:
             opr.update(review_type=review_post_type)
 
         if review_finished is True:
-            self._apply_finished(opr)
+            self._apply_finished(opr, reviewer_choice=payload.get("reviewBadge"))
 
     def _create_opr(self, contributor, review_datamodel) -> PeerReview:
         return PeerReview(
@@ -176,21 +177,35 @@ class ReviewService:
         opr.update(review_type=review_post_type)
 
         if review_finished is True:
-            self._apply_finished(opr)
+            self._apply_finished(opr, reviewer_choice=payload.get("reviewBadge"))
 
     # ------------------------------------------------------------------ #
     # finish: merge accepted values back into metadata
     # ------------------------------------------------------------------ #
-    def _apply_finished(self, opr) -> None:
-        """Mark the table reviewed and merge the (projected) accepted values into
-        the live table metadata and the pinned snapshot."""
+    def _apply_finished(self, opr, reviewer_choice=None) -> None:
+        """Mark the table reviewed, merge the (projected) accepted values into the
+        live table metadata and the pinned snapshot, and award the badge.
+
+        The badge is the reviewer's explicit choice if given, else the
+        auto-suggestion (see ``BadgeService`` for the swappable policy)."""
         review_table = Table.load(name=self.table_name)
         review_table.set_is_reviewed()
 
         envelope = {"reviewData": opr.review}
 
-        live_metadata = load_metadata_from_db(table=self.table_name)
-        save_metadata_to_db(self.table_name, recursive_update(live_metadata, envelope))
+        # Apply accepted values to the live metadata, then award the badge based
+        # on the resulting (final) metadata.
+        live_metadata = recursive_update(
+            load_metadata_from_db(table=self.table_name), envelope
+        )
+        badge = BadgeService().resolve_final_badge(
+            live_metadata, reviewer_choice=reviewer_choice
+        )
+        apply_badge_to_metadata(live_metadata, badge)
+        save_metadata_to_db(self.table_name, live_metadata)
 
-        opr.oemetadata = recursive_update(opr.oemetadata or {}, envelope)
+        # Mirror the merged values + badge into the pinned snapshot.
+        opr.oemetadata = apply_badge_to_metadata(
+            recursive_update(opr.oemetadata or {}, envelope), badge
+        )
         opr.save()
