@@ -4,21 +4,35 @@ ReviewService — single orchestration entry point for OPR mutations.
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
 
-Phase 2, step S2: the create-vs-update branching that used to live inside
-``TablePeerReviewView.post`` / ``TablePeerRreviewContributorView.post`` moves here
-**1:1**. This is intentionally behavior-preserving — it still calls the existing
-``PeerReview.save(review_type=...)`` / ``.update(review_type=...)`` model methods,
-so the duplicate-``PeerReviewManager`` bug is *not* fixed yet (that happens in
-S3/S4 together with the ``ReviewRound`` work). The 42 characterization tests stay
-green across this change.
+Phase 2 S3/S4: the create-vs-update branching lives here, and submit/finish now
+record a ``ReviewRound`` (the append-only per-turn log) and rebuild
+``PeerReview.review`` as a projection of all rounds. ``merge_field_reviews`` and
+the old "extend the reviewer payload with stored contributor reviews" hack are
+gone — round history + ``compute_round_delta`` replace them.
+
+Drafts (``reviewType="save"``) do NOT create a round; they store the working
+payload as-is. Status/turn/snapshot are still delegated to the model
+``PeerReview.save(review_type=...)`` / ``.update(review_type=...)``.
 
 HTTP concerns stay in the views: the service raises ``ContributorNotFoundError``
 for the "no table holder" case and the view maps it to a 400.
+
+NOTE: existing reviews must be backfilled into rounds (migration 0047) before this
+write path runs, otherwise an ongoing review's earlier history (which lived only
+in the old ``review`` blob) is not yet represented as rounds.
 """  # noqa: E501
 
-from dataedit.helper import merge_field_reviews, recursive_update
+from dataedit.helper import recursive_update
 from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
-from dataedit.models import PeerReview, PeerReviewManager, Table
+from dataedit.models import (
+    PeerReview,
+    PeerReviewManager,
+    ReviewDataStatus,
+    Reviewer,
+    ReviewRound,
+    Table,
+)
+from dataedit.peer_review.projection import compute_round_delta, project_review
 
 
 class ContributorNotFoundError(Exception):
@@ -34,34 +48,49 @@ class ReviewService:
         self.actor = actor
 
     # ------------------------------------------------------------------ #
-    # helpers
+    # rounds + projection
     # ------------------------------------------------------------------ #
-    def _load_review_metadata(self, review_id=None) -> dict:
-        """Mirror of the old ``TablePeerReviewView.load_json``: snapshot if a
-        review_id is given, else the live table metadata."""
-        if review_id is None:
-            return load_metadata_from_db(table=self.table_name)
-        opr = PeerReviewManager.get_opr_by_id(opr_id=review_id)
-        return opr.oemetadata
+    def _rounds(self, opr) -> list:
+        return list(
+            opr.rounds.order_by("sequence").values(
+                "sequence", "field_reviews", "sets_finished"
+            )
+        )
+
+    def _record_round(self, opr, role, review_post_type, incoming_reviews, finished):
+        """Append a ReviewRound for this turn and rebuild ``opr.review``.
+
+        Only the contributions new this turn (vs prior rounds) are stored on the
+        round; ``opr.review`` is then re-projected from all rounds. ``opr`` is not
+        saved here — the caller's ``save``/``update`` persists ``opr.review``.
+        """
+        prior = self._rounds(opr)
+        delta = compute_round_delta(incoming_reviews, prior)
+        next_sequence = (prior[-1]["sequence"] if prior else 0) + 1
+        action = (
+            ReviewDataStatus.FINISHED.value
+            if finished
+            else ReviewDataStatus.SUBMITTED.value
+        )
+        ReviewRound.objects.create(
+            opr=opr,
+            sequence=next_sequence,
+            role=role,
+            actor=self.actor,
+            action=action,
+            field_reviews=delta,
+            sets_finished=bool(finished),
+        )
+        opr.review = project_review(opr.review or {}, self._rounds(opr))
 
     # ------------------------------------------------------------------ #
     # reviewer side
     # ------------------------------------------------------------------ #
     def submit_reviewer_review(self, payload: dict, review_id=None) -> None:
-        """Reviewer save/submit/finish. Equivalent to the old reviewer POST
-        body (minus the ``delete`` branch, which the view handles)."""
-        review_data = payload
-        if review_id:
-            contributor_review = PeerReview.objects.filter(id=review_id).first()
-            if contributor_review:
-                contributor_review_data = (contributor_review.review or {}).get(
-                    "reviews", []
-                )
-                review_data["reviewData"]["reviews"].extend(contributor_review_data)
-
-        review_post_type = review_data.get("reviewType")
-        review_datamodel = review_data.get("reviewData")
+        review_datamodel = payload.get("reviewData") or {}
+        review_post_type = payload.get("reviewType")
         review_finished = review_datamodel.get("reviewFinished")
+        incoming_reviews = review_datamodel.get("reviews", [])
 
         contributor = PeerReviewManager.load_contributor(table=self.table_name)
         if contributor is None:
@@ -70,60 +99,98 @@ class ReviewService:
                 f"as table holder for the current table: {self.table_name}!"
             )
 
-        active_peer_review = PeerReview.load(table=self.table_name)
-        if active_peer_review is None or active_peer_review.is_finished:
-            # no active review (or the active one is finished) -> create a new one
-            table_review = PeerReview(
-                table=self.table_name,
-                is_finished=review_finished,
-                review=review_datamodel,
-                reviewer=self.actor,
-                contributor=contributor,
-                oemetadata=load_metadata_from_db(table=self.table_name),
+        active = PeerReview.load(table=self.table_name)
+        creating = active is None or active.is_finished
+
+        if review_post_type == "save":
+            # Draft: store the working payload as-is, no round recorded.
+            if creating:
+                self._create_opr(contributor, review_datamodel).save(review_type="save")
+            else:
+                active.review = review_datamodel
+                active.reviewer = self.actor
+                active.contributor = contributor
+                active.update(review_type="save")
+            return
+
+        if creating:
+            opr = self._create_opr(contributor, review_datamodel)
+            opr.save()  # obtain a pk; no manager yet
+            self._record_round(
+                opr,
+                Reviewer.REVIEWER.value,
+                review_post_type,
+                incoming_reviews,
+                review_finished,
             )
-            table_review.save(review_type=review_post_type)
+            opr.save(review_type=review_post_type)
         else:
-            # active review exists -> merge this turn into it and update
-            merged_review_data = merge_field_reviews(
-                current_json=active_peer_review.review, new_json=review_datamodel
+            opr = active
+            self._record_round(
+                opr,
+                Reviewer.REVIEWER.value,
+                review_post_type,
+                incoming_reviews,
+                review_finished,
             )
-            active_peer_review.review = merged_review_data
-            active_peer_review.reviewer = self.actor
-            active_peer_review.contributor = contributor
-            active_peer_review.update(review_type=review_post_type)
+            opr.reviewer = self.actor
+            opr.contributor = contributor
+            opr.update(review_type=review_post_type)
 
         if review_finished is True:
-            self._apply_finished(review_data, review_id)
+            self._apply_finished(opr)
 
-    def _apply_finished(self, review_data: dict, review_id) -> None:
-        """Merge accepted values back into the live + snapshot metadata and mark
-        the table reviewed (old reviewer POST ``review_finished`` block)."""
-        review_table = Table.load(name=self.table_name)
-        review_table.set_is_reviewed()
-
-        metadata = self._load_review_metadata(review_id=review_id)
-        updated_metadata = recursive_update(metadata, review_data)
-        save_metadata_to_db(self.table_name, updated_metadata)
-
-        active_peer_review = PeerReview.load(table=self.table_name)
-        if active_peer_review:
-            updated_oemetadata = recursive_update(
-                active_peer_review.oemetadata, review_data
-            )
-            active_peer_review.oemetadata = updated_oemetadata
-            active_peer_review.save()
+    def _create_opr(self, contributor, review_datamodel) -> PeerReview:
+        return PeerReview(
+            table=self.table_name,
+            is_finished=False,
+            review=review_datamodel,
+            reviewer=self.actor,
+            contributor=contributor,
+            oemetadata=load_metadata_from_db(table=self.table_name),
+        )
 
     # ------------------------------------------------------------------ #
     # contributor side
     # ------------------------------------------------------------------ #
     def submit_contributor_review(self, payload: dict, review_id) -> None:
-        """Contributor reply: merge into the existing review and update.
-        Equivalent to the old contributor POST body."""
+        review_datamodel = payload.get("reviewData") or {}
         review_post_type = payload.get("reviewType")
-        review_datamodel = payload.get("reviewData")
-        current_opr = PeerReviewManager.get_opr_by_id(opr_id=review_id)
-        merged_review = merge_field_reviews(
-            current_json=current_opr.review, new_json=review_datamodel
+        review_finished = review_datamodel.get("reviewFinished")
+        incoming_reviews = review_datamodel.get("reviews", [])
+
+        opr = PeerReviewManager.get_opr_by_id(opr_id=review_id)
+
+        if review_post_type == "save":
+            opr.review = review_datamodel
+            opr.update(review_type="save")
+            return
+
+        self._record_round(
+            opr,
+            Reviewer.CONTRIBUTOR.value,
+            review_post_type,
+            incoming_reviews,
+            review_finished,
         )
-        current_opr.review = merged_review
-        current_opr.update(review_type=review_post_type)
+        opr.update(review_type=review_post_type)
+
+        if review_finished is True:
+            self._apply_finished(opr)
+
+    # ------------------------------------------------------------------ #
+    # finish: merge accepted values back into metadata
+    # ------------------------------------------------------------------ #
+    def _apply_finished(self, opr) -> None:
+        """Mark the table reviewed and merge the (projected) accepted values into
+        the live table metadata and the pinned snapshot."""
+        review_table = Table.load(name=self.table_name)
+        review_table.set_is_reviewed()
+
+        envelope = {"reviewData": opr.review}
+
+        live_metadata = load_metadata_from_db(table=self.table_name)
+        save_metadata_to_db(self.table_name, recursive_update(live_metadata, envelope))
+
+        opr.oemetadata = recursive_update(opr.oemetadata or {}, envelope)
+        opr.save()
