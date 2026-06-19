@@ -39,7 +39,8 @@ from django.views.generic.edit import DeleteView
 from rest_framework.authtoken.models import Token
 
 import login.permissions
-from dataedit.models import PeerReview, PeerReviewManager, Table, Topic
+from dataedit.helper import delete_peer_review
+from dataedit.models import PeerReviewManager, Table, Topic
 from login.forms import EditUserForm, GroupForm
 from login.models import GroupMembership, UserGroup
 from login.models import myuser as OepUser
@@ -307,21 +308,13 @@ class ReviewsView(View):
 @require_POST
 def delete_peer_review_simple_view(request):
     """
-    Удаление Peer Review по review_id (упрощённый вариант),
-    считывая review_id из тела запроса (JSON).
+    Delete a peer review by ``review_id`` read from the JSON request body
+    (used by the profile page). Delegates to the single ``delete_peer_review``
+    implementation so both delete entry points behave identically.
     """
     data = json.loads(request.body)
-    review_id = data.get("review_id")  # берем из POST
-
-    if not review_id:
-        return JsonResponse({"error": "No review_id in request."}, status=400)
-
-    peer_review = PeerReview.objects.filter(id=review_id).first()
-    if peer_review:
-        peer_review.delete()
-        return JsonResponse({"message": "PeerReview successfully deleted."})
-    else:
-        return JsonResponse({"error": "PeerReview not found."}, status=404)
+    review_id = data.get("review_id")
+    return delete_peer_review(review_id)
 
 
 class SettingsView(View):
