@@ -368,6 +368,7 @@
     const fieldDescriptionsData = JSON.parse(document.getElementById("field-descriptions-json").textContent);
     var config = JSON.parse("{{ config|escapejs }}");
     window.state_dict = JSON.parse("{{ state_dict | escapejs }}");
+    window.field_history = JSON.parse("{{ field_history_json | escapejs }}");
     if (window.state_dict) {
       for (let [key, value] of Object.entries(window.state_dict)) {
         let field_id = `#field_${key}`.replace(/\./g, "\\.");
