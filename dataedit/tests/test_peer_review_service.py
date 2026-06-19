@@ -20,7 +20,7 @@ from dataedit.models import (
     ReviewRound,
 )
 from dataedit.peer_review.projection import project_review
-from dataedit.peer_review.service import ReviewService
+from dataedit.peer_review.service import ReviewFinishedError, ReviewService
 from login.models import myuser as User
 
 
@@ -162,3 +162,13 @@ class TestReviewServiceContributor(TestCase):
         self.assertEqual(pm.status, ReviewDataStatus.SAVED.value)
         # a draft save does not change whose turn it is
         self.assertEqual(pm.current_reviewer, Reviewer.CONTRIBUTOR.value)
+
+    def test_submit_to_a_finished_review_is_rejected(self):
+        opr = self._opr_with_reviewer_round()
+        opr.is_finished = True
+        opr.save()
+
+        with self.assertRaises(ReviewFinishedError):
+            ReviewService(
+                table_name="t_service", actor=self.contributor
+            ).submit_contributor_review(self._contributor_payload(), review_id=opr.id)
