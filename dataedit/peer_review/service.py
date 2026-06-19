@@ -32,7 +32,11 @@ from dataedit.models import (
     ReviewRound,
     Table,
 )
-from dataedit.peer_review.badges import BadgeService, apply_badge_to_metadata
+from dataedit.peer_review.badges import (
+    BadgeService,
+    apply_badge_to_metadata,
+    apply_badge_to_review,
+)
 from dataedit.peer_review.projection import compute_round_delta, project_review
 
 
@@ -208,4 +212,7 @@ class ReviewService:
         opr.oemetadata = apply_badge_to_metadata(
             recursive_update(opr.oemetadata or {}, envelope), badge
         )
+        # Record the badge on the review datamodel too — the dataview "Latest
+        # review completed" card reads PeerReview.review["badge"].
+        opr.review = apply_badge_to_review(opr.review, badge)
         opr.save()
