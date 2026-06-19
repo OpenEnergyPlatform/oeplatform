@@ -1241,7 +1241,7 @@ class TablePeerReviewView(LoginRequiredMixin, View):
         return JsonResponse({"status": "success"}, status=200)
 
 
-class TablePeerRreviewContributorView(TablePeerReviewView):
+class TablePeerReviewContributorView(TablePeerReviewView):
     """
     A view handling the contributor's side of the peer review process.
     This view supports rendering the review template and handling GET and
