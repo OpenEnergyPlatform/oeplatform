@@ -163,6 +163,62 @@ export function selectFirstReviewableField() {
 }
 
 /**
+ * Contributor: selects the first non-empty field the reviewer flagged
+ * (suggested or denied). The contributor only acts on those — never on
+ * already-accepted or unreviewed fields — so this is deliberately a different
+ * rule from selectFirstReviewableField (kept separate on purpose).
+ */
+export function selectFirstContributorField() {
+  const allFields = document.querySelectorAll('.review__item.field');
+
+  for (let field of allFields) {
+    const fieldKey = field.getAttribute('data-fieldkey');
+    const fieldValue = field.getAttribute('data-fieldvalue');
+
+    if (!fieldKey || fieldKey === '') continue;
+    if (isEffectivelyEmpty(fieldKey, fieldValue)) continue;
+
+    const currentState = window.state_dict?.[fieldKey];
+    if (currentState !== 'suggestion' && currentState !== 'rejected') continue;
+
+    const category = field.getAttribute('data-category');
+
+    // Field is in a collapsed accordion -> open it, then select.
+    const accordionCollapse = field.closest('.accordion-collapse');
+    if (accordionCollapse && !accordionCollapse.classList.contains('show')) {
+      const accordionButton = document.querySelector(
+        `[data-bs-target="#${accordionCollapse.id}"]`
+      );
+      if (accordionButton) {
+        accordionCollapse.addEventListener('shown.bs.collapse', () => {
+          selectFieldAfterTabSwitch(fieldKey, fieldValue, category);
+        }, { once: true });
+        accordionButton.click();
+        return;
+      }
+    }
+
+    // Field is on an inactive tab -> switch, then select.
+    const tabPane = field.closest('.tab-pane');
+    if (tabPane && !tabPane.classList.contains('active')) {
+      const tabButton = document.querySelector(`[data-bs-target="#${tabPane.id}"]`);
+      if (tabButton) {
+        setTimeout(() => {
+          selectFieldAfterTabSwitch(fieldKey, fieldValue, category);
+        }, 300);
+        tabButton.click();
+        return;
+      }
+    }
+
+    selectFieldAfterTabSwitch(fieldKey, fieldValue, category);
+    return;
+  }
+
+  console.log('No fields awaiting a contributor response (none suggested or denied)');
+}
+
+/**
  * Helper function to select field after tab/accordion animation
  */
 function selectFieldAfterTabSwitch(fieldKey, fieldValue, category) {
