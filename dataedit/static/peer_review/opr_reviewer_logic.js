@@ -34,15 +34,39 @@ export function finishPeerReview() {
     });
 }
 export function check_if_review_finished() {
-  if (!checkFieldStates()) {
+  // Reviewer-only flow: contributors never finish / award badges, so this must
+  // not touch their controls (check_if_review_finished also runs on the
+  // contributor page via peerReview()).
+  const marker = document.getElementById("opr-page-marker");
+  if (!marker || marker.dataset.oprPage !== "reviewer") {
     return;
   }
 
-  if (!clientSideReviewFinished) {
-    clientSideReviewFinished = true;
+  // Not every non-empty field has a state yet -> offer nothing special.
+  if (!checkFieldStates()) {
+    hideFinishUI();
+    return;
+  }
+
+  const submitButton = $("#submit_summary");
+
+  // At least one field is suggested or rejected: the contributor has to
+  // respond, so offer "Submit" (the ping-pong) and NOT the finish/badge UI.
+  if (reviewHasChanges()) {
+    hideFinishUI();
+    submitButton.removeClass("disabled").prop("disabled", false);
+    return;
+  }
+
+  // All non-empty fields are accepted: there is nothing to negotiate, so offer
+  // the finish/badge option instead of submitting to the contributor.
+  submitButton.prop("disabled", true);
+
+  if (!window.clientSideReviewFinished) {
+    window.clientSideReviewFinished = true;
     showToast(
       "Review completed!",
-      "You completed the review and can now award a suitable badge!",
+      "All fields are accepted – you can now award a badge and finish the review!",
       "success"
     );
 
@@ -77,18 +101,41 @@ export function check_if_review_finished() {
 
     finishButton.on("click", finishPeerReview);
 
-    if (!config.review_finished) {
-      reviewerDiv.show();
-      $("#submit_summary").prop("disabled", true);
-    } else {
+    if (config.review_finished) {
       reviewerDiv.hide();
       $("#submit_summary").hide();
       $("#peer_review-save").hide();
       $("#review-window").css("visibility", "hidden");
+    } else {
+      reviewerDiv.show();
     }
 
     $(".content-finish-review").append(reviewerDiv);
   }
+}
+
+// Remove the finish/badge UI if it was shown but the review is no longer in the
+// "all accepted" state (e.g. the reviewer changed a field to suggested).
+function hideFinishUI() {
+  if (window.clientSideReviewFinished) {
+    $("#finish-review-div").remove();
+    window.clientSideReviewFinished = false;
+  }
+}
+
+// True if any non-empty field is suggested or rejected (i.e. there is something
+// the contributor needs to respond to).
+function reviewHasChanges() {
+  const allFields = getAllFieldsAndValues();
+  for (const { fieldName, fieldValue } of allFields) {
+    if (!isEffectivelyEmpty(fieldName, fieldValue)) {
+      const fieldState = getFieldState(fieldName);
+      if (fieldState === "rejected" || fieldState === "suggestion") {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 export function checkFieldStates() {
