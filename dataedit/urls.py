@@ -24,8 +24,8 @@ from dataedit.views import (
     TableCreateMapView,
     TableDataView,
     TableMetaEditView,
+    TablePeerReviewContributorView,
     TablePeerReviewView,
-    TablePeerRreviewContributorView,
     TablePermissionView,
     TableWizardView,
     admin_column_view,
@@ -105,7 +105,7 @@ urlpatterns_view_schema = [
         r"^(?P<table>{qual})/opr_contributor/(?P<review_id>\d*)/$".format(  # noqa
             qual=pgsql_qualifier
         ),
-        TablePeerRreviewContributorView.as_view(),
+        TablePeerReviewContributorView.as_view(),
         name="peer_review_contributor",
     ),
 ]
