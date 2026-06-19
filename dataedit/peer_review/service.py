@@ -44,6 +44,24 @@ class ContributorNotFoundError(Exception):
     """No user identifies as table holder / contributor for the table."""
 
 
+class ReviewFinishedError(Exception):
+    """A finished review is read-only and cannot be edited further."""
+
+
+def _ensure_not_finished(review_id) -> None:
+    """Guard: reject any edit targeting an already-finished review.
+
+    Inspecting a finished review (via its review_id) must be read-only — a new
+    review is started through the create route instead, not by editing this one.
+    """
+    if review_id:
+        opr = PeerReviewManager.get_opr_by_id(opr_id=review_id)
+        if opr.is_finished:
+            raise ReviewFinishedError(
+                "This review is finished and can no longer be edited."
+            )
+
+
 class ReviewService:
     """All peer-review write paths. Views call this; they do not touch the ORM
     review models directly anymore."""
@@ -92,6 +110,7 @@ class ReviewService:
     # reviewer side
     # ------------------------------------------------------------------ #
     def submit_reviewer_review(self, payload: dict, review_id=None) -> None:
+        _ensure_not_finished(review_id)
         review_datamodel = payload.get("reviewData") or {}
         review_post_type = payload.get("reviewType")
         review_finished = review_datamodel.get("reviewFinished")
@@ -159,6 +178,7 @@ class ReviewService:
     # contributor side
     # ------------------------------------------------------------------ #
     def submit_contributor_review(self, payload: dict, review_id) -> None:
+        _ensure_not_finished(review_id)
         review_datamodel = payload.get("reviewData") or {}
         review_post_type = payload.get("reviewType")
         review_finished = review_datamodel.get("reviewFinished")
