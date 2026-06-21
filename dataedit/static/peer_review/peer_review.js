@@ -10,6 +10,7 @@ import { selectNextField, updatePercentageDisplay } from "./navigation.js";
 import {isEmptyValue, isEffectivelyEmpty, sendJson, getCookie, getErrorMsg} from "./utilities.js";
 import { getFieldState, updateClientStateDict } from "./state_current_review.js";
 import { isReviewerComplete, reviewerHasChanges } from "./selectors.js";
+import { saveReview, submitReview } from "./api.js";
 
 // Re-export utilities for other modules
 export { getCookie, sendJson, getErrorMsg };
@@ -211,8 +212,7 @@ export function peerReview(config, checkState = false) {
 
 export function savePeerReview() {
   $('#peer_review-save').removeClass('d-none');
-  let json = JSON.stringify({reviewType: 'save', reviewData: current_review});
-  sendJson("POST", config.url_peer_review, json).then(function() {
+  saveReview(config, current_review).then(function() {
     window.location = config.url_table;
   }).catch(function(err) {
     $('#peer_review-save').addClass('d-none');
@@ -222,8 +222,7 @@ export function savePeerReview() {
 
 export function submitPeerReview() {
   $('#peer_review-submitting').removeClass('d-none');
-  let json = JSON.stringify({reviewType: 'submit', reviewData: current_review});
-  sendJson("POST", config.url_peer_review, json).then(function() {
+  submitReview(config, current_review).then(function() {
     window.location = config.url_table;
   }).catch(function(err) {
     $('#peer_review-submitting').addClass('d-none');
