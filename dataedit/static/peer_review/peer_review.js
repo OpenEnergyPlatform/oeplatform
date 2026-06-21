@@ -346,13 +346,19 @@ export function renderFieldHistory(fieldKey) {
       const role = c.role || 'unknown';
       const state = c.state || '';
       const when = c.timestamp ? new Date(c.timestamp).toLocaleString() : '';
-      const value = c.newValue || c.reviewerSuggestion || '';
+      const previous = c.contributorValue || '';
+      const proposed = c.newValue || c.reviewerSuggestion || '';
       const comment = c.comment || c.additionalComment || '';
       return (
         `<li class="opr-history__item opr-history__item--${escapeHtml(state)}">` +
         `<span class="opr-history__role">${escapeHtml(role)}</span> ` +
         `<span class="opr-history__state">${escapeHtml(state)}</span>` +
-        (value ? `<div class="opr-history__value">${escapeHtml(value)}</div>` : '') +
+        (previous
+          ? `<div class="opr-history__previous">was: ${escapeHtml(previous)}</div>`
+          : '') +
+        (proposed
+          ? `<div class="opr-history__value">proposed: ${escapeHtml(proposed)}</div>`
+          : '') +
         (comment ? `<div class="opr-history__comment">${escapeHtml(comment)}</div>` : '') +
         (when ? `<span class="opr-history__time">${escapeHtml(when)}</span>` : '') +
         `</li>`
