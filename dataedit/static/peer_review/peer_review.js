@@ -306,70 +306,55 @@ export function highlightSelectedField(fieldKey, highlightColor = '#F6F9FB') {
   if (selectedDiv && !selectedDiv.classList.contains('field-ok')) {
     selectedDiv.style.backgroundColor = highlightColor;
   }
-
-  // Show the per-field reviewer/contributor history (the ping-pong) whenever a
-  // field is selected. No-op if there is no history for this field.
-  renderFieldHistory(fieldKey);
 }
 
 // --- Per-field review history (the ping-pong between reviewer & contributor) ---
-function ensureHistoryContainer() {
-  let el = document.getElementById('field-review-history');
-  if (!el) {
-    const host =
-      document.getElementById('review-window') ||
-      document.getElementById('field-descriptions');
-    if (!host) return null;
-    el = document.createElement('div');
-    el.id = 'field-review-history';
-    el.className = 'opr-history';
-    host.appendChild(el);
-  }
-  return el;
+// Rendered inline under each field row as a native collapsible <details>, so it
+// sits next to the value being discussed and is expandable on demand.
+function historyItemHtml(contribution) {
+  const role = contribution.role || 'unknown';
+  const state = contribution.state || '';
+  const when = contribution.timestamp
+    ? new Date(contribution.timestamp).toLocaleString()
+    : '';
+  const previous = contribution.contributorValue || '';
+  const proposed = contribution.newValue || contribution.reviewerSuggestion || '';
+  const comment = contribution.comment || contribution.additionalComment || '';
+  return (
+    `<li class="opr-history__item opr-history__item--${escapeHtml(state)}">` +
+    `<span class="opr-history__role">${escapeHtml(role)}</span> ` +
+    `<span class="opr-history__state">${escapeHtml(state)}</span>` +
+    (previous
+      ? `<div class="opr-history__previous">was: ${escapeHtml(previous)}</div>`
+      : '') +
+    (proposed
+      ? `<div class="opr-history__value">proposed: ${escapeHtml(proposed)}</div>`
+      : '') +
+    (comment ? `<div class="opr-history__comment">${escapeHtml(comment)}</div>` : '') +
+    (when ? `<span class="opr-history__time">${escapeHtml(when)}</span>` : '') +
+    `</li>`
+  );
 }
 
-export function renderFieldHistory(fieldKey) {
-  const container = ensureHistoryContainer();
-  if (!container) return;
-
+// Inject a collapsible history under every field row that has one. Idempotent.
+export function renderAllFieldHistories() {
   const all = window.field_history || {};
-  const history = all[fieldKey] || [];
+  Object.keys(all).forEach(fieldKey => {
+    const history = all[fieldKey] || [];
+    if (history.length < 1) return;
 
-  // Nothing recorded for this field yet -> clear the panel.
-  if (history.length < 1) {
-    container.innerHTML = '';
-    return;
-  }
+    const fieldEl = document.getElementById('field_' + fieldKey);
+    if (!fieldEl || fieldEl.querySelector('.opr-history')) return;
 
-  const items = history
-    .map(c => {
-      const role = c.role || 'unknown';
-      const state = c.state || '';
-      const when = c.timestamp ? new Date(c.timestamp).toLocaleString() : '';
-      const previous = c.contributorValue || '';
-      const proposed = c.newValue || c.reviewerSuggestion || '';
-      const comment = c.comment || c.additionalComment || '';
-      return (
-        `<li class="opr-history__item opr-history__item--${escapeHtml(state)}">` +
-        `<span class="opr-history__role">${escapeHtml(role)}</span> ` +
-        `<span class="opr-history__state">${escapeHtml(state)}</span>` +
-        (previous
-          ? `<div class="opr-history__previous">was: ${escapeHtml(previous)}</div>`
-          : '') +
-        (proposed
-          ? `<div class="opr-history__value">proposed: ${escapeHtml(proposed)}</div>`
-          : '') +
-        (comment ? `<div class="opr-history__comment">${escapeHtml(comment)}</div>` : '') +
-        (when ? `<span class="opr-history__time">${escapeHtml(when)}</span>` : '') +
-        `</li>`
-      );
-    })
-    .join('');
-
-  const roundWord = history.length === 1 ? 'round' : 'rounds';
-  container.innerHTML =
-    `<h4 class="opr-history__title">Review history (${history.length} ${roundWord})</h4>` +
-    `<ul class="opr-history__list">${items}</ul>`;
+    const roundWord = history.length === 1 ? 'round' : 'rounds';
+    const details = document.createElement('details');
+    details.className = 'opr-history';
+    details.innerHTML =
+      `<summary class="opr-history__summary">` +
+      `Review history (${history.length} ${roundWord})</summary>` +
+      `<ul class="opr-history__list">${history.map(historyItemHtml).join('')}</ul>`;
+    fieldEl.appendChild(details);
+  });
 }
 
 // --- Read-only mode for finished reviews ---
