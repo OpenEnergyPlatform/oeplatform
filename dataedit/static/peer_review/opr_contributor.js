@@ -254,6 +254,24 @@ function saveEntrancesForContributor() {
 
     updateFieldColor(currentKey, selectedState);
     updateClientStateDict(currentKey, selectedState);
+
+    // Reflect the contributor's response in the field row (the reviewer side
+    // does the same). Uses the slots that exist in the markup.
+    const fieldElement = document.getElementById("field_" + currentKey);
+    if (fieldElement) {
+      const suggEl = fieldElement.querySelector('.suggestion--highlight');
+      if (suggEl) {
+        suggEl.innerText =
+          (selectedState === "suggestion") ? reviewObj.reviewerSuggestion : '';
+      }
+      const commentEl = fieldElement.querySelector('.comment');
+      if (commentEl) {
+        commentEl.innerText =
+          (selectedState === "rejected")
+            ? reviewObj.additionalComment
+            : reviewObj.comment;
+      }
+    }
   }
 
   document.getElementById("comments").value = "";
