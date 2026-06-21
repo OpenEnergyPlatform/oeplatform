@@ -335,8 +335,8 @@ export function renderFieldHistory(fieldKey) {
   const all = window.field_history || {};
   const history = all[fieldKey] || [];
 
-  // A single round (e.g. accepted immediately) is not worth a timeline.
-  if (history.length <= 1) {
+  // Nothing recorded for this field yet -> clear the panel.
+  if (history.length < 1) {
     container.innerHTML = '';
     return;
   }
@@ -360,8 +360,9 @@ export function renderFieldHistory(fieldKey) {
     })
     .join('');
 
+  const roundWord = history.length === 1 ? 'round' : 'rounds';
   container.innerHTML =
-    `<h4 class="opr-history__title">Review history (${history.length} rounds)</h4>` +
+    `<h4 class="opr-history__title">Review history (${history.length} ${roundWord})</h4>` +
     `<ul class="opr-history__list">${items}</ul>`;
 }
 
