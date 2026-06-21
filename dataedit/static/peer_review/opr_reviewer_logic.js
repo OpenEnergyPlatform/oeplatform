@@ -9,21 +9,15 @@ import {
   showToast,
   snapshotReviewState,
 } from "./peer_review.js";
-import { sendJson } from "./utilities.js";
+import { finishReview } from "./api.js";
 import { isReviewerComplete, reviewerHasChanges } from "./selectors.js";
 export function finishPeerReview() {
   $("#peer_review-submitting").removeClass("d-none");
 
   var selectedBadge = $('input[name="reviewer-option"]:checked').val();
-  console.log(selectedBadge);
   current_review.badge = selectedBadge;
   current_review.reviewFinished = true;
-  let json = JSON.stringify({
-    reviewType: "finished",
-    reviewData: current_review,
-    reviewBadge: selectedBadge,
-  });
-  sendJson("POST", config.url_peer_review, json)
+  finishReview(config, current_review, selectedBadge)
     .then(function () {
       window.location = config.url_table;
     })
