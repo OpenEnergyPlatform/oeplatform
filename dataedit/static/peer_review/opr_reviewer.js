@@ -24,9 +24,9 @@ import {
   updateFieldDescription,
   initializeEventBindings,
   getErrorMsg,
-  sendJson
 } from './peer_review.js';
 
+import { deleteReview } from './api.js';
 import { check_if_review_finished } from './opr_reviewer_logic.js';
 import { getFieldState, setGetFieldState, updateClientStateDict } from "./state_current_review.js";
 import { switchCategoryTab, selectNextField, updatePercentageDisplay } from "./navigation.js";
@@ -124,14 +124,10 @@ function initializeEmptyFields() {
 
 function deletePeerReview() {
   if (!confirm("Are you sure?")) return;
-  const json = JSON.stringify({ 
-    reviewType: 'delete', 
-    reviewData: current_review, 
-    review_id: current_review.review_id || config.review_id
-  });
+  const reviewId = current_review.review_id || config.review_id;
 
   $('#peer_review-delete').addClass('d-none');
-  sendJson("POST", config.url_peer_review, json)
+  deleteReview(config, current_review, reviewId)
     .then(() => window.location = config.url_table)
     .catch((err) => {
       $('#peer_review-delete').removeClass('d-none');
