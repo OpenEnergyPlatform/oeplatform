@@ -24,7 +24,6 @@ import {
   current_review,
   selectedCategory,
   setSelectedCategory,
-  checkReviewComplete,
   showToast,
   updateFieldDescription,
   highlightSelectedField,
@@ -32,6 +31,12 @@ import {
 } from './peer_review.js';
 
 import { updateClientStateDict } from "./state_current_review.js";
+
+// Fields the reviewer left open (suggestion/deny) — only these need a
+// contributor response. Accepted fields are read-only for the contributor.
+// Captured once at init from the reviewer's states, so it does not shift as the
+// contributor responds.
+let contributorOpenFields = new Set();
 import { switchCategoryTab, selectNextField, updatePercentageDisplay } from "./navigation.js";
 import { renderSummaryPageFields, updateTabProgressIndicatorClasses } from "./summary.js";
 import { isEffectivelyEmpty } from "./utilities.js";
@@ -125,10 +130,34 @@ export function initContributor() {
     }
   });
 
+  // The reviewer's open fields (suggestion/deny) are the ones the contributor
+  // must respond to. Snapshot them from the reviewer's states at load.
+  contributorOpenFields = new Set(
+    Object.entries(window.state_dict || {})
+      .filter(([, s]) => s === "suggestion" || s === "rejected")
+      .map(([key]) => key)
+  );
+
   // Initial renders
   renderSummaryPageFields();
   updateTabProgressIndicatorClasses();
   updatePercentageDisplay();
+
+  // Submit stays disabled until every open field has a response.
+  checkContributorComplete();
+}
+
+// The contributor may submit only once they have responded to every open
+// (suggestion/deny) field; accepted fields need nothing.
+function checkContributorComplete() {
+  const responded = new Set(current_review.reviews.map((r) => r.key));
+  const allResponded = [...contributorOpenFields].every((k) => responded.has(k));
+  const submitButton = $("#submit_summary");
+  if (allResponded) {
+    submitButton.removeClass("disabled").prop("disabled", false);
+  } else {
+    submitButton.addClass("disabled").prop("disabled", true);
+  }
 }
 
 function click_field(fieldKey, fieldValue, category) {
@@ -165,11 +194,14 @@ function click_field(fieldKey, fieldValue, category) {
   updateFieldDescription(resolvedKey, fieldValue);
   highlightSelectedField(fieldKey);
 
-  // Enable the response buttons for this field.
+  // Only fields the reviewer left open (suggestion/deny) can be responded to;
+  // accepted fields are read-only for the contributor.
+  const isOpen = contributorOpenFields.has(fieldKey);
   ["ok-button", "rejected-button", "suggestion-button"].forEach(btn => {
     const el = document.getElementById(btn);
-    if (el) el.disabled = false;
+    if (el) el.disabled = !isOpen;
   });
+  $('.review__btns').toggle(isOpen);
 
   // Always start fresh visually.
   clearInputFields();
@@ -275,7 +307,7 @@ function saveEntrancesForContributor() {
   }
 
   document.getElementById("comments").value = "";
-  checkReviewComplete();
+  checkContributorComplete();
   renderSummaryPageFields();
   updateTabProgressIndicatorClasses();
   updatePercentageDisplay();
