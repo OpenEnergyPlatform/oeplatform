@@ -352,21 +352,25 @@ function saveEntrancesForReviewer() {
         updateFieldColor(currentKey, selectedState);
         updateClientStateDict(currentKey, selectedState);
         
-        // Update DOM suggestions immediately
-      const fieldElement = document.getElementById("field_" + currentKey);
-      if (fieldElement) {
-          const suggEl = fieldElement.querySelector('.suggestion--highlight');
-          if (suggEl) suggEl.innerText = reviewObj.reviewerSuggestion;
-          
-          // ADD THIS: show the comment under the suggested value
-          const suggCommentEl = fieldElement.querySelector('.suggestion--comment');
-          if (suggCommentEl) {
-              suggCommentEl.innerText = (selectedState === 'suggestion') ? reviewObj.comment : '';
-          }
-          
-          const commEl = fieldElement.querySelector('.suggestion--additional-comment');
-          if (commEl) commEl.innerText = reviewObj.additionalComment;
-      }
+        // Reflect the review in the field row using the slots that actually
+        // exist in the markup (.suggestion--highlight + .comment).
+        const fieldElement = document.getElementById("field_" + currentKey);
+        if (fieldElement) {
+            const suggEl = fieldElement.querySelector('.suggestion--highlight');
+            if (suggEl) {
+                suggEl.innerText =
+                    (selectedState === 'suggestion') ? reviewObj.reviewerSuggestion : '';
+            }
+            // One comment slot: the deny reason for rejected, else the
+            // suggestion comment.
+            const commentEl = fieldElement.querySelector('.comment');
+            if (commentEl) {
+                commentEl.innerText =
+                    (selectedState === 'rejected')
+                        ? reviewObj.additionalComment
+                        : reviewObj.comment;
+            }
+        }
     }
 
 
