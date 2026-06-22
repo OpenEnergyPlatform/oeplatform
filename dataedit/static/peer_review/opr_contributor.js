@@ -198,13 +198,16 @@ function click_field(fieldKey, fieldValue, category) {
   highlightSelectedField(fieldKey);
 
   // Only fields the reviewer left open (suggestion/deny) can be responded to;
-  // accepted fields are read-only for the contributor.
+  // accepted fields are read-only for the contributor. In read-only mode
+  // (finished / not your turn) nothing is actionable.
+  const readOnly = document.body.classList.contains('opr-readonly');
   const isOpen = contributorOpenFields.has(fieldKey);
+  const actionable = isOpen && !readOnly;
   ["ok-button", "rejected-button", "suggestion-button"].forEach(btn => {
     const el = document.getElementById(btn);
-    if (el) el.disabled = !isOpen;
+    if (el) el.disabled = !actionable;
   });
-  $('.review__btns').toggle(isOpen);
+  $('.review__btns').toggle(actionable);
 
   // Always start fresh visually.
   clearInputFields();
