@@ -229,34 +229,10 @@
                                class="accordion-collapse collapse"
                                data-bs-parent="#generalAccordion">
                             <div class="accordion-body">
-                              {% for item in group.flat %}
+                              {# group_index_only() makes each general group a flat list of items #}
+                              {% for item in group %}
                                 {% include "partials/review_item_snippet.html" with item=item category="general" only %}
                               {% endfor %}
-                              {% if group.grouped %}
-                                <div class="accordion" id="generalInnerAccordion_{{ group_key|slugify }}">
-                                  {% for sub_key, sub_items in group.grouped.items %}
-                                    <div class="accordion-item">
-                                      <h2 class="accordion-header"
-                                          id="heading-general-inner-{{ group_key|slugify }}-{{ forloop.counter }}">
-                                        <button class="accordion-button collapsed"
-                                                type="button"
-                                                data-bs-toggle="collapse"
-                                                data-bs-target="#collapse-general-inner-{{ group_key|slugify }}-{{ forloop.counter }}">
-                                          {{ sub_key }}
-                                        </button>
-                                      </h2>
-                                      <div id="collapse-general-inner-{{ group_key|slugify }}-{{ forloop.counter }}"
-                                           class="accordion-collapse collapse">
-                                        <div class="accordion-body">
-                                          {% for item in sub_items %}
-                                            {% include "partials/review_item_snippet.html" with item=item category="general" only %}
-                                          {% endfor %}
-                                        </div>
-                                      </div>
-                                    </div>
-                                  {% endfor %}
-                                </div>
-                              {% endif %}
                             </div>
                           </div>
                         </div>
