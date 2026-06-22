@@ -58,7 +58,9 @@ describe("selectors", () => {
       reviewerHasChanges(stateWith([{ key: "a", isEmpty: false }], { a: "ok" }))
     ).toBe(false);
     expect(
-      reviewerHasChanges(stateWith([{ key: "a", isEmpty: false }], { a: "rejected" }))
+      reviewerHasChanges(
+        stateWith([{ key: "a", isEmpty: false }], { a: "rejected" })
+      )
     ).toBe(true);
   });
 

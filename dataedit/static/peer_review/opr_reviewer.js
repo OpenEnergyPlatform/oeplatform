@@ -24,46 +24,58 @@ import {
   updateFieldDescription,
   initializeEventBindings,
   getErrorMsg,
-} from './peer_review.js';
+} from "./peer_review.js";
 
-import { deleteReview } from './api.js';
-import { check_if_review_finished } from './opr_reviewer_logic.js';
-import { getFieldState, setGetFieldState, updateClientStateDict } from "./state_current_review.js";
-import { switchCategoryTab, selectNextField, updatePercentageDisplay } from "./navigation.js";
-import { renderSummaryPageFields, updateTabProgressIndicatorClasses } from "./summary.js";
-import {isEmptyValue, isEffectivelyEmpty} from "./utilities.js";window.clientSideReviewFinished = window.clientSideReviewFinished ?? false;
+import { deleteReview } from "./api.js";
+import { check_if_review_finished } from "./opr_reviewer_logic.js";
+import {
+  getFieldState,
+  setGetFieldState,
+  updateClientStateDict,
+} from "./state_current_review.js";
+import {
+  switchCategoryTab,
+  selectNextField,
+  updatePercentageDisplay,
+} from "./navigation.js";
+import {
+  renderSummaryPageFields,
+  updateTabProgressIndicatorClasses,
+} from "./summary.js";
+import { isEmptyValue, isEffectivelyEmpty } from "./utilities.js";
+window.clientSideReviewFinished = window.clientSideReviewFinished ?? false;
 let initialReviewerSuggestions = {};
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener("DOMContentLoaded", function () {
   initializeEmptyFields();
 });
-window.addEventListener('load', function() {
+window.addEventListener("load", function () {
   initializeEmptyFields();
-})
+});
 window.clientSideReviewFinished = window.clientSideReviewFinished ?? false;
 export function initReviewer() {
   initializeEventBindings(saveEntrancesForReviewer);
 
-  $('#peer_review-delete').off('click').on('click', deletePeerReview);
-  
+  $("#peer_review-delete").off("click").on("click", deletePeerReview);
+
   // Toggle Logic for Reviewer Buttons
-  $('#ok-button').on('click', () => {
-      hideReviewerOptions();
-      hideReviewerCommentsOptions();
+  $("#ok-button").on("click", () => {
+    hideReviewerOptions();
+    hideReviewerCommentsOptions();
   });
-  $('#suggestion-button').on('click', () => {
-      showReviewerOptions();
-      hideReviewerCommentsOptions();
+  $("#suggestion-button").on("click", () => {
+    showReviewerOptions();
+    hideReviewerCommentsOptions();
   });
-  $('#rejected-button').on('click', () => {
-      hideReviewerOptions();
-      showReviewerCommentsOptions();
+  $("#rejected-button").on("click", () => {
+    hideReviewerOptions();
+    showReviewerCommentsOptions();
   });
 
-  document.addEventListener('click', function (event) {
+  document.addEventListener("click", function (event) {
     // Clicks inside the per-field history disclosure must not select the field.
-    if (event.target.closest('.opr-history')) return;
+    if (event.target.closest(".opr-history")) return;
 
-    const field = event.target.closest('.field');
+    const field = event.target.closest(".field");
     if (!field) return;
 
     const fieldKey = field.dataset.fieldkey;
@@ -75,16 +87,18 @@ export function initReviewer() {
     }
   });
 
-  document.querySelectorAll(".suggestion--highlight").forEach(function (suggestion) {
+  document
+    .querySelectorAll(".suggestion--highlight")
+    .forEach(function (suggestion) {
       var field = suggestion.id.split("_")[1];
-      if(field) initialReviewerSuggestions[field] = suggestion.innerText;
-  });
+      if (field) initialReviewerSuggestions[field] = suggestion.innerText;
+    });
 
   renderSummaryPageFields();
   updateTabProgressIndicatorClasses();
   updatePercentageDisplay();
-  
-  if (typeof window.state_dict !== 'undefined') {
+
+  if (typeof window.state_dict !== "undefined") {
     check_if_review_finished();
   }
 }
@@ -92,7 +106,7 @@ export function initReviewer() {
 function initializeEmptyFields() {
   const allFields = document.querySelectorAll(".field");
 
-  allFields.forEach(fieldEl => {
+  allFields.forEach((fieldEl) => {
     const fieldKey = fieldEl.dataset.fieldkey;
     const fieldValue = fieldEl.dataset.fieldvalue;
 
@@ -100,20 +114,21 @@ function initializeEmptyFields() {
 
     if (isEmpty) {
       // Grey out
-      const labelEl = fieldEl.querySelector('.key');
-      const valueEl = fieldEl.querySelector('.value');
+      const labelEl = fieldEl.querySelector(".key");
+      const valueEl = fieldEl.querySelector(".value");
 
-      if (labelEl) labelEl.style.color = '#6c757d';
-      if (valueEl) valueEl.style.color = '#6c757d';
+      if (labelEl) labelEl.style.color = "#6c757d";
+      if (valueEl) valueEl.style.color = "#6c757d";
 
       // Add explanation message
-      const safeKey = fieldKey.replace(/[^a-zA-Z0-9_-]/g, '_');
+      const safeKey = fieldKey.replace(/[^a-zA-Z0-9_-]/g, "_");
 
       if (!document.getElementById(`explanation_${safeKey}`)) {
-        const explanationElement = document.createElement('p');
+        const explanationElement = document.createElement("p");
         explanationElement.id = `explanation_${safeKey}`;
-        explanationElement.classList.add('explanation', 'text-muted', 'mt-1');
-        explanationElement.innerText = 'Field is empty. Reviewing is not possible.';
+        explanationElement.classList.add("explanation", "text-muted", "mt-1");
+        explanationElement.innerText =
+          "Field is empty. Reviewing is not possible.";
         fieldEl.appendChild(explanationElement);
       }
 
@@ -129,11 +144,11 @@ function deletePeerReview() {
   if (!confirm("Are you sure?")) return;
   const reviewId = current_review.review_id || config.review_id;
 
-  $('#peer_review-delete').addClass('d-none');
+  $("#peer_review-delete").addClass("d-none");
   deleteReview(config, current_review, reviewId)
-    .then(() => window.location = config.url_table)
+    .then(() => (window.location = config.url_table))
     .catch((err) => {
-      $('#peer_review-delete').removeClass('d-none');
+      $("#peer_review-delete").removeClass("d-none");
       alert(getErrorMsg(err));
     });
 }
@@ -143,7 +158,9 @@ function deletePeerReview() {
  * then scrolls the field into view once they are open.
  */
 function expandAccordionsAndScrollToField(fieldKey) {
-  const fieldElement = document.querySelector(`.field[data-fieldkey="${fieldKey}"]`);
+  const fieldElement = document.querySelector(
+    `.field[data-fieldkey="${fieldKey}"]`
+  );
   if (!fieldElement) return;
 
   // Collect all collapsed accordion-collapse ancestors
@@ -152,8 +169,8 @@ function expandAccordionsAndScrollToField(fieldKey) {
 
   while (parent) {
     if (
-      parent.classList.contains('accordion-collapse') &&
-      !parent.classList.contains('show')
+      parent.classList.contains("accordion-collapse") &&
+      !parent.classList.contains("show")
     ) {
       collapsedAncestors.push(parent);
     }
@@ -191,8 +208,8 @@ function expandAccordionsAndScrollToField(fieldKey) {
     }
 
     // Listen for when this panel finishes opening
-    collapseEl.addEventListener('shown.bs.collapse', function handler() {
-      collapseEl.removeEventListener('shown.bs.collapse', handler);
+    collapseEl.addEventListener("shown.bs.collapse", function handler() {
+      collapseEl.removeEventListener("shown.bs.collapse", handler);
       openNext(index + 1);
     });
 
@@ -207,7 +224,7 @@ function expandAccordionsAndScrollToField(fieldKey) {
  * Scrolls the field element into view smoothly, centered vertically.
  */
 function scrollToField(fieldElement) {
-  fieldElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  fieldElement.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
 function click_field(fieldKey, fieldValue, category) {
@@ -216,14 +233,14 @@ function click_field(fieldKey, fieldValue, category) {
   if (isEmpty) {
     return;
   }
-  
+
   switchCategoryTab(category);
   setSelectedField(fieldKey);
   setselectedFieldValue(fieldValue);
   setSelectedCategory(category);
 
-  const cleanedFieldKey = fieldKey.replace(/\.\d+/g, '');
-  
+  const cleanedFieldKey = fieldKey.replace(/\.\d+/g, "");
+
   const candidateKeys = [
     `resources.${category}.${fieldKey}`,
     `resources.${category}.${cleanedFieldKey}`,
@@ -234,7 +251,7 @@ function click_field(fieldKey, fieldValue, category) {
   ];
 
   let resolvedKey = cleanedFieldKey;
-  if (typeof fieldDescriptionsData !== 'undefined' && fieldDescriptionsData) {
+  if (typeof fieldDescriptionsData !== "undefined" && fieldDescriptionsData) {
     for (const candidate of candidateKeys) {
       if (fieldDescriptionsData[candidate]) {
         resolvedKey = candidate;
@@ -248,23 +265,25 @@ function click_field(fieldKey, fieldValue, category) {
 
   // Keep the action buttons disabled in read-only mode (finished / not your
   // turn) — the field is still selectable so the review can be inspected.
-  const readOnly = document.body.classList.contains('opr-readonly');
+  const readOnly = document.body.classList.contains("opr-readonly");
   const buttons = ["ok-button", "rejected-button", "suggestion-button"];
-  buttons.forEach(btn => {
+  buttons.forEach((btn) => {
     const el = document.getElementById(btn);
     if (el) el.disabled = readOnly;
   });
 
-  const fieldElementForMsg = document.querySelector(`.field[data-fieldkey="${fieldKey}"]`);
+  const fieldElementForMsg = document.querySelector(
+    `.field[data-fieldkey="${fieldKey}"]`
+  );
   if (fieldElementForMsg) {
-    const safeKey = fieldKey.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const safeKey = fieldKey.replace(/[^a-zA-Z0-9_-]/g, "_");
     let explanationElement = document.getElementById(`explanation_${safeKey}`);
-    const labelEl = fieldElementForMsg.querySelector('.key');
-    const valueEl = fieldElementForMsg.querySelector('.value');
+    const labelEl = fieldElementForMsg.querySelector(".key");
+    const valueEl = fieldElementForMsg.querySelector(".value");
 
     if (explanationElement) explanationElement.remove();
-    if (labelEl) labelEl.style.color = '';
-    if (valueEl) valueEl.style.color = '';
+    if (labelEl) labelEl.style.color = "";
+    if (valueEl) valueEl.style.color = "";
   }
 
   // Always start fresh visually
@@ -273,125 +292,132 @@ function click_field(fieldKey, fieldValue, category) {
   hideReviewerCommentsOptions();
 
   // --- NEW: Restore previous review entry if it exists ---
-  const existingReview = current_review.reviews.find(r => r.key === fieldKey);
+  const existingReview = current_review.reviews.find((r) => r.key === fieldKey);
   if (existingReview && existingReview.fieldReview) {
     const fr = existingReview.fieldReview;
     const previousState = fr.state;
 
     // Simulate clicking the correct state button to show the right UI
-    if (previousState === 'suggestion') {
+    if (previousState === "suggestion") {
       showReviewerOptions();
       hideReviewerCommentsOptions();
-      const valuearea = document.getElementById('valuearea');
-      const commentarea = document.getElementById('commentarea');
-      if (valuearea) valuearea.value = fr.newValue || '';
-      if (commentarea) commentarea.value = fr.comment || '';
-    } else if (previousState === 'rejected') {
+      const valuearea = document.getElementById("valuearea");
+      const commentarea = document.getElementById("commentarea");
+      if (valuearea) valuearea.value = fr.newValue || "";
+      if (commentarea) commentarea.value = fr.comment || "";
+    } else if (previousState === "rejected") {
       hideReviewerOptions();
       showReviewerCommentsOptions();
-      const comments = document.getElementById('comments');
-      if (comments) comments.value = fr.additionalComment || '';
+      const comments = document.getElementById("comments");
+      if (comments) comments.value = fr.additionalComment || "";
     }
     // For 'ok', no extra UI needed, fields stay hidden
   }
-    expandAccordionsAndScrollToField(fieldKey);
+  expandAccordionsAndScrollToField(fieldKey);
 }
 function updateFieldColor(fieldKey, state) {
-  const safeId = '#field_' + fieldKey.replace(/\./g, "\\.");
-  $(safeId).removeClass('field-ok field-suggestion field-rejected');
+  const safeId = "#field_" + fieldKey.replace(/\./g, "\\.");
+  $(safeId).removeClass("field-ok field-suggestion field-rejected");
   $(safeId).addClass(`field-${state}`);
 }
 
 function saveEntrancesForReviewer() {
-    if (selectedState === "rejected") {
-        const comments = document.getElementById('comments');
-        if (comments.value.trim() === '') {
-            showToast("Error", "Comment is required for rejection!", "error");
-            return;
-        }
-    } else if (selectedState === "suggestion") {
-        const valuearea = document.getElementById('valuearea');
-        if (valuearea.value.trim() === '') {
-            showToast("Error", "Value suggestion is required!", "error");
-            return;
-        }
+  if (selectedState === "rejected") {
+    const comments = document.getElementById("comments");
+    if (comments.value.trim() === "") {
+      showToast("Error", "Comment is required for rejection!", "error");
+      return;
     }
-
-    if (selectedState === "ok") {
-        clearInputFields();
+  } else if (selectedState === "suggestion") {
+    const valuearea = document.getElementById("valuearea");
+    if (valuearea.value.trim() === "") {
+      showToast("Error", "Value suggestion is required!", "error");
+      return;
     }
+  }
 
-    if (window.selectedField) {
-        const currentKey = window.selectedField;
-        let fieldExists = false;
-        
-        const reviewObj = {
-            "timestamp": Date.now(),
-            "user": "oep_reviewer",
-            "role": "reviewer",
-            "contributorValue": selectedFieldValue,
-            "newValue": (selectedState === "suggestion") ? document.getElementById("valuearea").value : "",
-            "comment": document.getElementById("commentarea").value,
-            "additionalComment": document.getElementById("comments").value,
-            "reviewerSuggestion": (selectedState === "suggestion") ? document.getElementById("valuearea").value : "",
-            "state": selectedState,
-        };
+  if (selectedState === "ok") {
+    clearInputFields();
+  }
 
-        current_review.reviews.forEach(function(review, idx) {
-            if (review["key"] === currentKey) {
-                fieldExists = true;
-                Object.assign(current_review["reviews"][idx], {
-                    "category": selectedCategory,
-                    "fieldReview": reviewObj
-                });
-            }
+  if (window.selectedField) {
+    const currentKey = window.selectedField;
+    let fieldExists = false;
+
+    const reviewObj = {
+      timestamp: Date.now(),
+      user: "oep_reviewer",
+      role: "reviewer",
+      contributorValue: selectedFieldValue,
+      newValue:
+        selectedState === "suggestion"
+          ? document.getElementById("valuearea").value
+          : "",
+      comment: document.getElementById("commentarea").value,
+      additionalComment: document.getElementById("comments").value,
+      reviewerSuggestion:
+        selectedState === "suggestion"
+          ? document.getElementById("valuearea").value
+          : "",
+      state: selectedState,
+    };
+
+    current_review.reviews.forEach(function (review, idx) {
+      if (review["key"] === currentKey) {
+        fieldExists = true;
+        Object.assign(current_review["reviews"][idx], {
+          category: selectedCategory,
+          fieldReview: reviewObj,
         });
+      }
+    });
 
-        if (!fieldExists) {
-            current_review.reviews.push({
-                "category": selectedCategory,
-                "key": currentKey,
-                "fieldReview": reviewObj
-            });
-        }
-
-        updateFieldColor(currentKey, selectedState);
-        updateClientStateDict(currentKey, selectedState);
-        
-        // Reflect the review in the field row.
-        const fieldElement = document.getElementById("field_" + currentKey);
-        if (fieldElement) {
-            const suggEl = fieldElement.querySelector('.suggestion--highlight');
-            const valueEl = fieldElement.querySelector('.value');
-            // Accepting a suggestion means the proposed value becomes the value.
-            if (selectedState === 'ok' && suggEl && valueEl) {
-                const accepted = suggEl.textContent.trim();
-                if (accepted) valueEl.textContent = accepted;
-            }
-            if (suggEl) {
-                suggEl.innerText =
-                    (selectedState === 'suggestion') ? reviewObj.reviewerSuggestion : '';
-            }
-            const commentEl = fieldElement.querySelector('.suggestion--comment');
-            if (commentEl) {
-                commentEl.innerText =
-                    (selectedState === 'suggestion') ? reviewObj.comment : '';
-            }
-            const denyEl = fieldElement.querySelector('.suggestion--additional-comment');
-            if (denyEl) {
-                denyEl.innerText =
-                    (selectedState === 'rejected') ? reviewObj.additionalComment : '';
-            }
-        }
+    if (!fieldExists) {
+      current_review.reviews.push({
+        category: selectedCategory,
+        key: currentKey,
+        fieldReview: reviewObj,
+      });
     }
 
+    updateFieldColor(currentKey, selectedState);
+    updateClientStateDict(currentKey, selectedState);
 
-    document.getElementById("comments").value = "";
-    checkReviewComplete();
-    renderSummaryPageFields();
-    updateTabProgressIndicatorClasses();
-    updatePercentageDisplay();
-    
-    selectNextField();
-    check_if_review_finished();
+    // Reflect the review in the field row.
+    const fieldElement = document.getElementById("field_" + currentKey);
+    if (fieldElement) {
+      const suggEl = fieldElement.querySelector(".suggestion--highlight");
+      const valueEl = fieldElement.querySelector(".value");
+      // Accepting a suggestion means the proposed value becomes the value.
+      if (selectedState === "ok" && suggEl && valueEl) {
+        const accepted = suggEl.textContent.trim();
+        if (accepted) valueEl.textContent = accepted;
+      }
+      if (suggEl) {
+        suggEl.innerText =
+          selectedState === "suggestion" ? reviewObj.reviewerSuggestion : "";
+      }
+      const commentEl = fieldElement.querySelector(".suggestion--comment");
+      if (commentEl) {
+        commentEl.innerText =
+          selectedState === "suggestion" ? reviewObj.comment : "";
+      }
+      const denyEl = fieldElement.querySelector(
+        ".suggestion--additional-comment"
+      );
+      if (denyEl) {
+        denyEl.innerText =
+          selectedState === "rejected" ? reviewObj.additionalComment : "";
+      }
+    }
+  }
+
+  document.getElementById("comments").value = "";
+  checkReviewComplete();
+  renderSummaryPageFields();
+  updateTabProgressIndicatorClasses();
+  updatePercentageDisplay();
+
+  selectNextField();
+  check_if_review_finished();
 }

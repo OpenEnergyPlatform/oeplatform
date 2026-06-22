@@ -18,51 +18,59 @@ function getFieldElByKey(fieldKey) {
 }
 
 function getTextFromEl(el, selectors) {
-  if (!el) return '';
+  if (!el) return "";
   for (const sel of selectors) {
     const found = el.querySelector(sel);
-    const txt = found?.textContent?.replace(/\s+/g, ' ')?.trim();
+    const txt = found?.textContent?.replace(/\s+/g, " ")?.trim();
     if (txt) return txt;
   }
-  return '';
+  return "";
 }
 
 function getFallbackTitle(fieldKey) {
   const fieldEl = getFieldElByKey(fieldKey);
-  return getTextFromEl(fieldEl, ['.field__label', '.label', 'label']) || fieldKey;
+  return (
+    getTextFromEl(fieldEl, [".field__label", ".label", "label"]) || fieldKey
+  );
 }
 
 function getFallbackDescription(fieldKey) {
   const fieldEl = getFieldElByKey(fieldKey);
-  const attr = fieldEl?.getAttribute('data-description') || fieldEl?.dataset?.description;
+  const attr =
+    fieldEl?.getAttribute("data-description") || fieldEl?.dataset?.description;
 
   if (attr && String(attr).trim()) return String(attr).trim();
 
-  return getTextFromEl(fieldEl, ['.help-text', '.description']) || '';
+  return getTextFromEl(fieldEl, [".help-text", ".description"]) || "";
 }
 
 export function updateFieldDescription(resolvedKey, fieldValue) {
-  const fieldDescriptionsElement = document.getElementById("field-descriptions");
+  const fieldDescriptionsElement =
+    document.getElementById("field-descriptions");
   const selectedName = document.querySelector("#review-field-name");
 
   // Use the resolvedKey directly - it has already been matched
   // against fieldDescriptionsData in click_field
-  const fieldInfo = (typeof fieldDescriptionsData !== 'undefined' && fieldDescriptionsData)
-    ? fieldDescriptionsData[resolvedKey] || null
-    : null;
+  const fieldInfo =
+    typeof fieldDescriptionsData !== "undefined" && fieldDescriptionsData
+      ? fieldDescriptionsData[resolvedKey] || null
+      : null;
 
   const rawKey = window.selectedField || resolvedKey;
   const titleText = fieldInfo?.title || getFallbackTitle(rawKey) || resolvedKey;
 
-  selectedName.textContent = `${titleText}${fieldValue ? ' — ' + fieldValue : ''}`;
-  selectedName.style.display = 'block';
+  selectedName.textContent = `${titleText}${fieldValue ? " — " + fieldValue : ""}`;
+  selectedName.style.display = "block";
 
   let html = '<div class="reviewer-item">';
   html += `<div class="reviewer-item__row">
     <h2 class="reviewer-item__title">${escapeHtml(titleText)}</h2>
   </div>`;
 
-  const desc = fieldInfo?.description || getFallbackDescription(rawKey) || 'No description available.';
+  const desc =
+    fieldInfo?.description ||
+    getFallbackDescription(rawKey) ||
+    "No description available.";
   html += `<div class="reviewer-item__row">
     <div class="reviewer-item__key">Description:</div>
     <div class="reviewer-item__value">${escapeHtml(desc)}</div>
@@ -82,17 +90,17 @@ export function updateFieldDescription(resolvedKey, fieldValue) {
     </div>`;
   }
 
-  html += '</div>';
+  html += "</div>";
   fieldDescriptionsElement.innerHTML = html;
 }
 
-export function highlightSelectedField(fieldKey, highlightColor = '#F6F9FB') {
+export function highlightSelectedField(fieldKey, highlightColor = "#F6F9FB") {
   if (!fieldKey) return;
-  const reviewItem = document.querySelectorAll('.review__item');
-  const selectedDiv = document.getElementById('field_' + fieldKey);
+  const reviewItem = document.querySelectorAll(".review__item");
+  const selectedDiv = document.getElementById("field_" + fieldKey);
 
-  reviewItem.forEach(div => div.style.backgroundColor = '');
-  if (selectedDiv && !selectedDiv.classList.contains('field-ok')) {
+  reviewItem.forEach((div) => (div.style.backgroundColor = ""));
+  if (selectedDiv && !selectedDiv.classList.contains("field-ok")) {
     selectedDiv.style.backgroundColor = highlightColor;
   }
 }

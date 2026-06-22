@@ -4,16 +4,19 @@
 // SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { getCategoryToTabIdMapping, makeFieldList, selectField } from "./peer_review.js";
+import {
+  getCategoryToTabIdMapping,
+  makeFieldList,
+  selectField,
+} from "./peer_review.js";
 import { isEmptyValue, isEffectivelyEmpty, sendJson } from "./utilities.js";
 
-
 export function updateTabProgress() {
-  const allFields = document.querySelectorAll('.review__item');
+  const allFields = document.querySelectorAll(".review__item");
   let total = 0;
   let accepted = 0;
 
-  allFields.forEach(field => {
+  allFields.forEach((field) => {
     const fieldKey = field.dataset.fieldkey;
     const fieldValue = field.dataset.fieldvalue;
 
@@ -22,7 +25,7 @@ export function updateTabProgress() {
       total++;
 
       // Only count accepted (ok) fields as progress
-      if (field.classList.contains('field-ok')) {
+      if (field.classList.contains("field-ok")) {
         accepted++;
       }
     }
@@ -30,8 +33,8 @@ export function updateTabProgress() {
 
   const percentage = total === 0 ? 0 : Math.round((accepted / total) * 100);
 
-  const circle = document.getElementById('okProgressCircle');
-  const text = document.getElementById('okPercentageText');
+  const circle = document.getElementById("okProgressCircle");
+  const text = document.getElementById("okPercentageText");
 
   if (circle && text) {
     const circumference = 326.72;
@@ -45,10 +48,10 @@ export function updateTabProgress() {
 export const updatePercentageDisplay = updateTabProgress;
 
 export function switchCategoryTab(category) {
-  const currentTab = document.querySelector('.tab-pane.active');
+  const currentTab = document.querySelector(".tab-pane.active");
   const tabIdForCategory = getCategoryToTabIdMapping()[category];
-  
-  if (currentTab && currentTab.getAttribute('id') !== tabIdForCategory) {
+
+  if (currentTab && currentTab.getAttribute("id") !== tabIdForCategory) {
     const targetTab = document.getElementById(tabIdForCategory);
     if (targetTab) {
       targetTab.click();
@@ -58,7 +61,7 @@ export function switchCategoryTab(category) {
 
 export function selectNextField() {
   const fieldList = makeFieldList();
-  const currentIndex = fieldList.indexOf('field_' + window.selectedField);
+  const currentIndex = fieldList.indexOf("field_" + window.selectedField);
 
   for (let i = currentIndex + 1; i < fieldList.length; i++) {
     const fieldElement = document.getElementById(fieldList[i]);
@@ -76,7 +79,7 @@ export function selectNextField() {
 
 export function selectPreviousField() {
   const fieldList = makeFieldList();
-  const currentIndex = fieldList.indexOf('field_' + window.selectedField);
+  const currentIndex = fieldList.indexOf("field_" + window.selectedField);
 
   for (let i = currentIndex - 1; i >= 0; i--) {
     const fieldElement = document.getElementById(fieldList[i]);
@@ -96,52 +99,58 @@ export function selectPreviousField() {
  */
 export function selectFirstReviewableField() {
   const fields = Array.from(
-    document.querySelectorAll('.review__item.field')
-  ).filter(field => {
-    const fieldKey = field.getAttribute('data-fieldkey');
+    document.querySelectorAll(".review__item.field")
+  ).filter((field) => {
+    const fieldKey = field.getAttribute("data-fieldkey");
     return (
       fieldKey &&
-      !isEffectivelyEmpty(fieldKey, field.getAttribute('data-fieldvalue'))
+      !isEffectivelyEmpty(fieldKey, field.getAttribute("data-fieldvalue"))
     );
   });
 
   if (fields.length === 0) return;
 
-  const isReviewed = field => {
-    const state = window.state_dict?.[field.getAttribute('data-fieldkey')];
-    return state === 'ok' || state === 'suggestion' || state === 'rejected';
+  const isReviewed = (field) => {
+    const state = window.state_dict?.[field.getAttribute("data-fieldkey")];
+    return state === "ok" || state === "suggestion" || state === "rejected";
   };
 
   // Prefer the first field that still needs review; if every field is already
   // reviewed (e.g. a resumed or finished review), fall back to the first field
   // so something is always selected for context.
-  const target = fields.find(field => !isReviewed(field)) || fields[0];
+  const target = fields.find((field) => !isReviewed(field)) || fields[0];
   selectFieldWithNav(target);
 }
 
 // Select a field, expanding its accordion / switching to its tab first if needed.
 function selectFieldWithNav(field) {
-  const fieldKey = field.getAttribute('data-fieldkey');
-  const fieldValue = field.getAttribute('data-fieldvalue');
-  const category = field.getAttribute('data-category');
+  const fieldKey = field.getAttribute("data-fieldkey");
+  const fieldValue = field.getAttribute("data-fieldvalue");
+  const category = field.getAttribute("data-category");
 
-  const accordionCollapse = field.closest('.accordion-collapse');
-  if (accordionCollapse && !accordionCollapse.classList.contains('show')) {
+  const accordionCollapse = field.closest(".accordion-collapse");
+  if (accordionCollapse && !accordionCollapse.classList.contains("show")) {
     const accordionButton = document.querySelector(
       `[data-bs-target="#${accordionCollapse.id}"]`
     );
     if (accordionButton) {
-      accordionCollapse.addEventListener('shown.bs.collapse', () => {
-        selectFieldAfterTabSwitch(fieldKey, fieldValue, category);
-      }, { once: true });
+      accordionCollapse.addEventListener(
+        "shown.bs.collapse",
+        () => {
+          selectFieldAfterTabSwitch(fieldKey, fieldValue, category);
+        },
+        { once: true }
+      );
       accordionButton.click();
       return;
     }
   }
 
-  const tabPane = field.closest('.tab-pane');
-  if (tabPane && !tabPane.classList.contains('active')) {
-    const tabButton = document.querySelector(`[data-bs-target="#${tabPane.id}"]`);
+  const tabPane = field.closest(".tab-pane");
+  if (tabPane && !tabPane.classList.contains("active")) {
+    const tabButton = document.querySelector(
+      `[data-bs-target="#${tabPane.id}"]`
+    );
     if (tabButton) {
       setTimeout(() => {
         selectFieldAfterTabSwitch(fieldKey, fieldValue, category);
@@ -161,39 +170,45 @@ function selectFieldWithNav(field) {
  * rule from selectFirstReviewableField (kept separate on purpose).
  */
 export function selectFirstContributorField() {
-  const allFields = document.querySelectorAll('.review__item.field');
+  const allFields = document.querySelectorAll(".review__item.field");
 
   for (let field of allFields) {
-    const fieldKey = field.getAttribute('data-fieldkey');
-    const fieldValue = field.getAttribute('data-fieldvalue');
+    const fieldKey = field.getAttribute("data-fieldkey");
+    const fieldValue = field.getAttribute("data-fieldvalue");
 
-    if (!fieldKey || fieldKey === '') continue;
+    if (!fieldKey || fieldKey === "") continue;
     if (isEffectivelyEmpty(fieldKey, fieldValue)) continue;
 
     const currentState = window.state_dict?.[fieldKey];
-    if (currentState !== 'suggestion' && currentState !== 'rejected') continue;
+    if (currentState !== "suggestion" && currentState !== "rejected") continue;
 
-    const category = field.getAttribute('data-category');
+    const category = field.getAttribute("data-category");
 
     // Field is in a collapsed accordion -> open it, then select.
-    const accordionCollapse = field.closest('.accordion-collapse');
-    if (accordionCollapse && !accordionCollapse.classList.contains('show')) {
+    const accordionCollapse = field.closest(".accordion-collapse");
+    if (accordionCollapse && !accordionCollapse.classList.contains("show")) {
       const accordionButton = document.querySelector(
         `[data-bs-target="#${accordionCollapse.id}"]`
       );
       if (accordionButton) {
-        accordionCollapse.addEventListener('shown.bs.collapse', () => {
-          selectFieldAfterTabSwitch(fieldKey, fieldValue, category);
-        }, { once: true });
+        accordionCollapse.addEventListener(
+          "shown.bs.collapse",
+          () => {
+            selectFieldAfterTabSwitch(fieldKey, fieldValue, category);
+          },
+          { once: true }
+        );
         accordionButton.click();
         return;
       }
     }
 
     // Field is on an inactive tab -> switch, then select.
-    const tabPane = field.closest('.tab-pane');
-    if (tabPane && !tabPane.classList.contains('active')) {
-      const tabButton = document.querySelector(`[data-bs-target="#${tabPane.id}"]`);
+    const tabPane = field.closest(".tab-pane");
+    if (tabPane && !tabPane.classList.contains("active")) {
+      const tabButton = document.querySelector(
+        `[data-bs-target="#${tabPane.id}"]`
+      );
       if (tabButton) {
         setTimeout(() => {
           selectFieldAfterTabSwitch(fieldKey, fieldValue, category);
@@ -207,7 +222,9 @@ export function selectFirstContributorField() {
     return;
   }
 
-  console.log('No fields awaiting a contributor response (none suggested or denied)');
+  console.log(
+    "No fields awaiting a contributor response (none suggested or denied)"
+  );
 }
 
 /**
@@ -215,12 +232,14 @@ export function selectFirstContributorField() {
  */
 function selectFieldAfterTabSwitch(fieldKey, fieldValue, category) {
   // Trigger the field click programmatically
-  const fieldElement = document.querySelector(`.field[data-fieldkey="${fieldKey}"]`);
-  
+  const fieldElement = document.querySelector(
+    `.field[data-fieldkey="${fieldKey}"]`
+  );
+
   if (fieldElement) {
     // Scroll to field
-    fieldElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    
+    fieldElement.scrollIntoView({ behavior: "smooth", block: "center" });
+
     // Trigger click event (this will call your click_field function)
     fieldElement.click();
   }

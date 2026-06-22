@@ -17,7 +17,12 @@ function initialState() {
     fields: [], // inventory: [{ key, category, value, isEmpty }]
     review: { reviews: [] }, // the review datamodel (POSTed as reviewData)
     fieldState: {}, // key -> 'ok' | 'suggestion' | 'rejected' | null
-    selection: { fieldKey: null, fieldValue: null, category: null, draftState: null },
+    selection: {
+      fieldKey: null,
+      fieldValue: null,
+      category: null,
+      draftState: null,
+    },
   };
 }
 
@@ -54,7 +59,11 @@ export function initStore({
   emit();
 }
 
-export function selectField({ fieldKey = null, fieldValue = null, category = null } = {}) {
+export function selectField({
+  fieldKey = null,
+  fieldValue = null,
+  category = null,
+} = {}) {
   state.selection = { fieldKey, fieldValue, category, draftState: null };
   emit();
 }

@@ -13,23 +13,24 @@
 import { escapeHtml } from "./utilities.js";
 
 function historyItemHtml(contribution) {
-  const role = contribution.role || 'unknown';
-  const state = contribution.state || '';
+  const role = contribution.role || "unknown";
+  const state = contribution.state || "";
   const when = contribution.timestamp
     ? new Date(contribution.timestamp).toLocaleString()
-    : '';
+    : "";
   const stateLabel =
-    { ok: 'Accepted', suggestion: 'Suggestion', rejected: 'Rejected' }[state] ||
+    { ok: "Accepted", suggestion: "Suggestion", rejected: "Rejected" }[state] ||
     state;
 
   // Only a suggestion has a before/after value; a rejection has a reason; an
   // acceptance ("ok") just confirms the current value — so don't show a
   // misleading "was:" line for it.
-  let body = '';
-  if (state === 'suggestion') {
-    const previous = contribution.contributorValue || '';
-    const proposed = contribution.newValue || contribution.reviewerSuggestion || '';
-    const comment = contribution.comment || '';
+  let body = "";
+  if (state === "suggestion") {
+    const previous = contribution.contributorValue || "";
+    const proposed =
+      contribution.newValue || contribution.reviewerSuggestion || "";
+    const comment = contribution.comment || "";
     if (previous) {
       body += `<div class="opr-history__previous">was: ${escapeHtml(previous)}</div>`;
     }
@@ -39,8 +40,8 @@ function historyItemHtml(contribution) {
     if (comment) {
       body += `<div class="opr-history__comment">${escapeHtml(comment)}</div>`;
     }
-  } else if (state === 'rejected') {
-    const reason = contribution.additionalComment || contribution.comment || '';
+  } else if (state === "rejected") {
+    const reason = contribution.additionalComment || contribution.comment || "";
     if (reason) {
       body += `<div class="opr-history__comment">${escapeHtml(reason)}</div>`;
     }
@@ -51,7 +52,7 @@ function historyItemHtml(contribution) {
     `<span class="opr-history__role">${escapeHtml(role)}</span> ` +
     `<span class="opr-history__state">${escapeHtml(stateLabel)}</span>` +
     body +
-    (when ? `<span class="opr-history__time">${escapeHtml(when)}</span>` : '') +
+    (when ? `<span class="opr-history__time">${escapeHtml(when)}</span>` : "") +
     `</li>`
   );
 }
@@ -59,34 +60,37 @@ function historyItemHtml(contribution) {
 // Inject a collapsible history under every field row that has one. Idempotent.
 export function renderAllFieldHistories() {
   const all = window.field_history || {};
-  Object.keys(all).forEach(fieldKey => {
+  Object.keys(all).forEach((fieldKey) => {
     const history = all[fieldKey] || [];
     if (history.length < 1) return;
 
-    const fieldEl = document.getElementById('field_' + fieldKey);
-    if (!fieldEl || fieldEl.querySelector('.opr-history')) return;
+    const fieldEl = document.getElementById("field_" + fieldKey);
+    if (!fieldEl || fieldEl.querySelector(".opr-history")) return;
 
     // If the field ended up accepted AFTER a change, show the agreed value in
     // the field header (with its green check) instead of the original — the
     // history below still shows the full chain. Accepted-as-is keeps the original.
     const latest = history[history.length - 1];
-    if (latest && latest.state === 'ok') {
-      let agreed = '';
+    if (latest && latest.state === "ok") {
+      let agreed = "";
       for (let i = history.length - 1; i >= 0; i -= 1) {
         const v = history[i].newValue || history[i].reviewerSuggestion;
-        if (v) { agreed = v; break; }
+        if (v) {
+          agreed = v;
+          break;
+        }
       }
-      const valueEl = fieldEl.querySelector('.value');
+      const valueEl = fieldEl.querySelector(".value");
       if (agreed && valueEl) valueEl.textContent = agreed;
     }
 
-    const roundWord = history.length === 1 ? 'round' : 'rounds';
-    const panelId = 'opr-hist-' + fieldKey.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const roundWord = history.length === 1 ? "round" : "rounds";
+    const panelId = "opr-hist-" + fieldKey.replace(/[^a-zA-Z0-9_-]/g, "_");
 
     // Bootstrap collapse so it animates smoothly and matches the page's other
     // accordions, instead of a native <details>.
-    const wrapper = document.createElement('div');
-    wrapper.className = 'opr-history';
+    const wrapper = document.createElement("div");
+    wrapper.className = "opr-history";
     wrapper.innerHTML =
       `<button class="opr-history__toggle" type="button" ` +
       `data-bs-toggle="collapse" data-bs-target="#${panelId}" ` +
@@ -94,7 +98,7 @@ export function renderAllFieldHistories() {
       `<span class="opr-history__caret" aria-hidden="true">›</span> ` +
       `Review history (${history.length} ${roundWord})</button>` +
       `<div class="collapse opr-history__panel" id="${panelId}">` +
-      `<ul class="opr-history__list">${history.map(historyItemHtml).join('')}</ul>` +
+      `<ul class="opr-history__list">${history.map(historyItemHtml).join("")}</ul>` +
       `</div>`;
     fieldEl.appendChild(wrapper);
   });

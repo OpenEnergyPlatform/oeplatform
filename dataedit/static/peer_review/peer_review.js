@@ -4,15 +4,31 @@
 // SPDX-FileCopyrightText: 2026 Vismaya Jochem <https://github.com/vismayajochem> © Reiner Lemoine Institut
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { check_if_review_finished } from './opr_reviewer_logic.js';
-import { renderSummaryPageFields, updateSubmitButtonColor, updateTabProgressIndicatorClasses } from "./summary.js";
+import { check_if_review_finished } from "./opr_reviewer_logic.js";
+import {
+  renderSummaryPageFields,
+  updateSubmitButtonColor,
+  updateTabProgressIndicatorClasses,
+} from "./summary.js";
 import { selectNextField, updatePercentageDisplay } from "./navigation.js";
-import {isEmptyValue, isEffectivelyEmpty, sendJson, getCookie, getErrorMsg} from "./utilities.js";
-import { getFieldState, updateClientStateDict } from "./state_current_review.js";
+import {
+  isEmptyValue,
+  isEffectivelyEmpty,
+  sendJson,
+  getCookie,
+  getErrorMsg,
+} from "./utilities.js";
+import {
+  getFieldState,
+  updateClientStateDict,
+} from "./state_current_review.js";
 import { isReviewerComplete, reviewerHasChanges } from "./selectors.js";
 import { saveReview, submitReview } from "./api.js";
 import { renderAllFieldHistories } from "./field_history.js";
-import { updateFieldDescription, highlightSelectedField } from "./field_description.js";
+import {
+  updateFieldDescription,
+  highlightSelectedField,
+} from "./field_description.js";
 import {
   clearInputFields,
   showReviewerOptions,
@@ -78,39 +94,47 @@ export function initCurrentReview(config) {
 // --- Event Bindings ---
 export function initializeEventBindings(saveEntrancesFn) {
   // Save actions
-  $('#submitButton').off('click').on('click', saveEntrancesFn);
-  $('#submitCommentButton').off('click').on('click', saveEntrancesFn);
-  $('#ok-button').off('click').on('click', saveEntrancesFn);
+  $("#submitButton").off("click").on("click", saveEntrancesFn);
+  $("#submitCommentButton").off("click").on("click", saveEntrancesFn);
+  $("#ok-button").off("click").on("click", saveEntrancesFn);
 
   // Global Review Actions
-  $('#submit_summary').off('click').on('click', submitPeerReview);
-  $('#peer_review-save').off('click').on('click', savePeerReview);
-  $('#peer_review-cancel').off('click').on('click', cancelPeerReview);
+  $("#submit_summary").off("click").on("click", submitPeerReview);
+  $("#peer_review-save").off("click").on("click", savePeerReview);
+  $("#peer_review-cancel").off("click").on("click", cancelPeerReview);
 
   // Button State Toggles (Visual)
-  $('#suggestion-button').off('click').on('click', () => {
-      selectState('suggestion'); 
+  $("#suggestion-button")
+    .off("click")
+    .on("click", () => {
+      selectState("suggestion");
       updateSubmitButtonColor();
-  });
-  $('#rejected-button').off('click').on('click', () => {
-      selectState('rejected');
+    });
+  $("#rejected-button")
+    .off("click")
+    .on("click", () => {
+      selectState("rejected");
       updateSubmitButtonColor();
-  });
-  $('#ok-button').on('click', () => {
-      selectState('ok');
-      updateSubmitButtonColor();
+    });
+  $("#ok-button").on("click", () => {
+    selectState("ok");
+    updateSubmitButtonColor();
   });
 
-  $('.nav-link').click(clearInputFields);
+  $(".nav-link").click(clearInputFields);
 }
 
 // --- Helper Functions ---
 export function getAllFieldsAndValues() {
-  const fields = document.querySelectorAll('.field');
+  const fields = document.querySelectorAll(".field");
   const fieldList = [];
-  fields.forEach(field => {
+  fields.forEach((field) => {
     const fieldName = field.id.slice(6);
-    const fieldValue = $(field).find('.value').text().replace(/\s+/g, ' ').trim();
+    const fieldValue = $(field)
+      .find(".value")
+      .text()
+      .replace(/\s+/g, " ")
+      .trim();
     fieldList.push({ fieldName, fieldValue });
   });
   return fieldList;
@@ -129,7 +153,7 @@ export function snapshotReviewState() {
 
 export function makeFieldList() {
   var fieldElements = [];
-  $(".field").each(function() {
+  $(".field").each(function () {
     fieldElements.push(this.id);
   });
   return fieldElements;
@@ -160,29 +184,33 @@ export function peerReview(config, checkState = false) {
   updateTabProgressIndicatorClasses();
   updatePercentageDisplay();
 
-  if (checkState && typeof window.state_dict !== 'undefined') {
+  if (checkState && typeof window.state_dict !== "undefined") {
     check_if_review_finished();
   }
 }
 
 export function savePeerReview() {
-  $('#peer_review-save').removeClass('d-none');
-  saveReview(config, current_review).then(function() {
-    window.location = config.url_table;
-  }).catch(function(err) {
-    $('#peer_review-save').addClass('d-none');
-    alert(getErrorMsg(err));
-  });
+  $("#peer_review-save").removeClass("d-none");
+  saveReview(config, current_review)
+    .then(function () {
+      window.location = config.url_table;
+    })
+    .catch(function (err) {
+      $("#peer_review-save").addClass("d-none");
+      alert(getErrorMsg(err));
+    });
 }
 
 export function submitPeerReview() {
-  $('#peer_review-submitting').removeClass('d-none');
-  submitReview(config, current_review).then(function() {
-    window.location = config.url_table;
-  }).catch(function(err) {
-    $('#peer_review-submitting').addClass('d-none');
-    alert(getErrorMsg(err));
-  });
+  $("#peer_review-submitting").removeClass("d-none");
+  submitReview(config, current_review)
+    .then(function () {
+      window.location = config.url_table;
+    })
+    .catch(function (err) {
+      $("#peer_review-submitting").addClass("d-none");
+      alert(getErrorMsg(err));
+    });
 }
 
 export function cancelPeerReview() {
@@ -194,49 +222,52 @@ export function checkReviewComplete() {
   // duplicated DOM loop (Phase 3 step B).
   const allComplete = isReviewerComplete(snapshotReviewState());
 
-  const submitButton = $('#submit_summary');
+  const submitButton = $("#submit_summary");
 
   if (allComplete) {
-    submitButton.removeClass('disabled');
+    submitButton.removeClass("disabled");
     if (!window.clientSideReviewFinished) {
-        showToast("Success", "You have reviewed all fields and can submit the review to get feedback!", 'success');
+      showToast(
+        "Success",
+        "You have reviewed all fields and can submit the review to get feedback!",
+        "success"
+      );
     }
   } else {
-    submitButton.addClass('disabled');
+    submitButton.addClass("disabled");
   }
 }
-
 
 // --- Read-only mode for finished reviews ---
 // Hide every editing affordance so a finished review can be inspected (states,
 // comments, history) but not changed. The backend also rejects edits to a
 // finished review (ReviewFinishedError) as defense in depth.
 export function applyReadOnlyMode() {
-  $('#ok-button, #suggestion-button, #rejected-button').prop('disabled', true);
-  $('.review__btns').hide();
-  $('#reviewer_remarks, #reviewer_comments').addClass('d-none');
-  $('#submit_summary, #peer_review-save, #peer_review-delete').hide();
-  $('#submitButton, #submitCommentButton').hide();
-  $('.content-finish-review').hide();
-  document.body.classList.add('opr-readonly');
+  $("#ok-button, #suggestion-button, #rejected-button").prop("disabled", true);
+  $(".review__btns").hide();
+  $("#reviewer_remarks, #reviewer_comments").addClass("d-none");
+  $("#submit_summary, #peer_review-save, #peer_review-delete").hide();
+  $("#submitButton, #submitCommentButton").hide();
+  $(".content-finish-review").hide();
+  document.body.classList.add("opr-readonly");
 }
 
 export function getCategoryToTabIdMapping() {
   return {
-    'general': 'general-tab',
-    'spatial': 'spatiotemporal-tab',
-    'temporal': 'spatiotemporal-tab',
-    'source': 'source-tab',
-    'license': 'license-tab',
+    general: "general-tab",
+    spatial: "spatiotemporal-tab",
+    temporal: "spatiotemporal-tab",
+    source: "source-tab",
+    license: "license-tab",
   };
 }
 
 export function showToast(title, message, type) {
-  var toast = document.getElementById('liveToast');
-  var toastTitle = document.getElementById('toastTitle');
-  var toastBody = document.getElementById('toastBody');
+  var toast = document.getElementById("liveToast");
+  var toastTitle = document.getElementById("toastTitle");
+  var toastBody = document.getElementById("toastBody");
 
-  toast.className = `toast hide ${type === 'error' ? 'bg-danger' : 'bg-success'}`;
+  toast.className = `toast hide ${type === "error" ? "bg-danger" : "bg-success"}`;
   toastTitle.textContent = title;
   toastBody.textContent = message;
 

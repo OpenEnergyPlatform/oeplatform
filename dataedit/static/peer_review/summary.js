@@ -14,11 +14,10 @@ export function renderSummaryPageFields() {
   const rejectedFields = [];
   const missingFields = [];
   const emptyFields = [];
-  
 
   const processedFields = new Set();
 
- if (window.state_dict && Object.keys(window.state_dict).length > 0) {
+  if (window.state_dict && Object.keys(window.state_dict).length > 0) {
     const fields = document.querySelectorAll(".field");
     for (let field of fields) {
       let field_id = field.id.slice(6);
@@ -36,12 +35,11 @@ export function renderSummaryPageFields() {
 
       // ADD THIS: read comment from DOM just like fieldSuggestion
       const fieldComment =
-        field
-          .querySelector(".suggestion--comment")
-          ?.textContent.trim() ||
+        field.querySelector(".suggestion--comment")?.textContent.trim() ||
         field
           .querySelector(".suggestion--additional-comment")
-          ?.textContent.trim() || "";
+          ?.textContent.trim() ||
+        "";
 
       let fieldName = field_id.replace(/\./g, " ");
 
@@ -57,7 +55,7 @@ export function renderSummaryPageFields() {
           fieldValue,
           fieldCategory,
           fieldSuggestion,
-          fieldComment,   // now defined
+          fieldComment, // now defined
         });
       } else if (fieldState === "ok") {
         acceptedFields.push({
@@ -65,7 +63,7 @@ export function renderSummaryPageFields() {
           fieldValue,
           fieldCategory,
           fieldSuggestion,
-          fieldComment,   // now defined
+          fieldComment, // now defined
         });
         processedFields.add(uniqueFieldIdentifier);
       }
@@ -80,7 +78,10 @@ export function renderSummaryPageFields() {
         const fieldCategory = review.category;
         const field_id = field.id.slice(6);
         const fieldSuggestion = review.fieldReview.reviewerSuggestion || "";
-        const fieldComment = review.fieldReview.comment || review.fieldReview.additionalComment || "";
+        const fieldComment =
+          review.fieldReview.comment ||
+          review.fieldReview.additionalComment ||
+          "";
 
         let fieldName = review.key.replace(/\./g, " ");
 
@@ -100,7 +101,7 @@ export function renderSummaryPageFields() {
             fieldValue,
             fieldCategory,
             fieldSuggestion,
-            fieldComment, 
+            fieldComment,
           });
         } else if (fieldState === "ok") {
           acceptedFields.push({
@@ -108,7 +109,7 @@ export function renderSummaryPageFields() {
             fieldValue,
             fieldCategory,
             fieldSuggestion,
-            fieldComment, 
+            fieldComment,
           });
         } else if (fieldState === "suggestion") {
           suggestingFields.push({
@@ -116,7 +117,7 @@ export function renderSummaryPageFields() {
             fieldValue,
             fieldCategory,
             fieldSuggestion,
-            fieldComment, 
+            fieldComment,
           });
         } else if (fieldState === "rejected") {
           rejectedFields.push({
@@ -160,12 +161,11 @@ export function renderSummaryPageFields() {
           ?.textContent.trim() || "";
 
       const fieldComment =
-        field
-          .querySelector(".suggestion--comment")
-          ?.textContent.trim() ||
+        field.querySelector(".suggestion--comment")?.textContent.trim() ||
         field
           .querySelector(".suggestion--additional-comment")
-          ?.textContent.trim() || "";
+          ?.textContent.trim() ||
+        "";
 
       let fieldName = field_id.replace(/\./g, " ");
 

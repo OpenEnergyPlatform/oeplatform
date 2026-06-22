@@ -13,19 +13,19 @@
 export function clearInputFields() {
   const v = document.getElementById("valuearea");
   const c = document.getElementById("commentarea");
-  if(v) v.value = "";
-  if(c) c.value = "";
+  if (v) v.value = "";
+  if (c) c.value = "";
 }
 
 export function showReviewerOptions() {
-  $("#reviewer_remarks").removeClass('d-none');
+  $("#reviewer_remarks").removeClass("d-none");
 }
 export function hideReviewerOptions() {
-  $("#reviewer_remarks").addClass('d-none');
+  $("#reviewer_remarks").addClass("d-none");
 }
 export function showReviewerCommentsOptions() {
-  $("#reviewer_comments").removeClass('d-none');
+  $("#reviewer_comments").removeClass("d-none");
 }
 export function hideReviewerCommentsOptions() {
-  $("#reviewer_comments").addClass('d-none');
+  $("#reviewer_comments").addClass("d-none");
 }
