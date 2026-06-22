@@ -283,15 +283,30 @@
               <div class="tab-pane fade"
                    id="spatiotemporal"
                    role="tabpanel"
-                   aria-labelledby="spatiotemporal-tab"></div>
+                   aria-labelledby="spatiotemporal-tab">
+                <div class="review__items">
+                  <p class="review__items-cat">Spatial</p>
+                  {% include "partials/review_category.html" with cat=meta.spatial category="spatial" acc="spatial" %}
+                  <p class="review__items-cat">Temporal</p>
+                  {% include "partials/review_category.html" with cat=meta.temporal category="temporal" acc="temporal" %}
+                </div>
+              </div>
               <div class="tab-pane fade"
                    id="source"
                    role="tabpanel"
-                   aria-labelledby="source-tab"></div>
+                   aria-labelledby="source-tab">
+                <div class="review__items">
+                  {% include "partials/review_category.html" with cat=meta.source category="source" acc="source" %}
+                </div>
+              </div>
               <div class="tab-pane fade"
                    id="license"
                    role="tabpanel"
-                   aria-labelledby="license-tab"></div>
+                   aria-labelledby="license-tab">
+                <div class="review__items">
+                  {% include "partials/review_category.html" with cat=meta.license category="license" acc="license" %}
+                </div>
+              </div>
               <div class="tab-pane fade"
                    id="summary"
                    role="tabpanel"
