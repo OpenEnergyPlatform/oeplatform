@@ -88,6 +88,7 @@ from dataedit.peer_review.metadata_serializer import (
 from dataedit.peer_review.projection import field_history
 from dataedit.peer_review.service import (
     ContributorNotFoundError,
+    NotYourTurnError,
     ReviewFinishedError,
     ReviewService,
 )
@@ -1155,6 +1156,11 @@ class TablePeerReviewView(LoginRequiredMixin, View):
                 review_data=existing_review, metadata=metadata, categories=categories
             )
             field_history_data = field_history(existing_review)
+            # Read-only unless it is the reviewer's turn (and not finished).
+            manager = PeerReviewManager.objects.filter(opr=opr_review).first()
+            read_only = bool(review_finished) or (
+                manager is not None and manager.current_reviewer != "reviewer"
+            )
         else:
             url_peer_review = reverse(
                 "dataedit:peer_review_create",
@@ -1164,6 +1170,7 @@ class TablePeerReviewView(LoginRequiredMixin, View):
             state_dict = None
             review_finished = None
             field_history_data = {}
+            read_only = False
 
         config_data = {
             "can_add": can_add,
@@ -1172,6 +1179,7 @@ class TablePeerReviewView(LoginRequiredMixin, View):
             "topic": topic,
             "table": table,
             "review_finished": review_finished,
+            "read_only": read_only,
             "review_id": review_id,
         }
         context_meta = {
@@ -1245,7 +1253,7 @@ class TablePeerReviewView(LoginRequiredMixin, View):
             service.submit_reviewer_review(review_data, review_id=review_id)
         except ContributorNotFoundError as exc:
             return JsonResponse({"error": str(exc)}, status=400)
-        except ReviewFinishedError as exc:
+        except (ReviewFinishedError, NotYourTurnError) as exc:
             return JsonResponse({"error": str(exc)}, status=409)
 
         return JsonResponse({"status": "success"}, status=200)
@@ -1298,6 +1306,11 @@ class TablePeerReviewContributorView(TablePeerReviewView):
             review_data=review_data, metadata=metadata, categories=categories
         )
         review_finished = peer_review.is_finished
+        # Read-only unless it is the contributor's turn (and not finished).
+        manager = PeerReviewManager.objects.filter(opr=peer_review).first()
+        read_only = bool(review_finished) or (
+            manager is not None and manager.current_reviewer != "contributor"
+        )
         context_meta = {
             "config": json.dumps(
                 {
@@ -1315,6 +1328,7 @@ class TablePeerReviewContributorView(TablePeerReviewView):
                     # "topic": table_obj.topics,
                     "table": table_obj.name,
                     "review_finished": review_finished,
+                    "read_only": read_only,
                     "review_id": review_id,
                 }
             ),
@@ -1347,6 +1361,6 @@ class TablePeerReviewContributorView(TablePeerReviewView):
         service = ReviewService(table_name=table, actor=request.user)
         try:
             service.submit_contributor_review(review_data, review_id=review_id)
-        except ReviewFinishedError as exc:
+        except (ReviewFinishedError, NotYourTurnError) as exc:
             return JsonResponse({"error": str(exc)}, status=409)
         return JsonResponse({"status": "success"}, status=200)
