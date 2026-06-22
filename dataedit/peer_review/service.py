@@ -48,6 +48,10 @@ class ReviewFinishedError(Exception):
     """A finished review is read-only and cannot be edited further."""
 
 
+class NotYourTurnError(Exception):
+    """It is the other party's turn; this actor cannot edit right now."""
+
+
 def _ensure_not_finished(review_id) -> None:
     """Guard: reject any edit targeting an already-finished review.
 
@@ -60,6 +64,19 @@ def _ensure_not_finished(review_id) -> None:
             raise ReviewFinishedError(
                 "This review is finished and can no longer be edited."
             )
+
+
+def _ensure_my_turn(opr, role) -> None:
+    """Guard: reject an edit when it is not ``role``'s turn.
+
+    A review reachable from the profile dashboard can be opened by either party
+    at any time, but only the party whose turn it is may submit.
+    """
+    manager = PeerReviewManager.objects.filter(opr=opr).first()
+    if manager and manager.current_reviewer != role:
+        raise NotYourTurnError(
+            "It is not your turn yet — waiting for the other party to respond."
+        )
 
 
 class ReviewService:
@@ -126,6 +143,10 @@ class ReviewService:
         active = PeerReview.load(table=self.table_name)
         creating = active is None or active.is_finished
 
+        # On an ongoing review, only the reviewer-turn may edit.
+        if not creating:
+            _ensure_my_turn(active, Reviewer.REVIEWER.value)
+
         if review_post_type == "save":
             # Draft: store the working payload as-is, no round recorded.
             if creating:
@@ -185,6 +206,7 @@ class ReviewService:
         incoming_reviews = review_datamodel.get("reviews", [])
 
         opr = PeerReviewManager.get_opr_by_id(opr_id=review_id)
+        _ensure_my_turn(opr, Reviewer.CONTRIBUTOR.value)
 
         if review_post_type == "save":
             opr.review = review_datamodel
