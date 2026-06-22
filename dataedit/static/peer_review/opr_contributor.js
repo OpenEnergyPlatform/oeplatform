@@ -118,6 +118,9 @@ export function initContributor() {
 
   // Delegated event listener for field clicks
   document.addEventListener('click', function (event) {
+    // Clicks inside the per-field history disclosure must not select the field.
+    if (event.target.closest('.opr-history')) return;
+
     const field = event.target.closest('.field');
     if (!field) return;
 
@@ -287,8 +290,8 @@ function saveEntrancesForContributor() {
     updateFieldColor(currentKey, selectedState);
     updateClientStateDict(currentKey, selectedState);
 
-    // Reflect the contributor's response in the field row (the reviewer side
-    // does the same). Uses the slots that exist in the markup.
+    // Reflect the contributor's response in the field row. .value keeps the
+    // ORIGINAL value; the proposal + comments go to the styled suggestion slots.
     const fieldElement = document.getElementById("field_" + currentKey);
     if (fieldElement) {
       const suggEl = fieldElement.querySelector('.suggestion--highlight');
@@ -296,12 +299,15 @@ function saveEntrancesForContributor() {
         suggEl.innerText =
           (selectedState === "suggestion") ? reviewObj.reviewerSuggestion : '';
       }
-      const commentEl = fieldElement.querySelector('.comment');
+      const commentEl = fieldElement.querySelector('.suggestion--comment');
       if (commentEl) {
         commentEl.innerText =
-          (selectedState === "rejected")
-            ? reviewObj.additionalComment
-            : reviewObj.comment;
+          (selectedState === "suggestion") ? reviewObj.comment : '';
+      }
+      const denyEl = fieldElement.querySelector('.suggestion--additional-comment');
+      if (denyEl) {
+        denyEl.innerText =
+          (selectedState === "rejected") ? reviewObj.additionalComment : '';
       }
     }
   }
