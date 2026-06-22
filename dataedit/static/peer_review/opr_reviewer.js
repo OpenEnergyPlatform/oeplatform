@@ -246,10 +246,13 @@ function click_field(fieldKey, fieldValue, category) {
   updateFieldDescription(resolvedKey, fieldValue);
   highlightSelectedField(fieldKey);
 
+  // Keep the action buttons disabled in read-only mode (finished / not your
+  // turn) — the field is still selectable so the review can be inspected.
+  const readOnly = document.body.classList.contains('opr-readonly');
   const buttons = ["ok-button", "rejected-button", "suggestion-button"];
   buttons.forEach(btn => {
     const el = document.getElementById(btn);
-    el.disabled = false;
+    if (el) el.disabled = readOnly;
   });
 
   const fieldElementForMsg = document.querySelector(`.field[data-fieldkey="${fieldKey}"]`);
