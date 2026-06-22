@@ -358,12 +358,16 @@ function saveEntrancesForReviewer() {
         updateFieldColor(currentKey, selectedState);
         updateClientStateDict(currentKey, selectedState);
         
-        // Reflect the review in the field row. .value keeps the ORIGINAL value
-        // (server-rendered, muted); the proposal + comments go to the styled
-        // suggestion slots.
+        // Reflect the review in the field row.
         const fieldElement = document.getElementById("field_" + currentKey);
         if (fieldElement) {
             const suggEl = fieldElement.querySelector('.suggestion--highlight');
+            const valueEl = fieldElement.querySelector('.value');
+            // Accepting a suggestion means the proposed value becomes the value.
+            if (selectedState === 'ok' && suggEl && valueEl) {
+                const accepted = suggEl.textContent.trim();
+                if (accepted) valueEl.textContent = accepted;
+            }
             if (suggEl) {
                 suggEl.innerText =
                     (selectedState === 'suggestion') ? reviewObj.reviewerSuggestion : '';
