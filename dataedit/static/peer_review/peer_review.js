@@ -248,7 +248,10 @@ export function applyReadOnlyMode() {
   $("#reviewer_remarks, #reviewer_comments").addClass("d-none");
   $("#submit_summary, #peer_review-save, #peer_review-delete").hide();
   $("#submitButton, #submitCommentButton").hide();
-  $(".content-finish-review").hide();
+  // Hide only the progress circle, NOT the whole .content-finish-review: that
+  // container also holds the category tab nav (#myTab), so hiding it would strip
+  // the tabs and leave a read-only review stuck on the General pane.
+  $(".ok-progress-wrapper").hide();
   document.body.classList.add("opr-readonly");
 }
 
