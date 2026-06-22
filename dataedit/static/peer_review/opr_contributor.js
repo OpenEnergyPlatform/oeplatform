@@ -293,11 +293,16 @@ function saveEntrancesForContributor() {
     updateFieldColor(currentKey, selectedState);
     updateClientStateDict(currentKey, selectedState);
 
-    // Reflect the contributor's response in the field row. .value keeps the
-    // ORIGINAL value; the proposal + comments go to the styled suggestion slots.
+    // Reflect the contributor's response in the field row.
     const fieldElement = document.getElementById("field_" + currentKey);
     if (fieldElement) {
       const suggEl = fieldElement.querySelector('.suggestion--highlight');
+      const valueEl = fieldElement.querySelector('.value');
+      // Accepting a suggestion means the proposed value becomes the value.
+      if (selectedState === "ok" && suggEl && valueEl) {
+        const accepted = suggEl.textContent.trim();
+        if (accepted) valueEl.textContent = accepted;
+      }
       if (suggEl) {
         suggEl.innerText =
           (selectedState === "suggestion") ? reviewObj.reviewerSuggestion : '';
