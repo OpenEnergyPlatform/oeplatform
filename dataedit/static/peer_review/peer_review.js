@@ -347,13 +347,22 @@ export function renderAllFieldHistories() {
     if (!fieldEl || fieldEl.querySelector('.opr-history')) return;
 
     const roundWord = history.length === 1 ? 'round' : 'rounds';
-    const details = document.createElement('details');
-    details.className = 'opr-history';
-    details.innerHTML =
-      `<summary class="opr-history__summary">` +
-      `Review history (${history.length} ${roundWord})</summary>` +
-      `<ul class="opr-history__list">${history.map(historyItemHtml).join('')}</ul>`;
-    fieldEl.appendChild(details);
+    const panelId = 'opr-hist-' + fieldKey.replace(/[^a-zA-Z0-9_-]/g, '_');
+
+    // Bootstrap collapse so it animates smoothly and matches the page's other
+    // accordions, instead of a native <details>.
+    const wrapper = document.createElement('div');
+    wrapper.className = 'opr-history';
+    wrapper.innerHTML =
+      `<button class="opr-history__toggle" type="button" ` +
+      `data-bs-toggle="collapse" data-bs-target="#${panelId}" ` +
+      `aria-expanded="false" aria-controls="${panelId}">` +
+      `<span class="opr-history__caret" aria-hidden="true">›</span> ` +
+      `Review history (${history.length} ${roundWord})</button>` +
+      `<div class="collapse opr-history__panel" id="${panelId}">` +
+      `<ul class="opr-history__list">${history.map(historyItemHtml).join('')}</ul>` +
+      `</div>`;
+    fieldEl.appendChild(wrapper);
   });
 }
 
