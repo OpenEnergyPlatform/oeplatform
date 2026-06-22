@@ -13,6 +13,13 @@ import { isReviewerComplete, reviewerHasChanges } from "./selectors.js";
 import { saveReview, submitReview } from "./api.js";
 import { renderAllFieldHistories } from "./field_history.js";
 import { updateFieldDescription, highlightSelectedField } from "./field_description.js";
+import {
+  clearInputFields,
+  showReviewerOptions,
+  hideReviewerOptions,
+  showReviewerCommentsOptions,
+  hideReviewerCommentsOptions,
+} from "./input_toggles.js";
 
 // Re-export utilities for other modules
 export { getCookie, sendJson, getErrorMsg };
@@ -21,6 +28,13 @@ export { getCookie, sendJson, getErrorMsg };
 // implementation lives in its own module.
 export { renderAllFieldHistories };
 export { updateFieldDescription, highlightSelectedField };
+export {
+  clearInputFields,
+  showReviewerOptions,
+  hideReviewerOptions,
+  showReviewerCommentsOptions,
+  hideReviewerCommentsOptions,
+};
 
 // --- State Management ---
 window.selectedField = window.selectedField ?? null;
@@ -137,27 +151,6 @@ export function selectState(state, shouldUpdateClient = false) {
   if (shouldUpdateClient) {
     check_if_review_finished();
   }
-}
-
-export function clearInputFields() {
-  const v = document.getElementById("valuearea");
-  const c = document.getElementById("commentarea");
-  if(v) v.value = "";
-  if(c) c.value = "";
-}
-
-// --- UI Toggles ---
-export function showReviewerOptions() {
-  $("#reviewer_remarks").removeClass('d-none');
-}
-export function hideReviewerOptions() {
-  $("#reviewer_remarks").addClass('d-none');
-}
-export function showReviewerCommentsOptions() {
-  $("#reviewer_comments").removeClass('d-none');
-}
-export function hideReviewerCommentsOptions() {
-  $("#reviewer_comments").addClass('d-none');
 }
 
 // --- Core Logic ---
