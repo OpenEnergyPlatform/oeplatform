@@ -317,20 +317,39 @@ function historyItemHtml(contribution) {
   const when = contribution.timestamp
     ? new Date(contribution.timestamp).toLocaleString()
     : '';
-  const previous = contribution.contributorValue || '';
-  const proposed = contribution.newValue || contribution.reviewerSuggestion || '';
-  const comment = contribution.comment || contribution.additionalComment || '';
+  const stateLabel =
+    { ok: 'Accepted', suggestion: 'Suggestion', rejected: 'Rejected' }[state] ||
+    state;
+
+  // Only a suggestion has a before/after value; a rejection has a reason; an
+  // acceptance ("ok") just confirms the current value — so don't show a
+  // misleading "was:" line for it.
+  let body = '';
+  if (state === 'suggestion') {
+    const previous = contribution.contributorValue || '';
+    const proposed = contribution.newValue || contribution.reviewerSuggestion || '';
+    const comment = contribution.comment || '';
+    if (previous) {
+      body += `<div class="opr-history__previous">was: ${escapeHtml(previous)}</div>`;
+    }
+    if (proposed) {
+      body += `<div class="opr-history__value">proposed: ${escapeHtml(proposed)}</div>`;
+    }
+    if (comment) {
+      body += `<div class="opr-history__comment">${escapeHtml(comment)}</div>`;
+    }
+  } else if (state === 'rejected') {
+    const reason = contribution.additionalComment || contribution.comment || '';
+    if (reason) {
+      body += `<div class="opr-history__comment">${escapeHtml(reason)}</div>`;
+    }
+  }
+
   return (
     `<li class="opr-history__item opr-history__item--${escapeHtml(state)}">` +
     `<span class="opr-history__role">${escapeHtml(role)}</span> ` +
-    `<span class="opr-history__state">${escapeHtml(state)}</span>` +
-    (previous
-      ? `<div class="opr-history__previous">was: ${escapeHtml(previous)}</div>`
-      : '') +
-    (proposed
-      ? `<div class="opr-history__value">proposed: ${escapeHtml(proposed)}</div>`
-      : '') +
-    (comment ? `<div class="opr-history__comment">${escapeHtml(comment)}</div>` : '') +
+    `<span class="opr-history__state">${escapeHtml(stateLabel)}</span>` +
+    body +
     (when ? `<span class="opr-history__time">${escapeHtml(when)}</span>` : '') +
     `</li>`
   );
@@ -345,6 +364,20 @@ export function renderAllFieldHistories() {
 
     const fieldEl = document.getElementById('field_' + fieldKey);
     if (!fieldEl || fieldEl.querySelector('.opr-history')) return;
+
+    // If the field ended up accepted AFTER a change, show the agreed value in
+    // the field header (with its green check) instead of the original — the
+    // history below still shows the full chain. Accepted-as-is keeps the original.
+    const latest = history[history.length - 1];
+    if (latest && latest.state === 'ok') {
+      let agreed = '';
+      for (let i = history.length - 1; i >= 0; i -= 1) {
+        const v = history[i].newValue || history[i].reviewerSuggestion;
+        if (v) { agreed = v; break; }
+      }
+      const valueEl = fieldEl.querySelector('.value');
+      if (agreed && valueEl) valueEl.textContent = agreed;
+    }
 
     const roundWord = history.length === 1 ? 'round' : 'rounds';
     const panelId = 'opr-hist-' + fieldKey.replace(/[^a-zA-Z0-9_-]/g, '_');
