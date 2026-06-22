@@ -364,21 +364,30 @@
                 </div>
                 <div id="explanation-container"></div>
                 <div class="d-none review__remarks" id="reviewer_remarks">
-                  <div class="review__field">
-                    <textarea class="form-control" id="valuearea"></textarea>
+                  <div class="review__field" id="field-value">
+                    <label for="valuearea" class="form-label">Your value suggestion*</label>
+                    <textarea class="form-control" id="valuearea" rows="2"></textarea>
                   </div>
-                  <div class="review__field">
-                    <textarea class="form-control" id="commentarea"></textarea>
+                  <div class="review__field review__field--nolabel" id="field-comment">
+                    <textarea class="form-control"
+                              id="commentarea"
+                              rows="2"
+                              placeholder="Comment here if you want to explain your suggestion"></textarea>
                   </div>
-                  <button type="button" class="btn btn-warning" id="submitButton">Save</button>
+                  <button type="button"
+                          class="btn btn-warning review__field-save"
+                          id="submitButton">Save comment/new value</button>
                 </div>
                 <div class="d-none review__comments" id="reviewer_comments">
-                  <div class="review__field">
-                    <textarea class="form-control" id="comments"></textarea>
+                  <div class="review__field review__field--nolabel" id="field-comment">
+                    <textarea class="form-control"
+                              id="comments"
+                              rows="2"
+                              placeholder="Comment here if you want to explain why you deny this field"></textarea>
                   </div>
-                  <button type="button" class="btn btn-warning" id="submitCommentButton">
-                    Save
-                  </button>
+                  <button type="button"
+                          class="btn btn-warning review__field-save"
+                          id="submitCommentButton">Save comment</button>
                 </div>
               </div>
             </div>
