@@ -208,10 +208,7 @@
                    role="tabpanel"
                    aria-labelledby="general-tab">
                 <div class="review__items">
-                  {# Match the reviewer's general pane (opr_review.html): render the
-                     flat general fields only. The grouped general entries
-                     (review/schema/topics/…) are intentionally not shown, so both
-                     pages render the General tab identically. #}
+                  {# General pane mirrors the reviewer: flat fields only (no grouped accordions). #}
                   {% for item in meta.general.flat %}
                     {% include "partials/review_item_snippet.html" with item=item category="general" only %}
                   {% endfor %}
