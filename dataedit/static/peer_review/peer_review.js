@@ -7,54 +7,20 @@
 import { check_if_review_finished } from './opr_reviewer_logic.js';
 import { renderSummaryPageFields, updateSubmitButtonColor, updateTabProgressIndicatorClasses } from "./summary.js";
 import { selectNextField, updatePercentageDisplay } from "./navigation.js";
-import {isEmptyValue, isEffectivelyEmpty, sendJson, getCookie, getErrorMsg, escapeHtml} from "./utilities.js";
+import {isEmptyValue, isEffectivelyEmpty, sendJson, getCookie, getErrorMsg} from "./utilities.js";
 import { getFieldState, updateClientStateDict } from "./state_current_review.js";
 import { isReviewerComplete, reviewerHasChanges } from "./selectors.js";
 import { saveReview, submitReview } from "./api.js";
 import { renderAllFieldHistories } from "./field_history.js";
+import { updateFieldDescription, highlightSelectedField } from "./field_description.js";
 
 // Re-export utilities for other modules
 export { getCookie, sendJson, getErrorMsg };
 
-// Re-export so existing importers (e.g. main.js) keep their import path while
-// the implementation lives in field_history.js.
+// Re-export so existing importers keep their import path while the
+// implementation lives in its own module.
 export { renderAllFieldHistories };
-
-// --- DOM Helpers ---
-function getFieldElByKey(fieldKey) {
-  return document.getElementById(`field_${fieldKey}`);
-}
-
-function normalizeFieldKey(fieldKey) {
-  return String(fieldKey)
-    .split('.')
-    .filter(part => part !== '' && !/^\d+$/.test(part))
-    .join('.');
-}
-
-function getTextFromEl(el, selectors) {
-  if (!el) return '';
-  for (const sel of selectors) {
-    const found = el.querySelector(sel);
-    const txt = found?.textContent?.replace(/\s+/g, ' ')?.trim();
-    if (txt) return txt;
-  }
-  return '';
-}
-
-function getFallbackTitle(fieldKey) {
-  const fieldEl = getFieldElByKey(fieldKey);
-  return getTextFromEl(fieldEl, ['.field__label', '.label', 'label']) || fieldKey;
-}
-
-function getFallbackDescription(fieldKey) {
-  const fieldEl = getFieldElByKey(fieldKey);
-  const attr = fieldEl?.getAttribute('data-description') || fieldEl?.dataset?.description;
-  
-  if (attr && String(attr).trim()) return String(attr).trim();
-
-  return getTextFromEl(fieldEl, ['.help-text', '.description']) || '';
-}
+export { updateFieldDescription, highlightSelectedField };
 
 // --- State Management ---
 window.selectedField = window.selectedField ?? null;
@@ -247,62 +213,6 @@ export function checkReviewComplete() {
   }
 }
 
-
-export function updateFieldDescription(resolvedKey, fieldValue) {
-  const fieldDescriptionsElement = document.getElementById("field-descriptions");
-  const selectedName = document.querySelector("#review-field-name");
-
-  // Use the resolvedKey directly - it has already been matched
-  // against fieldDescriptionsData in click_field
-  const fieldInfo = (typeof fieldDescriptionsData !== 'undefined' && fieldDescriptionsData)
-    ? fieldDescriptionsData[resolvedKey] || null
-    : null;
-
-  const rawKey = window.selectedField || resolvedKey;
-  const titleText = fieldInfo?.title || getFallbackTitle(rawKey) || resolvedKey;
-  
-  selectedName.textContent = `${titleText}${fieldValue ? ' — ' + fieldValue : ''}`;
-  selectedName.style.display = 'block';
-
-  let html = '<div class="reviewer-item">';
-  html += `<div class="reviewer-item__row">
-    <h2 class="reviewer-item__title">${escapeHtml(titleText)}</h2>
-  </div>`;
-
-  const desc = fieldInfo?.description || getFallbackDescription(rawKey) || 'No description available.';
-  html += `<div class="reviewer-item__row">
-    <div class="reviewer-item__key">Description:</div>
-    <div class="reviewer-item__value">${escapeHtml(desc)}</div>
-  </div>`;
-
-  if (fieldInfo?.example !== undefined) {
-    html += `<div class="reviewer-item__row">
-      <div class="reviewer-item__key">Example:</div>
-      <div class="reviewer-item__value">${escapeHtml(String(fieldInfo.example))}</div>
-    </div>`;
-  }
-
-  if (fieldInfo?.badge) {
-    html += `<div class="reviewer-item__row">
-      <div class="reviewer-item__key">Badge:</div>
-      <div class="reviewer-item__value">${escapeHtml(fieldInfo.badge)}</div>
-    </div>`;
-  }
-
-  html += '</div>';
-  fieldDescriptionsElement.innerHTML = html;
-}
-
-export function highlightSelectedField(fieldKey, highlightColor = '#F6F9FB') {
-  if (!fieldKey) return;
-  const reviewItem = document.querySelectorAll('.review__item');
-  const selectedDiv = document.getElementById('field_' + fieldKey);
-
-  reviewItem.forEach(div => div.style.backgroundColor = '');
-  if (selectedDiv && !selectedDiv.classList.contains('field-ok')) {
-    selectedDiv.style.backgroundColor = highlightColor;
-  }
-}
 
 // --- Read-only mode for finished reviews ---
 // Hide every editing affordance so a finished review can be inspected (states,
