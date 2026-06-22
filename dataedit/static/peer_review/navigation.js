@@ -95,71 +95,63 @@ export function selectPreviousField() {
  * Selects the first field that needs review (not empty and not yet reviewed)
  */
 export function selectFirstReviewableField() {
-  const allFields = document.querySelectorAll('.review__item.field');
-  
-  for (let field of allFields) {
+  const fields = Array.from(
+    document.querySelectorAll('.review__item.field')
+  ).filter(field => {
     const fieldKey = field.getAttribute('data-fieldkey');
-    const fieldValue = field.getAttribute('data-fieldvalue');
-    
-    // Skip if no fieldKey
-    if (!fieldKey || fieldKey === '') continue;
-    
-    // Check if field is effectively empty
-    if (isEffectivelyEmpty(fieldKey, fieldValue)) continue;
-    
-    // Check if field is already reviewed
-    const currentState = window.state_dict?.[fieldKey];
-    const isReviewed = currentState && ['ok', 'suggestion', 'rejected'].includes(currentState);
-    
-    // Select if NOT empty AND NOT reviewed
-    if (!isReviewed) {
-      // Get the category from the field
-      const category = field.getAttribute('data-category');
-      
-      // Check if field is in a collapsed accordion
-      const accordionCollapse = field.closest('.accordion-collapse');
-      
-      if (accordionCollapse && !accordionCollapse.classList.contains('show')) {
-        // Find and click the accordion button to expand it
-        const accordionButton = document.querySelector(
-          `[data-bs-target="#${accordionCollapse.id}"]`
-        );
-        
-        if (accordionButton) {
-          // Wait for accordion to expand, then select field
-          accordionCollapse.addEventListener('shown.bs.collapse', () => {
-            selectFieldAfterTabSwitch(fieldKey, fieldValue, category);
-          }, { once: true });
-          
-          accordionButton.click();
-          return; // Exit early, will be called after accordion opens
-        }
-      }
-      
-      // Check if we need to switch tabs
-      const tabPane = field.closest('.tab-pane');
-      if (tabPane && !tabPane.classList.contains('active')) {
-        const tabId = tabPane.id;
-        const tabButton = document.querySelector(`[data-bs-target="#${tabId}"]`);
-        
-        if (tabButton) {
-          // Wait for tab transition
-          setTimeout(() => {
-            selectFieldAfterTabSwitch(fieldKey, fieldValue, category);
-          }, 300);
-          
-          tabButton.click();
-          return;
-        }
-      }
-      
-      // Field is visible, select it directly
-      selectFieldAfterTabSwitch(fieldKey, fieldValue, category);
-      return; // Stop after selecting first field
+    return (
+      fieldKey &&
+      !isEffectivelyEmpty(fieldKey, field.getAttribute('data-fieldvalue'))
+    );
+  });
+
+  if (fields.length === 0) return;
+
+  const isReviewed = field => {
+    const state = window.state_dict?.[field.getAttribute('data-fieldkey')];
+    return state === 'ok' || state === 'suggestion' || state === 'rejected';
+  };
+
+  // Prefer the first field that still needs review; if every field is already
+  // reviewed (e.g. a resumed or finished review), fall back to the first field
+  // so something is always selected for context.
+  const target = fields.find(field => !isReviewed(field)) || fields[0];
+  selectFieldWithNav(target);
+}
+
+// Select a field, expanding its accordion / switching to its tab first if needed.
+function selectFieldWithNav(field) {
+  const fieldKey = field.getAttribute('data-fieldkey');
+  const fieldValue = field.getAttribute('data-fieldvalue');
+  const category = field.getAttribute('data-category');
+
+  const accordionCollapse = field.closest('.accordion-collapse');
+  if (accordionCollapse && !accordionCollapse.classList.contains('show')) {
+    const accordionButton = document.querySelector(
+      `[data-bs-target="#${accordionCollapse.id}"]`
+    );
+    if (accordionButton) {
+      accordionCollapse.addEventListener('shown.bs.collapse', () => {
+        selectFieldAfterTabSwitch(fieldKey, fieldValue, category);
+      }, { once: true });
+      accordionButton.click();
+      return;
     }
   }
-  
-  console.log('No reviewable fields found (all are either empty or already reviewed)');
+
+  const tabPane = field.closest('.tab-pane');
+  if (tabPane && !tabPane.classList.contains('active')) {
+    const tabButton = document.querySelector(`[data-bs-target="#${tabPane.id}"]`);
+    if (tabButton) {
+      setTimeout(() => {
+        selectFieldAfterTabSwitch(fieldKey, fieldValue, category);
+      }, 300);
+      tabButton.click();
+      return;
+    }
+  }
+
+  selectFieldAfterTabSwitch(fieldKey, fieldValue, category);
 }
 
 /**
