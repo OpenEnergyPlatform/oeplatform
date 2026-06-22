@@ -60,9 +60,9 @@ document.addEventListener('DOMContentLoaded', function () {
   // Inline, collapsible per-field review history under each field row.
   common.renderAllFieldHistories();
 
-  // A finished review is read-only for both roles: it can be inspected
-  // (states, comments, per-field history) but not edited.
-  if (typeof config !== 'undefined' && config.review_finished) {
+  // Read-only when the review is finished OR it is not this actor's turn: the
+  // review can be inspected (states, comments, per-field history) but not edited.
+  if (typeof config !== 'undefined' && (config.read_only || config.review_finished)) {
     common.applyReadOnlyMode();
   }
 });
