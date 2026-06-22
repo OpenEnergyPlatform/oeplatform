@@ -422,6 +422,17 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // ---- Condensed summary widget helpers ------------------------------------
+// Field names arrive as space-joined key tokens (e.g. "licenses 0 path"). Array
+// indices are zero-based in the data; show them as a human "#1" marker next to
+// the element's sub-field instead of a bare "0".
+function formatFieldName(name) {
+  return String(name == null ? "" : name)
+    .split(" ")
+    .filter((t) => t !== "")
+    .map((t) => (/^\d+$/.test(t) ? `#${parseInt(t, 10) + 1}` : t))
+    .join(" ");
+}
+
 // Builds one row of the per-category summary list: a colored status dot, the
 // field name + current value, the proposed value (for suggestions) and any
 // comment. Colors mirror the field-state borders (green/yellow/red).
@@ -437,12 +448,13 @@ function summaryRowHtml(f, META) {
   const comment = f.fieldComment
     ? `<div class="opr-summary__comment">${escapeHtml(f.fieldComment)}</div>`
     : "";
+  const name = escapeHtml(formatFieldName(f.fieldName));
   return (
     `<li class="opr-summary__row opr-summary__row--${m.cls}">` +
     `<span class="opr-summary__dot" title="${escapeHtml(m.label)}"></span>` +
     `<div class="opr-summary__body">` +
     `<div class="opr-summary__line">` +
-    `<span class="opr-summary__field">${escapeHtml(f.fieldName)}</span>${value}` +
+    `<span class="opr-summary__field">${name}</span>${value}` +
     `</div>${sugg}${comment}</div>` +
     `<span class="opr-summary__status opr-summary__status--${m.cls}">${escapeHtml(m.label)}</span>` +
     `</li>`
