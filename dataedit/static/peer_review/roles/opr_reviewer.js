@@ -24,25 +24,25 @@ import {
   updateFieldDescription,
   initializeEventBindings,
   getErrorMsg,
-} from "./peer_review.js";
+} from "../core/peer_review.js";
 
-import { deleteReview } from "./api.js";
+import { deleteReview } from "../api.js";
 import { check_if_review_finished } from "./opr_reviewer_logic.js";
 import {
   getFieldState,
   setGetFieldState,
   updateClientStateDict,
-} from "./state_current_review.js";
+} from "../core/state_current_review.js";
 import {
   switchCategoryTab,
   selectNextField,
   updatePercentageDisplay,
-} from "./navigation.js";
+} from "../ui/navigation.js";
 import {
   renderSummaryPageFields,
   updateTabProgressIndicatorClasses,
-} from "./summary.js";
-import { isEmptyValue, isEffectivelyEmpty } from "./utilities.js";
+} from "../ui/summary.js";
+import { isEmptyValue, isEffectivelyEmpty } from "../utilities.js";
 window.clientSideReviewFinished = window.clientSideReviewFinished ?? false;
 let initialReviewerSuggestions = {};
 document.addEventListener("DOMContentLoaded", function () {

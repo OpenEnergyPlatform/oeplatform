@@ -28,9 +28,9 @@ import {
   updateFieldDescription,
   highlightSelectedField,
   initializeEventBindings,
-} from "./peer_review.js";
+} from "../core/peer_review.js";
 
-import { updateClientStateDict } from "./state_current_review.js";
+import { updateClientStateDict } from "../core/state_current_review.js";
 
 // Fields the reviewer left open (suggestion/deny) — only these need a
 // contributor response. Accepted fields are read-only for the contributor.
@@ -41,12 +41,12 @@ import {
   switchCategoryTab,
   selectNextField,
   updatePercentageDisplay,
-} from "./navigation.js";
+} from "../ui/navigation.js";
 import {
   renderSummaryPageFields,
   updateTabProgressIndicatorClasses,
-} from "./summary.js";
-import { isEffectivelyEmpty } from "./utilities.js";
+} from "../ui/summary.js";
+import { isEffectivelyEmpty } from "../utilities.js";
 
 // --- Local Helpers ---
 

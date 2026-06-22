@@ -8,8 +8,8 @@ import {
   getCategoryToTabIdMapping,
   makeFieldList,
   selectField,
-} from "./peer_review.js";
-import { isEmptyValue, isEffectivelyEmpty, sendJson } from "./utilities.js";
+} from "../core/peer_review.js";
+import { isEmptyValue, isEffectivelyEmpty, sendJson } from "../utilities.js";
 
 export function updateTabProgress() {
   const allFields = document.querySelectorAll(".review__item");

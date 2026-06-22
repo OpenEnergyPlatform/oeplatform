@@ -10,7 +10,7 @@
 // peer_review.js as part of the Phase 3 frontend split; peer_review.js re-exports
 // renderAllFieldHistories so existing importers keep working.
 
-import { escapeHtml } from "./utilities.js";
+import { escapeHtml } from "../utilities.js";
 
 function historyItemHtml(contribution) {
   const role = contribution.role || "unknown";

@@ -4,38 +4,38 @@
 // SPDX-FileCopyrightText: 2026 Vismaya Jochem <https://github.com/vismayajochem> © Reiner Lemoine Institut
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { check_if_review_finished } from "./opr_reviewer_logic.js";
+import { check_if_review_finished } from "../roles/opr_reviewer_logic.js";
 import {
   renderSummaryPageFields,
   updateSubmitButtonColor,
   updateTabProgressIndicatorClasses,
-} from "./summary.js";
-import { selectNextField, updatePercentageDisplay } from "./navigation.js";
+} from "../ui/summary.js";
+import { selectNextField, updatePercentageDisplay } from "../ui/navigation.js";
 import {
   isEmptyValue,
   isEffectivelyEmpty,
   sendJson,
   getCookie,
   getErrorMsg,
-} from "./utilities.js";
+} from "../utilities.js";
 import {
   getFieldState,
   updateClientStateDict,
 } from "./state_current_review.js";
 import { isReviewerComplete, reviewerHasChanges } from "./selectors.js";
-import { saveReview, submitReview } from "./api.js";
-import { renderAllFieldHistories } from "./field_history.js";
+import { saveReview, submitReview } from "../api.js";
+import { renderAllFieldHistories } from "../ui/field_history.js";
 import {
   updateFieldDescription,
   highlightSelectedField,
-} from "./field_description.js";
+} from "../ui/field_description.js";
 import {
   clearInputFields,
   showReviewerOptions,
   hideReviewerOptions,
   showReviewerCommentsOptions,
   hideReviewerCommentsOptions,
-} from "./input_toggles.js";
+} from "../ui/input_toggles.js";
 
 // Re-export utilities for other modules
 export { getCookie, sendJson, getErrorMsg };

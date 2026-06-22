@@ -11,7 +11,7 @@ import {
   setFieldReview,
   setFinished,
   subscribe,
-} from "./store.js";
+} from "../core/store.js";
 
 describe("store", () => {
   beforeEach(() => _resetStore());

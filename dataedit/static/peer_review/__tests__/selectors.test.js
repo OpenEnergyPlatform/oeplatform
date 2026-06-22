@@ -8,7 +8,7 @@ import {
   nonEmptyFields,
   reviewProgress,
   reviewerHasChanges,
-} from "./selectors.js";
+} from "../core/selectors.js";
 
 const stateWith = (fields, fieldState) => ({ fields, fieldState });
 

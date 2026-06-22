@@ -8,9 +8,9 @@ import {
   getErrorMsg,
   showToast,
   snapshotReviewState,
-} from "./peer_review.js";
-import { finishReview } from "./api.js";
-import { isReviewerComplete, reviewerHasChanges } from "./selectors.js";
+} from "../core/peer_review.js";
+import { finishReview } from "../api.js";
+import { isReviewerComplete, reviewerHasChanges } from "../core/selectors.js";
 export function finishPeerReview() {
   $("#peer_review-submitting").removeClass("d-none");
 

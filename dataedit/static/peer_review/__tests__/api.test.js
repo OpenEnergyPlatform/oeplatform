@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { describe, expect, it } from "vitest";
 
-import { reviewPayload } from "./api.js";
+import { reviewPayload } from "../api.js";
 
 describe("api.reviewPayload", () => {
   const review = { reviews: [{ key: "title" }] };

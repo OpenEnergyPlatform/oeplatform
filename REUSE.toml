@@ -2205,7 +2205,7 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "dataedit/static/peer_review/schema.json"
+path = "dataedit/static/peer_review/data/schema.json"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
@@ -2215,7 +2215,7 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "dataedit/static/peer_review/example_datenmodell.json"
+path = "dataedit/static/peer_review/data/example_datenmodell.json"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
@@ -2224,7 +2224,7 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "dataedit/static/peer_review/template_datenmodell.json"
+path = "dataedit/static/peer_review/data/template_datenmodell.json"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
