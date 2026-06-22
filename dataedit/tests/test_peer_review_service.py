@@ -20,7 +20,11 @@ from dataedit.models import (
     ReviewRound,
 )
 from dataedit.peer_review.projection import project_review
-from dataedit.peer_review.service import ReviewFinishedError, ReviewService
+from dataedit.peer_review.service import (
+    NotYourTurnError,
+    ReviewFinishedError,
+    ReviewService,
+)
 from login.models import myuser as User
 
 
@@ -169,6 +173,18 @@ class TestReviewServiceContributor(TestCase):
         opr.save()
 
         with self.assertRaises(ReviewFinishedError):
+            ReviewService(
+                table_name="t_service", actor=self.contributor
+            ).submit_contributor_review(self._contributor_payload(), review_id=opr.id)
+
+    def test_submit_when_not_your_turn_is_rejected(self):
+        opr = self._opr_with_reviewer_round()
+        # Flip the turn back to the reviewer; the contributor must not edit.
+        pm = PeerReviewManager.objects.get(opr=opr)
+        pm.current_reviewer = Reviewer.REVIEWER.value
+        pm.save()
+
+        with self.assertRaises(NotYourTurnError):
             ReviewService(
                 table_name="t_service", actor=self.contributor
             ).submit_contributor_review(self._contributor_payload(), review_id=opr.id)
