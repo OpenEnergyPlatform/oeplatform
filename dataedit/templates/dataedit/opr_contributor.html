@@ -63,22 +63,23 @@
       .ok-progress-circle circle.bg { stroke: #e6e6e6; }
       .ok-progress-circle circle.progress { stroke: #4caf50; stroke-linecap: round; stroke-dasharray: 326.72; stroke-dashoffset: 326.72; transition: stroke-dashoffset 0.4s ease; }
       .percentage-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 22px; font-weight: bold; }
-      .opr-history { margin-top: 0.5rem; }
+      .opr-history { margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px dashed #e3e8ec; }
       .opr-history__toggle { background: none; border: none; padding: 0; font-size: 0.8rem; color: #2972A6; cursor: pointer; }
       .opr-history__toggle:hover { text-decoration: underline; }
       .opr-history__caret { display: inline-block; transition: transform 0.2s ease; }
       .opr-history__toggle[aria-expanded="true"] .opr-history__caret { transform: rotate(90deg); }
-      .opr-history__list { list-style: none; margin: 0.5rem 0 0; padding: 0; }
-      .opr-history__item { border-left: 3px solid #ced4da; padding: 0.25rem 0 0.25rem 0.6rem; margin-bottom: 0.4rem; font-size: 0.82rem; }
+      .opr-history__list { list-style: none; margin: 0.6rem 0 0; padding: 0 0 0 0.25rem; }
+      .opr-history__item { border-left: 3px solid #ced4da; padding: 0.45rem 0 0.45rem 0.75rem; margin-bottom: 0.6rem; font-size: 0.82rem; line-height: 1.45; }
+      .opr-history__item:last-child { margin-bottom: 0; }
       .opr-history__item--ok { border-left-color: #4caf50; }
       .opr-history__item--suggestion { border-left-color: #f0ad4e; }
       .opr-history__item--rejected { border-left-color: #d9534f; }
       .opr-history__role { font-weight: 600; text-transform: capitalize; }
       .opr-history__state { color: #6c757d; text-transform: capitalize; }
-      .opr-history__previous { color: #6c757d; }
-      .opr-history__value { font-weight: 600; }
-      .opr-history__comment { font-style: italic; color: #495057; }
-      .opr-history__time { display: block; font-size: 0.72rem; color: #adb5bd; }
+      .opr-history__previous { color: #6c757d; margin-top: 0.2rem; }
+      .opr-history__value { font-weight: 600; margin-top: 0.1rem; }
+      .opr-history__comment { font-style: italic; color: #495057; margin-top: 0.15rem; }
+      .opr-history__time { display: block; font-size: 0.72rem; color: #adb5bd; margin-top: 0.25rem; }
       </style>
       <div class="ok-progress-wrapper">
         <div class="ok-progress-circle">
