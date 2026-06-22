@@ -7,13 +7,18 @@
 import { check_if_review_finished } from './opr_reviewer_logic.js';
 import { renderSummaryPageFields, updateSubmitButtonColor, updateTabProgressIndicatorClasses } from "./summary.js";
 import { selectNextField, updatePercentageDisplay } from "./navigation.js";
-import {isEmptyValue, isEffectivelyEmpty, sendJson, getCookie, getErrorMsg} from "./utilities.js";
+import {isEmptyValue, isEffectivelyEmpty, sendJson, getCookie, getErrorMsg, escapeHtml} from "./utilities.js";
 import { getFieldState, updateClientStateDict } from "./state_current_review.js";
 import { isReviewerComplete, reviewerHasChanges } from "./selectors.js";
 import { saveReview, submitReview } from "./api.js";
+import { renderAllFieldHistories } from "./field_history.js";
 
 // Re-export utilities for other modules
 export { getCookie, sendJson, getErrorMsg };
+
+// Re-export so existing importers (e.g. main.js) keep their import path while
+// the implementation lives in field_history.js.
+export { renderAllFieldHistories };
 
 // --- DOM Helpers ---
 function getFieldElByKey(fieldKey) {
@@ -49,15 +54,6 @@ function getFallbackDescription(fieldKey) {
   if (attr && String(attr).trim()) return String(attr).trim();
 
   return getTextFromEl(fieldEl, ['.help-text', '.description']) || '';
-}
-
-function escapeHtml(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
 }
 
 // --- State Management ---
@@ -306,97 +302,6 @@ export function highlightSelectedField(fieldKey, highlightColor = '#F6F9FB') {
   if (selectedDiv && !selectedDiv.classList.contains('field-ok')) {
     selectedDiv.style.backgroundColor = highlightColor;
   }
-}
-
-// --- Per-field review history (the ping-pong between reviewer & contributor) ---
-// Rendered inline under each field row as a native collapsible <details>, so it
-// sits next to the value being discussed and is expandable on demand.
-function historyItemHtml(contribution) {
-  const role = contribution.role || 'unknown';
-  const state = contribution.state || '';
-  const when = contribution.timestamp
-    ? new Date(contribution.timestamp).toLocaleString()
-    : '';
-  const stateLabel =
-    { ok: 'Accepted', suggestion: 'Suggestion', rejected: 'Rejected' }[state] ||
-    state;
-
-  // Only a suggestion has a before/after value; a rejection has a reason; an
-  // acceptance ("ok") just confirms the current value — so don't show a
-  // misleading "was:" line for it.
-  let body = '';
-  if (state === 'suggestion') {
-    const previous = contribution.contributorValue || '';
-    const proposed = contribution.newValue || contribution.reviewerSuggestion || '';
-    const comment = contribution.comment || '';
-    if (previous) {
-      body += `<div class="opr-history__previous">was: ${escapeHtml(previous)}</div>`;
-    }
-    if (proposed) {
-      body += `<div class="opr-history__value">proposed: ${escapeHtml(proposed)}</div>`;
-    }
-    if (comment) {
-      body += `<div class="opr-history__comment">${escapeHtml(comment)}</div>`;
-    }
-  } else if (state === 'rejected') {
-    const reason = contribution.additionalComment || contribution.comment || '';
-    if (reason) {
-      body += `<div class="opr-history__comment">${escapeHtml(reason)}</div>`;
-    }
-  }
-
-  return (
-    `<li class="opr-history__item opr-history__item--${escapeHtml(state)}">` +
-    `<span class="opr-history__role">${escapeHtml(role)}</span> ` +
-    `<span class="opr-history__state">${escapeHtml(stateLabel)}</span>` +
-    body +
-    (when ? `<span class="opr-history__time">${escapeHtml(when)}</span>` : '') +
-    `</li>`
-  );
-}
-
-// Inject a collapsible history under every field row that has one. Idempotent.
-export function renderAllFieldHistories() {
-  const all = window.field_history || {};
-  Object.keys(all).forEach(fieldKey => {
-    const history = all[fieldKey] || [];
-    if (history.length < 1) return;
-
-    const fieldEl = document.getElementById('field_' + fieldKey);
-    if (!fieldEl || fieldEl.querySelector('.opr-history')) return;
-
-    // If the field ended up accepted AFTER a change, show the agreed value in
-    // the field header (with its green check) instead of the original — the
-    // history below still shows the full chain. Accepted-as-is keeps the original.
-    const latest = history[history.length - 1];
-    if (latest && latest.state === 'ok') {
-      let agreed = '';
-      for (let i = history.length - 1; i >= 0; i -= 1) {
-        const v = history[i].newValue || history[i].reviewerSuggestion;
-        if (v) { agreed = v; break; }
-      }
-      const valueEl = fieldEl.querySelector('.value');
-      if (agreed && valueEl) valueEl.textContent = agreed;
-    }
-
-    const roundWord = history.length === 1 ? 'round' : 'rounds';
-    const panelId = 'opr-hist-' + fieldKey.replace(/[^a-zA-Z0-9_-]/g, '_');
-
-    // Bootstrap collapse so it animates smoothly and matches the page's other
-    // accordions, instead of a native <details>.
-    const wrapper = document.createElement('div');
-    wrapper.className = 'opr-history';
-    wrapper.innerHTML =
-      `<button class="opr-history__toggle" type="button" ` +
-      `data-bs-toggle="collapse" data-bs-target="#${panelId}" ` +
-      `aria-expanded="false" aria-controls="${panelId}">` +
-      `<span class="opr-history__caret" aria-hidden="true">›</span> ` +
-      `Review history (${history.length} ${roundWord})</button>` +
-      `<div class="collapse opr-history__panel" id="${panelId}">` +
-      `<ul class="opr-history__list">${history.map(historyItemHtml).join('')}</ul>` +
-      `</div>`;
-    fieldEl.appendChild(wrapper);
-  });
 }
 
 // --- Read-only mode for finished reviews ---
