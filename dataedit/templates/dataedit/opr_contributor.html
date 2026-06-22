@@ -208,53 +208,13 @@
                    role="tabpanel"
                    aria-labelledby="general-tab">
                 <div class="review__items">
-                  {% if meta.general.flat is not None or meta.general.grouped is not None %}
-                    {# Flat items #}
-                    {% for item in meta.general.flat %}
-                      {% include "partials/review_item_snippet.html" with item=item category="general" only %}
-                    {% endfor %}
-                    {# Grouped items #}
-                    <div class="accordion" id="generalAccordion">
-                      {% for group_key, group in meta.general.grouped.items %}
-                        <div class="accordion-item">
-                          <h2 class="accordion-header" id="heading-general-{{ forloop.counter }}">
-                            <button class="accordion-button collapsed"
-                                    type="button"
-                                    data-bs-toggle="collapse"
-                                    data-bs-target="#collapse-general-{{ forloop.counter }}">
-                              {{ group_key }}
-                            </button>
-                          </h2>
-                          <div id="collapse-general-{{ forloop.counter }}"
-                               class="accordion-collapse collapse"
-                               data-bs-parent="#generalAccordion">
-                            <div class="accordion-body">
-                              {# group_index_only() makes each general group a flat list of items #}
-                              {% for item in group %}
-                                {% include "partials/review_item_snippet.html" with item=item category="general" only %}
-                              {% endfor %}
-                            </div>
-                          </div>
-                        </div>
-                      {% endfor %}
-                    </div>
-                  {% else %}
-                    {# Legacy #}
-                    {% for item in meta.general %}
-                      <div id="field_{{ item.field|default:'undefined' }}"
-                           class="field review__item"
-                           data-fieldkey="{{ item.field|default:'' }}"
-                           data-fieldvalue="{{ item.value|default:'' }}"
-                           data-category="general">
-                        <p class="review__item-content">
-                          <span class="key">{{ item.display_field|default:item.field }}</span>
-                          <span class="value">{{ item.value }}</span>
-                          <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                          <span class="comment">{{ item.suggestion_comment }}</span>
-                        </p>
-                      </div>
-                    {% endfor %}
-                  {% endif %}
+                  {# Match the reviewer's general pane (opr_review.html): render the
+                     flat general fields only. The grouped general entries
+                     (review/schema/topics/…) are intentionally not shown, so both
+                     pages render the General tab identically. #}
+                  {% for item in meta.general.flat %}
+                    {% include "partials/review_item_snippet.html" with item=item category="general" only %}
+                  {% endfor %}
                 </div>
               </div>
               <div class="tab-pane fade"
