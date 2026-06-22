@@ -60,6 +60,9 @@ export function initReviewer() {
   });
 
   document.addEventListener('click', function (event) {
+    // Clicks inside the per-field history disclosure must not select the field.
+    if (event.target.closest('.opr-history')) return;
+
     const field = event.target.closest('.field');
     if (!field) return;
 
@@ -352,8 +355,9 @@ function saveEntrancesForReviewer() {
         updateFieldColor(currentKey, selectedState);
         updateClientStateDict(currentKey, selectedState);
         
-        // Reflect the review in the field row using the slots that actually
-        // exist in the markup (.suggestion--highlight + .comment).
+        // Reflect the review in the field row. .value keeps the ORIGINAL value
+        // (server-rendered, muted); the proposal + comments go to the styled
+        // suggestion slots.
         const fieldElement = document.getElementById("field_" + currentKey);
         if (fieldElement) {
             const suggEl = fieldElement.querySelector('.suggestion--highlight');
@@ -361,14 +365,15 @@ function saveEntrancesForReviewer() {
                 suggEl.innerText =
                     (selectedState === 'suggestion') ? reviewObj.reviewerSuggestion : '';
             }
-            // One comment slot: the deny reason for rejected, else the
-            // suggestion comment.
-            const commentEl = fieldElement.querySelector('.comment');
+            const commentEl = fieldElement.querySelector('.suggestion--comment');
             if (commentEl) {
                 commentEl.innerText =
-                    (selectedState === 'rejected')
-                        ? reviewObj.additionalComment
-                        : reviewObj.comment;
+                    (selectedState === 'suggestion') ? reviewObj.comment : '';
+            }
+            const denyEl = fieldElement.querySelector('.suggestion--additional-comment');
+            if (denyEl) {
+                denyEl.innerText =
+                    (selectedState === 'rejected') ? reviewObj.additionalComment : '';
             }
         }
     }
