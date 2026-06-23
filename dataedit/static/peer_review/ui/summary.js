@@ -253,13 +253,20 @@ export function renderSummaryPageFields() {
     counts[f.fieldStatus] = (counts[f.fieldStatus] || 0) + 1;
   });
 
-  // Sticky overview bar: one colored-dot chip per state that occurs.
+  // Sticky overview bar: one colored-dot chip per state that occurs. Every chip
+  // except "Empty" doubles as a filter toggle (Empty has no detail rows).
   const statsHtml = ["Accepted", "Suggested", "Rejected", "Missing", "Empty"]
     .filter((s) => counts[s])
     .map((s) => {
       const m = STATUS_META[s];
+      const filterable = s !== "Empty";
+      const cls = filterable ? " opr-summary__stat--filterable" : "";
+      const attrs = filterable
+        ? ` data-state="${m.cls}" role="button" tabindex="0"` +
+          ` aria-pressed="false" title="Filter by ${m.label}"`
+        : "";
       return (
-        `<li class="opr-summary__stat opr-summary__stat--${m.cls}">` +
+        `<li class="opr-summary__stat opr-summary__stat--${m.cls}${cls}"${attrs}>` +
         `<span class="opr-summary__dot"></span>${counts[s]} ${m.label}</li>`
       );
     })
@@ -297,7 +304,14 @@ export function renderSummaryPageFields() {
     `</ul></div>` +
     (sectionsHtml ||
       `<p class="opr-summary__note">No reviewable fields in this review.</p>`) +
+    `<p class="opr-summary__note opr-summary__nomatch" hidden>` +
+    `No fields match this filter.</p>` +
     `</div>`;
+
+  // Wire up the state-filter chips and re-apply any active filter (the selected
+  // set persists in module scope across re-renders).
+  attachSummaryFilter(summaryContainer);
+  applySummaryFilter(summaryContainer);
 
   updateTabProgressIndicatorClasses();
   updatePercentageDisplay();
@@ -450,7 +464,7 @@ function summaryRowHtml(f, META) {
     : "";
   const name = escapeHtml(formatFieldName(f.fieldName));
   return (
-    `<li class="opr-summary__row opr-summary__row--${m.cls}">` +
+    `<li class="opr-summary__row opr-summary__row--${m.cls}" data-state="${m.cls}">` +
     `<span class="opr-summary__dot" title="${escapeHtml(m.label)}"></span>` +
     `<div class="opr-summary__body">` +
     `<div class="opr-summary__line">` +
@@ -497,6 +511,70 @@ function injectSummaryStyles() {
   .opr-summary__status--rejected { background: #fbe3e7; color: #a32f3e; }
   .opr-summary__status--missing { background: #eef1f3; color: #56636b; }
   .opr-summary__note { color: #6c757d; padding: 0.5rem 0.25rem; }
+  .opr-summary__stat--filterable { cursor: pointer; border: 1px solid transparent; border-radius: 1rem; padding: 0.12rem 0.6rem; transition: background 0.12s ease, opacity 0.12s ease; }
+  .opr-summary__stat--filterable:hover { background: #f0f3f5; }
+  .opr-summary__stat--filterable:focus-visible { outline: 2px solid #2972A6; outline-offset: 1px; }
+  .opr-summary__stat--filterable.is-active { background: #eef3f7; border-color: #cdd8e0; }
+  .opr-summary__stat--filterable.is-dimmed { opacity: 0.4; }
   `;
   document.head.appendChild(style);
+}
+
+// Selected review states to show in the summary. Empty set = show all. Module
+// scope so the choice survives the re-render after each save.
+const summaryFilter = new Set();
+
+// Attach click/keyboard toggles to the filter chips. Re-attached on every render
+// because renderSummaryPageFields() replaces the container's innerHTML.
+function attachSummaryFilter(container) {
+  container
+    .querySelectorAll(".opr-summary__stat--filterable")
+    .forEach((chip) => {
+      const toggle = () => {
+        const state = chip.dataset.state;
+        if (summaryFilter.has(state)) summaryFilter.delete(state);
+        else summaryFilter.add(state);
+        applySummaryFilter(container);
+      };
+      chip.addEventListener("click", toggle);
+      chip.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          toggle();
+        }
+      });
+    });
+}
+
+// Show only rows whose state is in summaryFilter (all when the set is empty),
+// hide categories left with no visible rows, and reflect the selection on the
+// chips. Pure DOM toggling — no re-render needed.
+function applySummaryFilter(container) {
+  const root = container.querySelector(".opr-summary");
+  if (!root) return;
+  const filtering = summaryFilter.size > 0;
+
+  root.querySelectorAll(".opr-summary__stat--filterable").forEach((chip) => {
+    const on = summaryFilter.has(chip.dataset.state);
+    chip.setAttribute("aria-pressed", on ? "true" : "false");
+    chip.classList.toggle("is-active", on);
+    chip.classList.toggle("is-dimmed", filtering && !on);
+  });
+
+  root.querySelectorAll(".opr-summary__row").forEach((row) => {
+    const show = !filtering || summaryFilter.has(row.dataset.state);
+    row.style.display = show ? "" : "none";
+  });
+
+  let anyVisible = false;
+  root.querySelectorAll(".opr-summary__section").forEach((sec) => {
+    const visible = Array.from(
+      sec.querySelectorAll(".opr-summary__row")
+    ).some((r) => r.style.display !== "none");
+    sec.style.display = visible ? "" : "none";
+    if (visible) anyVisible = true;
+  });
+
+  const nomatch = root.querySelector(".opr-summary__nomatch");
+  if (nomatch) nomatch.hidden = !(filtering && !anyVisible);
 }
