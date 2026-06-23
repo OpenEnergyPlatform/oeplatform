@@ -14,217 +14,77 @@ import {
 } from "../utilities.js";
 import { updatePercentageDisplay } from "./navigation.js";
 export function renderSummaryPageFields() {
-  const acceptedFields = [];
-  const suggestingFields = [];
-  const rejectedFields = [];
-  const missingFields = [];
-  const emptyFields = [];
+  // This round's in-progress responses, indexed by field key — used for the
+  // suggestion/comment text the current actor just entered.
+  const reviewsByKey = {};
+  ((current_review && current_review.reviews) || []).forEach((r) => {
+    reviewsByKey[r.key] = r;
+  });
 
-  const processedFields = new Set();
-
-  if (window.state_dict && Object.keys(window.state_dict).length > 0) {
-    const fields = document.querySelectorAll(".field");
-    for (let field of fields) {
-      let field_id = field.id.slice(6);
-      const fieldValue = $(field)
-        .find(".value")
-        .text()
-        .replace(/\s+/g, " ")
-        .trim();
-      const fieldState = getFieldState(field_id);
-      const fieldCategory = field.getAttribute("data-category");
-      const fieldSuggestion =
-        field
-          .querySelector(".suggestion.suggestion--highlight")
-          ?.textContent.trim() || "";
-
-      // ADD THIS: read comment from DOM just like fieldSuggestion
-      const fieldComment =
-        field.querySelector(".suggestion--comment")?.textContent.trim() ||
-        field
-          .querySelector(".suggestion--additional-comment")
-          ?.textContent.trim() ||
-        "";
-
-      let fieldName = field_id.replace(/\./g, " ");
-
-      if (fieldCategory !== "general") {
-        fieldName = fieldName.split(" ").slice(1).join(" ");
-      }
-
-      const uniqueFieldIdentifier = `${fieldName}-${fieldCategory}`;
-
-      if (isEffectivelyEmpty(field_id, fieldValue)) {
-        emptyFields.push({
-          fieldName,
-          fieldValue,
-          fieldCategory,
-          fieldSuggestion,
-          fieldComment, // now defined
-        });
-      } else if (fieldState === "ok") {
-        acceptedFields.push({
-          fieldName,
-          fieldValue,
-          fieldCategory,
-          fieldSuggestion,
-          fieldComment, // now defined
-        });
-        processedFields.add(uniqueFieldIdentifier);
-      }
-
-      for (const review of current_review.reviews) {
-        const fieldDomId = `field_${review.key}`;
-        const fieldEl = document.getElementById(fieldDomId);
-        const fieldValue = fieldEl
-          ? $(fieldEl).find(".value").text().replace(/\s+/g, " ").trim()
-          : "";
-        const fieldState = review.fieldReview.state;
-        const fieldCategory = review.category;
-        const field_id = field.id.slice(6);
-        const fieldSuggestion = review.fieldReview.reviewerSuggestion || "";
-        const fieldComment =
-          review.fieldReview.comment ||
-          review.fieldReview.additionalComment ||
-          "";
-
-        let fieldName = review.key.replace(/\./g, " ");
-
-        if (fieldCategory !== "general") {
-          fieldName = fieldName.split(" ").slice(1).join(" ");
-        }
-
-        const uniqueFieldIdentifier = `${fieldName}-${fieldCategory}`;
-
-        if (processedFields.has(uniqueFieldIdentifier)) {
-          continue;
-        }
-
-        if (isEffectivelyEmpty(field_id, fieldValue)) {
-          emptyFields.push({
-            fieldName,
-            fieldValue,
-            fieldCategory,
-            fieldSuggestion,
-            fieldComment,
-          });
-        } else if (fieldState === "ok") {
-          acceptedFields.push({
-            fieldName,
-            fieldValue,
-            fieldCategory,
-            fieldSuggestion,
-            fieldComment,
-          });
-        } else if (fieldState === "suggestion") {
-          suggestingFields.push({
-            fieldName,
-            fieldValue,
-            fieldCategory,
-            fieldSuggestion,
-            fieldComment,
-          });
-        } else if (fieldState === "rejected") {
-          rejectedFields.push({
-            fieldName,
-            fieldValue,
-            fieldCategory,
-            fieldSuggestion,
-            fieldComment,
-          });
-        }
-
-        processedFields.add(uniqueFieldIdentifier);
-      }
-    }
-  }
-
-  const categories = document.querySelectorAll(".tab-pane");
-
-  for (const category of categories) {
-    const category_name = category.id;
-
-    if (category_name === "summary") {
-      continue;
-    }
-    const category_fields = category.querySelectorAll(".field");
-    for (let field of category_fields) {
-      const field_id = field.id.slice(6);
-      const fieldValue = $(field)
-        .find(".value")
-        .text()
-        .replace(/\s+/g, " ")
-        .trim();
-      const found = current_review.reviews.some(
-        (review) => review.key === field_id
-      );
-      const fieldState = getFieldState(field_id);
-      const fieldCategory = field.getAttribute("data-category");
-      const fieldSuggestion =
-        field
-          .querySelector(".suggestion.suggestion--highlight")
-          ?.textContent.trim() || "";
-
-      const fieldComment =
-        field.querySelector(".suggestion--comment")?.textContent.trim() ||
-        field
-          .querySelector(".suggestion--additional-comment")
-          ?.textContent.trim() ||
-        "";
-
-      let fieldName = field_id.replace(/\./g, " ");
-
-      if (fieldCategory !== "general") {
-        fieldName = fieldName.split(" ").slice(1).join(" ");
-      }
-
-      const uniqueFieldIdentifier = `${fieldName}-${fieldCategory}`;
-
-      if (
-        !found &&
-        fieldState !== "ok" &&
-        !isEffectivelyEmpty(field_id, fieldValue) &&
-        !processedFields.has(uniqueFieldIdentifier)
-      ) {
-        missingFields.push({
-          fieldName,
-          fieldValue,
-          fieldCategory,
-          fieldSuggestion,
-          fieldComment,
-        });
-        processedFields.add(uniqueFieldIdentifier);
-      }
-    }
-  }
-
+  // One row per field, classified by its CURRENT state (window.state_dict, which
+  // reflects whoever acted last). This is role-agnostic: the contributor sees the
+  // reviewer's suggested/denied fields, the reviewer sees the contributor's, and
+  // each sees their own answers — not only this session's entries.
   const allData = [];
-  allData.push(
-    ...missingFields.map((item) => ({ ...item, fieldStatus: "Missing" }))
-  );
-  allData.push(
-    ...acceptedFields.map((item) => ({ ...item, fieldStatus: "Accepted" }))
-  );
-  allData.push(
-    ...suggestingFields.map((item) => ({ ...item, fieldStatus: "Suggested" }))
-  );
-  allData.push(
-    ...rejectedFields.map((item) => ({ ...item, fieldStatus: "Rejected" }))
-  );
-  allData.push(
-    ...emptyFields.map((item) => ({ ...item, fieldStatus: "Empty" }))
-  );
-
   const categoriesMap = {};
 
-  function addFieldToCategory(category, field) {
-    if (!categoriesMap[category]) categoriesMap[category] = [];
-    categoriesMap[category].push(field);
-  }
+  document.querySelectorAll(".field").forEach((field) => {
+    const key = field.id.slice(6);
+    if (!key) return;
 
-  allData.forEach((item) => {
-    const category = item.fieldCategory || "general";
-    addFieldToCategory(category, item);
+    const fieldCategory = field.getAttribute("data-category") || "general";
+    const fieldValue = $(field)
+      .find(".value")
+      .text()
+      .replace(/\s+/g, " ")
+      .trim();
+    const empty = isEffectivelyEmpty(key, fieldValue);
+    const state = empty ? null : getFieldState(key);
+
+    let fieldStatus;
+    if (empty) fieldStatus = "Empty";
+    else if (state === "ok") fieldStatus = "Accepted";
+    else if (state === "suggestion") fieldStatus = "Suggested";
+    else if (state === "rejected") fieldStatus = "Rejected";
+    else fieldStatus = "Missing";
+
+    // Suggestion / comment: prefer this round's own response, else the
+    // server-rendered values already in the field row (the other party's latest
+    // contribution).
+    const review = reviewsByKey[key];
+    const fr =
+      review && review.fieldReview && !Array.isArray(review.fieldReview)
+        ? review.fieldReview
+        : null;
+    const fieldSuggestion = fr
+      ? fr.reviewerSuggestion || fr.newValue || ""
+      : field
+          .querySelector(".suggestion.suggestion--highlight")
+          ?.textContent.trim() || "";
+    const fieldComment = fr
+      ? fr.comment || fr.additionalComment || ""
+      : field.querySelector(".suggestion--comment")?.textContent.trim() ||
+        field
+          .querySelector(".suggestion--additional-comment")
+          ?.textContent.trim() ||
+        "";
+
+    let fieldName = key.replace(/\./g, " ");
+    if (fieldCategory !== "general") {
+      fieldName = fieldName.split(" ").slice(1).join(" ");
+    }
+
+    const item = {
+      fieldName,
+      fieldValue,
+      fieldCategory,
+      fieldSuggestion,
+      fieldComment,
+      fieldStatus,
+    };
+    allData.push(item);
+    if (!categoriesMap[fieldCategory]) categoriesMap[fieldCategory] = [];
+    categoriesMap[fieldCategory].push(item);
   });
 
   // ---- Render: condensed, grouped overview of the review state ----------
