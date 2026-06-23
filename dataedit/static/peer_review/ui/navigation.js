@@ -110,15 +110,29 @@ export function selectFirstReviewableField() {
 
   if (fields.length === 0) return;
 
-  const isReviewed = (field) => {
-    const state = window.state_dict?.[field.getAttribute("data-fieldkey")];
-    return state === "ok" || state === "suggestion" || state === "rejected";
+  // A field needs the reviewer's action when the OTHER party last left it as a
+  // suggestion/deny (handed back), or — in round 1 — it has no history yet.
+  // Fields already answered this session, or that the contributor accepted,
+  // don't. Mirrors the tab-dot logic (fieldNeedsAction) in summary.js.
+  const responded = new Set(
+    (window.current_review?.reviews || []).map((r) => r.key)
+  );
+  const needsReviewerAction = (field) => {
+    const key = field.getAttribute("data-fieldkey");
+    if (responded.has(key)) return false;
+    const h = (window.field_history || {})[key] || [];
+    if (h.length === 0) return true;
+    const last = h[h.length - 1];
+    return (
+      !!last &&
+      last.role !== "reviewer" &&
+      (last.state === "suggestion" || last.state === "rejected")
+    );
   };
 
-  // Prefer the first field that still needs review; if every field is already
-  // reviewed (e.g. a resumed or finished review), fall back to the first field
-  // so something is always selected for context.
-  const target = fields.find((field) => !isReviewed(field)) || fields[0];
+  // Land on the first field that needs action; if everything is handled (a
+  // finished or fully-answered review) fall back to the first field for context.
+  const target = fields.find(needsReviewerAction) || fields[0];
   selectFieldWithNav(target);
 }
 
