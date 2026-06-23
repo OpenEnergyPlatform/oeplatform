@@ -44,39 +44,84 @@
         </div>
       </div>
     </div>
-    <div class="index-about-container-background">
-      <div class="index-about-container">
-        <div class="index-about-column">
-          <img src="{% static 'img/welcome/about-process-modelling.svg' %}" alt="" />
-          <b>API</b>
-          <span class="alternative">
-            Learn how to download and publish open data on the OEP using the
-            API.
-          </span>
+    <div class="index-features">
+      <div class="index-features-header">
+        <h2 class="index-features-title">Core Platform Features</h2>
+        <p class="index-features-subtitle">
+          Access energy system datasets, scenario descriptions &amp; context,
+          and shared standards for annotating transparent and reusable
+          research data
+        </p>
+      </div>
+      <div class="index-features-grid">
+        <div class="index-feature-card">
+          <div class="index-feature-card-body">
+            <img class="index-feature-icon"
+                 src="{% static 'img/welcome/i_hex_blue_database.svg' %}"
+                 alt="" />
+            <h3 class="index-feature-card-title">Database &amp; Metadata</h3>
+            <p class="index-feature-card-description">
+              Comprehensive energy datasets with rich metadata and advanced
+              search capabilities.
+            </p>
+          </div>
           <a role="button"
-             class="btn btn-primary btn-sm"
-             href="{{ EXTERNAL_URLS.tutorials_api1 }}">Learn more</a>
+             class="index-feature-link"
+             href="{% url 'dataedit:topic-list' %}">
+            <span>Explore Database</span>
+            {% include 'base/index-arrow.html' %}
+          </a>
         </div>
-        <div class="index-about-column">
-          <img src="{% static 'img/welcome/about-openscience.svg' %}" alt="" />
-          <b>Open Science</b>
-          <span class="alternative">
-            Good scientific practice needs open licenses for software, data and
-            content.
-          </span>
+        <div class="index-feature-card">
+          <div class="index-feature-card-body">
+            <img class="index-feature-icon"
+                 src="{% static 'img/welcome/i_hex_blue_scenario_bundles.svg' %}"
+                 alt="" />
+            <h3 class="index-feature-card-title">Scenario Bundles</h3>
+            <p class="index-feature-card-description">
+              Combining datasets, scenario context, and studies for
+              transparent energy modelling
+            </p>
+          </div>
           <a role="button"
-             class="btn btn-primary btn-sm"
-             href="{{ EXTERNAL_URLS.tutorials_licenses }}">Learn more</a>
+             class="index-feature-link"
+             href="{% url 'factsheet:factsheets_index' %}">
+            <span>View Scenarios</span>
+            {% include 'base/index-arrow.html' %}
+          </a>
         </div>
-        <div class="index-about-column">
-          <img src="{% static 'img/welcome/about-community.svg' %}" alt="" />
-          <b>Open Energy Community</b>
-          <span class="alternative">
-            Collaborate and contribute to the development on GitHub.
-          </span>
+        <div class="index-feature-card">
+          <div class="index-feature-card-body">
+            <img class="index-feature-icon"
+                 src="{% static 'img/welcome/i_hex_blue_factsheets.svg' %}"
+                 alt="" />
+            <h3 class="index-feature-card-title">Factsheets</h3>
+            <p class="index-feature-card-description">
+              Insights into model and framework characteristics
+            </p>
+          </div>
           <a role="button"
-             class="btn btn-primary btn-sm"
-             href="{{ EXTERNAL_URLSgithub_openenergyplatform }}">Learn more</a>
+             class="index-feature-link"
+             href="{% url 'modelview:modellist' 'model' %}">
+            <span>Browse Factsheets</span>
+            {% include 'base/index-arrow.html' %}
+          </a>
+        </div>
+        <div class="index-feature-card">
+          <div class="index-feature-card-body">
+            <img class="index-feature-icon"
+                 src="{% static 'img/welcome/i_hex_blue_ontology.svg' %}"
+                 alt="" />
+            <h3 class="index-feature-card-title">Ontology</h3>
+            <p class="index-feature-card-description">
+              Relevant terms and their relationships for annotating energy
+              systems modelling
+            </p>
+          </div>
+          <a role="button" class="index-feature-link" href="{% url 'ontology:index' %}">
+            <span>Explore Ontology</span>
+            {% include 'base/index-arrow.html' %}
+          </a>
         </div>
       </div>
     </div>
