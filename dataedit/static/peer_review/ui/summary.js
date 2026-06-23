@@ -336,33 +336,39 @@ function getOprRole() {
   );
 }
 
-// A category tab shows a red dot while it still needs action this round, green
-// ("done") once everything in it is handled. The rule depends on the role:
-//   reviewer    — every non-empty field must have a state (ok/suggestion/rejected)
-//   contributor — every field the reviewer left open (suggestion/rejected) must
-//                 have a contributor response this round; accepted fields and
-//                 empty fields need nothing.
-function isCategoryDone(tabName, role, flagged, responded) {
-  const fields = Array.from(document.querySelectorAll(`#${tabName} .field`));
-  return fields.every((field) => {
-    const key = field.id.replace("field_", "");
-    const value = $(field).find(".value").text().replace(/\s+/g, " ").trim();
-    if (isEffectivelyEmpty(key, value)) return true; // nothing to review
+// Does this field still need the current actor's action this round? Decided from
+// who acted LAST on the field — the ping-pong signal — so it works on every round,
+// not just the first:
+//   - empty field                          -> no (not reviewable)
+//   - already answered this session         -> no (in current_review.reviews)
+//   - no committed history yet              -> yes only for the reviewer (round 1:
+//                                              every non-empty field must be reviewed)
+//   - last commit was the OTHER party and a
+//     suggestion/deny                       -> yes (they handed it back to me)
+//   - otherwise (last commit was mine, or
+//     the other party accepted)             -> no (resolved for now)
+function fieldNeedsAction(field, role, history, responded) {
+  const key = field.id.replace("field_", "");
+  const value = $(field).find(".value").text().replace(/\s+/g, " ").trim();
+  if (isEffectivelyEmpty(key, value)) return false;
+  if (responded.has(key)) return false;
 
-    if (role === "contributor") {
-      // Done unless the reviewer flagged it and the contributor hasn't replied.
-      return !(flagged.has(key) && !responded.has(key));
-    }
-    // Reviewer: done once the field carries any review state.
-    return ["ok", "suggestion", "rejected"].includes(getFieldState(key));
-  });
+  const h = history[key] || [];
+  if (h.length === 0) return role === "reviewer";
+
+  const last = h[h.length - 1];
+  return (
+    !!last &&
+    last.role !== role &&
+    (last.state === "suggestion" || last.state === "rejected")
+  );
 }
 
 export function updateTabProgressIndicatorClasses() {
   const role = getOprRole();
-  // Fields the reviewer left open (suggestion/deny), captured by the contributor
-  // flow at load; empty for the reviewer role.
-  const flagged = window.contributorOpenFields || new Set();
+  // Committed ping-pong history per field (prior rounds); this round's in-progress
+  // answers live in current_review.reviews.
+  const history = window.field_history || {};
   const responded = new Set(
     ((current_review && current_review.reviews) || []).map((r) => r.key)
   );
@@ -370,11 +376,11 @@ export function updateTabProgressIndicatorClasses() {
   ["general", "spatiotemporal", "source", "license"].forEach((tabName) => {
     const tab = document.getElementById(`${tabName}-tab`);
     if (!tab) return;
+    const done = !Array.from(
+      document.querySelectorAll(`#${tabName} .field`)
+    ).some((field) => fieldNeedsAction(field, role, history, responded));
     tab.classList.add("status"); // ensure the dot is rendered at all
-    tab.classList.toggle(
-      "status--done",
-      isCategoryDone(tabName, role, flagged, responded)
-    );
+    tab.classList.toggle("status--done", done);
   });
 }
 
