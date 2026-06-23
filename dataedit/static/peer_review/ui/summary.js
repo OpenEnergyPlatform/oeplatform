@@ -330,72 +330,55 @@ export function updateSubmitButtonColor() {
   }
 }
 
-export function updateTabProgressIndicatorClasses() {
-  const tabNames = ["general", "spatiotemporal", "source", "license"];
-  tabNames.forEach((tabName) => {
-    const tab = document.getElementById(`${tabName}-tab`);
-    if (!tab) return;
+function getOprRole() {
+  return (
+    document.getElementById("opr-page-marker")?.dataset?.oprPage || "reviewer"
+  );
+}
 
-    const fieldsInTab = Array.from(
-      document.querySelectorAll(`#${tabName} .field`)
-    );
+// A category tab shows a red dot while it still needs action this round, green
+// ("done") once everything in it is handled. The rule depends on the role:
+//   reviewer    — every non-empty field must have a state (ok/suggestion/rejected)
+//   contributor — every field the reviewer left open (suggestion/rejected) must
+//                 have a contributor response this round; accepted fields and
+//                 empty fields need nothing.
+function isCategoryDone(tabName, role, flagged, responded) {
+  const fields = Array.from(document.querySelectorAll(`#${tabName} .field`));
+  return fields.every((field) => {
+    const key = field.id.replace("field_", "");
+    const value = $(field).find(".value").text().replace(/\s+/g, " ").trim();
+    if (isEffectivelyEmpty(key, value)) return true; // nothing to review
 
-    const allReviewed =
-      fieldsInTab.length === 0 ||
-      fieldsInTab.every((field) => {
-        const fieldKey = field.id.replace("field_", "");
-        const fieldValue = $(field)
-          .find(".value")
-          .text()
-          .replace(/\s+/g, " ")
-          .trim();
-        const fieldState = getFieldState(fieldKey);
-        const effectivelyEmpty = isEffectivelyEmpty(fieldKey, fieldValue);
-        return (
-          effectivelyEmpty ||
-          ["ok", "suggestion", "rejected"].includes(fieldState)
-        );
-      });
-
-    tab.classList.toggle("status--done", allReviewed);
+    if (role === "contributor") {
+      // Done unless the reviewer flagged it and the contributor hasn't replied.
+      return !(flagged.has(key) && !responded.has(key));
+    }
+    // Reviewer: done once the field carries any review state.
+    return ["ok", "suggestion", "rejected"].includes(getFieldState(key));
   });
 }
 
-export function updateTabClasses() {
-  const tabNames = ["general", "spatiotemporal", "source", "license"];
-  for (let i = 0; i < tabNames.length; i++) {
-    let tabName = tabNames[i];
-    let tab = document.getElementById(tabName + "-tab");
-    if (!tab) continue;
+export function updateTabProgressIndicatorClasses() {
+  const role = getOprRole();
+  // Fields the reviewer left open (suggestion/deny), captured by the contributor
+  // flow at load; empty for the reviewer role.
+  const flagged = window.contributorOpenFields || new Set();
+  const responded = new Set(
+    ((current_review && current_review.reviews) || []).map((r) => r.key)
+  );
 
-    let fields = Array.from(
-      document.querySelectorAll("#" + tabName + " .field")
+  ["general", "spatiotemporal", "source", "license"].forEach((tabName) => {
+    const tab = document.getElementById(`${tabName}-tab`);
+    if (!tab) return;
+    tab.classList.add("status"); // ensure the dot is rendered at all
+    tab.classList.toggle(
+      "status--done",
+      isCategoryDone(tabName, role, flagged, responded)
     );
-
-    let allReviewed = fields.every((field) => {
-      let fieldValue = $(field)
-        .find(".value")
-        .text()
-        .replace(/\s+/g, " ")
-        .trim();
-      let fieldId = field.id.replace("field_", "");
-      let fieldState = getFieldState(fieldId);
-      return (
-        isEffectivelyEmpty(fieldId, fieldValue) ||
-        ["ok", "suggestion", "rejected"].includes(fieldState)
-      );
-    });
-
-    if (allReviewed) {
-      tab.classList.add("status");
-      tab.classList.add("status--done");
-    } else {
-      tab.classList.add("status");
-      tab.classList.remove("status--done");
-    }
-  }
+  });
 }
-window.addEventListener("DOMContentLoaded", updateTabClasses);
+
+window.addEventListener("DOMContentLoaded", updateTabProgressIndicatorClasses);
 
 export const summaryTab = document.getElementById("summary-tab");
 export const otherTabs = [
