@@ -68,7 +68,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "prepare": "patch-package"
+    "prepare": "patch-package",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "keywords": [],
   "author": "",
@@ -86,6 +88,7 @@
     "eslint-plugin-react": "^7.37.3",
     "eslint-plugin-react-hooks": "^5.1.0",
     "prettier": "^3.3.2",
+    "vitest": "^3.2.4",
     "vite": "^8.0.16",
     "vite-plugin-eslint": "^1.8.1"
   }

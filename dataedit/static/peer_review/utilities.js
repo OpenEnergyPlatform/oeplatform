@@ -27,52 +27,60 @@ export function sendJson(method, url, data, success, error) {
   var token = getCsrfToken();
   return $.ajax({
     url: url,
-    type: method, 
-    headers: {"X-CSRFToken": token},
+    type: method,
+    headers: { "X-CSRFToken": token },
     dataType: "json",
     cache: false,
     contentType: "application/json; charset=utf-8",
     processData: false,
     data: data,
     success: success,
-    error: error
+    error: error,
   });
 }
 
 export function isEmptyValue(value) {
-    if (value === null || value === undefined) return true;
-    
-    // Convert to string and trim whitespace
-    const s = String(value).trim();
-    
-    return (
-        s === '' || 
-        s === 'None' || 
-        s === 'null' || 
-        s === '[]' || 
-        s === '{}'
-    );
+  if (value === null || value === undefined) return true;
+
+  // Convert to string and trim whitespace
+  const s = String(value).trim();
+
+  return s === "" || s === "None" || s === "null" || s === "[]" || s === "{}";
 }
 
 const BOUNDING_BOX_FIELDS = [
-  'extent.boundingBox.0',
-  'extent.boundingBox.1',
-  'extent.boundingBox.2',
-  'extent.boundingBox.3',
+  "extent.boundingBox.0",
+  "extent.boundingBox.1",
+  "extent.boundingBox.2",
+  "extent.boundingBox.3",
 ];
 
 export function isEffectivelyEmpty(fieldKey, fieldValue) {
   if (isEmptyValue(fieldValue)) return true;
-  if (BOUNDING_BOX_FIELDS.includes(fieldKey) && String(fieldValue).trim() === '0') return true;
+  if (
+    BOUNDING_BOX_FIELDS.includes(fieldKey) &&
+    String(fieldValue).trim() === "0"
+  )
+    return true;
   return false;
+}
+
+export function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 export function getErrorMsg(response) {
   try {
     if (response.responseJSON && response.responseJSON.error) {
-        return 'Upload failed: ' + response.responseJSON.error;
+      return "Upload failed: " + response.responseJSON.error;
     }
-    var response_msg = 'Upload failed: ' + JSON.parse(response.responseText).error;
+    var response_msg =
+      "Upload failed: " + JSON.parse(response.responseText).error;
   } catch (e) {
     console.log(response);
     var response_msg = response.responseText || "Unknown error";

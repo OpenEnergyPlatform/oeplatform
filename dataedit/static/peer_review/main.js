@@ -4,14 +4,14 @@
 // SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import * as common from "./peer_review.js";
-import { selectState } from './peer_review.js';
-import { selectNextField, selectPreviousField, selectFirstReviewableField } from './navigation.js';
-import { setGetFieldState } from './state_current_review.js';
+import * as common from "./core/peer_review.js";
+import { selectState } from './core/peer_review.js';
+import { selectNextField, selectPreviousField, selectFirstReviewableField, selectFirstContributorField } from './ui/navigation.js';
+import { setGetFieldState } from './core/state_current_review.js';
 
 // Static imports avoid the "Failed to fetch" dynamic import errors
-import { initReviewer } from './opr_reviewer.js';
-import { initContributor } from './opr_contributor.js';
+import { initReviewer } from './roles/opr_reviewer.js';
+import { initContributor } from './roles/opr_contributor.js';
 
 // Expose functions to global window scope for HTML onclick events
 window.selectState = selectState;
@@ -46,7 +46,23 @@ document.addEventListener('DOMContentLoaded', function () {
     
   } else if (oprPage === 'contributor') {
     initContributor();
+
+    // Auto-select the first field the reviewer flagged (suggested/denied), once
+    // accordions, tabs and state are ready.
+    setTimeout(() => {
+      selectFirstContributorField();
+    }, 600);
+
   } else {
     console.warn('OPR page marker not found or invalid; skipping role-specific initialization');
+  }
+
+  // Inline, collapsible per-field review history under each field row.
+  common.renderAllFieldHistories();
+
+  // Read-only when the review is finished OR it is not this actor's turn: the
+  // review can be inspected (states, comments, per-field history) but not edited.
+  if (typeof config !== 'undefined' && (config.read_only || config.review_finished)) {
+    common.applyReadOnlyMode();
   }
 });
