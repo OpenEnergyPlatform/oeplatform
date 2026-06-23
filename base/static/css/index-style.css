@@ -7,18 +7,6 @@
   align-items: center;
 }
 
-.index-padding {
-  margin-top: 2em;
-}
-
-.index-group {
-  height: 100%;
-  display: flex;
-  flex-flow: column;
-  align-items: center;
-  justify-content: space-around;
-}
-
 .index-tutorial {
   padding: 2em 1em;
 }
@@ -33,92 +21,113 @@
   border: 1px solid black;
 }
 
-.index-home h3 {
-  font-weight: 600;
-  font-size: 32px;
-  color: var(--primaryColor2);
-}
-
-.index-home span.subheader {
-  font-size: 24px;
-  color: var(--grey1);
-}
-
 .index-home h4 {
   font-weight: 600;
   color: var(--primaryColor4);
 }
 
-.index-tile {
-  transform: scale(0.8);
-  margin: -1.8em;
-  margin-bottom: 1em;
-  max-width: 350px;
+.index-hero {
+  background-color: #2972a6;
+  padding: 96px 24px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0.5em;
 }
 
-.inner-index-tile {
-  padding-left: 5px;
+.index-hero-inner {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-around;
-}
-
-.index-tile .btn{
-  /* button on bottom of box */
-  margin-top: auto;
-}
-
-
-.index-tile img {
-  align-self: center;
-  height: 60px;
-  width: 60px;
-  padding-top: 15px;
-  padding-left: 15px;
-}
-
-.index-tile a {
-  color: var(--white);
-  background-image: none;
-  border: none;
-
+  align-items: center;
+  gap: 16px;
   width: 100%;
+  max-width: 1248px;
 }
 
-.index-tile-color-1 a {
-  background-color: var(--primaryColor1);
+.index-hero-badge {
+  padding: 8px 0;
+  border-bottom: 2px solid var(--white);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.14px;
+  color: var(--white);
 }
 
-.index-tile-color-2 a {
-  background-color: var(--primaryColor2);
+.index-hero-title {
+  margin: 0;
+  font-size: 60px;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -1.2px;
+  color: var(--white);
 }
 
-.index-tile-color-3 a {
-  background-color: var(--primaryColor3);
+.index-hero-subtitle {
+  margin: 0;
+  max-width: 591px;
+  font-size: 20px;
+  font-weight: 300;
+  line-height: 1.4;
+  letter-spacing: 0.2px;
+  color: var(--white);
 }
 
-.index-tile-color-4 a {
-  background-color: var(--primaryColor4);
+.index-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px 0;
 }
 
-.index-tile-color-5 a {
-  background-color: var(--primaryColor5);
+.index-hero-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 46px;
+  padding: 0 24px;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.25px;
+  text-decoration: none;
+  white-space: nowrap;
 }
 
-.index-tile-colored {
-  background-color: white;
-  border: 2px groove var(--primaryColor1);
-  border-radius: 5px;
+.index-hero-btn-light {
+  background-color: #f6f9fb;
+  color: var(--primaryColor2);
+  border: none;
 }
 
-.index-tile-bordered a {
-  border: 1px solid var(--primaryColor4);
-  color: var(--primaryColor4);
+.index-hero-btn-light:hover {
+  background-color: var(--white);
+  color: var(--primaryColor2);
+}
+
+.index-hero-btn-outline {
+  background-color: transparent;
+  color: var(--white);
+  border: 2px solid var(--white);
+}
+
+.index-hero-btn-outline:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--white);
+}
+
+@media screen and (max-width: 800px) {
+  .index-hero {
+    padding: 48px 24px;
+  }
+
+  .index-hero-title {
+    font-size: 36px;
+  }
+
+  .index-hero-subtitle {
+    font-size: 16px;
+  }
 }
 
 .index-about-container-background {
@@ -172,35 +181,3 @@
   padding: 4px 12px;
 }
 
-.index-tile-container {
-  display: grid;
-  grid-template-columns: repeat(5, auto);
-  grid-gap: 2em;
-  padding: 2em 0;
-
-  justify-items: center;
-}
-
-/*
-.index-tile .hovertext {
-    visibility: hidden;
-    width: auto;
-    height: auto;
-    background-color: var(--secondaryColor1);
-    color: var(--primaryColor2);
-    justify-content: center;
-    align-items: center;
-    position: absolute;
-    z-index: 1;
-  }
-
-  .index-tile:hover .hovertext {
-    visibility: visible;
-  } */
-
-@media screen and (max-width: 800px) {
-  .index-tile-container {
-    grid-template-columns: repeat(2, auto);
-    grid-template-rows: repeat(2, auto);
-  }
-}

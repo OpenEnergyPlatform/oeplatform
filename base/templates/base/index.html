@@ -11,101 +11,36 @@
 {% endblock %}
 {% block main %}
   <div class="index-home">
-    <div class="index-group">
-      <div class="index-padding">
-        {% include 'base/messages.html' %}
-        <h3>Open Energy Platform</h3>
-        <span class="subheader">Make your energy system modelling process transparent!</span>
-        <div class="index-tile-container">
-          <div class="index-tile index-tile-colored index-tile-color-1">
-            <img src="{% static 'img/welcome/OpenEnergyFamily_Logo_OpenEnergyDatabase_icon.svg' %}"
-                 alt="OEDB" />
-            {% comment %}
-              <a role="button" class="btn btn-primary" href="{% url 'dataedit:topic-list' %}">Database</a>
-            {% endcomment %}
-            <div class="inner-index-tile">
-              <div class="panel-description">
-                <h2>Database</h2>
-                <p class="alternative">
-                  Are you interested in data? Visualize the database to explore
-                  it. All contributors publish datasets under an open license,
-                  so you can securely download and work with it. Are you
-                  interested in sharing your own data? This is the place to
-                  upload it.
-                </p>
-              </div>
-            </div>
-            <a role="button"
-               class="btn btn-primary pull-right"
-               style="font-size: 16px"
-               href="{% url 'dataedit:topic-list' %}">Database</a>
-          </div>
-          <div class="index-tile index-tile-colored index-tile-color-2">
-            <!-- <img src="{% static 'img/welcome/OpenEnergyFamily_Logo_Factsheets_icon.svg' %}"
-      alt="Factsheets"> -->
-            <img src="{% static 'img/welcome/bundles.png' %}" alt="Scenario Bundle" />
-            <div class="inner-index-tile">
-              <div class="panel-description">
-                <h2>Scenario Bundles</h2>
-                <p class="alternative">
-                  Do you want to learn more about scenarios, the models used to
-                  project them and the actual data? Then, this is the right
-                  place for you. If you contributed data to the OEP this is the
-                  place where you can provide more context by creating your own
-                  scenario bundle.
-                </p>
-              </div>
-            </div>
-            <a role="button"
-               class="btn btn-primary"
-               style="font-size: 16px"
-               href="{% url 'factsheet:factsheets_index' %}">Scenario Bundles</a>
-          </div>
-          {#    <div class="index-tile index-tile-colored index-tile-color-3">#}
-          {#    <img src="{% static 'img/welcome/bundles.png' %}" alt="">#}
-          {#    <a role="button" class="btn btn-primary" href="{{ EXTERNAL_URLS.github_openenergyplatform_oeplatform_issues_568 }}">Bundles</a>#}
-          {#    </div>#}
-          <div class="index-tile index-tile-colored index-tile-color-3">
-            <img src="{% static 'img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg' %}"
-                 alt="OEO" />
-            {% comment %}
-              <a role="button" class="btn btn-primary" href="{% url 'ontology:index' %}">Ontology</a>
-            {% endcomment %}
-            <div class="inner-index-tile">
-              <div class="panel-description">
-                <h2>Ontology</h2>
-                <p class="alternative">
-                  Ontology referes to a collection of domain specific
-                  terminology and their relationships. Come here to learn more
-                  about the Open Energy Ontology (OEO), which helps with data
-                  annotation and management.
-                </p>
-              </div>
-            </div>
-            <a role="button"
-               class="btn btn-primary"
-               style="font-size: 16px"
-               href="{% url 'ontology:index' %}">Ontology</a>
-          </div>
-          <div class="index-tile index-tile-colored index-tile-color-4">
-            <img src="{% static 'img/welcome/OpenEnergyFamily_Logo_Tutorials_icon.svg' %}"
-                 alt="Academy" />
-            <div class="inner-index-tile">
-              <div class="panel-description">
-                <h2>Academy</h2>
-                <p class="alternative">
-                  The Open Energy Academy (OEA) provides courses as well as
-                  dedicated tutorials covering important topics around the Open
-                  Energy Family (OEF) tools and the Open Energy Platform (OEP).
-                  You will also find short answers to urgent questions.
-                </p>
-              </div>
-            </div>
-            <a role="button"
-               class="btn btn-primary"
-               style="font-size: 16px"
-               href="{{ EXTERNAL_URLS.tutorials_index }}">Academy</a>
-          </div>
+    {% include 'base/messages.html' %}
+    <div class="index-hero">
+      <div class="index-hero-inner">
+        <div class="index-hero-badge">Open Energy Platform</div>
+        <h1 class="index-hero-title">
+          Open and FAIR Data<br />
+          for the Energy Systems Community
+        </h1>
+        <p class="index-hero-subtitle">
+          Discover, analyze and participate - with our integrated suite of
+          tools targeted at an open research data life cycle
+        </p>
+        <div class="index-hero-actions">
+          <a role="button"
+             class="index-hero-btn index-hero-btn-light"
+             href="{% url 'dataedit:topic-list' %}">
+            Explore Platform
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 width="16"
+                 height="16"
+                 fill="currentColor"
+                 class="bi bi-arrow-right"
+                 viewBox="0 0 16 16">
+              <path fill-rule="evenodd"
+                    d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8" />
+            </svg>
+          </a>
+          <a role="button"
+             class="index-hero-btn index-hero-btn-outline"
+             href="{{ EXTERNAL_URLS.mkdocs }}">View Documentation</a>
         </div>
       </div>
     </div>
