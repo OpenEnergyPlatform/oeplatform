@@ -151,9 +151,6 @@ export function initContributor() {
       .filter(([, s]) => s === "suggestion" || s === "rejected")
       .map(([key]) => key)
   );
-  // Expose for the summary's per-category dot indicator (red until every flagged
-  // field in a category has a contributor response this round).
-  window.contributorOpenFields = contributorOpenFields;
 
   // Initial renders
   renderSummaryPageFields();
