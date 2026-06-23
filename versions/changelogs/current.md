@@ -13,7 +13,17 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Features
 
+- Redesign the OPR Summary tab as a condensed, grouped overview with per-state
+  colored dots, comments, and clickable filters by review state.
+  [(#2345)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2345)
+
 ## Bugs
+
+- OPR review-flow fixes: keep the category tabs usable in read-only/finished
+  reviews, render the contributor General tab correctly, and make the category
+  indicator dots, summary states, and auto-select reflect each round's pending
+  actions for both reviewer and contributor.
+  [(#2345)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2345)
 
 - Fix navigation box during the OPR; show proper information and jump to next
   field that needs review. Hide start button for OPR if metadata is empty.
@@ -26,3 +36,9 @@ SPDX-License-Identifier: CC0-1.0
 ## Documentation updates
 
 ## Code Quality
+
+- Refactor the OPR feature: backend service layer (`ReviewService`) with
+  append-only review rounds + projection, a shared template partial removing
+  reviewer/contributor duplication, and the `peer_review` JS reorganized into
+  `core/` `roles/` `ui/` modules.
+  [(#2345)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2345)
