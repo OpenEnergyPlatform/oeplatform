@@ -252,25 +252,33 @@ export function renderSummaryPageFields() {
   allData.forEach((f) => {
     counts[f.fieldStatus] = (counts[f.fieldStatus] || 0) + 1;
   });
+  const hasFields = allData.length > 0;
 
-  // Sticky overview bar: one colored-dot chip per state that occurs. Every chip
-  // except "Empty" doubles as a filter toggle (Empty has no detail rows).
-  const statsHtml = ["Accepted", "Suggested", "Rejected", "Missing", "Empty"]
-    .filter((s) => counts[s])
-    .map((s) => {
-      const m = STATUS_META[s];
-      const filterable = s !== "Empty";
-      const cls = filterable ? " opr-summary__stat--filterable" : "";
-      const attrs = filterable
-        ? ` data-state="${m.cls}" role="button" tabindex="0"` +
-          ` aria-pressed="false" title="Filter by ${m.label}"`
-        : "";
-      return (
-        `<li class="opr-summary__stat opr-summary__stat--${m.cls}${cls}"${attrs}>` +
-        `<span class="opr-summary__dot"></span>${counts[s]} ${m.label}</li>`
-      );
-    })
-    .join("");
+  // Overview / filter bar. The four actionable states are ALWAYS shown as filter
+  // chips — so "Suggested" and "Deny" are available to filter by even when their
+  // current count is 0 — dimmed when empty. The "Empty" tally is informational
+  // (shown only when present) and is not a filter. Clicking a chip filters the
+  // list below; the per-row status pill still shows each field's state.
+  const FILTER_STATES = ["Accepted", "Suggested", "Rejected", "Missing"];
+  const chips = FILTER_STATES.map((s) => {
+    const m = STATUS_META[s];
+    const n = counts[s] || 0;
+    const zero = n === 0 ? " opr-summary__stat--zero" : "";
+    return (
+      `<li class="opr-summary__stat opr-summary__stat--${m.cls}` +
+      ` opr-summary__stat--filterable${zero}" data-state="${m.cls}"` +
+      ` role="button" tabindex="0" aria-pressed="false"` +
+      ` title="Show only ${m.label}">` +
+      `<span class="opr-summary__dot"></span>${n} ${m.label}</li>`
+    );
+  });
+  if (counts.Empty) {
+    chips.push(
+      `<li class="opr-summary__stat opr-summary__stat--empty">` +
+        `<span class="opr-summary__dot"></span>${counts.Empty} Empty</li>`
+    );
+  }
+  const statsHtml = chips.join("");
 
   // Per-category sections. Purely-empty fields are counted in the overview but
   // omitted from the detail list to keep it condensed.
@@ -297,11 +305,11 @@ export function renderSummaryPageFields() {
   const summaryContainer = document.getElementById("summary");
   summaryContainer.innerHTML =
     `<div class="opr-summary">` +
-    `<div class="opr-summary__overview"><ul class="opr-summary__stats">` +
-    (statsHtml ||
-      `<li class="opr-summary__stat opr-summary__stat--empty">` +
-        `<span class="opr-summary__dot"></span>Nothing reviewed yet</li>`) +
-    `</ul></div>` +
+    (hasFields
+      ? `<div class="opr-summary__overview">` +
+        `<span class="opr-summary__filter-label">Filter</span>` +
+        `<ul class="opr-summary__stats">${statsHtml}</ul></div>`
+      : "") +
     (sectionsHtml ||
       `<p class="opr-summary__note">No reviewable fields in this review.</p>`) +
     `<p class="opr-summary__note opr-summary__nomatch" hidden>` +
@@ -473,7 +481,8 @@ function injectSummaryStyles() {
   style.id = "opr-summary-styles";
   style.textContent = `
   .opr-summary { font-size: 0.9rem; color: #2b3b46; padding-bottom: 1rem; }
-  .opr-summary__overview { position: sticky; top: 0; z-index: 2; background: #fff; padding: 0.75rem 0 0.9rem; margin-bottom: 1.1rem; border-bottom: 1px solid #e3e8ec; }
+  .opr-summary__overview { position: sticky; top: 0; z-index: 2; background: #fff; padding: 0.75rem 0 0.9rem; margin-bottom: 1.1rem; border-bottom: 1px solid #e3e8ec; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.4rem 0.8rem; }
+  .opr-summary__filter-label { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; color: #9aa7b0; }
   .opr-summary__stats { list-style: none; display: flex; flex-wrap: wrap; gap: 0.4rem 1.4rem; margin: 0; padding: 0; }
   .opr-summary__stat { display: inline-flex; align-items: center; gap: 0.45rem; font-weight: 600; font-size: 0.85rem; }
   .opr-summary__dot { width: 10px; height: 10px; border-radius: 50%; background: #ced4da; flex: 0 0 auto; }
@@ -505,6 +514,8 @@ function injectSummaryStyles() {
   .opr-summary__stat--filterable:focus-visible { outline: 2px solid #2972A6; outline-offset: 1px; }
   .opr-summary__stat--filterable.is-active { background: #eef3f7; border-color: #cdd8e0; }
   .opr-summary__stat--filterable.is-dimmed { opacity: 0.4; }
+  .opr-summary__stat--zero { opacity: 0.45; }
+  .opr-summary__stat--zero.is-active { opacity: 1; }
   `;
   document.head.appendChild(style);
 }
