@@ -547,8 +547,11 @@
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       var targets = document.querySelectorAll('.index-animate-in');
+      var prefersReducedMotion = window.matchMedia(
+        '(prefers-reduced-motion: reduce)'
+      ).matches;
 
-      if (!('IntersectionObserver' in window)) {
+      if (prefersReducedMotion || !('IntersectionObserver' in window)) {
         targets.forEach(function (el) {
           el.classList.add('is-visible');
         });

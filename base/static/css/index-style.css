@@ -8,16 +8,52 @@
 }
 
 .index-animate-in {
-  opacity: 0;
-  transform: translateY(20px);
-  transition:
-    opacity 250ms ease-out,
-    transform 250ms ease-out;
+  opacity: 1;
 }
 
-.index-animate-in.is-visible {
-  opacity: 1;
-  transform: translateY(0);
+@media (prefers-reduced-motion: no-preference) {
+  .index-animate-in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition:
+      opacity 250ms ease-out,
+      transform 250ms ease-out;
+  }
+
+  .index-animate-in.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* stagger cards within a row by 80ms each; nth-child is scoped per grid */
+  .index-features-grid > .index-feature-card:nth-child(2) {
+    transition-delay: 80ms;
+  }
+
+  .index-features-grid > .index-feature-card:nth-child(3) {
+    transition-delay: 160ms;
+  }
+
+  .index-features-grid > .index-feature-card:nth-child(4) {
+    transition-delay: 240ms;
+  }
+
+  .index-capabilities-list > .index-capability-card:nth-child(2) {
+    transition-delay: 80ms;
+  }
+
+  .index-capabilities-list > .index-capability-card:nth-child(3) {
+    transition-delay: 160ms;
+  }
+
+  .index-capabilities-list > .index-capability-card:nth-child(4) {
+    transition-delay: 240ms;
+  }
+
+  /* sits beside .index-academy-intro in the same row, so it staggers after it */
+  .index-academy-quickstart.index-animate-in {
+    transition-delay: 80ms;
+  }
 }
 
 .index-tutorial {
@@ -218,19 +254,6 @@
   text-align: left;
 }
 
-/* stagger cards within a row by 80ms each; nth-child is scoped per grid */
-.index-features-grid > .index-feature-card:nth-child(2) {
-  transition-delay: 80ms;
-}
-
-.index-features-grid > .index-feature-card:nth-child(3) {
-  transition-delay: 160ms;
-}
-
-.index-features-grid > .index-feature-card:nth-child(4) {
-  transition-delay: 240ms;
-}
-
 .index-feature-card-body {
   display: flex;
   flex-direction: column;
@@ -354,18 +377,6 @@
   background-color: var(--white);
   box-shadow: 0 2px 1px rgba(41, 114, 166, 0.1);
   text-align: left;
-}
-
-.index-capabilities-list > .index-capability-card:nth-child(2) {
-  transition-delay: 80ms;
-}
-
-.index-capabilities-list > .index-capability-card:nth-child(3) {
-  transition-delay: 160ms;
-}
-
-.index-capabilities-list > .index-capability-card:nth-child(4) {
-  transition-delay: 240ms;
 }
 
 .index-capability-card-header {
@@ -592,11 +603,6 @@
   background-color: var(--white);
   box-shadow: 0 4px 2px rgba(41, 114, 166, 0.25);
   text-align: left;
-}
-
-/* sits beside .index-academy-intro in the same row, so it staggers after it */
-.index-academy-quickstart.index-animate-in {
-  transition-delay: 80ms;
 }
 
 .index-academy-quickstart-title {
