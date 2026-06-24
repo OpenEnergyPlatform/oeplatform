@@ -629,8 +629,42 @@
 }
 
 .index-navbar .nav-link {
+  position: relative;
   color: var(--white);
   font-size: 0.875rem;
+}
+
+/* dropdown-toggle items already use ::after for Bootstrap's caret,
+   so the underline uses ::before there instead to avoid clobbering it */
+.index-navbar .nav-link:not(.dropdown-toggle)::after,
+.index-navbar .nav-link.dropdown-toggle::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0%;
+  height: 2px;
+  background-color: var(--white);
+  transition: width 0.2s ease;
+}
+
+.index-navbar .nav-link:not(.dropdown-toggle):hover::after,
+.index-navbar .nav-link.dropdown-toggle:hover::before {
+  width: 100%;
+}
+
+/* replace Bootstrap's border-triangle caret with a chevron, same size */
+.index-navbar .dropdown-toggle::after {
+  display: inline-block;
+  width: 0.45em;
+  height: 0.45em;
+  margin-left: 0.35em;
+  vertical-align: 0.1em;
+  content: "";
+  border: 0;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
 }
 
 .index-navbar .dropdown-menu {
