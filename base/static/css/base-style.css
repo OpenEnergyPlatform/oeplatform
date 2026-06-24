@@ -35,6 +35,12 @@ body {
   background-image: unset;
 }
 
+@media screen and (max-width: 991.98px) {
+  .navbar-toggler + .navbar-brand {
+    margin-left: 2rem;
+  }
+}
+
 .site-header {
   text-align: center;
   width: 100%;
