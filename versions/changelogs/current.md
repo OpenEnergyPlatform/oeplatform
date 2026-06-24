@@ -11,8 +11,8 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
-- Updated the homepage with new content and styling 
-[(#2352)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2352)
+- Updated the homepage with new content and styling
+  [(#2352)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2352)
 
 ## Features
 
