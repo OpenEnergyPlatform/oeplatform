@@ -173,6 +173,23 @@
   max-width: 1248px;
 }
 
+.index-features-grid-quad {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+@media screen and (max-width: 1024px) {
+  .index-features-grid-quad {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media screen and (max-width: 800px) {
+  .index-features-grid-quad {
+    grid-template-columns: 1fr;
+  }
+}
+
 .index-feature-card {
   display: flex;
   flex: 1 0 240px;
