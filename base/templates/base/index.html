@@ -2,6 +2,7 @@
 {% load django_bootstrap5 %}
 {% load static %}
 {% load compress %}
+{% block title %} &ndash; Open and FAIR Energy Data Platform{% endblock %}
 {% block after-head %}
   {% compress css %}
     <link rel="stylesheet"
@@ -33,7 +34,7 @@
         </div>
         <div class="index-footer-columns">
           <div class="index-footer-column">
-            <p class="index-footer-column-title">Features</p>
+            <h3 class="index-footer-column-title">Features</h3>
             <ul class="index-footer-link-list">
               <li><a href="{% url 'dataedit:topic-list' %}">Database</a></li>
               <li><a href="{% url 'modelview:modellist' 'model' %}">Factsheets</a></li>
@@ -42,7 +43,7 @@
             </ul>
           </div>
           <div class="index-footer-column">
-            <p class="index-footer-column-title">Resources</p>
+            <h3 class="index-footer-column-title">Resources</h3>
             <ul class="index-footer-link-list">
               <li><a href="{{ EXTERNAL_URLS.tutorials_index }}">Academy</a></li>
               <li><a href="{{ EXTERNAL_URLS.readthedocs }}">API Docs</a></li>
@@ -51,7 +52,7 @@
             </ul>
           </div>
           <div class="index-footer-column">
-            <p class="index-footer-column-title">Platform</p>
+            <h3 class="index-footer-column-title">Platform</h3>
             <ul class="index-footer-link-list">
               <li><a href="{% url 'base:about' %}">About OEP</a></li>
               <li><a href="{% url 'base:contact' %}">Contact</a></li>
@@ -66,7 +67,7 @@
   </footer>
 {% endblock footer %}
 {% block main %}
-  <div class="index-home">
+  <main id="main-content" class="index-home">
     {% include 'base/messages.html' %}
     <div class="index-hero">
       <div class="index-hero-inner">
@@ -80,8 +81,7 @@
           tools targeted at an open research data life cycle
         </p>
         <div class="index-hero-actions">
-          <a role="button"
-             class="index-hero-btn index-hero-btn-light"
+          <a class="index-hero-btn index-hero-btn-light"
              href="{% url 'dataedit:topic-list' %}">
             Explore Platform
             <svg xmlns="http://www.w3.org/2000/svg"
@@ -89,13 +89,14 @@
                  height="16"
                  fill="currentColor"
                  class="bi bi-arrow-right"
-                 viewBox="0 0 16 16">
+                 viewBox="0 0 16 16"
+                 aria-hidden="true"
+                 focusable="false">
               <path fill-rule="evenodd"
                     d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8" />
             </svg>
           </a>
-          <a role="button"
-             class="index-hero-btn index-hero-btn-outline"
+          <a class="index-hero-btn index-hero-btn-outline"
              href="{{ EXTERNAL_URLS.mkdocs }}">View Documentation</a>
         </div>
       </div>
@@ -121,8 +122,7 @@
               search capabilities.
             </p>
           </div>
-          <a role="button"
-             class="index-feature-link"
+          <a class="index-feature-link"
              href="{% url 'dataedit:topic-list' %}">
             <span>Explore Database</span>
             {% include 'base/index-arrow.html' %}
@@ -139,8 +139,7 @@
               transparent energy modelling
             </p>
           </div>
-          <a role="button"
-             class="index-feature-link"
+          <a class="index-feature-link"
              href="{% url 'factsheet:factsheets_index' %}">
             <span>View Scenarios</span>
             {% include 'base/index-arrow.html' %}
@@ -156,8 +155,7 @@
               Insights into model and framework characteristics
             </p>
           </div>
-          <a role="button"
-             class="index-feature-link"
+          <a class="index-feature-link"
              href="{% url 'modelview:modellist' 'model' %}">
             <span>Browse Factsheets</span>
             {% include 'base/index-arrow.html' %}
@@ -174,7 +172,7 @@
               systems modelling
             </p>
           </div>
-          <a role="button" class="index-feature-link" href="{% url 'ontology:index' %}">
+          <a class="index-feature-link" href="{% url 'ontology:index' %}">
             <span>Explore Ontology</span>
             {% include 'base/index-arrow.html' %}
           </a>
@@ -206,7 +204,7 @@
           <hr class="index-capability-divider" />
           <div class="index-capability-columns">
             <div class="index-capability-column">
-              <p class="index-capability-column-title">Core Features:</p>
+              <h4 class="index-capability-column-title">Core Features:</h4>
               <ul class="index-capability-feature-list">
                 <li>
                   {% include 'base/index-checkmark.html' %}
@@ -227,7 +225,7 @@
               </ul>
             </div>
             <div class="index-capability-column">
-              <p class="index-capability-column-title">Additional Resources:</p>
+              <h4 class="index-capability-column-title">Additional Resources:</h4>
               <div class="index-capability-resource-list">
                 <a class="index-resource-link" href="{{ EXTERNAL_URLS.tutorials_api_upload }}">
                   {% include 'base/index-arrow.html' %}
@@ -261,7 +259,7 @@
           <hr class="index-capability-divider" />
           <div class="index-capability-columns">
             <div class="index-capability-column">
-              <p class="index-capability-column-title">Core Features:</p>
+              <h4 class="index-capability-column-title">Core Features:</h4>
               <ul class="index-capability-feature-list">
                 <li>
                   {% include 'base/index-checkmark.html' %}
@@ -282,7 +280,7 @@
               </ul>
             </div>
             <div class="index-capability-column">
-              <p class="index-capability-column-title">Additional Resources:</p>
+              <h4 class="index-capability-column-title">Additional Resources:</h4>
               <div class="index-capability-resource-list">
                 <a class="index-resource-link" href="{{ EXTERNAL_URLS.tutorials_wizard }}">
                   {% include 'base/index-arrow.html' %}
@@ -316,7 +314,7 @@
           <hr class="index-capability-divider" />
           <div class="index-capability-columns">
             <div class="index-capability-column">
-              <p class="index-capability-column-title">Core Features:</p>
+              <h4 class="index-capability-column-title">Core Features:</h4>
               <ul class="index-capability-feature-list">
                 <li>
                   {% include 'base/index-checkmark.html' %}
@@ -329,7 +327,7 @@
               </ul>
             </div>
             <div class="index-capability-column">
-              <p class="index-capability-column-title">Additional Resources:</p>
+              <h4 class="index-capability-column-title">Additional Resources:</h4>
               <div class="index-capability-resource-list">
                 <a class="index-resource-link" href="{{ EXTERNAL_URLS.tutorials_index }}">
                   {% include 'base/index-arrow.html' %}
@@ -364,7 +362,7 @@
           <hr class="index-capability-divider" />
           <div class="index-capability-columns">
             <div class="index-capability-column">
-              <p class="index-capability-column-title">Core Features:</p>
+              <h4 class="index-capability-column-title">Core Features:</h4>
               <ul class="index-capability-feature-list">
                 <li>
                   {% include 'base/index-checkmark.html' %}
@@ -381,7 +379,7 @@
               </ul>
             </div>
             <div class="index-capability-column">
-              <p class="index-capability-column-title">Additional Resources:</p>
+              <h4 class="index-capability-column-title">Additional Resources:</h4>
               <div class="index-capability-resource-list">
                 <a class="index-resource-link"
                    href="{{ EXTERNAL_URLS.github_openenergyplatform_ontology }}">
@@ -436,8 +434,7 @@
                 <span>Quick guidance for common questions</span>
               </li>
             </ul>
-            <a role="button"
-               class="index-hero-btn index-hero-btn-light"
+            <a class="index-hero-btn index-hero-btn-light"
                href="{{ EXTERNAL_URLS.tutorials_index }}">
               Visit Academy
               {% include 'base/index-arrow.html' %}
@@ -445,7 +442,7 @@
           </div>
         </div>
         <div class="index-academy-quickstart">
-          <p class="index-academy-quickstart-title">Quick Start Options</p>
+          <h3 class="index-academy-quickstart-title">Quick Start Options</h3>
           <div class="index-academy-quickstart-list">
             <div class="index-academy-quickstart-item">
               <img class="index-academy-quickstart-icon"
@@ -504,7 +501,7 @@
               with comprehensive documentation
             </p>
           </div>
-          <a role="button" class="index-feature-link" href="{{ EXTERNAL_URLS.readthedocs }}">
+          <a class="index-feature-link" href="{{ EXTERNAL_URLS.readthedocs }}">
             <span>API Documentation</span>
             {% include 'base/index-arrow.html' %}
           </a>
@@ -520,8 +517,7 @@
               access implementation examples
             </p>
           </div>
-          <a role="button"
-             class="index-feature-link"
+          <a class="index-feature-link"
              href="{{ EXTERNAL_URLS.github_openenergyplatform_oeplatform }}">
             <span>View on GitHub</span>
             {% include 'base/index-arrow.html' %}
@@ -538,12 +534,12 @@
               practices for all platform features
             </p>
           </div>
-          <a role="button" class="index-feature-link" href="{{ EXTERNAL_URLS.mkdocs }}">
+          <a class="index-feature-link" href="{{ EXTERNAL_URLS.mkdocs }}">
             <span>Read Documentation</span>
             {% include 'base/index-arrow.html' %}
           </a>
         </div>
       </div>
     </div>
-  </div>
+  </main>
 {% endblock %}
