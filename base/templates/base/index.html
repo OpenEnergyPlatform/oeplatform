@@ -9,6 +9,11 @@
           href="{% static 'css/index-style.css' %}" />
   {% endcompress %}
 {% endblock %}
+{% block header %}
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary index-navbar">
+    <div class="container-fluid">{% include 'base/_header.html' %}</div>
+  </nav>
+{% endblock header %}
 {% block main %}
   <div class="index-home">
     {% include 'base/messages.html' %}
