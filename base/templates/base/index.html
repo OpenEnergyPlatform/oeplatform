@@ -102,7 +102,7 @@
       </div>
     </div>
     <div class="index-features">
-      <div class="index-features-header">
+      <div class="index-features-header index-animate-in">
         <h2 class="index-features-title">Core Platform Features</h2>
         <p class="index-features-subtitle">
           Access energy system datasets, scenario descriptions &amp; context,
@@ -111,7 +111,7 @@
         </p>
       </div>
       <div class="index-features-grid index-features-grid-quad">
-        <div class="index-feature-card">
+        <div class="index-feature-card index-animate-in">
           <div class="index-feature-card-body">
             <img class="index-feature-icon"
                  src="{% static 'img/welcome/i_hex_blue_database.svg' %}"
@@ -128,7 +128,7 @@
             {% include 'base/index-arrow.html' %}
           </a>
         </div>
-        <div class="index-feature-card">
+        <div class="index-feature-card index-animate-in">
           <div class="index-feature-card-body">
             <img class="index-feature-icon"
                  src="{% static 'img/welcome/i_hex_blue_scenario_bundles.svg' %}"
@@ -145,7 +145,7 @@
             {% include 'base/index-arrow.html' %}
           </a>
         </div>
-        <div class="index-feature-card">
+        <div class="index-feature-card index-animate-in">
           <div class="index-feature-card-body">
             <img class="index-feature-icon"
                  src="{% static 'img/welcome/i_hex_blue_factsheets.svg' %}"
@@ -161,7 +161,7 @@
             {% include 'base/index-arrow.html' %}
           </a>
         </div>
-        <div class="index-feature-card">
+        <div class="index-feature-card index-animate-in">
           <div class="index-feature-card-body">
             <img class="index-feature-icon"
                  src="{% static 'img/welcome/i_hex_blue_ontology.svg' %}"
@@ -180,7 +180,7 @@
       </div>
     </div>
     <div class="index-capabilities">
-      <div class="index-capabilities-header">
+      <div class="index-capabilities-header index-animate-in">
         <h2 class="index-capabilities-title">Platform Capabilities</h2>
         <p class="index-capabilities-subtitle">
           Dive deeper into each section to discover the full range of tools
@@ -188,7 +188,7 @@
         </p>
       </div>
       <div class="index-capabilities-list">
-        <div class="index-capability-card">
+        <div class="index-capability-card index-animate-in">
           <div class="index-capability-card-header">
             <img class="index-feature-icon"
                  src="{% static 'img/welcome/i_hex_blue_database.svg' %}"
@@ -243,7 +243,7 @@
             </div>
           </div>
         </div>
-        <div class="index-capability-card">
+        <div class="index-capability-card index-animate-in">
           <div class="index-capability-card-header">
             <img class="index-feature-icon"
                  src="{% static 'img/welcome/i_hex_blue_scenario_bundles.svg' %}"
@@ -298,7 +298,7 @@
             </div>
           </div>
         </div>
-        <div class="index-capability-card">
+        <div class="index-capability-card index-animate-in">
           <div class="index-capability-card-header">
             <img class="index-feature-icon"
                  src="{% static 'img/welcome/i_hex_blue_factsheets.svg' %}"
@@ -346,7 +346,7 @@
             </div>
           </div>
         </div>
-        <div class="index-capability-card">
+        <div class="index-capability-card index-animate-in">
           <div class="index-capability-card-header">
             <img class="index-feature-icon"
                  src="{% static 'img/welcome/i_hex_blue_ontology.svg' %}"
@@ -404,7 +404,7 @@
     </div>
     <div class="index-academy">
       <div class="index-academy-inner">
-        <div class="index-academy-intro">
+        <div class="index-academy-intro index-animate-in">
           <img class="index-academy-icon"
                src="{% static 'img/welcome/i_hex_blue_academy.svg' %}"
                alt="" />
@@ -441,7 +441,7 @@
             </a>
           </div>
         </div>
-        <div class="index-academy-quickstart">
+        <div class="index-academy-quickstart index-animate-in">
           <h3 class="index-academy-quickstart-title">Quick Start Options</h3>
           <div class="index-academy-quickstart-list">
             <div class="index-academy-quickstart-item">
@@ -482,7 +482,7 @@
       </div>
     </div>
     <div class="index-features">
-      <div class="index-features-header">
+      <div class="index-features-header index-animate-in">
         <h2 class="index-features-title">Developer Resources</h2>
         <p class="index-features-subtitle">
           Access our comprehensive API, contribute to open source
@@ -490,7 +490,7 @@
         </p>
       </div>
       <div class="index-features-grid">
-        <div class="index-feature-card">
+        <div class="index-feature-card index-animate-in">
           <div class="index-feature-card-body">
             <img class="index-feature-icon"
                  src="{% static 'img/welcome/i_hex_blue_api.svg' %}"
@@ -506,7 +506,7 @@
             {% include 'base/index-arrow.html' %}
           </a>
         </div>
-        <div class="index-feature-card">
+        <div class="index-feature-card index-animate-in">
           <div class="index-feature-card-body">
             <img class="index-feature-icon"
                  src="{% static 'img/welcome/i_hex_blue_repo.svg' %}"
@@ -523,7 +523,7 @@
             {% include 'base/index-arrow.html' %}
           </a>
         </div>
-        <div class="index-feature-card">
+        <div class="index-feature-card index-animate-in">
           <div class="index-feature-card-body">
             <img class="index-feature-icon"
                  src="{% static 'img/welcome/i_hex_blue_docs.svg' %}"
@@ -542,4 +542,34 @@
       </div>
     </div>
   </main>
+{% endblock %}
+{% block after-body-bottom-js %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var targets = document.querySelectorAll('.index-animate-in');
+
+      if (!('IntersectionObserver' in window)) {
+        targets.forEach(function (el) {
+          el.classList.add('is-visible');
+        });
+        return;
+      }
+
+      var observer = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-visible');
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.1 }
+      );
+
+      targets.forEach(function (el) {
+        observer.observe(el);
+      });
+    });
+  </script>
 {% endblock %}
