@@ -1,0 +1,79 @@
+{% load static %}
+<div class="index-features">
+  <div class="index-features-header index-animate-in">
+    <h2 class="index-features-title">Core Platform Features</h2>
+    <p class="index-features-subtitle">
+      Access energy system datasets, scenario descriptions &amp; context,
+      and shared standards for annotating transparent and reusable
+      research data
+    </p>
+  </div>
+  <div class="index-features-grid index-features-grid-quad">
+    <div class="index-feature-card index-animate-in">
+      <div class="index-feature-card-body">
+        <img class="index-feature-icon"
+             src="{% static 'img/welcome/i_hex_blue_database.svg' %}"
+             alt="" />
+        <h3 class="index-feature-card-title">Database &amp; Metadata</h3>
+        <p class="index-feature-card-description">
+          Comprehensive energy datasets with rich metadata and advanced
+          search capabilities.
+        </p>
+      </div>
+      <a class="index-feature-link"
+         href="{% url 'dataedit:topic-list' %}">
+        <span>Explore Database</span>
+        {% include 'base/index-arrow.html' %}
+      </a>
+    </div>
+    <div class="index-feature-card index-animate-in">
+      <div class="index-feature-card-body">
+        <img class="index-feature-icon"
+             src="{% static 'img/welcome/i_hex_blue_scenario_bundles.svg' %}"
+             alt="" />
+        <h3 class="index-feature-card-title">Scenario Bundles</h3>
+        <p class="index-feature-card-description">
+          Combining datasets, scenario context, and studies for
+          transparent energy modelling
+        </p>
+      </div>
+      <a class="index-feature-link"
+         href="{% url 'factsheet:factsheets_index' %}">
+        <span>View Scenarios</span>
+        {% include 'base/index-arrow.html' %}
+      </a>
+    </div>
+    <div class="index-feature-card index-animate-in">
+      <div class="index-feature-card-body">
+        <img class="index-feature-icon"
+             src="{% static 'img/welcome/i_hex_blue_factsheets.svg' %}"
+             alt="" />
+        <h3 class="index-feature-card-title">Factsheets</h3>
+        <p class="index-feature-card-description">
+          Insights into model and framework characteristics
+        </p>
+      </div>
+      <a class="index-feature-link"
+         href="{% url 'modelview:modellist' 'model' %}">
+        <span>Browse Factsheets</span>
+        {% include 'base/index-arrow.html' %}
+      </a>
+    </div>
+    <div class="index-feature-card index-animate-in">
+      <div class="index-feature-card-body">
+        <img class="index-feature-icon"
+             src="{% static 'img/welcome/i_hex_blue_ontology.svg' %}"
+             alt="" />
+        <h3 class="index-feature-card-title">Ontology</h3>
+        <p class="index-feature-card-description">
+          Relevant terms and their relationships for annotating energy
+          systems modelling
+        </p>
+      </div>
+      <a class="index-feature-link" href="{% url 'ontology:index' %}">
+        <span>Explore Ontology</span>
+        {% include 'base/index-arrow.html' %}
+      </a>
+    </div>
+  </div>
+</div>

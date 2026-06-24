@@ -1,0 +1,32 @@
+<div class="index-hero">
+  <div class="index-hero-inner">
+    <div class="index-hero-badge">Open Energy Platform</div>
+    <h1 class="index-hero-title">
+      Open and FAIR Data<br />
+      for the Energy Systems Community
+    </h1>
+    <p class="index-hero-subtitle">
+      Discover, analyze and participate - with our integrated suite of
+      tools targeted at an open research data life cycle
+    </p>
+    <div class="index-hero-actions">
+      <a class="index-hero-btn index-hero-btn-light"
+         href="{% url 'dataedit:topic-list' %}">
+        Explore Platform
+        <svg xmlns="http://www.w3.org/2000/svg"
+             width="16"
+             height="16"
+             fill="currentColor"
+             class="bi bi-arrow-right"
+             viewBox="0 0 16 16"
+             aria-hidden="true"
+             focusable="false">
+          <path fill-rule="evenodd"
+                d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8" />
+        </svg>
+      </a>
+      <a class="index-hero-btn index-hero-btn-outline"
+         href="{{ EXTERNAL_URLS.mkdocs }}">View Documentation</a>
+    </div>
+  </div>
+</div>
