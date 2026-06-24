@@ -14,6 +14,57 @@
     <div class="container-fluid">{% include 'base/_header.html' %}</div>
   </nav>
 {% endblock header %}
+{% block footer %}
+  <footer class="index-footer">
+    <div class="index-footer-inner">
+      <div class="index-footer-top">
+        <div class="index-footer-brand">
+          <div class="index-footer-logo">
+            <img src="{% static 'OpenEnergyFamily_Logo_OpenEnergyPlatform_untitled_white.svg' %}"
+                 width="32"
+                 height="32"
+                 alt="" />
+            <p class="index-footer-brand-name">Open Energy Platform</p>
+          </div>
+          <p class="index-footer-tagline">
+            Collaborative platform for open energy data, scenarios, and
+            research tools.
+          </p>
+        </div>
+        <div class="index-footer-columns">
+          <div class="index-footer-column">
+            <p class="index-footer-column-title">Features</p>
+            <ul class="index-footer-link-list">
+              <li><a href="{% url 'dataedit:topic-list' %}">Database</a></li>
+              <li><a href="{% url 'modelview:modellist' 'model' %}">Factsheets</a></li>
+              <li><a href="{% url 'factsheet:factsheets_index' %}">Scenarios</a></li>
+              <li><a href="{% url 'ontology:index' %}">Ontology</a></li>
+            </ul>
+          </div>
+          <div class="index-footer-column">
+            <p class="index-footer-column-title">Resources</p>
+            <ul class="index-footer-link-list">
+              <li><a href="{{ EXTERNAL_URLS.tutorials_index }}">Academy</a></li>
+              <li><a href="{{ EXTERNAL_URLS.readthedocs }}">API Docs</a></li>
+              <li><a href="{{ EXTERNAL_URLS.github_openenergyplatform_oeplatform }}">GitHub</a></li>
+              <li><a href="{{ EXTERNAL_URLS.tutorials_wizard }}">Tutorial</a></li>
+            </ul>
+          </div>
+          <div class="index-footer-column">
+            <p class="index-footer-column-title">Platform</p>
+            <ul class="index-footer-link-list">
+              <li><a href="{% url 'base:about' %}">About OEP</a></li>
+              <li><a href="{% url 'base:contact' %}">Contact</a></li>
+              <li><a href="{% url 'base:legal-privacy-policy' %}">Privacy</a></li>
+              <li><a href="{% url 'base:legal-tou' %}">Terms</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <p class="index-footer-copyright">© {% now "Y" %} Open Energy Platform. All rights reserved.</p>
+    </div>
+  </footer>
+{% endblock footer %}
 {% block main %}
   <div class="index-home">
     {% include 'base/messages.html' %}
