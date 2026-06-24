@@ -7,6 +7,11 @@
   align-items: center;
 }
 
+.index-home .btn-close {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 .index-animate-in {
   opacity: 1;
 }
@@ -56,27 +61,8 @@
   }
 }
 
-.index-tutorial {
-  padding: 2em 1em;
-}
-
-.index-tutorial span {
-  line-height: 1.5em;
-}
-
-.index-tutorial a {
-  margin-top: 1em;
-  background-image: none;
-  border: 1px solid black;
-}
-
-.index-home h4 {
-  font-weight: 600;
-  color: var(--primaryColor4);
-}
-
 .index-hero {
-  background-color: #2972a6;
+  background-color: var(--bs-primary);
   padding: 96px 24px;
   display: flex;
   flex-direction: column;
@@ -141,6 +127,8 @@
   letter-spacing: 0.25px;
   text-decoration: none;
   white-space: nowrap;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .index-hero-btn-light {
@@ -291,11 +279,13 @@
   font-weight: 700;
   letter-spacing: 0.32px;
   line-height: 24px;
-  color: #2972a6;
+  color: var(--bs-primary);
   text-decoration: none;
   background-image: none;
   border: none;
   padding: 0;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .index-feature-link-arrow {
@@ -436,7 +426,7 @@
   color: #294456;
 }
 
-.index-capability-feature-list {
+.index-feature-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -445,10 +435,15 @@
   list-style: none;
 }
 
-.index-capability-feature-list li {
+.index-feature-list li {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.index-feature-list span {
+  font-size: 16px;
+  line-height: 24px;
 }
 
 .index-capability-check {
@@ -456,8 +451,6 @@
 }
 
 .index-capability-feature-list span {
-  font-size: 16px;
-  line-height: 24px;
   color: #294456;
 }
 
@@ -479,9 +472,11 @@
   font-size: 14px;
   font-weight: 700;
   line-height: 24px;
-  color: #2972a6;
+  color: var(--bs-primary);
   text-decoration: none;
   background-image: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .index-resource-link:hover .index-feature-link-arrow,
@@ -513,7 +508,7 @@
   justify-content: center;
   width: 100%;
   padding: 96px 24px;
-  background-color: #2972a6;
+  background-color: var(--bs-primary);
 }
 
 .index-academy-inner {
@@ -571,24 +566,10 @@
 }
 
 .index-academy-feature-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
   width: 100%;
 }
 
-.index-academy-feature-list li {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
 .index-academy-feature-list span {
-  font-size: 16px;
-  line-height: 24px;
   color: var(--white);
 }
 
@@ -649,6 +630,12 @@
   color: #4d748f;
 }
 
+@media screen and (max-width: 1024px) {
+  .index-academy-quickstart {
+    flex-basis: 320px;
+  }
+}
+
 @media screen and (max-width: 800px) {
   .index-academy {
     padding: 48px 24px;
@@ -681,6 +668,13 @@
   position: relative;
   color: var(--white);
   font-size: 0.875rem;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.index-navbar .navbar-toggler {
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 /* dropdown-toggle items already use ::after for Bootstrap's caret,
@@ -739,7 +733,7 @@
 
 .index-navbar .dropdown-item.active,
 .index-navbar .dropdown-item:active {
-  background-color: #2972a6;
+  background-color: var(--bs-primary);
   color: var(--white);
 }
 
@@ -761,7 +755,7 @@
   justify-content: center;
   width: 100%;
   padding: 96px 24px;
-  background-color: #2972a6;
+  background-color: var(--bs-primary);
 }
 
 .index-footer-inner {
