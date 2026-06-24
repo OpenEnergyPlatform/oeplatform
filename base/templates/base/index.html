@@ -348,5 +348,85 @@
         </div>
       </div>
     </div>
+    <div class="index-academy">
+      <div class="index-academy-inner">
+        <div class="index-academy-intro">
+          <img class="index-academy-icon"
+               src="{% static 'img/welcome/i_hex_blue_academy.svg' %}"
+               alt="" />
+          <div class="index-academy-content">
+            <div class="index-academy-heading">
+              <h2 class="index-academy-title">Academy &amp; Learning Resources</h2>
+              <p class="index-academy-subtitle">
+                Master the platform with comprehensive tutorials, workshops,
+                and educational materials designed for all skill levels.
+              </p>
+            </div>
+            <ul class="index-academy-feature-list">
+              <li>
+                {% include 'base/index-checkmark.html' %}
+                <span>Hands-on tutorials and guided learning</span>
+              </li>
+              <li>
+                {% include 'base/index-checkmark.html' %}
+                <span>Research data management concepts</span>
+              </li>
+              <li>
+                {% include 'base/index-checkmark.html' %}
+                <span>Best practices for FAIR research data</span>
+              </li>
+              <li>
+                {% include 'base/index-checkmark.html' %}
+                <span>Quick guidance for common questions</span>
+              </li>
+            </ul>
+            <a role="button"
+               class="index-hero-btn index-hero-btn-light"
+               href="{{ EXTERNAL_URLS.tutorials_index }}">
+              Visit Academy
+              {% include 'base/index-arrow.html' %}
+            </a>
+          </div>
+        </div>
+        <div class="index-academy-quickstart">
+          <p class="index-academy-quickstart-title">Quick Start Options</p>
+          <div class="index-academy-quickstart-list">
+            <div class="index-academy-quickstart-item">
+              <img class="index-academy-quickstart-icon"
+                   src="{% static 'img/welcome/i_courses.svg' %}"
+                   alt="" />
+              <div>
+                <p class="index-academy-quickstart-item-title">Courses</p>
+                <p class="index-academy-quickstart-item-description">
+                  Structured learning paths and guided introductions
+                </p>
+              </div>
+            </div>
+            <div class="index-academy-quickstart-item">
+              <img class="index-academy-quickstart-icon"
+                   src="{% static 'img/welcome/i_tutorials.svg' %}"
+                   alt="" />
+              <div>
+                <p class="index-academy-quickstart-item-title">Tutorials</p>
+                <p class="index-academy-quickstart-item-description">
+                  Step-by-step guides for specific tasks
+                </p>
+              </div>
+            </div>
+            <div class="index-academy-quickstart-item">
+              <img class="index-academy-quickstart-icon"
+                   src="{% static 'img/welcome/i_questions.svg' %}"
+                   alt="" />
+              <div>
+                <p class="index-academy-quickstart-item-title">Questions &amp; Guidance</p>
+                <p class="index-academy-quickstart-item-description">
+                  Quick answers to common questions
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 {% endblock %}
