@@ -32,7 +32,7 @@
     "chartjs-plugin-datalabels": "^2.2.0",
     "date-fns": "^2.30.0",
     "dayjs": "^1.11.13",
-    "echarts": "^6.0.0",
+    "echarts": "^6.1.0",
     "echarts-for-react": "^3.0.6",
     "font-awesome": "^4.7.0",
     "graphql": "^15.8.0",
