@@ -15,6 +15,11 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 from django.urls import include, path, re_path
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularRedocView,
+    SpectacularSwaggerView,
+)
 
 from api.views import (
     AdvancedCloseAllAPIView,
@@ -258,6 +263,24 @@ urlpatterns_v0_advanced = [
 ]
 
 urlpatterns_v0 = [
+    # OpenAPI Schema (JSON)
+    path(
+        "schema/",
+        SpectacularAPIView.as_view(),
+        name="openapi-schema",
+    ),
+    # Swagger UI
+    path(
+        "open-api/",
+        SpectacularSwaggerView.as_view(url_name="api:openapi-schema"),
+        name="swagger-ui",
+    ),
+    # Redoc UI
+    path(
+        "redoc/",
+        SpectacularRedocView.as_view(url_name="api:openapi-schema"),
+        name="redoc",
+    ),
     # PROBLEM: redirect does not work with POST/PUT/..., only GET
     # so we cannot redirect
     re_path(  # legacy API url for tables

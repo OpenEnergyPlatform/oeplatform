@@ -173,10 +173,15 @@ class DatasetReadSerializer(serializers.ModelSerializer):
 
 
 class DatasetCreateSerializer(serializers.Serializer):
-    name = serializers.CharField()
-    title = serializers.CharField()
-    description = serializers.CharField()
-    at_id = serializers.URLField(required=False)
+    name = serializers.CharField(help_text="Name of the dataset")
+    title = serializers.CharField(
+        help_text="Anzeigename des Datensatzes, z. B. 'Wind Power Dataset Germany'"
+    )
+    description = serializers.CharField(help_text="Kurze Beschreibung des Datensatzes")
+    at_id = serializers.URLField(
+        required=False,
+        help_text="Optional: Persistenter Identifier oder URL für den Datensatz",
+    )
 
 
 class DatasetAssignTablesSerializer(serializers.Serializer):
