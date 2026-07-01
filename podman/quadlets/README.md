@@ -72,13 +72,16 @@ Services start in dependency order. `oep-oeplatform` and `oep-ontop` wait for
 
 The `oep-oeplatform.container` publishes the app on **`127.0.0.1:8080`** only —
 it is not reachable from outside the server. An nginx reverse proxy on the host
-listens on plain HTTP and forwards to the container.
+listens on **port 443** and forwards to the container.
 
 > **Where is TLS?** HTTPS is terminated by an **upstream proxy / load balancer**
-> in front of this host. That upstream forwards already-decrypted HTTP to the
-> server, so this nginx holds no certificates. It exists to (a) keep the
-> rootless container bound to localhost and (b) forward the original request
-> headers (notably `X-Forwarded-Proto`) so Django knows the client used HTTPS.
+> in front of this host. It forwards already-decrypted **plain HTTP to this host
+> on port 443** (the only port open to the LB) — so nginx here listens on 443
+> _without_ `ssl` and holds no certificates. nginx runs as root, so it can bind
+> the privileged port 443 even though the app container is rootless. It exists
+> to (a) bind 443 in front of the rootless container, (b) keep that container
+> bound to localhost, and (c) forward the original request headers (notably
+> `X-Forwarded-Proto`) so Django knows the client used HTTPS.
 
 ### 1. Install nginx and the site config
 
@@ -92,8 +95,8 @@ sudo rm -f /etc/nginx/sites-enabled/default
 Edit `/etc/nginx/sites-available/oeplatform`:
 
 - Replace `openenergyplatform.example.org` with your real domain.
-- If the upstream proxy forwards to a port other than `80`, adjust the `listen`
-  directive to match.
+- The config listens on `443` (plain HTTP — TLS is terminated upstream). If your
+  upstream forwards to a different port, adjust the `listen` directive to match.
 
 ### 2. Tell Django it runs behind HTTPS
 
