@@ -42,17 +42,20 @@ COPY --from=vite-build /app/assets /app/assets
 COPY podman/entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
-# Volume mount points — created here so named volumes initialise correctly.
-# The OEO release and oeo_ext.owl are NOT baked into the image; entrypoint.sh
-# downloads/seeds them into the mounted named volumes on first container start
-# (see podman/entrypoint.sh).
+# Bake the OEO release and seed the OEO-extended store into the image BEFORE any
+# manage.py command runs: ontology/apps.py OntologyConfig.ready() aborts Django
+# startup — including the collectstatic/compress step below — unless these files
+# exist. build-files.zip extracts to ontologies/oeo/<version>/… , the layout
+# settings.py and ontology/views.py expect. -o overwrites any stale copy that
+# COPY . /app pulled in from the build context (non-interactive build has no TTY
+# to answer unzip's overwrite prompt).
 RUN mkdir -p /app/ontologies /app/media/oeo_ext \
     && cd /app/ontologies \
-        && wget -q https://github.com/OpenEnergyPlatform/ontology/releases/latest/download/build-files.zip \
-        && unzip -q build-files.zip \
-        && rm build-files.zip \
-        && cp /app/oeo_ext/oeo_extended_store/oeox_template/oeo_ext_template_empty.owl \
-        /app/media/oeo_ext/oeo_ext.owl
+    && wget -q https://github.com/OpenEnergyPlatform/ontology/releases/latest/download/build-files.zip \
+    && unzip -qo build-files.zip \
+    && rm build-files.zip \
+    && cp -f /app/oeo_ext/oeo_extended_store/oeox_template/oeo_ext_template_empty.owl \
+       /app/media/oeo_ext/oeo_ext.owl
 
 
 # Build-time static asset collection (no DB needed)
