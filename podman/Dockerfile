@@ -42,6 +42,12 @@ COPY --from=vite-build /app/assets /app/assets
 COPY podman/entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
+# Volume mount points — created here so named volumes initialise correctly.
+# The OEO release and oeo_ext.owl are NOT baked into the image; entrypoint.sh
+# downloads/seeds them into the mounted named volumes on first container start
+# (see podman/entrypoint.sh).
+RUN mkdir -p /app/ontologies /app/media/oeo_ext
+
 # Build-time static asset collection (no DB needed)
 # Compress is also run at build time since it only reads templates and static files
 RUN cp /app/oeplatform/securitysettings.py.default /app/oeplatform/securitysettings.py \
@@ -49,8 +55,6 @@ RUN cp /app/oeplatform/securitysettings.py.default /app/oeplatform/securitysetti
     && python manage.py compress --force \
     && rm /app/oeplatform/securitysettings.py
 
-# Volume mount points — created here so named volumes initialise correctly
-RUN mkdir -p /app/ontologies /app/media/oeo_ext
 
 EXPOSE 80
 
