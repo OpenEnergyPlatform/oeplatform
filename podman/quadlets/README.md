@@ -68,20 +68,20 @@ systemctl --user enable --now \
 Services start in dependency order. `oep-oeplatform` and `oep-ontop` wait for
 `oep-postgres` before starting.
 
-## Serving over HTTPS with nginx (TLS terminated upstream)
+## Serving over HTTPS with nginx
 
 The `oep-oeplatform.container` publishes the app on **`127.0.0.1:8080`** only —
 it is not reachable from outside the server. An nginx reverse proxy on the host
-listens on **port 443** and forwards to the container.
+terminates TLS on **port 443** and forwards to the container.
 
-> **Where is TLS?** HTTPS is terminated by an **upstream proxy / load balancer**
-> in front of this host. It forwards already-decrypted **plain HTTP to this host
-> on port 443** (the only port open to the LB) — so nginx here listens on 443
-> _without_ `ssl` and holds no certificates. nginx runs as root, so it can bind
-> the privileged port 443 even though the app container is rootless. It exists
-> to (a) bind 443 in front of the rootless container, (b) keep that container
-> bound to localhost, and (c) forward the original request headers (notably
-> `X-Forwarded-Proto`) so Django knows the client used HTTPS.
+> **TLS flow.** The public endpoint is an **upstream Apache reverse proxy** that
+> terminates the public TLS and handles authentication, then **re-encrypts to
+> this host** — it opens an HTTPS connection to nginx here on :443. So nginx
+> also terminates TLS (with a certificate) and proxies plain HTTP to the
+> container. nginx runs as root, so binding the privileged port 443 is fine even
+> though the app container is rootless. The backend certificate may be
+> self-signed — `install-nginx.sh` generates one automatically, and Apache's
+> `mod_proxy` does not verify the backend cert by default.
 
 ### 1. Tell Django it runs behind HTTPS
 
@@ -110,18 +110,20 @@ systemctl --user restart oep-oeplatform
 bash podman/nginx/install-nginx.sh
 ```
 
-This installs nginx (if needed), writes the site config with the `server_name`
-taken from `OEP_URL` in your `oep.env`, enables it, disables the default site,
-and reloads nginx. It is idempotent — re-run it after changing the config or
-domain. To override the domain, pass it explicitly:
+This installs nginx (if needed), **generates a self-signed TLS certificate** (if
+none exists at `/etc/nginx/ssl/oeplatform/`), writes the site config with the
+`server_name` taken from `OEP_URL` in your `oep.env`, enables it, disables the
+default site, and reloads nginx. It is idempotent — re-run it after changing the
+config or domain. To override the domain, pass it explicitly:
 `bash podman/nginx/install-nginx.sh my-domain.org`.
 
-> The config listens on `443` (plain HTTP — TLS is terminated upstream). If your
-> upstream forwards to a different port, adjust the `listen` directive in
-> `podman/nginx/oeplatform.conf` and re-run the script.
+> nginx terminates TLS on `443` and proxies to the container on
+> `127.0.0.1:8080`. The upstream Apache proxy re-encrypts to it, so a
+> self-signed backend cert is fine (Apache does not verify it by default). To
+> use a real certificate instead, drop `fullchain.pem` + `privkey.pem` into
+> `/etc/nginx/ssl/oeplatform/` before running the script.
 
-The platform is now served over HTTPS via the upstream proxy. No certificates
-are configured on this host.
+The platform is now served over HTTPS end-to-end.
 
 ## Managing Services
 

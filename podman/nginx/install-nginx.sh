@@ -55,6 +55,22 @@ if ! command -v nginx >/dev/null 2>&1; then
     ${SUDO} apt-get install -y nginx
 fi
 
+# ── Ensure a TLS certificate exists (self-signed unless one is provided) ─────
+# nginx terminates TLS on :443; the upstream Apache proxy re-encrypts to it.
+# Drop a real cert at these paths to replace the self-signed one.
+CERT_DIR=/etc/nginx/ssl/oeplatform
+if ! ${SUDO} test -f "${CERT_DIR}/fullchain.pem" || ! ${SUDO} test -f "${CERT_DIR}/privkey.pem"; then
+    echo "Generating self-signed certificate for '${DOMAIN}'…"
+    INTERNAL_FQDN="$(hostname -f 2>/dev/null || hostname)"
+    ${SUDO} mkdir -p "${CERT_DIR}"
+    ${SUDO} openssl req -x509 -nodes -days 825 -newkey rsa:2048 \
+        -keyout "${CERT_DIR}/privkey.pem" \
+        -out "${CERT_DIR}/fullchain.pem" \
+        -subj "/CN=${DOMAIN}" \
+        -addext "subjectAltName=DNS:${DOMAIN},DNS:${INTERNAL_FQDN},DNS:localhost,IP:127.0.0.1"
+    ${SUDO} chmod 600 "${CERT_DIR}/privkey.pem"
+fi
+
 # ── Install the site config with the domain substituted ──────────────────────
 tmp="$(mktemp)"
 sed "s/openenergyplatform\.example\.org/${DOMAIN}/g" "${CONF_SRC}" > "${tmp}"
@@ -69,5 +85,5 @@ ${SUDO} nginx -t
 ${SUDO} systemctl reload nginx
 
 echo ""
-echo "Done. nginx is serving '${DOMAIN}' on :443 (plain HTTP — TLS terminated"
-echo "upstream) and proxying to the container on 127.0.0.1:8080."
+echo "Done. nginx terminates TLS on :443 for '${DOMAIN}' and proxies to the"
+echo "container on 127.0.0.1:8080. The upstream Apache proxy re-encrypts to here."
