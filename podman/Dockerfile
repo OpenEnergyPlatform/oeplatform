@@ -46,7 +46,14 @@ RUN chmod +x /app/entrypoint.sh
 # The OEO release and oeo_ext.owl are NOT baked into the image; entrypoint.sh
 # downloads/seeds them into the mounted named volumes on first container start
 # (see podman/entrypoint.sh).
-RUN mkdir -p /app/ontologies /app/media/oeo_ext
+RUN mkdir -p /app/ontologies /app/media/oeo_ext \
+    && cd /app/ontologies \
+        && wget -q https://github.com/OpenEnergyPlatform/ontology/releases/latest/download/build-files.zip \
+        && unzip -q build-files.zip \
+        && rm build-files.zip \
+        && cp /app/oeo_ext/oeo_extended_store/oeox_template/oeo_ext_template_empty.owl \
+        /app/media/oeo_ext/oeo_ext.owl
+
 
 # Build-time static asset collection (no DB needed)
 # Compress is also run at build time since it only reads templates and static files
