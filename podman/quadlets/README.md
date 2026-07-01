@@ -83,22 +83,7 @@ listens on **port 443** and forwards to the container.
 > bound to localhost, and (c) forward the original request headers (notably
 > `X-Forwarded-Proto`) so Django knows the client used HTTPS.
 
-### 1. Install nginx and the site config
-
-```sh
-sudo apt install nginx
-sudo cp podman/nginx/oeplatform.conf /etc/nginx/sites-available/oeplatform
-sudo ln -s /etc/nginx/sites-available/oeplatform /etc/nginx/sites-enabled/oeplatform
-sudo rm -f /etc/nginx/sites-enabled/default
-```
-
-Edit `/etc/nginx/sites-available/oeplatform`:
-
-- Replace `openenergyplatform.example.org` with your real domain.
-- The config listens on `443` (plain HTTP — TLS is terminated upstream). If your
-  upstream forwards to a different port, adjust the `listen` directive to match.
-
-### 2. Tell Django it runs behind HTTPS
+### 1. Tell Django it runs behind HTTPS
 
 In `~/.config/oeplatform/oep.env` set the production block (see
 `oep.env.example`):
@@ -112,18 +97,28 @@ OEP_CSRF_TRUSTED_ORIGINS=https://your-domain.org
 ```
 
 `OEP_BEHIND_TLS_PROXY=True` makes Django trust the `X-Forwarded-Proto` header
-that the upstream sets and this nginx forwards. Then restart the app so it picks
-up the new environment file:
+that the upstream sets and this nginx forwards. Restart the app so it picks up
+the new environment file:
 
 ```sh
 systemctl --user restart oep-oeplatform
 ```
 
-### 3. Enable nginx
+### 2. Install and configure nginx
 
 ```sh
-sudo nginx -t && sudo systemctl reload nginx
+bash podman/nginx/install-nginx.sh
 ```
+
+This installs nginx (if needed), writes the site config with the `server_name`
+taken from `OEP_URL` in your `oep.env`, enables it, disables the default site,
+and reloads nginx. It is idempotent — re-run it after changing the config or
+domain. To override the domain, pass it explicitly:
+`bash podman/nginx/install-nginx.sh my-domain.org`.
+
+> The config listens on `443` (plain HTTP — TLS is terminated upstream). If your
+> upstream forwards to a different port, adjust the `listen` directive in
+> `podman/nginx/oeplatform.conf` and re-run the script.
 
 The platform is now served over HTTPS via the upstream proxy. No certificates
 are configured on this host.
