@@ -35,7 +35,7 @@ SPDX-License-Identifier: CC0-1.0
 
   - Fixed the documentation workflow by correcting an invalid `mkdocstrings`
     reference to `TablePeerReviewContributorView`.
-    [(#2350)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2350)
+    [(#2360)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2350)
 
 ## Documentation updates
 
