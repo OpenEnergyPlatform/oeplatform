@@ -74,12 +74,13 @@ services:
     container_name: ontop
     ports:
       - "${OEP_PORT_ONTOP:-8081}:8080"
+    # Ontology, mapping and JDBC driver are baked into the image; only the DB
+    # connection is configured here (reusing the postgres credentials).
     environment:
-      ONTOP_MAPPING_FILE: "/opt/ontop-config/mapping.obda"
-      ONTOP_OWL_FILE: "/opt/ontop-config/ontology.owl"
-      ONTOP_PROPERTIES_FILE: "/opt/ontop-config/ontop.properties"
-    volumes:
-      - ./serviceConfigs/ontop:/opt/ontop-config
+      ONTOP_DB_URL: ${ONTOP_DB_URL:-jdbc:postgresql://postgres:5432/oedb}
+      ONTOP_DB_USER: ${POSTGRES_USER}
+      ONTOP_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      ONTOP_WAIT_FOR: postgres:5432
     depends_on:
       - postgres
     networks:

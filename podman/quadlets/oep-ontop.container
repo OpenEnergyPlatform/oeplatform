@@ -2,9 +2,9 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 #
-# NOTE: The Volume= path below must point to your actual repo checkout.
-#       Update /opt/oeplatform to match your deployment path, or symlink it:
-#         sudo ln -s /your/actual/repo/path /opt/oeplatform
+# The ontology, mapping and JDBC driver are baked into the image — no host
+# files or bind mounts are required. The database connection is configured
+# through oep.env (ONTOP_DB_URL / ONTOP_DB_USER / ONTOP_DB_PASSWORD).
 
 [Unit]
 Description=OEPlatform Ontop SPARQL endpoint
@@ -13,10 +13,11 @@ After=oep-postgres.service
 [Container]
 Image=ghcr.io/openenergyplatform/oeplatform-ontop:latest
 ContainerName=ontop
-Volume=/opt/oeplatform/podman/serviceConfigs/ontop:/opt/ontop-config:ro
-Environment=ONTOP_MAPPING_FILE=/opt/ontop-config/mapping.obda
-Environment=ONTOP_OWL_FILE=/opt/ontop-config/ontology.owl
-Environment=ONTOP_PROPERTIES_FILE=/opt/ontop-config/ontop.properties
+# DB connection (ONTOP_DB_URL / ONTOP_DB_USER / ONTOP_DB_PASSWORD) comes from
+# the shared env file, like the web app.
+EnvironmentFile=%h/.config/oeplatform/oep.env
+# Wait for the database to accept connections before starting the endpoint.
+Environment=ONTOP_WAIT_FOR=postgres:5432
 PublishPort=8081:8080
 Network=oep.network
 
