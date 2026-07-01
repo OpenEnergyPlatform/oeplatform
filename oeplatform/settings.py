@@ -139,12 +139,16 @@ if os.environ.get("OEP_BEHIND_TLS_PROXY", "False").strip().lower() in (
     CSRF_COOKIE_SECURE = True
 
 # Comma-separated list of trusted origins for CSRF checks under HTTPS, e.g.
-# OEP_CSRF_TRUSTED_ORIGINS="https://openenergyplatform.org,https://www.openenergyplatform.org".
-# Required by Django for unsafe (POST/PUT/…) requests served over HTTPS.
+# OEP_CSRF_TRUSTED_ORIGINS="https://openenergyplatform.org,www.openenergyplatform.org".
+# Required by Django for unsafe (POST/PUT/…) requests served over HTTPS. Django
+# 4+ requires each origin to include a scheme, so a bare host (e.g. "example.org")
+# is normalised to "https://example.org".
 _csrf_trusted_origins = os.environ.get("OEP_CSRF_TRUSTED_ORIGINS", "").strip()
 if _csrf_trusted_origins:
     CSRF_TRUSTED_ORIGINS = [
-        o.strip() for o in _csrf_trusted_origins.split(",") if o.strip()
+        origin if "://" in origin else f"https://{origin}"
+        for origin in (o.strip() for o in _csrf_trusted_origins.split(","))
+        if origin
     ]
 
 
