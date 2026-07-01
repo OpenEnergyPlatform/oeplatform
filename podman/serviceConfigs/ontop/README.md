@@ -6,28 +6,14 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 # Ontop Service Configuration
 
-This directory contains the production configuration for the Ontop SPARQL
-endpoint. Two files must be provided manually before building or starting the
-ontop service — they are gitignored and must never be committed.
+This directory is mounted **read-only** into the ontop container at
+`/opt/ontop-config` and supplies its **runtime configuration**. Two files here
+must be provided manually before starting the service — they are gitignored and
+must never be committed.
 
-## Required files (not in git)
+## Required runtime files (not in git)
 
-### 1. `postgresql.jar` — JDBC driver
-
-Download the PostgreSQL JDBC driver from <https://jdbc.postgresql.org/> and
-place it here as `postgresql.jar`.
-
-This file is copied into the ontop image at build time:
-
-```sh
-# Build from the repository root after placing the jar here
-podman build -t localhost/oep-ontop:latest -f docker/Dockerfile.ontop docker/
-```
-
-> The `Dockerfile.ontop` copies the jar from `docker/serviceConfigs/ontop/`, not
-> from this directory. Place a copy (or symlink) there too before building.
-
-### 2. `ontology.owl` — Open Energy Ontology
+### 1. `ontology.owl` — Open Energy Ontology
 
 Download the latest OEO build artefacts from the
 [OEO GitHub releases](https://github.com/OpenEnergyPlatform/ontology/releases/latest)
@@ -36,21 +22,14 @@ and place the `ontology.owl` file here.
 ```sh
 wget -O /tmp/oeo.zip \
     https://github.com/OpenEnergyPlatform/ontology/releases/latest/download/build-files.zip
-unzip -j /tmp/oeo.zip "*/ontology.owl" -d podman/serviceConfigs/ontop/
+unzip -jo /tmp/oeo.zip "*/ontology.owl" -d podman/serviceConfigs/ontop/
 rm /tmp/oeo.zip
 ```
 
-## Files in git
+### 2. `ontop.properties` — JDBC connection + credentials
 
-| File                        | Description                                             |
-| --------------------------- | ------------------------------------------------------- |
-| `mapping.obda`              | Empty OBDA mapping skeleton — extend for your tables    |
-| `ontop.properties.template` | JDBC connection template — copy and fill in credentials |
-
-### `ontop.properties` credentials
-
-`ontop.properties` is gitignored. Create it from the template and fill in the
-real credentials from your `.env` / `oep.env` file:
+Create it from the template and fill in the real credentials from your `.env` /
+`oep.env` file:
 
 ```sh
 cp podman/serviceConfigs/ontop/ontop.properties.template \
@@ -59,13 +38,40 @@ cp podman/serviceConfigs/ontop/ontop.properties.template \
 ```
 
 ```properties
-jdbc.user=REPLACE_WITH_POSTGRES_USER      # → value of POSTGRES_USER
+jdbc.user=REPLACE_WITH_POSTGRES_USER          # → value of POSTGRES_USER
 jdbc.password=REPLACE_WITH_POSTGRES_PASSWORD  # → value of POSTGRES_PASSWORD
 ```
 
 Ontop does not support environment variable substitution in this file, so
 credentials must be written in plain text. The `.gitignore` in this directory
 prevents accidental commits.
+
+## The PostgreSQL JDBC driver lives elsewhere
+
+The `postgresql.jar` driver is **not** used from this directory. It is baked
+into the ontop image at **build time** from `docker/serviceConfigs/ontop/` —
+[docker/Dockerfile.ontop](../../../docker/Dockerfile.ontop) copies it to
+`/opt/ontop/lib/postgresql.jar`. Place it there before building the image:
+
+```sh
+# From the repository root
+curl -fsSL \
+  "https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.3/postgresql-42.7.3.jar" \
+  -o docker/serviceConfigs/ontop/postgresql.jar
+
+podman build -t ghcr.io/openenergyplatform/oeplatform-ontop:latest \
+  -f docker/Dockerfile.ontop docker/
+```
+
+That path is gitignored (`**/serviceConfigs/ontop/postgresql.jar` in the root
+`.gitignore`), so the driver never enters the repository.
+
+## Files in git
+
+| File                        | Description                                             |
+| --------------------------- | ------------------------------------------------------- |
+| `mapping.obda`              | Empty OBDA mapping skeleton — extend for your tables    |
+| `ontop.properties.template` | JDBC connection template — copy and fill in credentials |
 
 ### `mapping.obda` — extending the mapping
 

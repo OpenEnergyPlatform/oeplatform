@@ -95,7 +95,9 @@ apache*
 # Docker
 .node_modules_stamp
 .vite
-docker/serviceConfigs/ontop/postgresql.jar
+# PostgreSQL JDBC driver for Ontop — provided manually, never committed
+# (matches docker/ and podman/ service config dirs)
+**/serviceConfigs/ontop/postgresql.jar
 
 # Deployment files
 docker/oeplatform_data

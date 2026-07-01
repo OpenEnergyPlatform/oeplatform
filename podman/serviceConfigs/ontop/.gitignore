@@ -1,4 +1,5 @@
 # These files must be provided manually — never committed to version control.
+# (The postgresql.jar driver is NOT used here — it is baked into the ontop image
+# from docker/serviceConfigs/ontop/; see this directory's README.)
 ontology.owl
-postgresql.jar
 ontop.properties
