@@ -10,6 +10,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 QUADLET_DIR="${HOME}/.config/containers/systemd"
 ENV_DIR="${HOME}/.config/oeplatform"
 
@@ -18,6 +19,11 @@ mkdir -p "${QUADLET_DIR}"
 cp "${SCRIPT_DIR}"/*.container "${QUADLET_DIR}/"
 cp "${SCRIPT_DIR}"/*.volume    "${QUADLET_DIR}/"
 cp "${SCRIPT_DIR}"/*.network   "${QUADLET_DIR}/"
+
+# Resolve @@OEP_REPO@@ placeholders (host bind-mount paths, e.g. the lookup
+# config) to this checkout's absolute path — no manual symlink required.
+echo "Resolving repo path to ${REPO_ROOT}…"
+sed -i "s|@@OEP_REPO@@|${REPO_ROOT}|g" "${QUADLET_DIR}"/*.container
 
 if [ ! -f "${ENV_DIR}/oep.env" ]; then
     echo "Creating ${ENV_DIR}/oep.env from example…"

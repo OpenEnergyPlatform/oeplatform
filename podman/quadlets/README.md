@@ -158,17 +158,15 @@ systemctl --user restart oep-oeplatform
 
 ## Repo Path for Lookup
 
-The `oep-lookup.container` file bind-mounts its config from the repository,
-defaulting to `/opt/oeplatform`. If your checkout is elsewhere, update the
-`Volume=` line, or create a symlink:
+`oep-lookup.container` bind-mounts its config from this repository. The unit
+ships with an `@@OEP_REPO@@` placeholder that `install.sh` replaces with the
+absolute path of your checkout when it installs the units — so it works from any
+location with **no symlink and no manual editing**. Just run `install.sh` from
+the checkout you want to use.
 
-```sh
-sudo ln -s /your/actual/repo/path /opt/oeplatform
-```
-
-> `oep-ontop.container` no longer needs this — its ontology, mapping and JDBC
-> driver are baked into the image and its DB connection comes from `oep.env`
-> (`ONTOP_DB_URL` / `ONTOP_DB_USER` / `ONTOP_DB_PASSWORD`).
+> `oep-ontop.container` needs no repo path at all — its ontology, mapping and
+> JDBC driver are baked into the image and its DB connection comes from
+> `oep.env` (`ONTOP_DB_URL` / `ONTOP_DB_USER` / `ONTOP_DB_PASSWORD`).
 
 ## Uninstall
 
