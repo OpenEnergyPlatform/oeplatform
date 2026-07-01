@@ -6,77 +6,45 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 # Ontop Service Configuration
 
-This directory is mounted **read-only** into the ontop container at
-`/opt/ontop-config` and supplies its **runtime configuration**. Two files here
-must be provided manually before starting the service — they are gitignored and
-must never be committed.
+The ontop service is **self-provisioning** — you do not need to place any files
+here to run it. The ontop image
+([docker/Dockerfile.ontop](../../../docker/Dockerfile.ontop)) bakes in
+everything it needs:
 
-## Required runtime files (not in git)
+- **PostgreSQL JDBC driver** — downloaded from Maven Central at image build
+  time.
+- **`ontology.owl`** — baked into the image at `/opt/ontop-config/ontology.owl`.
+- **`mapping.obda`** — an **empty** default mapping is baked in at
+  `/opt/ontop-config/mapping.obda`, so the endpoint starts cleanly even before
+  the OEDB data tables exist. Provide the real mapping only once the tables are
+  present (see below).
+- **DB connection** — supplied at runtime via the env vars `ONTOP_DB_URL`,
+  `ONTOP_DB_USER` and `ONTOP_DB_PASSWORD`.
 
-### 1. `ontology.owl` — Open Energy Ontology
-
-Download the latest OEO build artefacts from the
-[OEO GitHub releases](https://github.com/OpenEnergyPlatform/ontology/releases/latest)
-and place the `ontology.owl` file here.
-
-```sh
-wget -O /tmp/oeo.zip \
-    https://github.com/OpenEnergyPlatform/ontology/releases/latest/download/build-files.zip
-unzip -jo /tmp/oeo.zip "*/ontology.owl" -d podman/serviceConfigs/ontop/
-rm /tmp/oeo.zip
-```
-
-### 2. `ontop.properties` — JDBC connection + credentials
-
-Create it from the template and fill in the real credentials from your `.env` /
-`oep.env` file:
+The database connection is configured like everything else — through `oep.env`
+(quadlets) or `.env` (compose). Ontop reads these environment variables
+natively, so there is **no `ontop.properties` file** to create.
 
 ```sh
-cp podman/serviceConfigs/ontop/ontop.properties.template \
-   podman/serviceConfigs/ontop/ontop.properties
-# then edit ontop.properties — it must never be committed
+# oep.env / .env
+ONTOP_DB_URL=jdbc:postgresql://postgres:5432/oedb
+ONTOP_DB_USER=<postgres user>
+ONTOP_DB_PASSWORD=<postgres password>
 ```
 
-```properties
-jdbc.user=REPLACE_WITH_POSTGRES_USER          # → value of POSTGRES_USER
-jdbc.password=REPLACE_WITH_POSTGRES_PASSWORD  # → value of POSTGRES_PASSWORD
-```
+## `mapping.obda`
 
-Ontop does not support environment variable substitution in this file, so
-credentials must be written in plain text. The `.gitignore` in this directory
-prevents accidental commits.
+The image ships an **empty** mapping so it always starts. The real mapping
+(`docker/serviceConfigs/ontop/mapping.obda`) should be applied only once the
+source tables exist in the `oedb` database. Two ways to apply it:
 
-## The PostgreSQL JDBC driver lives elsewhere
+1. **Override at runtime** (no rebuild): bind-mount your mapping over
+   `/opt/ontop-config/mapping.obda`, or point `ONTOP_MAPPING_FILE` at a mounted
+   file. This is the recommended approach while the mapping is still evolving.
+2. **Bake it in**: replace the empty default in `docker/Dockerfile.ontop`
+   (`mapping.default.obda`) with `mapping.obda` and rebuild the image.
 
-The `postgresql.jar` driver is **not** used from this directory. It is baked
-into the ontop image at **build time** from `docker/serviceConfigs/ontop/` —
-[docker/Dockerfile.ontop](../../../docker/Dockerfile.ontop) copies it to
-`/opt/ontop/lib/postgresql.jar`. Place it there before building the image:
-
-```sh
-# From the repository root
-curl -fsSL \
-  "https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.3/postgresql-42.7.3.jar" \
-  -o docker/serviceConfigs/ontop/postgresql.jar
-
-podman build -t ghcr.io/openenergyplatform/oeplatform-ontop:latest \
-  -f docker/Dockerfile.ontop docker/
-```
-
-That path is gitignored (`**/serviceConfigs/ontop/postgresql.jar` in the root
-`.gitignore`), so the driver never enters the repository.
-
-## Files in git
-
-| File                        | Description                                             |
-| --------------------------- | ------------------------------------------------------- |
-| `mapping.obda`              | Empty OBDA mapping skeleton — extend for your tables    |
-| `ontop.properties.template` | JDBC connection template — copy and fill in credentials |
-
-### `mapping.obda` — extending the mapping
-
-The skeleton file contains only prefix declarations and an empty mapping
-collection. Add OBDA mappings as needed:
+Extend the mapping as needed:
 
 ```obda
 [MappingDeclaration] @collection [[
@@ -88,5 +56,6 @@ source          SELECT "id" FROM "data"."my_table"
 ]]
 ```
 
-The source table must exist in the `oedb` database before Ontop can start
-successfully with a mapping that references it.
+The endpoint starts with `ONTOP_LAZY_INIT=true`, so it comes up even before the
+mapped source tables exist in the `oedb` database; mapping errors then surface
+at query time rather than blocking startup.

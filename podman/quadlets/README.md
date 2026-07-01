@@ -156,15 +156,19 @@ podman build -t localhost/oeplatform:latest -f podman/Dockerfile .
 systemctl --user restart oep-oeplatform
 ```
 
-## Repo Path for Ontop and Lookup
+## Repo Path for Lookup
 
-The `oep-ontop.container` and `oep-lookup.container` files bind-mount config
-files from the repository. They default to `/opt/oeplatform`. If your checkout
-is elsewhere, update the `Volume=` lines in both files, or create a symlink:
+The `oep-lookup.container` file bind-mounts its config from the repository,
+defaulting to `/opt/oeplatform`. If your checkout is elsewhere, update the
+`Volume=` line, or create a symlink:
 
 ```sh
 sudo ln -s /your/actual/repo/path /opt/oeplatform
 ```
+
+> `oep-ontop.container` no longer needs this — its ontology, mapping and JDBC
+> driver are baked into the image and its DB connection comes from `oep.env`
+> (`ONTOP_DB_URL` / `ONTOP_DB_USER` / `ONTOP_DB_PASSWORD`).
 
 ## Uninstall
 
