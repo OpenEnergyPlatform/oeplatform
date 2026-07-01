@@ -33,6 +33,10 @@ SPDX-License-Identifier: CC0-1.0
   percentage and auto-select and -scroll to next field.
   [(#2342)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2342)
 
+  - Fixed the documentation workflow by correcting an invalid `mkdocstrings`
+    reference to `TablePeerReviewContributorView`.
+    [(#2350)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2350)
+
 ## Documentation updates
 
 - Updated the OE Family Steering Committee
