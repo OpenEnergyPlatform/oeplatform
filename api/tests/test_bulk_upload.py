@@ -14,7 +14,7 @@ from datetime import timedelta
 from django.utils import timezone
 
 from api.tests import APITestCaseWithTable
-from dataedit.models import Embargo, Table
+from dataedit.models import BulkLoadEvent, Embargo, Table
 from oedb.connection import _get_engine
 
 
@@ -100,6 +100,9 @@ class TestBulkUpload(APITestCaseWithTable):
         )
         self.bulk_upload("id,name\n1,x\n", exp_code=403)
         # note: the table cannot be read back here - the embargo blocks reads too
+        event = BulkLoadEvent.objects.latest("created")
+        self.assertEqual(event.status, BulkLoadEvent.STATUS_EMBARGO)
+        self.assertEqual(event.table_name, self.test_table)
 
     def test_malformed_row_rolls_back_everything(self):
         csv_text = "id,name\n1,ok\nnot_an_int,bad\n3,also_ok\n"
@@ -223,6 +226,45 @@ class TestBulkUpload(APITestCaseWithTable):
         )
         ids = {r["name"]: r["id"] for r in self.get_rows()}
         self.assertGreater(ids["c"], 50)
+
+    def test_successful_upload_creates_event(self):
+        result = self.bulk_upload("id,name\n5,a\n7,b\n", exp_code=201)
+        event = BulkLoadEvent.objects.get(id=result["event_id"])
+        self.assertEqual(event.status, BulkLoadEvent.STATUS_SUCCESS)
+        self.assertEqual(event.table_name, self.test_table)
+        self.assertEqual(event.user_id, self.user.id)
+        self.assertEqual(event.row_count, 2)
+        self.assertEqual(event.id_min, 5)
+        self.assertEqual(event.id_max, 7)
+        self.assertGreater(event.bytes_received, 0)
+
+    def test_sequence_assigned_upload_records_id_range(self):
+        self.bulk_upload("name\na\nb\nc\n", exp_code=201)
+        event = BulkLoadEvent.objects.latest("created")
+        ids = sorted(r["id"] for r in self.get_rows())
+        self.assertEqual(event.id_min, ids[0])
+        self.assertEqual(event.id_max, ids[-1])
+
+    def test_failed_copy_creates_failure_event(self):
+        self.bulk_upload("id,name\n1,ok\nboom,bad\n", exp_code=400)
+        event = BulkLoadEvent.objects.latest("created")
+        self.assertEqual(event.status, BulkLoadEvent.STATUS_COPY_ERROR)
+        self.assertGreater(event.bytes_received, 0)
+        self.assertIn("boom", event.error_message)
+        # the data transaction rolled back, but the event persists
+        self.assertEqual(self.get_rows(), [])
+
+    def test_header_validation_failure_creates_event(self):
+        self.bulk_upload("id,no_such_column\n1,x\n", exp_code=400)
+        event = BulkLoadEvent.objects.latest("created")
+        self.assertEqual(event.status, BulkLoadEvent.STATUS_VALIDATION_ERROR)
+
+    def test_events_registered_in_admin(self):
+        from django.contrib import admin
+
+        self.assertIn(BulkLoadEvent, admin.site._registry)
+        model_admin = admin.site._registry[BulkLoadEvent]
+        self.assertIn("status", model_admin.list_filter)
 
     def test_no_journal_rows_written(self):
         self.bulk_upload("id,name\n1,x\n2,y\n", exp_code=201)

@@ -78,7 +78,7 @@ from api.utils import (
     table_or_404,
     table_or_404_from_dict,
 )
-from dataedit.models import Embargo, PeerReview, Table
+from dataedit.models import BulkLoadEvent, Embargo, PeerReview, Table
 from login.models import myuser as User
 from login.permissions import DELETE_PERM, WRITE_PERM
 from oedb.connection import (
@@ -1853,28 +1853,40 @@ class _ChainedStream:
     """File-like object serving buffered bytes first, then an inner stream.
 
     Used to hand the request body to COPY FROM STDIN after the CSV header
-    line has already been consumed from it.
+    line has already been consumed from it. Counts the bytes it serves
+    (for the Bulk Load Event audit record).
     """
 
     def __init__(self, head: bytes, tail):
         self._head = head
         self._tail = tail
+        self.bytes_served = 0
 
     def read(self, size: int = -1) -> bytes:
         if size is None or size < 0:
             data, self._head = self._head, b""
-            return data + (self._tail.read() if self._tail else b"")
-        data = self._head[:size]
-        self._head = self._head[size:]
-        if len(data) < size and self._tail:
-            data += self._tail.read(size - len(data))
+            data += self._tail.read() if self._tail else b""
+        else:
+            data = self._head[:size]
+            self._head = self._head[size:]
+            if len(data) < size and self._tail:
+                data += self._tail.read(size - len(data))
+        self.bytes_served += len(data)
         return data
 
 
-def _read_csv_header(stream) -> tuple[bytes, bytes]:
+def _attach_bulk_error_info(error: APIError, error_class: str, bytes_received: int):
+    if not hasattr(error, "bulk_error_class"):
+        error.bulk_error_class = error_class
+        error.bulk_bytes_received = bytes_received
+    return error
+
+
+def _read_csv_header(stream) -> tuple[bytes, bytes, int]:
     """Consume the first line from the stream without buffering the body.
 
-    Returns (header_line_without_newline, remainder_bytes_already_read).
+    Returns (header_line_without_newline, remainder_bytes_already_read,
+    bytes_consumed_by_the_header_itself).
     """
     buffer = b""
     while b"\n" not in buffer:
@@ -1883,13 +1895,18 @@ def _read_csv_header(stream) -> tuple[bytes, bytes]:
             break
         buffer += chunk
         if len(buffer) > _BULK_UPLOAD_MAX_HEADER_BYTES:
-            raise APIError("CSV header line too long", 400)
+            raise _attach_bulk_error_info(
+                APIError("CSV header line too long", 400),
+                BulkLoadEvent.STATUS_VALIDATION_ERROR,
+                len(buffer),
+            )
     if not buffer:
         raise APIError("Bulk upload requires a non-empty CSV body", 400)
     if buffer.startswith(b"\xef\xbb\xbf"):  # strip UTF-8 BOM (e.g. Excel exports)
         buffer = buffer[3:]
     header, _sep, remainder = buffer.partition(b"\n")
-    return header.rstrip(b"\r"), remainder
+    header_bytes = len(buffer) - len(remainder)
+    return header.rstrip(b"\r"), remainder, header_bytes
 
 
 def _parse_bulk_upload_columns(
@@ -1935,10 +1952,10 @@ def _parse_bulk_upload_columns(
             % ", ".join(missing_required),
             400,
         )
-    return columns
+    return columns, table_columns
 
 
-def bulk_upload_csv(table_obj: Table, stream, delimiter_name: str | None) -> int:
+def bulk_upload_csv(table_obj: Table, stream, delimiter_name: str | None) -> dict:
     """Bulk Upload (issue #2362): stream a CSV body into the main table.
 
     Uses COPY FROM STDIN and deliberately bypasses the edit-journal meta
@@ -1946,17 +1963,31 @@ def bulk_upload_csv(table_obj: Table, stream, delimiter_name: str | None) -> int
     upload runs in one transaction: it lands completely or not at all.
     The CSV header (required) maps columns by name; the delimiter must be
     passed explicitly, it is never inferred.
-    """
-    delimiter = BULK_UPLOAD_DELIMITERS.get(delimiter_name or "")
-    if delimiter is None:
-        raise APIError(
-            "Bulk upload requires a 'delimiter' parameter, one of: %s"
-            % ", ".join(sorted(BULK_UPLOAD_DELIMITERS)),
-            400,
-        )
 
-    header_line, remainder = _read_csv_header(stream)
-    columns = _parse_bulk_upload_columns(header_line, delimiter, table_obj)
+    Returns a stats dict: rows, bytes_received, id_min, id_max. On failure
+    raises APIError carrying bulk_error_class and bulk_bytes_received for
+    the caller's Bulk Load Event record.
+    """
+    header_bytes = 0
+    remainder = b""
+    try:
+        delimiter = BULK_UPLOAD_DELIMITERS.get(delimiter_name or "")
+        if delimiter is None:
+            raise APIError(
+                "Bulk upload requires a 'delimiter' parameter, one of: %s"
+                % ", ".join(sorted(BULK_UPLOAD_DELIMITERS)),
+                400,
+            )
+        header_line, remainder, header_bytes = _read_csv_header(stream)
+        columns, table_columns = _parse_bulk_upload_columns(
+            header_line, delimiter, table_obj
+        )
+    except APIError as e:
+        # bytes actually received so far: header plus any body bytes that
+        # arrived in the same chunks (best-effort abuse-visibility signal)
+        raise _attach_bulk_error_info(
+            e, BulkLoadEvent.STATUS_VALIDATION_ERROR, header_bytes + len(remainder)
+        )
 
     # identifiers are safe: whitelisted against the table's actual columns
     column_list = ", ".join('"%s"' % c.replace('"', '""') for c in columns)
@@ -1974,6 +2005,8 @@ def bulk_upload_csv(table_obj: Table, stream, delimiter_name: str | None) -> int
 
     engine = _get_engine()
     connection = engine.raw_connection()
+    body_stream = _ChainedStream(remainder, stream)
+    id_min = id_max = None
     try:
         cursor = connection.cursor()
         try:
@@ -1981,24 +2014,54 @@ def bulk_upload_csv(table_obj: Table, stream, delimiter_name: str | None) -> int
             pre_upload_max_id = None
             if id_uploaded:
                 pre_upload_max_id = _bulk_upload_table_max_id(cursor, qualified_table)
-            cursor.copy_expert(copy_sql, _ChainedStream(remainder, stream))
+            cursor.copy_expert(copy_sql, body_stream)
             row_count = cursor.rowcount
             if id_uploaded:
                 _enforce_bulk_upload_id_contract(
                     cursor, qualified_table, pre_upload_max_id
                 )
+            if ID_COLUMN_NAME in table_columns:
+                id_min, id_max = _bulk_upload_loaded_id_range(cursor, qualified_table)
         finally:
             cursor.close()
         connection.commit()
-    except APIError:
+    except APIError as e:
         connection.rollback()
-        raise
+        raise _attach_bulk_error_info(
+            e,
+            BulkLoadEvent.STATUS_VALIDATION_ERROR,
+            header_bytes + body_stream.bytes_served,
+        )
     except psycopg2.Error as e:
         connection.rollback()
-        raise APIError(_bulk_upload_error_message(e), 400)
+        raise _attach_bulk_error_info(
+            APIError(_bulk_upload_error_message(e), 400),
+            BulkLoadEvent.STATUS_COPY_ERROR,
+            header_bytes + body_stream.bytes_served,
+        )
     finally:
         connection.close()
-    return row_count
+    return {
+        "rows": row_count,
+        "bytes_received": header_bytes + body_stream.bytes_served,
+        "id_min": id_min,
+        "id_max": id_max,
+    }
+
+
+def _bulk_upload_loaded_id_range(cursor, qualified_table: str):
+    """min/max id of the rows inserted by the current transaction.
+
+    Identified via xmin, so it is exact for both explicit and
+    sequence-assigned ids. Costs a scan of the table inside the upload's
+    transaction - acceptable for now; revisit if it shows up in the
+    per-attempt phase timings.
+    """
+    cursor.execute(
+        'SELECT min("%s"), max("%s") FROM %s WHERE xmin = pg_current_xact_id()::xid'
+        % (ID_COLUMN_NAME, ID_COLUMN_NAME, qualified_table)
+    )
+    return cursor.fetchone()
 
 
 def _quoted_table_name(sa_table: "SATable") -> str:

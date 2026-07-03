@@ -13,6 +13,14 @@ SPDX-License-Identifier: CC0-1.0
 
 ### Features
 
+- Bulk load events: every authenticated, authorized bulk upload attempt -
+  successful or failed - is recorded with user, table, status/error class, bytes
+  received, and for successes the row count and the id range the rows landed in
+  (the only provenance of bulk-loaded rows, and the handle for block-deleting a
+  mistaken upload). Events are visible and filterable in the Django admin; the
+  success response references the event.
+  [(#2362)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2362)
+
 - Bulk upload id contract: after an id-bearing upload the table's id sequence is
   advanced past the loaded ids (so subsequent row inserts cannot collide) and
   never moves backwards; uploads introducing ids above a generous sanity bound

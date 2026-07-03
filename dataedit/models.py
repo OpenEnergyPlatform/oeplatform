@@ -1085,3 +1085,45 @@ class ReviewRound(models.Model):
 
     def __str__(self) -> str:
         return f"ReviewRound(opr={self.opr_id}, seq={self.sequence}, {self.role})"
+
+
+class BulkLoadEvent(models.Model):
+    """Audit record of one bulk upload attempt (issue #2362).
+
+    Bulk uploads bypass the per-row edit journal; this event - including the
+    id range the loaded rows landed in - is their only provenance, and the
+    id range is what makes a poisoned or mistaken upload deletable as a
+    block. Failed attempts are recorded too, so retry storms and abuse are
+    visible without log-grepping.
+    """
+
+    STATUS_SUCCESS = "success"
+    STATUS_VALIDATION_ERROR = "validation-error"
+    STATUS_COPY_ERROR = "copy-error"
+    STATUS_EMBARGO = "embargo"
+    STATUS_ERROR = "error"
+    STATUS_CHOICES = [
+        (STATUS_SUCCESS, "Success"),
+        (STATUS_VALIDATION_ERROR, "Validation error"),
+        (STATUS_COPY_ERROR, "Copy error"),
+        (STATUS_EMBARGO, "Embargo"),
+        (STATUS_ERROR, "Error"),
+    ]
+
+    table_name = CharField(max_length=1000, null=False)
+    user = ForeignKey(
+        "login.myuser",
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="bulk_load_events",
+    )
+    created = DateTimeField(auto_now_add=True)
+    status = CharField(max_length=32, choices=STATUS_CHOICES)
+    error_message = models.TextField(null=True, blank=True)
+    bytes_received = models.BigIntegerField(default=0)
+    row_count = models.BigIntegerField(null=True, blank=True)
+    id_min = models.BigIntegerField(null=True, blank=True)
+    id_max = models.BigIntegerField(null=True, blank=True)
+
+    def __str__(self) -> str:
+        return f"BulkLoadEvent({self.table_name}, {self.status}, {self.created})"

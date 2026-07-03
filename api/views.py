@@ -38,6 +38,7 @@ SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> Â© Ã
 import csv
 import itertools
 import json
+import logging
 import re
 from copy import deepcopy
 
@@ -181,7 +182,7 @@ from api.validators.column import validate_column_names
 from api.validators.identifier import (
     assert_valid_table_name,
 )
-from dataedit.models import Dataset, Table
+from dataedit.models import BulkLoadEvent, Dataset, Table
 from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
 from modelview.models import Energyframework, Energymodel
 from oekg.utils import (
@@ -202,6 +203,8 @@ from oeplatform.settings import (
 DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL_WO_QUERY = strip_query(
     DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL
 )
+
+logger = logging.getLogger("oeplatform")
 
 
 class TableMetadataAPIView(APIView):
@@ -1125,11 +1128,29 @@ class TableRowsAPIView(APIView):
         execute_sqla(query, cursor)
 
 
+def _record_bulk_load_event(table_obj, user, status_value, **fields):
+    """Write the audit record; never let a failure here mask the upload's
+    actual outcome (the event is best-effort, the response is not)."""
+    try:
+        return BulkLoadEvent.objects.create(
+            table_name=table_obj.name, user=user, status=status_value, **fields
+        )
+    except Exception:
+        logger.exception(
+            "failed to record bulk load event for table %s", table_obj.name
+        )
+        return None
+
+
 class TableBulkUploadAPIView(APIView):
     """Bulk Upload (issue #2362): the request body IS the CSV.
 
     Append-only, all-or-nothing; rows go directly into the main table
     without edit-journal records. The delimiter parameter is required.
+    Every attempt that reaches this endpoint body - i.e. authenticated,
+    authorized, existing table - leaves a BulkLoadEvent, the upload's only
+    provenance. Denials at the decorator level (401/403/404) deliberately
+    create no events, so anonymous requests cannot write database rows.
     """
 
     @api_exception
@@ -1138,15 +1159,48 @@ class TableBulkUploadAPIView(APIView):
         table_obj = table_or_404(table=table)
 
         if check_embargo(table_obj):
+            _record_bulk_load_event(
+                table_obj,
+                request.user,
+                BulkLoadEvent.STATUS_EMBARGO,
+                error_message="Access to this table is restricted due to embargo.",
+            )
             return JsonResponse(
                 {"error": "Access to this table is restricted due to embargo."},
                 status=403,
             )
 
-        row_count = bulk_upload_csv(
-            table_obj, request.stream, request.GET.get("delimiter")
+        try:
+            stats = bulk_upload_csv(
+                table_obj, request.stream, request.GET.get("delimiter")
+            )
+        except APIError as e:
+            _record_bulk_load_event(
+                table_obj,
+                request.user,
+                getattr(e, "bulk_error_class", BulkLoadEvent.STATUS_ERROR),
+                error_message=e.message,
+                bytes_received=getattr(e, "bulk_bytes_received", 0),
+            )
+            raise
+
+        event = _record_bulk_load_event(
+            table_obj,
+            request.user,
+            BulkLoadEvent.STATUS_SUCCESS,
+            bytes_received=stats["bytes_received"],
+            row_count=stats["rows"],
+            id_min=stats["id_min"],
+            id_max=stats["id_max"],
         )
-        return JsonResponse({"rows": row_count}, status=status.HTTP_201_CREATED)
+        return JsonResponse(
+            {
+                "rows": stats["rows"],
+                "event_id": event.id if event else None,
+                "id_range": [stats["id_min"], stats["id_max"]],
+            },
+            status=status.HTTP_201_CREATED,
+        )
 
 
 @api_exception
