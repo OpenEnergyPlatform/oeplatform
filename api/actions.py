@@ -23,6 +23,8 @@ SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> Â© Ã
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
+import csv
+import io
 import json
 import logging
 import re
@@ -1836,6 +1838,126 @@ def data_update(request: dict, context: dict) -> dict:
     result = __change_rows(table_obj, request, context, sa_table_edit, setter)
     apply_changes(table_obj, cursor)
     return result
+
+
+BULK_UPLOAD_DELIMITERS = {"comma": ",", "semicolon": ";", "tab": "\t"}
+_BULK_UPLOAD_HEADER_CHUNK = 8192
+_BULK_UPLOAD_MAX_HEADER_BYTES = 1024 * 1024
+
+
+class _ChainedStream:
+    """File-like object serving buffered bytes first, then an inner stream.
+
+    Used to hand the request body to COPY FROM STDIN after the CSV header
+    line has already been consumed from it.
+    """
+
+    def __init__(self, head: bytes, tail):
+        self._head = head
+        self._tail = tail
+
+    def read(self, size: int = -1) -> bytes:
+        if size is None or size < 0:
+            data, self._head = self._head, b""
+            return data + (self._tail.read() if self._tail else b"")
+        data = self._head[:size]
+        self._head = self._head[size:]
+        if len(data) < size and self._tail:
+            data += self._tail.read(size - len(data))
+        return data
+
+
+def _read_csv_header(stream) -> tuple[bytes, bytes]:
+    """Consume the first line from the stream without buffering the body.
+
+    Returns (header_line_without_newline, remainder_bytes_already_read).
+    """
+    buffer = b""
+    while b"\n" not in buffer:
+        chunk = stream.read(_BULK_UPLOAD_HEADER_CHUNK) if stream else b""
+        if not chunk:
+            break
+        buffer += chunk
+        if len(buffer) > _BULK_UPLOAD_MAX_HEADER_BYTES:
+            raise APIError("CSV header line too long", 400)
+    if not buffer:
+        raise APIError("Bulk upload requires a non-empty CSV body", 400)
+    header, _sep, remainder = buffer.partition(b"\n")
+    return header.rstrip(b"\r"), remainder
+
+
+def _parse_bulk_upload_columns(
+    header_line: bytes, delimiter: str, table_obj: Table
+) -> list:
+    try:
+        header_text = header_line.decode("utf-8")
+    except UnicodeDecodeError:
+        raise APIError("CSV header is not valid UTF-8", 400)
+    columns = next(csv.reader(io.StringIO(header_text), delimiter=delimiter), [])
+    columns = [c.strip() for c in columns if c.strip()]
+    if not columns:
+        raise APIError("CSV header contains no column names", 400)
+    table_columns = set(describe_columns(table_obj).keys())
+    unknown = [c for c in columns if c not in table_columns]
+    if unknown:
+        raise APIError(
+            "CSV header names columns that do not exist in table '%s': %s"
+            % (table_obj.name, ", ".join(unknown)),
+            400,
+        )
+    return columns
+
+
+def bulk_upload_csv(table_obj: Table, stream, delimiter_name: str | None) -> int:
+    """Bulk Upload (issue #2362): stream a CSV body into the main table.
+
+    Uses COPY FROM STDIN and deliberately bypasses the edit-journal meta
+    tables - bulk-loaded rows have no per-row change history. The whole
+    upload runs in one transaction: it lands completely or not at all.
+    The CSV header (required) maps columns by name; the delimiter must be
+    passed explicitly, it is never inferred.
+    """
+    delimiter = BULK_UPLOAD_DELIMITERS.get(delimiter_name or "")
+    if delimiter is None:
+        raise APIError(
+            "Bulk upload requires a 'delimiter' parameter, one of: %s"
+            % ", ".join(sorted(BULK_UPLOAD_DELIMITERS)),
+            400,
+        )
+
+    header_line, remainder = _read_csv_header(stream)
+    columns = _parse_bulk_upload_columns(header_line, delimiter, table_obj)
+
+    # identifiers are safe: whitelisted against the table's actual columns
+    column_list = ", ".join('"%s"' % c.replace('"', '""') for c in columns)
+    sa_table = table_obj.get_oedb_table_proxy(user=None)._main_table.get_sa_table()
+    copy_sql = 'COPY "%s"."%s" (%s) FROM STDIN WITH (FORMAT csv, DELIMITER \'%s\')' % (
+        sa_table.schema,
+        sa_table.name,
+        column_list,
+        delimiter,
+    )
+
+    engine = _get_engine()
+    connection = engine.raw_connection()
+    try:
+        cursor = connection.cursor()
+        try:
+            cursor.copy_expert(copy_sql, _ChainedStream(remainder, stream))
+            row_count = cursor.rowcount
+        finally:
+            cursor.close()
+        connection.commit()
+    except psycopg2.Error as e:
+        connection.rollback()
+        raise APIError(
+            "Bulk upload failed, nothing was inserted: %s"
+            % (getattr(e, "pgerror", None) or str(e)).strip(),
+            400,
+        )
+    finally:
+        connection.close()
+    return row_count
 
 
 def has_table(request: dict, context: dict | None = None) -> bool:

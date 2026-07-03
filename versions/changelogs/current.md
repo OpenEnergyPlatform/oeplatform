@@ -13,6 +13,14 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Features
 
+- New bulk upload endpoint
+  `POST /api/v0/tables/<table>/bulk-upload?delimiter=comma|semicolon|tab`:
+  streams a CSV request body directly into the table via PostgreSQL COPY for
+  fast ingestion of large datasets. Append-only and all-or-nothing; requires
+  write permission, respects embargoes, and deliberately bypasses the per-row
+  edit-journal (no row-level revision records for bulk-loaded rows).
+  [(#2362)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2362)
+
 - Redesign the OPR Summary tab as a condensed, grouped overview with per-state
   colored dots, comments, and clickable filters by review state.
   [(#2345)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2345)
