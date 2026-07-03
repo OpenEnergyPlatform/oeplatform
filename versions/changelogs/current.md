@@ -13,6 +13,13 @@ SPDX-License-Identifier: CC0-1.0
 
 ### Features
 
+- Harden the bulk upload CSV contract: header preflight rejects duplicate,
+  unknown, and missing required (NOT NULL without default) columns before the
+  body streams; a UTF-8 BOM is stripped; empty fields are always NULL whether
+  quoted or not; failure responses carry the CSV line number and column with the
+  database's data-level message and never internal details.
+  [(#2362)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2362)
+
 - New bulk upload endpoint
   `POST /api/v0/tables/<table>/bulk-upload?delimiter=comma|semicolon|tab`:
   streams a CSV request body directly into the table via PostgreSQL COPY for
