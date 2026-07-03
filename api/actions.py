@@ -1843,6 +1843,10 @@ def data_update(request: dict, context: dict) -> dict:
 BULK_UPLOAD_DELIMITERS = {"comma": ",", "semicolon": ";", "tab": "\t"}
 _BULK_UPLOAD_HEADER_CHUNK = 8192
 _BULK_UPLOAD_MAX_HEADER_BYTES = 1024 * 1024
+# generous sanity bound for explicitly uploaded ids: far above any real
+# dataset, far below the bigint maximum - a single upload must not be able
+# to exhaust a table's id sequence for every future insert
+BULK_UPLOAD_MAX_ID = 2**48
 
 
 class _ChainedStream:
@@ -1957,14 +1961,15 @@ def bulk_upload_csv(table_obj: Table, stream, delimiter_name: str | None) -> int
     # identifiers are safe: whitelisted against the table's actual columns
     column_list = ", ".join('"%s"' % c.replace('"', '""') for c in columns)
     sa_table = table_obj.get_oedb_table_proxy(user=None)._main_table.get_sa_table()
+    qualified_table = _quoted_table_name(sa_table)
     # FORCE_NULL on all uploaded columns: an empty field is NULL whether
     # quoted or not. Deliberate deviation from COPY's native CSV rule
     # (quoted "" = empty string) - many writers quote every field and would
     # silently store empty strings instead of NULLs otherwise.
     copy_sql = (
-        'COPY "%s"."%s" (%s) FROM STDIN WITH '
+        "COPY %s (%s) FROM STDIN WITH "
         "(FORMAT csv, DELIMITER '%s', FORCE_NULL (%s))"
-        % (sa_table.schema, sa_table.name, column_list, delimiter, column_list)
+        % (qualified_table, column_list, delimiter, column_list)
     )
 
     engine = _get_engine()
@@ -1972,17 +1977,82 @@ def bulk_upload_csv(table_obj: Table, stream, delimiter_name: str | None) -> int
     try:
         cursor = connection.cursor()
         try:
+            id_uploaded = ID_COLUMN_NAME in columns
+            pre_upload_max_id = None
+            if id_uploaded:
+                pre_upload_max_id = _bulk_upload_table_max_id(cursor, qualified_table)
             cursor.copy_expert(copy_sql, _ChainedStream(remainder, stream))
             row_count = cursor.rowcount
+            if id_uploaded:
+                _enforce_bulk_upload_id_contract(
+                    cursor, qualified_table, pre_upload_max_id
+                )
         finally:
             cursor.close()
         connection.commit()
+    except APIError:
+        connection.rollback()
+        raise
     except psycopg2.Error as e:
         connection.rollback()
         raise APIError(_bulk_upload_error_message(e), 400)
     finally:
         connection.close()
     return row_count
+
+
+def _quoted_table_name(sa_table: "SATable") -> str:
+    return '"%s"."%s"' % (
+        str(sa_table.schema).replace('"', '""'),
+        sa_table.name.replace('"', '""'),
+    )
+
+
+def _bulk_upload_table_max_id(cursor, qualified_table: str):
+    cursor.execute('SELECT max("%s") FROM %s' % (ID_COLUMN_NAME, qualified_table))
+    return cursor.fetchone()[0]
+
+
+def _enforce_bulk_upload_id_contract(
+    cursor, qualified_table: str, pre_upload_max_id
+) -> None:
+    """After an id-bearing upload: reject absurd ids, then advance the id
+    sequence past the loaded ids so subsequent row inserts cannot collide.
+
+    Runs inside the upload's transaction on the table's state including the
+    freshly copied rows. The sanity bound only judges ids introduced by THIS
+    upload (a pre-existing id above the bound must not block future uploads).
+    The sequence never moves backwards.
+    """
+    cursor.execute(
+        "SELECT pg_get_serial_sequence(%s, %s)", (qualified_table, ID_COLUMN_NAME)
+    )
+    row = cursor.fetchone()
+    sequence = row[0] if row else None
+    if not sequence:
+        return
+    max_id = _bulk_upload_table_max_id(cursor, qualified_table)
+    if max_id is None:
+        return
+    upload_raised_max = pre_upload_max_id is None or max_id > pre_upload_max_id
+    if max_id > BULK_UPLOAD_MAX_ID and upload_raised_max:
+        raise APIError(
+            "Bulk upload rejected: id %d exceeds the allowed maximum of %d - "
+            "ids this large would exhaust the table's id sequence"
+            % (max_id, BULK_UPLOAD_MAX_ID),
+            400,
+        )
+    # serialize concurrent bulk uploads on this sequence: setval is
+    # non-transactional, so two racing GREATEST reads could otherwise move
+    # the sequence backwards; the advisory lock is released on commit/rollback
+    cursor.execute("SELECT pg_advisory_xact_lock(hashtext(%s))", (sequence,))
+    # sequence name comes from postgres itself (pg_get_serial_sequence),
+    # safe to interpolate; GREATEST keeps the sequence from moving backwards
+    cursor.execute(
+        "SELECT setval(%%s, GREATEST(%%s::bigint, (SELECT last_value FROM %s)))"
+        % sequence,
+        (sequence, max_id),
+    )
 
 
 def _bulk_upload_error_message(e: psycopg2.Error) -> str:
