@@ -29,6 +29,7 @@ import io
 import json
 import logging
 import re
+import time
 import zlib
 from collections import Counter
 from copy import deepcopy
@@ -1885,7 +1886,12 @@ class _ChainedStream:
         # flag to recognize a size-cap abort
         self.too_large = False
 
+        # time spent serving reads = client transfer + decompression, i.e.
+        # the "transfer" phase of the upload (COPY itself is wall - this)
+        self.seconds_serving = 0.0
+
     def read(self, size: int = -1) -> bytes:
+        started = time.perf_counter()
         if size is None or size < 0:
             data, self._head = self._head, b""
             data += self._tail.read() if self._tail else b""
@@ -1895,6 +1901,7 @@ class _ChainedStream:
             if len(data) < size and self._tail:
                 data += self._tail.read(size - len(data))
         self.bytes_served += len(data)
+        self.seconds_serving += time.perf_counter() - started
         if (
             self._max_bytes is not None
             and self._initial_bytes + self.bytes_served > self._max_bytes
@@ -1906,18 +1913,24 @@ class _ChainedStream:
         return data
 
 
-def _attach_bulk_error_info(error: APIError, error_class: str, bytes_received: int):
+def _attach_bulk_error_info(
+    error: APIError, error_class: str, bytes_received: int, timings: dict | None = None
+):
     if not hasattr(error, "bulk_error_class"):
         error.bulk_error_class = error_class
         error.bulk_bytes_received = bytes_received
+        error.bulk_timings = timings or {}
     return error
 
 
-def _bulk_gzip_error(e: Exception, bytes_received: int) -> APIError:
+def _bulk_gzip_error(
+    e: Exception, bytes_received: int, timings: dict | None = None
+) -> APIError:
     return _attach_bulk_error_info(
         APIError("Request body is not valid gzip: %s" % e, 400),
         BulkLoadEvent.STATUS_VALIDATION_ERROR,
         bytes_received,
+        timings=timings,
     )
 
 
@@ -2011,11 +2024,13 @@ def bulk_upload_csv(
     in streaming fashion; `max_bytes` caps the DECOMPRESSED size.
 
     Returns a stats dict: rows, bytes_received (decompressed), id_min,
-    id_max. On failure raises APIError carrying bulk_error_class and
-    bulk_bytes_received for the caller's Bulk Load Event record.
+    id_max, and phase timings (transfer_s, copy_s, setval_s). On failure
+    raises APIError carrying bulk_error_class, bulk_bytes_received and
+    bulk_timings for the caller's Bulk Load Event record and log line.
     """
     header_bytes = 0
     remainder = b""
+    header_started = time.perf_counter()
     try:
         delimiter = BULK_UPLOAD_DELIMITERS.get(delimiter_name or "")
         if delimiter is None:
@@ -2033,13 +2048,19 @@ def bulk_upload_csv(
             header_line, delimiter, table_obj
         )
     except (gzip.BadGzipFile, EOFError, zlib.error) as e:
-        raise _bulk_gzip_error(e, 0)
+        raise _bulk_gzip_error(
+            e, 0, timings={"transfer_s": time.perf_counter() - header_started}
+        )
     except APIError as e:
         # bytes actually received so far: header plus any body bytes that
         # arrived in the same chunks (best-effort abuse-visibility signal)
         raise _attach_bulk_error_info(
-            e, BulkLoadEvent.STATUS_VALIDATION_ERROR, header_bytes + len(remainder)
+            e,
+            BulkLoadEvent.STATUS_VALIDATION_ERROR,
+            header_bytes + len(remainder),
+            timings={"transfer_s": time.perf_counter() - header_started},
         )
+    header_seconds = time.perf_counter() - header_started
 
     # identifiers are safe: whitelisted against the table's actual columns
     column_list = ", ".join('"%s"' % c.replace('"', '""') for c in columns)
@@ -2066,6 +2087,18 @@ def bulk_upload_csv(
         stall_detector=stall_detector,
     )
     id_min = id_max = None
+    copy_wall_seconds = setval_seconds = 0.0
+
+    def snapshot_timings():
+        # transfer = header read + time inside stream reads (client I/O and
+        # decompression); copy = COPY wall time minus that transfer share
+        transfer = header_seconds + body_stream.seconds_serving
+        return {
+            "transfer_s": transfer,
+            "copy_s": max(0.0, copy_wall_seconds - body_stream.seconds_serving),
+            "setval_s": setval_seconds,
+        }
+
     try:
         cursor = connection.cursor()
         try:
@@ -2074,26 +2107,37 @@ def bulk_upload_csv(
             pre_upload_max_id = None
             if id_uploaded:
                 pre_upload_max_id = _bulk_upload_table_max_id(cursor, qualified_table)
-            cursor.copy_expert(copy_sql, body_stream)
+            copy_started = time.perf_counter()
+            try:
+                cursor.copy_expert(copy_sql, body_stream)
+            finally:
+                # capture wall time even when COPY raises, so failure log
+                # lines attribute the time truthfully instead of copy_s=0
+                copy_wall_seconds = time.perf_counter() - copy_started
             row_count = cursor.rowcount
+            setval_started = time.perf_counter()
             if id_uploaded:
                 _enforce_bulk_upload_id_contract(
                     cursor, qualified_table, pre_upload_max_id
                 )
             if ID_COLUMN_NAME in table_columns:
                 id_min, id_max = _bulk_upload_loaded_id_range(cursor, qualified_table)
+            setval_seconds = time.perf_counter() - setval_started
         finally:
             cursor.close()
         connection.commit()
     except (gzip.BadGzipFile, EOFError, zlib.error) as e:
         connection.rollback()
-        raise _bulk_gzip_error(e, header_bytes + body_stream.bytes_served)
+        raise _bulk_gzip_error(
+            e, header_bytes + body_stream.bytes_served, timings=snapshot_timings()
+        )
     except APIError as e:
         connection.rollback()
         raise _attach_bulk_error_info(
             e,
             BulkLoadEvent.STATUS_VALIDATION_ERROR,
             header_bytes + body_stream.bytes_served,
+            timings=snapshot_timings(),
         )
     except (psycopg2.Error, _BulkUploadTooLarge, BulkUploadStalled) as e:
         connection.rollback()
@@ -2109,6 +2153,7 @@ def bulk_upload_csv(
                 ),
                 BulkLoadEvent.STATUS_SIZE_CAP,
                 header_bytes + body_stream.bytes_served,
+                timings=snapshot_timings(),
             )
         if stall_detector.stalled:
             raise _attach_bulk_error_info(
@@ -2120,11 +2165,13 @@ def bulk_upload_csv(
                 ),
                 BulkLoadEvent.STATUS_STALL,
                 header_bytes + body_stream.bytes_served,
+                timings=snapshot_timings(),
             )
         raise _attach_bulk_error_info(
             APIError(_bulk_upload_error_message(e), 400),
             BulkLoadEvent.STATUS_COPY_ERROR,
             header_bytes + body_stream.bytes_served,
+            timings=snapshot_timings(),
         )
     finally:
         connection.close()
@@ -2133,6 +2180,7 @@ def bulk_upload_csv(
         "bytes_received": header_bytes + body_stream.bytes_served,
         "id_min": id_min,
         "id_max": id_max,
+        "timings": snapshot_timings(),
     }
 
 
