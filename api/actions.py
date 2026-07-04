@@ -1316,7 +1316,11 @@ def fetchmany(request: dict, context):
     return cursor.fetchmany(int(request["size"]))
 
 
-def apply_changes(table_obj: Table, cursor: AbstractCursor | None = None):
+def apply_changes(
+    table_obj: Table,
+    cursor: AbstractCursor | None = None,
+    change_types: tuple = ("insert", "update", "delete"),
+):
     """Apply changes from the meta tables to the actual table.
 
     Meta tables are :
@@ -1324,6 +1328,9 @@ def apply_changes(table_obj: Table, cursor: AbstractCursor | None = None):
     * _<NAME>_update
     * _<NAME>_delete
 
+    Only the meta tables named in `change_types` are scanned, so callers that
+    know which operation they just performed (e.g. a pure insert) don't pay
+    for scanning the other meta tables.
     """
 
     def add_type(d, type):
@@ -1347,64 +1354,34 @@ def apply_changes(table_obj: Table, cursor: AbstractCursor | None = None):
         # so we pass user=None
         oedb_table = table_obj.get_oedb_table_proxy(user=None)
 
-        insert_sa_table = oedb_table._insert_table.get_sa_table()
-        _execute(
-            cursor,
-            'select * from "{schema}"."{table}" where _applied = FALSE;'.format(
-                schema=insert_sa_table.schema, table=insert_sa_table.name
-            ),
-        )
-        changes = [
-            add_type(
-                {
-                    c.name: v
-                    for c, v in zip(cursor.description, row)
-                    if c.name in extended_columns
-                },
-                "insert",
-            )
-            for row in cursor.fetchall()
-        ]
+        meta_tables = {
+            "insert": (oedb_table._insert_table, extended_columns),
+            "update": (oedb_table._edit_table, extended_columns),
+            "delete": (oedb_table._delete_table, ["_id", "id", "_submitted"]),
+        }
 
-        update_sa_table = oedb_table._edit_table.get_sa_table()
-        _execute(
-            cursor,
-            'select * from "{schema}"."{table}" where _applied = FALSE;'.format(
-                schema=update_sa_table.schema, table=update_sa_table.name
-            ),
-        )
-        changes += [
-            add_type(
-                {
-                    c.name: v
-                    for c, v in zip(cursor.description, row)
-                    if c.name in extended_columns
-                },
-                "update",
+        changes = []
+        for change_type in change_types:
+            meta_table, relevant_columns = meta_tables[change_type]
+            meta_sa_table = meta_table.get_sa_table()
+            _execute(
+                cursor,
+                'select * from "{schema}"."{table}" where _applied = FALSE;'.format(
+                    schema=meta_sa_table.schema, table=meta_sa_table.name
+                ),
             )
-            for row in cursor.fetchall()
-        ]
+            changes += [
+                add_type(
+                    {
+                        c.name: v
+                        for c, v in zip(cursor.description, row)
+                        if c.name in relevant_columns
+                    },
+                    change_type,
+                )
+                for row in cursor.fetchall()
+            ]
 
-        delete_sa_table = oedb_table._delete_table.get_sa_table()
-        _execute(
-            cursor,
-            'select * from "{schema}"."{table}" where _applied = FALSE;'.format(
-                schema=delete_sa_table.schema, table=delete_sa_table.name
-            ),
-        )
-        changes += [
-            add_type(
-                {
-                    c.name: v
-                    for c, v in zip(cursor.description, row)
-                    if c.name in ["_id", "id", "_submitted"]
-                },
-                "delete",
-            )
-            for row in cursor.fetchall()
-        ]
-
-        changes = list(changes)
         sa_table = oedb_table._main_table.get_sa_table()
 
         # ToDo: This may require some kind of dependency tree resolution
@@ -1415,10 +1392,9 @@ def apply_changes(table_obj: Table, cursor: AbstractCursor | None = None):
             if prev_type and change["_type"] != prev_type:
                 _apply_stack(cursor, sa_table, change_batch, prev_type)
                 change_batch = []
-            else:
-                change_batch.append((distilled_change, change["_id"]))
+            change_batch.append((distilled_change, change["_id"]))
             prev_type = change["_type"]
-        if prev_type:
+        if change_batch:
             _apply_stack(cursor, sa_table, change_batch, prev_type)
         if artificial_connection:
             connection.commit()
@@ -1458,15 +1434,16 @@ def set_applied(
     else:
         raise NotImplementedError
 
+    # Set-based comparison instead of an N-term OR chain; the extra
+    # `_applied = FALSE` condition lets the partial index on unapplied
+    # rows serve this update.
     update_query = (
         meta_sa_table.update()
-        .where(sql.or_(*(meta_sa_table.c._id == i for i in rids)))
+        .where(meta_sa_table.c._id.in_(list(rids)))
+        .where(meta_sa_table.c._applied == sql.false())
         .values(_applied=True)
-        .compile()
     )
-
-    query = str(update_query)
-    _execute(session, query, update_query.params)
+    execute_sqla(update_query, session)
 
 
 def apply_insert(session: AbstractCursor | Session, sa_table: "SATable", rows, rids):
@@ -1478,23 +1455,23 @@ def apply_insert(session: AbstractCursor | Session, sa_table: "SATable", rows, r
 
 def apply_update(session: AbstractCursor | Session, sa_table, rows, rids):
     logger.debug("apply updates (%d)", len(rids))
-    for row, rid in zip(rows, rids):
+    for row in rows:
         pks = [c.name for c in sa_table.columns if c.primary_key]
         query = sa_table.update(
             *[getattr(sa_table.c, pk) == row[pk] for pk in pks]
         ).values(row)
         execute_sqla(query, session)
-        set_applied(session, sa_table, [rid], __UPDATE)
+    set_applied(session, sa_table, list(rids), __UPDATE)
 
 
 def apply_deletion(session: AbstractCursor | Session, sa_table: "SATable", rows, rids):
     logger.debug("apply deletion (%d)", len(rids))
-    for row, rid in zip(rows, rids):
+    for row in rows:
         query = sa_table.delete().where(
             *[getattr(sa_table.c, col) == row[col] for col in row]
         )
         execute_sqla(query, session)
-        set_applied(session, sa_table, [rid], __DELETE)
+    set_applied(session, sa_table, list(rids), __DELETE)
 
 
 def update_meta_search(table: str) -> None:
@@ -1785,7 +1762,7 @@ def data_insert(request: dict, context: dict) -> dict:
         ]
     response["rowcount"] = cursor.rowcount
 
-    apply_changes(table_obj, cursor)
+    apply_changes(table_obj, cursor, change_types=("insert",))
 
     return response
 
@@ -1810,7 +1787,7 @@ def data_delete(request: dict, context: dict) -> dict:
     )
 
     result = __change_rows(table_obj, request, context, sa_table_delete, setter, ["id"])
-    apply_changes(table_obj, cursor)
+    apply_changes(table_obj, cursor, change_types=("delete",))
     return result
 
 
@@ -1834,7 +1811,7 @@ def data_update(request: dict, context: dict) -> dict:
         setter = dict(zip(field_names, setter))
     cursor = load_cursor_from_context(context)  # TODO:
     result = __change_rows(table_obj, request, context, sa_table_edit, setter)
-    apply_changes(table_obj, cursor)
+    apply_changes(table_obj, cursor, change_types=("update",))
     return result
 
 

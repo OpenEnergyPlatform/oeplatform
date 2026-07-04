@@ -190,6 +190,12 @@ class _OedbMetaTable(_OedbTable):
         )
 
     def _create_if_missing(self, include_indexes: bool = True) -> None:
+        # Short-circuit when the table exists: the DDL below must only run at
+        # actual creation time. Running it on every access can deadlock, e.g.
+        # the CREATE INDEX waits behind an uncommitted insert into the meta
+        # table held by the very transaction that triggered this call.
+        if self.exists():
+            return None
         query = (
             f'CREATE TABLE IF NOT EXISTS "{self.schema_name}"."{self.name}" (LIKE '
             f'"{self.main_table.schema_name}"."{self.main_table.name}"'
@@ -197,7 +203,21 @@ class _OedbMetaTable(_OedbTable):
         if include_indexes:
             query += "INCLUDING ALL EXCLUDING INDEXES, PRIMARY KEY (_id) "
         query += f") INHERITS ({EditBase.__tablename__});"
+        # Partial index so that finding/marking unapplied changes doesn't
+        # sequentially scan the meta table as it grows (issue #2362).
+        query += (
+            f' CREATE INDEX IF NOT EXISTS "{self.unapplied_index_name}" ON '
+            f'"{self.schema_name}"."{self.name}" (_id) WHERE _applied = FALSE;'
+        )
         return self._execute(query, requires_permission=ADMIN_PERM)
+
+    @property
+    def unapplied_index_name(self) -> str:
+        # postgres truncates identifiers to 63 bytes; truncate explicitly so
+        # CREATE INDEX IF NOT EXISTS matches the effective name on re-runs.
+        # Must stay in sync with _index_name in the oedb migration
+        # e3b1f6c2d9a4_index_unapplied_meta_rows.py.
+        return f"{self.name}_unapplied_idx"[:63]
 
     def get_sa_table(self) -> SATable:
         # create on demand
