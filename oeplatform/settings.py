@@ -441,6 +441,10 @@ CAPTCHA_FONT_SIZE = 52
 # clients are expected to split large datasets into several uploads.
 BULK_UPLOAD_MAX_BYTES = int(os.environ.get("BULK_UPLOAD_MAX_BYTES", 10 * 1024**3))
 
+# Bulk upload guards (ADR: synchronous WSGI protected by guards, not infra).
+# Concurrency: at most one running upload per user plus this global cap.
+BULK_UPLOAD_MAX_CONCURRENT = int(os.environ.get("BULK_UPLOAD_MAX_CONCURRENT", 2))
+
 # dynamic variable to check if code is run in test or not
 IS_TEST = "test" in sys.argv
 IS_SANDBOX = IS_TEST

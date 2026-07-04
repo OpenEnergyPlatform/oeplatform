@@ -336,6 +336,35 @@ class TestBulkUpload(APITestCaseWithTable):
         self.assertEqual(resp.status_code, 400, resp.content[:300])
         self.assertEqual(self.get_rows(), [])
 
+    def test_concurrent_upload_same_user_rejected_429(self):
+        from api.bulk_upload_guard import guard
+
+        guard.acquire(self.user.id)
+        try:
+            url = f"/api/v0/tables/{self.test_table}/bulk-upload/?delimiter=comma"
+            resp = self.client.post(
+                url,
+                data=b"id,name\n1,x\n",
+                content_type="text/csv",
+                HTTP_AUTHORIZATION=f"Token {self.token}",
+            )
+            self.assertEqual(resp.status_code, 429, resp.content[:300])
+            self.assertTrue(resp.has_header("Retry-After"))
+        finally:
+            guard.release(self.user.id)
+        self.assertEqual(self.get_rows(), [])
+
+    def test_global_capacity_full_rejected_429(self):
+        from api.bulk_upload_guard import guard
+
+        with self.settings(BULK_UPLOAD_MAX_CONCURRENT=1):
+            guard.acquire("someone-else")
+            try:
+                self.bulk_upload("id,name\n1,x\n", exp_code=429)
+            finally:
+                guard.release("someone-else")
+        self.assertEqual(self.get_rows(), [])
+
     def test_no_journal_rows_written(self):
         self.bulk_upload("id,name\n1,x\n2,y\n", exp_code=201)
         engine = _get_engine()

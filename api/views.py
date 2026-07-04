@@ -64,7 +64,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 import login.models as login_models
-from api import sessions
+from api import bulk_upload_guard, sessions
 from api.actions import (
     apply_changes,
     bulk_upload_csv,
@@ -1148,10 +1148,12 @@ class TableBulkUploadAPIView(APIView):
 
     Append-only, all-or-nothing; rows go directly into the main table
     without edit-journal records. The delimiter parameter is required.
-    Every attempt that reaches this endpoint body - i.e. authenticated,
-    authorized, existing table - leaves a BulkLoadEvent, the upload's only
-    provenance. Denials at the decorator level (401/403/404) deliberately
-    create no events, so anonymous requests cannot write database rows.
+    Every attempt that reaches the upload itself - i.e. authenticated,
+    authorized, existing table, free guard slot - leaves a BulkLoadEvent,
+    the upload's only provenance. Denials at the decorator level
+    (401/403/404) and guard rejections (429) deliberately create no
+    events: anonymous requests must not write database rows, and busy
+    rejections are cheap pre-work denials.
     """
 
     @api_exception
@@ -1176,14 +1178,21 @@ class TableBulkUploadAPIView(APIView):
             "x-gzip",  # legacy alias, RFC 9110
         )
         try:
-            stats = bulk_upload_csv(
-                table_obj,
-                request.stream,
-                request.GET.get("delimiter"),
-                gzipped=gzipped,
-                # read at request time (django.conf) so tests can override
-                max_bytes=django_settings.BULK_UPLOAD_MAX_BYTES,
-            )
+            # guard: one running upload per user + global cap (ADR 0002);
+            # rejections are cheap pre-work denials and create no event
+            with bulk_upload_guard.guard.slot(request.user.id):
+                stats = bulk_upload_csv(
+                    table_obj,
+                    request.stream,
+                    request.GET.get("delimiter"),
+                    gzipped=gzipped,
+                    # read at request time (django.conf) so tests can override
+                    max_bytes=django_settings.BULK_UPLOAD_MAX_BYTES,
+                )
+        except bulk_upload_guard.BulkUploadBusy as e:
+            response = JsonResponse({"error": str(e)}, status=429)
+            response["Retry-After"] = str(bulk_upload_guard.RETRY_AFTER_SECONDS)
+            return response
         except APIError as e:
             _record_bulk_load_event(
                 table_obj,
