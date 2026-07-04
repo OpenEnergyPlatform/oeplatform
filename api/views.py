@@ -1170,9 +1170,16 @@ class TableBulkUploadAPIView(APIView):
                 status=403,
             )
 
+        gzipped = request.META.get("HTTP_CONTENT_ENCODING", "").strip().lower() in (
+            "gzip",
+            "x-gzip",  # legacy alias, RFC 9110
+        )
         try:
             stats = bulk_upload_csv(
-                table_obj, request.stream, request.GET.get("delimiter")
+                table_obj,
+                request.stream,
+                request.GET.get("delimiter"),
+                gzipped=gzipped,
             )
         except APIError as e:
             _record_bulk_load_event(

@@ -8,6 +8,7 @@ SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
+import gzip
 import json
 from datetime import timedelta
 
@@ -265,6 +266,57 @@ class TestBulkUpload(APITestCaseWithTable):
         self.assertIn(BulkLoadEvent, admin.site._registry)
         model_admin = admin.site._registry[BulkLoadEvent]
         self.assertIn("status", model_admin.list_filter)
+
+    def gzip_upload(self, csv_text: str, exp_code: int | None = None) -> dict:
+        url = f"/api/v0/tables/{self.test_table}/bulk-upload/?delimiter=comma"
+        resp = self.client.post(
+            url,
+            data=gzip.compress(csv_text.encode("utf-8")),
+            content_type="text/csv",
+            HTTP_CONTENT_ENCODING="gzip",
+            HTTP_AUTHORIZATION=f"Token {self.token}",
+        )
+        if exp_code is not None:
+            self.assertEqual(resp.status_code, exp_code, resp.content[:500])
+        try:
+            return json.loads(resp.content)
+        except ValueError:
+            return {}
+
+    def test_gzip_upload_matches_plain(self):
+        result = self.gzip_upload("id,name,address\n1,gz,ip\n2,zip,ped\n", 201)
+        self.assertEqual(result["rows"], 2)
+        by_id = {r["id"]: r for r in self.get_rows()}
+        self.assertEqual(by_id[1]["name"], "gz")
+        self.assertEqual(by_id[2]["address"], "ped")
+
+    def test_truncated_gzip_mid_body_rolls_back(self):
+        # header parses fine, then the compressed stream ends prematurely
+        # during COPY - must roll back like any other failure
+        csv_text = "id,name\n" + "".join(f"{i},row{i}\n" for i in range(1, 20_000))
+        body = gzip.compress(csv_text.encode("utf-8"))
+        url = f"/api/v0/tables/{self.test_table}/bulk-upload/?delimiter=comma"
+        resp = self.client.post(
+            url,
+            data=body[: len(body) // 2],  # cut mid-stream
+            content_type="text/csv",
+            HTTP_CONTENT_ENCODING="gzip",
+            HTTP_AUTHORIZATION=f"Token {self.token}",
+        )
+        self.assertEqual(resp.status_code, 400, resp.content[:300])
+        self.assertEqual(self.get_rows(), [])
+
+    def test_invalid_gzip_rejected(self):
+        url = f"/api/v0/tables/{self.test_table}/bulk-upload/?delimiter=comma"
+        resp = self.client.post(
+            url,
+            data=b"id,name\n1,not-actually-gzip\n",
+            content_type="text/csv",
+            HTTP_CONTENT_ENCODING="gzip",
+            HTTP_AUTHORIZATION=f"Token {self.token}",
+        )
+        self.assertEqual(resp.status_code, 400, resp.content[:300])
+        self.assertEqual(self.get_rows(), [])
 
     def test_no_journal_rows_written(self):
         self.bulk_upload("id,name\n1,x\n2,y\n", exp_code=201)

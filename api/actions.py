@@ -24,10 +24,12 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 import csv
+import gzip
 import io
 import json
 import logging
 import re
+import zlib
 from collections import Counter
 from copy import deepcopy
 from datetime import datetime, timedelta
@@ -1882,6 +1884,14 @@ def _attach_bulk_error_info(error: APIError, error_class: str, bytes_received: i
     return error
 
 
+def _bulk_gzip_error(e: Exception, bytes_received: int) -> APIError:
+    return _attach_bulk_error_info(
+        APIError("Request body is not valid gzip: %s" % e, 400),
+        BulkLoadEvent.STATUS_VALIDATION_ERROR,
+        bytes_received,
+    )
+
+
 def _read_csv_header(stream) -> tuple[bytes, bytes, int]:
     """Consume the first line from the stream without buffering the body.
 
@@ -1955,18 +1965,24 @@ def _parse_bulk_upload_columns(
     return columns, table_columns
 
 
-def bulk_upload_csv(table_obj: Table, stream, delimiter_name: str | None) -> dict:
+def bulk_upload_csv(
+    table_obj: Table,
+    stream,
+    delimiter_name: str | None,
+    gzipped: bool = False,
+) -> dict:
     """Bulk Upload (issue #2362): stream a CSV body into the main table.
 
     Uses COPY FROM STDIN and deliberately bypasses the edit-journal meta
     tables - bulk-loaded rows have no per-row change history. The whole
     upload runs in one transaction: it lands completely or not at all.
     The CSV header (required) maps columns by name; the delimiter must be
-    passed explicitly, it is never inferred.
+    passed explicitly, it is never inferred. A gzipped body is decompressed
+    in streaming fashion.
 
-    Returns a stats dict: rows, bytes_received, id_min, id_max. On failure
-    raises APIError carrying bulk_error_class and bulk_bytes_received for
-    the caller's Bulk Load Event record.
+    Returns a stats dict: rows, bytes_received (decompressed), id_min,
+    id_max. On failure raises APIError carrying bulk_error_class and
+    bulk_bytes_received for the caller's Bulk Load Event record.
     """
     header_bytes = 0
     remainder = b""
@@ -1978,10 +1994,16 @@ def bulk_upload_csv(table_obj: Table, stream, delimiter_name: str | None) -> dic
                 % ", ".join(sorted(BULK_UPLOAD_DELIMITERS)),
                 400,
             )
+        if gzipped and stream is not None:
+            # streaming decompression: GzipFile.read(n) pulls compressed
+            # chunks as needed, never materializing the whole body
+            stream = gzip.GzipFile(fileobj=stream, mode="rb")
         header_line, remainder, header_bytes = _read_csv_header(stream)
         columns, table_columns = _parse_bulk_upload_columns(
             header_line, delimiter, table_obj
         )
+    except (gzip.BadGzipFile, EOFError, zlib.error) as e:
+        raise _bulk_gzip_error(e, 0)
     except APIError as e:
         # bytes actually received so far: header plus any body bytes that
         # arrived in the same chunks (best-effort abuse-visibility signal)
@@ -2025,6 +2047,9 @@ def bulk_upload_csv(table_obj: Table, stream, delimiter_name: str | None) -> dic
         finally:
             cursor.close()
         connection.commit()
+    except (gzip.BadGzipFile, EOFError, zlib.error) as e:
+        connection.rollback()
+        raise _bulk_gzip_error(e, header_bytes + body_stream.bytes_served)
     except APIError as e:
         connection.rollback()
         raise _attach_bulk_error_info(
