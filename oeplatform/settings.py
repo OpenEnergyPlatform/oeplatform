@@ -33,6 +33,7 @@ SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
+import os
 import sys
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -434,6 +435,11 @@ AXES_ONLY_USER_FAILURES = True  # Only track failures per user
 
 CAPTCHA_IMAGE_SIZE = (300, 80)  # width, height in pixels
 CAPTCHA_FONT_SIZE = 52
+
+# Maximum DECOMPRESSED bytes accepted per bulk upload request (default 10 GiB).
+# A backstop against gzip bombs and runaway streams, not flow control -
+# clients are expected to split large datasets into several uploads.
+BULK_UPLOAD_MAX_BYTES = int(os.environ.get("BULK_UPLOAD_MAX_BYTES", 10 * 1024**3))
 
 # dynamic variable to check if code is run in test or not
 IS_TEST = "test" in sys.argv

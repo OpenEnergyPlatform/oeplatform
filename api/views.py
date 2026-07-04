@@ -45,6 +45,7 @@ from copy import deepcopy
 import geoalchemy2  # noqa:F401 Although this import seems unused is has to be here
 import requests
 import zipstream
+from django.conf import settings as django_settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import TrigramSimilarity
 from django.db.models import Q
@@ -1180,6 +1181,8 @@ class TableBulkUploadAPIView(APIView):
                 request.stream,
                 request.GET.get("delimiter"),
                 gzipped=gzipped,
+                # read at request time (django.conf) so tests can override
+                max_bytes=django_settings.BULK_UPLOAD_MAX_BYTES,
             )
         except APIError as e:
             _record_bulk_load_event(

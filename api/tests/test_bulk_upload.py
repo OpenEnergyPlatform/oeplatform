@@ -290,6 +290,24 @@ class TestBulkUpload(APITestCaseWithTable):
         self.assertEqual(by_id[1]["name"], "gz")
         self.assertEqual(by_id[2]["address"], "ped")
 
+    def test_decompressed_size_cap_rejects_with_413(self):
+        rows = "".join(f"{i},{'x' * 50}\n" for i in range(1, 50))
+        with self.settings(BULK_UPLOAD_MAX_BYTES=500):
+            result = self.bulk_upload("id,name\n" + rows, exp_code=413)
+        self.assertIn("500", json.dumps(result))  # names the cap
+        self.assertEqual(self.get_rows(), [])  # rolled back
+        event = BulkLoadEvent.objects.latest("created")
+        self.assertEqual(event.status, BulkLoadEvent.STATUS_SIZE_CAP)
+
+    def test_gzip_bomb_cut_off_at_cap(self):
+        # several MB of repetitive CSV compress to a few KB; the cap must
+        # stop the expansion, not the wire size (names stay within the
+        # column's varchar(50) so the cap fires, not a data error)
+        bomb_rows = "".join(f"{i},{'a' * 40}\n" for i in range(1, 200_000))
+        with self.settings(BULK_UPLOAD_MAX_BYTES=10_000):
+            self.gzip_upload("id,name\n" + bomb_rows, 413)
+        self.assertEqual(self.get_rows(), [])
+
     def test_truncated_gzip_mid_body_rolls_back(self):
         # header parses fine, then the compressed stream ends prematurely
         # during COPY - must roll back like any other failure

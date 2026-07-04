@@ -13,6 +13,13 @@ SPDX-License-Identifier: CC0-1.0
 
 ### Features
 
+- Bulk upload transport: gzip-compressed request bodies
+  (`Content-Encoding: gzip`) are decompressed in streaming fashion straight into
+  COPY, and a configurable cap on decompressed bytes per request
+  (`BULK_UPLOAD_MAX_BYTES`, default 10 GiB) rejects oversized uploads and gzip
+  bombs with HTTP 413 before they can exhaust disk or memory.
+  [(#2362)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2362)
+
 - Bulk load events: every authenticated, authorized bulk upload attempt -
   successful or failed - is recorded with user, table, status/error class, bytes
   received, and for successes the row count and the id range the rows landed in

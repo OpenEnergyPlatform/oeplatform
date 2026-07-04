@@ -1851,18 +1851,29 @@ _BULK_UPLOAD_MAX_HEADER_BYTES = 1024 * 1024
 BULK_UPLOAD_MAX_ID = 2**48
 
 
+class _BulkUploadTooLarge(Exception):
+    """Raised mid-stream when an upload exceeds the decompressed size cap."""
+
+
 class _ChainedStream:
     """File-like object serving buffered bytes first, then an inner stream.
 
     Used to hand the request body to COPY FROM STDIN after the CSV header
     line has already been consumed from it. Counts the bytes it serves
-    (for the Bulk Load Event audit record).
+    (for the Bulk Load Event audit record) and enforces the decompressed
+    size cap - counting AFTER decompression is what neutralises gzip bombs.
     """
 
-    def __init__(self, head: bytes, tail):
+    def __init__(self, head: bytes, tail, max_bytes=None, initial_bytes: int = 0):
         self._head = head
         self._tail = tail
+        self._max_bytes = max_bytes
+        self._initial_bytes = initial_bytes
         self.bytes_served = 0
+        # psycopg2 stringifies exceptions raised in read() into a generic
+        # "error in .read() call" psycopg2.Error, so the caller checks this
+        # flag to recognize a size-cap abort
+        self.too_large = False
 
     def read(self, size: int = -1) -> bytes:
         if size is None or size < 0:
@@ -1874,6 +1885,12 @@ class _ChainedStream:
             if len(data) < size and self._tail:
                 data += self._tail.read(size - len(data))
         self.bytes_served += len(data)
+        if (
+            self._max_bytes is not None
+            and self._initial_bytes + self.bytes_served > self._max_bytes
+        ):
+            self.too_large = True
+            raise _BulkUploadTooLarge()
         return data
 
 
@@ -1970,6 +1987,7 @@ def bulk_upload_csv(
     stream,
     delimiter_name: str | None,
     gzipped: bool = False,
+    max_bytes: int | None = None,
 ) -> dict:
     """Bulk Upload (issue #2362): stream a CSV body into the main table.
 
@@ -1978,7 +1996,7 @@ def bulk_upload_csv(
     upload runs in one transaction: it lands completely or not at all.
     The CSV header (required) maps columns by name; the delimiter must be
     passed explicitly, it is never inferred. A gzipped body is decompressed
-    in streaming fashion.
+    in streaming fashion; `max_bytes` caps the DECOMPRESSED size.
 
     Returns a stats dict: rows, bytes_received (decompressed), id_min,
     id_max. On failure raises APIError carrying bulk_error_class and
@@ -2027,7 +2045,9 @@ def bulk_upload_csv(
 
     engine = _get_engine()
     connection = engine.raw_connection()
-    body_stream = _ChainedStream(remainder, stream)
+    body_stream = _ChainedStream(
+        remainder, stream, max_bytes=max_bytes, initial_bytes=header_bytes
+    )
     id_min = id_max = None
     try:
         cursor = connection.cursor()
@@ -2057,8 +2077,21 @@ def bulk_upload_csv(
             BulkLoadEvent.STATUS_VALIDATION_ERROR,
             header_bytes + body_stream.bytes_served,
         )
-    except psycopg2.Error as e:
+    except (psycopg2.Error, _BulkUploadTooLarge) as e:
         connection.rollback()
+        # a size-cap abort inside COPY's read() surfaces as a generic
+        # psycopg2.Error, so the stream's flag decides which failure this is
+        if body_stream.too_large:
+            raise _attach_bulk_error_info(
+                APIError(
+                    "Bulk upload exceeds the maximum of %d bytes (decompressed). "
+                    "Nothing was inserted - split the dataset into smaller "
+                    "uploads." % max_bytes,
+                    413,
+                ),
+                BulkLoadEvent.STATUS_SIZE_CAP,
+                header_bytes + body_stream.bytes_served,
+            )
         raise _attach_bulk_error_info(
             APIError(_bulk_upload_error_message(e), 400),
             BulkLoadEvent.STATUS_COPY_ERROR,
