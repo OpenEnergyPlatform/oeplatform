@@ -1101,12 +1101,14 @@ class BulkLoadEvent(models.Model):
     STATUS_VALIDATION_ERROR = "validation-error"
     STATUS_COPY_ERROR = "copy-error"
     STATUS_EMBARGO = "embargo"
+    STATUS_SIZE_CAP = "size-cap"
     STATUS_ERROR = "error"
     STATUS_CHOICES = [
         (STATUS_SUCCESS, "Success"),
         (STATUS_VALIDATION_ERROR, "Validation error"),
         (STATUS_COPY_ERROR, "Copy error"),
         (STATUS_EMBARGO, "Embargo"),
+        (STATUS_SIZE_CAP, "Size cap exceeded"),
         (STATUS_ERROR, "Error"),
     ]
 
