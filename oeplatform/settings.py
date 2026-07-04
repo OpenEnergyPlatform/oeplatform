@@ -452,6 +452,13 @@ BULK_UPLOAD_MIN_BYTES_PER_SECOND = int(
 BULK_UPLOAD_STALL_GRACE_SECONDS = int(
     os.environ.get("BULK_UPLOAD_STALL_GRACE_SECONDS", 30)
 )
+# Database session timeouts for the upload's transaction (milliseconds).
+BULK_UPLOAD_STATEMENT_TIMEOUT_MS = int(
+    os.environ.get("BULK_UPLOAD_STATEMENT_TIMEOUT_MS", 60 * 60 * 1000)
+)
+BULK_UPLOAD_IDLE_TX_TIMEOUT_MS = int(
+    os.environ.get("BULK_UPLOAD_IDLE_TX_TIMEOUT_MS", 60 * 1000)
+)
 
 # dynamic variable to check if code is run in test or not
 IS_TEST = "test" in sys.argv

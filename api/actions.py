@@ -37,6 +37,7 @@ from typing import TYPE_CHECKING, cast
 
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import psycopg2
+from django.conf import settings as django_conf_settings
 from django.db.models import Func, Value
 from omi.base import get_metadata_version
 from omi.conversion import convert_metadata
@@ -2068,6 +2069,7 @@ def bulk_upload_csv(
     try:
         cursor = connection.cursor()
         try:
+            _set_bulk_upload_session_timeouts(cursor)
             id_uploaded = ID_COLUMN_NAME in columns
             pre_upload_max_id = None
             if id_uploaded:
@@ -2132,6 +2134,33 @@ def bulk_upload_csv(
         "id_min": id_min,
         "id_max": id_max,
     }
+
+
+def _set_bulk_upload_session_timeouts(cursor) -> None:
+    """SET LOCAL both timeouts: scoped to the upload's transaction, so the
+    pooled connection is clean for its next user. statement_timeout bounds
+    the COPY itself; idle_in_transaction_session_timeout kills the
+    transaction if the client goes silent between protocol messages."""
+    # fallbacks mirror the settings defaults and must never be 0 (=disabled):
+    # a missing setting must fail closed, not remove the guard
+    cursor.execute(
+        "SET LOCAL statement_timeout = %d; "
+        "SET LOCAL idle_in_transaction_session_timeout = %d;"
+        % (
+            int(
+                getattr(
+                    django_conf_settings,
+                    "BULK_UPLOAD_STATEMENT_TIMEOUT_MS",
+                    60 * 60 * 1000,
+                )
+            ),
+            int(
+                getattr(
+                    django_conf_settings, "BULK_UPLOAD_IDLE_TX_TIMEOUT_MS", 60 * 1000
+                )
+            ),
+        )
+    )
 
 
 def _bulk_upload_loaded_id_range(cursor, qualified_table: str):

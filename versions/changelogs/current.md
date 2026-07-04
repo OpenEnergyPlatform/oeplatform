@@ -13,6 +13,14 @@ SPDX-License-Identifier: CC0-1.0
 
 ### Features
 
+- Bulk upload guards: at most one running upload per user plus a configurable
+  global cap (`BULK_UPLOAD_MAX_CONCURRENT`, default 2) - excess requests get
+  HTTP 429 with Retry-After; uploads whose transfer rate falls below a
+  configurable minimum are aborted (HTTP 408, recorded as a stall event); and
+  the upload's database transaction carries statement and idle-in-transaction
+  timeouts, so no client can pin a worker and an open transaction indefinitely.
+  [(#2362)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2362)
+
 - Bulk upload transport: gzip-compressed request bodies
   (`Content-Encoding: gzip`) are decompressed in streaming fashion straight into
   COPY, and a configurable cap on decompressed bytes per request

@@ -378,6 +378,21 @@ class TestBulkUpload(APITestCaseWithTable):
         event = BulkLoadEvent.objects.latest("created")
         self.assertEqual(event.status, BulkLoadEvent.STATUS_STALL)
 
+    def test_db_session_timeouts_applied(self):
+        from api.actions import _set_bulk_upload_session_timeouts
+
+        connection = _get_engine().raw_connection()
+        try:
+            cursor = connection.cursor()
+            _set_bulk_upload_session_timeouts(cursor)
+            cursor.execute("SHOW statement_timeout;")
+            self.assertNotIn(cursor.fetchone()[0], ("0", "0ms"))
+            cursor.execute("SHOW idle_in_transaction_session_timeout;")
+            self.assertNotIn(cursor.fetchone()[0], ("0", "0ms"))
+            connection.rollback()
+        finally:
+            connection.close()
+
     def test_no_journal_rows_written(self):
         self.bulk_upload("id,name\n1,x\n2,y\n", exp_code=201)
         engine = _get_engine()
