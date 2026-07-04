@@ -40,6 +40,7 @@ import itertools
 import json
 import logging
 import re
+import time
 from copy import deepcopy
 
 import geoalchemy2  # noqa:F401 Although this import seems unused is has to be here
@@ -1143,6 +1144,53 @@ def _record_bulk_load_event(table_obj, user, status_value, **fields):
         return None
 
 
+bulk_upload_logger = logging.getLogger("oeplatform.bulk_upload")
+
+
+def _log_bulk_upload_attempt(
+    table_obj,
+    user,
+    outcome: str,
+    total_seconds: float,
+    bytes_received: int = 0,
+    rows=None,
+    timings: dict | None = None,
+):
+    """Exactly one structured (logfmt) line per bulk upload attempt.
+
+    Format (fields never reordered; '-' when a value is not applicable):
+
+        bulk_upload table=<name> user=<username> outcome=<outcome>
+        rows=<n|-> bytes=<n> total_s=<s> transfer_s=<s|-> copy_s=<s|->
+        setval_s=<s|->
+
+    Outcomes: success, validation-error, copy-error, size-cap, stall,
+    embargo, busy, error. Phase timings: transfer = client I/O incl.
+    decompression, copy = database-side COPY work, setval = id-contract
+    and id-range queries. This line plus the BulkLoadEvent table is the
+    endpoint's shipped observability (dashboards/canary: ops follow-up).
+    """
+    timings = timings or {}
+
+    def seconds(key):
+        value = timings.get(key)
+        return "-" if value is None else "%.3f" % value
+
+    bulk_upload_logger.info(
+        "bulk_upload table=%s user=%s outcome=%s rows=%s bytes=%d "
+        "total_s=%.3f transfer_s=%s copy_s=%s setval_s=%s",
+        table_obj.name,
+        getattr(user, "name", None) or "-",
+        outcome,
+        rows if rows is not None else "-",
+        bytes_received,
+        total_seconds,
+        seconds("transfer_s"),
+        seconds("copy_s"),
+        seconds("setval_s"),
+    )
+
+
 class TableBulkUploadAPIView(APIView):
     """Bulk Upload (issue #2362): the request body IS the CSV.
 
@@ -1153,12 +1201,15 @@ class TableBulkUploadAPIView(APIView):
     the upload's only provenance. Denials at the decorator level
     (401/403/404) and guard rejections (429) deliberately create no
     events: anonymous requests must not write database rows, and busy
-    rejections are cheap pre-work denials.
+    rejections are cheap pre-work denials. Every attempt reaching this
+    endpoint body additionally emits one structured log line (see
+    _log_bulk_upload_attempt for the format).
     """
 
     @api_exception
     @require_write_permission
     def post(self, request: Request, table: str) -> JsonLikeResponse:
+        started = time.perf_counter()
         table_obj = table_or_404(table=table)
 
         if check_embargo(table_obj):
@@ -1167,6 +1218,12 @@ class TableBulkUploadAPIView(APIView):
                 request.user,
                 BulkLoadEvent.STATUS_EMBARGO,
                 error_message="Access to this table is restricted due to embargo.",
+            )
+            _log_bulk_upload_attempt(
+                table_obj,
+                request.user,
+                BulkLoadEvent.STATUS_EMBARGO,
+                time.perf_counter() - started,
             )
             return JsonResponse(
                 {"error": "Access to this table is restricted due to embargo."},
@@ -1190,16 +1247,44 @@ class TableBulkUploadAPIView(APIView):
                     max_bytes=django_settings.BULK_UPLOAD_MAX_BYTES,
                 )
         except bulk_upload_guard.BulkUploadBusy as e:
+            _log_bulk_upload_attempt(
+                table_obj, request.user, "busy", time.perf_counter() - started
+            )
             response = JsonResponse({"error": str(e)}, status=429)
             response["Retry-After"] = str(bulk_upload_guard.RETRY_AFTER_SECONDS)
             return response
         except APIError as e:
+            outcome = getattr(e, "bulk_error_class", BulkLoadEvent.STATUS_ERROR)
             _record_bulk_load_event(
                 table_obj,
                 request.user,
-                getattr(e, "bulk_error_class", BulkLoadEvent.STATUS_ERROR),
+                outcome,
                 error_message=e.message,
                 bytes_received=getattr(e, "bulk_bytes_received", 0),
+            )
+            _log_bulk_upload_attempt(
+                table_obj,
+                request.user,
+                outcome,
+                time.perf_counter() - started,
+                bytes_received=getattr(e, "bulk_bytes_received", 0),
+                timings=getattr(e, "bulk_timings", None),
+            )
+            raise
+        except Exception:
+            # unexpected failure (a bug, not a client error): still exactly
+            # one event and one log line per attempt, then let it propagate
+            _record_bulk_load_event(
+                table_obj,
+                request.user,
+                BulkLoadEvent.STATUS_ERROR,
+                error_message="unexpected error",
+            )
+            _log_bulk_upload_attempt(
+                table_obj,
+                request.user,
+                BulkLoadEvent.STATUS_ERROR,
+                time.perf_counter() - started,
             )
             raise
 
@@ -1211,6 +1296,15 @@ class TableBulkUploadAPIView(APIView):
             row_count=stats["rows"],
             id_min=stats["id_min"],
             id_max=stats["id_max"],
+        )
+        _log_bulk_upload_attempt(
+            table_obj,
+            request.user,
+            BulkLoadEvent.STATUS_SUCCESS,
+            time.perf_counter() - started,
+            bytes_received=stats["bytes_received"],
+            rows=stats["rows"],
+            timings=stats["timings"],
         )
         return JsonResponse(
             {

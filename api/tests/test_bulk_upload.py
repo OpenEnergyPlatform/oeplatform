@@ -393,6 +393,88 @@ class TestBulkUpload(APITestCaseWithTable):
         finally:
             connection.close()
 
+    def get_bulk_upload_log_lines(self, logs) -> list:
+        return [
+            record.getMessage()
+            for record in logs.records
+            if record.getMessage().startswith("bulk_upload ")
+        ]
+
+    def test_success_logs_one_structured_line_with_timings(self):
+        with self.assertLogs("oeplatform.bulk_upload", level="INFO") as logs:
+            self.bulk_upload("id,name\n1,a\n2,b\n", exp_code=201)
+        lines = self.get_bulk_upload_log_lines(logs)
+        self.assertEqual(len(lines), 1)
+        line = lines[0]
+        self.assertIn("outcome=success", line)
+        self.assertIn(f"table={self.test_table}", line)
+        self.assertIn("user=MrTest", line)
+        self.assertIn("rows=2", line)
+        self.assertIn("bytes=", line)
+        self.assertIn("total_s=", line)
+        self.assertIn("transfer_s=", line)  # phase timings: transfer vs copy
+        self.assertIn("copy_s=", line)
+        self.assertIn("setval_s=", line)
+
+    def test_validation_error_logged(self):
+        with self.assertLogs("oeplatform.bulk_upload", level="INFO") as logs:
+            self.bulk_upload("id,no_such_column\n1,x\n", exp_code=400)
+        lines = self.get_bulk_upload_log_lines(logs)
+        self.assertEqual(len(lines), 1)
+        self.assertIn("outcome=validation-error", lines[0])
+
+    def test_copy_error_logged(self):
+        with self.assertLogs("oeplatform.bulk_upload", level="INFO") as logs:
+            self.bulk_upload("id,name\n1,ok\nboom,bad\n", exp_code=400)
+        lines = self.get_bulk_upload_log_lines(logs)
+        self.assertEqual(len(lines), 1)
+        self.assertIn("outcome=copy-error", lines[0])
+
+    def test_size_cap_logged(self):
+        rows = "".join(f"{i},{'x' * 40}\n" for i in range(1, 60))
+        with self.settings(BULK_UPLOAD_MAX_BYTES=500):
+            with self.assertLogs("oeplatform.bulk_upload", level="INFO") as logs:
+                self.bulk_upload("id,name\n" + rows, exp_code=413)
+        lines = self.get_bulk_upload_log_lines(logs)
+        self.assertEqual(len(lines), 1)
+        self.assertIn("outcome=size-cap", lines[0])
+
+    def test_stall_logged(self):
+        with self.settings(
+            BULK_UPLOAD_MIN_BYTES_PER_SECOND=10**15,
+            BULK_UPLOAD_STALL_GRACE_SECONDS=-1,
+        ):
+            with self.assertLogs("oeplatform.bulk_upload", level="INFO") as logs:
+                self.bulk_upload("id,name\n1,x\n", exp_code=408)
+        lines = self.get_bulk_upload_log_lines(logs)
+        self.assertEqual(len(lines), 1)
+        self.assertIn("outcome=stall", lines[0])
+
+    def test_busy_rejection_logged(self):
+        from api.bulk_upload_guard import guard
+
+        guard.acquire(self.user.id)
+        try:
+            with self.assertLogs("oeplatform.bulk_upload", level="INFO") as logs:
+                self.bulk_upload("id,name\n1,x\n", exp_code=429)
+        finally:
+            guard.release(self.user.id)
+        lines = self.get_bulk_upload_log_lines(logs)
+        self.assertEqual(len(lines), 1)
+        self.assertIn("outcome=busy", lines[0])
+
+    def test_embargo_logged(self):
+        Embargo.objects.create(
+            table=Table.objects.get(name=self.test_table),
+            date_ended=timezone.now() + timedelta(days=30),
+            duration="6_months",
+        )
+        with self.assertLogs("oeplatform.bulk_upload", level="INFO") as logs:
+            self.bulk_upload("id,name\n1,x\n", exp_code=403)
+        lines = self.get_bulk_upload_log_lines(logs)
+        self.assertEqual(len(lines), 1)
+        self.assertIn("outcome=embargo", lines[0])
+
     def test_no_journal_rows_written(self):
         self.bulk_upload("id,name\n1,x\n2,y\n", exp_code=201)
         engine = _get_engine()

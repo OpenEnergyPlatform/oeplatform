@@ -13,6 +13,13 @@ SPDX-License-Identifier: CC0-1.0
 
 ### Features
 
+- Bulk upload observability: every upload attempt emits exactly one structured
+  (logfmt) log line - table, user, outcome (success, validation-error,
+  copy-error, size-cap, stall, embargo, busy), rows, bytes, and phase timings
+  separating client transfer time from database-side COPY time and the
+  id-sequence bookkeeping.
+  [(#2362)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2362)
+
 - Bulk upload guards: at most one running upload per user plus a configurable
   global cap (`BULK_UPLOAD_MAX_CONCURRENT`, default 2) - excess requests get
   HTTP 429 with Retry-After; uploads whose transfer rate falls below a
