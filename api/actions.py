@@ -57,6 +57,7 @@ from sqlalchemy.exc import NoSuchTableError
 from sqlalchemy.sql.expression import Executable, Select
 
 import dataedit.metadata
+from api.bulk_upload_guard import BulkUploadStalled, default_stall_detector
 from api.error import APIError
 from api.parser import (
     get_column_definition_query,
@@ -1864,11 +1865,19 @@ class _ChainedStream:
     size cap - counting AFTER decompression is what neutralises gzip bombs.
     """
 
-    def __init__(self, head: bytes, tail, max_bytes=None, initial_bytes: int = 0):
+    def __init__(
+        self,
+        head: bytes,
+        tail,
+        max_bytes=None,
+        initial_bytes: int = 0,
+        stall_detector=None,
+    ):
         self._head = head
         self._tail = tail
         self._max_bytes = max_bytes
         self._initial_bytes = initial_bytes
+        self._stall_detector = stall_detector
         self.bytes_served = 0
         # psycopg2 stringifies exceptions raised in read() into a generic
         # "error in .read() call" psycopg2.Error, so the caller checks this
@@ -1891,6 +1900,8 @@ class _ChainedStream:
         ):
             self.too_large = True
             raise _BulkUploadTooLarge()
+        if self._stall_detector is not None:
+            self._stall_detector.check(self._initial_bytes + self.bytes_served)
         return data
 
 
@@ -2045,8 +2056,13 @@ def bulk_upload_csv(
 
     engine = _get_engine()
     connection = engine.raw_connection()
+    stall_detector = default_stall_detector()
     body_stream = _ChainedStream(
-        remainder, stream, max_bytes=max_bytes, initial_bytes=header_bytes
+        remainder,
+        stream,
+        max_bytes=max_bytes,
+        initial_bytes=header_bytes,
+        stall_detector=stall_detector,
     )
     id_min = id_max = None
     try:
@@ -2077,10 +2093,10 @@ def bulk_upload_csv(
             BulkLoadEvent.STATUS_VALIDATION_ERROR,
             header_bytes + body_stream.bytes_served,
         )
-    except (psycopg2.Error, _BulkUploadTooLarge) as e:
+    except (psycopg2.Error, _BulkUploadTooLarge, BulkUploadStalled) as e:
         connection.rollback()
-        # a size-cap abort inside COPY's read() surfaces as a generic
-        # psycopg2.Error, so the stream's flag decides which failure this is
+        # aborts raised inside COPY's read() surface as a generic
+        # psycopg2.Error, so the flags decide which failure this really is
         if body_stream.too_large:
             raise _attach_bulk_error_info(
                 APIError(
@@ -2090,6 +2106,17 @@ def bulk_upload_csv(
                     413,
                 ),
                 BulkLoadEvent.STATUS_SIZE_CAP,
+                header_bytes + body_stream.bytes_served,
+            )
+        if stall_detector.stalled:
+            raise _attach_bulk_error_info(
+                APIError(
+                    "Bulk upload aborted: the transfer rate fell below the "
+                    "required minimum. Nothing was inserted - retry on a "
+                    "faster connection or split the dataset.",
+                    408,
+                ),
+                BulkLoadEvent.STATUS_STALL,
                 header_bytes + body_stream.bytes_served,
             )
         raise _attach_bulk_error_info(

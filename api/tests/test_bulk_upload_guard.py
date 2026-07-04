@@ -11,7 +11,12 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 from django.test import SimpleTestCase, override_settings
 
-from api.bulk_upload_guard import BulkUploadBusy, BulkUploadGuard
+from api.bulk_upload_guard import (
+    BulkUploadBusy,
+    BulkUploadGuard,
+    BulkUploadStalled,
+    StallDetector,
+)
 
 
 class TestBulkUploadGuard(SimpleTestCase):
@@ -51,3 +56,37 @@ class TestBulkUploadGuard(SimpleTestCase):
                     raise RuntimeError("upload failed")
         with guard.slot("user-1"):
             pass  # capacity fully available after 50 failures
+
+
+class TestStallDetector(SimpleTestCase):
+    def make_detector(self, min_rate=100, grace=10):
+        self.now = 0.0
+        detector = StallDetector(
+            min_bytes_per_second=min_rate,
+            grace_seconds=grace,
+            clock=lambda: self.now,
+        )
+        return detector
+
+    def test_no_check_during_grace_period(self):
+        detector = self.make_detector(min_rate=100, grace=10)
+        self.now = 9.0
+        detector.check(bytes_transferred=0)  # 0 B/s but within grace
+
+    def test_slow_transfer_raises_after_grace(self):
+        detector = self.make_detector(min_rate=100, grace=10)
+        self.now = 20.0
+        with self.assertRaises(BulkUploadStalled):
+            detector.check(bytes_transferred=500)  # 25 B/s < 100 B/s
+
+    def test_fast_transfer_passes_after_grace(self):
+        detector = self.make_detector(min_rate=100, grace=10)
+        self.now = 20.0
+        detector.check(bytes_transferred=5000)  # 250 B/s >= 100 B/s
+
+    def test_stalled_flag_set_on_abort(self):
+        detector = self.make_detector(min_rate=100, grace=0)
+        self.now = 10.0
+        with self.assertRaises(BulkUploadStalled):
+            detector.check(bytes_transferred=1)
+        self.assertTrue(detector.stalled)

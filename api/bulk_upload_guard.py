@@ -15,6 +15,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 import threading
+import time
 from contextlib import contextmanager
 
 from django.conf import settings
@@ -24,6 +25,10 @@ RETRY_AFTER_SECONDS = 60
 
 class BulkUploadBusy(Exception):
     """Raised when no bulk upload slot is available (HTTP 429)."""
+
+
+class BulkUploadStalled(Exception):
+    """Raised when an upload's transfer rate falls below the minimum."""
 
 
 class BulkUploadGuard:
@@ -63,6 +68,45 @@ class BulkUploadGuard:
             yield
         finally:
             self.release(user_key)
+
+
+class StallDetector:
+    """Aborts an upload whose average transfer rate falls below a minimum.
+
+    Only catches trickling clients (each read eventually returns); a fully
+    hung connection is bounded by the web server's request timeout and the
+    database session timeouts instead. Checked between stream reads, with
+    an initial grace period so slow-starting clients aren't punished.
+    """
+
+    def __init__(self, min_bytes_per_second, grace_seconds, clock=time.monotonic):
+        self._min_bytes_per_second = min_bytes_per_second
+        self._grace_seconds = grace_seconds
+        self._clock = clock
+        self._start = clock()
+        # psycopg2 surfaces exceptions raised inside COPY's read() as a
+        # generic error, so callers check this flag to recognize the abort
+        self.stalled = False
+
+    def check(self, bytes_transferred: int) -> None:
+        elapsed = self._clock() - self._start
+        if elapsed <= self._grace_seconds:
+            return
+        if bytes_transferred / elapsed < self._min_bytes_per_second:
+            self.stalled = True
+            raise BulkUploadStalled(
+                "Bulk upload aborted: transfer rate fell below %d bytes/second"
+                % self._min_bytes_per_second
+            )
+
+
+def default_stall_detector() -> StallDetector:
+    return StallDetector(
+        min_bytes_per_second=getattr(
+            settings, "BULK_UPLOAD_MIN_BYTES_PER_SECOND", 10 * 1024
+        ),
+        grace_seconds=getattr(settings, "BULK_UPLOAD_STALL_GRACE_SECONDS", 30),
+    )
 
 
 # module-level singleton: one guard per worker process

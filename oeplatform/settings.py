@@ -444,6 +444,14 @@ BULK_UPLOAD_MAX_BYTES = int(os.environ.get("BULK_UPLOAD_MAX_BYTES", 10 * 1024**3
 # Bulk upload guards (ADR: synchronous WSGI protected by guards, not infra).
 # Concurrency: at most one running upload per user plus this global cap.
 BULK_UPLOAD_MAX_CONCURRENT = int(os.environ.get("BULK_UPLOAD_MAX_CONCURRENT", 2))
+# Stall guard: abort uploads averaging less than this rate (bytes/second)
+# after the grace period - a trickling client must not pin a worker.
+BULK_UPLOAD_MIN_BYTES_PER_SECOND = int(
+    os.environ.get("BULK_UPLOAD_MIN_BYTES_PER_SECOND", 10 * 1024)
+)
+BULK_UPLOAD_STALL_GRACE_SECONDS = int(
+    os.environ.get("BULK_UPLOAD_STALL_GRACE_SECONDS", 30)
+)
 
 # dynamic variable to check if code is run in test or not
 IS_TEST = "test" in sys.argv

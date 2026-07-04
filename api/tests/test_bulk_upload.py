@@ -365,6 +365,19 @@ class TestBulkUpload(APITestCaseWithTable):
                 guard.release("someone-else")
         self.assertEqual(self.get_rows(), [])
 
+    def test_stalled_upload_aborted_and_rolled_back(self):
+        # an impossible minimum rate with no grace makes any real upload
+        # count as stalled - the wall-clock variants live in the guard's
+        # unit tests
+        with self.settings(
+            BULK_UPLOAD_MIN_BYTES_PER_SECOND=10**15,
+            BULK_UPLOAD_STALL_GRACE_SECONDS=-1,
+        ):
+            self.bulk_upload("id,name\n1,x\n2,y\n", exp_code=408)
+        self.assertEqual(self.get_rows(), [])
+        event = BulkLoadEvent.objects.latest("created")
+        self.assertEqual(event.status, BulkLoadEvent.STATUS_STALL)
+
     def test_no_journal_rows_written(self):
         self.bulk_upload("id,name\n1,x\n2,y\n", exp_code=201)
         engine = _get_engine()
