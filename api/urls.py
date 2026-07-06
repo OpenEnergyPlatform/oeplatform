@@ -64,6 +64,7 @@ from api.views import (
     TableMovePublishAPIView,
     TableRowsAPIView,
     TableUnpublishAPIView,
+    UnassignDatasetTables,
     grpprop_api_view,
     oeo_search_api_view,
     oevkg_query_api_view,
@@ -300,6 +301,11 @@ urlpatterns_v0 = [
         "datasets/<str:dataset_name>/assign-tables/",
         AssignDatasetTables.as_view(),
         name="dataset-assign-tables",
+    ),
+    path(
+        "datasets/<str:dataset_name>/unassign-tables/",
+        UnassignDatasetTables.as_view(),
+        name="dataset-unassign-tables",
     ),
     path(
         "datasets/<str:dataset_name>/",

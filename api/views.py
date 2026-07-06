@@ -342,15 +342,33 @@ class AssignDatasetTables(APIView):
         assert_dataset_ownership(request.user, dataset)
 
         missing = []
-        added_tables = []
+        tables = []
 
         for table_ref in table_refs:
             try:
-                table = Table.load(table_ref["name"])
-                dataset.tables.add(table)
-                added_tables.append(table.name)
+                tables.append(Table.load(table_ref["name"]))
             except Table.DoesNotExist:
                 missing.append(table_ref)
+
+        # Curation model: any published table may be assigned; draft tables
+        # and tables under an active embargo only by users holding write
+        # permission on the table (owners staging a release).
+        forbidden = [
+            table.name
+            for table in tables
+            if (not table.is_publish or check_embargo(table))
+            and not request.user.has_write_permissions(table.name)
+        ]
+        if forbidden:
+            raise PermissionDenied(
+                "Draft or embargoed tables require write permission on the "
+                f"table to be assigned: {', '.join(forbidden)}."
+            )
+
+        added_tables = []
+        for table in tables:
+            dataset.tables.add(table)
+            added_tables.append(table.name)
 
         dataset.update_resources_from_tables()
 
@@ -358,6 +376,45 @@ class AssignDatasetTables(APIView):
             {
                 "message": f"Added {len(added_tables)} tables.",
                 "added": added_tables,
+                "missing": missing,
+            },
+            status=200,
+        )
+
+
+class UnassignDatasetTables(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, dataset_name):
+        serializer = DatasetAssignTablesSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        table_refs = serializer.validated_data["tables"]
+
+        try:
+            dataset = Dataset.objects.get(name=dataset_name)
+        except Dataset.DoesNotExist:
+            return Response({"error": "Dataset not found"}, status=404)
+
+        assert_dataset_ownership(request.user, dataset)
+
+        missing = []
+        removed_tables = []
+
+        for table_ref in table_refs:
+            table = dataset.tables.filter(name=table_ref["name"]).first()
+            if table is None:
+                missing.append(table_ref)
+            else:
+                dataset.tables.remove(table)
+                removed_tables.append(table.name)
+
+        dataset.update_resources_from_tables()
+
+        return Response(
+            {
+                "message": f"Removed {len(removed_tables)} tables.",
+                "removed": removed_tables,
                 "missing": missing,
             },
             status=200,

@@ -36,6 +36,10 @@ SPDX-License-Identifier: CC0-1.0
   - Datasets are creator-owned: creating one requires login and records the
     creator; only the creator can update, delete or assign tables. Reading
     datasets stays public.
+  - Tables can be unassigned from a dataset again (new unassign endpoint).
+    Assigning follows a curation model: any published table can be added to a
+    dataset; draft tables and tables under an active embargo only by users with
+    write permission on the table.
 - The metadata api now also syncs the data schema documented in the metadata
   with the table schema available in the database
   [(#2290)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2290)

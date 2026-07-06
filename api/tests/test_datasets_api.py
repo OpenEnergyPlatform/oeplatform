@@ -3,13 +3,15 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 from copy import deepcopy
+from datetime import timedelta
 
+from django.utils import timezone
 from oemetadata.latest.template import OEMETADATA_LATEST_TEMPLATE
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from dataedit.models import Dataset, Table, Topic
-from login.models import myuser
+from dataedit.models import Dataset, Embargo, Table, Topic
+from login.models import WRITE_PERM, UserPermission, myuser
 
 
 class DatasetOwnershipTests(APITestCase):
@@ -147,6 +149,142 @@ class DatasetOwnershipTests(APITestCase):
         self.assertTrue(Table.objects.filter(name="t_keep").exists())
 
 
+class DatasetCurationRulesTests(APITestCase):
+    """Assign follows the curation model; unassign completes membership."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.curator, _ = myuser.objects.get_or_create(
+            name="Curator",
+            email="curator@test.com",
+            did_agree=True,
+            is_mail_verified=True,
+        )
+        cls.table_owner, _ = myuser.objects.get_or_create(
+            name="TableOwner",
+            email="table-owner@test.com",
+            did_agree=True,
+            is_mail_verified=True,
+        )
+
+    def setUp(self):
+        self.dataset = Dataset.objects.create(
+            name="curated_dataset",
+            metadata={"name": "curated_dataset", "resources": []},
+            creator=self.curator,
+        )
+        self.client.force_authenticate(user=self.curator)
+
+    def make_table(self, name, published=True, owner=None):
+        table = Table.objects.create(
+            name=name,
+            is_publish=published,
+            oemetadata={"resources": [{"name": name}]},
+        )
+        if owner is not None:
+            UserPermission.objects.create(holder=owner, table=table, level=WRITE_PERM)
+        return table
+
+    def assign(self, table_name):
+        return self.client.post(
+            "/api/v0/datasets/curated_dataset/assign-tables/",
+            {"tables": [{"name": table_name}]},
+            format="json",
+        )
+
+    def unassign(self, table_name):
+        return self.client.post(
+            "/api/v0/datasets/curated_dataset/unassign-tables/",
+            {"tables": [{"name": table_name}]},
+            format="json",
+        )
+
+    def test_creator_can_unassign_table(self):
+        table = self.make_table("t_member")
+        self.dataset.tables.add(table)
+
+        response = self.unassign("t_member")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(self.dataset.tables.count(), 0)
+        self.assertTrue(Table.objects.filter(name="t_member").exists())
+
+    def test_unassign_requires_dataset_ownership(self):
+        table = self.make_table("t_member")
+        self.dataset.tables.add(table)
+        self.client.force_authenticate(user=self.table_owner)
+
+        response = self.unassign("t_member")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(self.dataset.tables.count(), 1)
+
+    def test_unassign_anonymous_rejected(self):
+        self.client.force_authenticate(user=None)
+        response = self.unassign("t_member")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_can_assign_published_table_without_table_permission(self):
+        self.make_table("t_published", published=True, owner=self.table_owner)
+
+        response = self.assign("t_published")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(self.dataset.tables.count(), 1)
+
+    def test_cannot_assign_draft_table_without_write_permission(self):
+        self.make_table("t_draft", published=False, owner=self.table_owner)
+
+        response = self.assign("t_draft")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(self.dataset.tables.count(), 0)
+
+    def test_can_assign_own_draft_table(self):
+        self.make_table("t_own_draft", published=False, owner=self.curator)
+
+        response = self.assign("t_own_draft")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(self.dataset.tables.count(), 1)
+
+    def test_cannot_assign_embargoed_table_without_write_permission(self):
+        table = self.make_table("t_embargoed", published=True, owner=self.table_owner)
+        Embargo.objects.create(
+            table=table,
+            date_ended=timezone.now() + timedelta(days=30),
+            duration="6_months",
+        )
+
+        response = self.assign("t_embargoed")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(self.dataset.tables.count(), 0)
+
+    def test_can_assign_own_embargoed_table(self):
+        table = self.make_table("t_own_embargoed", published=True, owner=self.curator)
+        Embargo.objects.create(
+            table=table,
+            date_ended=timezone.now() + timedelta(days=30),
+            duration="6_months",
+        )
+
+        response = self.assign("t_own_embargoed")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(self.dataset.tables.count(), 1)
+
+    def test_expired_embargo_does_not_block_assignment(self):
+        table = self.make_table("t_released", published=True, owner=self.table_owner)
+        embargo = Embargo.objects.create(
+            table=table,
+            date_ended=timezone.now(),
+            duration="6_months",
+        )
+        # Embargo.save() derives date_ended from duration, so expire it
+        # behind save()'s back to simulate an embargo that has run out.
+        Embargo.objects.filter(pk=embargo.pk).update(
+            date_ended=timezone.now() - timedelta(days=1)
+        )
+
+        response = self.assign("t_released")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(self.dataset.tables.count(), 1)
+
+
 class DatasetAPITests(APITestCase):
     @classmethod
     def setUpTestData(cls):
@@ -198,8 +336,12 @@ class DatasetAPITests(APITestCase):
 
     def test_assign_tables_to_dataset(self):
         # schema = Topic.objects.create(name="test_schema")
-        Table.objects.create(name="t1", oemetadata=self.setUpResourceMetadata("t1"))
-        Table.objects.create(name="t2", oemetadata=self.setUpResourceMetadata("t2"))
+        Table.objects.create(
+            name="t1", is_publish=True, oemetadata=self.setUpResourceMetadata("t1")
+        )
+        Table.objects.create(
+            name="t2", is_publish=True, oemetadata=self.setUpResourceMetadata("t2")
+        )
         dataset = Dataset.objects.create(
             name="test_dataset", metadata={"name": "test_dataset"}, creator=self.user
         )
