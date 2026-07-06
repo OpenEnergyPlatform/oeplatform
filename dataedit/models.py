@@ -468,6 +468,14 @@ class Dataset(models.Model):
     metadata = models.JSONField(null=False, default=dict)
     tables = models.ManyToManyField("Table", related_name="datasets", blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    # nullable so datasets created before ownership existed survive the migration
+    creator = models.ForeignKey(
+        "login.myuser",
+        on_delete=models.SET_NULL,
+        related_name="datasets_created",
+        null=True,
+        blank=True,
+    )
 
     def update_resources_from_tables(self):
         """

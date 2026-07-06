@@ -33,6 +33,9 @@ SPDX-License-Identifier: CC0-1.0
   - Datasets and assigned Resources are stored in the django database using a
     m:n relation with tables to read the oemetadata.
   - Rest api implementation
+  - Datasets are creator-owned: creating one requires login and records the
+    creator; only the creator can update, delete or assign tables. Reading
+    datasets stays public.
 - The metadata api now also syncs the data schema documented in the metadata
   with the table schema available in the database
   [(#2290)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2290)
