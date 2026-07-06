@@ -261,7 +261,7 @@ def assert_dataset_ownership(user, dataset: Dataset) -> None:
 
 
 class DatasetsListCreate(generics.ListCreateAPIView):
-    queryset = Dataset.objects.all()
+    queryset = Dataset.objects.prefetch_related("tables")
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_serializer_class(self):
@@ -279,7 +279,10 @@ class DatasetsListCreate(generics.ListCreateAPIView):
         )
 
         return Response(
-            {"id": dataset.pk, "metadata": dataset.metadata},
+            {
+                "id": dataset.pk,
+                "metadata": DatasetReadSerializer(dataset).data["metadata"],
+            },
             status=status.HTTP_201_CREATED,
         )
 
@@ -311,6 +314,11 @@ class DatasetManager(APIView):
         assert_dataset_ownership(request.user, dataset)
         serializer = DatasetCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
+        if serializer.validated_data["name"] != dataset.name:
+            raise ValidationError(
+                {"name": "The dataset name is fixed at creation and can not change."}
+            )
 
         dataset.metadata = assemble_dataset_metadata(serializer.validated_data)
         dataset.save()
@@ -370,8 +378,6 @@ class AssignDatasetTables(APIView):
             dataset.tables.add(table)
             added_tables.append(table.name)
 
-        dataset.update_resources_from_tables()
-
         return Response(
             {
                 "message": f"Added {len(added_tables)} tables.",
@@ -408,8 +414,6 @@ class UnassignDatasetTables(APIView):
             else:
                 dataset.tables.remove(table)
                 removed_tables.append(table.name)
-
-        dataset.update_resources_from_tables()
 
         return Response(
             {

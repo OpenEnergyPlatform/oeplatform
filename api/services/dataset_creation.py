@@ -15,7 +15,9 @@ def assemble_dataset_metadata(
     # set the context
     oemetadata = deepcopy(oemetadata)
     oemetadata["@context"] = OEMETADATA_V20_EXAMPLE["@context"]
-    oemetadata["resources"] = []  # Remove resources
+    # resources are never stored on the dataset; they are assembled live
+    # from the member tables on every read
+    oemetadata.pop("resources", None)
 
     oemetadata["@id"] = validated_data.get("at_id")
     oemetadata["name"] = validated_data["name"]

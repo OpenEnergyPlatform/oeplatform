@@ -285,6 +285,103 @@ class DatasetCurationRulesTests(APITestCase):
         self.assertEqual(self.dataset.tables.count(), 1)
 
 
+class DatasetDerivedResourcesTests(APITestCase):
+    """Resources are assembled live from member tables on every read."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.creator, _ = myuser.objects.get_or_create(
+            name="ResourceReader",
+            email="resource-reader@test.com",
+            did_agree=True,
+            is_mail_verified=True,
+        )
+
+    def setUp(self):
+        self.client.force_authenticate(user=self.creator)
+        self.dataset = Dataset.objects.create(
+            name="derived_dataset",
+            metadata={
+                "name": "derived_dataset",
+                "title": "Derived",
+                "description": "Dataset with derived resources",
+            },
+            creator=self.creator,
+        )
+        self.table = Table.objects.create(
+            name="t_source",
+            is_publish=True,
+            oemetadata={"resources": [{"name": "t_source", "title": "Original"}]},
+        )
+        self.dataset.tables.add(self.table)
+
+    def read_resources(self):
+        response = self.client.get("/api/v0/datasets/derived_dataset/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        return response.data["metadata"]["resources"]
+
+    def test_detail_read_assembles_resources_from_tables(self):
+        resources = self.read_resources()
+        self.assertEqual(len(resources), 1)
+        self.assertEqual(resources[0]["name"], "t_source")
+
+    def test_table_metadata_edits_are_reflected_without_reassign(self):
+        self.table.oemetadata = {
+            "resources": [{"name": "t_source", "title": "Corrected"}]
+        }
+        self.table.save()
+
+        resources = self.read_resources()
+        self.assertEqual(resources[0]["title"], "Corrected")
+
+    def test_dataset_update_does_not_change_resources(self):
+        payload = {
+            "name": "derived_dataset",
+            "title": "New Title",
+            "description": "New description",
+        }
+        response = self.client.put(
+            "/api/v0/datasets/derived_dataset/", payload, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        resources = self.read_resources()
+        self.assertEqual(len(resources), 1)
+        self.assertEqual(resources[0]["name"], "t_source")
+
+    def test_rename_on_update_is_rejected(self):
+        payload = {
+            "name": "renamed_dataset",
+            "title": "New Title",
+            "description": "New description",
+        }
+        response = self.client.put(
+            "/api/v0/datasets/derived_dataset/", payload, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertTrue(Dataset.objects.filter(name="derived_dataset").exists())
+        self.assertFalse(Dataset.objects.filter(name="renamed_dataset").exists())
+
+    def test_create_rejects_non_slug_name(self):
+        payload = {
+            "name": "not a valid name!",
+            "title": "Bad Name",
+            "description": "Should be rejected",
+        }
+        response = self.client.post("/api/v0/datasets/", payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(Dataset.objects.filter(metadata__title="Bad Name").exists())
+
+    def test_no_resource_copy_is_persisted(self):
+        self.client.post(
+            "/api/v0/datasets/derived_dataset/assign-tables/",
+            {"tables": [{"name": "t_source"}]},
+            format="json",
+        )
+        self.dataset.refresh_from_db()
+        self.assertNotIn("resources", self.dataset.metadata)
+
+
 class DatasetAPITests(APITestCase):
     @classmethod
     def setUpTestData(cls):
@@ -360,7 +457,9 @@ class DatasetAPITests(APITestCase):
         self.assertEqual(response.status_code, 200)
         dataset.refresh_from_db()
         self.assertEqual(len(dataset.tables.all()), 2)
-        self.assertEqual(len(dataset.metadata["resources"]), 2)
+
+        detail = self.client.get("/api/v0/datasets/test_dataset/")
+        self.assertEqual(len(detail.data["metadata"]["resources"]), 2)
 
     def test_list_resources_for_dataset(self):
         schema = Topic.objects.create(name="test_schema")
@@ -372,7 +471,6 @@ class DatasetAPITests(APITestCase):
             name="test_dataset", metadata=self.setUpDatasetMetadata("test_dataset")
         )
         dataset.tables.add(table)
-        dataset.update_resources_from_tables()
 
         response = self.client.get(
             f"/api/v0/datasets/{dataset.name}/resources/"

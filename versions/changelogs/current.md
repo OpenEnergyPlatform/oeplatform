@@ -40,6 +40,10 @@ SPDX-License-Identifier: CC0-1.0
     Assigning follows a curation model: any published table can be added to a
     dataset; draft tables and tables under an active embargo only by users with
     write permission on the table.
+  - Dataset resource metadata is assembled live from the member tables on every
+    read instead of being stored on the dataset, so it can no longer go stale
+    after table metadata edits. Dataset names are slug-validated and fixed at
+    creation (renaming would break URLs and references).
 - The metadata api now also syncs the data schema documented in the metadata
   with the table schema available in the database
   [(#2290)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2290)

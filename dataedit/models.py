@@ -477,14 +477,17 @@ class Dataset(models.Model):
         blank=True,
     )
 
-    def update_resources_from_tables(self):
+    def resource_entries(self):
+        """Assemble the oemetadata `resources` list live from member tables.
+
+        The list is never persisted on the dataset (ADR 0001): tables own
+        their resource metadata and every read assembles the current state.
         """
-        Rebuild the `resources` field in OEMetadata based on linked tables.
-        """
-        self.metadata["resources"] = [
-            table.oemetadata["resources"][0] for table in self.tables.all()
+        return [
+            table.oemetadata["resources"][0]
+            for table in self.tables.all()
+            if table.oemetadata and table.oemetadata.get("resources")
         ]
-        self.save()
 
 
 class Embargo(models.Model):
