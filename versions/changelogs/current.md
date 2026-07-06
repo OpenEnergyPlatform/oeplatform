@@ -35,6 +35,10 @@ SPDX-License-Identifier: CC0-1.0
 
 - Fix "Add data set" button in database section
   [(#2359)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2359)
+  
+- Fixed the documentation workflow by correcting an invalid `mkdocstrings`
+  reference to `TablePeerReviewContributorView`.
+  [(#2360)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2350)
 
 ## Documentation updates
 
