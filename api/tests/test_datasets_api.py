@@ -267,6 +267,19 @@ class DatasetCurationRulesTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(self.dataset.tables.count(), 1)
 
+    def test_assign_mix_of_known_and_unknown_tables(self):
+        self.make_table("t_known", published=True)
+
+        response = self.client.post(
+            "/api/v0/datasets/curated_dataset/assign-tables/",
+            {"tables": [{"name": "t_known"}, {"name": "t_unknown"}]},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["added"], ["t_known"])
+        self.assertEqual(response.data["missing"], [{"name": "t_unknown"}])
+        self.assertEqual(self.dataset.tables.count(), 1)
+
     def test_expired_embargo_does_not_block_assignment(self):
         table = self.make_table("t_released", published=True, owner=self.table_owner)
         embargo = Embargo.objects.create(

@@ -260,6 +260,37 @@ def assert_dataset_ownership(user, dataset: Dataset) -> None:
         raise PermissionDenied("Only the dataset creator may modify this dataset.")
 
 
+def user_may_assign_table(user, table: Table) -> bool:
+    """Curation model: any published table may be assigned to a dataset;
+    draft tables and tables under an active embargo only by users holding
+    write permission on the table (owners staging a release)."""
+    if table.is_publish and not check_embargo(table):
+        return True
+    return user.has_write_permissions(table.name)
+
+
+def load_owned_dataset_from_request(request, dataset_name: str):
+    """Shared prologue of the dataset membership endpoints: validate the
+    table list, load the dataset and enforce ownership.
+
+    Returns (dataset, table_refs) or (error_response, None) when the
+    dataset does not exist.
+    """
+    serializer = DatasetAssignTablesSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+
+    try:
+        dataset = Dataset.objects.get(name=dataset_name)
+    except Dataset.DoesNotExist:
+        return (
+            Response({"error": "Dataset not found"}, status=status.HTTP_404_NOT_FOUND),
+            None,
+        )
+
+    assert_dataset_ownership(request.user, dataset)
+    return dataset, serializer.validated_data["tables"]
+
+
 class DatasetsListCreate(generics.ListCreateAPIView):
     queryset = Dataset.objects.prefetch_related("tables")
     permission_classes = [IsAuthenticatedOrReadOnly]
@@ -337,17 +368,9 @@ class AssignDatasetTables(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, dataset_name):
-        serializer = DatasetAssignTablesSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        table_refs = serializer.validated_data["tables"]
-
-        try:
-            dataset = Dataset.objects.get(name=dataset_name)
-        except Dataset.DoesNotExist:
-            return Response({"error": "Dataset not found"}, status=404)
-
-        assert_dataset_ownership(request.user, dataset)
+        dataset, table_refs = load_owned_dataset_from_request(request, dataset_name)
+        if table_refs is None:
+            return dataset
 
         missing = []
         tables = []
@@ -358,14 +381,10 @@ class AssignDatasetTables(APIView):
             except Table.DoesNotExist:
                 missing.append(table_ref)
 
-        # Curation model: any published table may be assigned; draft tables
-        # and tables under an active embargo only by users holding write
-        # permission on the table (owners staging a release).
         forbidden = [
             table.name
             for table in tables
-            if (not table.is_publish or check_embargo(table))
-            and not request.user.has_write_permissions(table.name)
+            if not user_may_assign_table(request.user, table)
         ]
         if forbidden:
             raise PermissionDenied(
@@ -384,7 +403,7 @@ class AssignDatasetTables(APIView):
                 "added": added_tables,
                 "missing": missing,
             },
-            status=200,
+            status=status.HTTP_200_OK,
         )
 
 
@@ -392,17 +411,9 @@ class UnassignDatasetTables(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, dataset_name):
-        serializer = DatasetAssignTablesSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        table_refs = serializer.validated_data["tables"]
-
-        try:
-            dataset = Dataset.objects.get(name=dataset_name)
-        except Dataset.DoesNotExist:
-            return Response({"error": "Dataset not found"}, status=404)
-
-        assert_dataset_ownership(request.user, dataset)
+        dataset, table_refs = load_owned_dataset_from_request(request, dataset_name)
+        if table_refs is None:
+            return dataset
 
         missing = []
         removed_tables = []
@@ -421,7 +432,7 @@ class UnassignDatasetTables(APIView):
                 "removed": removed_tables,
                 "missing": missing,
             },
-            status=200,
+            status=status.HTTP_200_OK,
         )
 
 

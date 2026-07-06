@@ -480,8 +480,9 @@ class Dataset(models.Model):
     def resource_entries(self):
         """Assemble the oemetadata `resources` list live from member tables.
 
-        The list is never persisted on the dataset (ADR 0001): tables own
-        their resource metadata and every read assembles the current state.
+        The list is never persisted on the dataset: tables own their
+        resource metadata and every read assembles the current state, so
+        dataset reads can not go stale after table metadata edits.
         """
         return [
             table.oemetadata["resources"][0]
