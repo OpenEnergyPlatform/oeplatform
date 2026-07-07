@@ -369,5 +369,15 @@ class BadgeService:
     def resolve_final_badge(
         self, metadata, reviewer_choice=None, schema=None
     ) -> Optional[PeerReviewBadge]:
-        """The reviewer's explicit choice wins; otherwise suggest badge."""
-        return normalize_badge(reviewer_choice) or self.suggest_badge(metadata, schema)
+        """The reviewer's explicit choice wins; otherwise the auto-suggestion,
+        floored at IRON.
+
+        A finished review always earns at least IRON: the iron-tier fields are
+        technical (``schema.fields`` / ``primaryKey`` / ``foreignKeys``) that are
+        not shown to the reviewer and are guaranteed correct at table creation, so
+        they must not gate the badge. Higher tiers still require their reviewed
+        fields to be accepted (that logic stays in the strategy)."""
+        chosen = normalize_badge(reviewer_choice)
+        if chosen:
+            return chosen
+        return self.suggest_badge(metadata, schema) or PeerReviewBadge.IRON
