@@ -11,13 +11,28 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
-## Features
+### Features
 
-- Redesign the OPR Summary tab as a condensed, grouped overview with per-state
-  colored dots, comments, and clickable filters by review state.
-  [(#2345)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2345)
-
-## Bugs
+- Add Dataset rest-api and metadata based concept as specified in oemetadata /
+  frictionless
+  ([#2071](https://github.com/OpenEnergyPlatform/oeplatform/pull/2071))
+  - Resource metadata is stored for each created table.
+  - Dataset objects can be listed, created, edited and existing tables can be
+    assigned as resource
+  - Datasets and assigned Resources are stored in the django database using a
+    m:n relation with tables to read the oemetadata.
+  - Rest api implementation
+  - Datasets are creator-owned: creating one requires login and records the
+    creator; only the creator can update, delete or assign tables. Reading
+    datasets stays public.
+  - Tables can be unassigned from a dataset again (new unassign endpoint).
+    Assigning follows a curation model: any published table can be added to a
+    dataset; draft tables and tables under an active embargo only by users with
+    write permission on the table.
+  - Dataset resource metadata is assembled live from the member tables on every
+    read instead of being stored on the dataset, so it can no longer go stale
+    after table metadata edits. Dataset names are slug-validated and fixed at
+    creation (renaming would break URLs and references).
 
 - OPR review-flow fixes: keep the category tabs usable in read-only/finished
   reviews, render the contributor General tab correctly, and make the category
@@ -33,9 +48,9 @@ SPDX-License-Identifier: CC0-1.0
   percentage and auto-select and -scroll to next field.
   [(#2342)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2342)
 
-  - Fixed the documentation workflow by correcting an invalid `mkdocstrings`
-    reference to `TablePeerReviewContributorView`.
-    [(#2360)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2350)
+- Fixed the documentation workflow by correcting an invalid `mkdocstrings`
+  reference to `TablePeerReviewContributorView`.
+  [(#2360)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2350)
 
 ## Documentation updates
 
