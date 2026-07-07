@@ -48,6 +48,9 @@ SPDX-License-Identifier: CC0-1.0
   percentage and auto-select and -scroll to next field.
   [(#2342)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2342)
 
+- Fix badge system; implement tier structure and bugfixes.
+  [(#2361)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2361)
+
 - Fixed the documentation workflow by correcting an invalid `mkdocstrings`
   reference to `TablePeerReviewContributorView`.
   [(#2360)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2350)

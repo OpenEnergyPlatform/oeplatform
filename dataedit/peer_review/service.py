@@ -239,13 +239,15 @@ class ReviewService:
 
         envelope = {"reviewData": opr.review}
 
-        # Apply accepted values to the live metadata, then award the badge based
-        # on the resulting (final) metadata.
+        # Apply accepted values to the live metadata, then award the badge. The
+        # badge is computed from the review datamodel (per-field 'ok' states), so
+        # pass opr.review — not live_metadata — or the strategy falls through to
+        # its legacy metadata-presence path (see cumulative_tier_strategy).
         live_metadata = recursive_update(
             load_metadata_from_db(table=self.table_name), envelope
         )
         badge = BadgeService().resolve_final_badge(
-            live_metadata, reviewer_choice=reviewer_choice
+            opr.review, reviewer_choice=reviewer_choice
         )
         apply_badge_to_metadata(live_metadata, badge)
         save_metadata_to_db(self.table_name, live_metadata)
