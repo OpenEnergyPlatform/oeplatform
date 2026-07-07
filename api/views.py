@@ -39,6 +39,7 @@ import csv
 import itertools
 import json
 import re
+from copy import deepcopy
 
 import geoalchemy2  # noqa:F401 Although this import seems unused is has to be here
 import requests
@@ -47,13 +48,15 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import TrigramSimilarity
 from django.db.models import Q
 from django.http import Http404, HttpRequest, JsonResponse
+from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
+from oemetadata.latest.example import OEMETADATA_LATEST_EXAMPLE
 from oemetadata.latest.template import OEMETADATA_LATEST_TEMPLATE
 from rest_framework import generics, status
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.exceptions import ValidationError
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -145,11 +148,16 @@ from api.parser import (
     query_typecast_select,
 )
 from api.serializers import (
+    DatasetAssignTablesSerializer,
+    DatasetCreateSerializer,
+    DatasetReadSerializer,
+    DatasetResourceSerializer,
     EnergyframeworkSerializer,
     EnergymodelSerializer,
     ScenarioBundleScenarioDatasetSerializer,
     ScenarioDataTablesSerializer,
 )
+from api.services.dataset_creation import assemble_dataset_metadata
 from api.services.embargo import (
     EmbargoValidationError,
     apply_embargo,
@@ -163,8 +171,10 @@ from api.utils import (
     table_or_404,
 )
 from api.validators.column import validate_column_names
-from api.validators.identifier import assert_valid_table_name
-from dataedit.models import Table
+from api.validators.identifier import (
+    assert_valid_table_name,
+)
+from dataedit.models import Dataset, Table
 from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
 from modelview.models import Energyframework, Energymodel
 from oekg.utils import (
@@ -188,6 +198,14 @@ DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL_WO_QUERY = strip_query(
 
 
 class TableMetadataAPIView(APIView):
+    """
+    Important note:
+    oemetadata v2 introduces datasets which are not relevant on a table level
+    always query for metadata["resources"][0]. Keeping the complete oemetadata v2 JSON
+    makes it easy to integrate as no further changes to validation are required for now.
+    Datasets are handled in the model.Datasets & api views.
+    """
+
     @api_exception
     @method_decorator(never_cache)
     def get(self, request: Request, table: str) -> JsonLikeResponse:
@@ -215,6 +233,9 @@ class TableMetadataAPIView(APIView):
 
         if metadata is not None:
             # update/sync keywords with tags before saving metadata
+            # oemetadata v2 introduces datasets which are not relevant on a table level
+            # always query for metadata["resources"][0]
+
             keywords = metadata["resources"][0].get("keywords", []) or []
             metadata["resources"][0]["keywords"] = update_tags_from_keywords(
                 table=table_obj.name, keywords=keywords
@@ -231,6 +252,188 @@ class TableMetadataAPIView(APIView):
             return JsonResponse(metadata)
         else:
             raise APIError(error)
+
+
+def assert_dataset_ownership(user, dataset: Dataset) -> None:
+    """Datasets are creator-owned: only the creator may modify one."""
+    if dataset.creator is None or dataset.creator != user:
+        raise PermissionDenied("Only the dataset creator may modify this dataset.")
+
+
+def user_may_assign_table(user, table: Table) -> bool:
+    """Curation model: any published table may be assigned to a dataset;
+    draft tables and tables under an active embargo only by users holding
+    write permission on the table (owners staging a release)."""
+    if table.is_publish and not check_embargo(table):
+        return True
+    return user.has_write_permissions(table.name)
+
+
+def load_owned_dataset_from_request(request, dataset_name: str):
+    """Shared prologue of the dataset membership endpoints: validate the
+    table list, load the dataset and enforce ownership.
+
+    Returns (dataset, table_refs) or (error_response, None) when the
+    dataset does not exist.
+    """
+    serializer = DatasetAssignTablesSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+
+    try:
+        dataset = Dataset.objects.get(name=dataset_name)
+    except Dataset.DoesNotExist:
+        return (
+            Response({"error": "Dataset not found"}, status=status.HTTP_404_NOT_FOUND),
+            None,
+        )
+
+    assert_dataset_ownership(request.user, dataset)
+    return dataset, serializer.validated_data["tables"]
+
+
+class DatasetsListCreate(generics.ListCreateAPIView):
+    queryset = Dataset.objects.prefetch_related("tables")
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return DatasetCreateSerializer
+        return DatasetReadSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        metadata = assemble_dataset_metadata(serializer.validated_data)
+        dataset = Dataset.objects.create(
+            metadata=metadata, name=metadata["name"], creator=request.user
+        )
+
+        return Response(
+            {
+                "id": dataset.pk,
+                "metadata": DatasetReadSerializer(dataset).data["metadata"],
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class DatasetsListResources(generics.ListAPIView):
+    serializer_class = DatasetResourceSerializer
+
+    def get_queryset(self):
+        dataset_name = self.kwargs["dataset_name"]
+        dataset = get_object_or_404(Dataset, name=dataset_name)
+        return dataset.tables.all()
+
+
+class DatasetManager(APIView):
+    """
+    View to retrieve, update, or delete a single dataset's metadata.
+    URL: /v0/datasets/<dataset_name>/
+    """
+
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get(self, request, dataset_name):
+        dataset = get_object_or_404(Dataset, name=dataset_name)
+        serializer = DatasetReadSerializer(dataset)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request, dataset_name):
+        dataset = get_object_or_404(Dataset, name=dataset_name)
+        assert_dataset_ownership(request.user, dataset)
+        serializer = DatasetCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        if serializer.validated_data["name"] != dataset.name:
+            raise ValidationError(
+                {"name": "The dataset name is fixed at creation and can not change."}
+            )
+
+        dataset.metadata = assemble_dataset_metadata(serializer.validated_data)
+        dataset.save()
+        return Response({"message": "Dataset updated"}, status=status.HTTP_200_OK)
+
+    def delete(self, request, dataset_name):
+        dataset = get_object_or_404(Dataset, name=dataset_name)
+        assert_dataset_ownership(request.user, dataset)
+        dataset.delete()
+        return Response(
+            {"message": "Dataset deleted"}, status=status.HTTP_204_NO_CONTENT
+        )
+
+
+class AssignDatasetTables(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, dataset_name):
+        dataset, table_refs = load_owned_dataset_from_request(request, dataset_name)
+        if table_refs is None:
+            return dataset
+
+        missing = []
+        tables = []
+
+        for table_ref in table_refs:
+            try:
+                tables.append(Table.load(table_ref["name"]))
+            except Table.DoesNotExist:
+                missing.append(table_ref)
+
+        forbidden = [
+            table.name
+            for table in tables
+            if not user_may_assign_table(request.user, table)
+        ]
+        if forbidden:
+            raise PermissionDenied(
+                "Draft or embargoed tables require write permission on the "
+                f"table to be assigned: {', '.join(forbidden)}."
+            )
+
+        added_tables = []
+        for table in tables:
+            dataset.tables.add(table)
+            added_tables.append(table.name)
+
+        return Response(
+            {
+                "message": f"Added {len(added_tables)} tables.",
+                "added": added_tables,
+                "missing": missing,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+class UnassignDatasetTables(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, dataset_name):
+        dataset, table_refs = load_owned_dataset_from_request(request, dataset_name)
+        if table_refs is None:
+            return dataset
+
+        missing = []
+        removed_tables = []
+
+        for table_ref in table_refs:
+            table = dataset.tables.filter(name=table_ref["name"]).first()
+            if table is None:
+                missing.append(table_ref)
+            else:
+                dataset.tables.remove(table)
+                removed_tables.append(table.name)
+
+        return Response(
+            {
+                "message": f"Removed {len(removed_tables)} tables.",
+                "removed": removed_tables,
+                "missing": missing,
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 class TableAPIView(APIView):
@@ -386,6 +589,36 @@ class TableAPIView(APIView):
 
         metadata = payload_query.get("metadata")
         if metadata:
+            set_table_metadata(table=table, metadata=metadata)
+        else:
+            # If no metadata is provided, we create a minimal metadata object
+            metadata = deepcopy(OEMETADATA_LATEST_TEMPLATE)
+            metadata["@context"] = OEMETADATA_LATEST_EXAMPLE["@context"]
+            metadata["metaMetadata"] = OEMETADATA_LATEST_EXAMPLE["metaMetadata"]
+
+            # Set basic resource info
+            resource = {
+                "name": table,
+            }
+
+            # Update the first resource - there will only be one resource.
+            # The dataset section is managed by the database implementation ...
+            metadata["resources"][0].update(resource)
+
+            # Build schema fields from columns
+            fields = []
+            for col in columns:
+                field = {
+                    "name": col["name"],
+                    "type": col["data_type"],
+                    "nullable": col.get("is_nullable", True),
+                    # add more field metadata as needed
+                }
+                fields.append(field)
+
+            # Replace the fields list entirely
+            metadata["resources"][0]["schema"]["fields"] = fields
+
             set_table_metadata(table=table, metadata=metadata)
 
         return JsonResponse({}, status=status.HTTP_201_CREATED)
