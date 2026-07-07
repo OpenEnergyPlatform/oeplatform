@@ -104,12 +104,17 @@ class PublicDatasetListTests(TestCase):
         )
         self.assertEqual(response.status_code, 404)
 
-    def test_draft_pseudo_topic_has_no_dataset_list(self):
-        Topic.objects.get_or_create(name=PSEUDO_TOPIC_DRAFT)
+    def test_draft_pseudo_topic_shows_placeholder_instead_of_datasets(self):
+        # the page must not 404 (the toggle links here from the draft
+        # table list) but never lists datasets either
+        self.make_dataset("never_a_draft_listing", topic=None)
+
         response = self.client.get(
             reverse("dataedit:datasets-in-topic", kwargs={"topic": PSEUDO_TOPIC_DRAFT})
         )
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Datasets are not listed under the draft topic")
+        self.assertNotContains(response, "never_a_draft_listing")
 
     def test_pagination(self):
         for index in range(ITEMS_PER_PAGE + 1):

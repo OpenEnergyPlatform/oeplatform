@@ -92,7 +92,16 @@
         {% endfor %}
       </div>
     {% else %}
-      <p class="mt-4">No datasets have been published yet.</p>
+      {% if is_draft_topic %}
+        <p class="mt-4">
+          Datasets are not listed under the draft topic. A dataset appears in
+          the topics of its member tables once it has topics assigned — switch
+          back to Tables to browse the drafts, or pick another topic to browse
+          datasets.
+        </p>
+      {% else %}
+        <p class="mt-4">No datasets have been published yet.</p>
+      {% endif %}
     {% endif %}
   </div>
 {% endblock data_content %}

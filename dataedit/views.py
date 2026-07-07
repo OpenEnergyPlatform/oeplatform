@@ -443,9 +443,9 @@ def datasets_view(request: HttpRequest, topic: str) -> HttpResponse:
     description, resource count and combined size of the member tables.
     Datasets never list under the draft pseudo-topic — it stays
     tables-only (dataset drafts become private with the publish PR)."""
-    if topic == PSEUDO_TOPIC_DRAFT:
-        raise Http404("Datasets are not listed under the draft topic.")
-    get_object_or_404(Topic, name=topic)
+    is_draft_topic = topic == PSEUDO_TOPIC_DRAFT
+    if not is_draft_topic:
+        get_object_or_404(Topic, name=topic)
 
     searched_query_string = request.GET.get("query")
     searched_tag_ids = request.GET.getlist("tags")
@@ -490,6 +490,7 @@ def datasets_view(request: HttpRequest, topic: str) -> HttpResponse:
         {
             "datasets_paginated": datasets_paginated,
             "topic": topic,
+            "is_draft_topic": is_draft_topic,
             "query": searched_query_string,
             "tags": searched_tag_ids,
             "params_wo_page": params_wo_page,
