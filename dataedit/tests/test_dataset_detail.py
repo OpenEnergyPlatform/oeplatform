@@ -119,6 +119,31 @@ class DatasetDetailTests(TestCase):
             ["t_heat_published", "t_heat_draft"],
         )
 
+    def test_created_dataset_document_conforms_to_oemetadata_spec(self):
+        # end to end: dashboard create -> metadata endpoint -> omi
+        # validation (license check off: datasets carry no own license yet,
+        # licenses live on the resources)
+        from omi.validation import validate_metadata
+
+        self.client.force_login(self.creator)
+        self.client.post(
+            reverse("login:datasets", args=[self.creator.id]),
+            {
+                "name": "spec_valid_ds",
+                "title": "Spec Valid Dataset",
+                "description": "Checked against the oemetadata v2 spec",
+            },
+        )
+
+        response = self.client.get(
+            reverse(
+                "dataedit:dataset-metadata",
+                kwargs={"dataset_name": "spec_valid_ds"},
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+        validate_metadata(response.json(), check_license=False)  # must not raise
+
     def test_creator_sees_dashboard_shortcut(self):
         self.client.force_login(self.creator)
         response = self.client.get(self.detail_url)
