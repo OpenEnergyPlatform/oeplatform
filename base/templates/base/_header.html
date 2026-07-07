@@ -125,31 +125,33 @@
         <a class="dropdown-item"
            href="{{ EXTERNAL_URLS.open_mastr }}"
            target="_blank"><i class="fas fa-external-link-alt"></i> Open MaStR</a>
-      </div>
-    </li>
-    <li class="nav-item dropdown">
-      <a class="nav-link dropdown-toggle"
-         href="#"
-         id="navbarDropdownAbout"
-         role="button"
-         data-bs-toggle="dropdown"
-         aria-haspopup="true"
-         aria-expanded="false">About</a>
-      <div class="dropdown-menu" aria-labelledby="navbarDropdownAbout">
-        <a class="dropdown-item" href="{% url 'base:about' %}">Overview</a>
-        <a class="dropdown-item" href="{% url 'base:oefamily-sc' %}">Open Energy Family Steering Committee</a>
-        <a class="dropdown-item"
-           href="{{ EXTERNAL_URLS.compendium }}"
-           target="_blank"><i class="fas fa-external-link-alt"></i> Compendium</a>
-        <a class="dropdown-item"
-           href="{{ EXTERNAL_URLS.mkdocs }}"
-           target="_blank"><i class="fas fa-external-link-alt"></i> Developer Documentation</a>
-        <a class="dropdown-item"
-           href="{{ EXTERNAL_URLS.readthedocs }}"
-           target="_blank"><i class="fas fa-external-link-alt"></i> REST-API Documentation</a>
-      </div>
-    </li>
-  </ul>
+      <a class="dropdown-item" href="https://rego-n.org/" target="_blank"><i class="fas fa-external-link-alt"></i>
+    eGon</a>
+  </div>
+</li>
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle"
+     href="#"
+     id="navbarDropdownAbout"
+     role="button"
+     data-bs-toggle="dropdown"
+     aria-haspopup="true"
+     aria-expanded="false">About</a>
+  <div class="dropdown-menu" aria-labelledby="navbarDropdownAbout">
+    <a class="dropdown-item" href="{% url 'base:about' %}">Overview</a>
+    <a class="dropdown-item" href="{% url 'base:oefamily-sc' %}">Open Energy Family Steering Committee</a>
+    <a class="dropdown-item"
+       href="{{ EXTERNAL_URLS.compendium }}"
+       target="_blank"><i class="fas fa-external-link-alt"></i> Compendium</a>
+    <a class="dropdown-item"
+       href="{{ EXTERNAL_URLS.mkdocs }}"
+       target="_blank"><i class="fas fa-external-link-alt"></i> Developer Documentation</a>
+    <a class="dropdown-item"
+       href="{{ EXTERNAL_URLS.readthedocs }}"
+       target="_blank"><i class="fas fa-external-link-alt"></i> REST-API Documentation</a>
+  </div>
+</li>
+</ul>
 </div>
 <div class="ms-auto">
   {% if request.user.is_authenticated %}
