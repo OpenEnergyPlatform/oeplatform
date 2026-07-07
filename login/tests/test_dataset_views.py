@@ -131,3 +131,111 @@ class DatasetDashboardTests(TestCase):
         response = self.client.get(reverse("login:tables", args=[self.user.id]))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "tables")
+
+
+class DatasetQuickActionsTests(TestCase):
+    """Edit and delete quick actions on the dashboard dataset cards."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user, _ = myuser.objects.get_or_create(
+            name="QuickActionUser",
+            email="quick-action-user@test.com",
+            did_agree=True,
+            is_mail_verified=True,
+        )
+        cls.other_user, _ = myuser.objects.get_or_create(
+            name="OtherQuickActionUser",
+            email="other-quick-action-user@test.com",
+            did_agree=True,
+            is_mail_verified=True,
+        )
+
+    def setUp(self):
+        self.client.force_login(self.user)
+        self.dataset = Dataset.objects.create(
+            name="quick_dataset",
+            metadata={
+                "name": "quick_dataset",
+                "title": "Quick Dataset",
+                "description": "A dataset with quick actions",
+            },
+            creator=self.user,
+        )
+        self.edit_url = reverse(
+            "login:dataset-edit", args=[self.user.id, "quick_dataset"]
+        )
+        self.delete_url = reverse(
+            "login:dataset-delete", args=[self.user.id, "quick_dataset"]
+        )
+
+    def test_edit_form_keeps_name_readonly(self):
+        response = self.client.get(self.edit_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "quick_dataset")
+        self.assertContains(response, 'name="title"')
+        self.assertNotContains(response, 'name="name"')
+
+    def test_edit_updates_title_and_description(self):
+        response = self.client.post(
+            self.edit_url,
+            {"title": "New Title", "description": "New description"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.dataset.refresh_from_db()
+        self.assertEqual(self.dataset.metadata["title"], "New Title")
+        self.assertEqual(self.dataset.metadata["description"], "New description")
+        self.assertEqual(self.dataset.name, "quick_dataset")
+        self.assertContains(response, "New Title")
+
+    def test_edit_validation_error_is_shown_inline(self):
+        response = self.client.post(
+            self.edit_url, {"title": "", "description": "Still here"}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.dataset.refresh_from_db()
+        self.assertEqual(self.dataset.metadata["title"], "Quick Dataset")
+        self.assertContains(response, "invalid-feedback")
+
+    def test_edit_forbidden_for_non_creator(self):
+        self.client.force_login(self.other_user)
+        response = self.client.post(
+            self.edit_url,
+            {"title": "Hijacked", "description": "Should fail"},
+        )
+        self.assertEqual(response.status_code, 403)
+        self.dataset.refresh_from_db()
+        self.assertEqual(self.dataset.metadata["title"], "Quick Dataset")
+
+    def test_delete_removes_only_the_dataset(self):
+        from dataedit.models import Table
+
+        table = Table.objects.create(
+            name="t_survives",
+            oemetadata={"resources": [{"name": "t_survives"}]},
+        )
+        self.dataset.tables.add(table)
+
+        response = self.client.post(self.delete_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Dataset.objects.filter(name="quick_dataset").exists())
+        self.assertTrue(Table.objects.filter(name="t_survives").exists())
+        self.assertNotContains(response, "quick_dataset")
+
+    def test_delete_forbidden_for_non_creator(self):
+        self.client.force_login(self.other_user)
+        response = self.client.post(self.delete_url)
+        self.assertEqual(response.status_code, 403)
+        self.assertTrue(Dataset.objects.filter(name="quick_dataset").exists())
+
+    def test_delete_confirm_copy_mentions_tables_survive(self):
+        response = self.client.get(reverse("login:datasets", args=[self.user.id]))
+        self.assertContains(response, "hx-confirm")
+        self.assertContains(response, "not deleted")
+
+    def test_actions_not_rendered_for_other_users(self):
+        self.client.force_login(self.other_user)
+        response = self.client.get(reverse("login:datasets", args=[self.user.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "quick_dataset")
+        self.assertNotContains(response, "hx-confirm")

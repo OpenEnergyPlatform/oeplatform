@@ -39,8 +39,12 @@ from django.views.generic.edit import DeleteView
 from rest_framework.authtoken.models import Token
 
 import login.permissions
-from api.serializers import DatasetCreateSerializer
-from api.services.dataset_creation import DatasetNameTaken, create_dataset
+from api.serializers import DatasetCreateSerializer, DatasetUpdateSerializer
+from api.services.dataset_creation import (
+    DatasetNameTaken,
+    create_dataset,
+    update_dataset,
+)
 from dataedit.helper import delete_peer_review
 from dataedit.models import Dataset, PeerReviewManager, Table, Topic
 from login.forms import EditUserForm, GroupForm
@@ -178,6 +182,75 @@ class DatasetsView(LoginRequiredMixin, View):
         form_values = request.POST if form_errors else {}
         context = self._context(request, user, form_errors, form_values)
         return render(request, "login/partials/datasets_sections.html", context)
+
+
+def _owned_dataset_or_none(request, dataset_name):
+    """Load a dataset if the requesting user is its creator, else None."""
+    dataset = get_object_or_404(Dataset, name=dataset_name)
+    if dataset.creator is None or dataset.creator != request.user:
+        return None
+    return dataset
+
+
+@login_required
+def dataset_edit_view(request, user_id, dataset_name):
+    """Inline edit of a dataset card: title and description only, the
+    name is immutable. GET returns the form partial, POST saves and
+    returns the refreshed card."""
+    dataset = _owned_dataset_or_none(request, dataset_name)
+    if dataset is None:
+        return HttpResponseForbidden("Only the dataset creator may edit this dataset.")
+
+    profile_user = get_object_or_404(OepUser, pk=user_id)
+    if request.method == "POST":
+        serializer = DatasetUpdateSerializer(data=request.POST)
+        if serializer.is_valid():
+            update_dataset(dataset, serializer.validated_data)
+            return render(
+                request,
+                "login/partials/dataset_card.html",
+                {"dataset": dataset, "profile_user": profile_user},
+            )
+        form_errors = {
+            field: " ".join(str(message) for message in messages)
+            for field, messages in serializer.errors.items()
+        }
+        form_values = request.POST
+    else:
+        form_errors = {}
+        form_values = {
+            "title": dataset.metadata.get("title", ""),
+            "description": dataset.metadata.get("description", ""),
+        }
+
+    return render(
+        request,
+        "login/partials/dataset_edit_form.html",
+        {
+            "dataset": dataset,
+            "profile_user": profile_user,
+            "form_errors": form_errors,
+            "form_values": form_values,
+        },
+    )
+
+
+@login_required
+@require_POST
+def dataset_delete_view(request, user_id, dataset_name):
+    """Delete a dataset (creator only). Member tables are never deleted.
+    Returns the refreshed datasets container for the HTMX swap."""
+    dataset = _owned_dataset_or_none(request, dataset_name)
+    if dataset is None:
+        return HttpResponseForbidden(
+            "Only the dataset creator may delete this dataset."
+        )
+
+    dataset.delete()
+
+    profile_user = get_object_or_404(OepUser, pk=user_id)
+    context = DatasetsView()._context(request, profile_user)
+    return render(request, "login/partials/datasets_sections.html", context)
 
 
 ##############################################################################

@@ -49,3 +49,19 @@ def create_dataset(validated_data: dict[str, Any], creator) -> Dataset:
 
     metadata = assemble_dataset_metadata(validated_data)
     return Dataset.objects.create(metadata=metadata, name=name, creator=creator)
+
+
+def update_dataset(dataset: Dataset, validated_data: dict[str, Any]) -> Dataset:
+    """Update the editable dataset-level fields (title, description, @id).
+
+    The name is immutable and always taken from the existing dataset; a
+    missing @id keeps the stored one.
+    """
+    data = dict(validated_data)
+    data["name"] = dataset.name
+    if not data.get("at_id"):
+        data["at_id"] = dataset.metadata.get("@id")
+
+    dataset.metadata = assemble_dataset_metadata(data)
+    dataset.save()
+    return dataset

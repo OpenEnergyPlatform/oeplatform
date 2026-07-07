@@ -1,0 +1,28 @@
+<div class="profile-table-card" id="dataset-card-{{ dataset.name }}">
+  <div class="profile-table-card__content">
+    <div class="profile-table-card__content--left">
+      <h3 class="profile-table-card__heading">{{ dataset.metadata.title|default:dataset.name }}</h3>
+      <p class="profile-table-card__subheading">{{ dataset.name }}</p>
+      {% if dataset.metadata.description %}
+        <p>{{ dataset.metadata.description|truncatechars:120 }}</p>
+      {% endif %}
+      <p>
+        {{ dataset.tables.count }} resource{{ dataset.tables.count|pluralize }}
+        &middot; created {{ dataset.created_at|date:"d/m/Y" }}
+      </p>
+    </div>
+    <div class="profile-table-card__content--right">
+      <button type="button"
+              class="btn btn-sm btn-outline-secondary"
+              hx-get="{% url 'login:dataset-edit' user_id=profile_user.id dataset_name=dataset.name %}"
+              hx-target="#dataset-card-{{ dataset.name }}"
+              hx-swap="outerHTML">Edit</button>
+      <button type="button"
+              class="btn btn-sm btn-outline-danger"
+              hx-post="{% url 'login:dataset-delete' user_id=profile_user.id dataset_name=dataset.name %}"
+              hx-confirm="Delete dataset '{{ dataset.name }}'? Your tables are not deleted - only the dataset and its table list are removed."
+              hx-target="#datasets-container"
+              hx-swap="outerHTML">Delete</button>
+    </div>
+  </div>
+</div>

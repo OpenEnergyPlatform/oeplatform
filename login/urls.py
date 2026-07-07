@@ -31,6 +31,8 @@ from login.views import (
     ReviewsView,
     SettingsView,
     TablesView,
+    dataset_delete_view,
+    dataset_edit_view,
     delete_peer_review_simple_view,
     group_leave_view,
     group_member_count_view,
@@ -81,6 +83,16 @@ urlpatterns = [
         r"^profile/(?P<user_id>[\d]+)/datasets$",
         DatasetsView.as_view(),
         name="datasets",
+    ),
+    re_path(
+        r"^profile/(?P<user_id>[\d]+)/datasets/(?P<dataset_name>[\w-]+)/edit$",
+        dataset_edit_view,
+        name="dataset-edit",
+    ),
+    re_path(
+        r"^profile/(?P<user_id>[\d]+)/datasets/(?P<dataset_name>[\w-]+)/delete$",
+        dataset_delete_view,
+        name="dataset-delete",
     ),
     re_path(
         r"^profile/(?P<user_id>[\d]+)/tables$",

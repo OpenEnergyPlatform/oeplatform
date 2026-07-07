@@ -58,21 +58,7 @@
         <div class="profile-tables__row">
           {% for dataset in datasets %}
             <div class="profile-tables__col">
-              <div class="profile-table-card">
-                <div class="profile-table-card__content">
-                  <div class="profile-table-card__content--left">
-                    <h3 class="profile-table-card__heading">{{ dataset.metadata.title|default:dataset.name }}</h3>
-                    <p class="profile-table-card__subheading">{{ dataset.name }}</p>
-                    {% if dataset.metadata.description %}
-                      <p>{{ dataset.metadata.description|truncatechars:120 }}</p>
-                    {% endif %}
-                    <p>
-                      {{ dataset.tables.count }} resource{{ dataset.tables.count|pluralize }}
-                      &middot; created {{ dataset.created_at|date:"d/m/Y" }}
-                    </p>
-                  </div>
-                </div>
-              </div>
+              {% include "login/partials/dataset_card.html" %}
             </div>
           {% endfor %}
         </div>

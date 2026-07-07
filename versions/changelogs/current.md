@@ -21,6 +21,12 @@ SPDX-License-Identifier: CC0-1.0
   as a validation error instead of failing.
   ([#1971](https://github.com/OpenEnergyPlatform/oeplatform/issues/1971))
 
+- Dataset quick actions on the dashboard: each dataset card can be edited inline
+  (title and description; the name stays fixed) and deleted with a confirmation
+  that makes clear the member tables are not deleted. Both actions update the
+  page without reloads and are only available to the dataset creator.
+  ([#1971](https://github.com/OpenEnergyPlatform/oeplatform/issues/1971))
+
 - Add Dataset rest-api and metadata based concept as specified in oemetadata /
   frictionless
   ([#2071](https://github.com/OpenEnergyPlatform/oeplatform/pull/2071))
