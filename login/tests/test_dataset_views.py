@@ -330,6 +330,17 @@ class DatasetResourceManagementTests(TestCase):
         self.assertNotContains(response, "t_embargoed_foreign")
         self.assertNotContains(response, "t_already_in")
 
+    def test_picker_caps_results_and_hints_at_refining(self):
+        for index in range(25):
+            self.make_table(f"t_bulk_{index:02d}", published=True)
+
+        response = self.client.get(self.search_url)
+        self.assertEqual(response.status_code, 200)
+        # capped at 20 result rows (one hx-vals per Add button) plus a
+        # hint to refine the search
+        self.assertContains(response, "hx-vals", count=20)
+        self.assertContains(response, "refine your search")
+
     def test_picker_search_filters_by_name(self):
         self.make_table("solar_capacity", published=True)
         self.make_table("wind_capacity", published=True)

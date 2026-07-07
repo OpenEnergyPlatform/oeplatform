@@ -259,13 +259,28 @@ def dataset_delete_view(request, profile_user, dataset):
     return render(request, "login/partials/datasets_sections.html", context)
 
 
+PICKER_MAX_RESULTS = 20
+
+
+def _picker_context(request, dataset, search=""):
+    """Picker results capped at PICKER_MAX_RESULTS, with a flag telling
+    the template that more matches exist (hint to refine the search)."""
+    tables = list(
+        assignable_tables_for(request.user, dataset, search)[: PICKER_MAX_RESULTS + 1]
+    )
+    return {
+        "picker_tables": tables[:PICKER_MAX_RESULTS],
+        "picker_truncated": len(tables) > PICKER_MAX_RESULTS,
+    }
+
+
 def _render_dataset_manage(request, profile_user, dataset, search=""):
     context = {
         "profile_user": profile_user,
         "dataset": dataset,
         "resources": dataset.tables.all().order_by("name"),
-        "picker_tables": assignable_tables_for(request.user, dataset, search)[:20],
         "search": search,
+        **_picker_context(request, dataset, search),
     }
     return render(request, "login/partials/dataset_manage.html", context)
 
@@ -287,7 +302,7 @@ def dataset_table_search_view(request, profile_user, dataset):
     context = {
         "profile_user": profile_user,
         "dataset": dataset,
-        "picker_tables": assignable_tables_for(request.user, dataset, search)[:20],
+        **_picker_context(request, dataset, search),
     }
     return render(request, "login/partials/dataset_table_search_results.html", context)
 

@@ -58,29 +58,25 @@
       </div>
     </div>
     {% if datasets_paginated.paginator.count > 0 %}
-      <div class="profile-tables">
-        <div class="profile-tables__row">
-          {% for dataset in datasets_paginated %}
-            <div class="profile-tables__col">
-              <div class="profile-table-card">
-                <div class="profile-table-card__content">
-                  <div class="profile-table-card__content--left">
-                    <h3 class="profile-table-card__heading">{{ dataset.metadata.title|default:dataset.name }}</h3>
-                    <p class="profile-table-card__subheading">{{ dataset.name }}</p>
-                    {% if dataset.metadata.description %}
-                      <p>{{ dataset.metadata.description|truncatechars:160 }}</p>
-                    {% endif %}
-                    <p>
-                      {{ dataset.tables.count }} resource{{ dataset.tables.count|pluralize }}
-                      &middot; Total size: {{ dataset.total_size_bytes|filesizeformat }}
-                      &middot; created {{ dataset.created_at|date:"d/m/Y" }}
-                    </p>
-                  </div>
-                </div>
+      <div class="row row-cols-1 row-cols-md-2 g-3">
+        {% for dataset in datasets_paginated %}
+          <div class="col">
+            <div class="card h-100">
+              <div class="card-body">
+                <h5 class="card-title mb-1">{{ dataset.metadata.title|default:dataset.name }}</h5>
+                <h6 class="card-subtitle text-muted mb-2">{{ dataset.name }}</h6>
+                {% if dataset.metadata.description %}
+                  <p class="card-text mb-2">{{ dataset.metadata.description|truncatechars:160 }}</p>
+                {% endif %}
+                <p class="card-text text-muted small mb-0">
+                  {{ dataset.tables.count }} resource{{ dataset.tables.count|pluralize }}
+                  &middot; Total size: {{ dataset.total_size_bytes|filesizeformat }}
+                  &middot; created {{ dataset.created_at|date:"d/m/Y" }}
+                </p>
               </div>
             </div>
-          {% endfor %}
-        </div>
+          </div>
+        {% endfor %}
       </div>
     {% else %}
       <p class="mt-4">No datasets have been published yet.</p>

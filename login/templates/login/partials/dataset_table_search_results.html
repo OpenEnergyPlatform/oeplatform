@@ -1,13 +1,13 @@
 {% if picker_tables %}
   <ul class="list-group">
     {% for table in picker_tables %}
-      <li class="list-group-item d-flex justify-content-between align-items-center">
-        <span>
+      <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
+        <span class="text-truncate">
           {{ table.human_readable_name|default:table.name }}
           {% if not table.is_publish %}<span class="badge bg-warning text-dark">Draft</span>{% endif %}
         </span>
         <button type="button"
-                class="btn btn-sm btn-outline-primary"
+                class="btn btn-sm btn-outline-primary flex-shrink-0"
                 hx-post="{% url 'login:dataset-assign' user_id=profile_user.id dataset_name=dataset.name %}"
                 hx-vals='{"table": "{{ table.name }}"}'
                 hx-target="#dataset-card-{{ dataset.name }}"
@@ -15,6 +15,11 @@
       </li>
     {% endfor %}
   </ul>
+  {% if picker_truncated %}
+    <p class="text-muted small mt-2 mb-0">
+      Showing the first {{ picker_tables|length }} matches &mdash; refine your search to find more tables.
+    </p>
+  {% endif %}
 {% else %}
-  <p>No assignable tables found.</p>
+  <p class="text-muted">No assignable tables found.</p>
 {% endif %}
