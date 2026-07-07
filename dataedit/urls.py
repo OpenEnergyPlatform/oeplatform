@@ -30,6 +30,7 @@ from dataedit.views import (
     TableWizardView,
     admin_column_view,
     admin_constraints_view,
+    datasets_view,
     metadata_widget_view,
     table_view_delete_view,
     table_view_save_view,
@@ -144,6 +145,7 @@ urlpatterns = [
         tables_view,
         name="tables-in-topic",
     ),
+    path("datasets/", datasets_view, name="dataset-list"),
     re_path(r"^$", topic_view, name="topic-list"),
     re_path(
         r"^admin/columns/",

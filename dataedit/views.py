@@ -54,6 +54,7 @@ from api.actions import (
     assert_add_tag_permission,
     data_insert,
     describe_columns,
+    list_table_sizes,
     remove_queued_column,
     remove_queued_constraint,
     table_get_row_count,
@@ -76,7 +77,7 @@ from dataedit.helper import (
 )
 from dataedit.metadata import has_valid_filled_metadata, load_metadata_from_db
 from dataedit.metadata.widget import MetaDataWidget
-from dataedit.models import Embargo
+from dataedit.models import Dataset, Embargo
 from dataedit.models import Filter as DBFilter
 from dataedit.models import PeerReview, PeerReviewManager, Table, Tag, Topic
 from dataedit.models import View as DBView
@@ -433,6 +434,30 @@ def tables_view(request: HttpRequest, topic: str) -> HttpResponse:
             "topic": topic,
             "doc_oem_builder_link": DOCUMENTATION_LINKS["oemetabuilder"],
         },
+    )
+
+
+@never_cache
+def datasets_view(request: HttpRequest) -> HttpResponse:
+    """Public, paginated card list of all datasets: name, description,
+    resource count and combined size of the member tables."""
+    datasets = Dataset.objects.order_by("-created_at").prefetch_related("tables")
+
+    paginator = Paginator(datasets, ITEMS_PER_PAGE)
+    datasets_paginated = paginator.get_page(get_page(request))
+
+    # one query for all table sizes; tables missing from the data schema
+    # (e.g. drafts) count as zero
+    sizes = {row["table_name"]: row["total_bytes"] for row in list_table_sizes()}
+    for dataset in datasets_paginated:
+        dataset.total_size_bytes = sum(
+            sizes.get(table.name, 0) for table in dataset.tables.all()
+        )
+
+    return render(
+        request,
+        "dataedit/dataedit_datasetlist.html",
+        {"datasets_paginated": datasets_paginated},
     )
 
 

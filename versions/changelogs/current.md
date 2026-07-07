@@ -35,6 +35,12 @@ SPDX-License-Identifier: CC0-1.0
   on the table pages.
   ([#1971](https://github.com/OpenEnergyPlatform/oeplatform/issues/1971))
 
+- Public dataset list: the previously disabled "Datasets" toggle on the database
+  table list is now active and shows a paginated card list of all datasets with
+  name, description, resource count and the combined size of the member tables.
+  Accessible without login; dataset detail pages follow in a later iteration.
+  ([#1971](https://github.com/OpenEnergyPlatform/oeplatform/issues/1971))
+
 - Add Dataset rest-api and metadata based concept as specified in oemetadata /
   frictionless
   ([#2071](https://github.com/OpenEnergyPlatform/oeplatform/pull/2071))

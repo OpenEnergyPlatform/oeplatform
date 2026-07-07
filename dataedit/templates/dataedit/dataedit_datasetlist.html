@@ -1,0 +1,89 @@
+{% extends "dataedit/filter.html" %}
+{% load static %}
+{% block title %}- Datasets{% endblock %}
+{% block site-header %}
+  <div class="main-header">
+    <h1 class="main-header__title">Database</h1>
+    <div class="main-header__wizard">
+      <a href="{% url 'dataedit:topic-list' %}">Topics</a> / Datasets
+    </div>
+  </div>
+{% endblock site-header %}
+{% block data_content %}
+  <div id="dataset-list-container">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3 mt-4">
+      <div class="btn-group shadow-sm" role="group" aria-label="View toggle">
+        <input type="radio"
+               class="btn-check"
+               name="viewToggle"
+               id="toggleTables"
+               autocomplete="off"
+               onclick="window.location.href='{% url 'dataedit:topic-list' %}'" />
+        <label class="btn btn-outline-primary" for="toggleTables">Tables</label>
+        <input type="radio"
+               class="btn-check"
+               name="viewToggle"
+               id="toggleDatasets"
+               autocomplete="off"
+               checked />
+        <label class="btn btn-outline-primary" for="toggleDatasets">Datasets</label>
+      </div>
+      <div class="d-flex align-items-center flex-wrap gap-3">
+        {% if datasets_paginated.paginator.count > 0 %}
+          <p class="mb-0 text-secondary">
+            Showing <span class="fw-medium text-dark">{{ datasets_paginated.start_index }}</span> to <span class="fw-medium text-dark">{{ datasets_paginated.end_index }}</span> of <span class="fw-medium text-dark">{{ datasets_paginated.paginator.count }}</span> results
+          </p>
+          {% if datasets_paginated.paginator.num_pages > 1 %}
+            <nav aria-label="Dataset list pagination">
+              <ul class="pagination pagination-sm mb-0">
+                {% if datasets_paginated.has_previous %}
+                  <li class="page-item">
+                    <a class="page-link shadow-sm"
+                       href="?page={{ datasets_paginated.previous_page_number }}">&laquo;</a>
+                  </li>
+                {% endif %}
+                <li class="page-item">
+                  <span class="page-link shadow-sm">{{ datasets_paginated.number }} / {{ datasets_paginated.paginator.num_pages }}</span>
+                </li>
+                {% if datasets_paginated.has_next %}
+                  <li class="page-item">
+                    <a class="page-link shadow-sm"
+                       href="?page={{ datasets_paginated.next_page_number }}">&raquo;</a>
+                  </li>
+                {% endif %}
+              </ul>
+            </nav>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+    {% if datasets_paginated.paginator.count > 0 %}
+      <div class="profile-tables">
+        <div class="profile-tables__row">
+          {% for dataset in datasets_paginated %}
+            <div class="profile-tables__col">
+              <div class="profile-table-card">
+                <div class="profile-table-card__content">
+                  <div class="profile-table-card__content--left">
+                    <h3 class="profile-table-card__heading">{{ dataset.metadata.title|default:dataset.name }}</h3>
+                    <p class="profile-table-card__subheading">{{ dataset.name }}</p>
+                    {% if dataset.metadata.description %}
+                      <p>{{ dataset.metadata.description|truncatechars:160 }}</p>
+                    {% endif %}
+                    <p>
+                      {{ dataset.tables.count }} resource{{ dataset.tables.count|pluralize }}
+                      &middot; Total size: {{ dataset.total_size_bytes|filesizeformat }}
+                      &middot; created {{ dataset.created_at|date:"d/m/Y" }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% else %}
+      <p class="mt-4">No datasets have been published yet.</p>
+    {% endif %}
+  </div>
+{% endblock data_content %}
