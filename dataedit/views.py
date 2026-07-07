@@ -29,7 +29,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.core.paginator import Paginator
-from django.db.models import Count, F
+from django.db.models import Count, F, Q
 from django.db.utils import IntegrityError
 from django.http import (
     Http404,
@@ -447,10 +447,30 @@ def datasets_view(request: HttpRequest, topic: str) -> HttpResponse:
         raise Http404("Datasets are not listed under the draft topic.")
     get_object_or_404(Topic, name=topic)
 
+    searched_query_string = request.GET.get("query")
+    searched_tag_ids = request.GET.getlist("tags")
+
+    # all query params without "page", so pagination keeps the filter state
+    params_wo_page = request.GET.copy()
+    params_wo_page.pop("page", None)
+    params_wo_page = params_wo_page.urlencode()
+
+    Tag.increment_usage_count_many(searched_tag_ids)
+
+    datasets = Dataset.objects.filter(topics__name=topic)
+    if searched_query_string:
+        datasets = datasets.filter(
+            Q(name__icontains=searched_query_string)
+            | Q(metadata__title__icontains=searched_query_string)
+            | Q(metadata__description__icontains=searched_query_string)
+        )
+    # a dataset carries a tag when any member table does; several selected
+    # tags AND together, mirroring the table filter's semantics
+    for tag_id in searched_tag_ids:
+        datasets = datasets.filter(tables__tags__pk=tag_id)
+
     datasets = (
-        Dataset.objects.filter(topics__name=topic)
-        .order_by("-created_at")
-        .prefetch_related("tables", "topics")
+        datasets.distinct().order_by("-created_at").prefetch_related("tables", "topics")
     )
 
     paginator = Paginator(datasets, ITEMS_PER_PAGE)
@@ -467,7 +487,13 @@ def datasets_view(request: HttpRequest, topic: str) -> HttpResponse:
     return render(
         request,
         "dataedit/dataedit_datasetlist.html",
-        {"datasets_paginated": datasets_paginated, "topic": topic},
+        {
+            "datasets_paginated": datasets_paginated,
+            "topic": topic,
+            "query": searched_query_string,
+            "tags": searched_tag_ids,
+            "params_wo_page": params_wo_page,
+        },
     )
 
 

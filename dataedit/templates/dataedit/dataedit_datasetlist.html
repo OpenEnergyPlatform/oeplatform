@@ -18,7 +18,8 @@
                name="viewToggle"
                id="toggleTables"
                autocomplete="off"
-               onclick="window.location.href='{% url 'dataedit:tables-in-topic' topic=topic %}'" />
+               data-href="{% url 'dataedit:tables-in-topic' topic=topic %}"
+               onclick="window.location.href=this.dataset.href" />
         <label class="btn btn-outline-primary" for="toggleTables">Tables</label>
         <input type="radio"
                class="btn-check"
@@ -39,7 +40,7 @@
                 {% if datasets_paginated.has_previous %}
                   <li class="page-item">
                     <a class="page-link shadow-sm"
-                       href="?page={{ datasets_paginated.previous_page_number }}">&laquo;</a>
+                       href="?{{ params_wo_page }}&amp;page={{ datasets_paginated.previous_page_number }}">&laquo;</a>
                   </li>
                 {% endif %}
                 <li class="page-item">
@@ -48,7 +49,7 @@
                 {% if datasets_paginated.has_next %}
                   <li class="page-item">
                     <a class="page-link shadow-sm"
-                       href="?page={{ datasets_paginated.next_page_number }}">&raquo;</a>
+                       href="?{{ params_wo_page }}&amp;page={{ datasets_paginated.next_page_number }}">&raquo;</a>
                   </li>
                 {% endif %}
               </ul>
@@ -95,3 +96,33 @@
     {% endif %}
   </div>
 {% endblock data_content %}
+{% block after-body-bottom-js %}
+  {{ block.super }}
+  <script id="dataset-live-search">
+    // live search: refresh the card list while typing, without a reload;
+    // the URL keeps the GET params so filtered views stay bookmarkable
+    (function () {
+      const input = document.getElementById("search-filter");
+      const form = document.getElementById("form-filter");
+      if (!input || !form) return;
+      let timer;
+      input.addEventListener("input", function () {
+        clearTimeout(timer);
+        timer = setTimeout(function () {
+          const params = new URLSearchParams(new FormData(form));
+          fetch(form.action + "?" + params.toString())
+            .then((response) => response.text())
+            .then((html) => {
+              const doc = new DOMParser().parseFromString(html, "text/html");
+              const fresh = doc.getElementById("dataset-list-container");
+              const current = document.getElementById("dataset-list-container");
+              if (fresh && current) {
+                current.replaceWith(fresh);
+                history.replaceState(null, "", "?" + params.toString());
+              }
+            });
+        }, 300);
+      });
+    })();
+  </script>
+{% endblock after-body-bottom-js %}

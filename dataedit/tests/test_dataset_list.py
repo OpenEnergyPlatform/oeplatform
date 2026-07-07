@@ -8,7 +8,7 @@ from unittest import mock
 from django.test import TestCase
 from django.urls import reverse
 
-from dataedit.models import Dataset, Table, Topic
+from dataedit.models import Dataset, Table, Tag, Topic
 from dataedit.views import ITEMS_PER_PAGE
 from login.models import myuser
 from oeplatform.settings import PSEUDO_TOPIC_DRAFT
@@ -139,3 +139,108 @@ class PublicDatasetListTests(TestCase):
         response = self.client.get(reverse("dataedit:dataset-list"))
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response["Location"], reverse("dataedit:topic-list"))
+
+
+class DatasetListFilterTests(TestCase):
+    """Search and tag filter on the topic dataset list: text matches name,
+    title and description; a dataset carries a tag when any member table
+    does, several tags AND together (mirroring the table filter)."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user, _ = myuser.objects.get_or_create(
+            name="FilterUser",
+            email="filter-user@test.com",
+            did_agree=True,
+            is_mail_verified=True,
+        )
+        cls.topic = Topic.objects.create(name="power")
+        cls.list_url = reverse("dataedit:datasets-in-topic", kwargs={"topic": "power"})
+        cls.tag_hourly = Tag.objects.create(name="hourly")
+        cls.tag_open = Tag.objects.create(name="open")
+
+    def make_dataset(self, name, title=None, description=None, tags_by_table=()):
+        dataset = Dataset.objects.create(
+            name=name,
+            metadata={
+                "name": name,
+                "title": title or f"Title of {name}",
+                "description": description or f"Description of {name}",
+            },
+            creator=self.user,
+        )
+        dataset.topics.add(self.topic)
+        for index, tags in enumerate(tags_by_table):
+            table = Table.objects.create(
+                name=f"{name}_t{index}",
+                is_publish=True,
+                oemetadata={"resources": [{"name": f"{name}_t{index}"}]},
+            )
+            table.tags.add(*tags)
+            dataset.tables.add(table)
+        return dataset
+
+    def test_query_matches_dataset_name(self):
+        self.make_dataset("wind_power_ds")
+        self.make_dataset("solar_ds")
+
+        response = self.client.get(self.list_url, {"query": "wind"})
+        self.assertContains(response, "wind_power_ds")
+        self.assertNotContains(response, "solar_ds")
+
+    def test_query_matches_title_and_description_case_insensitively(self):
+        self.make_dataset("first_ds", title="Grid Expansion Study")
+        self.make_dataset("second_ds", description="Contains grid measurements")
+        self.make_dataset("third_ds")
+
+        response = self.client.get(self.list_url, {"query": "GRID"})
+        self.assertContains(response, "first_ds")
+        self.assertContains(response, "second_ds")
+        self.assertNotContains(response, "third_ds")
+
+    def test_tag_matches_via_any_member_table(self):
+        self.make_dataset("tagged_ds", tags_by_table=[[self.tag_hourly]])
+        self.make_dataset("untagged_ds", tags_by_table=[[]])
+
+        response = self.client.get(self.list_url, {"tags": [self.tag_hourly.pk]})
+        self.assertContains(response, "tagged_ds")
+        self.assertNotContains(response, "untagged_ds")
+
+    def test_multiple_tags_and_together_across_member_tables(self):
+        # the two tags sit on different member tables of the same dataset
+        self.make_dataset(
+            "both_tags_ds", tags_by_table=[[self.tag_hourly], [self.tag_open]]
+        )
+        self.make_dataset("one_tag_ds", tags_by_table=[[self.tag_hourly]])
+
+        response = self.client.get(
+            self.list_url, {"tags": [self.tag_hourly.pk, self.tag_open.pk]}
+        )
+        self.assertContains(response, "both_tags_ds")
+        self.assertNotContains(response, "one_tag_ds")
+
+    def test_query_and_tags_combine(self):
+        self.make_dataset("wind_tagged_ds", tags_by_table=[[self.tag_hourly]])
+        self.make_dataset("wind_untagged_ds", tags_by_table=[[]])
+        self.make_dataset("solar_tagged_ds", tags_by_table=[[self.tag_hourly]])
+
+        response = self.client.get(
+            self.list_url, {"query": "wind", "tags": [self.tag_hourly.pk]}
+        )
+        self.assertContains(response, "wind_tagged_ds")
+        self.assertNotContains(response, "wind_untagged_ds")
+        self.assertNotContains(response, "solar_tagged_ds")
+
+    def test_form_keeps_query_state(self):
+        self.make_dataset("stateful_ds")
+        response = self.client.get(self.list_url, {"query": "stateful"})
+        self.assertContains(response, 'value="stateful"')
+
+    def test_pagination_preserves_query(self):
+        for index in range(ITEMS_PER_PAGE + 1):
+            self.make_dataset(f"windy_{index:03d}")
+
+        response = self.client.get(self.list_url, {"query": "windy"})
+        self.assertContains(response, "query=windy")
+        second_page = self.client.get(self.list_url, {"query": "windy", "page": 2})
+        self.assertContains(second_page, "windy_000")

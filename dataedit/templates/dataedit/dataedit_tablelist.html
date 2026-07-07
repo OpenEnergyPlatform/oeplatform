@@ -36,7 +36,8 @@
                name="viewToggle"
                id="toggleDatasets"
                autocomplete="off"
-               onclick="window.location.href='{% url 'dataedit:datasets-in-topic' topic=topic %}'">
+               data-href="{% url 'dataedit:datasets-in-topic' topic=topic %}"
+               onclick="window.location.href=this.dataset.href">
         <label class="btn btn-outline-primary" for="toggleDatasets">Datasets</label>
       </div>
       <div class="d-flex align-items-center flex-wrap gap-3">
