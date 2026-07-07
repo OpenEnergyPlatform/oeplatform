@@ -31,15 +31,8 @@ from dataedit.utils import PeerReviewBadge
 # A strategy maps (metadata, schema) -> a badge. Pure; no DB, no request.
 BadgeStrategy = Callable[[dict, dict], PeerReviewBadge]
 
-# Badge tiers from lowest to highest. IRON is the fallback when no tier is met.
+# Badge tiers from lowest to highest. Iron has its own badge
 TIER_ORDER = [
-    PeerReviewBadge.BRONZE,
-    PeerReviewBadge.SILVER,
-    PeerReviewBadge.GOLD,
-    PeerReviewBadge.PLATINUM,
-]
-# Iron has its own badge
-TIER_ORDER_IRON = [
     PeerReviewBadge.IRON,
     PeerReviewBadge.BRONZE,
     PeerReviewBadge.SILVER,
@@ -104,26 +97,11 @@ def fields_by_tier(schema) -> dict:
     Reads the per-field ``badge`` attribute via the metadata serializer, so it
     follows the schema exactly. Returns ``{PeerReviewBadge: [dotted paths]}``.
     """
-    descriptions = get_all_field_descriptions(schema)
-    tiers = {tier: [] for tier in TIER_ORDER}
-    for path, info in descriptions.items():
-        badge = normalize_badge(info.get("badge"))
-        if badge in tiers:
-            tiers[badge].append(path)
-    return tiers
-
-
-def fields_by_tier_iron(schema) -> dict:
-    """Group schema field paths by their declared ``badge`` tier.
-
-    Reads the per-field ``badge`` attribute via the metadata serializer, so it
-    follows the schema exactly. Returns ``{PeerReviewBadge: [dotted paths]}``.
-    """
     if schema is None:
         schema = OEMETADATA_V20_SCHEMA
 
     descriptions = get_all_field_descriptions(schema)
-    tiers = {tier: [] for tier in TIER_ORDER_IRON}
+    tiers = {tier: [] for tier in TIER_ORDER}
     for path, info in descriptions.items():
         badge = normalize_badge(info.get("badge"))
         if badge in tiers:
@@ -138,33 +116,31 @@ def fields_by_tier_iron(schema) -> dict:
 # --------------------------------------------------------------------------- #
 # the default policy — REPLACE/EDIT THIS to change how badges are calculated
 # --------------------------------------------------------------------------- #
-def cumulative_tier_strategy(metadata, schema) -> PeerReviewBadge:
-    """Award the highest tier whose fields (and all lower tiers') are present.
+# def cumulative_tier_strategy(metadata, schema) -> PeerReviewBadge:
+#     """Award the highest tier whose fields (and all lower tiers') are present.
 
-    Cumulative: a Silver field only counts once every Bronze field is present,
-    etc. Stops at the first tier with a gap. Returns IRON if Bronze is not met.
+#     Cumulative: a Silver field only counts once every Bronze field is present,
+#     etc. Stops at the first tier with a gap. Returns IRON if Bronze is not met.
 
-    This is a first, deliberately-simple policy — the real weighting of "which
-    fields matter most" is still open, so expect to rewrite this function.
-    """
-    tiers = fields_by_tier(schema)
-    earned = PeerReviewBadge.IRON
-    cumulative = []
-    for tier in TIER_ORDER:
-        tier_paths = tiers.get(tier, [])
-        if not tier_paths:
-            # A tier with no declared requirements cannot be earned (and must not
-            # auto-upgrade from a lower tier).
-            continue
-        cumulative += tier_paths
-        if all(field_is_present(metadata, path) for path in cumulative):
-            earned = tier
-        else:
-            break
-    return earned
+#     This is a first, deliberately-simple policy — the real weighting of "which
+#     fields matter most" is still open, so expect to rewrite this function.
+#     """
+#     tiers = fields_by_tier(schema)
+#     earned = PeerReviewBadge.IRON
+#     cumulative = []
+#     for tier in TIER_ORDER:
+#         tier_paths = tiers.get(tier, [])
+#         if not tier_paths:
+#             # A tier with no declared requirements cannot be earned (and must not
+#             # auto-upgrade from a lower tier).
+#             continue
+#         cumulative += tier_paths
+#         if all(field_is_present(metadata, path) for path in cumulative):
+#             earned = tier
+#         else:
+#             break
+#     return earned
 
-
-DEFAULT_BADGE_STRATEGY: BadgeStrategy = cumulative_tier_strategy
 
 # ---------------------------------------------------------------------------
 # 2. Review datamodel → ok-field extraction
@@ -306,9 +282,9 @@ def review_based_cumulative_tier_strategy_details(
     }
 
 
-def cumulative_tier_strategy_iron(metadata_or_review, schema=None) -> PeerReviewBadge:
+def cumulative_tier_strategy(metadata_or_review, schema=None) -> PeerReviewBadge:
     """
-    Drop-in replacement for the old cumulative_tier_strategy_iron.
+    Drop-in replacement for the old cumulative_tier_strategy.
 
     - If input looks like PeerReview.review ({'reviews': [...]})
       → review-state based, iron → platinum, cumulative.
@@ -323,7 +299,7 @@ def cumulative_tier_strategy_iron(metadata_or_review, schema=None) -> PeerReview
 
     # legacy fields_by_tier (no iron)
     descriptions = get_all_field_descriptions(schema)
-    tiers_legacy = {tier: [] for tier in TIER_ORDER_IRON}
+    tiers_legacy = {tier: [] for tier in TIER_ORDER}
     for path, info in descriptions.items():
         badge = normalize_badge(info.get("badge"))
         if badge in tiers_legacy:
@@ -331,7 +307,7 @@ def cumulative_tier_strategy_iron(metadata_or_review, schema=None) -> PeerReview
 
     earned = PeerReviewBadge.IRON
     cumulative: List[str] = []
-    for tier in TIER_ORDER_IRON:
+    for tier in TIER_ORDER:
         tier_paths = tiers_legacy.get(tier, [])
         if not tier_paths:
             continue
@@ -343,7 +319,7 @@ def cumulative_tier_strategy_iron(metadata_or_review, schema=None) -> PeerReview
     return earned
 
 
-DEFAULT_BADGE_STRATEGY: BadgeStrategy = cumulative_tier_strategy_iron
+DEFAULT_BADGE_STRATEGY: BadgeStrategy = cumulative_tier_strategy
 
 
 def badge_label(badge: PeerReviewBadge) -> str:
