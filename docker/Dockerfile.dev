@@ -12,9 +12,16 @@ ARG GROUP_ID=1000
 
 # RUN echo "Building with UID: $USER_ID and GID: $GROUP_ID"
 
-# Create user and group dynamically
-RUN groupadd -g ${GROUP_ID} appgroup \
-     && useradd -m -u ${USER_ID} -g appgroup --shell /bin/bash appuser
+# Create user and group dynamically, tolerating IDs that already exist in the
+# base image. On macOS `id -g` returns 20, which already exists as `dialout` in
+# the Debian-based python image, so an unconditional `groupadd -g 20` fails with
+# exit code 4. Reuse the existing group/user in that case.
+RUN if ! getent group ${GROUP_ID} >/dev/null; then \
+          groupadd -g ${GROUP_ID} appgroup; \
+     fi \
+     && if ! id -u ${USER_ID} >/dev/null 2>&1; then \
+          useradd -m -u ${USER_ID} -g ${GROUP_ID} --shell /bin/bash appuser; \
+     fi
 
 
 WORKDIR /home/appuser/app

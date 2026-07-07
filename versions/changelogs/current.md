@@ -13,17 +13,6 @@ SPDX-License-Identifier: CC0-1.0
 
 ### Features
 
-- Build search field to search in the user's tables
-  [(#2248)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2248)
-
-- Update the Graph Vie WIdget on the OEO Viewer page and enable the graph
-  comparison feature
-  [(#2277)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2277).
-
-- Add a Option to select the Language on the OEO Entity Pages. This only shows
-  the german / english synonym if available for an entity
-  [(#2277)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2277).
-
 - Add Dataset rest-api and metadata based concept as specified in oemetadata /
   frictionless
   ([#2071](https://github.com/OpenEnergyPlatform/oeplatform/pull/2071))
@@ -44,61 +33,34 @@ SPDX-License-Identifier: CC0-1.0
     read instead of being stored on the dataset, so it can no longer go stale
     after table metadata edits. Dataset names are slug-validated and fixed at
     creation (renaming would break URLs and references).
-- The metadata api now also syncs the data schema documented in the metadata
-  with the table schema available in the database
-  [(#2290)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2290)
 
-- Add new java script functionality for enhanced fetching of additional
-  information from table metadata and reworked table listing UI to show table
-  listing cards with additional information
-  [(#2311)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2311)
-
-### Bugs
-
-- Reviewer&Contributor page: calculation of percentage of progress of reviewed
-  fields takes into account empty fields
-  [(#1386)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1386)
-
-- Refactored the OEO Viewer layout to better organize hierarchy, metadata, and
-  graph widgets, including improved mobile responsiveness and also adapt to the
-  oeo inferred version which is now served by the TIB-TS (OLSv4 System)
-  [(#2237)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2277).
-
-- Update the Hierarchy Widget to Expand and highlight the currently selected
-  Entity in the OEO Viewer
-  [(#2237)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2277).
-
-- On the OEO Entity page the Entity type is now automatically detected to stream
-  line the user experience as users do not have to check the type manually - we
-  now also show the type of the entity
-  [(#2237)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2277).
-
-- Fixed a bug in the TIB-TS api when the user navigates to ObjectProperties /
-  Individuals. The API path is now correctly set
-  [(#2237)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2277).
-
-- Reviewer&Contributor page: calculation of percentage of progress of reviewed
-  fields takes into account empty fields
-  [(#1386)](https://github.com/OpenEnergyPlatform/oeplatform/pull/1386)
-
-- Cleanup incomplete updates to the OpenPeerReview. Some parts of the code are
-  incomplete due to a messi code refactoring where some code snippets have been
-  lost due to merge conflicts in commits that are not pushed to remote.
-  [(#2289)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2289)
-
-- Fixed a bug in the oemetaBuilder tool that removed `isAbout` and
-  `valueReference` entries and added unwanted properties when the users submits
-  the Editor form
-  [(#2290)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2290)
-
-- Fixed a bug in OEO loading module that was made visible by OEO version 2.12.0
-  as there was a new metadata owl file introduced which can not be parsed with
-  rdflib [(#2311)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2311)
+- OPR review-flow fixes: keep the category tabs usable in read-only/finished
+  reviews, render the contributor General tab correctly, and make the category
+  indicator dots, summary states, and auto-select reflect each round's pending
+  actions for both reviewer and contributor.
+  [(#2345)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2345)
 
 - Fix navigation box during the OPR; show proper information and jump to next
   field that needs review. Hide start button for OPR if metadata is empty.
   [(#2310)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2310)
 
+- Show comment in field when going to next field during OPR. Fix progress
+  percentage and auto-select and -scroll to next field.
+  [(#2342)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2342)
+
+- Fixed the documentation workflow by correcting an invalid `mkdocstrings`
+  reference to `TablePeerReviewContributorView`.
+  [(#2360)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2350)
+
 ## Documentation updates
 
+- Updated the OE Family Steering Committee
+  [#2332](https://github.com/OpenEnergyPlatform/oeplatform/pull/2332)
+
 ## Code Quality
+
+- Refactor the OPR feature: backend service layer (`ReviewService`) with
+  append-only review rounds + projection, a shared template partial removing
+  reviewer/contributor duplication, and the `peer_review` JS reorganized into
+  `core/` `roles/` `ui/` modules.
+  [(#2345)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2345)
