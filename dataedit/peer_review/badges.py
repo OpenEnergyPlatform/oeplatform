@@ -2,6 +2,7 @@
 BadgeService — suggest a peer-review badge, with a swappable scoring policy.
 
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2026 Vismaya Jochem <https://github.com/vismayajochem> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
 
 Phase 2 S5. The *policy* for how a badge is calculated (and which fields matter)
