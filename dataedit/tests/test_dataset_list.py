@@ -11,10 +11,11 @@ from django.urls import reverse
 from dataedit.models import Dataset, Table, Topic
 from dataedit.views import ITEMS_PER_PAGE
 from login.models import myuser
+from oeplatform.settings import PSEUDO_TOPIC_DRAFT
 
 
 class PublicDatasetListTests(TestCase):
-    """Public, paginated card list of all datasets in the dataedit app."""
+    """Public, paginated card list of the datasets in one topic."""
 
     @classmethod
     def setUpTestData(cls):
@@ -30,9 +31,10 @@ class PublicDatasetListTests(TestCase):
             did_agree=True,
             is_mail_verified=True,
         )
-        cls.list_url = reverse("dataedit:dataset-list")
+        cls.topic = Topic.objects.create(name="energy")
+        cls.list_url = reverse("dataedit:datasets-in-topic", kwargs={"topic": "energy"})
 
-    def make_dataset(self, name, creator=None, table_names=()):
+    def make_dataset(self, name, creator=None, table_names=(), topic=...):
         dataset = Dataset.objects.create(
             name=name,
             metadata={
@@ -42,6 +44,10 @@ class PublicDatasetListTests(TestCase):
             },
             creator=creator or self.user,
         )
+        if topic is ...:
+            topic = self.topic
+        if topic is not None:
+            dataset.topics.add(topic)
         for table_name in table_names:
             table = Table.objects.create(
                 name=table_name,
@@ -81,6 +87,30 @@ class PublicDatasetListTests(TestCase):
         self.assertContains(response, "mine")
         self.assertContains(response, "theirs")
 
+    def test_lists_only_datasets_of_the_topic(self):
+        other_topic = Topic.objects.create(name="mobility")
+        self.make_dataset("in_topic")
+        self.make_dataset("other_topic_ds", topic=other_topic)
+        self.make_dataset("untopiced_ds", topic=None)
+
+        response = self.client.get(self.list_url)
+        self.assertContains(response, "in_topic")
+        self.assertNotContains(response, "other_topic_ds")
+        self.assertNotContains(response, "untopiced_ds")
+
+    def test_unknown_topic_is_404(self):
+        response = self.client.get(
+            reverse("dataedit:datasets-in-topic", kwargs={"topic": "no_such"})
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_draft_pseudo_topic_has_no_dataset_list(self):
+        Topic.objects.get_or_create(name=PSEUDO_TOPIC_DRAFT)
+        response = self.client.get(
+            reverse("dataedit:datasets-in-topic", kwargs={"topic": PSEUDO_TOPIC_DRAFT})
+        )
+        self.assertEqual(response.status_code, 404)
+
     def test_pagination(self):
         for index in range(ITEMS_PER_PAGE + 1):
             self.make_dataset(f"ds_{index:03d}")
@@ -91,14 +121,21 @@ class PublicDatasetListTests(TestCase):
         # newest first: the oldest dataset lands on page 2
         self.assertContains(second_page, "ds_000")
 
-    def test_table_list_toggle_is_enabled_and_links_here(self):
-        Topic.objects.create(name="toggle_topic")
+    def test_table_list_toggle_links_to_datasets_in_same_topic(self):
         response = self.client.get(
-            reverse("dataedit:tables-in-topic", kwargs={"topic": "toggle_topic"})
+            reverse("dataedit:tables-in-topic", kwargs={"topic": "energy"})
         )
         self.assertContains(response, self.list_url)
         self.assertNotContains(response, "coming soon")
 
-    def test_dataset_list_links_back_to_table_list(self):
+    def test_dataset_list_toggle_links_to_tables_in_same_topic(self):
         response = self.client.get(self.list_url)
-        self.assertContains(response, reverse("dataedit:topic-list"))
+        self.assertContains(
+            response,
+            reverse("dataedit:tables-in-topic", kwargs={"topic": "energy"}),
+        )
+
+    def test_global_dataset_url_redirects_to_topic_overview(self):
+        response = self.client.get(reverse("dataedit:dataset-list"))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], reverse("dataedit:topic-list"))

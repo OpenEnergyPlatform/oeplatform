@@ -145,7 +145,17 @@ urlpatterns = [
         tables_view,
         name="tables-in-topic",
     ),
-    path("datasets/", datasets_view, name="dataset-list"),
+    re_path(
+        r"^topic/(?P<topic>{qual})/datasets$".format(qual=pgsql_qualifier),
+        datasets_view,
+        name="datasets-in-topic",
+    ),
+    # datasets are browsed per topic; the bare URL falls back to the topics
+    path(
+        "datasets/",
+        RedirectView.as_view(pattern_name="dataedit:topic-list"),
+        name="dataset-list",
+    ),
     re_path(r"^$", topic_view, name="topic-list"),
     re_path(
         r"^admin/columns/",

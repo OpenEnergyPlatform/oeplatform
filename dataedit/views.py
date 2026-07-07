@@ -438,11 +438,19 @@ def tables_view(request: HttpRequest, topic: str) -> HttpResponse:
 
 
 @never_cache
-def datasets_view(request: HttpRequest) -> HttpResponse:
-    """Public, paginated card list of all datasets: name, description,
-    resource count and combined size of the member tables."""
-    datasets = Dataset.objects.order_by("-created_at").prefetch_related(
-        "tables", "topics"
+def datasets_view(request: HttpRequest, topic: str) -> HttpResponse:
+    """Public, paginated card list of the datasets in one topic: name,
+    description, resource count and combined size of the member tables.
+    Datasets never list under the draft pseudo-topic — it stays
+    tables-only (dataset drafts become private with the publish PR)."""
+    if topic == PSEUDO_TOPIC_DRAFT:
+        raise Http404("Datasets are not listed under the draft topic.")
+    get_object_or_404(Topic, name=topic)
+
+    datasets = (
+        Dataset.objects.filter(topics__name=topic)
+        .order_by("-created_at")
+        .prefetch_related("tables", "topics")
     )
 
     paginator = Paginator(datasets, ITEMS_PER_PAGE)
@@ -459,7 +467,7 @@ def datasets_view(request: HttpRequest) -> HttpResponse:
     return render(
         request,
         "dataedit/dataedit_datasetlist.html",
-        {"datasets_paginated": datasets_paginated},
+        {"datasets_paginated": datasets_paginated, "topic": topic},
     )
 
 
