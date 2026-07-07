@@ -157,7 +157,11 @@ from api.serializers import (
     ScenarioBundleScenarioDatasetSerializer,
     ScenarioDataTablesSerializer,
 )
-from api.services.dataset_creation import assemble_dataset_metadata
+from api.services.dataset_creation import (
+    DatasetNameTaken,
+    assemble_dataset_metadata,
+    create_dataset,
+)
 from api.services.embargo import (
     EmbargoValidationError,
     apply_embargo,
@@ -304,10 +308,10 @@ class DatasetsListCreate(generics.ListCreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        metadata = assemble_dataset_metadata(serializer.validated_data)
-        dataset = Dataset.objects.create(
-            metadata=metadata, name=metadata["name"], creator=request.user
-        )
+        try:
+            dataset = create_dataset(serializer.validated_data, creator=request.user)
+        except DatasetNameTaken as error:
+            raise ValidationError({"name": str(error)})
 
         return Response(
             {

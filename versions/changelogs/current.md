@@ -13,6 +13,14 @@ SPDX-License-Identifier: CC0-1.0
 
 ### Features
 
+- Dataset management UI, first slice: the user dashboard now opens on a
+  dataset-first view with a switch to the familiar tables view. Users can see
+  their own datasets and create new ones (name, title, description) without page
+  reloads; invalid or taken names show inline errors. Creating tables without a
+  dataset keeps working unchanged. The dataset API now reports duplicate names
+  as a validation error instead of failing.
+  ([#1971](https://github.com/OpenEnergyPlatform/oeplatform/issues/1971))
+
 - Add Dataset rest-api and metadata based concept as specified in oemetadata /
   frictionless
   ([#2071](https://github.com/OpenEnergyPlatform/oeplatform/pull/2071))

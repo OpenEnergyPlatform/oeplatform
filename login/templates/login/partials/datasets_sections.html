@@ -1,0 +1,84 @@
+<div id="datasets-container">
+  <!-- ###### Create dataset ###### -->
+  <section class="profile-category">
+    <h2 class="profile-category__heading">Create dataset</h2>
+    <p>
+      Bundle your tables into a citable dataset. The name is permanent and
+      identifies the dataset in links and metadata; title and description
+      stay editable.
+    </p>
+    <form hx-post="{% url 'login:datasets' user_id=profile_user.id %}"
+          hx-target="#datasets-container"
+          hx-swap="outerHTML">
+      <div class="mb-2">
+        <label class="form-label" for="dataset-name">Name</label>
+        <input type="text"
+               id="dataset-name"
+               name="name"
+               class="form-control {% if form_errors.name %}is-invalid{% endif %}"
+               placeholder="my_dataset_name"
+               value="{{ form_values.name|default:'' }}"
+               required />
+        {% if form_errors.name %}
+          <div class="invalid-feedback d-block">{{ form_errors.name }}</div>
+        {% endif %}
+      </div>
+      <div class="mb-2">
+        <label class="form-label" for="dataset-title">Title</label>
+        <input type="text"
+               id="dataset-title"
+               name="title"
+               class="form-control {% if form_errors.title %}is-invalid{% endif %}"
+               placeholder="A human readable title"
+               value="{{ form_values.title|default:'' }}"
+               required />
+        {% if form_errors.title %}
+          <div class="invalid-feedback d-block">{{ form_errors.title }}</div>
+        {% endif %}
+      </div>
+      <div class="mb-2">
+        <label class="form-label" for="dataset-description">Description</label>
+        <textarea id="dataset-description"
+                  name="description"
+                  class="form-control {% if form_errors.description %}is-invalid{% endif %}"
+                  rows="2"
+                  required>{{ form_values.description|default:'' }}</textarea>
+        {% if form_errors.description %}
+          <div class="invalid-feedback d-block">{{ form_errors.description }}</div>
+        {% endif %}
+      </div>
+      <button type="submit" class="btn btn-primary">Create dataset</button>
+    </form>
+  </section>
+  <!-- ###### My datasets ###### -->
+  <section class="profile-category">
+    <h2 class="profile-category__heading">My datasets</h2>
+    {% if datasets %}
+      <div class="profile-tables">
+        <div class="profile-tables__row">
+          {% for dataset in datasets %}
+            <div class="profile-tables__col">
+              <div class="profile-table-card">
+                <div class="profile-table-card__content">
+                  <div class="profile-table-card__content--left">
+                    <h3 class="profile-table-card__heading">{{ dataset.metadata.title|default:dataset.name }}</h3>
+                    <p class="profile-table-card__subheading">{{ dataset.name }}</p>
+                    {% if dataset.metadata.description %}
+                      <p>{{ dataset.metadata.description|truncatechars:120 }}</p>
+                    {% endif %}
+                    <p>
+                      {{ dataset.tables.count }} resource{{ dataset.tables.count|pluralize }}
+                      &middot; created {{ dataset.created_at|date:"d/m/Y" }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% else %}
+      <p>You have no datasets yet. Create one above to bundle your tables.</p>
+    {% endif %}
+  </section>
+</div>

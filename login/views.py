@@ -39,8 +39,10 @@ from django.views.generic.edit import DeleteView
 from rest_framework.authtoken.models import Token
 
 import login.permissions
+from api.serializers import DatasetCreateSerializer
+from api.services.dataset_creation import DatasetNameTaken, create_dataset
 from dataedit.helper import delete_peer_review
-from dataedit.models import PeerReviewManager, Table, Topic
+from dataedit.models import Dataset, PeerReviewManager, Table, Topic
 from login.forms import EditUserForm, GroupForm
 from login.models import GroupMembership, UserGroup
 from login.models import myuser as OepUser
@@ -117,6 +119,65 @@ class TablesView(View):
             )
         else:
             return render(request, "login/user_tables.html", context)
+
+
+##############################################################################
+#           User Datasets related views & partial views for htmx            #
+##############################################################################
+
+
+class DatasetsView(LoginRequiredMixin, View):
+    """Dataset-first dashboard view: list the user's datasets and create
+    new ones via HTMX without page reloads. The name is immutable after
+    creation; title and description stay editable."""
+
+    def _context(self, request, profile_user, form_errors=None, form_values=None):
+        if profile_user == request.user:
+            datasets = (
+                Dataset.objects.filter(creator=request.user)
+                .order_by("-created_at")
+                .prefetch_related("tables")
+            )
+        else:
+            datasets = Dataset.objects.none()
+        return {
+            "profile_user": profile_user,
+            "datasets": datasets,
+            "form_errors": form_errors or {},
+            "form_values": form_values or {},
+        }
+
+    @method_decorator(never_cache)
+    def get(self, request, user_id):
+        user = get_object_or_404(OepUser, pk=user_id)
+        context = self._context(request, user)
+        if "HX-Request" in request.headers:
+            return render(request, "login/partials/datasets_sections.html", context)
+        return render(request, "login/user_datasets.html", context)
+
+    def post(self, request, user_id):
+        user = get_object_or_404(OepUser, pk=user_id)
+        if user != request.user:
+            return HttpResponseForbidden(
+                "Datasets can only be created on your own dashboard."
+            )
+
+        serializer = DatasetCreateSerializer(data=request.POST)
+        form_errors = {}
+        if serializer.is_valid():
+            try:
+                create_dataset(serializer.validated_data, creator=request.user)
+            except DatasetNameTaken as error:
+                form_errors["name"] = str(error)
+        else:
+            form_errors = {
+                field: " ".join(str(message) for message in messages)
+                for field, messages in serializer.errors.items()
+            }
+
+        form_values = request.POST if form_errors else {}
+        context = self._context(request, user, form_errors, form_values)
+        return render(request, "login/partials/datasets_sections.html", context)
 
 
 ##############################################################################

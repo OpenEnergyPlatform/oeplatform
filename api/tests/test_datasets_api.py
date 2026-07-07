@@ -385,6 +385,16 @@ class DatasetDerivedResourcesTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertFalse(Dataset.objects.filter(metadata__title="Bad Name").exists())
 
+    def test_create_rejects_duplicate_name(self):
+        payload = {
+            "name": "derived_dataset",
+            "title": "Duplicate",
+            "description": "Name is already taken",
+        }
+        response = self.client.post("/api/v0/datasets/", payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(Dataset.objects.filter(name="derived_dataset").count(), 1)
+
     def test_no_resource_copy_is_persisted(self):
         self.client.post(
             "/api/v0/datasets/derived_dataset/assign-tables/",

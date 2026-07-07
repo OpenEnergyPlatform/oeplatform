@@ -20,6 +20,7 @@ from django.urls import path, re_path
 
 from base.views import handler404
 from login.views import (
+    DatasetsView,
     EditUserView,
     GroupManagementView,
     GroupsView,
@@ -71,9 +72,15 @@ urlpatterns = [
         name="password_reset_complete",
     ),
     re_path(
+        # dataset-first dashboard: the profile opens on the datasets view
         r"^profile/(?P<user_id>[\d]+)$",
-        TablesView.as_view(),
+        DatasetsView.as_view(),
         name="profile",
+    ),
+    re_path(
+        r"^profile/(?P<user_id>[\d]+)/datasets$",
+        DatasetsView.as_view(),
+        name="datasets",
     ),
     re_path(
         r"^profile/(?P<user_id>[\d]+)/tables$",
