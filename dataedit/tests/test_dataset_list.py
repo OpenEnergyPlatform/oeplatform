@@ -3,6 +3,8 @@ SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
+from unittest import mock
+
 from django.test import TestCase
 from django.urls import reverse
 
@@ -56,10 +58,19 @@ class PublicDatasetListTests(TestCase):
     def test_cards_show_name_description_count_and_size(self):
         self.make_dataset("public_ds", table_names=["t_a", "t_b"])
 
-        response = self.client.get(self.list_url)
+        sizes = [
+            {"table_name": "t_a", "total_bytes": 1024},
+            {"table_name": "t_b", "total_bytes": 2048},
+            {"table_name": "t_unrelated", "total_bytes": 4096},
+        ]
+        with mock.patch("dataedit.views.list_table_sizes", return_value=sizes):
+            response = self.client.get(self.list_url)
+
         self.assertContains(response, "public_ds")
         self.assertContains(response, "Description of public_ds")
         self.assertContains(response, "2 resource")
+        # 1024 + 2048 bytes, unrelated tables excluded
+        self.assertContains(response, "3.0")
         self.assertContains(response, "Total size")
 
     def test_lists_datasets_from_all_creators(self):

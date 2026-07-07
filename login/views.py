@@ -16,6 +16,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 import json
+from functools import wraps
 from itertools import groupby
 
 from django.contrib.auth.decorators import login_required
@@ -132,31 +133,59 @@ class TablesView(View):
 ##############################################################################
 
 
+def _datasets_context(request, profile_user, form_errors=None, form_values=None):
+    """Context for the dashboard datasets sections: only ever lists the
+    requesting user's own datasets."""
+    if profile_user == request.user:
+        datasets = (
+            Dataset.objects.filter(creator=request.user)
+            .order_by("-created_at")
+            .prefetch_related("tables")
+        )
+    else:
+        datasets = Dataset.objects.none()
+    return {
+        "profile_user": profile_user,
+        "datasets": datasets,
+        "form_errors": form_errors or {},
+        "form_values": form_values or {},
+    }
+
+
+def _serializer_errors(serializer):
+    """Flatten DRF serializer errors into one message per field."""
+    return {
+        field: " ".join(str(message) for message in messages)
+        for field, messages in serializer.errors.items()
+    }
+
+
+def dataset_creator_required(view_func):
+    """Resolve profile user and dataset for the dataset partial views and
+    enforce that only the dataset's creator may act (403 otherwise)."""
+
+    @wraps(view_func)
+    def wrapper(request, user_id, dataset_name, *args, **kwargs):
+        dataset = get_object_or_404(Dataset, name=dataset_name)
+        if dataset.creator is None or dataset.creator != request.user:
+            return HttpResponseForbidden(
+                "Only the dataset creator may manage this dataset."
+            )
+        profile_user = get_object_or_404(OepUser, pk=user_id)
+        return view_func(request, profile_user, dataset, *args, **kwargs)
+
+    return wrapper
+
+
 class DatasetsView(LoginRequiredMixin, View):
     """Dataset-first dashboard view: list the user's datasets and create
     new ones via HTMX without page reloads. The name is immutable after
     creation; title and description stay editable."""
 
-    def _context(self, request, profile_user, form_errors=None, form_values=None):
-        if profile_user == request.user:
-            datasets = (
-                Dataset.objects.filter(creator=request.user)
-                .order_by("-created_at")
-                .prefetch_related("tables")
-            )
-        else:
-            datasets = Dataset.objects.none()
-        return {
-            "profile_user": profile_user,
-            "datasets": datasets,
-            "form_errors": form_errors or {},
-            "form_values": form_values or {},
-        }
-
     @method_decorator(never_cache)
     def get(self, request, user_id):
         user = get_object_or_404(OepUser, pk=user_id)
-        context = self._context(request, user)
+        context = _datasets_context(request, user)
         if "HX-Request" in request.headers:
             return render(request, "login/partials/datasets_sections.html", context)
         return render(request, "login/user_datasets.html", context)
@@ -176,34 +205,19 @@ class DatasetsView(LoginRequiredMixin, View):
             except DatasetNameTaken as error:
                 form_errors["name"] = str(error)
         else:
-            form_errors = {
-                field: " ".join(str(message) for message in messages)
-                for field, messages in serializer.errors.items()
-            }
+            form_errors = _serializer_errors(serializer)
 
         form_values = request.POST if form_errors else {}
-        context = self._context(request, user, form_errors, form_values)
+        context = _datasets_context(request, user, form_errors, form_values)
         return render(request, "login/partials/datasets_sections.html", context)
 
 
-def _owned_dataset_or_none(request, dataset_name):
-    """Load a dataset if the requesting user is its creator, else None."""
-    dataset = get_object_or_404(Dataset, name=dataset_name)
-    if dataset.creator is None or dataset.creator != request.user:
-        return None
-    return dataset
-
-
 @login_required
-def dataset_edit_view(request, user_id, dataset_name):
+@dataset_creator_required
+def dataset_edit_view(request, profile_user, dataset):
     """Inline edit of a dataset card: title and description only, the
     name is immutable. GET returns the form partial, POST saves and
     returns the refreshed card."""
-    dataset = _owned_dataset_or_none(request, dataset_name)
-    if dataset is None:
-        return HttpResponseForbidden("Only the dataset creator may edit this dataset.")
-
-    profile_user = get_object_or_404(OepUser, pk=user_id)
     if request.method == "POST":
         serializer = DatasetUpdateSerializer(data=request.POST)
         if serializer.is_valid():
@@ -213,10 +227,7 @@ def dataset_edit_view(request, user_id, dataset_name):
                 "login/partials/dataset_card.html",
                 {"dataset": dataset, "profile_user": profile_user},
             )
-        form_errors = {
-            field: " ".join(str(message) for message in messages)
-            for field, messages in serializer.errors.items()
-        }
+        form_errors = _serializer_errors(serializer)
         form_values = request.POST
     else:
         form_errors = {}
@@ -239,19 +250,12 @@ def dataset_edit_view(request, user_id, dataset_name):
 
 @login_required
 @require_POST
-def dataset_delete_view(request, user_id, dataset_name):
+@dataset_creator_required
+def dataset_delete_view(request, profile_user, dataset):
     """Delete a dataset (creator only). Member tables are never deleted.
     Returns the refreshed datasets container for the HTMX swap."""
-    dataset = _owned_dataset_or_none(request, dataset_name)
-    if dataset is None:
-        return HttpResponseForbidden(
-            "Only the dataset creator may delete this dataset."
-        )
-
     dataset.delete()
-
-    profile_user = get_object_or_404(OepUser, pk=user_id)
-    context = DatasetsView()._context(request, profile_user)
+    context = _datasets_context(request, profile_user)
     return render(request, "login/partials/datasets_sections.html", context)
 
 
@@ -267,28 +271,18 @@ def _render_dataset_manage(request, profile_user, dataset, search=""):
 
 
 @login_required
-def dataset_manage_view(request, user_id, dataset_name):
+@dataset_creator_required
+def dataset_manage_view(request, profile_user, dataset):
     """Manage panel for a dataset's resources: current tables with draft
     badges and links, plus the picker for adding tables. Creator only."""
-    dataset = _owned_dataset_or_none(request, dataset_name)
-    if dataset is None:
-        return HttpResponseForbidden(
-            "Only the dataset creator may manage this dataset."
-        )
-    profile_user = get_object_or_404(OepUser, pk=user_id)
     return _render_dataset_manage(request, profile_user, dataset)
 
 
 @login_required
-def dataset_table_search_view(request, user_id, dataset_name):
+@dataset_creator_required
+def dataset_table_search_view(request, profile_user, dataset):
     """Picker search: only tables the user may assign under the curation
     rules, minus already assigned ones."""
-    dataset = _owned_dataset_or_none(request, dataset_name)
-    if dataset is None:
-        return HttpResponseForbidden(
-            "Only the dataset creator may manage this dataset."
-        )
-    profile_user = get_object_or_404(OepUser, pk=user_id)
     search = request.GET.get("q", "").strip()
     context = {
         "profile_user": profile_user,
@@ -300,34 +294,24 @@ def dataset_table_search_view(request, user_id, dataset_name):
 
 @login_required
 @require_POST
-def dataset_assign_view(request, user_id, dataset_name):
-    dataset = _owned_dataset_or_none(request, dataset_name)
-    if dataset is None:
-        return HttpResponseForbidden(
-            "Only the dataset creator may manage this dataset."
-        )
+@dataset_creator_required
+def dataset_assign_view(request, profile_user, dataset):
     table = get_object_or_404(Table, name=request.POST.get("table", ""))
     if not user_may_assign_table(request.user, table):
         return HttpResponseForbidden(
             "Draft or embargoed tables require write permission on the table."
         )
     dataset.tables.add(table)
-    profile_user = get_object_or_404(OepUser, pk=user_id)
     return _render_dataset_manage(request, profile_user, dataset)
 
 
 @login_required
 @require_POST
-def dataset_unassign_view(request, user_id, dataset_name):
-    dataset = _owned_dataset_or_none(request, dataset_name)
-    if dataset is None:
-        return HttpResponseForbidden(
-            "Only the dataset creator may manage this dataset."
-        )
+@dataset_creator_required
+def dataset_unassign_view(request, profile_user, dataset):
     table = dataset.tables.filter(name=request.POST.get("table", "")).first()
     if table is not None:
         dataset.tables.remove(table)
-    profile_user = get_object_or_404(OepUser, pk=user_id)
     return _render_dataset_manage(request, profile_user, dataset)
 
 

@@ -308,7 +308,8 @@ class DatasetResourceManagementTests(TestCase):
         response = self.client.get(self.manage_url)
         self.assertContains(response, "t_pub_resource")
         self.assertContains(response, "t_draft_resource")
-        self.assertContains(response, "Draft")
+        # exactly one badge: the draft table carries it, the published not
+        self.assertContains(response, "Draft", count=1)
         self.assertContains(
             response, reverse("dataedit:view", kwargs={"table": "t_pub_resource"})
         )
@@ -368,3 +369,6 @@ class DatasetResourceManagementTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertFalse(self.dataset.tables.filter(name="t_removable").exists())
         self.assertTrue(Table.objects.filter(name="t_removable").exists())
+        # the refreshed fragment shows an empty resource list (the table
+        # itself reappears in the picker, so match the empty-state copy)
+        self.assertContains(response, "No tables assigned yet")
