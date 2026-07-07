@@ -46,6 +46,7 @@ from api.services.dataset_creation import (
     assign_table,
     assignable_tables_for,
     create_dataset,
+    normalize_dataset_name,
     set_dataset_topics,
     update_dataset,
     user_may_assign_table,
@@ -200,13 +201,28 @@ class DatasetsView(LoginRequiredMixin, View):
                 "Datasets can only be created on your own dashboard."
             )
 
-        serializer = DatasetCreateSerializer(data=request.POST)
+        # the permanent URL name is derived from the title, so users can
+        # style the title freely without thinking in slugs
+        derived_name = normalize_dataset_name(request.POST.get("title", ""))
+        data = request.POST.dict()
+        if derived_name:
+            data["name"] = derived_name
+
+        serializer = DatasetCreateSerializer(data=data)
         form_errors = {}
-        if serializer.is_valid():
+        if derived_name is None:
+            form_errors["title"] = (
+                "The title needs at least one letter or number so a web "
+                "address name can be derived from it."
+            )
+        elif serializer.is_valid():
             try:
                 create_dataset(serializer.validated_data, creator=request.user)
-            except DatasetNameTaken as error:
-                form_errors["name"] = str(error)
+            except DatasetNameTaken:
+                form_errors["title"] = (
+                    f"This title gives the web address name '{derived_name}', "
+                    "which is already taken. Please choose a different title."
+                )
         else:
             form_errors = _serializer_errors(serializer)
 

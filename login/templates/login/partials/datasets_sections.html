@@ -5,34 +5,22 @@
     <div class="card mb-4">
       <div class="card-body">
         <p class="card-text text-muted">
-          Bundle your tables into a citable dataset. The name is permanent and
-          identifies the dataset in links and metadata; title and description
-          stay editable.
+          Bundle your tables into a citable dataset. Style the title as you
+          like &mdash; the permanent web address name is derived from it
+          automatically (e.g. &ldquo;Wind Power 2024&rdquo; &rarr;
+          <code>wind_power_2024</code>); title and description stay editable.
         </p>
         <form hx-post="{% url 'login:datasets' user_id=profile_user.id %}"
               hx-target="#datasets-container"
               hx-swap="outerHTML">
           <div class="row g-2">
-            <div class="col-md-4">
-              <label class="form-label" for="dataset-name">Name</label>
-              <input type="text"
-                     id="dataset-name"
-                     name="name"
-                     class="form-control {% if form_errors.name %}is-invalid{% endif %}"
-                     placeholder="my_dataset_name"
-                     value="{{ form_values.name|default:'' }}"
-                     required />
-              {% if form_errors.name %}
-                <div class="invalid-feedback d-block">{{ form_errors.name }}</div>
-              {% endif %}
-            </div>
-            <div class="col-md-8">
+            <div class="col-12">
               <label class="form-label" for="dataset-title">Title</label>
               <input type="text"
                      id="dataset-title"
                      name="title"
                      class="form-control {% if form_errors.title %}is-invalid{% endif %}"
-                     placeholder="A human readable title"
+                     placeholder="A human readable title, e.g. Wind Power in Germany 2024"
                      value="{{ form_values.title|default:'' }}"
                      required />
               {% if form_errors.title %}

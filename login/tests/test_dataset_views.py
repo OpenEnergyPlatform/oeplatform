@@ -67,7 +67,6 @@ class DatasetDashboardTests(TestCase):
         response = self.client.post(
             self.datasets_url,
             {
-                "name": "fresh_dataset",
                 "title": "Fresh Dataset",
                 "description": "Created from the dashboard",
             },
@@ -75,53 +74,67 @@ class DatasetDashboardTests(TestCase):
         self.assertEqual(response.status_code, 200)
         dataset = Dataset.objects.get(name="fresh_dataset")
         self.assertEqual(dataset.creator, self.user)
+        self.assertEqual(dataset.metadata["title"], "Fresh Dataset")
         self.assertContains(response, "fresh_dataset")
+
+    def test_create_form_has_no_name_field(self):
+        response = self.client.get(self.datasets_url)
+        self.assertNotContains(response, 'name="name"')
+
+    def test_create_derives_normalized_name_from_styled_title(self):
+        response = self.client.post(
+            self.datasets_url,
+            {
+                "title": "  Wind Power (Germany) 2024!  ",
+                "description": "User-preferred styling stays in the title",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        dataset = Dataset.objects.get(name="wind_power_germany_2024")
+        self.assertEqual(dataset.metadata["title"], "Wind Power (Germany) 2024!")
 
     def test_create_returns_partial_not_full_page(self):
         response = self.client.post(
             self.datasets_url,
             {
-                "name": "partial_dataset",
                 "title": "Partial",
                 "description": "HTMX swap target only",
             },
         )
         self.assertNotContains(response, "<html")
 
-    def test_create_invalid_slug_shows_inline_error(self):
+    def test_create_title_without_letters_or_digits_shows_inline_error(self):
         response = self.client.post(
             self.datasets_url,
             {
-                "name": "not a slug!",
-                "title": "Bad",
+                "title": "!!! ???",
                 "description": "Should fail",
             },
         )
         self.assertEqual(response.status_code, 200)
-        self.assertFalse(Dataset.objects.filter(metadata__title="Bad").exists())
-        self.assertContains(response, "name")
+        self.assertFalse(Dataset.objects.filter(metadata__title="!!! ???").exists())
         self.assertContains(response, "invalid-feedback")
 
-    def test_create_duplicate_name_shows_inline_error(self):
+    def test_create_duplicate_normalized_name_shows_inline_error(self):
         self.create_dataset("taken_name")
         response = self.client.post(
             self.datasets_url,
             {
-                "name": "taken_name",
-                "title": "Duplicate",
+                "title": "Taken -- Name",
                 "description": "Should fail",
             },
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Dataset.objects.filter(name="taken_name").count(), 1)
         self.assertContains(response, "invalid-feedback")
+        # the error names the clashing URL name so the user can restyle
+        self.assertContains(response, "taken_name")
 
     def test_cannot_create_on_foreign_profile(self):
         response = self.client.post(
             reverse("login:datasets", args=[self.other_user.id]),
             {
-                "name": "sneaky_dataset",
-                "title": "Sneaky",
+                "title": "Sneaky Dataset",
                 "description": "Posting on someone else's dashboard",
             },
         )

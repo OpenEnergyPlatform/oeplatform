@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
+import re
 from copy import deepcopy
 from typing import Any
 
@@ -17,6 +18,17 @@ from oeplatform.settings import PSEUDO_TOPIC_DRAFT
 
 class DatasetNameTaken(Exception):
     """Raised when creating a dataset under a name that already exists."""
+
+
+def normalize_dataset_name(title: str) -> str | None:
+    """Derive the permanent URL name from a human-styled title: lowercase,
+    every run of non-alphanumeric characters becomes one underscore. The
+    title keeps the user's preferred styling; the name keys URLs and the
+    oemetadata document. Returns None when nothing usable remains."""
+    name = (title or "").lower()
+    name = re.sub(r"[^a-z0-9]+", "_", name).strip("_")
+    name = name[:60].strip("_")
+    return name or None
 
 
 def assemble_dataset_metadata(
