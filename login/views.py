@@ -275,14 +275,27 @@ def dataset_edit_view(request, profile_user, dataset):
 
 
 @login_required
+@dataset_creator_required
+def dataset_card_view(request, profile_user, dataset):
+    """A single dataset card, used to close an open edit or manage panel
+    back to its card without re-rendering the whole container (which
+    would collapse every other open panel)."""
+    return render(
+        request,
+        "login/partials/dataset_card.html",
+        {"dataset": dataset, "profile_user": profile_user},
+    )
+
+
+@login_required
 @require_POST
 @dataset_creator_required
 def dataset_delete_view(request, profile_user, dataset):
     """Delete a dataset (creator only). Member tables are never deleted.
-    Returns the refreshed datasets container for the HTMX swap."""
+    Returns an empty swap so only this card disappears and other open
+    panels keep their state."""
     dataset.delete()
-    context = _datasets_context(request, profile_user)
-    return render(request, "login/partials/datasets_sections.html", context)
+    return HttpResponse("")
 
 
 PICKER_MAX_RESULTS = 20

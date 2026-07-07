@@ -246,6 +246,33 @@ class DatasetQuickActionsTests(TestCase):
         self.assertTrue(Table.objects.filter(name="t_survives").exists())
         self.assertNotContains(response, "quick_dataset")
 
+    def test_card_partial_returns_single_card_only(self):
+        response = self.client.get(
+            reverse("login:dataset-card", args=[self.user.id, "quick_dataset"])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "quick_dataset")
+        # a single card, not the whole dashboard section
+        self.assertNotContains(response, "Create dataset")
+
+    def test_edit_cancel_swaps_only_its_own_card(self):
+        response = self.client.get(self.edit_url)
+        self.assertContains(
+            response,
+            reverse("login:dataset-card", args=[self.user.id, "quick_dataset"]),
+        )
+        # cancelling must not re-render the whole container (that would
+        # collapse every other open edit or manage panel)
+        self.assertNotContains(response, 'hx-target="#datasets-container"')
+
+    def test_delete_removes_only_its_own_card(self):
+        response = self.client.post(self.delete_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Dataset.objects.filter(name="quick_dataset").exists())
+        # empty swap target: the card disappears, the rest of the page
+        # (other open panels, the create form) stays untouched
+        self.assertNotContains(response, "Create dataset")
+
     def test_delete_forbidden_for_non_creator(self):
         self.client.force_login(self.other_user)
         response = self.client.post(self.delete_url)
@@ -318,6 +345,14 @@ class DatasetResourceManagementTests(TestCase):
                 holder=writable_by, table=table, level=WRITE_PERM
             )
         return table
+
+    def test_manage_close_swaps_only_its_own_card(self):
+        response = self.client.get(self.manage_url)
+        self.assertContains(
+            response,
+            reverse("login:dataset-card", args=[self.user.id, "managed_dataset"]),
+        )
+        self.assertNotContains(response, 'hx-target="#datasets-container"')
 
     def test_manage_view_creator_only(self):
         self.client.force_login(self.other_user)

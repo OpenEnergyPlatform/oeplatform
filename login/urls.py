@@ -32,6 +32,7 @@ from login.views import (
     SettingsView,
     TablesView,
     dataset_assign_view,
+    dataset_card_view,
     dataset_delete_view,
     dataset_edit_view,
     dataset_manage_view,
@@ -87,6 +88,11 @@ urlpatterns = [
         r"^profile/(?P<user_id>[\d]+)/datasets$",
         DatasetsView.as_view(),
         name="datasets",
+    ),
+    re_path(
+        r"^profile/(?P<user_id>[\d]+)/datasets/(?P<dataset_name>[\w-]+)/card$",
+        dataset_card_view,
+        name="dataset-card",
     ),
     re_path(
         r"^profile/(?P<user_id>[\d]+)/datasets/(?P<dataset_name>[\w-]+)/edit$",

@@ -5,8 +5,8 @@
     </span>
     <button type="button"
             class="btn btn-sm btn-outline-secondary"
-            hx-get="{% url 'login:datasets' user_id=profile_user.id %}"
-            hx-target="#datasets-container"
+            hx-get="{% url 'login:dataset-card' user_id=profile_user.id dataset_name=dataset.name %}"
+            hx-target="#dataset-card-{{ dataset.name }}"
             hx-swap="outerHTML">Close</button>
   </div>
   <div class="card-body">

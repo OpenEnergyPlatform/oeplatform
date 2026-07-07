@@ -27,7 +27,7 @@
                 class="btn btn-outline-danger"
                 hx-post="{% url 'login:dataset-delete' user_id=profile_user.id dataset_name=dataset.name %}"
                 hx-confirm="Delete dataset '{{ dataset.name }}'? Your tables are not deleted - only the dataset and its table list are removed."
-                hx-target="#datasets-container"
+                hx-target="#dataset-card-{{ dataset.name }}"
                 hx-swap="outerHTML">Delete</button>
       </div>
     </div>
