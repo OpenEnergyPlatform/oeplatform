@@ -34,6 +34,9 @@ SPDX-License-Identifier: CC0-1.0
     after table metadata edits. Dataset names are slug-validated and fixed at
     creation (renaming would break URLs and references).
 
+- Added eGon to the Open Data Tools section in the header navigation.
+  ([#2300](https://github.com/OpenEnergyPlatform/oeplatform/issues/2300))
+
 - OPR review-flow fixes: keep the category tabs usable in read-only/finished
   reviews, render the contributor General tab correctly, and make the category
   indicator dots, summary states, and auto-select reflect each round's pending
