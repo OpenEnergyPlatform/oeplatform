@@ -34,6 +34,7 @@ from django.db.models import (
     ForeignKey,
     IntegerField,
     JSONField,
+    PositiveIntegerField,
     QuerySet,
 )
 from django.urls import reverse
@@ -590,8 +591,7 @@ class PeerReview(models.Model):
     oemetadata = JSONField(null=False, default=dict)
 
     review_id: QuerySet["PeerReviewManager"]  # related_name, for static type checking
-    prev_review: QuerySet["PeerReviewManager"]  # related_name, for static type checking
-    next_review: QuerySet["PeerReviewManager"]  # related_name, for static type checking
+    rounds: QuerySet["ReviewRound"]  # related_name, for static type checking
 
     # laden
     @classmethod
@@ -640,45 +640,40 @@ class PeerReview(models.Model):
 
     def save(self, *args, **kwargs):
         review_type = kwargs.pop("review_type", None)
-        pm_new = None
 
-        if not self.contributor == self.reviewer:
+        if self.contributor == self.reviewer:
+            raise ValidationError("Contributor and reviewer cannot be the same.")
+
+        super().save(*args, **kwargs)
+
+        if review_type is None:
+            return
+
+        # One PeerReviewManager per review: get_or_create avoids the historical
+        # duplicate-manager bug where every save() created a fresh manager
+        # (which then broke PeerReviewManager.load via .get()).
+        pm, _ = PeerReviewManager.objects.get_or_create(opr=self)
+
+        if review_type == "save":
+            pm.status = ReviewDataStatus.SAVED.value
+            pm.save()
+
+        elif review_type == "submit":
+            result = self.set_version_of_metadata_for_review(table=self.table)
+            logger.info(result[1])
+
+            pm.status = ReviewDataStatus.SUBMITTED.value
+            pm.set_next_reviewer()  # persists the manager
+
+        elif review_type == "finished":
+            result = self.set_version_of_metadata_for_review(table=self.table)
+            logger.info(result[1])
+
+            pm.status = ReviewDataStatus.FINISHED.value
+            self.is_finished = True
+            self.date_finished = timezone.now()
             super().save(*args, **kwargs)
-            # TODO: This causes errors if review list ist empty
-
-            if review_type == "save":
-                pm_new = PeerReviewManager(
-                    opr=self, status=ReviewDataStatus.SAVED.value
-                )
-
-            elif review_type == "submit":
-                result = self.set_version_of_metadata_for_review(table=self.table)
-                if result[0]:
-                    logger.info(result[1])
-                elif result[0] is False:
-                    logger.info(result[1])
-
-                pm_new = PeerReviewManager(
-                    opr=self, status=ReviewDataStatus.SUBMITTED.value
-                )
-                pm_new.set_next_reviewer()
-
-            elif review_type == "finished":
-                result = self.set_version_of_metadata_for_review(table=self.table)
-                if result[0]:
-                    logger.info(result[1])
-                elif result[0] is False:
-                    logger.info(result[1])
-
-                pm_new = PeerReviewManager(
-                    opr=self, status=ReviewDataStatus.FINISHED.value
-                )
-                self.is_finished = True
-                self.date_finished = timezone.now()
-                super().save(*args, **kwargs)
-
-            if pm_new:
-                pm_new.save()
+            pm.save()
 
         else:
             raise ValidationError("Contributor and reviewer cannot be the same.")
@@ -800,8 +795,6 @@ class PeerReviewManager(models.Model):
         current_reviewer (CharField): The current reviewer.
         status (CharField): The current status of the review.
         is_open_since (CharField): How long the review has been open.
-        prev_review (ForeignKey): The previous review in the process.
-        next_review (ForeignKey): The next review in the process.
     """
 
     REVIEW_STATUS = [(status.value, status.name) for status in ReviewDataStatus]
@@ -817,20 +810,9 @@ class PeerReviewManager(models.Model):
         choices=REVIEW_STATUS, max_length=10, default=ReviewDataStatus.SAVED.value
     )
     is_open_since = models.CharField(null=True, max_length=10)
-    prev_review = ForeignKey(
-        PeerReview,
-        on_delete=models.CASCADE,
-        related_name="prev_review",
-        null=True,
-        default=None,
-    )  # TODO: add logic
-    next_review = ForeignKey(
-        PeerReview,
-        on_delete=models.CASCADE,
-        related_name="next_review",
-        null=True,
-        default=None,
-    )  # TODO: add logic
+
+    # Review history (the ping-pong of turns) is modelled by ReviewRound, not by
+    # prev/next FKs on the manager — those were unused and have been removed.
 
     @classmethod
     def load(cls, opr):
@@ -1049,3 +1031,54 @@ class PeerReviewManager(models.Model):
     @staticmethod
     def get_opr_by_id(opr_id) -> PeerReview:
         return PeerReview.objects.get(id=opr_id)
+
+
+class ReviewRound(models.Model):
+    """One immutable turn of a peer review (Phase 1).
+
+    A ReviewRound records a single reviewer/contributor submission. It is the
+    append-only log of the ping-pong; ``PeerReview.review`` is rebuilt from these
+    rows as a derived projection (see ``dataedit.peer_review.projection``).
+
+    Drafts (``reviewType="save"``) do NOT create rounds — only ``submit`` and
+    ``finished`` do. Within a single round every ``field_reviews`` entry's
+    ``fieldReview`` is a single dict (one turn = one contribution); the
+    dict-or-list ambiguity only ever appears in the rebuilt projection, where it
+    is always a list.
+
+    Attributes:
+        opr (ForeignKey): The peer review this round belongs to.
+        sequence (PositiveIntegerField): 1-based turn counter within the opr.
+        role (CharField): Who acted — reviewer or contributor.
+        actor (ForeignKey): The user who submitted (kept on user deletion).
+        action (CharField): SUBMITTED or FINISHED.
+        field_reviews (JSONField): list of {key, category, fieldReview: dict}.
+        sets_finished (BooleanField): Whether this round finished the review.
+        created (DateTimeField): When the round was recorded.
+    """
+
+    REVIEW_STATUS = [(status.value, status.name) for status in ReviewDataStatus]
+    REVIEWER_CHOICES = [(choice.value, choice.name) for choice in Reviewer]
+
+    opr = ForeignKey(
+        PeerReview, on_delete=models.CASCADE, related_name="rounds", null=False
+    )
+    sequence = PositiveIntegerField(null=False)
+    role = CharField(choices=REVIEWER_CHOICES, max_length=20, null=False)
+    actor = ForeignKey(
+        "login.myuser",
+        on_delete=models.SET_NULL,
+        related_name="review_rounds",
+        null=True,
+    )
+    action = CharField(choices=REVIEW_STATUS, max_length=10, null=False)
+    field_reviews = JSONField(default=list)
+    sets_finished = BooleanField(null=False, default=False)
+    created = DateTimeField(null=False, default=timezone.now)
+
+    class Meta:
+        unique_together = ("opr", "sequence")
+        ordering = ["opr", "sequence"]
+
+    def __str__(self) -> str:
+        return f"ReviewRound(opr={self.opr_id}, seq={self.sequence}, {self.role})"

@@ -21,8 +21,6 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 import csv
 import json
-import re
-from collections import defaultdict
 from io import TextIOWrapper
 from itertools import chain
 
@@ -73,22 +71,27 @@ from dataedit.helper import (
     find_tables,
     get_cancle_state,
     get_page,
-    merge_field_reviews,
     process_review_data,
-    recursive_update,
     update_keywords_from_tags,
 )
-from dataedit.metadata import (
-    has_valid_filled_metadata,
-    load_metadata_from_db,
-    save_metadata_to_db,
-)
+from dataedit.metadata import has_valid_filled_metadata, load_metadata_from_db
 from dataedit.metadata.widget import MetaDataWidget
 from dataedit.models import Embargo
 from dataedit.models import Filter as DBFilter
 from dataedit.models import PeerReview, PeerReviewManager, Table, Tag, Topic
 from dataedit.models import View as DBView
 from dataedit.models import View as DataViewModel
+from dataedit.peer_review.metadata_serializer import (
+    get_all_field_descriptions,
+    sort_in_category,
+)
+from dataedit.peer_review.projection import field_history
+from dataedit.peer_review.service import (
+    ContributorNotFoundError,
+    NotYourTurnError,
+    ReviewFinishedError,
+    ReviewService,
+)
 from login import models as login_models
 from oeplatform.settings import (
     DOCUMENTATION_LINKS,
@@ -1095,276 +1098,6 @@ class TablePeerReviewView(LoginRequiredMixin, View):
         json_schema = OEMETADATA_V20_SCHEMA
         return json_schema
 
-    def parse_keys(self, val, old=""):
-        """
-        Recursively parse keys from a nested dictionary or list and return them
-        as a list of dictionaries.
-
-        Args:
-            val (dict or list): The input dictionary or list to parse.
-            old (str, optional): The prefix for nested keys. Defaults to an
-                empty string.
-
-        Returns:
-            list: A list of dictionaries, each containing 'field' and 'value'
-                keys.
-        """
-        lines = []
-        if isinstance(val, dict):
-            for k in val.keys():
-                lines += self.parse_keys(val[k], old + "." + str(k))
-        elif isinstance(val, list):
-            if not val:
-                # handles empty list
-                lines += [{"field": old[1:], "value": str(val)}]
-            else:
-                for i, k in enumerate(val):
-                    lines += self.parse_keys(
-                        k, old + "." + str(i)
-                    )  # handles user value
-        else:
-            lines += [{"field": old[1:], "value": str(val)}]
-        return lines
-
-    def sort_in_category(self, table: str, oemetadata):
-        """
-                Groups OEMetadata v2 fields by top categories and
-                creates a two-level grouping of lists
-                (accordion-within-an-accordion) for general,
-                source, license, and spatial/temporal.
-
-        Category Exit:
-                {"flat":    [ { field, value, label, display_field, newValue,
-                 reviewer_suggestion, suggestion_comment,
-                   ... } ],
-                  "grouped": { "<Name N>": { "flat":[...], "grouped":{ "<Sub N>":[...]
-                  } }, ... }
-                }
-        """
-
-        def _plus_one_if_digit(txt: str) -> str:
-            return str(int(txt) + 1) if str(txt).isdigit() else txt
-
-        flattened = self.parse_keys(oemetadata)
-        flattened = [
-            x for x in flattened if str(x.get("field", "")).startswith("resources.")
-        ]
-
-        base_items = []
-        for item in flattened:
-            raw = item["field"]
-            parts = raw.split(".")
-            if len(parts) >= 3 and parts[0] == "resources" and parts[1].isdigit():
-                trimmed = ".".join(parts[2:])
-            else:
-                trimmed = raw
-
-            lbl_parts = [p.replace("_", " ") for p in trimmed.split(".")]
-            if lbl_parts:
-                lbl_parts[0] = lbl_parts[0][:1].upper() + lbl_parts[0][1:]
-            label = " ".join(lbl_parts)
-
-            base_items.append(
-                {
-                    "field": trimmed,
-                    "label": label,
-                    "value": item.get("value", ""),
-                    "newValue": "",
-                    "reviewer_suggestion": "",
-                    "suggestion_comment": "",
-                    "additional_comment": item.get("additional_comment", ""),
-                }
-            )
-
-        main_categories = defaultdict(list)
-        for itm in base_items:
-            root = itm["field"].split(".")[0] if "." in itm["field"] else itm["field"]
-            cat = {
-                "spatial": "spatial",
-                "temporal": "temporal",
-                "sources": "source",
-                "licenses": "license",
-            }.get(root, "general")
-            main_categories[cat].append(itm)
-
-        def extract_index(prefix: str) -> int:
-            m = re.search(r"(?:\.|\s)([0-9]+)$", prefix or "")
-            return int(m.group(1)) if m else -1
-
-        def group_index_only(items):
-            """First index occurrence: name.0.* → 'Name 1';
-            otherwise, group by the first token."""
-            result = {"flat": [], "grouped": defaultdict(list)}
-            for itm in items:
-                field = itm["field"]
-                m = re.match(r"^([^.]+)\.([0-9]+)(?:\.(.*))?$", field)
-                if m:
-                    list_name, idx, tail = (
-                        m.group(1),
-                        int(m.group(2)),
-                        m.group(3) or "value",
-                    )
-                    disp_prefix = f"{list_name.capitalize()} {idx + 1}"
-                    enriched = dict(itm)
-                    enriched["display_field"] = tail
-                    enriched["display_prefix"] = disp_prefix
-                    enriched["display_index"] = str(idx + 1)
-                    result["grouped"][disp_prefix].append(enriched)
-                elif "." in field:
-                    group_key = field.split(".")[0]
-                    enriched = dict(itm)
-                    enriched["display_field"] = ".".join(field.split(".")[1:])
-                    enriched["display_prefix"] = group_key
-                    enriched.pop("display_index", None)
-                    result["grouped"][group_key].append(enriched)
-                else:
-                    enriched = dict(itm)
-                    enriched["display_field"] = field
-                    enriched.pop("display_index", None)
-                    result["flat"].append(enriched)
-            result["grouped"] = dict(
-                sorted(result["grouped"].items(), key=lambda kv: extract_index(kv[0]))
-            )
-            return result
-
-        def nest_sublist_groups(items_for_one_parent):
-            from collections import defaultdict
-
-            grouped_map = defaultdict(lambda: {"flat": [], "grouped": {}})
-            flat = []
-
-            for itm in items_for_one_parent:
-                field = itm["field"]
-                m = re.match(r"^([^.]+)\.([0-9]+)(?:\.(.*))?$", field)
-                if m:
-                    head, idx, tail = m.group(1), int(m.group(2)), m.group(3)
-                    e = dict(itm)
-                    e["display_field"] = tail if (tail and tail.strip()) else str(idx)
-                    e["display_prefix"] = head
-                    e.pop("display_index", None)
-                    grouped_map[head.capitalize()]["flat"].append(e)
-                else:
-                    e = dict(itm)
-                    trimmed = ".".join(field.split(".")[1:]) if "." in field else field
-                    e["display_field"] = _plus_one_if_digit(trimmed)
-                    flat.append(e)
-
-            grouped = dict(sorted(grouped_map.items(), key=lambda kv: kv[0]))
-            return {"flat": flat, "grouped": grouped}
-
-        def _strip_cat_prefix(items, cat_name):
-            """spatial.extent.name → extent.name; temporal.period.start →
-            period.start"""
-            out = []
-            for it in items:
-                f = it["field"]
-                if f.startswith(cat_name + "."):
-                    trimmed = f[len(cat_name) + 1 :]
-                    e = dict(it)
-                    e["field"] = trimmed
-                    out.append(e)
-                else:
-                    out.append(it)
-            return out
-
-        def _group_spatiotemporal(items, cat_name):
-            """Level 1: by the first token AFTER
-            'spatial.'/'temporal.'
-            Level 2: as usual – separate the '<name>.<idx>.*'
-            lists into nested sections.
-            """
-
-            stripped = _strip_cat_prefix(items, cat_name)
-
-            first = group_index_only(stripped)
-
-            nested_grouped = {}
-            for gkey, gitems in first["grouped"].items():
-                nested_grouped[gkey.capitalize()] = nest_sublist_groups(gitems)
-
-            return {"flat": first["flat"], "grouped": nested_grouped}
-
-        grouped_meta = {}
-        for cat, items in main_categories.items():
-            if cat == "spatial":
-                grouped = _group_spatiotemporal(items, "spatial")
-            elif cat == "temporal":
-                grouped = _group_spatiotemporal(items, "temporal")
-            elif cat == "source":
-                first = group_index_only(items)
-                nested_grouped = {
-                    k: nest_sublist_groups(v) for k, v in first["grouped"].items()
-                }
-                grouped = {"flat": first["flat"], "grouped": nested_grouped}
-            elif cat == "license":
-                first = group_index_only(items)
-                nested_grouped = {
-                    k: nest_sublist_groups(v) for k, v in first["grouped"].items()
-                }
-                grouped = {"flat": first["flat"], "grouped": nested_grouped}
-            else:
-                # general (как было у вас)
-                grouped = group_index_only(items)
-
-            grouped_meta[cat] = {"flat": grouped["flat"], "grouped": grouped["grouped"]}
-
-        for k in ("general", "spatial", "temporal", "source", "license"):
-            grouped_meta.setdefault(k, {"flat": [], "grouped": {}})
-
-        return grouped_meta
-
-    def get_all_field_descriptions(self, json_schema, prefix=""):
-        """
-        Collects the field title, descriptions, examples, and badge information
-        for each field of the oemetadata from the JSON schema and prepares them
-        for further processing.
-
-        Args:
-            json_schema (dict): The JSON schema to extract field descriptions
-                from.
-            prefix (str, optional): The prefix for nested keys. Defaults to an
-                empty string.
-
-        Returns:
-            dict: A dictionary containing field descriptions, examples, and
-                other information.
-        """
-
-        field_descriptions = {}
-
-        def extract_descriptions(properties, prefix=""):
-            for field, value in properties.items():
-                key = f"{prefix}.{field}" if prefix else field
-
-                if any(
-                    attr in value
-                    for attr in ["description", "examples", "example", "badge", "title"]
-                ):
-                    field_descriptions[key] = {}
-                    if "description" in value:
-                        field_descriptions[key]["description"] = value["description"]
-                    # Prefer v2 "examples" (array) over v1 "example" (single value)
-                    if "examples" in value and value["examples"]:
-                        # v2: first item of the examples array
-                        field_descriptions[key]["example"] = value["examples"][0]
-                    elif "example" in value:
-                        # v1 fallback
-                        field_descriptions[key]["example"] = value["example"]
-                    if "badge" in value:
-                        field_descriptions[key]["badge"] = value["badge"]
-                    if "title" in value:
-                        field_descriptions[key]["title"] = value["title"]
-                if "properties" in value:
-                    new_prefix = f"{prefix}.{field}" if prefix else field
-                    extract_descriptions(value["properties"], new_prefix)
-                if "items" in value:
-                    new_prefix = f"{prefix}.{field}" if prefix else field
-                    if "properties" in value["items"]:
-                        extract_descriptions(value["items"]["properties"], new_prefix)
-
-        extract_descriptions(json_schema["properties"], prefix)
-        return field_descriptions
-
     @method_decorator(never_cache)
     def get(
         self,
@@ -1391,7 +1124,7 @@ class TablePeerReviewView(LoginRequiredMixin, View):
         # review_state = PeerReview.is_finished  # TODO: Use later
         json_schema = self.load_json_schema()
         can_add = False
-        field_descriptions = self.get_all_field_descriptions(json_schema)
+        field_descriptions = get_all_field_descriptions(json_schema)
 
         # Check user permissions
         user: login_models.myuser = request.user  # type: ignore
@@ -1400,8 +1133,8 @@ class TablePeerReviewView(LoginRequiredMixin, View):
             can_add = level >= login.permissions.WRITE_PERM
 
         oemetadata = self.load_json(table, review_id)
-        metadata = self.sort_in_category(
-            table, oemetadata=oemetadata
+        metadata = sort_in_category(
+            oemetadata=oemetadata
         )  # Generate URL for peer_review_reviewer
         if review_id is not None:
             url_peer_review = reverse(
@@ -1422,6 +1155,12 @@ class TablePeerReviewView(LoginRequiredMixin, View):
             state_dict = process_review_data(
                 review_data=existing_review, metadata=metadata, categories=categories
             )
+            field_history_data = field_history(existing_review)
+            # Read-only unless it is the reviewer's turn (and not finished).
+            manager = PeerReviewManager.objects.filter(opr=opr_review).first()
+            read_only = bool(review_finished) or (
+                manager is not None and manager.current_reviewer != "reviewer"
+            )
         else:
             url_peer_review = reverse(
                 "dataedit:peer_review_create",
@@ -1430,6 +1169,8 @@ class TablePeerReviewView(LoginRequiredMixin, View):
             # existing_review={}
             state_dict = None
             review_finished = None
+            field_history_data = {}
+            read_only = False
 
         config_data = {
             "can_add": can_add,
@@ -1438,6 +1179,7 @@ class TablePeerReviewView(LoginRequiredMixin, View):
             "topic": topic,
             "table": table,
             "review_finished": review_finished,
+            "read_only": read_only,
             "review_id": review_id,
         }
         context_meta = {
@@ -1450,6 +1192,7 @@ class TablePeerReviewView(LoginRequiredMixin, View):
             "json_schema": json_schema,
             "field_descriptions_json": json.dumps(field_descriptions),
             "state_dict": json.dumps(state_dict),
+            "field_history_json": json.dumps(field_history_data),
             "review_finished": review_finished,
             "review_id": review_id,
         }
@@ -1496,89 +1239,27 @@ class TablePeerReviewView(LoginRequiredMixin, View):
         """
         table_obj = table_or_404(table=table)
 
-        # context = {}
-        user: login_models.myuser = request.user  # type: ignore
-
         # get the review data and additional application metadata
         # from user peer review submit/save
         review_data = json.loads(request.body)
-        if review_id:
-            contributor_review = PeerReview.objects.filter(id=review_id).first()
-            if contributor_review:
-                contributor_review_data = (contributor_review.review or {}).get(
-                    "reviews", []
-                )
-                review_data["reviewData"]["reviews"].extend(contributor_review_data)
 
-        # The type can be "save" or "submit" as this triggers different behavior
-        review_post_type = review_data.get("reviewType")
-        # The opr datamodel that includes the field review data and metadata
-        review_datamodel = review_data.get("reviewData")
-        review_finished = review_datamodel.get("reviewFinished")
-        # TODO: Send a notification to the user that he can't review tables
-        # he is the table holder.
-        if review_post_type == "delete":
+        # The delete path is handled directly (unified into ReviewService in a
+        # later step); everything else is orchestrated by the service.
+        if review_data.get("reviewType") == "delete":
             return delete_peer_review(review_id)
 
-        contributor = PeerReviewManager.load_contributor(table=table_obj.name)
-
-        if contributor is not None:
-            # Überprüfen, ob ein aktiver PeerReview existiert
-            active_peer_review = PeerReview.load(table=table_obj.name)
-            if active_peer_review is None or active_peer_review.is_finished:
-                # Kein aktiver PeerReview vorhanden
-                # oder der aktive PeerReview ist abgeschlossen
-                table_review = PeerReview(
-                    table=table_obj.name,
-                    is_finished=review_finished,
-                    review=review_datamodel,
-                    reviewer=user,
-                    contributor=contributor,
-                    oemetadata=load_metadata_from_db(table=table_obj.name),
-                )
-                table_review.save(review_type=review_post_type)
-            else:
-                # Aktiver PeerReview ist vorhanden ... aktualisieren
-                current_review_data = active_peer_review.review
-                merged_review_data = merge_field_reviews(
-                    current_json=current_review_data, new_json=review_datamodel
-                )
-
-                # Set new review values and update existing review
-                active_peer_review.review = merged_review_data
-                active_peer_review.reviewer = user  # type: ignore TODO warning?
-                active_peer_review.contributor = contributor  # type: ignore TODO
-                active_peer_review.update(review_type=review_post_type)
-        else:
-            error_msg = (
-                "Failed to retrieve any user that identifies "
-                f"as table holder for the current table: {table_obj.name}!"
-            )
-            return JsonResponse({"error": error_msg}, status=400)
-
-        # TODO: Check for topic as reviewed finished also indicates the table
-        # needs to be or has to be moved.
-        if review_finished is True:
-            review_table = Table.load(name=table_obj.name)
-            review_table.set_is_reviewed()
-            metadata = self.load_json(table_obj.name, review_id=review_id)
-            updated_metadata = recursive_update(metadata, review_data)
-            save_metadata_to_db(table_obj.name, updated_metadata)
-            active_peer_review = PeerReview.load(table=table_obj.name)
-
-            if active_peer_review:
-                updated_oemetadata = recursive_update(
-                    active_peer_review.oemetadata, review_data
-                )
-                active_peer_review.oemetadata = updated_oemetadata
-                active_peer_review.save()
-
-            # TODO: also update reviewFinished in review datamodel json
+        service = ReviewService(table_name=table_obj.name, actor=request.user)
+        try:
+            service.submit_reviewer_review(review_data, review_id=review_id)
+        except ContributorNotFoundError as exc:
+            return JsonResponse({"error": str(exc)}, status=400)
+        except (ReviewFinishedError, NotYourTurnError) as exc:
+            return JsonResponse({"error": str(exc)}, status=409)
 
         return JsonResponse({"status": "success"}, status=200)
 
 
-class TablePeerRreviewContributorView(TablePeerReviewView):
+class TablePeerReviewContributorView(TablePeerReviewView):
     """
     A view handling the contributor's side of the peer review process.
     This view supports rendering the review template and handling GET and
@@ -1609,9 +1290,9 @@ class TablePeerRreviewContributorView(TablePeerReviewView):
             level = user.get_table_permission_level(table_obj)
             can_add = level >= login.permissions.WRITE_PERM
         oemetadata = self.load_json(table_obj.name, review_id)
-        metadata = self.sort_in_category(table_obj.name, oemetadata=oemetadata)
+        metadata = sort_in_category(oemetadata=oemetadata)
         json_schema = self.load_json_schema()
-        field_descriptions = self.get_all_field_descriptions(json_schema)
+        field_descriptions = get_all_field_descriptions(json_schema)
         review_data = (peer_review.review or {}).get("reviews", [])
 
         categories = [
@@ -1623,6 +1304,12 @@ class TablePeerRreviewContributorView(TablePeerReviewView):
         ]
         state_dict = process_review_data(
             review_data=review_data, metadata=metadata, categories=categories
+        )
+        review_finished = peer_review.is_finished
+        # Read-only unless it is the contributor's turn (and not finished).
+        manager = PeerReviewManager.objects.filter(opr=peer_review).first()
+        read_only = bool(review_finished) or (
+            manager is not None and manager.current_reviewer != "contributor"
         )
         context_meta = {
             "config": json.dumps(
@@ -1640,6 +1327,9 @@ class TablePeerRreviewContributorView(TablePeerReviewView):
                     ),
                     # "topic": table_obj.topics,
                     "table": table_obj.name,
+                    "review_finished": review_finished,
+                    "read_only": read_only,
+                    "review_id": review_id,
                 }
             ),
             "table": table_obj.name,
@@ -1648,6 +1338,8 @@ class TablePeerRreviewContributorView(TablePeerReviewView):
             "json_schema": json_schema,
             "field_descriptions_json": json.dumps(field_descriptions),
             "state_dict": json.dumps(state_dict),
+            "field_history_json": json.dumps(field_history(review_data)),
+            "review_finished": review_finished,
         }
         return render(request, "dataedit/opr_contributor.html", context=context_meta)
 
@@ -1665,21 +1357,10 @@ class TablePeerRreviewContributorView(TablePeerReviewView):
             HttpResponse: Rendered HTML response for contributor review.
 
         """
-        # table_obj = table_or_404(table=table)
-        # TODO: why unused argument "table"?
-
-        # context = {}
-        if request.method == "POST":
-            review_data = json.loads(request.body)
-            review_post_type = review_data.get("reviewType")
-            review_datamodel = review_data.get("reviewData")
-            current_opr = PeerReviewManager.get_opr_by_id(opr_id=review_id)
-            existing_reviews = current_opr.review
-            merged_review = merge_field_reviews(
-                current_json=existing_reviews, new_json=review_datamodel
-            )
-
-            current_opr.review = merged_review
-            current_opr.update(review_type=review_post_type)
-
+        review_data = json.loads(request.body)
+        service = ReviewService(table_name=table, actor=request.user)
+        try:
+            service.submit_contributor_review(review_data, review_id=review_id)
+        except (ReviewFinishedError, NotYourTurnError) as exc:
+            return JsonResponse({"error": str(exc)}, status=409)
         return JsonResponse({"status": "success"}, status=200)

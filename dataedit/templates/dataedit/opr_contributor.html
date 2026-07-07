@@ -63,6 +63,24 @@
       .ok-progress-circle circle.bg { stroke: #e6e6e6; }
       .ok-progress-circle circle.progress { stroke: #4caf50; stroke-linecap: round; stroke-dasharray: 326.72; stroke-dashoffset: 326.72; transition: stroke-dashoffset 0.4s ease; }
       .percentage-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 22px; font-weight: bold; }
+      .field-suggestion .suggestion--highlight:not(:empty)::before { content: "NEW"; display: inline-block; background: #f0ad4e; color: #fff; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.04em; padding: 0.05rem 0.35rem; border-radius: 0.6rem; margin-right: 0.4rem; vertical-align: middle; }
+      .opr-history { margin-top: 0.75rem; padding: 0.5rem 1rem 0.25rem 1rem; border-top: 1px dashed #e3e8ec; }
+      .opr-history__toggle { background: none; border: none; padding: 0; font-size: 0.8rem; color: #2972A6; cursor: pointer; }
+      .opr-history__toggle:hover { text-decoration: underline; }
+      .opr-history__caret { display: inline-block; transition: transform 0.2s ease; }
+      .opr-history__toggle[aria-expanded="true"] .opr-history__caret { transform: rotate(90deg); }
+      .opr-history__list { list-style: none; margin: 0.6rem 0 0; padding: 0 0 0 0.25rem; }
+      .opr-history__item { border-left: 3px solid #ced4da; padding: 0.45rem 0 0.45rem 0.75rem; margin-bottom: 0.6rem; font-size: 0.82rem; line-height: 1.45; }
+      .opr-history__item:last-child { margin-bottom: 0; }
+      .opr-history__item--ok { border-left-color: #4caf50; }
+      .opr-history__item--suggestion { border-left-color: #f0ad4e; }
+      .opr-history__item--rejected { border-left-color: #d9534f; }
+      .opr-history__role { font-weight: 600; text-transform: capitalize; }
+      .opr-history__state { color: #6c757d; text-transform: capitalize; }
+      .opr-history__previous { color: #6c757d; margin-top: 0.2rem; }
+      .opr-history__value { font-weight: 600; margin-top: 0.1rem; }
+      .opr-history__comment { font-style: italic; color: #495057; margin-top: 0.15rem; }
+      .opr-history__time { display: block; font-size: 0.72rem; color: #adb5bd; margin-top: 0.25rem; }
       </style>
       <div class="ok-progress-wrapper">
         <div class="ok-progress-circle">
@@ -190,91 +208,39 @@
                    role="tabpanel"
                    aria-labelledby="general-tab">
                 <div class="review__items">
-                  {% if meta.general.flat is not None or meta.general.grouped is not None %}
-                    {# Flat items #}
-                    {% for item in meta.general.flat %}
-                      {% include "partials/review_item_snippet.html" with item=item category="general" only %}
-                    {% endfor %}
-                    {# Grouped items #}
-                    <div class="accordion" id="generalAccordion">
-                      {% for group_key, group in meta.general.grouped.items %}
-                        <div class="accordion-item">
-                          <h2 class="accordion-header" id="heading-general-{{ forloop.counter }}">
-                            <button class="accordion-button collapsed"
-                                    type="button"
-                                    data-bs-toggle="collapse"
-                                    data-bs-target="#collapse-general-{{ forloop.counter }}">
-                              {{ group_key }}
-                            </button>
-                          </h2>
-                          <div id="collapse-general-{{ forloop.counter }}"
-                               class="accordion-collapse collapse"
-                               data-bs-parent="#generalAccordion">
-                            <div class="accordion-body">
-                              {% for item in group.flat %}
-                                {% include "partials/review_item_snippet.html" with item=item category="general" only %}
-                              {% endfor %}
-                              {% if group.grouped %}
-                                <div class="accordion" id="generalInnerAccordion_{{ group_key|slugify }}">
-                                  {% for sub_key, sub_items in group.grouped.items %}
-                                    <div class="accordion-item">
-                                      <h2 class="accordion-header"
-                                          id="heading-general-inner-{{ group_key|slugify }}-{{ forloop.counter }}">
-                                        <button class="accordion-button collapsed"
-                                                type="button"
-                                                data-bs-toggle="collapse"
-                                                data-bs-target="#collapse-general-inner-{{ group_key|slugify }}-{{ forloop.counter }}">
-                                          {{ sub_key }}
-                                        </button>
-                                      </h2>
-                                      <div id="collapse-general-inner-{{ group_key|slugify }}-{{ forloop.counter }}"
-                                           class="accordion-collapse collapse">
-                                        <div class="accordion-body">
-                                          {% for item in sub_items %}
-                                            {% include "partials/review_item_snippet.html" with item=item category="general" only %}
-                                          {% endfor %}
-                                        </div>
-                                      </div>
-                                    </div>
-                                  {% endfor %}
-                                </div>
-                              {% endif %}
-                            </div>
-                          </div>
-                        </div>
-                      {% endfor %}
-                    </div>
-                  {% else %}
-                    {# Legacy #}
-                    {% for item in meta.general %}
-                      <div id="field_{{ item.field|default:'undefined' }}"
-                           class="field review__item"
-                           data-fieldkey="{{ item.field|default:'' }}"
-                           data-fieldvalue="{{ item.value|default:'' }}"
-                           data-category="general">
-                        <p class="review__item-content">
-                          <span class="key">{{ item.display_field|default:item.field }}</span>
-                          <span class="value">{{ item.newValue|default:item.value }}</span>
-                          <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                          <span class="comment">{{ item.suggestion_comment }}</span>
-                        </p>
-                      </div>
-                    {% endfor %}
-                  {% endif %}
+                  {# General pane mirrors the reviewer: flat fields only (no grouped accordions). #}
+                  {% for item in meta.general.flat %}
+                    {% include "partials/review_item_snippet.html" with item=item category="general" only %}
+                  {% endfor %}
                 </div>
               </div>
               <div class="tab-pane fade"
                    id="spatiotemporal"
                    role="tabpanel"
-                   aria-labelledby="spatiotemporal-tab"></div>
+                   aria-labelledby="spatiotemporal-tab">
+                <div class="review__items">
+                  <p class="review__items-cat">Spatial</p>
+                  {% include "partials/review_category.html" with cat=meta.spatial category="spatial" acc="spatial" %}
+                  <p class="review__items-cat">Temporal</p>
+                  {% include "partials/review_category.html" with cat=meta.temporal category="temporal" acc="temporal" %}
+                </div>
+              </div>
               <div class="tab-pane fade"
                    id="source"
                    role="tabpanel"
-                   aria-labelledby="source-tab"></div>
+                   aria-labelledby="source-tab">
+                <div class="review__items">
+                  {% include "partials/review_category.html" with cat=meta.source category="source" acc="source" %}
+                </div>
+              </div>
               <div class="tab-pane fade"
                    id="license"
                    role="tabpanel"
-                   aria-labelledby="license-tab"></div>
+                   aria-labelledby="license-tab">
+                <div class="review__items">
+                  {% include "partials/review_category.html" with cat=meta.license category="license" acc="license" %}
+                </div>
+              </div>
               <div class="tab-pane fade"
                    id="summary"
                    role="tabpanel"
@@ -331,21 +297,30 @@
                 </div>
                 <div id="explanation-container"></div>
                 <div class="d-none review__remarks" id="reviewer_remarks">
-                  <div class="review__field">
-                    <textarea class="form-control" id="valuearea"></textarea>
+                  <div class="review__field" id="field-value">
+                    <label for="valuearea" class="form-label">Your value suggestion*</label>
+                    <textarea class="form-control" id="valuearea" rows="2"></textarea>
                   </div>
-                  <div class="review__field">
-                    <textarea class="form-control" id="commentarea"></textarea>
+                  <div class="review__field review__field--nolabel" id="field-comment">
+                    <textarea class="form-control"
+                              id="commentarea"
+                              rows="2"
+                              placeholder="Comment here if you want to explain your suggestion"></textarea>
                   </div>
-                  <button type="button" class="btn btn-warning" id="submitButton">Save</button>
+                  <button type="button"
+                          class="btn btn-warning review__field-save"
+                          id="submitButton">Save comment/new value</button>
                 </div>
                 <div class="d-none review__comments" id="reviewer_comments">
-                  <div class="review__field">
-                    <textarea class="form-control" id="comments"></textarea>
+                  <div class="review__field review__field--nolabel" id="field-comment">
+                    <textarea class="form-control"
+                              id="comments"
+                              rows="2"
+                              placeholder="Comment here if you want to explain why you deny this field"></textarea>
                   </div>
-                  <button type="button" class="btn btn-warning" id="submitCommentButton">
-                    Save
-                  </button>
+                  <button type="button"
+                          class="btn btn-warning review__field-save"
+                          id="submitCommentButton">Save comment</button>
                 </div>
               </div>
             </div>
@@ -368,6 +343,7 @@
     const fieldDescriptionsData = JSON.parse(document.getElementById("field-descriptions-json").textContent);
     var config = JSON.parse("{{ config|escapejs }}");
     window.state_dict = JSON.parse("{{ state_dict | escapejs }}");
+    window.field_history = JSON.parse("{{ field_history_json | escapejs }}");
     if (window.state_dict) {
       for (let [key, value] of Object.entries(window.state_dict)) {
         let field_id = `#field_${key}`.replace(/\./g, "\\.");
