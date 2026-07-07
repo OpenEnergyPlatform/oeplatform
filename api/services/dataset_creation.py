@@ -10,8 +10,9 @@ from django.utils import timezone
 from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE
 from oemetadata.v2.v20.template import OEMETADATA_V20_TEMPLATE
 
-from dataedit.models import Dataset, Table
+from dataedit.models import Dataset, Table, Topic
 from login.permissions import WRITE_PERM
+from oeplatform.settings import PSEUDO_TOPIC_DRAFT
 
 
 class DatasetNameTaken(Exception):
@@ -84,6 +85,21 @@ def assignable_tables_for(user, dataset: Dataset, search: str = "") -> QuerySet[
         )
 
     return tables.distinct().order_by("name")
+
+
+def assign_table(dataset: Dataset, table: Table) -> None:
+    """Add a table to a dataset and seed the dataset's topics additively:
+    the table's topics are added (except the draft pseudo-topic), existing
+    topics are never removed, so creator-curated removals survive."""
+    dataset.tables.add(table)
+    dataset.topics.add(*table.topics.exclude(name=PSEUDO_TOPIC_DRAFT))
+
+
+def set_dataset_topics(dataset: Dataset, topic_names: list[str]) -> None:
+    """Replace the creator-curated topic set. Unknown names are ignored and
+    the draft pseudo-topic can never become a dataset topic."""
+    topics = Topic.objects.filter(name__in=topic_names).exclude(name=PSEUDO_TOPIC_DRAFT)
+    dataset.topics.set(topics)
 
 
 def update_dataset(dataset: Dataset, validated_data: dict[str, Any]) -> Dataset:

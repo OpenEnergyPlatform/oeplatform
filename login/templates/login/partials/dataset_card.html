@@ -26,6 +26,13 @@
                 hx-swap="outerHTML">Delete</button>
       </div>
     </div>
+    {% if dataset.topics.all %}
+      <p class="mb-2">
+        {% for topic in dataset.topics.all %}
+          <span class="badge text-bg-light border me-1">{{ topic.name }}</span>
+        {% endfor %}
+      </p>
+    {% endif %}
     {% if dataset.metadata.description %}
       <p class="card-text mb-2">{{ dataset.metadata.description|truncatechars:160 }}</p>
     {% endif %}

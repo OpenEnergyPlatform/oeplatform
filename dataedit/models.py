@@ -468,6 +468,9 @@ class Dataset(models.Model):
     name = models.CharField(max_length=255, unique=True)
     metadata = models.JSONField(null=False, default=dict)
     tables = models.ManyToManyField("Table", related_name="datasets", blank=True)
+    # seeded additively from member tables' topics on assign, editable by
+    # the creator; never contains the draft pseudo-topic
+    topics = models.ManyToManyField(Topic, related_name="datasets", blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     # nullable so datasets created before ownership existed survive the migration
     creator = models.ForeignKey(

@@ -160,6 +160,7 @@ from api.serializers import (
 from api.services.dataset_creation import (
     DatasetNameTaken,
     assemble_dataset_metadata,
+    assign_table,
     create_dataset,
     user_may_assign_table,
 )
@@ -390,7 +391,7 @@ class AssignDatasetTables(APIView):
 
         added_tables = []
         for table in tables:
-            dataset.tables.add(table)
+            assign_table(dataset, table)
             added_tables.append(table.name)
 
         return Response(

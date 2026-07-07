@@ -30,6 +30,31 @@
           <div class="invalid-feedback d-block">{{ form_errors.description }}</div>
         {% endif %}
       </div>
+      <div class="mb-3">
+        <span class="form-label d-block">Topics</span>
+        <div class="border rounded p-2"
+             style="max-height: 10rem;
+                    overflow-y: auto">
+          {% for topic in available_topics %}
+            <div class="form-check form-check-inline">
+              <input class="form-check-input"
+                     type="checkbox"
+                     name="topics"
+                     id="edit-topic-{{ dataset.name }}-{{ topic.name }}"
+                     value="{{ topic.name }}"
+                     {% if topic.name in selected_topics %}checked{% endif %} />
+              <label class="form-check-label"
+                     for="edit-topic-{{ dataset.name }}-{{ topic.name }}">{{ topic.name }}</label>
+            </div>
+          {% empty %}
+            <span class="text-muted small">No topics exist yet.</span>
+          {% endfor %}
+        </div>
+        <div class="form-text">
+          Assigning a table adds its topics automatically; topics you remove
+          here stay removed until a table carrying them is assigned again.
+        </div>
+      </div>
       <button type="submit" class="btn btn-sm btn-primary">Save</button>
       <button type="button"
               class="btn btn-sm btn-outline-secondary"

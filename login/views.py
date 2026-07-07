@@ -43,8 +43,10 @@ import login.permissions
 from api.serializers import DatasetCreateSerializer, DatasetUpdateSerializer
 from api.services.dataset_creation import (
     DatasetNameTaken,
+    assign_table,
     assignable_tables_for,
     create_dataset,
+    set_dataset_topics,
     update_dataset,
     user_may_assign_table,
 )
@@ -55,6 +57,7 @@ from login.models import GroupMembership, UserGroup
 from login.models import myuser as OepUser
 from login.permissions import ADMIN_PERM, DELETE_PERM, WRITE_PERM
 from login.utils import get_tables_if_group_assigned
+from oeplatform.settings import PSEUDO_TOPIC_DRAFT
 
 # Pagination
 ITEMS_PER_PAGE = 8
@@ -140,7 +143,7 @@ def _datasets_context(request, profile_user, form_errors=None, form_values=None)
         datasets = (
             Dataset.objects.filter(creator=request.user)
             .order_by("-created_at")
-            .prefetch_related("tables")
+            .prefetch_related("tables", "topics")
         )
     else:
         datasets = Dataset.objects.none()
@@ -215,13 +218,14 @@ class DatasetsView(LoginRequiredMixin, View):
 @login_required
 @dataset_creator_required
 def dataset_edit_view(request, profile_user, dataset):
-    """Inline edit of a dataset card: title and description only, the
+    """Inline edit of a dataset card: title, description and topics; the
     name is immutable. GET returns the form partial, POST saves and
     returns the refreshed card."""
     if request.method == "POST":
         serializer = DatasetUpdateSerializer(data=request.POST)
         if serializer.is_valid():
             update_dataset(dataset, serializer.validated_data)
+            set_dataset_topics(dataset, request.POST.getlist("topics"))
             return render(
                 request,
                 "login/partials/dataset_card.html",
@@ -229,12 +233,14 @@ def dataset_edit_view(request, profile_user, dataset):
             )
         form_errors = _serializer_errors(serializer)
         form_values = request.POST
+        selected_topics = set(request.POST.getlist("topics"))
     else:
         form_errors = {}
         form_values = {
             "title": dataset.metadata.get("title", ""),
             "description": dataset.metadata.get("description", ""),
         }
+        selected_topics = set(dataset.topics.values_list("name", flat=True))
 
     return render(
         request,
@@ -244,6 +250,10 @@ def dataset_edit_view(request, profile_user, dataset):
             "profile_user": profile_user,
             "form_errors": form_errors,
             "form_values": form_values,
+            "available_topics": Topic.objects.exclude(name=PSEUDO_TOPIC_DRAFT).order_by(
+                "name"
+            ),
+            "selected_topics": selected_topics,
         },
     )
 
@@ -316,7 +326,7 @@ def dataset_assign_view(request, profile_user, dataset):
         return HttpResponseForbidden(
             "Draft or embargoed tables require write permission on the table."
         )
-    dataset.tables.add(table)
+    assign_table(dataset, table)
     return _render_dataset_manage(request, profile_user, dataset)
 
 

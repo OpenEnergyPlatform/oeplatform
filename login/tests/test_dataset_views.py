@@ -6,8 +6,9 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 from django.test import TestCase
 from django.urls import reverse
 
-from dataedit.models import Dataset, Embargo, Table
+from dataedit.models import Dataset, Embargo, Table, Topic
 from login.models import WRITE_PERM, UserPermission, myuser
+from oeplatform.settings import PSEUDO_TOPIC_DRAFT
 
 
 class DatasetDashboardTests(TestCase):
@@ -383,3 +384,131 @@ class DatasetResourceManagementTests(TestCase):
         # the refreshed fragment shows an empty resource list (the table
         # itself reappears in the picker, so match the empty-state copy)
         self.assertContains(response, "No tables assigned yet")
+
+
+class DatasetTopicTests(TestCase):
+    """Dataset topics are seeded additively from assigned tables and stay
+    editable by the creator; nothing is ever removed automatically."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user, _ = myuser.objects.get_or_create(
+            name="TopicUser",
+            email="topic-user@test.com",
+            did_agree=True,
+            is_mail_verified=True,
+        )
+        cls.wind = Topic.objects.create(name="wind")
+        cls.solar = Topic.objects.create(name="solar")
+        cls.draft_topic = Topic.objects.create(name=PSEUDO_TOPIC_DRAFT)
+
+    def setUp(self):
+        self.client.force_login(self.user)
+        self.dataset = Dataset.objects.create(
+            name="topical_dataset",
+            metadata={
+                "name": "topical_dataset",
+                "title": "Topical Dataset",
+                "description": "",
+            },
+            creator=self.user,
+        )
+        self.assign_url = reverse(
+            "login:dataset-assign", args=[self.user.id, "topical_dataset"]
+        )
+        self.unassign_url = reverse(
+            "login:dataset-unassign", args=[self.user.id, "topical_dataset"]
+        )
+        self.edit_url = reverse(
+            "login:dataset-edit", args=[self.user.id, "topical_dataset"]
+        )
+
+    def make_table(self, name, topics=()):
+        table = Table.objects.create(
+            name=name,
+            is_publish=True,
+            oemetadata={"resources": [{"name": name}]},
+        )
+        for topic in topics:
+            table.topics.add(topic)
+        return table
+
+    def topic_names(self):
+        return set(self.dataset.topics.values_list("name", flat=True))
+
+    def test_assign_seeds_topics_from_table(self):
+        self.make_table("t_windy", topics=[self.wind])
+
+        response = self.client.post(self.assign_url, {"table": "t_windy"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.topic_names(), {"wind"})
+
+    def test_assign_never_seeds_the_draft_pseudo_topic(self):
+        self.make_table("t_staged", topics=[self.wind, self.draft_topic])
+
+        self.client.post(self.assign_url, {"table": "t_staged"})
+        self.assertEqual(self.topic_names(), {"wind"})
+
+    def test_unassign_removes_no_topics(self):
+        self.make_table("t_leaving", topics=[self.wind])
+        self.client.post(self.assign_url, {"table": "t_leaving"})
+
+        self.client.post(self.unassign_url, {"table": "t_leaving"})
+        self.assertFalse(self.dataset.tables.exists())
+        self.assertEqual(self.topic_names(), {"wind"})
+
+    def test_edit_form_offers_topics_with_current_ones_checked(self):
+        self.dataset.topics.add(self.wind)
+
+        response = self.client.get(self.edit_url)
+        self.assertContains(response, 'name="topics"')
+        self.assertContains(response, 'value="wind"')
+        self.assertContains(response, 'value="solar"')
+        self.assertNotContains(response, f'value="{PSEUDO_TOPIC_DRAFT}"')
+        # only the dataset's own topic is preselected
+        self.assertContains(response, "checked", count=1)
+
+    def test_edit_can_add_and_remove_topics(self):
+        self.dataset.topics.add(self.wind)
+
+        response = self.client.post(
+            self.edit_url,
+            {
+                "title": "Topical Dataset",
+                "description": "now on solar",
+                "topics": ["solar"],
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.topic_names(), {"solar"})
+
+    def test_edit_cannot_smuggle_in_the_draft_pseudo_topic(self):
+        self.client.post(
+            self.edit_url,
+            {
+                "title": "Topical Dataset",
+                "description": "no drafts",
+                "topics": ["solar", PSEUDO_TOPIC_DRAFT],
+            },
+        )
+        self.assertEqual(self.topic_names(), {"solar"})
+
+    def test_creator_removal_survives_later_assigns(self):
+        self.dataset.topics.add(self.wind)
+        self.client.post(
+            self.edit_url,
+            {"title": "Topical Dataset", "description": "topics cleared"},
+        )
+        self.assertEqual(self.topic_names(), set())
+
+        self.make_table("t_sunny", topics=[self.solar])
+        self.client.post(self.assign_url, {"table": "t_sunny"})
+        # the assign adds its own topics but does not resurrect removed ones
+        self.assertEqual(self.topic_names(), {"solar"})
+
+    def test_dashboard_card_shows_topic_badges(self):
+        self.dataset.topics.add(self.wind, self.solar)
+
+        response = self.client.get(reverse("login:datasets", args=[self.user.id]))
+        self.assertContains(response, "wind")
+        self.assertContains(response, "solar")

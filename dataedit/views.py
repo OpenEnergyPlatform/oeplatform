@@ -441,7 +441,9 @@ def tables_view(request: HttpRequest, topic: str) -> HttpResponse:
 def datasets_view(request: HttpRequest) -> HttpResponse:
     """Public, paginated card list of all datasets: name, description,
     resource count and combined size of the member tables."""
-    datasets = Dataset.objects.order_by("-created_at").prefetch_related("tables")
+    datasets = Dataset.objects.order_by("-created_at").prefetch_related(
+        "tables", "topics"
+    )
 
     paginator = Paginator(datasets, ITEMS_PER_PAGE)
     datasets_paginated = paginator.get_page(get_page(request))
