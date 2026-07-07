@@ -1,0 +1,20 @@
+{% if picker_tables %}
+  <ul class="list-group">
+    {% for table in picker_tables %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <span>
+          {{ table.human_readable_name|default:table.name }}
+          {% if not table.is_publish %}<span class="badge bg-warning text-dark">Draft</span>{% endif %}
+        </span>
+        <button type="button"
+                class="btn btn-sm btn-outline-primary"
+                hx-post="{% url 'login:dataset-assign' user_id=profile_user.id dataset_name=dataset.name %}"
+                hx-vals='{"table": "{{ table.name }}"}'
+                hx-target="#dataset-card-{{ dataset.name }}"
+                hx-swap="outerHTML">Add</button>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No assignable tables found.</p>
+{% endif %}

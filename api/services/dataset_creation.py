@@ -5,10 +5,13 @@
 from copy import deepcopy
 from typing import Any
 
+from django.db.models import Q, QuerySet
+from django.utils import timezone
 from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE
 from oemetadata.v2.v20.template import OEMETADATA_V20_TEMPLATE
 
-from dataedit.models import Dataset
+from dataedit.models import Dataset, Table
+from login.permissions import WRITE_PERM
 
 
 class DatasetNameTaken(Exception):
@@ -49,6 +52,38 @@ def create_dataset(validated_data: dict[str, Any], creator) -> Dataset:
 
     metadata = assemble_dataset_metadata(validated_data)
     return Dataset.objects.create(metadata=metadata, name=name, creator=creator)
+
+
+def user_may_assign_table(user, table: Table) -> bool:
+    """Curation model: any published table may be assigned to a dataset;
+    draft tables and tables under an active embargo only by users holding
+    write permission on the table (owners staging a release)."""
+    from api.helper import check_embargo
+
+    if table.is_publish and not check_embargo(table):
+        return True
+    return user.has_write_permissions(table.name)
+
+
+def assignable_tables_for(user, dataset: Dataset, search: str = "") -> QuerySet[Table]:
+    """Tables the user may assign to the dataset under the curation rules,
+    excluding tables already assigned. Queryset twin of
+    user_may_assign_table for the dashboard picker."""
+    now = timezone.now()
+    writable_ids = user.get_tables_queryset(
+        min_permission_level=WRITE_PERM
+    ).values_list("id", flat=True)
+
+    freely_assignable = Q(is_publish=True) & ~Q(embargos__date_ended__gt=now)
+    tables = Table.objects.filter(freely_assignable | Q(id__in=writable_ids))
+    tables = tables.exclude(id__in=dataset.tables.values_list("id", flat=True))
+
+    if search:
+        tables = tables.filter(
+            Q(name__icontains=search) | Q(human_readable_name__icontains=search)
+        )
+
+    return tables.distinct().order_by("name")
 
 
 def update_dataset(dataset: Dataset, validated_data: dict[str, Any]) -> Dataset:

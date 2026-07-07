@@ -42,8 +42,10 @@ import login.permissions
 from api.serializers import DatasetCreateSerializer, DatasetUpdateSerializer
 from api.services.dataset_creation import (
     DatasetNameTaken,
+    assignable_tables_for,
     create_dataset,
     update_dataset,
+    user_may_assign_table,
 )
 from dataedit.helper import delete_peer_review
 from dataedit.models import Dataset, PeerReviewManager, Table, Topic
@@ -251,6 +253,82 @@ def dataset_delete_view(request, user_id, dataset_name):
     profile_user = get_object_or_404(OepUser, pk=user_id)
     context = DatasetsView()._context(request, profile_user)
     return render(request, "login/partials/datasets_sections.html", context)
+
+
+def _render_dataset_manage(request, profile_user, dataset, search=""):
+    context = {
+        "profile_user": profile_user,
+        "dataset": dataset,
+        "resources": dataset.tables.all().order_by("name"),
+        "picker_tables": assignable_tables_for(request.user, dataset, search)[:20],
+        "search": search,
+    }
+    return render(request, "login/partials/dataset_manage.html", context)
+
+
+@login_required
+def dataset_manage_view(request, user_id, dataset_name):
+    """Manage panel for a dataset's resources: current tables with draft
+    badges and links, plus the picker for adding tables. Creator only."""
+    dataset = _owned_dataset_or_none(request, dataset_name)
+    if dataset is None:
+        return HttpResponseForbidden(
+            "Only the dataset creator may manage this dataset."
+        )
+    profile_user = get_object_or_404(OepUser, pk=user_id)
+    return _render_dataset_manage(request, profile_user, dataset)
+
+
+@login_required
+def dataset_table_search_view(request, user_id, dataset_name):
+    """Picker search: only tables the user may assign under the curation
+    rules, minus already assigned ones."""
+    dataset = _owned_dataset_or_none(request, dataset_name)
+    if dataset is None:
+        return HttpResponseForbidden(
+            "Only the dataset creator may manage this dataset."
+        )
+    profile_user = get_object_or_404(OepUser, pk=user_id)
+    search = request.GET.get("q", "").strip()
+    context = {
+        "profile_user": profile_user,
+        "dataset": dataset,
+        "picker_tables": assignable_tables_for(request.user, dataset, search)[:20],
+    }
+    return render(request, "login/partials/dataset_table_search_results.html", context)
+
+
+@login_required
+@require_POST
+def dataset_assign_view(request, user_id, dataset_name):
+    dataset = _owned_dataset_or_none(request, dataset_name)
+    if dataset is None:
+        return HttpResponseForbidden(
+            "Only the dataset creator may manage this dataset."
+        )
+    table = get_object_or_404(Table, name=request.POST.get("table", ""))
+    if not user_may_assign_table(request.user, table):
+        return HttpResponseForbidden(
+            "Draft or embargoed tables require write permission on the table."
+        )
+    dataset.tables.add(table)
+    profile_user = get_object_or_404(OepUser, pk=user_id)
+    return _render_dataset_manage(request, profile_user, dataset)
+
+
+@login_required
+@require_POST
+def dataset_unassign_view(request, user_id, dataset_name):
+    dataset = _owned_dataset_or_none(request, dataset_name)
+    if dataset is None:
+        return HttpResponseForbidden(
+            "Only the dataset creator may manage this dataset."
+        )
+    table = dataset.tables.filter(name=request.POST.get("table", "")).first()
+    if table is not None:
+        dataset.tables.remove(table)
+    profile_user = get_object_or_404(OepUser, pk=user_id)
+    return _render_dataset_manage(request, profile_user, dataset)
 
 
 ##############################################################################

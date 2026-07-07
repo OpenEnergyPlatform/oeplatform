@@ -27,6 +27,14 @@ SPDX-License-Identifier: CC0-1.0
   page without reloads and are only available to the dataset creator.
   ([#1971](https://github.com/OpenEnergyPlatform/oeplatform/issues/1971))
 
+- Dataset resource management on the dashboard: a manage panel per dataset lists
+  the assigned tables (draft tables are badged, every entry links to its table
+  page) and offers a search picker that only shows tables the user may assign -
+  all published tables plus their own drafts and embargoed tables. Assigning and
+  removing tables updates the panel without page reloads; data upload continues
+  on the table pages.
+  ([#1971](https://github.com/OpenEnergyPlatform/oeplatform/issues/1971))
+
 - Add Dataset rest-api and metadata based concept as specified in oemetadata /
   frictionless
   ([#2071](https://github.com/OpenEnergyPlatform/oeplatform/pull/2071))

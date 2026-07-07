@@ -161,6 +161,7 @@ from api.services.dataset_creation import (
     DatasetNameTaken,
     assemble_dataset_metadata,
     create_dataset,
+    user_may_assign_table,
 )
 from api.services.embargo import (
     EmbargoValidationError,
@@ -262,15 +263,6 @@ def assert_dataset_ownership(user, dataset: Dataset) -> None:
     """Datasets are creator-owned: only the creator may modify one."""
     if dataset.creator is None or dataset.creator != user:
         raise PermissionDenied("Only the dataset creator may modify this dataset.")
-
-
-def user_may_assign_table(user, table: Table) -> bool:
-    """Curation model: any published table may be assigned to a dataset;
-    draft tables and tables under an active embargo only by users holding
-    write permission on the table (owners staging a release)."""
-    if table.is_publish and not check_embargo(table):
-        return True
-    return user.has_write_permissions(table.name)
 
 
 def load_owned_dataset_from_request(request, dataset_name: str):

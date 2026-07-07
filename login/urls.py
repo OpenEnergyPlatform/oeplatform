@@ -31,8 +31,12 @@ from login.views import (
     ReviewsView,
     SettingsView,
     TablesView,
+    dataset_assign_view,
     dataset_delete_view,
     dataset_edit_view,
+    dataset_manage_view,
+    dataset_table_search_view,
+    dataset_unassign_view,
     delete_peer_review_simple_view,
     group_leave_view,
     group_member_count_view,
@@ -93,6 +97,26 @@ urlpatterns = [
         r"^profile/(?P<user_id>[\d]+)/datasets/(?P<dataset_name>[\w-]+)/delete$",
         dataset_delete_view,
         name="dataset-delete",
+    ),
+    re_path(
+        r"^profile/(?P<user_id>[\d]+)/datasets/(?P<dataset_name>[\w-]+)/manage$",
+        dataset_manage_view,
+        name="dataset-manage",
+    ),
+    re_path(
+        r"^profile/(?P<user_id>[\d]+)/datasets/(?P<dataset_name>[\w-]+)/table-search$",  # noqa: E501
+        dataset_table_search_view,
+        name="dataset-table-search",
+    ),
+    re_path(
+        r"^profile/(?P<user_id>[\d]+)/datasets/(?P<dataset_name>[\w-]+)/assign$",
+        dataset_assign_view,
+        name="dataset-assign",
+    ),
+    re_path(
+        r"^profile/(?P<user_id>[\d]+)/datasets/(?P<dataset_name>[\w-]+)/unassign$",
+        dataset_unassign_view,
+        name="dataset-unassign",
     ),
     re_path(
         r"^profile/(?P<user_id>[\d]+)/tables$",

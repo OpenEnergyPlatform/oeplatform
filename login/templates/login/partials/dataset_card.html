@@ -13,6 +13,11 @@
     </div>
     <div class="profile-table-card__content--right">
       <button type="button"
+              class="btn btn-sm btn-outline-primary"
+              hx-get="{% url 'login:dataset-manage' user_id=profile_user.id dataset_name=dataset.name %}"
+              hx-target="#dataset-card-{{ dataset.name }}"
+              hx-swap="outerHTML">Manage tables</button>
+      <button type="button"
               class="btn btn-sm btn-outline-secondary"
               hx-get="{% url 'login:dataset-edit' user_id=profile_user.id dataset_name=dataset.name %}"
               hx-target="#dataset-card-{{ dataset.name }}"
