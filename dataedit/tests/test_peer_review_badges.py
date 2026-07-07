@@ -388,6 +388,15 @@ class TestBadgeService(SimpleTestCase):
         )
         self.assertEqual(badge, PeerReviewBadge.BRONZE)
 
+    def test_floors_at_iron_when_suggestion_is_none(self):
+        # A finished review with nothing accepted still earns at least IRON:
+        # iron-tier fields are technical and not part of the review.
+        svc = BadgeService()
+        badge = svc.resolve_final_badge(
+            {"reviews": []}, reviewer_choice=None, schema=FAKE_SCHEMA
+        )
+        self.assertEqual(badge, PeerReviewBadge.IRON)
+
     def test_strategy_is_swappable(self):
         def always_platinum(metadata, schema):
             return PeerReviewBadge.PLATINUM
