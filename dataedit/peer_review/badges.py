@@ -7,7 +7,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 Phase 2 S5. The *policy* for how a badge is calculated (and which fields matter)
 is still being decided, so it is isolated behind a tiny strategy seam:
 
-    BadgeStrategy = Callable[[metadata, schema], PeerReviewBadge]
+    BadgeStrategy = Callable[[metadata, schema], Optional[PeerReviewBadge]]
 
 To change the calculation, either:
   * edit / replace ``cumulative_tier_strategy`` below, or
@@ -28,10 +28,10 @@ from oemetadata.v2.v20.schema import OEMETADATA_V20_SCHEMA
 from dataedit.peer_review.metadata_serializer import get_all_field_descriptions
 from dataedit.utils import PeerReviewBadge
 
-# A strategy maps (metadata, schema) -> a badge. Pure; no DB, no request.
-BadgeStrategy = Callable[[dict, dict], PeerReviewBadge]
+# A strategy maps (metadata, schema) -> a badge or None. Pure; no DB, no request.
+BadgeStrategy = Callable[[dict, dict], Optional[PeerReviewBadge]]
 
-# Badge tiers from lowest to highest. Iron has its own badge
+# Badge tiers from lowest to highest.
 TIER_ORDER = [
     PeerReviewBadge.IRON,
     PeerReviewBadge.BRONZE,
@@ -219,11 +219,9 @@ def review_based_cumulative_tier_strategy(
     - iron + bronze ok          -> BRONZE
     - iron + bronze + silver ok -> SILVER
     - ...
-    - silver ok but bronze NOT  -> returns IRON (fails at bronze),
-                                  i.e. no silver badge
+    - silver ok but bronze NOT  -> returns None (fails at bronze)
 
-    Returns None if not even iron is fully satisfied.
-    The public wrapper maps None -> IRON for backward compat.
+    Returns None if even iron is not fully satisfied.
     """
     tiers = fields_by_tier(schema or OEMETADATA_V20_SCHEMA)
     ok_fields = extract_ok_fields(review_data)
@@ -282,30 +280,29 @@ def review_based_cumulative_tier_strategy_details(
     }
 
 
-def cumulative_tier_strategy(metadata_or_review, schema=None) -> PeerReviewBadge:
+def cumulative_tier_strategy(
+    metadata_or_review, schema=None
+) -> Optional[PeerReviewBadge]:
     """
     Drop-in replacement for the old cumulative_tier_strategy.
 
     - If input looks like PeerReview.review ({'reviews': [...]})
       → review-state based, iron → platinum, cumulative.
-    - Else → legacy metadata-presence path (bronze → platinum).
+    - Else → legacy metadata-presence path.
 
-    Always returns a PeerReviewBadge (never None) for BadgeService compatibility.
+    Returns the earned PeerReviewBadge, or None if no requirements are met.
     """
+    # Detect PeerReview.review shape
+    if isinstance(metadata_or_review, dict) and "reviews" in metadata_or_review:
+        return review_based_cumulative_tier_strategy(metadata_or_review, schema)
 
     # ---- LEGACY: metadata presence path ----
     if schema is None:
         schema = OEMETADATA_V20_SCHEMA
 
-    # legacy fields_by_tier (no iron)
-    descriptions = get_all_field_descriptions(schema)
-    tiers_legacy = {tier: [] for tier in TIER_ORDER}
-    for path, info in descriptions.items():
-        badge = normalize_badge(info.get("badge"))
-        if badge in tiers_legacy:
-            tiers_legacy[badge].append(path)
+    tiers_legacy = fields_by_tier(schema)
 
-    earned = PeerReviewBadge.IRON
+    earned: Optional[PeerReviewBadge] = None
     cumulative: List[str] = []
     for tier in TIER_ORDER:
         tier_paths = tiers_legacy.get(tier, [])
@@ -322,18 +319,15 @@ def cumulative_tier_strategy(metadata_or_review, schema=None) -> PeerReviewBadge
 DEFAULT_BADGE_STRATEGY: BadgeStrategy = cumulative_tier_strategy
 
 
-def badge_label(badge: PeerReviewBadge) -> str:
-    """Human-readable badge label (e.g. ``"Bronze"``). ``Table`` and the
-    profile/dataview cards upper-case it when matching, so case is not critical."""
+def badge_label(badge: Optional[PeerReviewBadge]) -> str:
+    """Human-readable badge label (e.g. ``"Bronze"``) or empty string."""
+    if badge is None:
+        return ""
     return badge.name.capitalize()
 
 
-def apply_badge_to_metadata(metadata: dict, badge: PeerReviewBadge) -> dict:
-    """Persist the badge under ``metadata["review"]["badge"]`` in the form
-    ``Table.get_review_badge_from_table_metadata`` expects (it upper-cases and
-    matches the enum name)."""
-
-    # Safely get the existing review data
+def apply_badge_to_metadata(metadata: dict, badge: Optional[PeerReviewBadge]) -> dict:
+    """Persist the badge under ``metadata["review"]["badge"]``."""
     review = metadata.get("review")
 
     # If it doesn't exist, OR if it exists but is a string/other type, reset it
@@ -342,18 +336,23 @@ def apply_badge_to_metadata(metadata: dict, badge: PeerReviewBadge) -> dict:
         review = {}
         metadata["review"] = review
 
-    review["badge"] = badge_label(badge)
+    if badge is None:
+        review.pop("badge", None)
+    else:
+        review["badge"] = badge_label(badge)
     return metadata
 
 
-def apply_badge_to_review(review: dict, badge: PeerReviewBadge) -> dict:
-    """Persist the badge onto the review datamodel. The dataview "Latest review
-    completed" card reads ``PeerReview.review["badge"]`` (see views.py), so the
-    award must land here too — not only in the table metadata."""
+def apply_badge_to_review(review: dict, badge: Optional[PeerReviewBadge]) -> dict:
+    """Persist the badge onto the review datamodel."""
     review = review or {}
-    label = badge_label(badge)
-    review["badge"] = label
-    review["grantedBadge"] = label
+    if badge is None:
+        review.pop("badge", None)
+        review.pop("grantedBadge", None)
+    else:
+        label = badge_label(badge)
+        review["badge"] = label
+        review["grantedBadge"] = label
     return review
 
 
@@ -363,12 +362,11 @@ class BadgeService:
     def __init__(self, strategy: Optional[BadgeStrategy] = None):
         self.strategy = strategy or DEFAULT_BADGE_STRATEGY
 
-    def suggest_badge(self, metadata, schema=None) -> PeerReviewBadge:
+    def suggest_badge(self, metadata, schema=None) -> Optional[PeerReviewBadge]:
         return self.strategy(metadata, schema or OEMETADATA_V20_SCHEMA)
 
     def resolve_final_badge(
         self, metadata, reviewer_choice=None, schema=None
-    ) -> PeerReviewBadge:
-        """The reviewer's explicit choice wins (decision §D: auto + override);
-        otherwise fall back to the auto-suggestion."""
+    ) -> Optional[PeerReviewBadge]:
+        """The reviewer's explicit choice wins; otherwise suggest badge."""
         return normalize_badge(reviewer_choice) or self.suggest_badge(metadata, schema)

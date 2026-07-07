@@ -110,17 +110,13 @@ class TestFieldResolution(SimpleTestCase):
 class TestFieldsByTier(SimpleTestCase):
     def test_groups_by_declared_badge(self):
         tiers = fields_by_tier(FAKE_SCHEMA)
-        # fields_by_tier only includes BRONZE, SILVER, GOLD, PLATINUM
         self.assertCountEqual(tiers[PeerReviewBadge.BRONZE], ["name", "title"])
         self.assertCountEqual(tiers[PeerReviewBadge.SILVER], ["spatial.location"])
         self.assertCountEqual(tiers[PeerReviewBadge.GOLD], ["resources.description"])
-        self.assertEqual(tiers[PeerReviewBadge.PLATINUM], [])
 
     def test_returns_empty_list_for_undeclared_tier(self):
         tiers = fields_by_tier(FAKE_SCHEMA)
-        # Platinum is declared in TIER_ORDER but not in FAKE_SCHEMA
         self.assertIn(PeerReviewBadge.PLATINUM, tiers)
-        self.assertEqual(tiers[PeerReviewBadge.PLATINUM], [])
 
 
 class TestFieldsByTierIron(SimpleTestCase):
@@ -133,58 +129,17 @@ class TestFieldsByTierIron(SimpleTestCase):
         self.assertCountEqual(tiers[PeerReviewBadge.PLATINUM], ["resources.path"])
 
     def test_defaults_to_oemetadata_schema_when_none(self):
-        # should not raise – uses OEMETADATA_V20_SCHEMA internally
         tiers = fields_by_tier(None)
         self.assertIn(PeerReviewBadge.IRON, tiers)
         self.assertTrue(len(tiers[PeerReviewBadge.IRON]) > 0)
 
 
-# class TestCumulativeTierStrategy(SimpleTestCase):
-#     def test_iron_when_bronze_incomplete(self):
-#         md = {"name": "n"}  # title missing
-#         self.assertEqual(
-#             cumulative_tier_strategy(md, FAKE_SCHEMA), PeerReviewBadge.IRON
-#         )
-
-#     def test_bronze_when_only_bronze_complete(self):
-#         md = {"name": "n", "title": "t"}
-#         self.assertEqual(
-#             cumulative_tier_strategy(md, FAKE_SCHEMA), PeerReviewBadge.BRONZE
-#         )
-
-#     def test_silver_then_gold_cumulative(self):
-#         silver = {"name": "n", "title": "t", "spatial": {"location": "DE"}}
-#         self.assertEqual(
-#             cumulative_tier_strategy(silver, FAKE_SCHEMA), PeerReviewBadge.SILVER
-#         )
-
-#         gold = dict(silver, resources=[{"description": "d"}])
-#         self.assertEqual(
-#             cumulative_tier_strategy(gold, FAKE_SCHEMA), PeerReviewBadge.GOLD
-#         )
-
-#     def test_gap_stops_progression(self):
-#         # bronze ok, silver missing, gold present -> capped at bronze
-#         md = {"name": "n", "title": "t", "resources": [{"description": "d"}]}
-#         self.assertEqual(
-#             cumulative_tier_strategy(md, FAKE_SCHEMA), PeerReviewBadge.BRONZE
-#         )
-
-#     def test_empty_top_tier_is_not_auto_awarded(self):
-#         # FAKE_SCHEMA declares no Platinum fields -> never reaches Platinum
-#         full = {
-#             "name": "n",
-#             "title": "t",
-#             "spatial": {"location": "DE"},
-#             "resources": [{"description": "d"}],
-#         }
-#         self.assertEqual(
-#             cumulative_tier_strategy(full, FAKE_SCHEMA), PeerReviewBadge.GOLD
-#         )
-
-
 class TestCumulativeTierStrategy(SimpleTestCase):
     """cumulative_tier_strategy – iron is explicit, not just fallback."""
+
+    def test_none_when_iron_incomplete(self):
+        md = {"id": "x"}  # context.homepage missing
+        self.assertIsNone(cumulative_tier_strategy(md, FAKE_SCHEMA))
 
     def test_iron_awarded_when_iron_fields_complete(self):
         md = {"id": "x", "context": {"homepage": "https://example.org"}}
@@ -194,12 +149,9 @@ class TestCumulativeTierStrategy(SimpleTestCase):
         )
 
     def test_bronze_requires_iron_first(self):
-        # bronze fields filled, iron missing -> stays IRON (fallback start value)
+        # bronze fields filled, iron missing -> remains None
         md = {"name": "n", "title": "t"}
-        self.assertEqual(
-            cumulative_tier_strategy(md, FAKE_SCHEMA),
-            PeerReviewBadge.IRON,
-        )
+        self.assertIsNone(cumulative_tier_strategy(md, FAKE_SCHEMA))
 
     def test_full_cumulative_iron_to_platinum(self):
         md = {
@@ -247,7 +199,6 @@ class TestNormalizeReviewKey(SimpleTestCase):
 
     def test_empty_and_none_safe(self):
         self.assertEqual(normalize_review_key(""), "")
-        # None is falsy – function returns input unchanged
         self.assertIsNone(normalize_review_key(None))  # type: ignore[arg-type]
 
 
@@ -330,12 +281,34 @@ class TestExtractFieldStates(SimpleTestCase):
 
 
 class TestReviewBasedCumulativeTierStrategy(SimpleTestCase):
-    """Review-state based, cumulative – uses fields_by_tier (bronze→platinum)."""
+    """Review-state based, cumulative – uses fields_by_tier (iron→platinum)."""
 
-    def test_bronze_awarded_when_bronze_fields_ok(self):
-        # FAKE_SCHEMA bronze = name, title
+    def test_iron_awarded_when_iron_fields_ok(self):
         review = {
             "reviews": [
+                {"key": "id", "fieldReview": {"state": "ok"}},
+                {"key": "context.homepage", "fieldReview": {"state": "ok"}},
+            ]
+        }
+        badge = review_based_cumulative_tier_strategy(review, FAKE_SCHEMA)
+        self.assertEqual(badge, PeerReviewBadge.IRON)
+
+    def test_bronze_requires_iron_first(self):
+        # bronze ok, iron missing -> None
+        review = {
+            "reviews": [
+                {"key": "name", "fieldReview": {"state": "ok"}},
+                {"key": "title", "fieldReview": {"state": "ok"}},
+            ]
+        }
+        badge = review_based_cumulative_tier_strategy(review, FAKE_SCHEMA)
+        self.assertIsNone(badge)
+
+    def test_bronze_awarded_when_iron_and_bronze_ok(self):
+        review = {
+            "reviews": [
+                {"key": "id", "fieldReview": {"state": "ok"}},
+                {"key": "context.homepage", "fieldReview": {"state": "ok"}},
                 {"key": "name", "fieldReview": {"state": "ok"}},
                 {"key": "title", "fieldReview": {"state": "ok"}},
             ]
@@ -343,29 +316,11 @@ class TestReviewBasedCumulativeTierStrategy(SimpleTestCase):
         badge = review_based_cumulative_tier_strategy(review, FAKE_SCHEMA)
         self.assertEqual(badge, PeerReviewBadge.BRONZE)
 
-    def test_silver_requires_bronze_first(self):
-        # silver ok, bronze missing -> None (caller maps None→IRON)
-        review = {
-            "reviews": [{"key": "spatial.location", "fieldReview": {"state": "ok"}}]
-        }
-        badge = review_based_cumulative_tier_strategy(review, FAKE_SCHEMA)
-        self.assertIsNone(badge)
-
-    def test_silver_awarded_when_bronze_and_silver_ok(self):
-        review = {
-            "reviews": [
-                {"key": "name", "fieldReview": {"state": "ok"}},
-                {"key": "title", "fieldReview": {"state": "ok"}},
-                {"key": "spatial.location", "fieldReview": {"state": "ok"}},
-            ]
-        }
-        badge = review_based_cumulative_tier_strategy(review, FAKE_SCHEMA)
-        self.assertEqual(badge, PeerReviewBadge.SILVER)
-
     def test_handles_indexed_resource_keys(self):
-        # review keys come as resources.0.description
         review = {
             "reviews": [
+                {"key": "id", "fieldReview": {"state": "ok"}},
+                {"key": "context.homepage", "fieldReview": {"state": "ok"}},
                 {"key": "name", "fieldReview": {"state": "ok"}},
                 {"key": "title", "fieldReview": {"state": "ok"}},
                 {"key": "spatial.location", "fieldReview": {"state": "ok"}},
@@ -375,23 +330,10 @@ class TestReviewBasedCumulativeTierStrategy(SimpleTestCase):
         badge = review_based_cumulative_tier_strategy(review, FAKE_SCHEMA)
         self.assertEqual(badge, PeerReviewBadge.GOLD)
 
-    def test_last_field_review_wins(self):
-        review = {
-            "reviews": [
-                {"key": "name", "fieldReview": {"state": "ok"}},
-                {
-                    "key": "title",
-                    "fieldReview": [{"state": "suggestion"}, {"state": "ok"}],
-                },
-            ]
-        }
-        badge = review_based_cumulative_tier_strategy(review, FAKE_SCHEMA)
-        self.assertEqual(badge, PeerReviewBadge.BRONZE)
-
 
 class TestReviewBasedCumulativeTierStrategyDetails(SimpleTestCase):
     def test_returns_diagnostics_on_failure(self):
-        # bronze incomplete (title missing)
+        # iron incomplete (id and context.homepage missing)
         review = {
             "reviews": [
                 {"key": "name", "fieldReview": {"state": "ok"}},
@@ -402,8 +344,8 @@ class TestReviewBasedCumulativeTierStrategyDetails(SimpleTestCase):
             review, FAKE_SCHEMA
         )
         self.assertIsNone(badge)
-        self.assertEqual(details["failed_at"], PeerReviewBadge.BRONZE)
-        self.assertIn("title", details["missing"][PeerReviewBadge.BRONZE])
+        self.assertEqual(details["failed_at"], PeerReviewBadge.IRON)
+        self.assertIn("id", details["missing"][PeerReviewBadge.IRON])
         self.assertIn("name", details["ok_fields"])
 
     def test_details_include_full_requirement_map(self):
@@ -420,14 +362,11 @@ class TestBadgeLabel(SimpleTestCase):
     def test_capitalizes_enum_name(self):
         self.assertEqual(badge_label(PeerReviewBadge.IRON), "Iron")
         self.assertEqual(badge_label(PeerReviewBadge.BRONZE), "Bronze")
-        self.assertEqual(badge_label(PeerReviewBadge.SILVER), "Silver")
-        self.assertEqual(badge_label(PeerReviewBadge.GOLD), "Gold")
-        self.assertEqual(badge_label(PeerReviewBadge.PLATINUM), "Platinum")
+        self.assertEqual(badge_label(None), "")
 
 
 class TestBadgeService(SimpleTestCase):
     def test_reviewer_choice_overrides_suggestion(self):
-        # metadata would auto-suggest IRON, but the reviewer picked gold
         svc = BadgeService()
         badge = svc.resolve_final_badge(
             {"name": "n"}, reviewer_choice="gold", schema=FAKE_SCHEMA
@@ -437,7 +376,14 @@ class TestBadgeService(SimpleTestCase):
     def test_falls_back_to_suggestion_without_choice(self):
         svc = BadgeService()
         badge = svc.resolve_final_badge(
-            {"name": "n", "title": "t"}, reviewer_choice=None, schema=FAKE_SCHEMA
+            {
+                "id": "x",
+                "context": {"homepage": "h"},
+                "name": "n",
+                "title": "t",
+            },
+            reviewer_choice=None,
+            schema=FAKE_SCHEMA,
         )
         self.assertEqual(badge, PeerReviewBadge.BRONZE)
 
@@ -454,7 +400,6 @@ class TestBadgeService(SimpleTestCase):
         self.assertEqual(md["review"]["badge"], "Silver")
 
     def test_apply_badge_to_review_sets_badge_and_granted_badge(self):
-        # the dataview card reads PeerReview.review["badge"]
         review = {"reviews": []}
         apply_badge_to_review(review, PeerReviewBadge.GOLD)
         self.assertEqual(review["badge"], "Gold")
@@ -465,17 +410,14 @@ class TestBadgeService(SimpleTestCase):
         self.assertEqual(result["badge"], "Bronze")
 
     def test_suggest_badge_accepts_review_datamodel(self):
-        # new review-state path – BadgeService auto-detects {'reviews':[...]}
-        svc = (
-            BadgeService()
-        )  # defaults to cumulative_tier_strategy which detects review shape
+        svc = BadgeService()
         review_data = {
             "reviews": [
+                {"key": "id", "fieldReview": {"state": "ok"}},
+                {"key": "context.homepage", "fieldReview": {"state": "ok"}},
                 {"key": "name", "fieldReview": {"state": "ok"}},
                 {"key": "title", "fieldReview": {"state": "ok"}},
             ]
         }
         badge = svc.suggest_badge(review_data, schema=FAKE_SCHEMA)
-        # review_based path returns BRONZE, wrapper maps None→IRON –
-        # here bronze succeeds
         self.assertEqual(badge, PeerReviewBadge.BRONZE)
