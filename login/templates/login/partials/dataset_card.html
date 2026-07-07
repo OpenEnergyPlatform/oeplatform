@@ -2,7 +2,12 @@
   <div class="card-body">
     <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
       <div>
-        <h5 class="card-title mb-1">{{ dataset.metadata.title|default:dataset.name }}</h5>
+        <h5 class="card-title mb-1">
+          <a class="text-decoration-none"
+             href="{% url 'dataedit:dataset-detail' dataset_name=dataset.name %}"
+             target="_blank"
+             rel="noopener">{{ dataset.metadata.title|default:dataset.name }}</a>
+        </h5>
         <h6 class="card-subtitle text-muted mb-2">{{ dataset.name }}</h6>
       </div>
       <div class="btn-group btn-group-sm"

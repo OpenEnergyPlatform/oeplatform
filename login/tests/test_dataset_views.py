@@ -128,6 +128,18 @@ class DatasetDashboardTests(TestCase):
         self.assertEqual(response.status_code, 403)
         self.assertFalse(Dataset.objects.filter(name="sneaky_dataset").exists())
 
+    def test_card_links_to_public_detail_in_new_tab(self):
+        self.create_dataset("linked_dataset")
+
+        response = self.client.get(self.datasets_url)
+        self.assertContains(
+            response,
+            reverse(
+                "dataedit:dataset-detail", kwargs={"dataset_name": "linked_dataset"}
+            ),
+        )
+        self.assertContains(response, 'target="_blank"')
+
     def test_tables_view_still_works(self):
         response = self.client.get(reverse("login:tables", args=[self.user.id]))
         self.assertEqual(response.status_code, 200)

@@ -471,6 +471,49 @@ def datasets_view(request: HttpRequest, topic: str) -> HttpResponse:
     )
 
 
+def dataset_detail_view(request: HttpRequest, dataset_name: str) -> HttpResponse:
+    """Public read view for one dataset. Deliberately not topic-bound
+    (datasets carry several topics); linked from the cards and the
+    dashboard, opening in a new tab."""
+    dataset = get_object_or_404(
+        Dataset.objects.prefetch_related("tables", "topics"), name=dataset_name
+    )
+    resources = dataset.tables.all().order_by("name")
+
+    sizes = {row["table_name"]: row["total_bytes"] for row in list_table_sizes()}
+    total_size_bytes = sum(sizes.get(table.name, 0) for table in resources)
+
+    is_creator = (
+        request.user.is_authenticated
+        and dataset.creator is not None
+        and dataset.creator == request.user
+    )
+
+    return render(
+        request,
+        "dataedit/dataedit_dataset_detail.html",
+        {
+            "dataset": dataset,
+            "resources": resources,
+            "total_size_bytes": total_size_bytes,
+            "is_creator": is_creator,
+            "metadata_url": reverse(
+                "dataedit:dataset-metadata", kwargs={"dataset_name": dataset.name}
+            ),
+        },
+    )
+
+
+def dataset_metadata_json_view(request: HttpRequest, dataset_name: str) -> JsonResponse:
+    """The dataset's oemetadata document with live resources, as plain
+    JSON: feeds the metadata viewer on the detail page and doubles as
+    the raw-JSON download."""
+    dataset = get_object_or_404(Dataset, name=dataset_name)
+    metadata = dict(dataset.metadata)
+    metadata["resources"] = dataset.resource_entries()
+    return JsonResponse(metadata)
+
+
 @require_POST
 def table_view_save_view(request: HttpRequest, table: str) -> HttpResponse:
     table_obj = table_or_404(table=table)
