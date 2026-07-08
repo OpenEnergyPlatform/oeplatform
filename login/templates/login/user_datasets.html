@@ -4,24 +4,6 @@
 {% block main-content-body %}
   {% if profile_user == request.user %}
     {% include "login/user_nav.html" %}
-    <!-- ====== search field ====== -->
-    <div class="profile-category_search"
-         style="margin-bottom: 0;
-                max-width: 300px">
-      <input type="text"
-             id="dataset-search"
-             name="search"
-             class="form-control"
-             placeholder="Search your datasets..."
-             value="{{ search_query }}"
-             hx-get="{% url 'login:datasets' user_id=profile_user.id %}"
-             hx-trigger="keyup changed delay:300ms"
-             hx-target="#datasets-container"
-             hx-select="#datasets-container"
-             hx-include="this"
-             hx-push-url="true"
-             hx-swap="outerHTML" />
-    </div>
     {% include "login/partials/datasets_sections.html" %}
   {% endif %}
 {% endblock %}

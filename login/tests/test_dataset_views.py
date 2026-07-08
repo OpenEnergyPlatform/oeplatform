@@ -254,6 +254,20 @@ class DatasetDashboardSearchTests(TestCase):
         self.assertContains(response, 'id="dataset-search"')
         self.assertContains(response, 'name="search"')
 
+    def test_search_box_lives_in_the_datasets_section_not_over_create(self):
+        # the box refreshes only the list container, so it must sit outside
+        # it and swap it; this keeps focus while typing and places the box
+        # with the datasets rather than above the create form
+        response = self.client.get(self.datasets_url)
+        self.assertContains(response, 'id="dataset-list-container"')
+        self.assertContains(response, 'hx-target="#dataset-list-container"')
+        body = response.content.decode()
+        self.assertLess(
+            body.index("Create dataset"),
+            body.index('id="dataset-search"'),
+            "search box should render below the create section",
+        )
+
     def test_create_still_returns_the_first_page(self):
         # a fresh dataset is newest, so it lands on page 1 after creation
         for index in range(ITEMS_PER_PAGE + 3):

@@ -46,36 +46,55 @@
   </section>
   <!-- ###### My datasets ###### -->
   <section class="profile-category">
-    <h2 class="profile-category__heading">My datasets</h2>
-    {% if datasets_page.object_list %}
-      {% for dataset in datasets_page %}
-        {% include "login/partials/dataset_card.html" %}
-      {% endfor %}
-      {% if datasets_page.paginator.num_pages > 1 %}
-        <nav aria-label="Dataset pages" class="mt-3">
-          <ul class="pagination pagination-sm">
-            {% if datasets_page.has_previous %}
-              <li class="page-item">
-                <a class="page-link"
-                   href="?datasets_page={{ datasets_page.previous_page_number }}{% if search_query %}&amp;search={{ search_query|urlencode }}{% endif %}">Previous</a>
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+      <h2 class="profile-category__heading mb-0">My datasets</h2>
+      <div class="profile-category_search mb-0" style="max-width: 300px">
+        <input type="text"
+               id="dataset-search"
+               name="search"
+               class="form-control form-control-sm"
+               placeholder="Search your datasets..."
+               value="{{ search_query }}"
+               hx-get="{% url 'login:datasets' user_id=profile_user.id %}"
+               hx-trigger="keyup changed delay:300ms"
+               hx-target="#dataset-list-container"
+               hx-select="#dataset-list-container"
+               hx-include="this"
+               hx-push-url="true"
+               hx-swap="outerHTML" />
+      </div>
+    </div>
+    <div id="dataset-list-container">
+      {% if datasets_page.object_list %}
+        {% for dataset in datasets_page %}
+          {% include "login/partials/dataset_card.html" %}
+        {% endfor %}
+        {% if datasets_page.paginator.num_pages > 1 %}
+          <nav aria-label="Dataset pages" class="mt-3">
+            <ul class="pagination pagination-sm">
+              {% if datasets_page.has_previous %}
+                <li class="page-item">
+                  <a class="page-link"
+                     href="?datasets_page={{ datasets_page.previous_page_number }}{% if search_query %}&amp;search={{ search_query|urlencode }}{% endif %}">Previous</a>
+                </li>
+              {% endif %}
+              <li class="page-item active">
+                <span class="page-link">Page {{ datasets_page.number }} of {{ datasets_page.paginator.num_pages }}</span>
               </li>
-            {% endif %}
-            <li class="page-item active">
-              <span class="page-link">Page {{ datasets_page.number }} of {{ datasets_page.paginator.num_pages }}</span>
-            </li>
-            {% if datasets_page.has_next %}
-              <li class="page-item">
-                <a class="page-link"
-                   href="?datasets_page={{ datasets_page.next_page_number }}{% if search_query %}&amp;search={{ search_query|urlencode }}{% endif %}">Next</a>
-              </li>
-            {% endif %}
-          </ul>
-        </nav>
+              {% if datasets_page.has_next %}
+                <li class="page-item">
+                  <a class="page-link"
+                     href="?datasets_page={{ datasets_page.next_page_number }}{% if search_query %}&amp;search={{ search_query|urlencode }}{% endif %}">Next</a>
+                </li>
+              {% endif %}
+            </ul>
+          </nav>
+        {% endif %}
+      {% elif search_query %}
+        <p>No datasets match &ldquo;{{ search_query }}&rdquo;.</p>
+      {% else %}
+        <p>You have no datasets yet. Create one above to bundle your tables.</p>
       {% endif %}
-    {% elif search_query %}
-      <p>No datasets match &ldquo;{{ search_query }}&rdquo;.</p>
-    {% else %}
-      <p>You have no datasets yet. Create one above to bundle your tables.</p>
-    {% endif %}
+    </div>
   </section>
 </div>
