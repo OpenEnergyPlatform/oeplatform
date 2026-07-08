@@ -31,27 +31,27 @@
   }
 
   /* stagger cards within a row by 80ms each; nth-child is scoped per grid */
-  .index-features-grid > .index-feature-card:nth-child(2) {
+  .index-features-grid>.index-feature-card:nth-child(2) {
     transition-delay: 80ms;
   }
 
-  .index-features-grid > .index-feature-card:nth-child(3) {
+  .index-features-grid>.index-feature-card:nth-child(3) {
     transition-delay: 160ms;
   }
 
-  .index-features-grid > .index-feature-card:nth-child(4) {
+  .index-features-grid>.index-feature-card:nth-child(4) {
     transition-delay: 240ms;
   }
 
-  .index-capabilities-list > .index-capability-card:nth-child(2) {
+  .index-capabilities-list>.index-capability-card:nth-child(2) {
     transition-delay: 80ms;
   }
 
-  .index-capabilities-list > .index-capability-card:nth-child(3) {
+  .index-capabilities-list>.index-capability-card:nth-child(3) {
     transition-delay: 160ms;
   }
 
-  .index-capabilities-list > .index-capability-card:nth-child(4) {
+  .index-capabilities-list>.index-capability-card:nth-child(4) {
     transition-delay: 240ms;
   }
 
@@ -607,6 +607,9 @@
   padding: 16px;
   border: 1px solid #d7e2ea;
   border-radius: 4px;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
 }
 
 .index-academy-quickstart-icon {
@@ -745,6 +748,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }

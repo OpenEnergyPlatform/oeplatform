@@ -41,7 +41,10 @@
     <div class="index-academy-quickstart index-animate-in">
       <h3 class="index-academy-quickstart-title">Quick Start Options</h3>
       <div class="index-academy-quickstart-list">
-        <div class="index-academy-quickstart-item">
+        <a class="index-academy-quickstart-item"
+           href="{{ EXTERNAL_URLS.tutorials_index }}"
+           target="_blank"
+           rel="noopener noreferrer">
           <img class="index-academy-quickstart-icon"
                src="{% static 'img/welcome/i_courses.svg' %}"
                alt="" />
@@ -51,8 +54,11 @@
               Structured learning paths and guided introductions
             </p>
           </div>
-        </div>
-        <div class="index-academy-quickstart-item">
+        </a>
+        <a class="index-academy-quickstart-item"
+           href="{{ EXTERNAL_URLS.tutorials_wizard }}"
+           target="_blank"
+           rel="noopener noreferrer">
           <img class="index-academy-quickstart-icon"
                src="{% static 'img/welcome/i_tutorials.svg' %}"
                alt="" />
@@ -62,8 +68,11 @@
               Step-by-step guides for specific tasks
             </p>
           </div>
-        </div>
-        <div class="index-academy-quickstart-item">
+        </a>
+        <a class="index-academy-quickstart-item"
+           href="{{ EXTERNAL_URLS.tutorials_faq }}"
+           target="_blank"
+           rel="noopener noreferrer">
           <img class="index-academy-quickstart-icon"
                src="{% static 'img/welcome/i_questions.svg' %}"
                alt="" />
@@ -73,7 +82,7 @@
               Quick answers to common questions
             </p>
           </div>
-        </div>
+        </a>
       </div>
     </div>
   </div>
