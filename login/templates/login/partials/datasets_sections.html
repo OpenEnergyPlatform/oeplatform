@@ -47,10 +47,33 @@
   <!-- ###### My datasets ###### -->
   <section class="profile-category">
     <h2 class="profile-category__heading">My datasets</h2>
-    {% if datasets %}
-      {% for dataset in datasets %}
+    {% if datasets_page.object_list %}
+      {% for dataset in datasets_page %}
         {% include "login/partials/dataset_card.html" %}
       {% endfor %}
+      {% if datasets_page.paginator.num_pages > 1 %}
+        <nav aria-label="Dataset pages" class="mt-3">
+          <ul class="pagination pagination-sm">
+            {% if datasets_page.has_previous %}
+              <li class="page-item">
+                <a class="page-link"
+                   href="?datasets_page={{ datasets_page.previous_page_number }}{% if search_query %}&amp;search={{ search_query|urlencode }}{% endif %}">Previous</a>
+              </li>
+            {% endif %}
+            <li class="page-item active">
+              <span class="page-link">Page {{ datasets_page.number }} of {{ datasets_page.paginator.num_pages }}</span>
+            </li>
+            {% if datasets_page.has_next %}
+              <li class="page-item">
+                <a class="page-link"
+                   href="?datasets_page={{ datasets_page.next_page_number }}{% if search_query %}&amp;search={{ search_query|urlencode }}{% endif %}">Next</a>
+              </li>
+            {% endif %}
+          </ul>
+        </nav>
+      {% endif %}
+    {% elif search_query %}
+      <p>No datasets match &ldquo;{{ search_query }}&rdquo;.</p>
     {% else %}
       <p>You have no datasets yet. Create one above to bundle your tables.</p>
     {% endif %}

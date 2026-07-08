@@ -139,7 +139,8 @@ class TablesView(View):
 
 def _datasets_context(request, profile_user, form_errors=None, form_values=None):
     """Context for the dashboard datasets sections: only ever lists the
-    requesting user's own datasets."""
+    requesting user's own datasets, searchable and paginated so a creator
+    with many datasets can still browse them."""
     if profile_user == request.user:
         datasets = (
             Dataset.objects.filter(creator=request.user)
@@ -148,9 +149,22 @@ def _datasets_context(request, profile_user, form_errors=None, form_values=None)
         )
     else:
         datasets = Dataset.objects.none()
+
+    search_query = request.GET.get("search", "").strip()
+    if search_query:
+        datasets = datasets.filter(
+            Q(name__icontains=search_query)
+            | Q(metadata__title__icontains=search_query)
+            | Q(metadata__description__icontains=search_query)
+        )
+
+    paginator = Paginator(datasets, ITEMS_PER_PAGE)
+    datasets_page = paginator.get_page(request.GET.get("datasets_page", 1))
+
     return {
         "profile_user": profile_user,
-        "datasets": datasets,
+        "datasets_page": datasets_page,
+        "search_query": search_query,
         "form_errors": form_errors or {},
         "form_values": form_values or {},
     }

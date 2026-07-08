@@ -8,6 +8,7 @@ from django.urls import reverse
 
 from dataedit.models import Dataset, Embargo, Table, Topic
 from login.models import WRITE_PERM, UserPermission, myuser
+from login.views import ITEMS_PER_PAGE
 from oeplatform.settings import PSEUDO_TOPIC_DRAFT
 
 
@@ -157,6 +158,112 @@ class DatasetDashboardTests(TestCase):
         response = self.client.get(reverse("login:tables", args=[self.user.id]))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "tables")
+
+
+class DatasetDashboardSearchTests(TestCase):
+    """The dashboard dataset list is searchable and paginated so a creator
+    with many datasets can still find and browse them."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user, _ = myuser.objects.get_or_create(
+            name="SearchUser",
+            email="search-user@test.com",
+            did_agree=True,
+            is_mail_verified=True,
+        )
+
+    def setUp(self):
+        self.client.force_login(self.user)
+        self.datasets_url = reverse("login:datasets", args=[self.user.id])
+
+    def make_dataset(self, name, title=None, description=""):
+        return Dataset.objects.create(
+            name=name,
+            metadata={
+                "name": name,
+                "title": title if title is not None else name,
+                "description": description,
+            },
+            creator=self.user,
+        )
+
+    def test_search_filters_by_name(self):
+        self.make_dataset("wind_atlas")
+        self.make_dataset("solar_atlas")
+        response = self.client.get(self.datasets_url, {"search": "wind"})
+        self.assertContains(response, "wind_atlas")
+        self.assertNotContains(response, "solar_atlas")
+
+    def test_search_matches_title(self):
+        self.make_dataset("ds_one", title="Offshore Wind Farms")
+        self.make_dataset("ds_two", title="Rooftop Solar")
+        response = self.client.get(self.datasets_url, {"search": "offshore"})
+        self.assertContains(response, "ds_one")
+        self.assertNotContains(response, "ds_two")
+
+    def test_search_matches_description(self):
+        self.make_dataset("ds_desc_hit", description="Hourly demand curves")
+        self.make_dataset("ds_desc_miss", description="Nothing relevant")
+        response = self.client.get(self.datasets_url, {"search": "demand"})
+        self.assertContains(response, "ds_desc_hit")
+        self.assertNotContains(response, "ds_desc_miss")
+
+    def test_search_is_case_insensitive(self):
+        self.make_dataset("ds_case", title="Grid Capacity")
+        response = self.client.get(self.datasets_url, {"search": "GRID"})
+        self.assertContains(response, "ds_case")
+
+    def test_empty_search_lists_all_within_a_page(self):
+        self.make_dataset("ds_a")
+        self.make_dataset("ds_b")
+        response = self.client.get(self.datasets_url, {"search": ""})
+        self.assertContains(response, "ds_a")
+        self.assertContains(response, "ds_b")
+
+    def test_first_page_is_capped_at_the_page_size(self):
+        for index in range(ITEMS_PER_PAGE + 3):
+            self.make_dataset(f"ds_page_{index:02d}")
+        response = self.client.get(self.datasets_url)
+        page = response.context["datasets_page"]
+        self.assertEqual(len(page), ITEMS_PER_PAGE)
+        self.assertEqual(page.paginator.num_pages, 2)
+
+    def test_second_page_shows_the_remainder(self):
+        for index in range(ITEMS_PER_PAGE + 3):
+            self.make_dataset(f"ds_rem_{index:02d}")
+        response = self.client.get(self.datasets_url, {"datasets_page": 2})
+        page = response.context["datasets_page"]
+        self.assertEqual(len(page), 3)
+
+    def test_pagination_preserves_the_search_filter(self):
+        for index in range(ITEMS_PER_PAGE + 3):
+            self.make_dataset(f"keep_{index:02d}", title="Keeper")
+        for index in range(3):
+            self.make_dataset(f"drop_{index:02d}", title="Other")
+        response = self.client.get(
+            self.datasets_url, {"search": "keeper", "datasets_page": 2}
+        )
+        page = response.context["datasets_page"]
+        self.assertEqual(page.paginator.count, ITEMS_PER_PAGE + 3)
+        for dataset in page:
+            self.assertTrue(dataset.name.startswith("keep_"))
+
+    def test_search_box_is_rendered_on_the_full_page(self):
+        response = self.client.get(self.datasets_url)
+        self.assertContains(response, 'id="dataset-search"')
+        self.assertContains(response, 'name="search"')
+
+    def test_create_still_returns_the_first_page(self):
+        # a fresh dataset is newest, so it lands on page 1 after creation
+        for index in range(ITEMS_PER_PAGE + 3):
+            self.make_dataset(f"existing_{index:02d}")
+        response = self.client.post(
+            self.datasets_url,
+            {"title": "Brand New", "description": "Newest dataset"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "brand_new")
 
 
 class DatasetQuickActionsTests(TestCase):
