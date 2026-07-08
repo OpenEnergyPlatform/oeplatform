@@ -1,10 +1,17 @@
 {% if picker_tables %}
   <ul class="list-group">
     {% for table in picker_tables %}
-      <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
+      <li class="list-group-item d-flex justify-content-between align-items-start gap-2">
         <span class="text-truncate">
           {{ table.human_readable_name|default:table.name }}
-          {% if not table.is_publish %}<span class="badge bg-warning text-dark">Draft</span>{% endif %}
+          {% if table.is_publish %}
+            <span class="badge bg-success">Published</span>
+          {% else %}
+            <span class="badge bg-warning text-dark">Draft</span>
+          {% endif %}
+          {% for topic in table.topics.all %}
+            <span class="badge text-bg-light border">{{ topic.name }}</span>
+          {% endfor %}
         </span>
         <button type="button"
                 class="btn btn-sm btn-outline-primary flex-shrink-0"

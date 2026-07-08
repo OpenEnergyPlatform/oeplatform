@@ -503,7 +503,8 @@ def dataset_detail_view(request: HttpRequest, dataset_name: str) -> HttpResponse
     (datasets carry several topics); linked from the cards and the
     dashboard, opening in a new tab."""
     dataset = get_object_or_404(
-        Dataset.objects.prefetch_related("tables", "topics"), name=dataset_name
+        Dataset.objects.prefetch_related("tables__topics", "topics"),
+        name=dataset_name,
     )
     resources = dataset.tables.all().order_by("name")
 

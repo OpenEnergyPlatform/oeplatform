@@ -16,11 +16,18 @@
         {% if resources %}
           <ul class="list-group overflow-auto" style="max-height: 20rem">
             {% for table in resources %}
-              <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
-                <span class="text-truncate">
+              <li class="list-group-item d-flex justify-content-between align-items-start gap-2">
+                <div class="text-truncate">
                   <a href="{% url 'dataedit:view' table=table.name %}">{{ table.human_readable_name|default:table.name }}</a>
-                  {% if not table.is_publish %}<span class="badge bg-warning text-dark">Draft</span>{% endif %}
-                </span>
+                  {% if table.is_publish %}
+                    <span class="badge bg-success">Published</span>
+                  {% else %}
+                    <span class="badge bg-warning text-dark">Draft</span>
+                  {% endif %}
+                  {% for topic in table.topics.all %}
+                    <span class="badge text-bg-light border">{{ topic.name }}</span>
+                  {% endfor %}
+                </div>
                 <button type="button"
                         class="btn btn-sm btn-outline-danger flex-shrink-0"
                         hx-post="{% url 'login:dataset-unassign' user_id=profile_user.id dataset_name=dataset.name %}"

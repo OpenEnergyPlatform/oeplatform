@@ -96,7 +96,7 @@ def assignable_tables_for(user, dataset: Dataset, search: str = "") -> QuerySet[
             Q(name__icontains=search) | Q(human_readable_name__icontains=search)
         )
 
-    return tables.distinct().order_by("name")
+    return tables.distinct().order_by("name").prefetch_related("topics")
 
 
 def assign_table(dataset: Dataset, table: Table) -> None:

@@ -77,7 +77,7 @@ class DatasetDetailTests(TestCase):
         )
         self.assertEqual(response.status_code, 404)
 
-    def test_resources_link_to_table_pages_with_draft_badge(self):
+    def test_resources_link_to_table_pages_with_status_badges(self):
         response = self.client.get(self.detail_url)
         self.assertContains(
             response, reverse("dataedit:view", kwargs={"table": "t_heat_published"})
@@ -85,8 +85,16 @@ class DatasetDetailTests(TestCase):
         self.assertContains(
             response, reverse("dataedit:view", kwargs={"table": "t_heat_draft"})
         )
-        # exactly one badge: the draft table carries it, the published not
+        # each resource shows its status: one Published, one Draft
+        self.assertContains(response, "Published", count=1)
         self.assertContains(response, "Draft", count=1)
+
+    def test_resources_show_their_topic_badges(self):
+        resource_topic = Topic.objects.create(name="mobility")
+        self.published.topics.add(resource_topic)
+        response = self.client.get(self.detail_url)
+        # the resource's own topic is rendered on its row
+        self.assertContains(response, "mobility")
 
     def test_topic_badge_links_to_topic_dataset_list(self):
         response = self.client.get(self.detail_url)
@@ -125,11 +133,12 @@ class DatasetDetailTests(TestCase):
         # licenses live on the resources)
         from omi.validation import validate_metadata
 
+        # the create view derives the name from the title
+        # ("Spec Valid Dataset" -> "spec_valid_dataset")
         self.client.force_login(self.creator)
         self.client.post(
             reverse("login:datasets", args=[self.creator.id]),
             {
-                "name": "spec_valid_ds",
                 "title": "Spec Valid Dataset",
                 "description": "Checked against the oemetadata v2 spec",
             },
@@ -138,7 +147,7 @@ class DatasetDetailTests(TestCase):
         response = self.client.get(
             reverse(
                 "dataedit:dataset-metadata",
-                kwargs={"dataset_name": "spec_valid_ds"},
+                kwargs={"dataset_name": "spec_valid_dataset"},
             )
         )
         self.assertEqual(response.status_code, 200)

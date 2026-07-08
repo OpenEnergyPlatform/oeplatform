@@ -75,7 +75,16 @@
             <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
                href="{% url 'dataedit:view' table=table.name %}">
               <span>{{ table.human_readable_name|default:table.name }}</span>
-              {% if not table.is_publish %}<span class="badge text-bg-warning">Draft</span>{% endif %}
+              <span class="d-flex align-items-center gap-1">
+                {% for topic in table.topics.all %}
+                  <span class="badge text-bg-light border">{{ topic.name }}</span>
+                {% endfor %}
+                {% if table.is_publish %}
+                  <span class="badge text-bg-success">Published</span>
+                {% else %}
+                  <span class="badge text-bg-warning">Draft</span>
+                {% endif %}
+              </span>
             </a>
           {% empty %}
             <div class="list-group-item text-muted">No tables assigned yet.</div>

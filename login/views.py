@@ -317,7 +317,7 @@ def _render_dataset_manage(request, profile_user, dataset, search=""):
     context = {
         "profile_user": profile_user,
         "dataset": dataset,
-        "resources": dataset.tables.all().order_by("name"),
+        "resources": dataset.tables.all().order_by("name").prefetch_related("topics"),
         "search": search,
         **_picker_context(request, dataset, search),
     }

@@ -359,7 +359,7 @@ class DatasetResourceManagementTests(TestCase):
         response = self.client.get(self.manage_url)
         self.assertEqual(response.status_code, 403)
 
-    def test_manage_lists_resources_with_links_and_draft_badge(self):
+    def test_manage_lists_resources_with_links_and_status_badges(self):
         published = self.make_table("t_pub_resource", published=True)
         draft = self.make_table(
             "t_draft_resource", published=False, writable_by=self.user
@@ -369,11 +369,20 @@ class DatasetResourceManagementTests(TestCase):
         response = self.client.get(self.manage_url)
         self.assertContains(response, "t_pub_resource")
         self.assertContains(response, "t_draft_resource")
-        # exactly one badge: the draft table carries it, the published not
+        # each resource shows its status: one Published, one Draft
+        self.assertContains(response, "Published", count=1)
         self.assertContains(response, "Draft", count=1)
         self.assertContains(
             response, reverse("dataedit:view", kwargs={"table": "t_pub_resource"})
         )
+
+    def test_manage_shows_resource_topic_badges(self):
+        table = self.make_table("t_topical", published=True)
+        table.topics.add(Topic.objects.create(name="grids"))
+        self.dataset.tables.add(table)
+
+        response = self.client.get(self.manage_url)
+        self.assertContains(response, "grids")
 
     def test_picker_offers_only_assignable_tables(self):
         self.make_table("t_free", published=True)
