@@ -81,7 +81,7 @@ SPDX-License-Identifier: CC0-1.0
 
 - Fix "Add data set" button in database section
   [(#2359)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2359)
-  
+
 - Fix Model/Framework factsheets silently dropping the 10th and later entries of
   array fields (e.g. Author(s)) on submit, caused by a regex that only matched
   single-digit field-name suffixes.
