@@ -52,7 +52,7 @@ SPDX-License-Identifier: CC0-1.0
   array fields (e.g. Author(s)) on submit, caused by a regex that only matched
   single-digit field-name suffixes.
   [(#2365)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2365)
-  
+
 - Fix badge system; implement tier structure and bugfixes.
   [(#2361)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2361)
 
