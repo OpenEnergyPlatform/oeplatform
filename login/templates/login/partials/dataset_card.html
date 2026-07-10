@@ -1,0 +1,49 @@
+<div class="card mb-3" id="dataset-card-{{ dataset.name }}">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+      <div>
+        <h5 class="card-title mb-1">
+          <a class="text-decoration-none"
+             href="{% url 'dataedit:dataset-detail' dataset_name=dataset.name %}"
+             target="_blank"
+             rel="noopener">{{ dataset.metadata.title|default:dataset.name }}</a>
+        </h5>
+        <h6 class="card-subtitle text-muted mb-2">{{ dataset.name }}</h6>
+      </div>
+      <div class="btn-group btn-group-sm"
+           role="group"
+           aria-label="Dataset actions">
+        <button type="button"
+                class="btn btn-outline-primary"
+                hx-get="{% url 'login:dataset-manage' user_id=profile_user.id dataset_name=dataset.name %}"
+                hx-target="#dataset-card-{{ dataset.name }}"
+                hx-swap="outerHTML">Manage tables</button>
+        <button type="button"
+                class="btn btn-outline-secondary"
+                hx-get="{% url 'login:dataset-edit' user_id=profile_user.id dataset_name=dataset.name %}"
+                hx-target="#dataset-card-{{ dataset.name }}"
+                hx-swap="outerHTML">Edit</button>
+        <button type="button"
+                class="btn btn-outline-danger"
+                hx-post="{% url 'login:dataset-delete' user_id=profile_user.id dataset_name=dataset.name %}"
+                hx-confirm="Delete dataset '{{ dataset.name }}'? Your tables are not deleted - only the dataset and its table list are removed."
+                hx-target="#dataset-card-{{ dataset.name }}"
+                hx-swap="outerHTML">Delete</button>
+      </div>
+    </div>
+    {% if dataset.topics.all %}
+      <p class="mb-2">
+        {% for topic in dataset.topics.all %}
+          <span class="badge text-bg-light border me-1">{{ topic.name }}</span>
+        {% endfor %}
+      </p>
+    {% endif %}
+    {% if dataset.metadata.description %}
+      <p class="card-text mb-2">{{ dataset.metadata.description|truncatechars:160 }}</p>
+    {% endif %}
+    <p class="card-text text-muted small mb-0">
+      {{ dataset.tables.count }} resource{{ dataset.tables.count|pluralize }}
+      &middot; created {{ dataset.created_at|date:"d/m/Y" }}
+    </p>
+  </div>
+</div>

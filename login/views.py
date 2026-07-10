@@ -16,6 +16,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 import json
+from functools import wraps
 from itertools import groupby
 
 from django.contrib.auth.decorators import login_required
@@ -39,13 +40,25 @@ from django.views.generic.edit import DeleteView
 from rest_framework.authtoken.models import Token
 
 import login.permissions
+from api.serializers import DatasetCreateSerializer, DatasetUpdateSerializer
+from api.services.dataset_creation import (
+    DatasetNameTaken,
+    assign_table,
+    assignable_tables_for,
+    create_dataset,
+    normalize_dataset_name,
+    set_dataset_topics,
+    update_dataset,
+    user_may_assign_table,
+)
 from dataedit.helper import delete_peer_review
-from dataedit.models import PeerReviewManager, Table, Topic
+from dataedit.models import Dataset, PeerReviewManager, Table, Topic
 from login.forms import EditUserForm, GroupForm
 from login.models import GroupMembership, UserGroup
 from login.models import myuser as OepUser
 from login.permissions import ADMIN_PERM, DELETE_PERM, WRITE_PERM
 from login.utils import get_tables_if_group_assigned
+from oeplatform.settings import PSEUDO_TOPIC_DRAFT
 
 # Pagination
 ITEMS_PER_PAGE = 8
@@ -117,6 +130,257 @@ class TablesView(View):
             )
         else:
             return render(request, "login/user_tables.html", context)
+
+
+##############################################################################
+#           User Datasets related views & partial views for htmx            #
+##############################################################################
+
+
+def _datasets_context(request, profile_user, form_errors=None, form_values=None):
+    """Context for the dashboard datasets sections: only ever lists the
+    requesting user's own datasets, searchable and paginated so a creator
+    with many datasets can still browse them."""
+    if profile_user == request.user:
+        datasets = (
+            Dataset.objects.filter(creator=request.user)
+            .order_by("-created_at")
+            .prefetch_related("tables", "topics")
+        )
+    else:
+        datasets = Dataset.objects.none()
+
+    search_query = request.GET.get("search", "").strip()
+    if search_query:
+        datasets = datasets.filter(
+            Q(name__icontains=search_query)
+            | Q(metadata__title__icontains=search_query)
+            | Q(metadata__description__icontains=search_query)
+        )
+
+    paginator = Paginator(datasets, ITEMS_PER_PAGE)
+    datasets_page = paginator.get_page(request.GET.get("datasets_page", 1))
+
+    return {
+        "profile_user": profile_user,
+        "datasets_page": datasets_page,
+        "search_query": search_query,
+        "form_errors": form_errors or {},
+        "form_values": form_values or {},
+    }
+
+
+def _serializer_errors(serializer):
+    """Flatten DRF serializer errors into one message per field."""
+    return {
+        field: " ".join(str(message) for message in messages)
+        for field, messages in serializer.errors.items()
+    }
+
+
+def dataset_creator_required(view_func):
+    """Resolve profile user and dataset for the dataset partial views and
+    enforce that only the dataset's creator may act (403 otherwise)."""
+
+    @wraps(view_func)
+    def wrapper(request, user_id, dataset_name, *args, **kwargs):
+        dataset = get_object_or_404(Dataset, name=dataset_name)
+        if dataset.creator is None or dataset.creator != request.user:
+            return HttpResponseForbidden(
+                "Only the dataset creator may manage this dataset."
+            )
+        profile_user = get_object_or_404(OepUser, pk=user_id)
+        return view_func(request, profile_user, dataset, *args, **kwargs)
+
+    return wrapper
+
+
+class DatasetsView(LoginRequiredMixin, View):
+    """Dataset-first dashboard view: list the user's datasets and create
+    new ones via HTMX without page reloads. The name is immutable after
+    creation; title and description stay editable."""
+
+    @method_decorator(never_cache)
+    def get(self, request, user_id):
+        user = get_object_or_404(OepUser, pk=user_id)
+        context = _datasets_context(request, user)
+        if "HX-Request" in request.headers:
+            return render(request, "login/partials/datasets_sections.html", context)
+        return render(request, "login/user_datasets.html", context)
+
+    def post(self, request, user_id):
+        user = get_object_or_404(OepUser, pk=user_id)
+        if user != request.user:
+            return HttpResponseForbidden(
+                "Datasets can only be created on your own dashboard."
+            )
+
+        # the permanent URL name is derived from the title, so users can
+        # style the title freely without thinking in slugs
+        derived_name = normalize_dataset_name(request.POST.get("title", ""))
+        data = request.POST.dict()
+        if derived_name:
+            data["name"] = derived_name
+
+        serializer = DatasetCreateSerializer(data=data)
+        form_errors = {}
+        if derived_name is None:
+            form_errors["title"] = (
+                "The title needs at least one letter or number so a web "
+                "address name can be derived from it."
+            )
+        elif serializer.is_valid():
+            try:
+                create_dataset(serializer.validated_data, creator=request.user)
+            except DatasetNameTaken:
+                form_errors["title"] = (
+                    f"This title gives the web address name '{derived_name}', "
+                    "which is already taken. Please choose a different title."
+                )
+        else:
+            form_errors = _serializer_errors(serializer)
+
+        form_values = request.POST if form_errors else {}
+        context = _datasets_context(request, user, form_errors, form_values)
+        return render(request, "login/partials/datasets_sections.html", context)
+
+
+@login_required
+@dataset_creator_required
+def dataset_edit_view(request, profile_user, dataset):
+    """Inline edit of a dataset card: title, description and topics; the
+    name is immutable. GET returns the form partial, POST saves and
+    returns the refreshed card."""
+    if request.method == "POST":
+        serializer = DatasetUpdateSerializer(data=request.POST)
+        if serializer.is_valid():
+            update_dataset(dataset, serializer.validated_data)
+            set_dataset_topics(dataset, request.POST.getlist("topics"))
+            return render(
+                request,
+                "login/partials/dataset_card.html",
+                {"dataset": dataset, "profile_user": profile_user},
+            )
+        form_errors = _serializer_errors(serializer)
+        form_values = request.POST
+        selected_topics = set(request.POST.getlist("topics"))
+    else:
+        form_errors = {}
+        form_values = {
+            "title": dataset.metadata.get("title", ""),
+            "description": dataset.metadata.get("description", ""),
+        }
+        selected_topics = set(dataset.topics.values_list("name", flat=True))
+
+    return render(
+        request,
+        "login/partials/dataset_edit_form.html",
+        {
+            "dataset": dataset,
+            "profile_user": profile_user,
+            "form_errors": form_errors,
+            "form_values": form_values,
+            "available_topics": Topic.objects.exclude(name=PSEUDO_TOPIC_DRAFT).order_by(
+                "name"
+            ),
+            "selected_topics": selected_topics,
+        },
+    )
+
+
+@login_required
+@dataset_creator_required
+def dataset_card_view(request, profile_user, dataset):
+    """A single dataset card, used to close an open edit or manage panel
+    back to its card without re-rendering the whole container (which
+    would collapse every other open panel)."""
+    return render(
+        request,
+        "login/partials/dataset_card.html",
+        {"dataset": dataset, "profile_user": profile_user},
+    )
+
+
+@login_required
+@require_POST
+@dataset_creator_required
+def dataset_delete_view(request, profile_user, dataset):
+    """Delete a dataset (creator only). Member tables are never deleted.
+    Returns an empty swap so only this card disappears and other open
+    panels keep their state."""
+    dataset.delete()
+    return HttpResponse("")
+
+
+PICKER_MAX_RESULTS = 20
+
+
+def _picker_context(request, dataset, search=""):
+    """Picker results capped at PICKER_MAX_RESULTS, with a flag telling
+    the template that more matches exist (hint to refine the search)."""
+    tables = list(
+        assignable_tables_for(request.user, dataset, search)[: PICKER_MAX_RESULTS + 1]
+    )
+    return {
+        "picker_tables": tables[:PICKER_MAX_RESULTS],
+        "picker_truncated": len(tables) > PICKER_MAX_RESULTS,
+    }
+
+
+def _render_dataset_manage(request, profile_user, dataset, search=""):
+    context = {
+        "profile_user": profile_user,
+        "dataset": dataset,
+        "resources": dataset.tables.all().order_by("name").prefetch_related("topics"),
+        "search": search,
+        **_picker_context(request, dataset, search),
+    }
+    return render(request, "login/partials/dataset_manage.html", context)
+
+
+@login_required
+@dataset_creator_required
+def dataset_manage_view(request, profile_user, dataset):
+    """Manage panel for a dataset's resources: current tables with draft
+    badges and links, plus the picker for adding tables. Creator only."""
+    return _render_dataset_manage(request, profile_user, dataset)
+
+
+@login_required
+@dataset_creator_required
+def dataset_table_search_view(request, profile_user, dataset):
+    """Picker search: only tables the user may assign under the curation
+    rules, minus already assigned ones."""
+    search = request.GET.get("q", "").strip()
+    context = {
+        "profile_user": profile_user,
+        "dataset": dataset,
+        **_picker_context(request, dataset, search),
+    }
+    return render(request, "login/partials/dataset_table_search_results.html", context)
+
+
+@login_required
+@require_POST
+@dataset_creator_required
+def dataset_assign_view(request, profile_user, dataset):
+    table = get_object_or_404(Table, name=request.POST.get("table", ""))
+    if not user_may_assign_table(request.user, table):
+        return HttpResponseForbidden(
+            "Draft or embargoed tables require write permission on the table."
+        )
+    assign_table(dataset, table)
+    return _render_dataset_manage(request, profile_user, dataset)
+
+
+@login_required
+@require_POST
+@dataset_creator_required
+def dataset_unassign_view(request, profile_user, dataset):
+    table = dataset.tables.filter(name=request.POST.get("table", "")).first()
+    if table is not None:
+        dataset.tables.remove(table)
+    return _render_dataset_manage(request, profile_user, dataset)
 
 
 ##############################################################################

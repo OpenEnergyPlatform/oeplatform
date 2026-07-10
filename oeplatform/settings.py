@@ -206,6 +206,7 @@ EXTERNAL_URLS = {
     "github_openenergyplatform": "https://github.com/OpenEnergyPlatform",
     "ORKG": "https://academy.orkg.org/orkg-academy/main/index.html",
     "open_plan": "https://open-plan-tool.org/",
+    "open_egon": "https://rego-n.org/",
     "open_mastr": "https://open-mastr.readthedocs.io/en/latest/",
     "tutorials_index": "https://openenergyplatform.github.io/academy/",
     "tutorials_faq": "https://openenergyplatform.github.io/academy/questions/",

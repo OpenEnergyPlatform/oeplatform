@@ -157,7 +157,13 @@ from api.serializers import (
     ScenarioBundleScenarioDatasetSerializer,
     ScenarioDataTablesSerializer,
 )
-from api.services.dataset_creation import assemble_dataset_metadata
+from api.services.dataset_creation import (
+    DatasetNameTaken,
+    assemble_dataset_metadata,
+    assign_table,
+    create_dataset,
+    user_may_assign_table,
+)
 from api.services.embargo import (
     EmbargoValidationError,
     apply_embargo,
@@ -260,15 +266,6 @@ def assert_dataset_ownership(user, dataset: Dataset) -> None:
         raise PermissionDenied("Only the dataset creator may modify this dataset.")
 
 
-def user_may_assign_table(user, table: Table) -> bool:
-    """Curation model: any published table may be assigned to a dataset;
-    draft tables and tables under an active embargo only by users holding
-    write permission on the table (owners staging a release)."""
-    if table.is_publish and not check_embargo(table):
-        return True
-    return user.has_write_permissions(table.name)
-
-
 def load_owned_dataset_from_request(request, dataset_name: str):
     """Shared prologue of the dataset membership endpoints: validate the
     table list, load the dataset and enforce ownership.
@@ -304,10 +301,10 @@ class DatasetsListCreate(generics.ListCreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        metadata = assemble_dataset_metadata(serializer.validated_data)
-        dataset = Dataset.objects.create(
-            metadata=metadata, name=metadata["name"], creator=request.user
-        )
+        try:
+            dataset = create_dataset(serializer.validated_data, creator=request.user)
+        except DatasetNameTaken as error:
+            raise ValidationError({"name": str(error)})
 
         return Response(
             {
@@ -394,7 +391,7 @@ class AssignDatasetTables(APIView):
 
         added_tables = []
         for table in tables:
-            dataset.tables.add(table)
+            assign_table(dataset, table)
             added_tables.append(table.name)
 
         return Response(
