@@ -13,6 +13,34 @@ SPDX-License-Identifier: CC0-1.0
 
 ### Features
 
+- Dataset management UI, first slice: the user dashboard now opens on a
+  dataset-first view with a switch to the familiar tables view. Users can see
+  their own datasets and create new ones (name, title, description) without page
+  reloads; invalid or taken names show inline errors. Creating tables without a
+  dataset keeps working unchanged. The dataset API now reports duplicate names
+  as a validation error instead of failing.
+  ([#1971](https://github.com/OpenEnergyPlatform/oeplatform/issues/1971))
+
+- Dataset quick actions on the dashboard: each dataset card can be edited inline
+  (title and description; the name stays fixed) and deleted with a confirmation
+  that makes clear the member tables are not deleted. Both actions update the
+  page without reloads and are only available to the dataset creator.
+  ([#1971](https://github.com/OpenEnergyPlatform/oeplatform/issues/1971))
+
+- Dataset resource management on the dashboard: a manage panel per dataset lists
+  the assigned tables (draft tables are badged, every entry links to its table
+  page) and offers a search picker that only shows tables the user may assign -
+  all published tables plus their own drafts and embargoed tables. Assigning and
+  removing tables updates the panel without page reloads; data upload continues
+  on the table pages.
+  ([#1971](https://github.com/OpenEnergyPlatform/oeplatform/issues/1971))
+
+- Public dataset list: the previously disabled "Datasets" toggle on the database
+  table list is now active and shows a paginated card list of all datasets with
+  name, description, resource count and the combined size of the member tables.
+  Accessible without login; dataset detail pages follow in a later iteration.
+  ([#1971](https://github.com/OpenEnergyPlatform/oeplatform/issues/1971))
+
 - Add Dataset rest-api and metadata based concept as specified in oemetadata /
   frictionless
   ([#2071](https://github.com/OpenEnergyPlatform/oeplatform/pull/2071))

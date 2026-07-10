@@ -190,6 +190,14 @@ class DatasetCreateSerializer(serializers.Serializer):
     at_id = serializers.URLField(required=False)
 
 
+class DatasetUpdateSerializer(serializers.Serializer):
+    # updates touch only the editable dataset-level fields; the name is
+    # immutable and therefore not part of this serializer
+    title = serializers.CharField()
+    description = serializers.CharField()
+    at_id = serializers.URLField(required=False)
+
+
 class DatasetAssignTablesSerializer(serializers.Serializer):
     tables = serializers.ListField(
         child=serializers.DictField(child=serializers.CharField()), min_length=1

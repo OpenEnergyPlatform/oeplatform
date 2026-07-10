@@ -199,6 +199,36 @@ class DatasetCurationRulesTests(APITestCase):
             format="json",
         )
 
+    def test_assign_seeds_dataset_topics_additively(self):
+        from dataedit.models import Topic
+        from oeplatform.settings import PSEUDO_TOPIC_DRAFT
+
+        wind, _ = Topic.objects.get_or_create(name="wind")
+        draft, _ = Topic.objects.get_or_create(name=PSEUDO_TOPIC_DRAFT)
+        table = self.make_table("t_tagged")
+        table.topics.add(wind, draft)
+
+        response = self.assign("t_tagged")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # the table's topics seed the dataset, the draft pseudo-topic never
+        self.assertEqual(
+            set(self.dataset.topics.values_list("name", flat=True)), {"wind"}
+        )
+
+    def test_unassign_keeps_dataset_topics(self):
+        from dataedit.models import Topic
+
+        wind, _ = Topic.objects.get_or_create(name="wind")
+        table = self.make_table("t_tagged_member")
+        table.topics.add(wind)
+        self.assign("t_tagged_member")
+
+        response = self.unassign("t_tagged_member")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            set(self.dataset.topics.values_list("name", flat=True)), {"wind"}
+        )
+
     def test_creator_can_unassign_table(self):
         table = self.make_table("t_member")
         self.dataset.tables.add(table)
@@ -384,6 +414,16 @@ class DatasetDerivedResourcesTests(APITestCase):
         response = self.client.post("/api/v0/datasets/", payload, format="json")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertFalse(Dataset.objects.filter(metadata__title="Bad Name").exists())
+
+    def test_create_rejects_duplicate_name(self):
+        payload = {
+            "name": "derived_dataset",
+            "title": "Duplicate",
+            "description": "Name is already taken",
+        }
+        response = self.client.post("/api/v0/datasets/", payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(Dataset.objects.filter(name="derived_dataset").count(), 1)
 
     def test_no_resource_copy_is_persisted(self):
         self.client.post(

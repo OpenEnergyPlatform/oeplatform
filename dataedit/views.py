@@ -29,7 +29,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.core.paginator import Paginator
-from django.db.models import Count, F
+from django.db.models import Count, F, Q
 from django.db.utils import IntegrityError
 from django.http import (
     Http404,
@@ -54,6 +54,7 @@ from api.actions import (
     assert_add_tag_permission,
     data_insert,
     describe_columns,
+    list_table_sizes,
     remove_queued_column,
     remove_queued_constraint,
     table_get_row_count,
@@ -76,7 +77,7 @@ from dataedit.helper import (
 )
 from dataedit.metadata import has_valid_filled_metadata, load_metadata_from_db
 from dataedit.metadata.widget import MetaDataWidget
-from dataedit.models import Embargo
+from dataedit.models import Dataset, Embargo
 from dataedit.models import Filter as DBFilter
 from dataedit.models import PeerReview, PeerReviewManager, Table, Tag, Topic
 from dataedit.models import View as DBView
@@ -434,6 +435,111 @@ def tables_view(request: HttpRequest, topic: str) -> HttpResponse:
             "doc_oem_builder_link": DOCUMENTATION_LINKS["oemetabuilder"],
         },
     )
+
+
+@never_cache
+def datasets_view(request: HttpRequest, topic: str) -> HttpResponse:
+    """Public, paginated card list of the datasets in one topic: name,
+    description, resource count and combined size of the member tables.
+    Datasets never list under the draft pseudo-topic — it stays
+    tables-only (dataset drafts become private with the publish PR)."""
+    is_draft_topic = topic == PSEUDO_TOPIC_DRAFT
+    if not is_draft_topic:
+        get_object_or_404(Topic, name=topic)
+
+    searched_query_string = request.GET.get("query")
+    searched_tag_ids = request.GET.getlist("tags")
+
+    # all query params without "page", so pagination keeps the filter state
+    params_wo_page = request.GET.copy()
+    params_wo_page.pop("page", None)
+    params_wo_page = params_wo_page.urlencode()
+
+    Tag.increment_usage_count_many(searched_tag_ids)
+
+    datasets = Dataset.objects.filter(topics__name=topic)
+    if searched_query_string:
+        datasets = datasets.filter(
+            Q(name__icontains=searched_query_string)
+            | Q(metadata__title__icontains=searched_query_string)
+            | Q(metadata__description__icontains=searched_query_string)
+        )
+    # a dataset carries a tag when any member table does; several selected
+    # tags AND together, mirroring the table filter's semantics
+    for tag_id in searched_tag_ids:
+        datasets = datasets.filter(tables__tags__pk=tag_id)
+
+    datasets = (
+        datasets.distinct().order_by("-created_at").prefetch_related("tables", "topics")
+    )
+
+    paginator = Paginator(datasets, ITEMS_PER_PAGE)
+    datasets_paginated = paginator.get_page(get_page(request))
+
+    # one query for all table sizes; tables missing from the data schema
+    # (e.g. drafts) count as zero
+    sizes = {row["table_name"]: row["total_bytes"] for row in list_table_sizes()}
+    for dataset in datasets_paginated:
+        dataset.total_size_bytes = sum(
+            sizes.get(table.name, 0) for table in dataset.tables.all()
+        )
+
+    return render(
+        request,
+        "dataedit/dataedit_datasetlist.html",
+        {
+            "datasets_paginated": datasets_paginated,
+            "topic": topic,
+            "is_draft_topic": is_draft_topic,
+            "query": searched_query_string,
+            "tags": searched_tag_ids,
+            "params_wo_page": params_wo_page,
+        },
+    )
+
+
+def dataset_detail_view(request: HttpRequest, dataset_name: str) -> HttpResponse:
+    """Public read view for one dataset. Deliberately not topic-bound
+    (datasets carry several topics); linked from the cards and the
+    dashboard, opening in a new tab."""
+    dataset = get_object_or_404(
+        Dataset.objects.prefetch_related("tables__topics", "topics"),
+        name=dataset_name,
+    )
+    resources = dataset.tables.all().order_by("name")
+
+    sizes = {row["table_name"]: row["total_bytes"] for row in list_table_sizes()}
+    total_size_bytes = sum(sizes.get(table.name, 0) for table in resources)
+
+    is_creator = (
+        request.user.is_authenticated
+        and dataset.creator is not None
+        and dataset.creator == request.user
+    )
+
+    return render(
+        request,
+        "dataedit/dataedit_dataset_detail.html",
+        {
+            "dataset": dataset,
+            "resources": resources,
+            "total_size_bytes": total_size_bytes,
+            "is_creator": is_creator,
+            "metadata_url": reverse(
+                "dataedit:dataset-metadata", kwargs={"dataset_name": dataset.name}
+            ),
+        },
+    )
+
+
+def dataset_metadata_json_view(request: HttpRequest, dataset_name: str) -> JsonResponse:
+    """The dataset's oemetadata document with live resources, as plain
+    JSON: feeds the metadata viewer on the detail page and doubles as
+    the raw-JSON download."""
+    dataset = get_object_or_404(Dataset, name=dataset_name)
+    metadata = dict(dataset.metadata)
+    metadata["resources"] = dataset.resource_entries()
+    return JsonResponse(metadata)
 
 
 @require_POST
