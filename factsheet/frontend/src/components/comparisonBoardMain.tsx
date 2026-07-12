@@ -19,7 +19,10 @@ import BreadcrumbsNavGrid from "../styles/oep-theme/components/breadcrumbsNaviga
 // Import our new sub-components
 import QualitativeView from "./comparison/qualitativeView.jsx";
 import QuantitativeView from "./comparison/quantitativeView.jsx";
-import RegistryComparison from "./comparison/RegistryComparison.jsx";
+// PROTOTYPE (wayfinder WF-07): multi-source selection variants on the
+// Registry (beta) tab, ?variant=A|B|C|0. Falls back to RegistryComparison in
+// production builds; remove with the prototype.
+import MultiSourcePrototype from "./comparison/prototype_multisource/MultiSourcePrototype.jsx";
 
 const ComparisonBoardMain = ({ params }) => {
   const [scenarios, setScenarios] = useState([]);
@@ -110,7 +113,7 @@ const ComparisonBoardMain = ({ params }) => {
           {alignment === "Quantitative" && (
             <QuantitativeView scenarios={scenarios} />
           )}
-          {alignment === "Registry" && <RegistryComparison />}
+          {alignment === "Registry" && <MultiSourcePrototype />}
         </Container>
       </Grid>
     )
