@@ -457,4 +457,260 @@ mappingId       ariadne2_data_with_labels_technology_overhead_line
 target          oekg:data-descriptor/ariadne2_data_with_labels/{id} oeo:IAO_0000136 oeo:OEO_00000047 .
 source          SELECT "id" FROM "data"."ariadne2_data_with_labels" WHERE (' | ' || "iamc_full_string" || ' | ') LIKE '% | overhead line | %'
 
+mappingId       amiris_germany2019_biogas_awarded_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_biogas/awarded_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_biogas"^^xsd:string ; oeo:OEO_00140178 "{awarded_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140122 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "awarded_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_biogas" WHERE "awarded_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_biogas_offered_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_biogas/offered_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_biogas"^^xsd:string ; oeo:OEO_00140178 "{offered_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140121 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "offered_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_biogas" WHERE "offered_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_biogas_received_money_in_eur
+target          oekg:data-descriptor/amiris_germany2019_biogas/received_money_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_biogas"^^xsd:string ; oeo:OEO_00140178 "{received_money_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020128 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "received_money_in_eur", "time_step" FROM "data"."amiris_germany2019_biogas" WHERE "received_money_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_biogas_variable_costs_in_eur
+target          oekg:data-descriptor/amiris_germany2019_biogas/variable_costs_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_biogas"^^xsd:string ; oeo:OEO_00140178 "{variable_costs_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020145 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "variable_costs_in_eur", "time_step" FROM "data"."amiris_germany2019_biogas" WHERE "variable_costs_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_biogas_fixed_costs_in_eur
+target          oekg:data-descriptor/amiris_germany2019_biogas/fixed_costs_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_biogas"^^xsd:string ; oeo:OEO_00140178 "{fixed_costs_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020168 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "fixed_costs_in_eur", "time_step" FROM "data"."amiris_germany2019_biogas" WHERE "fixed_costs_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_biogas_investment_annuity_in_eur
+target          oekg:data-descriptor/amiris_germany2019_biogas/investment_annuity_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_biogas"^^xsd:string ; oeo:OEO_00140178 "{investment_annuity_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020167 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "investment_annuity_in_eur", "time_step" FROM "data"."amiris_germany2019_biogas" WHERE "investment_annuity_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_conventional_plant_operator_co2_emissions_in_t
+target          oekg:data-descriptor/amiris_germany2019_conventional_plant_operator/co2_emissions_in_t/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_conventional_plant_operator"^^xsd:string ; oeo:OEO_00140178 "{co2_emissions_in_t}" ; oeo:OEO_00040010 "t" ; oeo:IAO_0000136 oeo:OEO_00260007 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "co2_emissions_in_t", "time_step" FROM "data"."amiris_germany2019_conventional_plant_operator" WHERE "co2_emissions_in_t" IS NOT NULL
+
+mappingId       amiris_germany2019_conventional_plant_operator_fuel_consumption_in_thermal_mwh
+target          oekg:data-descriptor/amiris_germany2019_conventional_plant_operator/fuel_consumption_in_thermal_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_conventional_plant_operator"^^xsd:string ; oeo:OEO_00140178 "{fuel_consumption_in_thermal_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00010210 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "fuel_consumption_in_thermal_mwh", "time_step" FROM "data"."amiris_germany2019_conventional_plant_operator" WHERE "fuel_consumption_in_thermal_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_conventional_plant_operator_awarded_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_conventional_plant_operator/awarded_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_conventional_plant_operator"^^xsd:string ; oeo:OEO_00140178 "{awarded_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140122 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "awarded_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_conventional_plant_operator" WHERE "awarded_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_conventional_plant_operator_offered_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_conventional_plant_operator/offered_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_conventional_plant_operator"^^xsd:string ; oeo:OEO_00140178 "{offered_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140121 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "offered_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_conventional_plant_operator" WHERE "offered_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_conventional_plant_operator_received_money_in_eur
+target          oekg:data-descriptor/amiris_germany2019_conventional_plant_operator/received_money_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_conventional_plant_operator"^^xsd:string ; oeo:OEO_00140178 "{received_money_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020128 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "received_money_in_eur", "time_step" FROM "data"."amiris_germany2019_conventional_plant_operator" WHERE "received_money_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_conventional_plant_operator_variable_costs_in_eur
+target          oekg:data-descriptor/amiris_germany2019_conventional_plant_operator/variable_costs_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_conventional_plant_operator"^^xsd:string ; oeo:OEO_00140178 "{variable_costs_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020145 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "variable_costs_in_eur", "time_step" FROM "data"."amiris_germany2019_conventional_plant_operator" WHERE "variable_costs_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_conventional_plant_operator_fixed_costs_in_eur
+target          oekg:data-descriptor/amiris_germany2019_conventional_plant_operator/fixed_costs_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_conventional_plant_operator"^^xsd:string ; oeo:OEO_00140178 "{fixed_costs_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020168 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "fixed_costs_in_eur", "time_step" FROM "data"."amiris_germany2019_conventional_plant_operator" WHERE "fixed_costs_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_conventional_plant_operator_investment_annuity_in_eur
+target          oekg:data-descriptor/amiris_germany2019_conventional_plant_operator/investment_annuity_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_conventional_plant_operator"^^xsd:string ; oeo:OEO_00140178 "{investment_annuity_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020167 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "investment_annuity_in_eur", "time_step" FROM "data"."amiris_germany2019_conventional_plant_operator" WHERE "investment_annuity_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_conventional_trader_offered_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_conventional_trader/offered_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_conventional_trader"^^xsd:string ; oeo:OEO_00140178 "{offered_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140121 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "offered_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_conventional_trader" WHERE "offered_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_conventional_trader_awarded_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_conventional_trader/awarded_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_conventional_trader"^^xsd:string ; oeo:OEO_00140178 "{awarded_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140122 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "awarded_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_conventional_trader" WHERE "awarded_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_conventional_trader_requested_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_conventional_trader/requested_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_conventional_trader"^^xsd:string ; oeo:OEO_00140178 "{requested_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140121 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "requested_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_conventional_trader" WHERE "requested_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_day_ahead_market_single_zone_awarded_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_day_ahead_market_single_zone/awarded_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_day_ahead_market_single_zone"^^xsd:string ; oeo:OEO_00140178 "{awarded_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140122 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "awarded_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_day_ahead_market_single_zone" WHERE "awarded_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_day_ahead_market_single_zone_electricity_price_in_eur_per_mwh
+target          oekg:data-descriptor/amiris_germany2019_day_ahead_market_single_zone/electricity_price_in_eur_per_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_day_ahead_market_single_zone"^^xsd:string ; oeo:OEO_00140178 "{electricity_price_in_eur_per_mwh}" ; oeo:OEO_00040010 "EUR/MWh" ; oeo:IAO_0000136 oeo:OEO_00020117 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "electricity_price_in_eur_per_mwh", "time_step" FROM "data"."amiris_germany2019_day_ahead_market_single_zone" WHERE "electricity_price_in_eur_per_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_day_ahead_market_single_zone_dispatch_system_cost_in_eur
+target          oekg:data-descriptor/amiris_germany2019_day_ahead_market_single_zone/dispatch_system_cost_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_day_ahead_market_single_zone"^^xsd:string ; oeo:OEO_00140178 "{dispatch_system_cost_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020116 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "dispatch_system_cost_in_eur", "time_step" FROM "data"."amiris_germany2019_day_ahead_market_single_zone" WHERE "dispatch_system_cost_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_demand_trader_offered_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_demand_trader/offered_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_demand_trader"^^xsd:string ; oeo:OEO_00140178 "{offered_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140121 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "offered_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_demand_trader" WHERE "offered_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_demand_trader_awarded_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_demand_trader/awarded_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_demand_trader"^^xsd:string ; oeo:OEO_00140178 "{awarded_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140122 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "awarded_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_demand_trader" WHERE "awarded_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_demand_trader_requested_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_demand_trader/requested_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_demand_trader"^^xsd:string ; oeo:OEO_00140178 "{requested_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140121 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "requested_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_demand_trader" WHERE "requested_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_generic_flexibility_trader_received_money_in_eur
+target          oekg:data-descriptor/amiris_germany2019_generic_flexibility_trader/received_money_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_generic_flexibility_trader"^^xsd:string ; oeo:OEO_00140178 "{received_money_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020128 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "received_money_in_eur", "time_step" FROM "data"."amiris_germany2019_generic_flexibility_trader" WHERE "received_money_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_generic_flexibility_trader_offered_charge_price_in_eur_per_mwh
+target          oekg:data-descriptor/amiris_germany2019_generic_flexibility_trader/offered_charge_price_in_eur_per_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_generic_flexibility_trader"^^xsd:string ; oeo:OEO_00140178 "{offered_charge_price_in_eur_per_mwh}" ; oeo:OEO_00040010 "EUR/MWh" ; oeo:IAO_0000136 oeo:OEO_00020117 ; oeo:IAO_0000136 oeo:OEO_00140121 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "offered_charge_price_in_eur_per_mwh", "time_step" FROM "data"."amiris_germany2019_generic_flexibility_trader" WHERE "offered_charge_price_in_eur_per_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_generic_flexibility_trader_offered_discharge_price_in_eur_per_mwh
+target          oekg:data-descriptor/amiris_germany2019_generic_flexibility_trader/offered_discharge_price_in_eur_per_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_generic_flexibility_trader"^^xsd:string ; oeo:OEO_00140178 "{offered_discharge_price_in_eur_per_mwh}" ; oeo:OEO_00040010 "EUR/MWh" ; oeo:IAO_0000136 oeo:OEO_00020117 ; oeo:IAO_0000136 oeo:OEO_00140121 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "offered_discharge_price_in_eur_per_mwh", "time_step" FROM "data"."amiris_germany2019_generic_flexibility_trader" WHERE "offered_discharge_price_in_eur_per_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_generic_flexibility_trader_awarded_charge_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_generic_flexibility_trader/awarded_charge_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_generic_flexibility_trader"^^xsd:string ; oeo:OEO_00140178 "{awarded_charge_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140122 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "awarded_charge_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_generic_flexibility_trader" WHERE "awarded_charge_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_generic_flexibility_trader_awarded_discharge_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_generic_flexibility_trader/awarded_discharge_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_generic_flexibility_trader"^^xsd:string ; oeo:OEO_00140178 "{awarded_discharge_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140122 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "awarded_discharge_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_generic_flexibility_trader" WHERE "awarded_discharge_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_generic_flexibility_trader_stored_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_generic_flexibility_trader/stored_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_generic_flexibility_trader"^^xsd:string ; oeo:OEO_00140178 "{stored_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "stored_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_generic_flexibility_trader" WHERE "stored_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_generic_flexibility_trader_variable_costs_in_eur
+target          oekg:data-descriptor/amiris_germany2019_generic_flexibility_trader/variable_costs_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_generic_flexibility_trader"^^xsd:string ; oeo:OEO_00140178 "{variable_costs_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020145 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "variable_costs_in_eur", "time_step" FROM "data"."amiris_germany2019_generic_flexibility_trader" WHERE "variable_costs_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_generic_flexibility_trader_dispatch_multiplier
+target          oekg:data-descriptor/amiris_germany2019_generic_flexibility_trader/dispatch_multiplier/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_generic_flexibility_trader"^^xsd:string ; oeo:OEO_00140178 "{dispatch_multiplier}" ; oeo:OEO_00040010 "1" ; oeo:IAO_0000136 oeo:OEO_00240016 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "dispatch_multiplier", "time_step" FROM "data"."amiris_germany2019_generic_flexibility_trader" WHERE "dispatch_multiplier" IS NOT NULL
+
+mappingId       amiris_germany2019_generic_flexibility_trader_electricity_price_prediction_in_eur_per_mwh
+target          oekg:data-descriptor/amiris_germany2019_generic_flexibility_trader/electricity_price_prediction_in_eur_per_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_generic_flexibility_trader"^^xsd:string ; oeo:OEO_00140178 "{electricity_price_prediction_in_eur_per_mwh}" ; oeo:OEO_00040010 "EUR/MWh" ; oeo:IAO_0000136 oeo:OEO_00020117 ; oeo:IAO_0000136 oeo:OEO_00000063 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "electricity_price_prediction_in_eur_per_mwh", "time_step" FROM "data"."amiris_germany2019_generic_flexibility_trader" WHERE "electricity_price_prediction_in_eur_per_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_generic_flexibility_trader_offered_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_generic_flexibility_trader/offered_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_generic_flexibility_trader"^^xsd:string ; oeo:OEO_00140178 "{offered_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140121 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "offered_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_generic_flexibility_trader" WHERE "offered_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_generic_flexibility_trader_awarded_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_generic_flexibility_trader/awarded_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_generic_flexibility_trader"^^xsd:string ; oeo:OEO_00140178 "{awarded_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140122 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "awarded_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_generic_flexibility_trader" WHERE "awarded_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_generic_flexibility_trader_requested_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_generic_flexibility_trader/requested_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_generic_flexibility_trader"^^xsd:string ; oeo:OEO_00140178 "{requested_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140121 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "requested_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_generic_flexibility_trader" WHERE "requested_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_no_support_trader_received_support_in_eur
+target          oekg:data-descriptor/amiris_germany2019_no_support_trader/received_support_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_no_support_trader"^^xsd:string ; oeo:OEO_00140178 "{received_support_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020125 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "received_support_in_eur", "time_step" FROM "data"."amiris_germany2019_no_support_trader" WHERE "received_support_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_no_support_trader_refunded_support_in_eur
+target          oekg:data-descriptor/amiris_germany2019_no_support_trader/refunded_support_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_no_support_trader"^^xsd:string ; oeo:OEO_00140178 "{refunded_support_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020125 ; oeo:IAO_0000136 oeo:OEO_00020124 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "refunded_support_in_eur", "time_step" FROM "data"."amiris_germany2019_no_support_trader" WHERE "refunded_support_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_no_support_trader_received_market_revenues
+target          oekg:data-descriptor/amiris_germany2019_no_support_trader/received_market_revenues/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_no_support_trader"^^xsd:string ; oeo:OEO_00140178 "{received_market_revenues}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020128 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "received_market_revenues", "time_step" FROM "data"."amiris_germany2019_no_support_trader" WHERE "received_market_revenues" IS NOT NULL
+
+mappingId       amiris_germany2019_no_support_trader_true_generation_potential_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_no_support_trader/true_generation_potential_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_no_support_trader"^^xsd:string ; oeo:OEO_00140178 "{true_generation_potential_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140139 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "true_generation_potential_in_mwh", "time_step" FROM "data"."amiris_germany2019_no_support_trader" WHERE "true_generation_potential_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_no_support_trader_offered_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_no_support_trader/offered_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_no_support_trader"^^xsd:string ; oeo:OEO_00140178 "{offered_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140121 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "offered_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_no_support_trader" WHERE "offered_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_no_support_trader_awarded_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_no_support_trader/awarded_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_no_support_trader"^^xsd:string ; oeo:OEO_00140178 "{awarded_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140122 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "awarded_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_no_support_trader" WHERE "awarded_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_no_support_trader_requested_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_no_support_trader/requested_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_no_support_trader"^^xsd:string ; oeo:OEO_00140178 "{requested_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140121 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "requested_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_no_support_trader" WHERE "requested_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_renewable_trader_received_support_in_eur
+target          oekg:data-descriptor/amiris_germany2019_renewable_trader/received_support_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_renewable_trader"^^xsd:string ; oeo:OEO_00140178 "{received_support_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020125 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "received_support_in_eur", "time_step" FROM "data"."amiris_germany2019_renewable_trader" WHERE "received_support_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_renewable_trader_refunded_support_in_eur
+target          oekg:data-descriptor/amiris_germany2019_renewable_trader/refunded_support_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_renewable_trader"^^xsd:string ; oeo:OEO_00140178 "{refunded_support_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020125 ; oeo:IAO_0000136 oeo:OEO_00020124 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "refunded_support_in_eur", "time_step" FROM "data"."amiris_germany2019_renewable_trader" WHERE "refunded_support_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_renewable_trader_received_market_revenues
+target          oekg:data-descriptor/amiris_germany2019_renewable_trader/received_market_revenues/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_renewable_trader"^^xsd:string ; oeo:OEO_00140178 "{received_market_revenues}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020128 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "received_market_revenues", "time_step" FROM "data"."amiris_germany2019_renewable_trader" WHERE "received_market_revenues" IS NOT NULL
+
+mappingId       amiris_germany2019_renewable_trader_true_generation_potential_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_renewable_trader/true_generation_potential_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_renewable_trader"^^xsd:string ; oeo:OEO_00140178 "{true_generation_potential_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140139 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "true_generation_potential_in_mwh", "time_step" FROM "data"."amiris_germany2019_renewable_trader" WHERE "true_generation_potential_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_renewable_trader_offered_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_renewable_trader/offered_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_renewable_trader"^^xsd:string ; oeo:OEO_00140178 "{offered_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140121 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "offered_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_renewable_trader" WHERE "offered_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_renewable_trader_awarded_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_renewable_trader/awarded_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_renewable_trader"^^xsd:string ; oeo:OEO_00140178 "{awarded_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140122 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "awarded_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_renewable_trader" WHERE "awarded_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_renewable_trader_requested_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_renewable_trader/requested_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_renewable_trader"^^xsd:string ; oeo:OEO_00140178 "{requested_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140121 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "requested_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_renewable_trader" WHERE "requested_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_sensitivity_forecaster_awarded_energy_forecast_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_sensitivity_forecaster/awarded_energy_forecast_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_sensitivity_forecaster"^^xsd:string ; oeo:OEO_00140178 "{awarded_energy_forecast_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00010411 ; oeo:IAO_0000136 oeo:OEO_00140122 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "awarded_energy_forecast_in_mwh", "time_step" FROM "data"."amiris_germany2019_sensitivity_forecaster" WHERE "awarded_energy_forecast_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_sensitivity_forecaster_electricity_price_forecast_in_eur_per_mwh
+target          oekg:data-descriptor/amiris_germany2019_sensitivity_forecaster/electricity_price_forecast_in_eur_per_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_sensitivity_forecaster"^^xsd:string ; oeo:OEO_00140178 "{electricity_price_forecast_in_eur_per_mwh}" ; oeo:OEO_00040010 "EUR/MWh" ; oeo:IAO_0000136 oeo:OEO_00020117 ; oeo:IAO_0000136 oeo:OEO_00010411 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "electricity_price_forecast_in_eur_per_mwh", "time_step" FROM "data"."amiris_germany2019_sensitivity_forecaster" WHERE "electricity_price_forecast_in_eur_per_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_system_operator_trader_received_support_in_eur
+target          oekg:data-descriptor/amiris_germany2019_system_operator_trader/received_support_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_system_operator_trader"^^xsd:string ; oeo:OEO_00140178 "{received_support_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020125 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "received_support_in_eur", "time_step" FROM "data"."amiris_germany2019_system_operator_trader" WHERE "received_support_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_system_operator_trader_refunded_support_in_eur
+target          oekg:data-descriptor/amiris_germany2019_system_operator_trader/refunded_support_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_system_operator_trader"^^xsd:string ; oeo:OEO_00140178 "{refunded_support_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020125 ; oeo:IAO_0000136 oeo:OEO_00020124 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "refunded_support_in_eur", "time_step" FROM "data"."amiris_germany2019_system_operator_trader" WHERE "refunded_support_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_system_operator_trader_received_market_revenues
+target          oekg:data-descriptor/amiris_germany2019_system_operator_trader/received_market_revenues/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_system_operator_trader"^^xsd:string ; oeo:OEO_00140178 "{received_market_revenues}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020128 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "received_market_revenues", "time_step" FROM "data"."amiris_germany2019_system_operator_trader" WHERE "received_market_revenues" IS NOT NULL
+
+mappingId       amiris_germany2019_system_operator_trader_true_generation_potential_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_system_operator_trader/true_generation_potential_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_system_operator_trader"^^xsd:string ; oeo:OEO_00140178 "{true_generation_potential_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140139 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "true_generation_potential_in_mwh", "time_step" FROM "data"."amiris_germany2019_system_operator_trader" WHERE "true_generation_potential_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_system_operator_trader_offered_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_system_operator_trader/offered_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_system_operator_trader"^^xsd:string ; oeo:OEO_00140178 "{offered_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140121 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "offered_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_system_operator_trader" WHERE "offered_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_system_operator_trader_awarded_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_system_operator_trader/awarded_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_system_operator_trader"^^xsd:string ; oeo:OEO_00140178 "{awarded_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140122 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "awarded_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_system_operator_trader" WHERE "awarded_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_system_operator_trader_requested_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_system_operator_trader/requested_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_system_operator_trader"^^xsd:string ; oeo:OEO_00140178 "{requested_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140121 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "requested_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_system_operator_trader" WHERE "requested_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_variable_renewable_operator_awarded_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_variable_renewable_operator/awarded_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_variable_renewable_operator"^^xsd:string ; oeo:OEO_00140178 "{awarded_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140122 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "awarded_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_variable_renewable_operator" WHERE "awarded_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_variable_renewable_operator_offered_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_variable_renewable_operator/offered_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_variable_renewable_operator"^^xsd:string ; oeo:OEO_00140178 "{offered_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140121 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "offered_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_variable_renewable_operator" WHERE "offered_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_variable_renewable_operator_received_money_in_eur
+target          oekg:data-descriptor/amiris_germany2019_variable_renewable_operator/received_money_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_variable_renewable_operator"^^xsd:string ; oeo:OEO_00140178 "{received_money_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020128 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "received_money_in_eur", "time_step" FROM "data"."amiris_germany2019_variable_renewable_operator" WHERE "received_money_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_variable_renewable_operator_variable_costs_in_eur
+target          oekg:data-descriptor/amiris_germany2019_variable_renewable_operator/variable_costs_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_variable_renewable_operator"^^xsd:string ; oeo:OEO_00140178 "{variable_costs_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020145 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "variable_costs_in_eur", "time_step" FROM "data"."amiris_germany2019_variable_renewable_operator" WHERE "variable_costs_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_variable_renewable_operator_fixed_costs_in_eur
+target          oekg:data-descriptor/amiris_germany2019_variable_renewable_operator/fixed_costs_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_variable_renewable_operator"^^xsd:string ; oeo:OEO_00140178 "{fixed_costs_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020168 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "fixed_costs_in_eur", "time_step" FROM "data"."amiris_germany2019_variable_renewable_operator" WHERE "fixed_costs_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_variable_renewable_operator_investment_annuity_in_eur
+target          oekg:data-descriptor/amiris_germany2019_variable_renewable_operator/investment_annuity_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_variable_renewable_operator"^^xsd:string ; oeo:OEO_00140178 "{investment_annuity_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020167 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "investment_annuity_in_eur", "time_step" FROM "data"."amiris_germany2019_variable_renewable_operator" WHERE "investment_annuity_in_eur" IS NOT NULL
+
 ]]

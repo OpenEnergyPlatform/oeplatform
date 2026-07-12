@@ -147,6 +147,44 @@ dimensions:
     object_kind: literal
     datatype: xsd:string
 
+  # --- AMIRIS facet dimensions (WF-04, 2026-07-09) ---------------------------
+  # One is-about triple per classified concept on a measure column; the enum
+  # sets below are mutually disjoint AND disjoint from iamc_tokens, so the
+  # frontend's enum isolation disambiguates them on the shared predicate.
+  # `substance` is the PRIMARY facet: measure label + unit carrier, single-valued
+  # per column (enforced by the generator — extras are reported, never emitted).
+  # Each substance entry carries `aggregation: sum | mean` (WF-06 decision 4:
+  # extensive quantities sum, intensive quantities average; no hint -> the query
+  # layer must not aggregate).
+  - key: data_role
+    concept: null # epistemic status; absent = realized value
+    predicate: oeo:IAO_0000136 # is about (interim; refine -> hasDataRole)
+    object_kind: iri
+    value_space: amiris_facets
+
+  - key: transaction_role
+    concept: null # market act qualifier
+    predicate: oeo:IAO_0000136 # is about (interim; refine -> hasTransactionRole)
+    object_kind: iri
+    value_space: amiris_facets
+
+  - key: substance
+    concept: null # the measured quantity (primary facet, unit carrier)
+    predicate: oeo:IAO_0000136 # is about (interim; refine -> hasSubstance)
+    object_kind: iri
+    value_space: amiris_facets
+
+  # --- raw time axis (WF-06 decision 1) ---------------------------------------
+  # Hourly (or finer) rows enter the VKG as-is; the generator detects the time
+  # column by its isAbout resolving to `concept` (fallback: timestamp-typed
+  # column). The derived scenario_year is NOT extracted from this — it is a
+  # declared constant per run (WF-06 decision 2, temporal.timeseries block).
+  - key: time_step
+    concept: oeo:OEO_00140043 # "TimeStamp" [confirmed] (AMIRIS time_step isAbout)
+    predicate: oekg:time_step # [provisional] literal, like oekg:scenario
+    object_kind: literal
+    datatype: xsd:dateTime
+
   - key: sector
     predicate: oeo:IAO_0000136 # is about (interim; refine -> hasSector)
     object_kind: iri
@@ -293,3 +331,109 @@ value_spaces:
         name: "light commercial vehicle",
       } # not in OEO; mint OR unreleased-ontology vocab
     additional: { iri: null, dimension: qualifier, name: "increase of role" } # only CommonCore match; qualifier semantics open
+
+  # AMIRIS facet enums (WF-04 classification table, resolved against the real
+  # metadata 2026-07-09; cleaned by WF-10). Same structured shape as iamc_tokens:
+  # code -> {iri, dimension, name}. Substance entries additionally carry
+  # `aggregation` (WF-06 decision 4). The generator classifies each oemetadata
+  # isAbout IRI through this table; concepts NOT listed here (e.g. fuel
+  # OEO_00000173) are reported unmapped — never silently emitted.
+  amiris_facets:
+    # data_role — epistemic status; absent = realized value
+    forecast: {
+        iri: "oeo:OEO_00010411",
+        dimension: data_role,
+        name: "forecast",
+      } # [ts]
+    assumption: {
+        iri: "oeo:OEO_00000063",
+        dimension: data_role,
+        name: "assumption",
+      } # [ts]
+    yield_profile: {
+        iri: "oeo:OEO_00140139",
+        dimension: data_role,
+        name: "yield profile",
+      } # [ts] a potential, epistemically like a forecast (WF-04 decision 1)
+    # transaction_role — market act
+    bid: { iri: "oeo:OEO_00140121", dimension: transaction_role, name: "bid" } # [ts]
+    award: {
+        iri: "oeo:OEO_00140122",
+        dimension: transaction_role,
+        name: "award",
+      } # [ts]
+    due: { iri: "oeo:OEO_00020124", dimension: transaction_role, name: "due" } # [ts]
+    # substance — measured quantity (primary facet); aggregation per WF-06:
+    # energy/money/emissions are extensive (sum), prices/factors intensive (mean)
+    electrical_energy: {
+        iri: "oeo:OEO_00000139",
+        dimension: substance,
+        name: "electrical energy",
+        aggregation: sum,
+      } # [ts]
+    electricity_price: {
+        iri: "oeo:OEO_00020117",
+        dimension: substance,
+        name: "electricity price",
+        aggregation: mean,
+      } # [ts]
+    co2_emission: {
+        iri: "oeo:OEO_00260007",
+        dimension: substance,
+        name: "CO2 emission",
+        aggregation: sum,
+      } # [ts]
+    co2_certificate_price: {
+        iri: "oeo:OEO_00010271",
+        dimension: substance,
+        name: "CO2 certificate price",
+        aggregation: mean,
+      } # [ts]
+    market_revenue: {
+        iri: "oeo:OEO_00020128",
+        dimension: substance,
+        name: "market revenue",
+        aggregation: sum,
+      } # [ts]
+    remuneration: {
+        iri: "oeo:OEO_00020125",
+        dimension: substance,
+        name: "remuneration",
+        aggregation: sum,
+      } # [ts]
+    variable_cost: {
+        iri: "oeo:OEO_00020145",
+        dimension: substance,
+        name: "variable cost",
+        aggregation: sum,
+      } # [ts]
+    fixed_cost: {
+        iri: "oeo:OEO_00020168",
+        dimension: substance,
+        name: "fixed cost",
+        aggregation: sum,
+      } # [ts]
+    investment_cost: {
+        iri: "oeo:OEO_00020167",
+        dimension: substance,
+        name: "investment cost",
+        aggregation: sum,
+      } # [ts] same IRI as iamc_tokens `investment` (quantity_kind) — different value space, no is-about collision
+    system_cost: {
+        iri: "oeo:OEO_00020116",
+        dimension: substance,
+        name: "system cost",
+        aggregation: sum,
+      } # [ts]
+    energy_use: {
+        iri: "oeo:OEO_00010210",
+        dimension: substance,
+        name: "energy use",
+        aggregation: sum,
+      } # [ts]
+    net_capacity_factor: {
+        iri: "oeo:OEO_00240016",
+        dimension: substance,
+        name: "net capacity factor",
+        aggregation: mean,
+      } # [ts]

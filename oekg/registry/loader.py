@@ -16,12 +16,18 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 #     "version", "namespaces", "row_anchor", "generic_super_property",
 #     "dimensions": [
 #       {"key", "concept", "predicate", "object_kind", "datatype",
-#        "value_space", "values": [{"code", "iri", "label"}]}
-#     ]
+#        "value_space", "values": [{"code", "iri", "label", "aggregation"?}]}
+#     ],
+#     "unmapped_columns": {table: [{"column", "reason"}]}   # if a report exists
 #   }
 # Value spaces are inlined per dimension as `values` (resolved code -> IRI + label)
 # so both the frontend (build filters) and the generator (emit one block per value)
 # read the same place. iamc_tokens are filtered to the dimension they belong to.
+# `aggregation` (sum | mean, WF-06) rides along on substance values; absent means
+# the query layer must not aggregate that value.
+# `unmapped_columns` is the report-don't-guess contract (WF-05): the mapping
+# generator writes unmapped_columns.json next to this file; "what isn't
+# queryable" is served beside "what is" so the UI can badge incomplete sources.
 
 from __future__ import annotations
 
@@ -31,6 +37,7 @@ from pathlib import Path
 import yaml
 
 REGISTRY_PATH = Path(__file__).with_name("dimension_property_registry.yaml")
+UNMAPPED_PATH = Path(__file__).with_name("unmapped_columns.json")
 
 
 def _load_yaml(path: Path = REGISTRY_PATH) -> dict:
@@ -54,7 +61,10 @@ def _normalize_values(value_space: dict, dimension_key: str) -> list[dict]:
         if isinstance(val, dict):
             if val.get("dimension") and val.get("dimension") != dimension_key:
                 continue
-            out.append({"code": code, "iri": val.get("iri"), "label": val.get("name")})
+            entry = {"code": code, "iri": val.get("iri"), "label": val.get("name")}
+            if val.get("aggregation"):
+                entry["aggregation"] = val["aggregation"]
+            out.append(entry)
         else:
             out.append({"code": code, "iri": val, "label": None})
     return out
@@ -83,13 +93,18 @@ def build_contract(raw: dict | None = None) -> dict:
                 "values": values,
             }
         )
-    return {
+    contract = {
         "version": raw.get("version"),
         "namespaces": raw.get("namespaces", {}),
         "row_anchor": raw.get("row_anchor", {}),
         "generic_super_property": raw.get("generic_super_property"),
         "dimensions": dimensions,
     }
+    if UNMAPPED_PATH.exists():
+        contract["unmapped_columns"] = json.loads(
+            UNMAPPED_PATH.read_text(encoding="utf-8")
+        )
+    return contract
 
 
 def load_registry() -> dict:

@@ -1,0 +1,72 @@
+{
+  "amiris_germany2019_biogas": [
+    {
+      "column": "agent_id",
+      "reason": "no substance concept — column not mapped"
+    }
+  ],
+  "amiris_germany2019_conventional_plant_operator": [
+    {
+      "column": "agent_id",
+      "reason": "no substance concept — column not mapped"
+    },
+    {
+      "column": "fuel_consumption_in_thermal_mwh",
+      "reason": "concept oeo:OEO_00000173 not in any facet enum — not emitted (report, don't guess)"
+    }
+  ],
+  "amiris_germany2019_conventional_trader": [
+    {
+      "column": "agent_id",
+      "reason": "no substance concept — column not mapped"
+    }
+  ],
+  "amiris_germany2019_day_ahead_market_single_zone": [
+    {
+      "column": "agent_id",
+      "reason": "no substance concept — column not mapped"
+    }
+  ],
+  "amiris_germany2019_demand_trader": [
+    {
+      "column": "agent_id",
+      "reason": "no substance concept — column not mapped"
+    }
+  ],
+  "amiris_germany2019_generic_flexibility_trader": [
+    {
+      "column": "agent_id",
+      "reason": "no substance concept — column not mapped"
+    }
+  ],
+  "amiris_germany2019_no_support_trader": [
+    {
+      "column": "agent_id",
+      "reason": "no substance concept — column not mapped"
+    }
+  ],
+  "amiris_germany2019_renewable_trader": [
+    {
+      "column": "agent_id",
+      "reason": "no substance concept — column not mapped"
+    }
+  ],
+  "amiris_germany2019_sensitivity_forecaster": [
+    {
+      "column": "agent_id",
+      "reason": "no substance concept — column not mapped"
+    }
+  ],
+  "amiris_germany2019_system_operator_trader": [
+    {
+      "column": "agent_id",
+      "reason": "no substance concept — column not mapped"
+    }
+  ],
+  "amiris_germany2019_variable_renewable_operator": [
+    {
+      "column": "agent_id",
+      "reason": "no substance concept — column not mapped"
+    }
+  ]
+}
