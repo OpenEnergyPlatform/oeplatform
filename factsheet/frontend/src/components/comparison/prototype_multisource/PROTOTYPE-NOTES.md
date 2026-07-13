@@ -27,7 +27,7 @@ selection survives switching — and implement the decided semantics:
 
 ## Run
 
-```
+```bash
 python manage.py runserver     # Django on :8000 (registry, rows API, /api/oevkg-query)
 ./docker/ontop-reload.sh --check   # make sure ontop serves the current mapping
 npm run dev                    # vite; open the comparison page → Registry (beta) tab
@@ -54,11 +54,13 @@ Demo selections against the live test bench:
 
 1. **A table with NO measure dimension (eu_leg live) is treated as its own
    measure space** → always blocked against other sources, reason "measure
-   spaces not aligned … declares no measure dimension". WF-12's blocked example
-   implied eu_leg would meet AMIRIS at the _unit_ leg — that needs eu_leg
-   annotated with a substance (e.g. `co2_emission`, already in the enum). Is
-   annotating eu_leg a follow-up ticket, or is "own space" the intended
-   semantics?
+   spaces not aligned … declares no measure dimension". _Reacted (2026-07-12):_
+   the declaration exists in the metadata (value column
+   `isAbout OEO_00140082 greenhouse gas emission value`, species per row via
+   `gas` valueReferences) but the hand-written eu_leg mapping never emits it and
+   the substance enum lacks the concept — charted as wayfinder ticket WF-21.
+   Once fixed, this UI picks the measure up automatically (it discovers measures
+   from the VKG).
 2. **Dataset family grouping on the cards is a frontend heuristic**
    (`familyOf()` prefix match). Should come from the semantic layer (Datasets
    feature / registry) eventually.
