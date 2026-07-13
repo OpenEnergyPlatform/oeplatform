@@ -181,6 +181,10 @@ through the existing flow.
   popup, right where the user searches (custom `PaperComponent`;
   `onMouseDown preventDefault` keeps the input focused so using them doesn't
   close the popup). Nothing measure-related sits outside the field anymore.
+  _Follow-up (same day):_ the controls are now **small circular icon buttons
+  with hover help**, the usual filter idiom — sort-by-sources, sort-A–Z, and an
+  eye toggle for the hidden single-source measures (badge shows how many are
+  hidden; the tooltip explains why they are).
 - **No more helper text under toolbar fields** — the "stacking is off while
   grouped by source" caption elevated the Chart style field and broke the row
   baseline. Replaced by an in-field lock indicator (visible whenever grouping by

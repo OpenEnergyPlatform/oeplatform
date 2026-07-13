@@ -25,11 +25,15 @@ import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import Autocomplete, { createFilterOptions } from "@mui/material/Autocomplete";
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Paper from "@mui/material/Paper";
 import InputAdornment from "@mui/material/InputAdornment";
+import IconButton from "@mui/material/IconButton";
+import Badge from "@mui/material/Badge";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import SortIcon from "@mui/icons-material/Sort";
+import SortByAlphaIcon from "@mui/icons-material/SortByAlpha";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import {
   GranularityLadder,
   VerdictPanel,
@@ -86,71 +90,88 @@ export default function VariantB({ ms }) {
   }, [ms.measureOptions, ms.measure, includeSingle, measureSort]);
 
   // Sort + single-source controls live INSIDE the dropdown, next to the
-  // search (reaction round 7) — onMouseDown preventDefault keeps the input
-  // focused so interacting with them doesn't close the popup.
-  const MeasurePaper = useMemo(
-    () =>
-      function MeasurePaper({ children, ...rest }) {
-        return (
-          <Paper {...rest}>
-            <Box
-              onMouseDown={(e) => e.preventDefault()}
-              sx={{
-                px: 1.5,
-                py: 1,
-                borderBottom: "1px solid",
-                borderColor: "divider",
-              }}
-            >
-              <Stack direction="row" spacing={1} alignItems="center">
-                <Typography variant="caption" color="text.secondary">
-                  Sort
-                </Typography>
-                <ToggleButtonGroup
-                  exclusive
-                  size="small"
-                  value={measureSort}
-                  onChange={(e, v) => v && setMeasureSort(v)}
+  // search (reaction round 7) — as small round icon buttons with hover help,
+  // the way filter controls are usually shown (round 7 follow-up).
+  // onMouseDown preventDefault keeps the input focused so clicking them
+  // doesn't close the popup.
+  const MeasurePaper = useMemo(() => {
+    const filterBtn = (on) => ({
+      width: 28,
+      height: 28,
+      border: "1px solid",
+      borderColor: on ? "primary.main" : "divider",
+      bgcolor: on ? "primary.main" : "transparent",
+      color: on ? "primary.contrastText" : "text.secondary",
+      "&:hover": { bgcolor: on ? "primary.dark" : "action.hover" },
+    });
+    return function MeasurePaper({ children, ...rest }) {
+      return (
+        <Paper {...rest}>
+          <Stack
+            direction="row"
+            spacing={0.75}
+            alignItems="center"
+            onMouseDown={(e) => e.preventDefault()}
+            sx={{
+              px: 1.5,
+              py: 0.75,
+              borderBottom: "1px solid",
+              borderColor: "divider",
+            }}
+          >
+            <Tooltip arrow title="Sort by number of sources — most first">
+              <IconButton
+                size="small"
+                onClick={() => setMeasureSort("sources")}
+                sx={filterBtn(measureSort === "sources")}
+              >
+                <SortIcon sx={{ fontSize: 16 }} />
+              </IconButton>
+            </Tooltip>
+            <Tooltip arrow title="Sort alphabetically">
+              <IconButton
+                size="small"
+                onClick={() => setMeasureSort("alpha")}
+                sx={filterBtn(measureSort === "alpha")}
+              >
+                <SortByAlphaIcon sx={{ fontSize: 16 }} />
+              </IconButton>
+            </Tooltip>
+            <Box sx={{ flex: 1 }} />
+            {singleCount > 0 && (
+              <Tooltip
+                arrow
+                title={
+                  includeSingle
+                    ? "Hide single-source measures again"
+                    : `Show ${singleCount} hidden measure${singleCount !== 1 ? "s" : ""} provided by a single source only — no second scenario dataset exists to compare them against`
+                }
+              >
+                <Badge
+                  badgeContent={includeSingle ? 0 : singleCount}
+                  color="primary"
+                  overlap="circular"
                 >
-                  <ToggleButton value="sources" sx={{ py: 0.25 }}>
-                    most sources
-                  </ToggleButton>
-                  <ToggleButton value="alpha" sx={{ py: 0.25 }}>
-                    A–Z
-                  </ToggleButton>
-                </ToggleButtonGroup>
-              </Stack>
-              {singleCount > 0 && (
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  display="block"
-                  sx={{ mt: 0.5 }}
-                >
-                  {includeSingle
-                    ? `Showing ${singleCount} single-source measures — only one scenario dataset each, nothing to compare against yet. `
-                    : `${singleCount} measure${singleCount !== 1 ? "s" : ""} hidden — provided by a single source only, so no second scenario dataset exists for a comparison. `}
-                  <Typography
-                    component="span"
-                    variant="caption"
+                  <IconButton
+                    size="small"
                     onClick={() => setIncludeSingle((v) => !v)}
-                    sx={{
-                      color: "primary.main",
-                      cursor: "pointer",
-                      textDecoration: "underline",
-                    }}
+                    sx={filterBtn(includeSingle)}
                   >
-                    {includeSingle ? "hide them again" : "show and search them"}
-                  </Typography>
-                </Typography>
-              )}
-            </Box>
-            {children}
-          </Paper>
-        );
-      },
-    [measureSort, includeSingle, singleCount]
-  );
+                    {includeSingle ? (
+                      <VisibilityIcon sx={{ fontSize: 16 }} />
+                    ) : (
+                      <VisibilityOffIcon sx={{ fontSize: 16 }} />
+                    )}
+                  </IconButton>
+                </Badge>
+              </Tooltip>
+            )}
+          </Stack>
+          {children}
+        </Paper>
+      );
+    };
+  }, [measureSort, includeSingle, singleCount]);
   if (!ms.catalog) return <LinearProgress />;
 
   const visible = ms.catalog.filter(
