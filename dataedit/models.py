@@ -19,6 +19,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 import json
 import logging
 import re
+import uuid
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import TYPE_CHECKING, Literal, Mapping, Union
@@ -455,6 +456,43 @@ class Table(Tagable):
             schema_name=self.oedb_schema,
             permission_level=permission_level,
         )
+
+
+class Dataset(models.Model):
+    """Represents a dataset in the database.
+
+    Datasets are implemented according to oemetadata specification.
+    """
+
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255, unique=True)
+    metadata = models.JSONField(null=False, default=dict)
+    tables = models.ManyToManyField("Table", related_name="datasets", blank=True)
+    # seeded additively from member tables' topics on assign, editable by
+    # the creator; never contains the draft pseudo-topic
+    topics = models.ManyToManyField(Topic, related_name="datasets", blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    # nullable so datasets created before ownership existed survive the migration
+    creator = models.ForeignKey(
+        "login.myuser",
+        on_delete=models.SET_NULL,
+        related_name="datasets_created",
+        null=True,
+        blank=True,
+    )
+
+    def resource_entries(self):
+        """Assemble the oemetadata `resources` list live from member tables.
+
+        The list is never persisted on the dataset: tables own their
+        resource metadata and every read assembles the current state, so
+        dataset reads can not go stale after table metadata edits.
+        """
+        return [
+            table.oemetadata["resources"][0]
+            for table in self.tables.all()
+            if table.oemetadata and table.oemetadata.get("resources")
+        ]
 
 
 class Embargo(models.Model):

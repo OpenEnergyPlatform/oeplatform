@@ -502,6 +502,45 @@
              hx-trigger="load">Loading ...</div>
       </div>
     {% endif %}
+    {% if table_obj.datasets.all %}
+      <div class="table-sidebar__section" id="sidebar-datasets">
+        <h2 class="table-sidebar__heading">Datasets</h2>
+        <ul class="list-unstyled mb-0">
+          {% for dataset in table_obj.datasets.all %}
+            {% if forloop.counter <= 3 %}
+              <li class="mb-1">
+                <a href="{% url 'dataedit:dataset-detail' dataset_name=dataset.name %}"
+                   target="_blank"
+                   rel="noopener">{{ dataset.metadata.title|default:dataset.name }}</a>
+              </li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+        {% if table_obj.datasets.all|length > 3 %}
+          <div class="collapse" id="sidebar-datasets-all">
+            <ul class="list-unstyled mb-0">
+              {% for dataset in table_obj.datasets.all %}
+                {% if forloop.counter > 3 %}
+                  <li class="mb-1">
+                    <a href="{% url 'dataedit:dataset-detail' dataset_name=dataset.name %}"
+                       target="_blank"
+                       rel="noopener">{{ dataset.metadata.title|default:dataset.name }}</a>
+                  </li>
+                {% endif %}
+              {% endfor %}
+            </ul>
+          </div>
+          <button class="btn btn-sm btn-link px-0"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#sidebar-datasets-all"
+                  aria-expanded="false"
+                  aria-controls="sidebar-datasets-all">
+            Show all ({{ table_obj.datasets.all|length }})
+          </button>
+        {% endif %}
+      </div>
+    {% endif %}
     <div class="table-sidebar__section">
       <h2 class="table-sidebar__heading">Downloads</h2>
       <a href="{% url 'api:api_rows' table=table %}?form=csv"

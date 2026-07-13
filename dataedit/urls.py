@@ -30,6 +30,9 @@ from dataedit.views import (
     TableWizardView,
     admin_column_view,
     admin_constraints_view,
+    dataset_detail_view,
+    dataset_metadata_json_view,
+    datasets_view,
     metadata_widget_view,
     table_view_delete_view,
     table_view_save_view,
@@ -143,6 +146,27 @@ urlpatterns = [
         r"^topic/(?P<topic>{qual})$".format(qual=pgsql_qualifier),
         tables_view,
         name="tables-in-topic",
+    ),
+    re_path(
+        r"^topic/(?P<topic>{qual})/datasets$".format(qual=pgsql_qualifier),
+        datasets_view,
+        name="datasets-in-topic",
+    ),
+    # datasets are browsed per topic; the bare URL falls back to the topics
+    path(
+        "datasets/",
+        RedirectView.as_view(pattern_name="dataedit:topic-list"),
+        name="dataset-list",
+    ),
+    path(
+        "datasets/<str:dataset_name>",
+        dataset_detail_view,
+        name="dataset-detail",
+    ),
+    path(
+        "datasets/<str:dataset_name>/metadata",
+        dataset_metadata_json_view,
+        name="dataset-metadata",
     ),
     re_path(r"^$", topic_view, name="topic-list"),
     re_path(

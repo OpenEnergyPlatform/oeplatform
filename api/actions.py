@@ -1524,7 +1524,6 @@ def set_table_metadata(table: str, metadata):
     Args:
         table(str): name of table
         metadata: OEPMetadata or metadata object (dict) or metadata str
-        cursor: sql alchemy connection cursor
     """
 
     # ---------------------------------------

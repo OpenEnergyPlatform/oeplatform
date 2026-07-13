@@ -21,7 +21,7 @@
             <img src="{% static 'img/welcome/OpenEnergyFamily_Logo_OpenEnergyDatabase_icon.svg' %}"
                  alt="OEDB" />
             {% comment %}
-              <a role="button" class="btn btn-primary" href="{% url 'dataedit:topic-list' %}">Database</a>
+          <a role="button" class="btn btn-primary" href="{% url 'dataedit:topic-list' %}">Database</a>
             {% endcomment %}
             <div class="inner-index-tile">
               <div class="panel-description">
@@ -61,15 +61,11 @@
                style="font-size: 16px"
                href="{% url 'factsheet:factsheets_index' %}">Scenario Bundles</a>
           </div>
-          {#    <div class="index-tile index-tile-colored index-tile-color-3">#}
-          {#    <img src="{% static 'img/welcome/bundles.png' %}" alt="">#}
-          {#    <a role="button" class="btn btn-primary" href="{{ EXTERNAL_URLS.github_openenergyplatform_oeplatform_issues_568 }}">Bundles</a>#}
-          {#    </div>#}
           <div class="index-tile index-tile-colored index-tile-color-3">
             <img src="{% static 'img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg' %}"
                  alt="OEO" />
             {% comment %}
-              <a role="button" class="btn btn-primary" href="{% url 'ontology:index' %}">Ontology</a>
+          <a role="button" class="btn btn-primary" href="{% url 'ontology:index' %}">Ontology</a>
             {% endcomment %}
             <div class="inner-index-tile">
               <div class="panel-description">
@@ -141,7 +137,8 @@
           </span>
           <a role="button"
              class="btn btn-primary btn-sm"
-             href="{{ EXTERNAL_URLSgithub_openenergyplatform }}">Learn more</a>
+             href="{{ EXTERNAL_URLS.github_openenergyplatform }}">Learn
+          more</a>
         </div>
       </div>
     </div>
