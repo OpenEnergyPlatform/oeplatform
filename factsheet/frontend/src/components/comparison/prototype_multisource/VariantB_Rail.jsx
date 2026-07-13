@@ -30,11 +30,16 @@ import Paper from "@mui/material/Paper";
 import InputAdornment from "@mui/material/InputAdornment";
 import IconButton from "@mui/material/IconButton";
 import Badge from "@mui/material/Badge";
+import Collapse from "@mui/material/Collapse";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import SortIcon from "@mui/icons-material/Sort";
 import SortByAlphaIcon from "@mui/icons-material/SortByAlpha";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import ViewListIcon from "@mui/icons-material/ViewList";
+import AccountTreeIcon from "@mui/icons-material/AccountTree";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import {
   GranularityLadder,
   VerdictPanel,
@@ -53,9 +58,32 @@ const measureFilter = createFilterOptions({
   stringify: (o) => `${o.label} ${o.value} ${o.space}`,
 });
 
+// round icon-button filter idiom (round 7)
+const roundBtn = (on) => ({
+  width: 28,
+  height: 28,
+  border: "1px solid",
+  borderColor: on ? "primary.main" : "divider",
+  bgcolor: on ? "primary.main" : "transparent",
+  color: on ? "primary.contrastText" : "text.secondary",
+  "&:hover": { bgcolor: on ? "primary.dark" : "action.hover" },
+});
+
 export default function VariantB({ ms }) {
   const [filter, setFilter] = useState("");
   const [verdictOpen, setVerdictOpen] = useState(false);
+  // rail mode (round 9): browse tables flat, or lead with the SCENARIO —
+  // for now scenario = dataset family; the OEKG scenario bundle becomes the
+  // source of definition once WF-14 harvests the links
+  const [railMode, setRailMode] = useState("tables");
+  const [expandedFams, setExpandedFams] = useState(() => new Set());
+  const toggleExpand = (fam) =>
+    setExpandedFams((prev) => {
+      const n = new Set(prev);
+      if (n.has(fam)) n.delete(fam);
+      else n.add(fam);
+      return n;
+    });
   // measure picker controls (reaction round 6): search, sort, and a summary
   // of single-source measures instead of flooding the list with them
   const [measureSort, setMeasureSort] = useState("sources");
@@ -96,15 +124,6 @@ export default function VariantB({ ms }) {
   // onMouseDown preventDefault keeps the input focused so clicking them
   // doesn't close the popup.
   const MeasurePaper = useMemo(() => {
-    const filterBtn = (on) => ({
-      width: 28,
-      height: 28,
-      border: "1px solid",
-      borderColor: on ? "primary.main" : "divider",
-      bgcolor: on ? "primary.main" : "transparent",
-      color: on ? "primary.contrastText" : "text.secondary",
-      "&:hover": { bgcolor: on ? "primary.dark" : "action.hover" },
-    });
     return function MeasurePaper({ children, ...rest }) {
       return (
         <Paper {...rest}>
@@ -124,7 +143,7 @@ export default function VariantB({ ms }) {
               <IconButton
                 size="small"
                 onClick={() => setMeasureSort("sources")}
-                sx={filterBtn(measureSort === "sources")}
+                sx={roundBtn(measureSort === "sources")}
               >
                 <SortIcon sx={{ fontSize: 16 }} />
               </IconButton>
@@ -133,7 +152,7 @@ export default function VariantB({ ms }) {
               <IconButton
                 size="small"
                 onClick={() => setMeasureSort("alpha")}
-                sx={filterBtn(measureSort === "alpha")}
+                sx={roundBtn(measureSort === "alpha")}
               >
                 <SortByAlphaIcon sx={{ fontSize: 16 }} />
               </IconButton>
@@ -156,7 +175,7 @@ export default function VariantB({ ms }) {
                   <IconButton
                     size="small"
                     onClick={() => setIncludeSingle((v) => !v)}
-                    sx={filterBtn(includeSingle)}
+                    sx={roundBtn(includeSingle)}
                   >
                     {includeSingle ? (
                       <VisibilityIcon sx={{ fontSize: 16 }} />
@@ -198,17 +217,32 @@ export default function VariantB({ ms }) {
         }}
       >
         <Box sx={{ p: 1.5, pb: 1 }}>
-          <Typography variant="subtitle2" gutterBottom>
-            Data sources
-            <Typography
-              component="span"
-              variant="caption"
-              color="text.secondary"
-              sx={{ ml: 1 }}
-            >
-              (scenario grouping follows WF-14)
+          <Stack direction="row" alignItems="center" sx={{ mb: 0.5 }}>
+            <Typography variant="subtitle2" sx={{ flex: 1 }}>
+              Data sources
             </Typography>
-          </Typography>
+            <Tooltip arrow title="Browse individual tables">
+              <IconButton
+                size="small"
+                onClick={() => setRailMode("tables")}
+                sx={{ ...roundBtn(railMode === "tables"), mr: 0.5 }}
+              >
+                <ViewListIcon sx={{ fontSize: 16 }} />
+              </IconButton>
+            </Tooltip>
+            <Tooltip
+              arrow
+              title="Select by scenario — one tick takes the whole scenario dataset (scenario = dataset family for now; the OEKG scenario bundle becomes the source of definition with WF-14)"
+            >
+              <IconButton
+                size="small"
+                onClick={() => setRailMode("scenarios")}
+                sx={roundBtn(railMode === "scenarios")}
+              >
+                <AccountTreeIcon sx={{ fontSize: 16 }} />
+              </IconButton>
+            </Tooltip>
+          </Stack>
           <TextField
             fullWidth
             size="small"
@@ -219,78 +253,121 @@ export default function VariantB({ ms }) {
         </Box>
         <Divider />
         <Box sx={{ overflowY: "auto", flex: 1 }}>
-          {families.map((fam) => (
-            <Box key={fam}>
-              <Typography
-                variant="overline"
-                color="text.secondary"
-                sx={{ px: 1.5 }}
-              >
-                {fam}
-              </Typography>
-              <List dense disablePadding>
-                {visible
-                  .filter((c) => c.family === fam)
-                  .map((c) => {
-                    const on = ms.selected.includes(c.table);
-                    return (
-                      <ListItemButton
-                        key={c.table}
-                        dense
-                        selected={on}
-                        onClick={() => ms.toggle(c.table)}
-                      >
-                        <Checkbox
-                          edge="start"
-                          size="small"
-                          checked={on}
-                          tabIndex={-1}
-                          disableRipple
-                        />
-                        <ListItemText
-                          primary={
-                            <Stack
-                              direction="row"
-                              spacing={0.5}
-                              alignItems="center"
-                            >
-                              <CandidateDot status={ms.candidates[c.table]} />
-                              <Typography
-                                variant="body2"
-                                noWrap
-                                title={c.title}
-                                sx={{ maxWidth: 140 }}
-                              >
-                                {c.title}
-                              </Typography>
-                              {c.unmapped.length > 0 && (
-                                <Tooltip
-                                  arrow
-                                  title={c.unmapped
-                                    .map((u) => `${u.column} — ${u.reason}`)
-                                    .join(" · ")}
+          {families.map((fam) => {
+            const famTables = ms.catalog
+              .filter((c) => c.family === fam)
+              .map((c) => c.table);
+            const selCount = famTables.filter((t) =>
+              ms.selected.includes(t)
+            ).length;
+            const open = railMode === "tables" || expandedFams.has(fam);
+            return (
+              <Box key={fam}>
+                {/* scenario row (round 9): one tick selects the whole dataset
+                  family — the scenario stand-in until WF-14 */}
+                <Stack direction="row" alignItems="center" sx={{ pr: 0.5 }}>
+                  <Checkbox
+                    size="small"
+                    checked={selCount === famTables.length}
+                    indeterminate={selCount > 0 && selCount < famTables.length}
+                    onChange={(e) =>
+                      ms.toggleFamily(famTables, e.target.checked)
+                    }
+                  />
+                  <Typography
+                    variant="overline"
+                    color="text.secondary"
+                    noWrap
+                    sx={{
+                      flex: 1,
+                      cursor: railMode === "scenarios" ? "pointer" : undefined,
+                    }}
+                    onClick={
+                      railMode === "scenarios"
+                        ? () => toggleExpand(fam)
+                        : undefined
+                    }
+                  >
+                    {fam} ({selCount}/{famTables.length})
+                  </Typography>
+                  {railMode === "scenarios" && (
+                    <IconButton size="small" onClick={() => toggleExpand(fam)}>
+                      {open ? (
+                        <ExpandLessIcon sx={{ fontSize: 18 }} />
+                      ) : (
+                        <ExpandMoreIcon sx={{ fontSize: 18 }} />
+                      )}
+                    </IconButton>
+                  )}
+                </Stack>
+                <Collapse in={open}>
+                  <List dense disablePadding>
+                    {visible
+                      .filter((c) => c.family === fam)
+                      .map((c) => {
+                        const on = ms.selected.includes(c.table);
+                        return (
+                          <ListItemButton
+                            key={c.table}
+                            dense
+                            selected={on}
+                            onClick={() => ms.toggle(c.table)}
+                          >
+                            <Checkbox
+                              edge="start"
+                              size="small"
+                              checked={on}
+                              tabIndex={-1}
+                              disableRipple
+                            />
+                            <ListItemText
+                              primary={
+                                <Stack
+                                  direction="row"
+                                  spacing={0.5}
+                                  alignItems="center"
                                 >
-                                  <WarningAmberIcon
-                                    color="warning"
-                                    sx={{ fontSize: 16 }}
+                                  <CandidateDot
+                                    status={ms.candidates[c.table]}
                                   />
-                                </Tooltip>
-                              )}
-                              <TablePeek table={c.table} title={c.title} />
-                            </Stack>
-                          }
-                          secondary={`${c.granularity ? (c.granularity === "hour" ? "hourly" : "yearly") : "no temporal declaration"} · ${c.table}`}
-                          secondaryTypographyProps={{
-                            noWrap: true,
-                            fontSize: 11,
-                          }}
-                        />
-                      </ListItemButton>
-                    );
-                  })}
-              </List>
-            </Box>
-          ))}
+                                  <Typography
+                                    variant="body2"
+                                    noWrap
+                                    title={c.title}
+                                    sx={{ maxWidth: 140 }}
+                                  >
+                                    {c.title}
+                                  </Typography>
+                                  {c.unmapped.length > 0 && (
+                                    <Tooltip
+                                      arrow
+                                      title={c.unmapped
+                                        .map((u) => `${u.column} — ${u.reason}`)
+                                        .join(" · ")}
+                                    >
+                                      <WarningAmberIcon
+                                        color="warning"
+                                        sx={{ fontSize: 16 }}
+                                      />
+                                    </Tooltip>
+                                  )}
+                                  <TablePeek table={c.table} title={c.title} />
+                                </Stack>
+                              }
+                              secondary={`${c.granularity ? (c.granularity === "hour" ? "hourly" : "yearly") : "no temporal declaration"} · ${c.table}`}
+                              secondaryTypographyProps={{
+                                noWrap: true,
+                                fontSize: 11,
+                              }}
+                            />
+                          </ListItemButton>
+                        );
+                      })}
+                  </List>
+                </Collapse>
+              </Box>
+            );
+          })}
         </Box>
         <Divider />
         <Box sx={{ p: 1.5 }}>
@@ -458,6 +535,30 @@ export default function VariantB({ ms }) {
               </MenuItem>
             ))}
           </TextField>
+          {/* facet filters (round 9): a spread facet can be pinned to one
+              value instead of grouped by — "everything summed all the time"
+              stops being the only alternative */}
+          {Object.entries(ms.facetSpread)
+            .filter(([, vals]) => vals.length > 1)
+            .map(([key, vals]) => (
+              <TextField
+                key={key}
+                select
+                size="small"
+                label={key.replace(/_/g, " ")}
+                value={ms.facetFilters[key] || "all"}
+                sx={{ minWidth: 165 }}
+                onChange={(e) => ms.setFacetFilter(key, e.target.value)}
+              >
+                <MenuItem value="all">all (summed)</MenuItem>
+                {vals.map((v) => (
+                  <MenuItem key={v.iri} value={v.iri}>
+                    {v.label}
+                  </MenuItem>
+                ))}
+                <MenuItem value="none">without this facet</MenuItem>
+              </TextField>
+            ))}
           <ChartTypeSelect
             chartType={ms.chartType}
             setChartType={ms.setChartType}
@@ -494,7 +595,9 @@ export default function VariantB({ ms }) {
             The selected sources annotate <b>{ms.measure?.label}</b> values with
             several <b>{c.label}</b> facets ({c.values.join(" · ")}). Grouped by{" "}
             {ms.groupKey === "source" ? "source" : ms.groupKey}, these different
-            things are <b>summed into one series</b>.
+            things are <b>summed into one series</b> — group by {c.label}, or
+            pin one value with the {c.label.toLowerCase()} filter in the
+            toolbar.
           </Alert>
         ))}
 

@@ -225,6 +225,25 @@ through the existing flow.
   timestamp predated the round-7 rework); no reference remains — hard reload
   clears it.
 
+## Reaction round 9 (2026-07-13) — facet filters + scenario-mode rail
+
+- **Facet filters** — the conflation guard alone made every group-by warn
+  (electrical energy spreads over transaction_role AND data_role). Each spread
+  facet now gets a toolbar select: `all (summed)` · one value (e.g. award) ·
+  `without this facet` (FILTER NOT EXISTS — excludes e.g. forecasts). Pinning a
+  facet clears its warning; active filters appear in the chart heading and are
+  part of stale detection + the run snapshot.
+- **Scenario-mode rail** — toggle at the rail top (round icon buttons): table
+  list ↔ scenario list. Scenario mode collapses each dataset family to one row
+  with a tri-state checkbox (one tick = the whole scenario's tables), expandable
+  to members; family checkboxes + n/m counts work in both modes. Scenario =
+  dataset family FOR NOW (maintainer decision); the OEKG scenario bundle becomes
+  the source of definition once WF-14 harvests bundle links.
+- **Trader/operator mixing recorded** — 11 AMIRIS sources are agent-role
+  perspectives on the same flows (same MWh at operator → trader → market); the
+  contract has no declaration to tell them apart. Sharpened on the map's
+  "comparability beyond unit + substance" fog entry (WF-14 interplay).
+
 ## Verdict
 
 **Variant B (workbench rail).** Remaining before this directory dies: further

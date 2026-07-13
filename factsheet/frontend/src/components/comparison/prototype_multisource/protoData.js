@@ -181,7 +181,8 @@ SELECT DISTINCT ?v WHERE {
         v.iri &&
         found.some((f) => f === expandCurie(registry, v.iri) || f === v.iri)
     );
-    if (hits.length) out[d.key] = hits.map((v) => v.label || v.iri);
+    if (hits.length)
+      out[d.key] = hits.map((v) => ({ iri: v.iri, label: v.label || v.iri }));
   }
   return out;
 }
@@ -255,6 +256,7 @@ export function buildMergedQuery({
   granularity,
   groupKey,
   agg,
+  facetFilters = {},
 }) {
   const byKey = Object.fromEntries(
     (registry.dimensions || []).map((d) => [d.key, d])
@@ -274,6 +276,29 @@ export function buildMergedQuery({
     patterns.push(
       `?s ${unitDim.predicate} ?unit . FILTER(STR(?unit) = "${unit.replace(/"/g, '\\"')}") .`
     );
+  }
+  // facet filters (round 9): pin one value of a spread facet — or exclude the
+  // facet entirely ("none" → observations NOT annotated with any enum value).
+  // Enum-scoped so the shared is-about predicate stays isolated.
+  for (const [key, choice] of Object.entries(facetFilters)) {
+    if (!choice || choice === "all") continue;
+    const fd = byKey[key];
+    if (!fd) continue;
+    const set = (fd.values || [])
+      .filter((v) => v.iri)
+      .map((v) => sparqlTerm(v.iri));
+    if (!set.length) continue;
+    if (choice === "none") {
+      // ontop rejects (NOT) EXISTS — negation via OPTIONAL + !BOUND instead
+      patterns.push(
+        `OPTIONAL { ?s ${fd.predicate} ?no_${key} . FILTER(?no_${key} IN (${set.join(", ")})) }`,
+        `FILTER(!BOUND(?no_${key})) .`
+      );
+    } else {
+      patterns.push(
+        `?s ${fd.predicate} ?f_${key} . FILTER(?f_${key} = ${sparqlTerm(choice)}) .`
+      );
+    }
   }
   const groupVars = ["?table_name", ...bucket.vars];
   if (groupKey && groupKey !== "source") {

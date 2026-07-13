@@ -100,6 +100,14 @@ export default function useMultiSource() {
   // measure-first shortcut (reaction round 2): select every source that
   // provides the chosen measure
   const selectProviders = (providers) => setSelected([...providers]);
+  // scenario-mode shortcut (reaction round 9): (de)select a whole dataset
+  // family — the stand-in for a scenario until WF-14 harvests bundle links
+  const toggleFamily = (tables, on) =>
+    setSelected((cur) =>
+      on
+        ? [...new Set([...cur, ...tables])]
+        : cur.filter((t) => !tables.includes(t))
+    );
   const entriesFor = (tables) =>
     (catalog || []).filter((c) => tables.includes(c.table));
   const selectedEntries = useMemo(
@@ -380,12 +388,39 @@ export default function useMultiSource() {
       active = false;
     };
   }, [registry, selected, measure]);
+  // facet filters (round 9): pin a spread facet to one value ("all" sums, a
+  // value filters, "none" keeps only observations without the facet) — the
+  // alternative to grouping by it, so not every group-by choice warns
+  const [facetFilters, setFacetFilters] = useState({});
+  const setFacetFilter = (key, choice) =>
+    setFacetFilters((cur) => ({ ...cur, [key]: choice }));
+  useEffect(() => {
+    // drop filters whose facet/value the new measure/selection no longer has
+    setFacetFilters((cur) => {
+      const next = {};
+      for (const [k, v] of Object.entries(cur)) {
+        const vals = facetSpread[k] || [];
+        if (v === "all" || v === "none" || vals.some((x) => x.iri === v))
+          next[k] = v;
+      }
+      return next;
+    });
+  }, [facetSpread]);
   const conflations = useMemo(
     () =>
       Object.entries(facetSpread)
-        .filter(([key, vals]) => vals.length > 1 && key !== groupKey)
-        .map(([key, vals]) => ({ key, label: titleCase(key), values: vals })),
-    [facetSpread, groupKey]
+        .filter(
+          ([key, vals]) =>
+            vals.length > 1 &&
+            key !== groupKey &&
+            (facetFilters[key] || "all") === "all"
+        )
+        .map(([key, vals]) => ({
+          key,
+          label: titleCase(key),
+          values: vals.map((v) => v.label),
+        })),
+    [facetSpread, groupKey, facetFilters]
   );
 
   // ---- granularity ladder ----
@@ -419,6 +454,7 @@ export default function useMultiSource() {
     unit,
     granularity,
     groupKey,
+    facetFilters,
   });
   const [ranKey, setRanKey] = useState(null);
   const [ranGranularity, setRanGranularity] = useState(null);
@@ -439,6 +475,7 @@ export default function useMultiSource() {
         granularity,
         groupKey,
         agg: measure?.aggregation,
+        facetFilters,
       });
       setLastQuery(q);
       const data = await postSparql(q);
@@ -485,6 +522,15 @@ export default function useMultiSource() {
             hinted: !!measure?.aggregation,
           })),
         conversions: verdict?.conversions || [],
+        filters: Object.entries(facetFilters)
+          .filter(([, v]) => v && v !== "all")
+          .map(([k, v]) => ({
+            label: titleCase(k),
+            value:
+              v === "none"
+                ? "without this facet"
+                : (facetSpread[k] || []).find((x) => x.iri === v)?.label || v,
+          })),
       });
     } catch (e) {
       setErr(e?.message || "Query failed");
@@ -534,6 +580,7 @@ export default function useMultiSource() {
     selected,
     toggle,
     selectProviders,
+    toggleFamily,
     selectedEntries,
     measureOptions,
     measure,
@@ -550,6 +597,9 @@ export default function useMultiSource() {
     verdictInput,
     candidates,
     conflations,
+    facetSpread,
+    facetFilters,
+    setFacetFilter,
     ladder,
     granularity,
     setGranularity,

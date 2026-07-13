@@ -355,6 +355,7 @@ export function ChartHeading({ summary }) {
         {names.length} source{names.length !== 1 ? "s" : ""}:{" "}
         {shown.join(" · ")}
         {more > 0 ? ` · +${more} more` : ""}
+        {(summary.filters || []).map((f) => ` — ${f.label}: ${f.value}`)}
       </Typography>
     </Box>
   );
