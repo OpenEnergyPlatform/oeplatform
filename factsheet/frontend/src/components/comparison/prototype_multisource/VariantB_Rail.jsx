@@ -8,7 +8,7 @@
 // by the chart with a slim toolbar and a COMPARABILITY STRIP above it — the
 // verdict is always visible while composing, before anything runs.
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import Typography from "@mui/material/Typography";
@@ -24,6 +24,9 @@ import LinearProgress from "@mui/material/LinearProgress";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
+import Autocomplete, { createFilterOptions } from "@mui/material/Autocomplete";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import {
   GranularityLadder,
@@ -39,9 +42,46 @@ import {
 
 export const VARIANT_NAME = "Workbench rail (comparison-first)";
 
+const measureFilter = createFilterOptions({
+  stringify: (o) => `${o.label} ${o.value} ${o.space}`,
+});
+
 export default function VariantB({ ms }) {
   const [filter, setFilter] = useState("");
   const [verdictOpen, setVerdictOpen] = useState(false);
+  // measure picker controls (reaction round 6): search, sort, and a summary
+  // of single-source measures instead of flooding the list with them
+  const [measureSort, setMeasureSort] = useState("sources");
+  const [includeSingle, setIncludeSingle] = useState(false);
+  const singleCount = useMemo(
+    () => ms.measureOptions.filter((o) => o.providers.length === 1).length,
+    [ms.measureOptions]
+  );
+  const measureChoices = useMemo(() => {
+    // default pool: measures ≥2 sources can compare — plus the current
+    // choice, so the field never holds a value missing from its own list
+    const pool = includeSingle
+      ? ms.measureOptions
+      : ms.measureOptions.filter(
+          (o) =>
+            o.providers.length > 1 ||
+            (ms.measure &&
+              o.space === ms.measure.space &&
+              o.value === ms.measure.value)
+        );
+    const byLabel = (a, b) => a.label.localeCompare(b.label);
+    const sorted = [...pool].sort(
+      measureSort === "alpha"
+        ? byLabel
+        : (a, b) => b.providers.length - a.providers.length || byLabel(a, b)
+    );
+    // keep multi-provider options ahead of single-provider ones so the
+    // Autocomplete group headers appear once each
+    return [
+      ...sorted.filter((o) => o.providers.length > 1),
+      ...sorted.filter((o) => o.providers.length === 1),
+    ];
+  }, [ms.measureOptions, ms.measure, includeSingle, measureSort]);
   if (!ms.catalog) return <LinearProgress />;
 
   const visible = ms.catalog.filter(
@@ -192,26 +232,52 @@ export default function VariantB({ ms }) {
             flexWrap="wrap"
             alignItems="center"
           >
-            <TextField
-              select
+            <Autocomplete
               size="small"
-              label="Measure (start here)"
-              value={ms.measureId}
-              sx={{ minWidth: 280 }}
-              onChange={(e) => ms.setMeasureId(e.target.value)}
-            >
-              {ms.measureOptions.map((o) => (
-                <MenuItem
-                  key={`${o.space}:${o.value}`}
-                  value={`${o.space}:${o.value}`}
-                >
+              sx={{ minWidth: 460 }}
+              options={measureChoices}
+              filterOptions={measureFilter}
+              value={ms.measure}
+              onChange={(e, o) => o && ms.setMeasureId(`${o.space}:${o.value}`)}
+              disableClearable
+              getOptionLabel={(o) => o.label || ""}
+              isOptionEqualToValue={(o, v) =>
+                o.space === v.space && o.value === v.value
+              }
+              groupBy={(o) =>
+                o.providers.length > 1
+                  ? "Comparable across sources"
+                  : "Single source only"
+              }
+              renderOption={(props, o) => (
+                <li {...props} key={`${o.space}:${o.value}`}>
                   <ListItemText
                     primary={o.label}
                     secondary={`${o.space === "substance" ? "substance" : "IAMC quantity"} · ${o.providers.length} source${o.providers.length !== 1 ? "s" : ""} provide${o.providers.length === 1 ? "s" : ""} it${o.selectedProviders ? ` (${o.selectedProviders} selected)` : ""}`}
                   />
-                </MenuItem>
-              ))}
-            </TextField>
+                </li>
+              )}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Measure (start here)"
+                  placeholder="search measures…"
+                />
+              )}
+            />
+            <ToggleButtonGroup
+              exclusive
+              size="small"
+              value={measureSort}
+              onChange={(e, v) => v && setMeasureSort(v)}
+            >
+              <Tooltip arrow title="Most sources first">
+                <ToggleButton value="sources">sources</ToggleButton>
+              </Tooltip>
+              <Tooltip arrow title="Alphabetical">
+                <ToggleButton value="alpha">A–Z</ToggleButton>
+              </Tooltip>
+            </ToggleButtonGroup>
             {ms.measure && (
               <Typography variant="body2" color="text.secondary">
                 Provided by <b>{ms.measure.providers.length}</b> source
@@ -247,6 +313,35 @@ export default function VariantB({ ms }) {
               </Button>
             )}
           </Stack>
+          {singleCount > 0 && (
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              display="block"
+              sx={{ mt: 0.5 }}
+            >
+              {includeSingle
+                ? `Showing ${singleCount} single-source measures too — each has only one scenario dataset, so there is nothing to compare it against yet. `
+                : `${singleCount} more measure${singleCount !== 1 ? "s are" : " is"} summarized away: provided by a single source only, so no second scenario dataset exists for a comparison. `}
+              <Typography
+                component="button"
+                variant="caption"
+                onClick={() => setIncludeSingle((v) => !v)}
+                sx={{
+                  border: "none",
+                  background: "none",
+                  color: "primary.main",
+                  cursor: "pointer",
+                  p: 0,
+                  textDecoration: "underline",
+                }}
+              >
+                {includeSingle
+                  ? "hide them again"
+                  : "show and search them anyway"}
+              </Typography>
+            </Typography>
+          )}
         </Card>
 
         {/* toolbar */}
@@ -369,6 +464,7 @@ export default function VariantB({ ms }) {
             stale={ms.stale}
             running={ms.running}
             onRerun={ms.run}
+            summary={ms.ranSummary}
           />
         )}
         {!ms.rows && !ms.running && ms.verdict?.kind !== "blocked" && (

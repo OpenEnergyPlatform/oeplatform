@@ -149,6 +149,31 @@ Charted as wayfinder WF-24 (entry-point rework, affects qualitative comparison
 too); "okay for now" per the maintainer, so this prototype stays reachable
 through the existing flow.
 
+## Reaction round 6 (2026-07-13) — title, computation statement, measure picker, How it works
+
+- **Generated chart title** — the chart writes out what is plotted ("Electricity
+  price in EUR/MWh per month, grouped by source" + source list), built from a
+  run-time snapshot (`ranSummary`) so it stays truthful while the stale overlay
+  is up. The single-table view's title misses the measure — noted on WF-22.
+- **Computation statement** — under the title, every run states what was done to
+  the stored values: "✓ Plotted as stored — no aggregation and no unit
+  conversion" for a pure merge, else per-source aggregation lines (function +
+  registry-hint provenance) and, once WF-13 units exist, conversion lines. The
+  live aggregation notices moved into this snapshot; the FAME bookings caveat
+  stays a chart footnote.
+- **Measure picker rework (Variant B)** — searchable Autocomplete, 460px wide,
+  sort toggle (most sources first ↔ A–Z), and single-source measures summarized
+  away by default with an explanatory caption + "show and search them anyway"
+  toggle; group headers split "Comparable across sources" from "Single source
+  only".
+- **"How it works?" content** — the dead button on the comparison board toolbar
+  now opens a per-tab dialog (`HowItWorks.jsx`); the Registry walkthrough
+  explains rail dots, measure spaces, the verdict contract, the ladder +
+  registry-hinted aggregation and the chart rules in user language.
+- **Multi-measure charts** (not built) — charted as wayfinder WF-25: co-display
+  of two+ measures (dual axes), pairing suggested semantically (part–whole,
+  price×volume); cross-measure arithmetic stays out of scope.
+
 ## Verdict
 
 **Variant B (workbench rail).** Remaining before this directory dies: further

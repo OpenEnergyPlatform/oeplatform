@@ -284,6 +284,7 @@ export default function VariantC({ ms }) {
           stale={ms.stale}
           running={ms.running}
           onRerun={ms.run}
+          summary={ms.ranSummary}
         />
       )}
       {ms.verdict?.kind !== "blocked" && !ms.rows && !ms.running && (

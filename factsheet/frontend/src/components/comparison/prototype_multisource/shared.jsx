@@ -334,6 +334,81 @@ export function CandidateDot({ status }) {
   );
 }
 
+// Generated chart title (reaction round 6): write out WHAT the user sees,
+// constructed from the run snapshot — mirrors the single-table view's
+// generated title, plus the measure that view is missing.
+export function ChartHeading({ summary }) {
+  if (!summary) return null;
+  const names = summary.sources.map((s) => s.title || s.table);
+  const shown = names.slice(0, 4);
+  const more = names.length - shown.length;
+  return (
+    <Box sx={{ mb: 0.5 }}>
+      <Typography variant="h6" sx={{ fontWeight: 600, lineHeight: 1.3 }}>
+        {summary.measureLabel || "Value"}
+        {summary.unit ? ` in ${summary.unit}` : ""} per {summary.granularity},
+        grouped by {summary.groupLabel}
+      </Typography>
+      <Typography variant="body2" color="text.secondary">
+        {names.length} source{names.length !== 1 ? "s" : ""}:{" "}
+        {shown.join(" · ")}
+        {more > 0 ? ` · +${more} more` : ""}
+      </Typography>
+    </Box>
+  );
+}
+
+// Computation statement (reaction round 6): after a green merge the user must
+// know whether the tool calculated anything or plotted values as stored.
+export function ComputationNote({ summary }) {
+  if (!summary) return null;
+  const { transforms = [], conversions = [] } = summary;
+  if (!transforms.length && !conversions.length) {
+    return (
+      <Typography
+        variant="caption"
+        display="block"
+        sx={{ color: "success.main", mb: 0.5 }}
+      >
+        ✓ Plotted as stored — no aggregation and no unit conversion was applied
+        to any source.
+      </Typography>
+    );
+  }
+  return (
+    <Box sx={{ mb: 0.5 }}>
+      {transforms.map((t, i) => (
+        <Typography
+          key={i}
+          variant="caption"
+          display="block"
+          sx={{ color: "info.main" }}
+        >
+          ⟲ {t.table}: {t.from}ly values {t.fn} to {t.to} —{" "}
+          {t.hinted
+            ? "aggregation function from the registry hint"
+            : "sum fallback (no registry hint)"}
+        </Typography>
+      ))}
+      {conversions.map((c, i) => (
+        <Typography
+          key={`c${i}`}
+          variant="caption"
+          display="block"
+          sx={{ color: "info.main" }}
+        >
+          ⇄ {c.table}: values converted {c.from} → {c.to} (×{c.factor})
+        </Typography>
+      ))}
+      <Typography variant="caption" display="block" color="text.secondary">
+        {conversions.length === 0
+          ? `No unit conversion — every source declares ${summary.unit || "the same unit"} verbatim.`
+          : null}
+      </Typography>
+    </Box>
+  );
+}
+
 // One merged chart over the GROUP BY result rows. Source is a first-class
 // dimension: grouped by table_name unless another group dim is chosen.
 // `stale` dims the chart once parameters diverge from the run (item 4).
@@ -350,6 +425,7 @@ export function MergedChart({
   stale = false,
   onRerun = null,
   running = false,
+  summary = null,
 }) {
   // Legends must never show raw OEO ids (reaction round 4): resolve IRI-valued
   // group values through the TIB Terminology Service — same resolution (and
@@ -469,6 +545,8 @@ export function MergedChart({
   if (!option) return null;
   return (
     <Box>
+      <ChartHeading summary={summary} />
+      <ComputationNote summary={summary} />
       <Box sx={{ position: "relative" }}>
         <Box sx={{ opacity: stale ? 0.3 : 1, transition: "opacity 0.2s" }}>
           <ReactECharts option={option} style={{ height: 420 }} notMerge />

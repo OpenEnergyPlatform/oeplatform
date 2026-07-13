@@ -262,6 +262,7 @@ export default function VariantA({ ms }) {
             stale={ms.stale}
             running={ms.running}
             onRerun={ms.run}
+            summary={ms.ranSummary}
           />
         </>
       )}

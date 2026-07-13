@@ -23,10 +23,15 @@ import QuantitativeView from "./comparison/quantitativeView.jsx";
 // Registry (beta) tab, ?variant=A|B|C|0. Falls back to RegistryComparison in
 // production builds; remove with the prototype.
 import MultiSourcePrototype from "./comparison/prototype_multisource/MultiSourcePrototype.jsx";
+// PROTOTYPE (WF-07 reaction round 6): content for the previously dead
+// "How it works?" button — when the prototype folds into the real view,
+// keep the dialog and re-home it.
+import HowItWorksDialog from "./comparison/prototype_multisource/HowItWorks.jsx";
 
 const ComparisonBoardMain = ({ params }) => {
   const [scenarios, setScenarios] = useState([]);
   const [alignment, setAlignment] = useState("Qualitative");
+  const [howOpen, setHowOpen] = useState(false);
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -78,9 +83,15 @@ const ComparisonBoardMain = ({ params }) => {
                   variant="text"
                   size="small"
                   startIcon={<ArrowRightIcon />}
+                  onClick={() => setHowOpen(true)}
                 >
                   How it works?
                 </Button>
+                <HowItWorksDialog
+                  open={howOpen}
+                  onClose={() => setHowOpen(false)}
+                  alignment={alignment}
+                />
               </Grid>
               <Grid item xs={4}></Grid>
               <Grid item xs={6}>

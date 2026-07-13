@@ -394,6 +394,7 @@ export default function useMultiSource() {
   });
   const [ranKey, setRanKey] = useState(null);
   const [ranGranularity, setRanGranularity] = useState(null);
+  const [ranSummary, setRanSummary] = useState(null);
   const stale = !!rows && ranKey !== paramsKey;
 
   const run = async () => {
@@ -416,6 +417,47 @@ export default function useMultiSource() {
       setRows(data?.results?.bindings || []);
       setRanKey(paramsKey);
       setRanGranularity(granularity);
+      // snapshot of WHAT this run plotted and WHAT was done to the data —
+      // feeds the generated chart title + the computation statement (round 6);
+      // snapshotted so title/statement stay truthful while parameters drift
+      setRanSummary({
+        measureLabel: measure?.label || null,
+        space: measure?.space || null,
+        unit: unit || null,
+        granularity,
+        groupKey,
+        groupLabel:
+          groupKey === "source"
+            ? "source"
+            : titleCase(
+                groupOptions.find((o) => o.key === groupKey)?.label || groupKey
+              ),
+        sources: selectedEntries.map((e) => ({
+          table: e.table,
+          title: e.title,
+        })),
+        // per-source transformation story: aggregation is the only
+        // calculation the tool performs today (unit conversion is the WF-13
+        // seam and stays inert until the registry serves units:)
+        transforms: verdictInput
+          .filter(
+            (e) =>
+              e.series &&
+              e.series.granularity &&
+              e.series.granularity !== granularity
+          )
+          .map((e) => ({
+            table: e.table,
+            from: e.series.granularity,
+            to: granularity,
+            fn:
+              measure?.aggregation === "mean"
+                ? "averaged (AVG)"
+                : "summed (SUM)",
+            hinted: !!measure?.aggregation,
+          })),
+        conversions: verdict?.conversions || [],
+      });
     } catch (e) {
       setErr(e?.message || "Query failed");
     } finally {
@@ -423,20 +465,11 @@ export default function useMultiSource() {
     }
   };
 
-  // notices: what the tool did / will do — stated on the chart (WF-06/WF-12)
+  // notices: standing caveats stated on the chart (WF-06). Per-source
+  // aggregation statements moved into ranSummary.transforms (round 6) so the
+  // computation story is run-snapshotted, not live-drifting.
   const notices = useMemo(() => {
     const out = [];
-    for (const e of verdictInput) {
-      if (
-        e.series &&
-        e.series.granularity &&
-        e.series.granularity !== granularity
-      ) {
-        out.push(
-          `${e.table} (${e.series.granularity}ly) ${measure?.aggregation === "mean" ? "averaged" : "summed"} to ${granularity} — registry aggregation hint: ${measure?.aggregation || "sum (fallback)"}`
-        );
-      }
-    }
     if (
       ["day", "month"].includes(granularity) &&
       selectedEntries.some((e) => e.family.startsWith("AMIRIS"))
@@ -446,7 +479,7 @@ export default function useMultiSource() {
       );
     }
     return out;
-  }, [verdictInput, granularity, measure, selectedEntries]);
+  }, [granularity, selectedEntries]);
 
   const unmappedFootnotes = useMemo(
     () =>
@@ -495,6 +528,7 @@ export default function useMultiSource() {
     setChartType,
     stale,
     ranGranularity,
+    ranSummary,
     notices,
     unmappedFootnotes,
     bucketLabel,
