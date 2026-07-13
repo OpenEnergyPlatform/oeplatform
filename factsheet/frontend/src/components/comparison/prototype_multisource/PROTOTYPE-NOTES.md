@@ -244,6 +244,17 @@ through the existing flow.
   contract has no declaration to tell them apart. Sharpened on the map's
   "comparability beyond unit + substance" fog entry (WF-14 interplay).
 
+## Reaction round 10 (2026-07-13) — provenance both ways
+
+- **Rail rows list their measures** — each table row gets a second caption line
+  with every measure the table provides (from the same VKG-discovered options
+  the picker uses); the currently chosen measure is bolded, overflow ellipsized
+  with the full list on hover.
+- **Measure options show their scenarios** — every entry in the measure dropdown
+  now says which scenario(s) the providing sources belong to ("from AMIRIS
+  Germany 2019 (3) · Ariadne (1)"), matching the breakdown the measure bar
+  already showed for the selected measure.
+
 ## Verdict
 
 **Variant B (workbench rail).** Remaining before this directory dies: further

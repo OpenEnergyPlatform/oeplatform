@@ -194,6 +194,20 @@ export default function VariantB({ ms }) {
   }, [measureSort, includeSingle, singleCount]);
   if (!ms.catalog) return <LinearProgress />;
 
+  // round 10: measures per rail row + scenario provenance per measure option
+  const measuresOf = (table) =>
+    ms.measureOptions.filter((o) => o.providers.includes(table));
+  const famBreakdown = (o) => {
+    const counts = {};
+    for (const t of o.providers) {
+      const f = ms.catalog.find((c) => c.table === t)?.family || "other";
+      counts[f] = (counts[f] || 0) + 1;
+    }
+    return Object.entries(counts)
+      .map(([f, n]) => `${f} (${n})`)
+      .join(" · ");
+  };
+
   const visible = ms.catalog.filter(
     (c) =>
       !filter ||
@@ -354,9 +368,57 @@ export default function VariantB({ ms }) {
                                   <TablePeek table={c.table} title={c.title} />
                                 </Stack>
                               }
-                              secondary={`${c.granularity ? (c.granularity === "hour" ? "hourly" : "yearly") : "no temporal declaration"} · ${c.table}`}
+                              secondary={
+                                <>
+                                  <span
+                                    style={{
+                                      display: "block",
+                                      whiteSpace: "nowrap",
+                                      overflow: "hidden",
+                                      textOverflow: "ellipsis",
+                                    }}
+                                  >
+                                    {c.granularity
+                                      ? c.granularity === "hour"
+                                        ? "hourly"
+                                        : "yearly"
+                                      : "no temporal declaration"}{" "}
+                                    · {c.table}
+                                  </span>
+                                  {/* measures this table provides (round 10);
+                                      the chosen one is bolded */}
+                                  <span
+                                    style={{
+                                      display: "block",
+                                      whiteSpace: "nowrap",
+                                      overflow: "hidden",
+                                      textOverflow: "ellipsis",
+                                    }}
+                                    title={measuresOf(c.table)
+                                      .map((o) => o.label)
+                                      .join(" · ")}
+                                  >
+                                    {measuresOf(c.table).length
+                                      ? measuresOf(c.table).map((o, i) => (
+                                          <React.Fragment
+                                            key={`${o.space}:${o.value}`}
+                                          >
+                                            {i > 0 && " · "}
+                                            {ms.measure &&
+                                            o.space === ms.measure.space &&
+                                            o.value === ms.measure.value ? (
+                                              <b>{o.label}</b>
+                                            ) : (
+                                              o.label
+                                            )}
+                                          </React.Fragment>
+                                        ))
+                                      : "no measures declared"}
+                                  </span>
+                                </>
+                              }
                               secondaryTypographyProps={{
-                                noWrap: true,
+                                component: "div",
                                 fontSize: 11,
                               }}
                             />
@@ -422,7 +484,27 @@ export default function VariantB({ ms }) {
                 <li {...props} key={`${o.space}:${o.value}`}>
                   <ListItemText
                     primary={o.label}
-                    secondary={`${o.space === "substance" ? "substance" : "IAMC quantity"} · ${o.providers.length} source${o.providers.length !== 1 ? "s" : ""} provide${o.providers.length === 1 ? "s" : ""} it${o.selectedProviders ? ` (${o.selectedProviders} selected)` : ""}`}
+                    secondary={
+                      <>
+                        <span style={{ display: "block" }}>
+                          {o.space === "substance"
+                            ? "substance"
+                            : "IAMC quantity"}{" "}
+                          · {o.providers.length} source
+                          {o.providers.length !== 1 ? "s" : ""} provide
+                          {o.providers.length === 1 ? "s" : ""} it
+                          {o.selectedProviders
+                            ? ` (${o.selectedProviders} selected)`
+                            : ""}
+                        </span>
+                        {/* scenario provenance (round 10): which scenario(s)
+                            the providing sources belong to */}
+                        <span style={{ display: "block" }}>
+                          from {famBreakdown(o)}
+                        </span>
+                      </>
+                    }
+                    secondaryTypographyProps={{ component: "div" }}
                   />
                 </li>
               )}
