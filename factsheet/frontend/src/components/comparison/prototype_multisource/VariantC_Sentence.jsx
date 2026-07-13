@@ -27,6 +27,7 @@ import {
   GranularityChip,
   MergedChart,
   ChartTypeSelect,
+  NoDataAlert,
   titleCase,
 } from "./shared.jsx";
 
@@ -261,7 +262,15 @@ export default function VariantC({ ms }) {
       {/* CHART */}
       {ms.running && <LinearProgress sx={{ mb: 2 }} />}
       {ms.err && <Typography color="error">{ms.err}</Typography>}
-      {ms.verdict?.kind !== "blocked" && ms.rows && (
+      {ms.verdict?.kind !== "blocked" && ms.rows && ms.rows.length === 0 && (
+        <NoDataAlert
+          measure={ms.measure}
+          unit={ms.unit}
+          granularity={ms.ranGranularity || ms.granularity}
+          nSources={ms.selected.length}
+        />
+      )}
+      {ms.verdict?.kind !== "blocked" && ms.rows && ms.rows.length > 0 && (
         <MergedChart
           registry={ms.registry}
           rows={ms.rows}

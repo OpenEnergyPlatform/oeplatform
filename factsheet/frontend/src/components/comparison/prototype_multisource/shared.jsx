@@ -7,8 +7,9 @@
 // (badge wording, verdict reasons, ladder, chart correctness) identical
 // across them so the maintainer reacts to STRUCTURE, not to copy drift.
 
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import ReactECharts from "echarts-for-react";
+import axios from "axios";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
@@ -20,10 +21,23 @@ import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
+import IconButton from "@mui/material/IconButton";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import CircularProgress from "@mui/material/CircularProgress";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import PreviewIcon from "@mui/icons-material/Preview";
+import LaunchIcon from "@mui/icons-material/Launch";
 import { labelForIri } from "../registryQuery.js";
 import { LADDER } from "../comparability.js";
-import { bucketLabel } from "./protoData.js";
+import { bucketLabel, ROWS_SCHEMA } from "./protoData.js";
 
 export const PALETTE = [
   "#1f77b4",
@@ -157,6 +171,124 @@ export function VerdictChip({ verdict, onClick }) {
   const m = map[verdict.kind];
   return (
     <Chip size="small" color={m.color} label={m.label} onClick={onClick} />
+  );
+}
+
+// Empty result ≠ blank graph (reaction round 3): say WHAT returned nothing,
+// so the user knows the sources hold the measure but not this exact slice.
+export function NoDataAlert({ measure, unit, granularity, nSources }) {
+  return (
+    <Alert severity="warning" sx={{ my: 2 }}>
+      <AlertTitle sx={{ fontWeight: 700 }}>No data for this query</AlertTitle>
+      <Typography variant="body2">
+        <b>{measure?.label || "the chosen measure"}</b>
+        {unit ? (
+          <>
+            {" "}
+            in <b>{unit}</b>
+          </>
+        ) : null}{" "}
+        per <b>{granularity}</b> across {nSources} source
+        {nSources !== 1 ? "s" : ""} returned no rows. The sources declare the
+        measure, but not in this unit/granularity slice — try another unit or a
+        coarser granularity, or peek at the raw data via the rail.
+      </Typography>
+    </Alert>
+  );
+}
+
+// Transparency (reaction round 3): a quick look at the ACTUAL rows behind a
+// source + a link to its table page — without leaving the composition.
+export function TablePeek({ table, title }) {
+  const [open, setOpen] = useState(false);
+  const [rows, setRows] = useState(null);
+  const [err, setErr] = useState(null);
+  useEffect(() => {
+    if (!open || rows) return;
+    let active = true;
+    axios
+      .get(`/api/v0/schema/${ROWS_SCHEMA}/tables/${table}/rows/?limit=8`)
+      .then((res) => active && setRows(Array.isArray(res.data) ? res.data : []))
+      .catch((e) => active && setErr(e?.message || "could not load rows"));
+    return () => {
+      active = false;
+    };
+  }, [open, rows, table]);
+  const cols = rows?.length ? Object.keys(rows[0]) : [];
+  return (
+    <>
+      <Tooltip arrow title="Peek at the raw data">
+        <IconButton
+          size="small"
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpen(true);
+          }}
+        >
+          <PreviewIcon sx={{ fontSize: 16 }} />
+        </IconButton>
+      </Tooltip>
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        maxWidth="lg"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <DialogTitle>
+          {title || table}
+          <Typography variant="caption" color="text.secondary" display="block">
+            first 8 rows of {ROWS_SCHEMA}.{table}
+          </Typography>
+        </DialogTitle>
+        <DialogContent dividers sx={{ p: 0 }}>
+          {err && <Alert severity="error">{err}</Alert>}
+          {!rows && !err && (
+            <Box sx={{ p: 4, textAlign: "center" }}>
+              <CircularProgress size={24} />
+            </Box>
+          )}
+          {rows && (
+            <Box sx={{ overflowX: "auto", maxWidth: "80vw" }}>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    {cols.map((c) => (
+                      <TableCell key={c} sx={{ fontWeight: 700 }}>
+                        {c}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {rows.map((r, i) => (
+                    <TableRow key={i}>
+                      {cols.map((c) => (
+                        <TableCell key={c} sx={{ whiteSpace: "nowrap" }}>
+                          {String(r[c] ?? "")}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button
+            size="small"
+            endIcon={<LaunchIcon />}
+            href={`/dataedit/view/${ROWS_SCHEMA}/${table}`}
+            target="_blank"
+          >
+            Open table page
+          </Button>
+          <Button size="small" onClick={() => setOpen(false)}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 }
 

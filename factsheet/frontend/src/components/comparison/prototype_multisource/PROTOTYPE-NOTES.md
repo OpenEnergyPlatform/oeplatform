@@ -116,6 +116,18 @@ species-conditional `co2_emission`).
   grouping is the safe near-term use; a verdict leg needs double-counting and
   CO2e-weighting guardrails first.
 
+## Reaction round 3 (2026-07-13) — no-data feedback + raw-data transparency
+
+- **No blank graphs** — an empty result now renders a "No data for this query"
+  panel naming the exact slice (measure, unit, granularity, number of sources)
+  and suggesting what to change; all three variants.
+- **Table peek** — every rail row carries a preview icon: a dialog with the
+  first 8 raw rows of the table plus an "Open table page" link
+  (`/dataedit/view/model_draft/<table>`), without leaving the composition.
+- eu_leg awareness confirmed on the ticket: it blocks against everything because
+  its species live in the `greenhouse_gas` DIMENSION while the measure concept
+  is never emitted — WF-21 (decided) fixes the CO2 slice, WF-23 generalizes.
+
 ## Verdict
 
 **Variant B (workbench rail).** Remaining before this directory dies: further

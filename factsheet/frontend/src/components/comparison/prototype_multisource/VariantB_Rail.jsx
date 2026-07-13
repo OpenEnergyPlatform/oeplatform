@@ -32,6 +32,8 @@ import {
   MergedChart,
   ChartTypeSelect,
   CandidateDot,
+  NoDataAlert,
+  TablePeek,
   PALETTE,
 } from "./shared.jsx";
 
@@ -126,7 +128,7 @@ export default function VariantB({ ms }) {
                                 variant="body2"
                                 noWrap
                                 title={c.title}
-                                sx={{ maxWidth: 160 }}
+                                sx={{ maxWidth: 140 }}
                               >
                                 {c.title}
                               </Typography>
@@ -143,6 +145,7 @@ export default function VariantB({ ms }) {
                                   />
                                 </Tooltip>
                               )}
+                              <TablePeek table={c.table} title={c.title} />
                             </Stack>
                           }
                           secondary={`${c.granularity ? (c.granularity === "hour" ? "hourly" : "yearly") : "no temporal declaration"} · ${c.table}`}
@@ -344,7 +347,15 @@ export default function VariantB({ ms }) {
         {/* CHART */}
         {ms.running && <LinearProgress sx={{ mb: 2 }} />}
         {ms.err && <Typography color="error">{ms.err}</Typography>}
-        {ms.verdict?.kind !== "blocked" && ms.rows && (
+        {ms.verdict?.kind !== "blocked" && ms.rows && ms.rows.length === 0 && (
+          <NoDataAlert
+            measure={ms.measure}
+            unit={ms.unit}
+            granularity={ms.ranGranularity || ms.granularity}
+            nSources={ms.selected.length}
+          />
+        )}
+        {ms.verdict?.kind !== "blocked" && ms.rows && ms.rows.length > 0 && (
           <MergedChart
             registry={ms.registry}
             rows={ms.rows}

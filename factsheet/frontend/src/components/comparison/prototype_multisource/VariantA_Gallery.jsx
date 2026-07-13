@@ -29,6 +29,7 @@ import {
   VerdictPanel,
   MergedChart,
   ChartTypeSelect,
+  NoDataAlert,
   titleCase,
 } from "./shared.jsx";
 
@@ -231,7 +232,15 @@ export default function VariantA({ ms }) {
       {ms.running && <LinearProgress sx={{ mb: 2 }} />}
       <VerdictPanel verdict={ms.verdict} />
       {ms.err && <Typography color="error">{ms.err}</Typography>}
-      {ms.verdict?.kind !== "blocked" && ms.rows && (
+      {ms.verdict?.kind !== "blocked" && ms.rows && ms.rows.length === 0 && (
+        <NoDataAlert
+          measure={ms.measure}
+          unit={ms.unit}
+          granularity={ms.ranGranularity || ms.granularity}
+          nSources={ms.selected.length}
+        />
+      )}
+      {ms.verdict?.kind !== "blocked" && ms.rows && ms.rows.length > 0 && (
         <>
           <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 1 }}>
             <ChartTypeSelect

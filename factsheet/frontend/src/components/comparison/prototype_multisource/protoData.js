@@ -17,7 +17,7 @@ import {
 } from "../registryQuery.js";
 
 export const TABLE_PRED = "oeo:OEO_00000504";
-const ROWS_SCHEMA = "model_draft";
+export const ROWS_SCHEMA = "model_draft";
 
 export async function postSparql(query) {
   const res = await axios.post(conf.obdi, query, {
