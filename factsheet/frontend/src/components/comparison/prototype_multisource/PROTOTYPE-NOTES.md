@@ -128,6 +128,17 @@ species-conditional `co2_emission`).
   its species live in the `greenhouse_gas` DIMENSION while the measure concept
   is never emitted — WF-21 (decided) fixes the CO2 slice, WF-23 generalizes.
 
+## Reaction round 4 (2026-07-13) — legend term resolution + zoom
+
+- **No raw OEO ids in the legend** — IRI-valued group values resolve through the
+  TIB Terminology Service (`../tibTerms.js`, same cache as the single-table
+  view): TIB label first, registry enum label second, shortened IRI last. Legend
+  entries show the ontology definition on hover, and a term-chip row under the
+  chart links each series to its ontology term.
+- **Zoom / range selection** — echarts `dataZoom` (wheel/drag inside the plot,
+  range slider, toolbox zoom/restore) activates whenever the x-axis has more
+  than 31 buckets — hourly and daily series over long periods are now navigable.
+
 ## Verdict
 
 **Variant B (workbench rail).** Remaining before this directory dies: further

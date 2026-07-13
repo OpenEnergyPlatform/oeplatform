@@ -32,10 +32,12 @@ import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
+import Stack from "@mui/material/Stack";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import PreviewIcon from "@mui/icons-material/Preview";
 import LaunchIcon from "@mui/icons-material/Launch";
 import { labelForIri } from "../registryQuery.js";
+import { resolveTerms } from "../tibTerms.js";
 import { LADDER } from "../comparability.js";
 import { bucketLabel, ROWS_SCHEMA } from "./protoData.js";
 
@@ -349,57 +351,120 @@ export function MergedChart({
   onRerun = null,
   running = false,
 }) {
-  const option = useMemo(() => {
-    if (!rows || !registry) return null;
+  // Legends must never show raw OEO ids (reaction round 4): resolve IRI-valued
+  // group values through the TIB Terminology Service — same resolution (and
+  // cache) the single-table view uses.
+  const [terms, setTerms] = useState({});
+  useEffect(() => {
+    if (!rows?.length || !registry) return undefined;
+    const byKey = Object.fromEntries(
+      (registry.dimensions || []).map((d) => [d.key, d])
+    );
+    const gd = groupKey !== "source" ? byKey[groupKey] : null;
+    if (!gd || gd.object_kind !== "iri") return undefined;
+    let active = true;
+    resolveTerms([
+      ...new Set(rows.map((r) => r[gd.key]?.value).filter(Boolean)),
+    ])
+      .then((m) => active && setTerms((p) => ({ ...p, ...m })))
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [rows, registry, groupKey]);
+
+  const { option, stacks } = useMemo(() => {
+    if (!rows || !registry) return { option: null, stacks: [] };
     const byKey = Object.fromEntries(
       (registry.dimensions || []).map((d) => [d.key, d])
     );
     const groupDim = groupKey !== "source" ? byKey[groupKey] : null;
     const titleOf = (t) => catalog.find((c) => c.table === t)?.title || t;
-    const seriesKey = (r) =>
-      groupDim
-        ? groupDim.object_kind === "iri"
-          ? labelForIri(registry, groupDim, r[groupDim.key]?.value)
-          : r[groupDim.key]?.value
-        : titleOf(r.table_name?.value);
+    const shorten = (s) =>
+      s && String(s).startsWith("http") ? String(s).split("/").pop() : s;
+    // TIB label first, registry enum label second, shortened IRI last —
+    // the raw IRI never reaches the legend
+    const seriesOf = (r) => {
+      if (!groupDim) return { name: titleOf(r.table_name?.value), iri: null };
+      const raw = r[groupDim.key]?.value;
+      if (raw == null) return { name: null, iri: null };
+      if (groupDim.object_kind !== "iri") return { name: raw, iri: null };
+      const enumLabel = labelForIri(registry, groupDim, raw);
+      return {
+        name:
+          terms[raw]?.label || (enumLabel !== raw ? enumLabel : shorten(raw)),
+        iri: raw,
+      };
+    };
     const xVals = [
       ...new Set(rows.map((r) => bucketLabel(r, granularity))),
     ].sort();
-    const names = [];
+    const stackList = [];
     const matrix = {};
     for (const r of rows) {
-      const s = seriesKey(r);
+      const s = seriesOf(r);
       const x = bucketLabel(r, granularity);
       const v = parseFloat(r.value?.value);
-      if (s == null || Number.isNaN(v)) continue;
-      if (!names.includes(s)) names.push(s);
-      matrix[s] = matrix[s] || {};
-      matrix[s][x] = (matrix[s][x] || 0) + v;
+      if (s.name == null || Number.isNaN(v)) continue;
+      if (!stackList.find((k) => k.name === s.name)) stackList.push(s);
+      matrix[s.name] = matrix[s.name] || {};
+      matrix[s.name][x] = (matrix[s.name][x] || 0) + v;
     }
     const isLine = chartType === "line";
     // WF-02 guardrail mirrored here: never stack when source is the group-by
     const stacked = chartType === "stacked" && groupKey !== "source";
-    return {
+    // zoom + range selection (reaction round 4): essential for hourly/daily
+    // series with thousands of steps — wheel/drag zoom inside the plot plus a
+    // range slider; only shown when the axis is long enough to need it
+    const zoomable = xVals.length > 31;
+    const opt = {
       tooltip: {
         trigger: "axis",
         axisPointer: { type: isLine ? "line" : "shadow" },
       },
-      legend: { type: "scroll", top: 0 },
-      grid: { left: 80, right: 20, bottom: 40, top: 40 },
+      legend: {
+        type: "scroll",
+        top: 0,
+        tooltip: {
+          show: true,
+          formatter: (p) => {
+            const s = stackList.find((k) => k.name === p.name);
+            const d = s?.iri && terms[s.iri]?.description;
+            return d ? `<b>${p.name}</b><br/>${d}` : p.name;
+          },
+        },
+      },
+      grid: { left: 80, right: 20, bottom: zoomable ? 70 : 40, top: 40 },
+      ...(zoomable
+        ? {
+            dataZoom: [
+              { type: "inside", throttle: 50 },
+              { type: "slider", height: 22, bottom: 10 },
+            ],
+            toolbox: {
+              right: 10,
+              feature: {
+                dataZoom: { yAxisIndex: "none" },
+                restore: {},
+              },
+            },
+          }
+        : {}),
       xAxis: { type: "category", data: xVals, name: titleCase(granularity) },
       yAxis: { type: "value", name: unit || "value" },
-      series: names.map((n, i) => ({
-        name: n,
+      series: stackList.map((s, i) => ({
+        name: s.name,
         type: isLine ? "line" : "bar",
         ...(stacked ? { stack: "total" } : {}),
         showSymbol: xVals.length < 100,
         smooth: false,
         emphasis: { focus: "series" },
         itemStyle: { color: PALETTE[i % PALETTE.length] },
-        data: xVals.map((x) => matrix[n]?.[x] ?? null),
+        data: xVals.map((x) => matrix[s.name]?.[x] ?? null),
       })),
     };
-  }, [rows, registry, groupKey, unit, chartType, granularity, catalog]);
+    return { option: opt, stacks: stackList };
+  }, [rows, registry, groupKey, unit, chartType, granularity, catalog, terms]);
 
   if (!option) return null;
   return (
@@ -440,6 +505,43 @@ export function MergedChart({
           </Box>
         )}
       </Box>
+      {/* what each series means — TIB label, description on hover, click →
+          ontology term (mirrors the single-table view's group definitions) */}
+      {stacks.some((s) => s.iri) && (
+        <Stack
+          direction="row"
+          spacing={1}
+          useFlexGap
+          flexWrap="wrap"
+          sx={{ mt: 1 }}
+        >
+          {stacks.map(
+            (s, i) =>
+              s.iri && (
+                <Tooltip
+                  key={s.name}
+                  arrow
+                  title={terms[s.iri]?.description || "Loading definition…"}
+                >
+                  <Chip
+                    size="small"
+                    variant="outlined"
+                    label={s.name}
+                    component="a"
+                    href={s.iri}
+                    target="_blank"
+                    clickable
+                    sx={{
+                      borderColor: PALETTE[i % PALETTE.length],
+                      color: PALETTE[i % PALETTE.length],
+                      fontWeight: 600,
+                    }}
+                  />
+                </Tooltip>
+              )
+          )}
+        </Stack>
+      )}
       {(notices.length > 0 || unmappedFootnotes.length > 0) && (
         <Box sx={{ mt: 1 }}>
           {notices.map((n, i) => (
