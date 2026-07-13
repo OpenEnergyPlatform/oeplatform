@@ -139,6 +139,16 @@ species-conditional `co2_emission`).
   range slider, toolbox zoom/restore) activates whenever the x-axis has more
   than 31 buckets — hourly and daily series over long periods are now navigable.
 
+## Reaction round 5 (2026-07-13) — feedback pause; entry point charted
+
+"Prototype looks good for now" — no build changes. The remaining issue is bigger
+than this prototype: the comparison board is only reachable via scenario-bundles
+listing → badge-select ≥2 scenarios → "Compare scenarios", although the Registry
+tab never uses the selected scenario uids (only the Qualitative view does).
+Charted as wayfinder WF-24 (entry-point rework, affects qualitative comparison
+too); "okay for now" per the maintainer, so this prototype stays reachable
+through the existing flow.
+
 ## Verdict
 
 **Variant B (workbench rail).** Remaining before this directory dies: further
