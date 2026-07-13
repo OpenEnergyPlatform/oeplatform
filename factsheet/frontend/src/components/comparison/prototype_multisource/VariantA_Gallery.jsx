@@ -166,7 +166,8 @@ export default function VariantA({ ms }) {
                     key={`${o.space}:${o.value}`}
                     value={`${o.space}:${o.value}`}
                   >
-                    {o.label} · {o.tables.length}/{ms.selected.length} sources
+                    {o.label} · {o.selectedProviders}/{ms.selected.length}{" "}
+                    selected sources
                   </MenuItem>
                 ))}
               </TextField>
@@ -245,10 +246,13 @@ export default function VariantA({ ms }) {
             groupKey={ms.groupKey}
             unit={ms.unit}
             chartType={ms.chartType}
-            granularity={ms.granularity}
+            granularity={ms.ranGranularity || ms.granularity}
             catalog={ms.catalog}
             notices={ms.notices}
             unmappedFootnotes={ms.unmappedFootnotes}
+            stale={ms.stale}
+            running={ms.running}
+            onRerun={ms.run}
           />
         </>
       )}

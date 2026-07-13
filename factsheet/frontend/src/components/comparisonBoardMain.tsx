@@ -56,7 +56,9 @@ const ComparisonBoardMain = ({ params }) => {
       >
         <BreadcrumbsNavGrid subheaderContent="Comparison" />
 
-        <Container maxWidth="lg2">
+        {/* PROTOTYPE (WF-07 reaction, item 1): the Registry workbench needs
+            the full viewport width — the lg2 container blocks it. */}
+        <Container maxWidth={alignment === "Registry" ? false : "lg2"}>
           {/* TOP TOOLBAR */}
           <Toolbar sx={{ marginBottom: (theme) => theme.spacing(4) }}>
             <Grid container justifyContent="space-between" spacing={2}>

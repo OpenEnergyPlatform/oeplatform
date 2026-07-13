@@ -10,6 +10,7 @@
 import React, { useMemo } from "react";
 import ReactECharts from "echarts-for-react";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import Alert from "@mui/material/Alert";
 import AlertTitle from "@mui/material/AlertTitle";
@@ -159,8 +160,49 @@ export function VerdictChip({ verdict, onClick }) {
   );
 }
 
+// Rail indicator: what would happen if this table joined the selection —
+// computed from the pure contract (reaction round 1, items 2+3).
+export function CandidateDot({ status }) {
+  if (!status) return null;
+  const map = {
+    merge: {
+      color: "#2e7d32",
+      label: "comparable — merges with the selection",
+    },
+    aggregate_first: {
+      color: "#0288d1",
+      label: "comparable after aggregation to a common granularity",
+    },
+    blocked: { color: "#d32f2f", label: `would block: ${status.reason}` },
+    no_data: {
+      color: "#9e9e9e",
+      label: `no data for this measure (${status.reason})`,
+    },
+  };
+  const m = map[status.kind] || map.no_data;
+  return (
+    <Tooltip
+      arrow
+      title={`${m.label}${status.detail ? ` — ${status.detail}` : ""}`}
+    >
+      <Box
+        component="span"
+        sx={{
+          width: 10,
+          height: 10,
+          borderRadius: "50%",
+          bgcolor: m.color,
+          display: "inline-block",
+          flexShrink: 0,
+        }}
+      />
+    </Tooltip>
+  );
+}
+
 // One merged chart over the GROUP BY result rows. Source is a first-class
 // dimension: grouped by table_name unless another group dim is chosen.
+// `stale` dims the chart once parameters diverge from the run (item 4).
 export function MergedChart({
   registry,
   rows,
@@ -171,6 +213,9 @@ export function MergedChart({
   catalog = [],
   notices = [],
   unmappedFootnotes = [],
+  stale = false,
+  onRerun = null,
+  running = false,
 }) {
   const option = useMemo(() => {
     if (!rows || !registry) return null;
@@ -227,7 +272,42 @@ export function MergedChart({
   if (!option) return null;
   return (
     <Box>
-      <ReactECharts option={option} style={{ height: 420 }} notMerge />
+      <Box sx={{ position: "relative" }}>
+        <Box sx={{ opacity: stale ? 0.3 : 1, transition: "opacity 0.2s" }}>
+          <ReactECharts option={option} style={{ height: 420 }} notMerge />
+        </Box>
+        {stale && (
+          <Box
+            sx={{
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Alert
+              severity="warning"
+              action={
+                onRerun && (
+                  <Button
+                    size="small"
+                    variant="contained"
+                    color="warning"
+                    disabled={running}
+                    onClick={onRerun}
+                  >
+                    {running ? "…" : "Update chart"}
+                  </Button>
+                )
+              }
+            >
+              Parameters changed — the chart still shows the previous
+              configuration.
+            </Alert>
+          </Box>
+        )}
+      </Box>
       {(notices.length > 0 || unmappedFootnotes.length > 0) && (
         <Box sx={{ mt: 1 }}>
           {notices.map((n, i) => (

@@ -152,7 +152,7 @@ export default function VariantC({ ms }) {
                   >
                     <ListItemText
                       primary={o.label}
-                      secondary={`${o.space} · in ${o.tables.length}/${ms.selected.length} selected sources`}
+                      secondary={`${o.space} · in ${o.selectedProviders}/${ms.selected.length} selected sources (${o.providers.length} total)`}
                     />
                   </MenuItem>
                 ))}
@@ -268,10 +268,13 @@ export default function VariantC({ ms }) {
           groupKey={ms.groupKey}
           unit={ms.unit}
           chartType={ms.chartType}
-          granularity={ms.granularity}
+          granularity={ms.ranGranularity || ms.granularity}
           catalog={ms.catalog}
           notices={ms.notices}
           unmappedFootnotes={ms.unmappedFootnotes}
+          stale={ms.stale}
+          running={ms.running}
+          onRerun={ms.run}
         />
       )}
       {ms.verdict?.kind !== "blocked" && !ms.rows && !ms.running && (

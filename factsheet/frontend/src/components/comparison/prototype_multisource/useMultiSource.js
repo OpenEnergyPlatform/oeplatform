@@ -15,7 +15,7 @@
 import { useEffect, useMemo, useState } from "react";
 import useRegistry from "../useRegistry.js";
 import { labelForIri, expandCurie } from "../registryQuery.js";
-import { selectionVerdict, LADDER } from "../comparability.js";
+import { compareSeries, selectionVerdict, LADDER } from "../comparability.js";
 import {
   postSparql,
   fetchMappedTables,
@@ -103,51 +103,51 @@ export default function useMultiSource() {
     [catalog, selected]
   );
 
-  // ---- measure options = union over the selection, both spaces ----
+  // ---- measure options: CATALOG-wide (measure-first flow, reaction round 1
+  //      item 3) — pick a measure, then see which sources provide it; measures
+  //      the current selection provides sort first ----
   const substanceDim = useMemo(
     () => (registry?.dimensions || []).find((d) => d.key === "substance"),
     [registry]
   );
   const measureOptions = useMemo(() => {
     const opts = [];
-    for (const e of selectedEntries) {
+    const add = (space, value, table, label, aggregation) => {
+      let o = opts.find((x) => x.space === space && x.value === value);
+      if (!o) {
+        o = { space, value, label, aggregation, providers: [] };
+        opts.push(o);
+      }
+      o.providers.push(table);
+    };
+    for (const e of catalog || []) {
       for (const iri of e.substances) {
-        const found = opts.find(
-          (o) => o.space === "substance" && o.value === iri
+        const enumVal = (substanceDim?.values || []).find(
+          (v) => expandCurie(registry, v.iri) === iri || v.iri === iri
         );
-        if (found) found.tables.push(e.table);
-        else {
-          const enumVal = (substanceDim?.values || []).find(
-            (v) => expandCurie(registry, v.iri) === iri || v.iri === iri
-          );
-          opts.push({
-            space: "substance",
-            value: iri,
-            tables: [e.table],
-            label:
-              enumVal?.label || labelForIri(registry, substanceDim || {}, iri),
-            aggregation: enumVal?.aggregation || null,
-          });
-        }
-      }
-      for (const v of e.quantityKinds) {
-        const found = opts.find(
-          (o) => o.space === "quantity_kind" && o.value === v
+        add(
+          "substance",
+          iri,
+          e.table,
+          enumVal?.label || labelForIri(registry, substanceDim || {}, iri),
+          enumVal?.aggregation || null
         );
-        if (found) found.tables.push(e.table);
-        else
-          opts.push({
-            space: "quantity_kind",
-            value: v,
-            tables: [e.table],
-            label: titleCase(v),
-            aggregation: null,
-          });
       }
+      for (const v of e.quantityKinds)
+        add("quantity_kind", v, e.table, titleCase(v), null);
     }
-    // most widely shared first — the cross-source measures are the point
-    return opts.sort((a, b) => b.tables.length - a.tables.length);
-  }, [selectedEntries, registry, substanceDim]);
+    return opts
+      .map((o) => ({
+        ...o,
+        selectedProviders: o.providers.filter((t) => selected.includes(t))
+          .length,
+      }))
+      .sort(
+        (a, b) =>
+          b.selectedProviders - a.selectedProviders ||
+          b.providers.length - a.providers.length
+      );
+  }, [catalog, selected, registry, substanceDim]);
 
   const [measureId, setMeasureId] = useState("");
   const measure = useMemo(
@@ -156,17 +156,20 @@ export default function useMultiSource() {
     [measureOptions, measureId]
   );
   useEffect(() => {
-    // keep a valid measure selected; prefer one every selected source shares
+    // keep a valid measure selected; prefer one the selection provides
     if (measure) return;
-    const best = measureOptions[0];
+    const best =
+      measureOptions.find((o) => o.selectedProviders > 0) || measureOptions[0];
     setMeasureId(best ? `${best.space}:${best.value}` : "");
   }, [measureOptions, measure]);
 
-  // ---- units per (table, measure); options span ALL selected sources ----
+  // ---- units per (table, measure) for the WHOLE catalog (the rail's
+  //      would-it-be-comparable indicators need unselected tables' units);
+  //      the unit SELECT stays scoped to the selection (WF-02) ----
   const [unitsByTable, setUnitsByTable] = useState({});
   const [unit, setUnit] = useState("");
   useEffect(() => {
-    if (!registry || !selected.length || !measure) {
+    if (!registry || !catalog?.length || !measure) {
       setUnitsByTable({});
       return;
     }
@@ -175,13 +178,10 @@ export default function useMultiSource() {
       try {
         const u = await unitsByTableForMeasure({
           registry,
-          tables: selected,
+          tables: catalog.map((c) => c.table),
           measure,
         });
-        if (!active) return;
-        setUnitsByTable(u);
-        const all = [...new Set(Object.values(u).flat())];
-        setUnit((cur) => (all.includes(cur) ? cur : all[0] || ""));
+        if (active) setUnitsByTable(u);
       } catch (e) {
         if (active) setUnitsByTable({});
       }
@@ -189,11 +189,14 @@ export default function useMultiSource() {
     return () => {
       active = false;
     };
-  }, [registry, selected, measure]);
+  }, [registry, catalog, measure]);
   const unitOptions = useMemo(
-    () => [...new Set(Object.values(unitsByTable).flat())],
-    [unitsByTable]
+    () => [...new Set(selected.flatMap((t) => unitsByTable[t] || []))],
+    [unitsByTable, selected]
   );
+  useEffect(() => {
+    setUnit((cur) => (unitOptions.includes(cur) ? cur : unitOptions[0] || ""));
+  }, [unitOptions]);
 
   // ---- group-by discovery: union of per-table ASKs (WF-07 spec) ----
   const [availByTable, setAvailByTable] = useState({});
@@ -224,9 +227,19 @@ export default function useMultiSource() {
     for (const t of selected)
       for (const k of availByTable[t] || []) union.add(k);
     const dims = (registry?.dimensions || []).filter((d) => union.has(d.key));
+    // shared = every selected source populates the dimension — grouping by a
+    // partial dimension silently drops the sources that lack it (transparency
+    // ask, reaction round 1 item 3)
+    const sharedAll = (k) =>
+      selected.length > 0 &&
+      selected.every((t) => (availByTable[t] || new Set()).has(k));
     return [
-      { key: "source", label: "Source (table)", isSource: true },
-      ...dims.map((d) => ({ key: d.key, label: titleCase(d.key) })),
+      { key: "source", label: "Source (table)", shared: true, isSource: true },
+      ...dims.map((d) => ({
+        key: d.key,
+        label: titleCase(d.key),
+        shared: sharedAll(d.key),
+      })),
     ];
   }, [registry, selected, availByTable]);
 
@@ -246,55 +259,57 @@ export default function useMultiSource() {
   }, [groupOptions]);
 
   // ---- series + verdict (pure — ../comparability.js) ----
-  const verdictInput = useMemo(() => {
-    if (!measure) return [];
-    return selectedEntries.map((e) => {
-      const declaresSubstance = e.substances.length > 0;
-      const declaresQk = e.quantityKinds.length > 0;
-      if (!declaresSubstance && !declaresQk) {
-        // PROTOTYPE ASSUMPTION (not pinned by WF-12): a table with NO measure
-        // dimension is its own measure space → blocked against everything.
-        // eu_leg is the live case; reaction wanted.
-        return {
-          table: e.table,
-          series: null,
-          reason: "measure spaces not aligned",
-          detail: `${e.table} declares no measure dimension (neither substance nor quantity_kind)`,
-        };
-      }
-      const inSpace =
-        measure.space === "substance" ? e.substances : e.quantityKinds;
-      if (!inSpace.length) {
-        return {
-          table: e.table,
-          series: null,
-          reason: "measure spaces not aligned",
-          detail: `${e.table} annotates ${declaresSubstance ? "substance" : "quantity_kind"}, the chosen measure lives in ${measure.space}`,
-        };
-      }
-      if (!inSpace.includes(measure.value)) {
-        return {
-          table: e.table,
-          series: null,
-          reason: "measure mismatch",
-          detail: `${e.table} does not report ${measure.label}`,
-        };
-      }
-      const tableUnits = unitsByTable[e.table] || [];
+  // one catalog entry's series for the chosen measure — or null + WF-12 reason
+  const entrySeries = (e) => {
+    const declaresSubstance = e.substances.length > 0;
+    const declaresQk = e.quantityKinds.length > 0;
+    if (!declaresSubstance && !declaresQk) {
+      // eu_leg live case: metadata declares the measure but the mapping never
+      // emits it — treated as its own measure space until WF-21 lands.
       return {
         table: e.table,
-        series: {
-          table: e.table,
-          space: measure.space,
-          measure: measure.value,
-          measureLabel: measure.label,
-          unit: tableUnits.includes(unit) ? unit : tableUnits[0] || null,
-          granularity: e.granularity,
-          aggregation: measure.aggregation,
-        },
+        series: null,
+        reason: "measure spaces not aligned",
+        detail: `${e.table} declares no measure dimension (neither substance nor quantity_kind)`,
       };
-    });
-  }, [selectedEntries, measure, unitsByTable, unit]);
+    }
+    const inSpace =
+      measure.space === "substance" ? e.substances : e.quantityKinds;
+    if (!inSpace.length) {
+      return {
+        table: e.table,
+        series: null,
+        reason: "measure spaces not aligned",
+        detail: `${e.table} annotates ${declaresSubstance ? "substance" : "quantity_kind"}, the chosen measure lives in ${measure.space}`,
+      };
+    }
+    if (!inSpace.includes(measure.value)) {
+      return {
+        table: e.table,
+        series: null,
+        reason: "measure mismatch",
+        detail: `${e.table} does not report ${measure.label}`,
+      };
+    }
+    const tableUnits = unitsByTable[e.table] || [];
+    return {
+      table: e.table,
+      series: {
+        table: e.table,
+        space: measure.space,
+        measure: measure.value,
+        measureLabel: measure.label,
+        unit: tableUnits.includes(unit) ? unit : tableUnits[0] || null,
+        granularity: e.granularity,
+        aggregation: measure.aggregation,
+      },
+    };
+  };
+
+  const verdictInput = useMemo(
+    () => (measure ? selectedEntries.map(entrySeries) : []),
+    [selectedEntries, measure, unitsByTable, unit] // eslint-disable-line react-hooks/exhaustive-deps
+  );
 
   const verdict = useMemo(
     () =>
@@ -303,6 +318,44 @@ export default function useMultiSource() {
         : null,
     [verdictInput, registry]
   );
+
+  // ---- candidate indicators (reaction round 1, items 2+3): for EVERY catalog
+  //      table, what would happen if it joined the current selection — same
+  //      pure contract, surfaced in the selection window ----
+  const candidates = useMemo(() => {
+    if (!measure || !catalog) return {};
+    const selSeries = verdictInput.filter((x) => x.series).map((x) => x.series);
+    const out = {};
+    for (const c of catalog) {
+      const entry = entrySeries(c);
+      if (!entry.series) {
+        out[c.table] = {
+          kind: "no_data",
+          reason: entry.reason,
+          detail: entry.detail,
+        };
+        continue;
+      }
+      let kind = "merge";
+      let reason = null;
+      let detail = null;
+      for (const s of selSeries) {
+        if (s.table === c.table) continue;
+        const v = compareSeries(entry.series, s, {
+          units: registry?.units || null,
+        });
+        if (v.kind === "blocked") {
+          kind = "blocked";
+          reason = v.reason;
+          detail = v.detail;
+          break;
+        }
+        if (v.kind === "aggregate_first") kind = "aggregate_first";
+      }
+      out[c.table] = { kind, reason, detail };
+    }
+    return out;
+  }, [catalog, measure, verdictInput, unitsByTable, unit, registry]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ---- granularity ladder ----
   const ladder = useMemo(() => {
@@ -327,6 +380,19 @@ export default function useMultiSource() {
   const [lastQuery, setLastQuery] = useState("");
   const [chartType, setChartType] = useState("line");
 
+  // stale-chart detection (reaction round 1, item 4): the chart remembers the
+  // parameters it was run with; any change dims it until re-run
+  const paramsKey = JSON.stringify({
+    selected: [...selected].sort(),
+    measureId,
+    unit,
+    granularity,
+    groupKey,
+  });
+  const [ranKey, setRanKey] = useState(null);
+  const [ranGranularity, setRanGranularity] = useState(null);
+  const stale = !!rows && ranKey !== paramsKey;
+
   const run = async () => {
     if (!registry || !selected.length || verdict?.kind === "blocked") return;
     setRunning(true);
@@ -345,6 +411,8 @@ export default function useMultiSource() {
       setLastQuery(q);
       const data = await postSparql(q);
       setRows(data?.results?.bindings || []);
+      setRanKey(paramsKey);
+      setRanGranularity(granularity);
     } catch (e) {
       setErr(e?.message || "Query failed");
     } finally {
@@ -410,6 +478,7 @@ export default function useMultiSource() {
     setGroupKey,
     verdict,
     verdictInput,
+    candidates,
     ladder,
     granularity,
     setGranularity,
@@ -420,6 +489,8 @@ export default function useMultiSource() {
     lastQuery,
     chartType,
     setChartType,
+    stale,
+    ranGranularity,
     notices,
     unmappedFootnotes,
     bucketLabel,

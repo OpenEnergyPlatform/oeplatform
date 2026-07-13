@@ -31,6 +31,7 @@ import {
   VerdictChip,
   MergedChart,
   ChartTypeSelect,
+  CandidateDot,
   PALETTE,
 } from "./shared.jsx";
 
@@ -56,9 +57,9 @@ export default function VariantB({ ms }) {
       <Card
         variant="outlined"
         sx={{
-          width: 320,
+          width: 340,
           flexShrink: 0,
-          maxHeight: 640,
+          maxHeight: "calc(100vh - 230px)",
           display: "flex",
           flexDirection: "column",
         }}
@@ -66,6 +67,14 @@ export default function VariantB({ ms }) {
         <Box sx={{ p: 1.5, pb: 1 }}>
           <Typography variant="subtitle2" gutterBottom>
             Data sources
+            <Typography
+              component="span"
+              variant="caption"
+              color="text.secondary"
+              sx={{ ml: 1 }}
+            >
+              (scenario grouping follows WF-14)
+            </Typography>
           </Typography>
           <TextField
             fullWidth
@@ -112,11 +121,12 @@ export default function VariantB({ ms }) {
                               spacing={0.5}
                               alignItems="center"
                             >
+                              <CandidateDot status={ms.candidates[c.table]} />
                               <Typography
                                 variant="body2"
                                 noWrap
                                 title={c.title}
-                                sx={{ maxWidth: 170 }}
+                                sx={{ maxWidth: 160 }}
                               >
                                 {c.title}
                               </Typography>
@@ -150,10 +160,18 @@ export default function VariantB({ ms }) {
         </Box>
         <Divider />
         <Box sx={{ p: 1.5 }}>
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" color="text.secondary" display="block">
             {ms.selected.length} source{ms.selected.length !== 1 ? "s" : ""}{" "}
             selected
             {ms.selected.length > 1 ? " — grouped by source by default" : ""}
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            For <b>{ms.measure?.label || "…"}</b>:{" "}
+            <span style={{ color: "#2e7d32" }}>●</span> merges ·{" "}
+            <span style={{ color: "#0288d1" }}>●</span> aggregate first ·{" "}
+            <span style={{ color: "#d32f2f" }}>●</span> would block ·{" "}
+            <span style={{ color: "#9e9e9e" }}>●</span> no data — from the
+            registry contract, not heuristics
           </Typography>
         </Box>
       </Card>
@@ -172,17 +190,25 @@ export default function VariantB({ ms }) {
           <TextField
             select
             size="small"
-            label="Measure"
+            label="Measure (start here)"
             value={ms.measureId}
-            sx={{ minWidth: 240 }}
+            sx={{ minWidth: 260 }}
             onChange={(e) => ms.setMeasureId(e.target.value)}
+            helperText={
+              ms.measure
+                ? `${ms.measure.selectedProviders}/${ms.selected.length} selected sources provide it`
+                : "the rail dots show which sources provide it"
+            }
           >
             {ms.measureOptions.map((o) => (
               <MenuItem
                 key={`${o.space}:${o.value}`}
                 value={`${o.space}:${o.value}`}
               >
-                {o.label} · {o.tables.length}/{ms.selected.length}
+                <ListItemText
+                  primary={o.label}
+                  secondary={`${o.space === "substance" ? "substance" : "IAMC quantity"} · ${o.providers.length} source${o.providers.length !== 1 ? "s" : ""} provide${o.providers.length === 1 ? "s" : ""} it${o.selectedProviders ? ` (${o.selectedProviders} selected)` : ""}`}
+                />
               </MenuItem>
             ))}
           </TextField>
@@ -211,12 +237,19 @@ export default function VariantB({ ms }) {
             size="small"
             label="Grouped by"
             value={ms.groupKey}
-            sx={{ minWidth: 150 }}
+            sx={{ minWidth: 170 }}
             onChange={(e) => ms.setGroupKey(e.target.value)}
+            helperText={
+              ms.groupOptions.find((o) => o.key === ms.groupKey)?.shared ===
+              false
+                ? "⚠ not in every selected source"
+                : undefined
+            }
           >
             {ms.groupOptions.map((o) => (
               <MenuItem key={o.key} value={o.key}>
                 {o.label}
+                {o.shared === false ? " — some sources only" : ""}
               </MenuItem>
             ))}
           </TextField>
@@ -275,10 +308,13 @@ export default function VariantB({ ms }) {
             groupKey={ms.groupKey}
             unit={ms.unit}
             chartType={ms.chartType}
-            granularity={ms.granularity}
+            granularity={ms.ranGranularity || ms.granularity}
             catalog={ms.catalog}
             notices={ms.notices}
             unmappedFootnotes={ms.unmappedFootnotes}
+            stale={ms.stale}
+            running={ms.running}
+            onRerun={ms.run}
           />
         )}
         {!ms.rows && !ms.running && ms.verdict?.kind !== "blocked" && (
