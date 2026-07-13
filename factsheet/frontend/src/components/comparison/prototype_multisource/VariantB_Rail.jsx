@@ -27,6 +27,8 @@ import ListItemText from "@mui/material/ListItemText";
 import Autocomplete, { createFilterOptions } from "@mui/material/Autocomplete";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import Paper from "@mui/material/Paper";
+import InputAdornment from "@mui/material/InputAdornment";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import {
   GranularityLadder,
@@ -82,6 +84,73 @@ export default function VariantB({ ms }) {
       ...sorted.filter((o) => o.providers.length === 1),
     ];
   }, [ms.measureOptions, ms.measure, includeSingle, measureSort]);
+
+  // Sort + single-source controls live INSIDE the dropdown, next to the
+  // search (reaction round 7) — onMouseDown preventDefault keeps the input
+  // focused so interacting with them doesn't close the popup.
+  const MeasurePaper = useMemo(
+    () =>
+      function MeasurePaper({ children, ...rest }) {
+        return (
+          <Paper {...rest}>
+            <Box
+              onMouseDown={(e) => e.preventDefault()}
+              sx={{
+                px: 1.5,
+                py: 1,
+                borderBottom: "1px solid",
+                borderColor: "divider",
+              }}
+            >
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Typography variant="caption" color="text.secondary">
+                  Sort
+                </Typography>
+                <ToggleButtonGroup
+                  exclusive
+                  size="small"
+                  value={measureSort}
+                  onChange={(e, v) => v && setMeasureSort(v)}
+                >
+                  <ToggleButton value="sources" sx={{ py: 0.25 }}>
+                    most sources
+                  </ToggleButton>
+                  <ToggleButton value="alpha" sx={{ py: 0.25 }}>
+                    A–Z
+                  </ToggleButton>
+                </ToggleButtonGroup>
+              </Stack>
+              {singleCount > 0 && (
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  display="block"
+                  sx={{ mt: 0.5 }}
+                >
+                  {includeSingle
+                    ? `Showing ${singleCount} single-source measures — only one scenario dataset each, nothing to compare against yet. `
+                    : `${singleCount} measure${singleCount !== 1 ? "s" : ""} hidden — provided by a single source only, so no second scenario dataset exists for a comparison. `}
+                  <Typography
+                    component="span"
+                    variant="caption"
+                    onClick={() => setIncludeSingle((v) => !v)}
+                    sx={{
+                      color: "primary.main",
+                      cursor: "pointer",
+                      textDecoration: "underline",
+                    }}
+                  >
+                    {includeSingle ? "hide them again" : "show and search them"}
+                  </Typography>
+                </Typography>
+              )}
+            </Box>
+            {children}
+          </Paper>
+        );
+      },
+    [measureSort, includeSingle, singleCount]
+  );
   if (!ms.catalog) return <LinearProgress />;
 
   const visible = ms.catalog.filter(
@@ -237,6 +306,7 @@ export default function VariantB({ ms }) {
               sx={{ minWidth: 460 }}
               options={measureChoices}
               filterOptions={measureFilter}
+              PaperComponent={MeasurePaper}
               value={ms.measure}
               onChange={(e, o) => o && ms.setMeasureId(`${o.space}:${o.value}`)}
               disableClearable
@@ -265,19 +335,6 @@ export default function VariantB({ ms }) {
                 />
               )}
             />
-            <ToggleButtonGroup
-              exclusive
-              size="small"
-              value={measureSort}
-              onChange={(e, v) => v && setMeasureSort(v)}
-            >
-              <Tooltip arrow title="Most sources first">
-                <ToggleButton value="sources">sources</ToggleButton>
-              </Tooltip>
-              <Tooltip arrow title="Alphabetical">
-                <ToggleButton value="alpha">A–Z</ToggleButton>
-              </Tooltip>
-            </ToggleButtonGroup>
             {ms.measure && (
               <Typography variant="body2" color="text.secondary">
                 Provided by <b>{ms.measure.providers.length}</b> source
@@ -313,35 +370,6 @@ export default function VariantB({ ms }) {
               </Button>
             )}
           </Stack>
-          {singleCount > 0 && (
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              display="block"
-              sx={{ mt: 0.5 }}
-            >
-              {includeSingle
-                ? `Showing ${singleCount} single-source measures too — each has only one scenario dataset, so there is nothing to compare it against yet. `
-                : `${singleCount} more measure${singleCount !== 1 ? "s are" : " is"} summarized away: provided by a single source only, so no second scenario dataset exists for a comparison. `}
-              <Typography
-                component="button"
-                variant="caption"
-                onClick={() => setIncludeSingle((v) => !v)}
-                sx={{
-                  border: "none",
-                  background: "none",
-                  color: "primary.main",
-                  cursor: "pointer",
-                  p: 0,
-                  textDecoration: "underline",
-                }}
-              >
-                {includeSingle
-                  ? "hide them again"
-                  : "show and search them anyway"}
-              </Typography>
-            </Typography>
-          )}
         </Card>
 
         {/* toolbar */}
@@ -380,10 +408,24 @@ export default function VariantB({ ms }) {
             value={ms.groupKey}
             sx={{ minWidth: 170 }}
             onChange={(e) => ms.setGroupKey(e.target.value)}
-            helperText={
+            InputProps={
               ms.groupOptions.find((o) => o.key === ms.groupKey)?.shared ===
               false
-                ? "⚠ not in every selected source"
+                ? {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Tooltip
+                          arrow
+                          title="This dimension is not present in every selected source — sources lacking it drop out of the chart."
+                        >
+                          <WarningAmberIcon
+                            color="warning"
+                            sx={{ fontSize: 18 }}
+                          />
+                        </Tooltip>
+                      </InputAdornment>
+                    ),
+                  }
                 : undefined
             }
           >

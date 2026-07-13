@@ -174,6 +174,21 @@ through the existing flow.
   of two+ measures (dual axes), pairing suggested semantically (part–whole,
   price×volume); cross-measure arithmetic stays out of scope.
 
+## Reaction round 7 (2026-07-13) — picker controls into the dropdown, toolbar alignment
+
+- **Measure picker controls moved inside the dropdown** — sort (most sources ↔
+  A–Z) and the single-source show/hide live in a header of the Autocomplete
+  popup, right where the user searches (custom `PaperComponent`;
+  `onMouseDown preventDefault` keeps the input focused so using them doesn't
+  close the popup). Nothing measure-related sits outside the field anymore.
+- **No more helper text under toolbar fields** — the "stacking is off while
+  grouped by source" caption elevated the Chart style field and broke the row
+  baseline. Replaced by an in-field lock indicator (visible whenever grouping by
+  source blocks stacking; tooltip explains why and how to unblock) plus a "—
+  locked by group-by" annotation on the disabled menu item. The Grouped-by
+  field's "not in every selected source" helper got the same treatment (warning
+  icon in the field, tooltip with the consequence).
+
 ## Verdict
 
 **Variant B (workbench rail).** Remaining before this directory dies: further

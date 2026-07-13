@@ -22,6 +22,7 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
 import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
@@ -35,6 +36,7 @@ import TableRow from "@mui/material/TableRow";
 import Stack from "@mui/material/Stack";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import PreviewIcon from "@mui/icons-material/Preview";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import LaunchIcon from "@mui/icons-material/Launch";
 import { labelForIri } from "../registryQuery.js";
 import { resolveTerms } from "../tibTerms.js";
@@ -652,6 +654,8 @@ export function MergedChart({
 
 // WF-02 guardrail: stacking across sources is never offered while source is
 // the group-by — a cross-source stack reads as a sum nobody asked for.
+// The blocked state shows as an in-field lock indicator + tooltip instead of
+// helper text below the field, which misaligned the toolbar row (round 7).
 export function ChartTypeSelect({ chartType, setChartType, groupKey, sx }) {
   const stackBlocked = groupKey === "source";
   return (
@@ -661,15 +665,28 @@ export function ChartTypeSelect({ chartType, setChartType, groupKey, sx }) {
       label="Chart style"
       value={stackBlocked && chartType === "stacked" ? "grouped" : chartType}
       onChange={(e) => setChartType(e.target.value)}
-      sx={{ minWidth: 160, ...sx }}
-      helperText={
-        stackBlocked ? "stacking is off while grouped by source" : undefined
+      sx={{ minWidth: 180, ...sx }}
+      InputProps={
+        stackBlocked
+          ? {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Tooltip
+                    arrow
+                    title="Grouped by source: stacked bars are locked — values from different sources are never summed together. Regroup by another dimension to stack."
+                  >
+                    <LockOutlinedIcon fontSize="small" color="action" />
+                  </Tooltip>
+                </InputAdornment>
+              ),
+            }
+          : undefined
       }
     >
       <MenuItem value="line">Lines (trend)</MenuItem>
       <MenuItem value="grouped">Grouped bars (compare)</MenuItem>
       <MenuItem value="stacked" disabled={stackBlocked}>
-        Stacked bars (composition)
+        Stacked bars{stackBlocked ? " — locked by group-by" : " (composition)"}
       </MenuItem>
     </TextField>
   );
