@@ -96,6 +96,9 @@ export default function useMultiSource() {
     setSelected((cur) =>
       cur.includes(t) ? cur.filter((x) => x !== t) : [...cur, t]
     );
+  // measure-first shortcut (reaction round 2): select every source that
+  // provides the chosen measure
+  const selectProviders = (providers) => setSelected([...providers]);
   const entriesFor = (tables) =>
     (catalog || []).filter((c) => tables.includes(c.table));
   const selectedEntries = useMemo(
@@ -464,6 +467,7 @@ export default function useMultiSource() {
     catalog,
     selected,
     toggle,
+    selectProviders,
     selectedEntries,
     measureOptions,
     measure,

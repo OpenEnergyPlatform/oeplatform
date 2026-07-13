@@ -178,6 +178,74 @@ export default function VariantB({ ms }) {
 
       {/* WORKBENCH */}
       <Box sx={{ flex: 1, minWidth: 0 }}>
+        {/* MEASURE BAR — the initially required choice sits on top of the
+            graph filters (reaction round 2): pick a measure, see how many
+            sources from which scenario provide it, select them all at once */}
+        <Card variant="outlined" sx={{ px: 1.5, py: 1, mb: 1.5 }}>
+          <Stack
+            direction="row"
+            spacing={2}
+            useFlexGap
+            flexWrap="wrap"
+            alignItems="center"
+          >
+            <TextField
+              select
+              size="small"
+              label="Measure (start here)"
+              value={ms.measureId}
+              sx={{ minWidth: 280 }}
+              onChange={(e) => ms.setMeasureId(e.target.value)}
+            >
+              {ms.measureOptions.map((o) => (
+                <MenuItem
+                  key={`${o.space}:${o.value}`}
+                  value={`${o.space}:${o.value}`}
+                >
+                  <ListItemText
+                    primary={o.label}
+                    secondary={`${o.space === "substance" ? "substance" : "IAMC quantity"} · ${o.providers.length} source${o.providers.length !== 1 ? "s" : ""} provide${o.providers.length === 1 ? "s" : ""} it${o.selectedProviders ? ` (${o.selectedProviders} selected)` : ""}`}
+                  />
+                </MenuItem>
+              ))}
+            </TextField>
+            {ms.measure && (
+              <Typography variant="body2" color="text.secondary">
+                Provided by <b>{ms.measure.providers.length}</b> source
+                {ms.measure.providers.length !== 1 ? "s" : ""}:{" "}
+                {Object.entries(
+                  ms.measure.providers.reduce((acc, t) => {
+                    const fam =
+                      ms.catalog.find((c) => c.table === t)?.family || "other";
+                    acc[fam] = (acc[fam] || 0) + 1;
+                    return acc;
+                  }, {})
+                )
+                  .map(([fam, n]) => `${fam} (${n})`)
+                  .join(" · ")}{" "}
+                — {ms.measure.selectedProviders} of{" "}
+                {ms.selected.length || "none"} selected provide it
+              </Typography>
+            )}
+            <Box sx={{ flex: 1 }} />
+            {ms.measure && (
+              <Button
+                size="small"
+                variant="outlined"
+                disabled={
+                  ms.measure.providers.length === 0 ||
+                  (ms.measure.selectedProviders ===
+                    ms.measure.providers.length &&
+                    ms.selected.length === ms.measure.providers.length)
+                }
+                onClick={() => ms.selectProviders(ms.measure.providers)}
+              >
+                Select all {ms.measure.providers.length} providers
+              </Button>
+            )}
+          </Stack>
+        </Card>
+
         {/* toolbar */}
         <Stack
           direction="row"
@@ -187,31 +255,6 @@ export default function VariantB({ ms }) {
           alignItems="center"
           sx={{ mb: 1 }}
         >
-          <TextField
-            select
-            size="small"
-            label="Measure (start here)"
-            value={ms.measureId}
-            sx={{ minWidth: 260 }}
-            onChange={(e) => ms.setMeasureId(e.target.value)}
-            helperText={
-              ms.measure
-                ? `${ms.measure.selectedProviders}/${ms.selected.length} selected sources provide it`
-                : "the rail dots show which sources provide it"
-            }
-          >
-            {ms.measureOptions.map((o) => (
-              <MenuItem
-                key={`${o.space}:${o.value}`}
-                value={`${o.space}:${o.value}`}
-              >
-                <ListItemText
-                  primary={o.label}
-                  secondary={`${o.space === "substance" ? "substance" : "IAMC quantity"} · ${o.providers.length} source${o.providers.length !== 1 ? "s" : ""} provide${o.providers.length === 1 ? "s" : ""} it${o.selectedProviders ? ` (${o.selectedProviders} selected)` : ""}`}
-                />
-              </MenuItem>
-            ))}
-          </TextField>
           <TextField
             select
             size="small"

@@ -102,6 +102,20 @@ Still open for the next round: comparability beyond unit + substance
 (WF-18: possibly preset-only entry), eu_leg substance fix (WF-21, decided:
 species-conditional `co2_emission`).
 
+## Reaction round 2 (2026-07-13) — measure bar
+
+- **Measure bar on top of the graph filters** — the measure select moved out of
+  the toolbar into its own bar above them (it is the initially required
+  selection), with per-scenario provider info ("Provided by 3 sources: AMIRIS
+  Germany 2019 (2) · Ariadne (1) — 1 of 2 selected provide it") and a **"Select
+  all N providers"** button (`ms.selectProviders`).
+- **Ontology-hierarchy measure grouping** (maintainer idea, charted as wayfinder
+  WF-23, not built): OEO verifiably groups per-species emission rates under
+  `OEO_00140082` _greenhouse gas emission rate_ — subclass traversal could let
+  sources annotating different subclasses meet at a parent class. Discovery
+  grouping is the safe near-term use; a verdict leg needs double-counting and
+  CO2e-weighting guardrails first.
+
 ## Verdict
 
 **Variant B (workbench rail).** Remaining before this directory dies: further
