@@ -451,8 +451,9 @@ export function MergedChart({
     };
   }, [rows, registry, groupKey]);
 
-  const { option, stacks } = useMemo(() => {
-    if (!rows || !registry) return { option: null, stacks: [] };
+  const { option, stacks, numeric, allZero } = useMemo(() => {
+    if (!rows || !registry)
+      return { option: null, stacks: [], numeric: 0, allZero: false };
     const byKey = Object.fromEntries(
       (registry.dimensions || []).map((d) => [d.key, d])
     );
@@ -479,11 +480,15 @@ export function MergedChart({
     ].sort();
     const stackList = [];
     const matrix = {};
+    let numericCount = 0;
+    let nonZero = false;
     for (const r of rows) {
       const s = seriesOf(r);
       const x = bucketLabel(r, granularity);
       const v = parseFloat(r.value?.value);
       if (s.name == null || Number.isNaN(v)) continue;
+      numericCount += 1;
+      if (v !== 0) nonZero = true;
       if (!stackList.find((k) => k.name === s.name)) stackList.push(s);
       matrix[s.name] = matrix[s.name] || {};
       matrix[s.name][x] = (matrix[s.name][x] || 0) + v;
@@ -499,6 +504,9 @@ export function MergedChart({
       tooltip: {
         trigger: "axis",
         axisPointer: { type: isLine ? "line" : "shadow" },
+        // hover listing sorted by value, largest first — matches the visual
+        // order of the lines at that x position (round 8)
+        order: "valueDesc",
       },
       legend: {
         type: "scroll",
@@ -541,14 +549,42 @@ export function MergedChart({
         data: xVals.map((x) => matrix[s.name]?.[x] ?? null),
       })),
     };
-    return { option: opt, stacks: stackList };
+    return {
+      option: opt,
+      stacks: stackList,
+      numeric: numericCount,
+      allZero: numericCount > 0 && !nonZero,
+    };
   }, [rows, registry, groupKey, unit, chartType, granularity, catalog, terms]);
 
   if (!option) return null;
+  // rows came back but none carried a readable number — say so instead of
+  // rendering an empty coordinate system (round 8)
+  if (numeric === 0) {
+    return (
+      <Box>
+        <ChartHeading summary={summary} />
+        <Alert severity="warning" sx={{ my: 1 }}>
+          The query returned {rows.length} row{rows.length !== 1 ? "s" : ""},
+          but none carried a numeric value that could be plotted — the values
+          may be empty in the underlying table. Peek at the raw data via the
+          rail to check.
+        </Alert>
+      </Box>
+    );
+  }
   return (
     <Box>
       <ChartHeading summary={summary} />
       <ComputationNote summary={summary} />
+      {allZero && (
+        <Alert severity="info" sx={{ mb: 1 }}>
+          Every value in this slice is exactly <b>0</b> — the sources report the
+          measure, but record zero throughout (the flat line sits on the
+          x-axis). The data was read correctly; there is just nothing non-zero
+          to see here.
+        </Alert>
+      )}
       <Box sx={{ position: "relative" }}>
         <Box sx={{ opacity: stale ? 0.3 : 1, transition: "opacity 0.2s" }}>
           <ReactECharts option={option} style={{ height: 420 }} notMerge />

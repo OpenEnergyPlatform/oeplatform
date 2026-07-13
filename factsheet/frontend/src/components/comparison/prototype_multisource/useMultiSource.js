@@ -27,6 +27,7 @@ import {
   askDimension,
   buildMergedQuery,
   bucketLabel,
+  facetValuesForMeasure,
 } from "./protoData.js";
 
 const titleCase = (k) =>
@@ -360,6 +361,33 @@ export default function useMultiSource() {
     return out;
   }, [catalog, measure, verdictInput, unitsByTable, unit, registry]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ---- facet-conflation guard (reaction round 8): a value's meaning is the
+  //      COMBINATION of its annotations (WF-04). If the chosen measure's
+  //      observations spread over ≥2 values of a facet dimension the chart is
+  //      not grouped by, those values are summed into one series — warn and
+  //      offer the fixing group-by instead of plotting silently. ----
+  const [facetSpread, setFacetSpread] = useState({});
+  useEffect(() => {
+    if (!registry || !selected.length || !measure) {
+      setFacetSpread({});
+      return;
+    }
+    let active = true;
+    facetValuesForMeasure({ registry, tables: selected, measure })
+      .then((s) => active && setFacetSpread(s))
+      .catch(() => active && setFacetSpread({}));
+    return () => {
+      active = false;
+    };
+  }, [registry, selected, measure]);
+  const conflations = useMemo(
+    () =>
+      Object.entries(facetSpread)
+        .filter(([key, vals]) => vals.length > 1 && key !== groupKey)
+        .map(([key, vals]) => ({ key, label: titleCase(key), values: vals })),
+    [facetSpread, groupKey]
+  );
+
   // ---- granularity ladder ----
   const ladder = useMemo(() => {
     const ok =
@@ -470,6 +498,11 @@ export default function useMultiSource() {
   // computation story is run-snapshotted, not live-drifting.
   const notices = useMemo(() => {
     const out = [];
+    for (const c of conflations) {
+      out.push(
+        `Mixed ${c.label} values (${c.values.join(" · ")}) are summed within each series — group by ${c.label} to keep them apart.`
+      );
+    }
     if (
       ["day", "month"].includes(granularity) &&
       selectedEntries.some((e) => e.family.startsWith("AMIRIS"))
@@ -479,7 +512,7 @@ export default function useMultiSource() {
       );
     }
     return out;
-  }, [granularity, selectedEntries]);
+  }, [granularity, selectedEntries, conflations]);
 
   const unmappedFootnotes = useMemo(
     () =>
@@ -516,6 +549,7 @@ export default function useMultiSource() {
     verdict,
     verdictInput,
     candidates,
+    conflations,
     ladder,
     granularity,
     setGranularity,

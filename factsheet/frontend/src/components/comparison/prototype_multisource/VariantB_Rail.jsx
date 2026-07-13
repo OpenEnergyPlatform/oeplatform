@@ -21,6 +21,7 @@ import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
 import Tooltip from "@mui/material/Tooltip";
 import LinearProgress from "@mui/material/LinearProgress";
+import Alert from "@mui/material/Alert";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
@@ -470,6 +471,32 @@ export default function VariantB({ ms }) {
             {ms.running ? "…" : "Compare"}
           </Button>
         </Stack>
+
+        {/* FACET-CONFLATION GUARD (round 8): the meaning of a value is the
+            combination of its annotations — never sum bid+award style facets
+            into one series without saying so */}
+        {ms.conflations.map((c) => (
+          <Alert
+            key={c.key}
+            severity="warning"
+            sx={{ mb: 1.5 }}
+            action={
+              <Button
+                size="small"
+                color="warning"
+                variant="outlined"
+                onClick={() => ms.setGroupKey(c.key)}
+              >
+                Group by {c.label}
+              </Button>
+            }
+          >
+            The selected sources annotate <b>{ms.measure?.label}</b> values with
+            several <b>{c.label}</b> facets ({c.values.join(" · ")}). Grouped by{" "}
+            {ms.groupKey === "source" ? "source" : ms.groupKey}, these different
+            things are <b>summed into one series</b>.
+          </Alert>
+        ))}
 
         {/* COMPARABILITY STRIP — always visible while composing */}
         <Card variant="outlined" sx={{ px: 1.5, py: 1, mb: 1.5 }}>

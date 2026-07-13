@@ -14,6 +14,7 @@ import {
   prefixHeader,
   sparqlTerm,
   sharedPredicates,
+  expandCurie,
 } from "../registryQuery.js";
 
 export const TABLE_PRED = "oeo:OEO_00000504";
@@ -131,7 +132,12 @@ export async function askDimension(registry, table, dim) {
     const set = (dim.values || [])
       .filter((v) => v.iri)
       .map((v) => sparqlTerm(v.iri));
-    if (set.length) iso = ` FILTER(?v IN (${set.join(", ")}))`;
+    // a shared-predicate dimension with NO enum IRIs cannot be isolated from
+    // the other is-about facets — never offer it (round 8: the `qualifier`
+    // dim has iri:null, which silently dropped the filter and let grouping
+    // bind EVERY annotation incl. the substance itself)
+    if (!set.length) return false;
+    iso = ` FILTER(?v IN (${set.join(", ")}))`;
   }
   const q = `${prefixHeader(registry)}
 ASK { ?s ${TABLE_PRED} ?t . FILTER(?t = "${table}") ?s ${dim.predicate} ?v .${iso} }`;
@@ -140,6 +146,44 @@ ASK { ?s ${TABLE_PRED} ?t . FILTER(?t = "${table}") ?s ${dim.predicate} ?v .${is
   } catch (e) {
     return true; // fail open, like the existing view
   }
+}
+
+// Which facet values (transaction_role, data_role, …) the chosen measure's
+// observations carry within the selected tables — one query over the shared
+// is-about predicate, bucketed back per dimension via the enums. Feeds the
+// facet-conflation guard (round 8): if a measure spreads over ≥2 values of a
+// facet the chart is NOT grouped by, those values are summed into one series.
+export async function facetValuesForMeasure({ registry, tables, measure }) {
+  if (!tables.length || !measure) return {};
+  const dims = (registry.dimensions || []).filter(
+    (d) =>
+      d.key !== "substance" &&
+      d.object_kind === "iri" &&
+      sharedPredicates(registry).has(d.predicate) &&
+      (d.values || []).some((v) => v.iri)
+  );
+  if (!dims.length) return {};
+  const pred = dims[0].predicate; // all share the is-about predicate
+  const all = dims.flatMap((d) =>
+    (d.values || []).filter((v) => v.iri).map((v) => sparqlTerm(v.iri))
+  );
+  const q = `${prefixHeader(registry)}
+SELECT DISTINCT ?v WHERE {
+  ?s ${TABLE_PRED} ?t . FILTER(?t IN (${tables.map((t) => `"${t}"`).join(", ")})) .
+  ${measureScope(registry, measure)}
+  ?s ${pred} ?v . FILTER(?v IN (${all.join(", ")})) .
+}`;
+  const found = bindings(await postSparql(q)).map((b) => b.v.value);
+  const out = {};
+  for (const d of dims) {
+    const hits = (d.values || []).filter(
+      (v) =>
+        v.iri &&
+        found.some((f) => f === expandCurie(registry, v.iri) || f === v.iri)
+    );
+    if (hits.length) out[d.key] = hits.map((v) => v.label || v.iri);
+  }
+  return out;
 }
 
 // ---- the merged, aggregated comparison query -------------------------------
@@ -234,18 +278,18 @@ export function buildMergedQuery({
   const groupVars = ["?table_name", ...bucket.vars];
   if (groupKey && groupKey !== "source") {
     const gd = byKey[groupKey];
-    if (gd) {
+    const shared =
+      gd &&
+      gd.object_kind === "iri" &&
+      sharedPredicates(registry).has(gd.predicate);
+    const set = shared
+      ? (gd.values || []).filter((v) => v.iri).map((v) => sparqlTerm(v.iri))
+      : [];
+    // shared-predicate dim without enum IRIs is un-isolatable — fall back to
+    // grouping by source instead of binding every is-about annotation
+    if (gd && !(shared && !set.length)) {
       patterns.push(`?s ${gd.predicate} ?${gd.key} .`);
-      if (
-        gd.object_kind === "iri" &&
-        sharedPredicates(registry).has(gd.predicate)
-      ) {
-        const set = (gd.values || [])
-          .filter((v) => v.iri)
-          .map((v) => sparqlTerm(v.iri));
-        if (set.length)
-          patterns.push(`FILTER(?${gd.key} IN (${set.join(", ")})) .`);
-      }
+      if (shared) patterns.push(`FILTER(?${gd.key} IN (${set.join(", ")})) .`);
       groupVars.push(`?${gd.key}`);
     }
   }

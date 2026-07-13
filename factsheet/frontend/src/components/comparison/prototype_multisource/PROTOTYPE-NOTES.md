@@ -193,6 +193,38 @@ through the existing flow.
   field's "not in every selected source" helper got the same treatment (warning
   icon in the field, tooltip with the consequence).
 
+## Reaction round 8 (2026-07-13) — facet semantics, enum-isolation hole, tooltip order
+
+- **Enum-isolation hole closed** — the `qualifier` registry dimension's only
+  enum value has `iri: null`; the isolation filter (built from enum IRIs)
+  silently vanished, so (a) qualifier was OFFERED as a group-by for every table
+  with any is-about triple and (b) grouping by it bound EVERY annotation —
+  award, bid, and the substance _electrical energy_ itself (the irritating
+  three-series plot, where "electrical energy" ≈ award + bid double-counted).
+  Fix: a shared-predicate dimension without enum IRIs is un-isolatable →
+  `askDimension` never offers it, `buildMergedQuery` refuses to group by it.
+- **Facet-conflation guard** (the deeper WF-04 point: the MEANING is the
+  combination of annotations) — verified live that biogas "electrical energy" =
+  8,761 bid + 8,761 award observations: grouped by source they were summed into
+  one series. Now the hook discovers which facet values the chosen measure
+  spreads over in the selected sources (`facetValuesForMeasure`, one
+  enum-isolated query); if a facet has ≥2 values and isn't the group-by, Variant
+  B shows a warning ("bid · award are summed into one series") with a one-click
+  "Group by Transaction Role" fix, and the chart carries a footnote (all
+  variants).
+- **Extraction verified faithful** — the "empty" investment-cost chart was
+  correct data: AMIRIS Germany2019 reports investment/fixed/variable cost as
+  all-zero (8,761 hourly rows × 0 per agent; market revenue €1.5e9 and energy
+  8.09e7 MWh check out). The chart now says so: an info note "every value in
+  this slice is exactly 0 — read correctly, nothing non-zero to see", and a
+  separate guard replaces the empty coordinate system when rows carry NO
+  readable numbers at all.
+- **Tooltip ordering** — the hover listing sorts by value, largest first
+  (`tooltip.order: "valueDesc"`), matching the visual order of the lines.
+- A stale-HMR `ToggleButtonGroup is not defined` error was reported once (module
+  timestamp predated the round-7 rework); no reference remains — hard reload
+  clears it.
+
 ## Verdict
 
 **Variant B (workbench rail).** Remaining before this directory dies: further
