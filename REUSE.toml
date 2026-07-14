@@ -3517,7 +3517,7 @@ path = [
   "base/templates/homepage/features.html",
   "base/templates/homepage/hero.html",
   "base/templates/homepage/resources.html",
-  "ontology/templates/ontology/partial_integrated_workflows.html",
+  "base/templates/homepage/integrated_workflows.html",
 ]
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
