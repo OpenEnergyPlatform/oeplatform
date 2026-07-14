@@ -94,6 +94,10 @@ SPDX-License-Identifier: CC0-1.0
   reference to `TablePeerReviewContributorView`.
   [(#2360)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2350)
 
+- Fix the oemetaBuilder Download button, which did nothing due to a
+  `ReferenceError` under strict mode. The downloaded file now also gets a
+  sensible name in the standalone tool instead of `undefined.metadata.json`.
+
 ## Documentation updates
 
 - Updated the OE Family Steering Committee
