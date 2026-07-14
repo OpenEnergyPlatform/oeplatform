@@ -7,7 +7,6 @@ SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
-import os
 from pathlib import Path
 
 from owlready2 import get_ontology
@@ -23,13 +22,10 @@ from oeplatform.settings import (
     RDF_DATABASES,
     USE_DOCKER,
 )
+from ontology.utils import get_ontology_version
 
-versions = os.listdir(
-    Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
-)  # TODO bad - windows dev will get path error
-
-version = max((d for d in versions), key=lambda d: [int(x) for x in d.split(".")])
 onto_base_path = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
+version = get_ontology_version(onto_base_path)
 path = onto_base_path / version  # TODO bad - windows dev will get path error
 file = "oeo-full.owl"  # TODO- set in settings
 
