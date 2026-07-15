@@ -3519,6 +3519,8 @@ path = [
   "base/templates/homepage/resources.html",
   "base/templates/homepage/integrated_workflows.html",
 ]
+
+[[annotations]]
 path = "login/templates/login/user_datasets.html"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
