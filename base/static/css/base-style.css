@@ -196,3 +196,95 @@ i.default-user-icon {
 .topic-card__header {
   cursor: pointer;
 }
+
+.index-navbar .container-fluid {
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+.index-navbar .nav-link {
+  position: relative;
+  color: var(--white);
+  font-size: 0.875rem;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.index-navbar .navbar-toggler {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* dropdown-toggle items already use ::after for Bootstrap's caret,
+   so the underline uses ::before there instead to avoid clobbering it */
+.index-navbar .nav-link:not(.dropdown-toggle)::after,
+.index-navbar .nav-link.dropdown-toggle::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0%;
+  height: 2px;
+  background-color: var(--white);
+  transition: width 0.2s ease;
+}
+
+.index-navbar .nav-link:not(.dropdown-toggle):hover::after,
+.index-navbar .nav-link.dropdown-toggle:hover::before {
+  width: 100%;
+}
+
+/* replace Bootstrap's border-triangle caret with a chevron, same size */
+.index-navbar .dropdown-toggle::after {
+  display: inline-block;
+  width: 0.45em;
+  height: 0.45em;
+  margin-left: 0.35em;
+  vertical-align: 0.1em;
+  content: "";
+  border: 0;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+}
+
+.index-navbar .dropdown-menu {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  border: 1px solid #e9f0f5;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(41, 114, 166, 0.15);
+  font-size: 0.875rem;
+}
+
+.index-navbar .dropdown-item {
+  padding: 0.625rem 0.75rem;
+  border-radius: 4px;
+  color: #294456;
+}
+
+.index-navbar .dropdown-item:hover,
+.index-navbar .dropdown-item:focus {
+  background-color: #eaf3fa;
+  color: #1f567d;
+}
+
+.index-navbar .dropdown-item.active,
+.index-navbar .dropdown-item:active {
+  background-color: var(--bs-primary);
+  color: var(--white);
+}
+
+.index-navbar .dropdown-menu.show {
+  animation: index-dropdown-fade 0.15s ease;
+}
+
+@keyframes index-dropdown-fade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
