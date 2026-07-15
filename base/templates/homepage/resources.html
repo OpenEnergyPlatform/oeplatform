@@ -1,0 +1,61 @@
+{% load static %}
+<div class="index-features">
+  <div class="index-features-header index-animate-in">
+    <h2 class="index-features-title">Developer Resources</h2>
+    <p class="index-features-subtitle">
+      Access our comprehensive API, contribute to open source
+      development, and integrate OEP into your workflows
+    </p>
+  </div>
+  <div class="index-features-grid">
+    <div class="index-feature-card index-animate-in">
+      <div class="index-feature-card-body">
+        <img class="index-feature-icon"
+             src="{% static 'img/welcome/i_hex_blue_api.svg' %}"
+             alt="" />
+        <h3 class="index-feature-card-title">API Access</h3>
+        <p class="index-feature-card-description">
+          Programmatic access to all platform data and functionality
+          with comprehensive documentation
+        </p>
+      </div>
+      <a class="index-feature-link" href="{{ EXTERNAL_URLS.readthedocs }}">
+        <span>API Documentation</span>
+        {% include 'base/index-arrow.html' %}
+      </a>
+    </div>
+    <div class="index-feature-card index-animate-in">
+      <div class="index-feature-card-body">
+        <img class="index-feature-icon"
+             src="{% static 'img/welcome/i_hex_blue_repo.svg' %}"
+             alt="" />
+        <h3 class="index-feature-card-title">Code Repository</h3>
+        <p class="index-feature-card-description">
+          Open source platform code, contribute to development and
+          access implementation examples
+        </p>
+      </div>
+      <a class="index-feature-link"
+         href="{{ EXTERNAL_URLS.github_openenergyplatform_oeplatform }}">
+        <span>View on GitHub</span>
+        {% include 'base/index-arrow.html' %}
+      </a>
+    </div>
+    <div class="index-feature-card index-animate-in">
+      <div class="index-feature-card-body">
+        <img class="index-feature-icon"
+             src="{% static 'img/welcome/i_hex_blue_docs.svg' %}"
+             alt="" />
+        <h3 class="index-feature-card-title">Documentation</h3>
+        <p class="index-feature-card-description">
+          Comprehensive technical documentation, guides, and best
+          practices for all platform features
+        </p>
+      </div>
+      <a class="index-feature-link" href="{{ EXTERNAL_URLS.mkdocs }}">
+        <span>Read Documentation</span>
+        {% include 'base/index-arrow.html' %}
+      </a>
+    </div>
+  </div>
+</div>

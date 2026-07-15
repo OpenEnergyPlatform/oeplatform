@@ -34,13 +34,14 @@
     {% endblock after-head %}
   </head>
   <body class="d-flex flex-column h-100">
+    <a class="visually-hidden-focusable" href="#main-content">Skip to main content</a>
     {% block header %}
-      <nav class="navbar navbar-expand-lg navbar-dark bg-secondary">
+      <nav class="navbar navbar-expand-lg navbar-dark bg-primary index-navbar">
         <div class="container-fluid">{% include 'base/_header.html' %}</div>
       </nav>
     {% endblock header %}
     {% block main %}
-      <main class="main">
+      <main class="main" id="main-content">
         {% block site-header %}
         {% endblock site-header %}
         <div class="content">

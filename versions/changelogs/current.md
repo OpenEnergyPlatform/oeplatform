@@ -11,7 +11,10 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
-### Features
+- Updated the homepage with new content and styling
+  [(#2352)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2352)
+
+## Features
 
 - Dataset management UI, first slice: the user dashboard now opens on a
   dataset-first view with a switch to the familiar tables view. Users can see

@@ -2,6 +2,7 @@
 {% load django_bootstrap5 %}
 {% load static %}
 {% load compress %}
+{% block title %}&ndash; Open and FAIR Energy Data Platform{% endblock %}
 {% block after-head %}
   {% compress css %}
     <link rel="stylesheet"
@@ -9,138 +10,98 @@
           href="{% static 'css/index-style.css' %}" />
   {% endcompress %}
 {% endblock %}
+{% block footer %}
+  <footer class="index-footer">
+    <div class="index-footer-inner">
+      <div class="index-footer-top">
+        <div class="index-footer-brand">
+          <div class="index-footer-logo">
+            <img src="{% static 'OpenEnergyFamily_Logo_OpenEnergyPlatform_untitled_white.svg' %}"
+                 width="32"
+                 height="32"
+                 alt="" />
+            <p class="index-footer-brand-name">Open Energy Platform</p>
+          </div>
+          <p class="index-footer-tagline">
+            Collaborative platform for open energy data, scenarios, and
+            research tools.
+          </p>
+        </div>
+        <div class="index-footer-columns">
+          <div class="index-footer-column">
+            <h3 class="index-footer-column-title">Features</h3>
+            <ul class="index-footer-link-list">
+              <li><a href="{% url 'dataedit:topic-list' %}">Database</a></li>
+              <li><a href="{% url 'modelview:modellist' 'model' %}">Factsheets</a></li>
+              <li><a href="{% url 'factsheet:factsheets_index' %}">Scenarios</a></li>
+              <li><a href="{% url 'ontology:index' %}">Ontology</a></li>
+            </ul>
+          </div>
+          <div class="index-footer-column">
+            <h3 class="index-footer-column-title">Resources</h3>
+            <ul class="index-footer-link-list">
+              <li><a href="{{ EXTERNAL_URLS.tutorials_index }}">Academy</a></li>
+              <li><a href="{{ EXTERNAL_URLS.readthedocs }}">API Docs</a></li>
+              <li><a href="{{ EXTERNAL_URLS.github_openenergyplatform_oeplatform }}">GitHub</a></li>
+              <li><a href="{{ EXTERNAL_URLS.tutorials_wizard }}">Tutorial</a></li>
+            </ul>
+          </div>
+          <div class="index-footer-column">
+            <h3 class="index-footer-column-title">Platform</h3>
+            <ul class="index-footer-link-list">
+              <li><a href="{% url 'base:about' %}">About OEP</a></li>
+              <li><a href="{% url 'base:contact' %}">Contact</a></li>
+              <li><a href="{% url 'base:legal-privacy-policy' %}">Privacy</a></li>
+              <li><a href="{% url 'base:legal-tou' %}">Terms</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <p class="index-footer-copyright">© {% now "Y" %} Open Energy Platform. All rights reserved.</p>
+    </div>
+  </footer>
+{% endblock footer %}
 {% block main %}
-  <div class="index-home">
-    <div class="index-group">
-      <div class="index-padding">
-        {% include 'base/messages.html' %}
-        <h3>Open Energy Platform</h3>
-        <span class="subheader">Make your energy system modelling process transparent!</span>
-        <div class="index-tile-container">
-          <div class="index-tile index-tile-colored index-tile-color-1">
-            <img src="{% static 'img/welcome/OpenEnergyFamily_Logo_OpenEnergyDatabase_icon.svg' %}"
-                 alt="OEDB" />
-            {% comment %}
-          <a role="button" class="btn btn-primary" href="{% url 'dataedit:topic-list' %}">Database</a>
-            {% endcomment %}
-            <div class="inner-index-tile">
-              <div class="panel-description">
-                <h2>Database</h2>
-                <p class="alternative">
-                  Are you interested in data? Visualize the database to explore
-                  it. All contributors publish datasets under an open license,
-                  so you can securely download and work with it. Are you
-                  interested in sharing your own data? This is the place to
-                  upload it.
-                </p>
-              </div>
-            </div>
-            <a role="button"
-               class="btn btn-primary pull-right"
-               style="font-size: 16px"
-               href="{% url 'dataedit:topic-list' %}">Database</a>
-          </div>
-          <div class="index-tile index-tile-colored index-tile-color-2">
-            <!-- <img src="{% static 'img/welcome/OpenEnergyFamily_Logo_Factsheets_icon.svg' %}"
-      alt="Factsheets"> -->
-            <img src="{% static 'img/welcome/bundles.png' %}" alt="Scenario Bundle" />
-            <div class="inner-index-tile">
-              <div class="panel-description">
-                <h2>Scenario Bundles</h2>
-                <p class="alternative">
-                  Do you want to learn more about scenarios, the models used to
-                  project them and the actual data? Then, this is the right
-                  place for you. If you contributed data to the OEP this is the
-                  place where you can provide more context by creating your own
-                  scenario bundle.
-                </p>
-              </div>
-            </div>
-            <a role="button"
-               class="btn btn-primary"
-               style="font-size: 16px"
-               href="{% url 'factsheet:factsheets_index' %}">Scenario Bundles</a>
-          </div>
-          <div class="index-tile index-tile-colored index-tile-color-3">
-            <img src="{% static 'img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg' %}"
-                 alt="OEO" />
-            {% comment %}
-          <a role="button" class="btn btn-primary" href="{% url 'ontology:index' %}">Ontology</a>
-            {% endcomment %}
-            <div class="inner-index-tile">
-              <div class="panel-description">
-                <h2>Ontology</h2>
-                <p class="alternative">
-                  Ontology referes to a collection of domain specific
-                  terminology and their relationships. Come here to learn more
-                  about the Open Energy Ontology (OEO), which helps with data
-                  annotation and management.
-                </p>
-              </div>
-            </div>
-            <a role="button"
-               class="btn btn-primary"
-               style="font-size: 16px"
-               href="{% url 'ontology:index' %}">Ontology</a>
-          </div>
-          <div class="index-tile index-tile-colored index-tile-color-4">
-            <img src="{% static 'img/welcome/OpenEnergyFamily_Logo_Tutorials_icon.svg' %}"
-                 alt="Academy" />
-            <div class="inner-index-tile">
-              <div class="panel-description">
-                <h2>Academy</h2>
-                <p class="alternative">
-                  The Open Energy Academy (OEA) provides courses as well as
-                  dedicated tutorials covering important topics around the Open
-                  Energy Family (OEF) tools and the Open Energy Platform (OEP).
-                  You will also find short answers to urgent questions.
-                </p>
-              </div>
-            </div>
-            <a role="button"
-               class="btn btn-primary"
-               style="font-size: 16px"
-               href="{{ EXTERNAL_URLS.tutorials_index }}">Academy</a>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="index-about-container-background">
-      <div class="index-about-container">
-        <div class="index-about-column">
-          <img src="{% static 'img/welcome/about-process-modelling.svg' %}" alt="" />
-          <b>API</b>
-          <span class="alternative">
-            Learn how to download and publish open data on the OEP using the
-            API.
-          </span>
-          <a role="button"
-             class="btn btn-primary btn-sm"
-             href="{{ EXTERNAL_URLS.tutorials_api1 }}">Learn more</a>
-        </div>
-        <div class="index-about-column">
-          <img src="{% static 'img/welcome/about-openscience.svg' %}" alt="" />
-          <b>Open Science</b>
-          <span class="alternative">
-            Good scientific practice needs open licenses for software, data and
-            content.
-          </span>
-          <a role="button"
-             class="btn btn-primary btn-sm"
-             href="{{ EXTERNAL_URLS.tutorials_licenses }}">Learn more</a>
-        </div>
-        <div class="index-about-column">
-          <img src="{% static 'img/welcome/about-community.svg' %}" alt="" />
-          <b>Open Energy Community</b>
-          <span class="alternative">
-            Collaborate and contribute to the development on GitHub.
-          </span>
-          <a role="button"
-             class="btn btn-primary btn-sm"
-             href="{{ EXTERNAL_URLS.github_openenergyplatform }}">Learn
-          more</a>
-        </div>
-      </div>
-    </div>
-  </div>
+  <main id="main-content" class="index-home">
+    {% include 'base/messages.html' %}
+    {% include 'homepage/hero.html' %}
+    {% include 'homepage/features.html' %}
+    {% include 'homepage/capabilities.html' %}
+    {% include 'homepage/integrated_workflows.html' %}
+    {% include 'homepage/academy.html' %}
+    {% include 'homepage/resources.html' %}
+  </main>
+{% endblock %}
+{% block after-body-bottom-js %}
+  <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var targets = document.querySelectorAll('.index-animate-in');
+    var prefersReducedMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)'
+    ).matches;
+
+    if (prefersReducedMotion || !('IntersectionObserver' in window)) {
+      targets.forEach(function (el) {
+        el.classList.add('is-visible');
+      });
+      return;
+    }
+
+    var observer = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    targets.forEach(function (el) {
+      observer.observe(el);
+    });
+  });
+  </script>
 {% endblock %}

@@ -5,6 +5,16 @@ set -euo pipefail
 sleep 5
 
 # ----------------------------------------------------------------
+# Ownership target for bind-mounted dirs.
+# We reference the *numeric* uid:gid of the current process rather than
+# the `appuser:appgroup` names: on macOS the host GID (e.g. 20) already
+# exists in the base image, so no group literally named `appgroup` is
+# created and `chown appuser:appgroup` fails with "invalid group".
+# The container also runs as this (non-root) user via compose's `user:`,
+# so any chown is at most a no-op — guard each call with `|| true`.
+OWNER="$(id -u):$(id -g)"
+
+# ----------------------------------------------------------------
 # Bootstrap permissions on bind-mounted dirs so appuser can write
 # ----------------------------------------------------------------
 for d in ontologies media/oeo_ext static; do
@@ -13,8 +23,8 @@ for d in ontologies media/oeo_ext static; do
   # ensure the directory exists
   mkdir -p "$TARGET"
 
-  # make appuser own it
-  chown -R appuser:appgroup "$TARGET"
+  # make appuser own it (no-op when already owned; non-root can't chown)
+  chown -R "$OWNER" "$TARGET" || true
 
   # owner & group: read/write + conditional-exec (dirs executable,
   # files only if already marked) ; others: read + conditional-exec
@@ -35,7 +45,7 @@ if [ ! -d "$ONT_DIR/oeo" ]; then
   unzip -q /tmp/ont.zip -d "$ONT_DIR"
   rm /tmp/ont.zip
 
-  chown -R appuser:appgroup "$ONT_DIR"
+  chown -R "$OWNER" "$ONT_DIR" || true
   chmod -R u+rwX,g+rwX,o+rX "$ONT_DIR"
 fi
 
@@ -47,7 +57,7 @@ if [ ! -f "${MEDIA_DIR}/oeo_ext.owl" ]; then
      "$MEDIA_DIR/oeo_ext.owl"
 
   # fix perms on the new file
-  chown appuser:appgroup "$MEDIA_DIR/oeo_ext.owl"
+  chown "$OWNER" "$MEDIA_DIR/oeo_ext.owl" || true
   chmod u+rw,g+rw,o+rX "$MEDIA_DIR"
 fi
 
@@ -59,7 +69,7 @@ SEC_DEF=/home/appuser/app/oeplatform/securitysettings.py.default
 if [ ! -f "$SEC" ]; then
   echo "Copying default securitysettings…"
   cp "$SEC_DEF" "$SEC"
-  chown appuser:appgroup "$SEC"
+  chown "$OWNER" "$SEC" || true
   chmod u+rw,g+rw,o+rX "$SEC"
 fi
 

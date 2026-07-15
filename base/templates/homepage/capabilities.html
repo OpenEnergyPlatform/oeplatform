@@ -1,0 +1,224 @@
+{% load static %}
+<div class="index-capabilities">
+  <div class="index-capabilities-header index-animate-in">
+    <h2 class="index-capabilities-title">Platform Capabilities</h2>
+    <p class="index-capabilities-subtitle">
+      Dive deeper into each section to discover the full range of tools
+      and resources available
+    </p>
+  </div>
+  <div class="index-capabilities-list">
+    <div class="index-capability-card index-animate-in">
+      <div class="index-capability-card-header">
+        <img class="index-feature-icon"
+             src="{% static 'img/welcome/i_hex_blue_database.svg' %}"
+             alt="" />
+        <div class="index-capability-card-heading">
+          <h3 class="index-capability-card-title">Database &amp; Metadata</h3>
+          <p class="index-capability-card-description">
+            Collaborative energy data repository with advanced search and
+            metadata management
+          </p>
+        </div>
+      </div>
+      <hr class="index-capability-divider" />
+      <div class="index-capability-columns">
+        <div class="index-capability-column">
+          <h4 class="index-capability-column-title">Core Features:</h4>
+          <ul class="index-feature-list index-capability-feature-list">
+            <li>
+              {% include 'base/index-checkmark.html' %}
+              <span>Upload and publish datasets via the OEP interface or API</span>
+            </li>
+            <li>
+              {% include 'base/index-checkmark.html' %}
+              <span>Collaborative and standardized metadata management</span>
+            </li>
+            <li>
+              {% include 'base/index-checkmark.html' %}
+              <span>Data quality assessment and validation tools</span>
+            </li>
+            <li>
+              {% include 'base/index-checkmark.html' %}
+              <span>Collaborative data contribution workflows</span>
+            </li>
+          </ul>
+        </div>
+        <div class="index-capability-column">
+          <h4 class="index-capability-column-title">Additional Resources:</h4>
+          <div class="index-capability-resource-list">
+            <a class="index-resource-link"
+               href="{{ EXTERNAL_URLS.academy_course_upload }}">
+              {% include 'base/index-arrow.html' %}
+              <span>Data Upload Guidelines</span>
+            </a>
+            <a class="index-resource-link"
+               href="{{ EXTERNAL_URLS.oemetadata_latest }}">
+              {% include 'base/index-arrow.html' %}
+              <span>Metadata Schema Documentation</span>
+            </a>
+            <a class="index-resource-link" href="{{ EXTERNAL_URLS.readthedocs }}">
+              {% include 'base/index-arrow.html' %}
+              <span>API Reference</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="index-capability-card index-animate-in">
+      <div class="index-capability-card-header">
+        <img class="index-feature-icon"
+             src="{% static 'img/welcome/i_hex_blue_scenario_bundles.svg' %}"
+             alt="" />
+        <div class="index-capability-card-heading">
+          <h3 class="index-capability-card-title">Scenario Bundles</h3>
+          <p class="index-capability-card-description">
+            Collaborative scenario packages for energy system modeling and
+            analysis
+          </p>
+        </div>
+      </div>
+      <hr class="index-capability-divider" />
+      <div class="index-capability-columns">
+        <div class="index-capability-column">
+          <h4 class="index-capability-column-title">Core Features:</h4>
+          <ul class="index-feature-list index-capability-feature-list">
+            <li>
+              {% include 'base/index-checkmark.html' %}
+              <span>Transparent, linked scenario bundles across data, models, and tools</span>
+            </li>
+            <li>
+              {% include 'base/index-checkmark.html' %}
+              <span>Scenario comparison and analysis tools</span>
+            </li>
+            <li>
+              {% include 'base/index-checkmark.html' %}
+              <span>Customizable parameter sets and assumptions</span>
+            </li>
+            <li>
+              {% include 'base/index-checkmark.html' %}
+              <span>Integration with modeling frameworks</span>
+            </li>
+          </ul>
+        </div>
+        <div class="index-capability-column">
+          <h4 class="index-capability-column-title">Additional Resources:</h4>
+          <div class="index-capability-resource-list">
+            <a class="index-resource-link"
+               href="{{ EXTERNAL_URLS.academy_course_scenario_bundle }}">
+              {% include 'base/index-arrow.html' %}
+              <span>Scenario Creation Guide</span>
+            </a>
+            <a class="index-resource-link"
+               href="{{ EXTERNAL_URLS.academy_course_enable_comparisons }}">
+              {% include 'base/index-arrow.html' %}
+              <span>Comparison Tool Tutorial</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="index-capability-card index-animate-in">
+      <div class="index-capability-card-header">
+        <img class="index-feature-icon"
+             src="{% static 'img/welcome/i_hex_blue_factsheets.svg' %}"
+             alt="" />
+        <div class="index-capability-card-heading">
+          <h3 class="index-capability-card-title">Factsheets</h3>
+          <p class="index-capability-card-description">
+            Collaborative documentation and analysis of energy
+            technologies and topics
+          </p>
+        </div>
+      </div>
+      <hr class="index-capability-divider" />
+      <div class="index-capability-columns">
+        <div class="index-capability-column">
+          <h4 class="index-capability-column-title">Core Features:</h4>
+          <ul class="index-feature-list index-capability-feature-list">
+            <li>
+              {% include 'base/index-checkmark.html' %}
+              <span>Structured documentation for energy system models and frameworks</span>
+            </li>
+            <li>
+              {% include 'base/index-checkmark.html' %}
+              <span>Collaborative editing</span>
+            </li>
+          </ul>
+        </div>
+        <div class="index-capability-column">
+          <h4 class="index-capability-column-title">Additional Resources:</h4>
+          <div class="index-capability-resource-list">
+            <span class="index-resource-link index-resource-link-disabled"
+                  aria-disabled="true"
+                  title="Coming soon">
+              {% include 'base/index-arrow.html' %}
+              <span>Factsheet Templates — Coming soon</span>
+            </span>
+            <span class="index-resource-link index-resource-link-disabled"
+                  aria-disabled="true"
+                  title="Coming soon">
+              {% include 'base/index-arrow.html' %}
+              <span>Contribution Guidelines — Coming soon</span>
+            </span>
+            <span class="index-resource-link index-resource-link-disabled"
+                  aria-disabled="true"
+                  title="Coming soon">
+              {% include 'base/index-arrow.html' %}
+              <span>Review Process Documentation — Coming soon</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="index-capability-card index-animate-in">
+      <div class="index-capability-card-header">
+        <img class="index-feature-icon"
+             src="{% static 'img/welcome/i_hex_blue_ontology.svg' %}"
+             alt="" />
+        <div class="index-capability-card-heading">
+          <h3 class="index-capability-card-title">Ontology</h3>
+          <p class="index-capability-card-description">
+            Advanced analytical tools and specialized platform
+            capabilities
+          </p>
+        </div>
+      </div>
+      <hr class="index-capability-divider" />
+      <div class="index-capability-columns">
+        <div class="index-capability-column">
+          <h4 class="index-capability-column-title">Core Features:</h4>
+          <ul class="index-feature-list index-capability-feature-list">
+            <li>
+              {% include 'base/index-checkmark.html' %}
+              <span>Community-developed domain ontology for energy system analysis</span>
+            </li>
+            <li>
+              {% include 'base/index-checkmark.html' %}
+              <span>Interactive exploration of ontology classes and relationships</span>
+            </li>
+            <li>
+              {% include 'base/index-checkmark.html' %}
+              <span>Linked data access and semantic querying via SPARQL</span>
+            </li>
+          </ul>
+        </div>
+        <div class="index-capability-column">
+          <h4 class="index-capability-column-title">Additional Resources:</h4>
+          <div class="index-capability-resource-list">
+            <a class="index-resource-link"
+               href="{{ EXTERNAL_URLS.github_openenergyplatform_ontology }}">
+              {% include 'base/index-arrow.html' %}
+              <span>Tool Documentation</span>
+            </a>
+            <a class="index-resource-link"
+               href="{{ EXTERNAL_URLS.github_openenergyplatform_ontology_wiki_welcome__how_to_participate }}">
+              {% include 'base/index-arrow.html' %}
+              <span>Best Practice Guide</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

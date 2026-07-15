@@ -101,7 +101,7 @@ $new-breakpoints: (
 $grid-breakpoints: map-merge($grid-breakpoints, $new-breakpoints);
 
 // New colors
-$primary:       $blue;
+$primary:       $blue-700;
 $secondary:     $blue-700;
 $success:       $green;
 $info:          $cyan;

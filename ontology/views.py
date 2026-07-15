@@ -60,15 +60,8 @@ def get_OEO_COMMON_DATA() -> dict:
 class OntologyAboutView(View):
     def get(self, request, ontology="oeo", version=None):
         onto_base_path = Path(ONTOLOGY_ROOT, ontology)
-
-        if not onto_base_path.exists():
-            raise Http404
-        versions = os.listdir(onto_base_path)
+        version = get_ontology_version(onto_base_path, version)
         logger.info(f"Loaded oeo version {version}")
-        if not version:
-            version = max(
-                (d for d in versions), key=lambda d: [int(x) for x in d.split(".")]
-            )
         return render(
             request,
             "ontology/about.html",
@@ -185,10 +178,7 @@ class OntologyStaticsView(View):
         if not extension:
             extension = "owl"
         if not version:
-            version = max(
-                (d for d in os.listdir(onto_base_path)),
-                key=lambda d: [int(x) for x in d.split(".")],
-            )
+            version = get_ontology_version(onto_base_path, version)
         if imports:
             file_path = onto_base_path / version / "imports" / f"{file}.{extension}"
         elif glossary:

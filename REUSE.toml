@@ -3485,6 +3485,49 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
+path = [
+  "base/static/img/welcome/i_courses.svg",
+  "base/static/img/welcome/i_hex_blue_academy.svg",
+  "base/static/img/welcome/i_hex_blue_api.svg",
+  "base/static/img/welcome/i_hex_blue_database.svg",
+  "base/static/img/welcome/i_hex_blue_docs.svg",
+  "base/static/img/welcome/i_hex_blue_factsheets.svg",
+  "base/static/img/welcome/i_hex_blue_ontology.svg",
+  "base/static/img/welcome/i_hex_blue_repo.svg",
+  "base/static/img/welcome/i_hex_blue_scenario_bundles.svg",
+  "base/static/img/welcome/i_hex_light_analysis.svg",
+  "base/static/img/welcome/i_hex_light_workflow.svg",
+  "base/static/img/welcome/i_questions.svg",
+  "base/static/img/welcome/i_tutorials.svg",
+]
+precedence = "override"
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileCopyrightText = [
+  "2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2026 Bryan Lancien <https://github.com/bmlancien> © bryanlancien ui",
+  "2026 Tomi Nguyen <https://github.com/tomi-rli> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = [
+  "base/templates/base/index-arrow.html",
+  "base/templates/base/index-checkmark.html",
+  "base/templates/homepage/academy.html",
+  "base/templates/homepage/capabilities.html",
+  "base/templates/homepage/features.html",
+  "base/templates/homepage/hero.html",
+  "base/templates/homepage/resources.html",
+  "base/templates/homepage/integrated_workflows.html",
+]
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2026 Bryan Lancien <https://github.com/bmlancien> © bryanlancien ui",
+  "2026 Tomi Nguyen <https://github.com/tomi-rli> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
 path = "login/templates/login/user_datasets.html"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
@@ -3546,4 +3589,6 @@ precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
   "2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2026 Bryan Lancien <https://github.com/bmlancien> © bryanlancien ui",
+  "2026 Tomi Nguyen <https://github.com/tomi-rli> © Reiner Lemoine Institut",
 ]

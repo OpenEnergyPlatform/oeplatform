@@ -11,7 +11,7 @@
 <a class="navbar-brand" href="{% url 'base:home' %}">
   <img width="45"
        height="45"
-       alt="logo"
+       alt="Open Energy Platform home"
        src="{% static 'OpenEnergyFamily_Logo_OpenEnergyPlatform_untitled_white.svg' %}" />
 </a>
 <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -150,7 +150,8 @@
          data-bs-toggle="dropdown"
          aria-haspopup="true"
          aria-expanded="false">About</a>
-      <div class="dropdown-menu" aria-labelledby="navbarDropdownAbout">
+      <div class="dropdown-menu dropdown-menu-end"
+           aria-labelledby="navbarDropdownAbout">
         <a class="dropdown-item" href="{% url 'base:about' %}">Overview</a>
         <a class="dropdown-item" href="{% url 'base:oefamily-sc' %}">Open Energy Family Steering Committee</a>
         <a class="dropdown-item"
