@@ -185,6 +185,7 @@ MIDDLEWARE = (
 ROOT_URLCONF = "oeplatform.urls"
 
 EXTERNAL_URLS = {
+    "academy_courses_introduction": "https://openenergyplatform.github.io/academy/courses/01_introduction/",  # noqa E501
     "tutorials_index": "https://openenergyplatform.github.io/academy/",
     "tutorials_faq": "https://openenergyplatform.github.io/academy/questions/",
     "tutorials_api1": "https://openenergyplatform.github.io/academy/tutorials/01_api/01_api_download/",  # noqa E501
