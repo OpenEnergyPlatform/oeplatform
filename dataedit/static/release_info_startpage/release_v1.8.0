@@ -1,0 +1,16 @@
+<!--
+SPDX-FileCopyrightText: 2026 Vismaya Jochem <https://github.com/vismayajochem> © Reiner Lemoine Institut,
+
+SPDX-License-Identifier: CC0-1.0
+-->
+
+### ✨ Highlights
+
+* **Redesigned Tables listings & Search:** Introduced a dedicated search field for user tables and reworked the table listing UI to display additional metadata directly on the table cards.
+* **Updated OEO Viewer & Entity Pages:** Reorganized the OEO Viewer layout for better hierarchy and mobile responsiveness. Added a language toggle for English/German synonyms, automatic entity-type detection, and an updated Graph View widget that supports graph comparisons.
+* **Scenario Comparison App (Prototype) Update:** Refactored the quantitative scenario comparison prototype to work with the updated OEKG and OEO. The app now uses E-Charts as its graph library.
+* **Automated Metadata Syncing:** The metadata API now synchronizes the documented data schema in the metadata with the actual table schema available in the database.
+* **Bug Fixes & General Improvements:** Fixed an issue in the oemetaBuilder tool that removed specific references on save, corrected the Reviewer & Contributor progress calculations to account for empty fields, and patched an OEO loading bug related to version 2.12.0.
+
+👉 **Check out the full changelog and explore what’s new!**
+[Full Changelog](https://github.com/OpenEnergyPlatform/oeplatform/blob/master/versions/changelogs/1_8_0.md)
