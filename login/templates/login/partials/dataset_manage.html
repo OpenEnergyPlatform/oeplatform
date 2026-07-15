@@ -1,0 +1,64 @@
+<div class="card mb-3" id="dataset-card-{{ dataset.name }}">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span>
+      Manage tables &mdash; <strong>{{ dataset.name }}</strong>
+    </span>
+    <button type="button"
+            class="btn btn-sm btn-outline-secondary"
+            hx-get="{% url 'login:dataset-card' user_id=profile_user.id dataset_name=dataset.name %}"
+            hx-target="#dataset-card-{{ dataset.name }}"
+            hx-swap="outerHTML">Close</button>
+  </div>
+  <div class="card-body">
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <h6 class="text-muted text-uppercase small">Resources</h6>
+        {% if resources %}
+          <ul class="list-group overflow-auto" style="max-height: 20rem">
+            {% for table in resources %}
+              <li class="list-group-item d-flex justify-content-between align-items-start gap-2">
+                <div class="text-truncate">
+                  <a href="{% url 'dataedit:view' table=table.name %}">{{ table.human_readable_name|default:table.name }}</a>
+                  {% if table.is_publish %}
+                    <span class="badge bg-success">Published</span>
+                  {% else %}
+                    <span class="badge bg-warning text-dark">Draft</span>
+                  {% endif %}
+                  {% for topic in table.topics.all %}
+                    <span class="badge text-bg-light border">{{ topic.name }}</span>
+                  {% endfor %}
+                </div>
+                <button type="button"
+                        class="btn btn-sm btn-outline-danger flex-shrink-0"
+                        hx-post="{% url 'login:dataset-unassign' user_id=profile_user.id dataset_name=dataset.name %}"
+                        hx-vals='{"table": "{{ table.name }}"}'
+                        hx-target="#dataset-card-{{ dataset.name }}"
+                        hx-swap="outerHTML">Remove</button>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-muted">No tables assigned yet. Add some from the right.</p>
+        {% endif %}
+      </div>
+      <div class="col-lg-6">
+        <h6 class="text-muted text-uppercase small">Add tables</h6>
+        <input type="text"
+               class="form-control mb-2"
+               name="q"
+               placeholder="Search assignable tables..."
+               value="{{ search|default:'' }}"
+               hx-get="{% url 'login:dataset-table-search' user_id=profile_user.id dataset_name=dataset.name %}"
+               hx-trigger="keyup changed delay:300ms"
+               hx-target="#picker-results-{{ dataset.name }}"
+               hx-swap="innerHTML"
+               hx-include="this" />
+        <div id="picker-results-{{ dataset.name }}"
+             class="overflow-auto"
+             style="max-height: 20rem">
+          {% include "login/partials/dataset_table_search_results.html" %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
