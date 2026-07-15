@@ -186,6 +186,9 @@ ROOT_URLCONF = "oeplatform.urls"
 
 EXTERNAL_URLS = {
     "academy_courses_introduction": "https://openenergyplatform.github.io/academy/courses/01_introduction/",  # noqa E501
+    "academy_course_upload": "https://openenergyplatform.github.io/academy/courses/04_upload/",  # noqa E501
+    "academy_course_scenario_bundle": "https://openenergyplatform.github.io/academy/courses/10_scenario_bundle/",  # noqa E501
+    "academy_course_enable_comparisons": "https://openenergyplatform.github.io/academy/courses/06_enable_comparisons/",  # noqa E501
     "tutorials_index": "https://openenergyplatform.github.io/academy/",
     "tutorials_faq": "https://openenergyplatform.github.io/academy/questions/",
     "tutorials_api1": "https://openenergyplatform.github.io/academy/tutorials/01_api/01_api_download/",  # noqa E501
@@ -206,7 +209,7 @@ EXTERNAL_URLS = {
     "oeo_extended_github": "https://github.com/OpenEnergyPlatform/oeo-extended",  # noqa E501
     "oedatamodel": "https://github.com/OpenEnergyPlatform/oedatamodel",
     "github_openenergyplatform": "https://github.com/OpenEnergyPlatform",
-    "ORKG": "https://academy.orkg.org/orkg-academy/main/index.html",
+    "ORKG": "https://academy.orkg.org/index.html",
     "open_plan": "https://open-plan-tool.org/",
     "open_egon": "https://rego-n.org/",
     "open_mastr": "https://open-mastr.readthedocs.io/en/latest/",
@@ -228,7 +231,7 @@ EXTERNAL_URLS = {
     "oemetadata_key_description": "https://github.com/OpenEnergyPlatform/oemetadata/blob/develop/oemetadata/latest/metadata_key_description.md",  # noqa E501
     "oeo_extended_github": "https://github.com/OpenEnergyPlatform/oeo-extended",  # noqa E501
     "oedatamodel": "https://github.com/OpenEnergyPlatform/oedatamodel",
-    "ORKG": "https://academy.orkg.org/orkg-academy/main/index.html",
+    "ORKG": "https://academy.orkg.org/index.html",
     "open_plan": "https://open-plan-tool.org/",
     "open_mastr": "https://open-mastr.readthedocs.io/en/latest/",
     "creativecommons_licenses_by_3_0_de": "http://creativecommons.org/licenses/by/3.0/de/",  # noqa:E501

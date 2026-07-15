@@ -783,6 +783,12 @@
   color: #e7f1f9;
 }
 
+.index-resource-link-disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 @media screen and (max-width: 800px) {
   .index-footer {
     padding: 48px 24px;
