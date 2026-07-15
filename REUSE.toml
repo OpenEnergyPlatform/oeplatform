@@ -3519,6 +3519,13 @@ path = [
   "base/templates/homepage/resources.html",
   "base/templates/homepage/integrated_workflows.html",
 ]
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2026 Bryan Lancien <https://github.com/bmlancien> © bryanlancien ui",
+  "2026 Tomi Nguyen <https://github.com/tomi-rli> © Reiner Lemoine Institut",
+]
 
 [[annotations]]
 path = "login/templates/login/user_datasets.html"
