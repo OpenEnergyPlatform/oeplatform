@@ -28,6 +28,7 @@ import io
 import json
 import logging
 import re
+from collections import Counter
 from copy import deepcopy
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, cast
@@ -1881,6 +1882,8 @@ def _read_csv_header(stream) -> tuple[bytes, bytes]:
             raise APIError("CSV header line too long", 400)
     if not buffer:
         raise APIError("Bulk upload requires a non-empty CSV body", 400)
+    if buffer.startswith(b"\xef\xbb\xbf"):  # strip UTF-8 BOM (e.g. Excel exports)
+        buffer = buffer[3:]
     header, _sep, remainder = buffer.partition(b"\n")
     return header.rstrip(b"\r"), remainder
 
@@ -1896,12 +1899,36 @@ def _parse_bulk_upload_columns(
     columns = [c.strip() for c in columns if c.strip()]
     if not columns:
         raise APIError("CSV header contains no column names", 400)
-    table_columns = set(describe_columns(table_obj).keys())
+
+    duplicates = sorted(c for c, n in Counter(columns).items() if n > 1)
+    if duplicates:
+        raise APIError(
+            "CSV header contains duplicate column names: %s" % ", ".join(duplicates),
+            400,
+        )
+
+    table_columns = describe_columns(table_obj)
     unknown = [c for c in columns if c not in table_columns]
     if unknown:
         raise APIError(
             "CSV header names columns that do not exist in table '%s': %s"
             % (table_obj.name, ", ".join(unknown)),
+            400,
+        )
+
+    # NOT NULL columns without a default must be present in the CSV,
+    # otherwise the upload is doomed - reject before streaming the body
+    missing_required = sorted(
+        name
+        for name, info in table_columns.items()
+        if name not in columns
+        and not info.get("is_nullable")
+        and not info.get("column_default")
+    )
+    if missing_required:
+        raise APIError(
+            "CSV header is missing required columns (NOT NULL without default): %s"
+            % ", ".join(missing_required),
             400,
         )
     return columns
@@ -1930,11 +1957,14 @@ def bulk_upload_csv(table_obj: Table, stream, delimiter_name: str | None) -> int
     # identifiers are safe: whitelisted against the table's actual columns
     column_list = ", ".join('"%s"' % c.replace('"', '""') for c in columns)
     sa_table = table_obj.get_oedb_table_proxy(user=None)._main_table.get_sa_table()
-    copy_sql = 'COPY "%s"."%s" (%s) FROM STDIN WITH (FORMAT csv, DELIMITER \'%s\')' % (
-        sa_table.schema,
-        sa_table.name,
-        column_list,
-        delimiter,
+    # FORCE_NULL on all uploaded columns: an empty field is NULL whether
+    # quoted or not. Deliberate deviation from COPY's native CSV rule
+    # (quoted "" = empty string) - many writers quote every field and would
+    # silently store empty strings instead of NULLs otherwise.
+    copy_sql = (
+        'COPY "%s"."%s" (%s) FROM STDIN WITH '
+        "(FORMAT csv, DELIMITER '%s', FORCE_NULL (%s))"
+        % (sa_table.schema, sa_table.name, column_list, delimiter, column_list)
     )
 
     engine = _get_engine()
@@ -1949,14 +1979,33 @@ def bulk_upload_csv(table_obj: Table, stream, delimiter_name: str | None) -> int
         connection.commit()
     except psycopg2.Error as e:
         connection.rollback()
-        raise APIError(
-            "Bulk upload failed, nothing was inserted: %s"
-            % (getattr(e, "pgerror", None) or str(e)).strip(),
-            400,
-        )
+        raise APIError(_bulk_upload_error_message(e), 400)
     finally:
         connection.close()
     return row_count
+
+
+def _bulk_upload_error_message(e: psycopg2.Error) -> str:
+    """Data-level error message with the CSV location - never raw SQL,
+    server context dumps, or internal paths."""
+    diag = getattr(e, "diag", None)
+    primary = getattr(diag, "message_primary", None)
+    if not primary:
+        # no server diagnostics (e.g. connection lost mid-COPY): str(e) may
+        # contain socket paths or other internals - keep it generic instead
+        primary = "a database error occurred"
+    primary = primary.strip().splitlines()[0]
+    context = getattr(diag, "context", None) or ""
+    location = ""
+    match = re.search(r"COPY [^,]+, line (\d+)(?:, column ([^:]+))?", context)
+    if match:
+        # +1 because postgres counts data lines and the CSV's line 1 is
+        # the header (which never reaches COPY)
+        location = " (CSV line %d" % (int(match.group(1)) + 1)
+        if match.group(2):
+            location += ", column %s" % match.group(2).strip()
+        location += ")"
+    return "Bulk upload failed, nothing was inserted: %s%s" % (primary, location)
 
 
 def has_table(request: dict, context: dict | None = None) -> bool:

@@ -117,6 +117,69 @@ class TestBulkUpload(APITestCaseWithTable):
     def test_nonexistent_table_rejected(self):
         self.bulk_upload("id\n1\n", table="no_such_table", exp_code=404)
 
+    def test_column_order_is_free(self):
+        self.bulk_upload("name,id\nswapped,7\n", exp_code=201)
+        rows = self.get_rows()
+        self.assertEqual(rows[0]["id"], 7)
+        self.assertEqual(rows[0]["name"], "swapped")
+
+    def test_duplicate_header_columns_rejected(self):
+        result = self.bulk_upload("id,name,name\n1,x,y\n", exp_code=400)
+        self.assertIn("name", json.dumps(result))
+        self.assertEqual(self.get_rows(), [])
+
+    def test_missing_required_column_rejected(self):
+        required_table = "test_table_required"
+        self.create_table(
+            structure={
+                "columns": [
+                    {"name": "id", "data_type": "bigserial", "is_nullable": False},
+                    {
+                        "name": "req_col",
+                        "data_type": "character varying",
+                        "is_nullable": False,
+                        "character_maximum_length": 50,
+                    },
+                    {
+                        "name": "opt_col",
+                        "data_type": "character varying",
+                        "is_nullable": True,
+                        "character_maximum_length": 50,
+                    },
+                ]
+            },
+            table=required_table,
+        )
+        # without req_col: rejected before streaming, names the column
+        result = self.bulk_upload(
+            "id,opt_col\n1,x\n", table=required_table, exp_code=400
+        )
+        self.assertIn("req_col", json.dumps(result))
+        # with req_col (id omitted is fine - bigserial has a default): accepted
+        self.bulk_upload("req_col\nfilled\n", table=required_table, exp_code=201)
+        self.drop_table(table=required_table)
+
+    def test_bom_header_parses(self):
+        self.bulk_upload("\ufeffid,name\n1,bommed\n", exp_code=201)
+        self.assertEqual(self.get_rows()[0]["name"], "bommed")
+
+    def test_empty_fields_are_null_quoted_or_not(self):
+        self.bulk_upload('id,name,address\n1,,""\n', exp_code=201)
+        row = self.get_rows()[0]
+        self.assertIsNone(row["name"])  # unquoted empty field
+        self.assertIsNone(row["address"])  # quoted empty field (FORCE_NULL)
+
+    def test_error_names_csv_line_and_column_without_internals(self):
+        result = self.bulk_upload("id,name\n1,ok\nboom,bad\n", exp_code=400)
+        message = json.dumps(result)
+        self.assertIn("line 3", message)  # header is line 1, bad row is line 3
+        self.assertIn("id", message)
+        self.assertIn("boom", message)  # the offending value helps debugging
+        self.assertNotIn("Traceback", message)
+        self.assertNotIn("COPY ", message)  # no raw SQL / context dump
+        self.assertNotIn("STDIN", message)
+        self.assertEqual(self.get_rows(), [])
+
     def test_no_journal_rows_written(self):
         self.bulk_upload("id,name\n1,x\n2,y\n", exp_code=201)
         engine = _get_engine()
