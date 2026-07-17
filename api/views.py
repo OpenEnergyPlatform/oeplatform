@@ -65,6 +65,7 @@ import login.models as login_models
 from api import sessions
 from api.actions import (
     apply_changes,
+    bulk_upload_csv,
     close_cursor,
     close_raw_connection,
     column_add,
@@ -1122,6 +1123,30 @@ class TableRowsAPIView(APIView):
 
         cursor = sessions.load_cursor_from_context(request_data_dict(request))
         execute_sqla(query, cursor)
+
+
+class TableBulkUploadAPIView(APIView):
+    """Bulk Upload (issue #2362): the request body IS the CSV.
+
+    Append-only, all-or-nothing; rows go directly into the main table
+    without edit-journal records. The delimiter parameter is required.
+    """
+
+    @api_exception
+    @require_write_permission
+    def post(self, request: Request, table: str) -> JsonLikeResponse:
+        table_obj = table_or_404(table=table)
+
+        if check_embargo(table_obj):
+            return JsonResponse(
+                {"error": "Access to this table is restricted due to embargo."},
+                status=403,
+            )
+
+        row_count = bulk_upload_csv(
+            table_obj, request.stream, request.GET.get("delimiter")
+        )
+        return JsonResponse({"rows": row_count}, status=status.HTTP_201_CREATED)
 
 
 @api_exception
