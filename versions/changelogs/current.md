@@ -116,6 +116,12 @@ SPDX-License-Identifier: CC0-1.0
   `ReferenceError` under strict mode. The downloaded file now also gets a
   sensible name in the standalone tool instead of `undefined.metadata.json`.
 
+- Fix nondeterministic resource order in the dataset metadata document: the
+  resources list assembled live from a dataset's member tables is now ordered by
+  table name (matching the dataset detail page) instead of database-dependent
+  order, which also made a dataset detail test flaky on CI.
+  ([#1971](https://github.com/OpenEnergyPlatform/oeplatform/issues/1971))
+
 ## Documentation updates
 
 - Updated the OE Family Steering Committee
