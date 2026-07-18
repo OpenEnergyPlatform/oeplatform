@@ -13,6 +13,12 @@ SPDX-License-Identifier: CC0-1.0
 
 ### Features
 
+- Bulk upload id contract: after an id-bearing upload the table's id sequence is
+  advanced past the loaded ids (so subsequent row inserts cannot collide) and
+  never moves backwards; uploads introducing ids above a generous sanity bound
+  are rejected to protect the sequence for all writers of the table.
+  [(#2362)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2362)
+
 - Harden the bulk upload CSV contract: header preflight rejects duplicate,
   unknown, and missing required (NOT NULL without default) columns before the
   body streams; a UTF-8 BOM is stripped; empty fields are always NULL whether

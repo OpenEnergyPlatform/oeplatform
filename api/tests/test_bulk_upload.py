@@ -180,6 +180,50 @@ class TestBulkUpload(APITestCaseWithTable):
         self.assertNotIn("STDIN", message)
         self.assertEqual(self.get_rows(), [])
 
+    def test_upload_without_id_column_uses_sequence(self):
+        self.bulk_upload("name\nfirst\nsecond\n", exp_code=201)
+        ids = sorted(r["id"] for r in self.get_rows())
+        self.assertEqual(len(set(ids)), 2)
+
+    def test_explicit_ids_then_row_upload_does_not_collide(self):
+        self.bulk_upload("id,name\n10,a\n11,b\n", exp_code=201)
+        # a subsequent Row Upload must get a fresh id beyond the bulk ids
+        self.api_req(
+            "post", path="rows/new", data={"query": {"name": "after"}}, exp_code=201
+        )
+        rows = self.get_rows()
+        self.assertEqual(len(rows), 3)
+        new_id = next(r["id"] for r in rows if r["name"] == "after")
+        self.assertGreater(new_id, 11)
+
+    def test_id_above_sanity_bound_rejected(self):
+        huge = 2**48 + 1
+        result = self.bulk_upload(f"id,name\n{huge},x\n", exp_code=400)
+        self.assertIn(str(2**48), json.dumps(result))  # error names the bound
+        self.assertEqual(self.get_rows(), [])  # fully rolled back
+
+    def test_preexisting_high_id_does_not_block_uploads(self):
+        # a huge id inserted via the row API (which enforces no bound) must
+        # not poison the table for id-bearing bulk uploads afterwards
+        huge = 2**48 + 5
+        self.api_req(
+            "post",
+            path="rows/new",
+            data={"query": {"id": huge, "name": "old"}},
+            exp_code=201,
+        )
+        self.bulk_upload("id,name\n1,new\n", exp_code=201)
+        self.assertEqual(len(self.get_rows()), 2)
+
+    def test_sequence_never_moves_backwards(self):
+        self.bulk_upload("id,name\n50,a\n", exp_code=201)
+        self.bulk_upload("id,name\n20,b\n", exp_code=201)  # lower ids afterwards
+        self.api_req(
+            "post", path="rows/new", data={"query": {"name": "c"}}, exp_code=201
+        )
+        ids = {r["name"]: r["id"] for r in self.get_rows()}
+        self.assertGreater(ids["c"], 50)
+
     def test_no_journal_rows_written(self):
         self.bulk_upload("id,name\n1,x\n2,y\n", exp_code=201)
         engine = _get_engine()
