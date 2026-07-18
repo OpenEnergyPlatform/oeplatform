@@ -487,10 +487,12 @@ class Dataset(models.Model):
         The list is never persisted on the dataset: tables own their
         resource metadata and every read assembles the current state, so
         dataset reads can not go stale after table metadata edits.
+
+        Ordered by table name, matching the dataset detail page.
         """
         return [
             table.oemetadata["resources"][0]
-            for table in self.tables.all()
+            for table in self.tables.order_by("name")
             if table.oemetadata and table.oemetadata.get("resources")
         ]
 
