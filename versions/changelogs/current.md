@@ -13,6 +13,36 @@ SPDX-License-Identifier: CC0-1.0
 
 ### Features
 
+- Bulk upload observability: every upload attempt emits exactly one structured
+  (logfmt) log line - table, user, outcome (success, validation-error,
+  copy-error, size-cap, stall, embargo, busy), rows, bytes, and phase timings
+  separating client transfer time from database-side COPY time and the
+  id-sequence bookkeeping.
+  [(#2362)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2362)
+
+- Bulk upload guards: at most one running upload per user plus a configurable
+  global cap (`BULK_UPLOAD_MAX_CONCURRENT`, default 2) - excess requests get
+  HTTP 429 with Retry-After; uploads whose transfer rate falls below a
+  configurable minimum are aborted (HTTP 408, recorded as a stall event); and
+  the upload's database transaction carries statement and idle-in-transaction
+  timeouts, so no client can pin a worker and an open transaction indefinitely.
+  [(#2362)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2362)
+
+- Bulk upload transport: gzip-compressed request bodies
+  (`Content-Encoding: gzip`) are decompressed in streaming fashion straight into
+  COPY, and a configurable cap on decompressed bytes per request
+  (`BULK_UPLOAD_MAX_BYTES`, default 10 GiB) rejects oversized uploads and gzip
+  bombs with HTTP 413 before they can exhaust disk or memory.
+  [(#2362)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2362)
+
+- Bulk load events: every authenticated, authorized bulk upload attempt -
+  successful or failed - is recorded with user, table, status/error class, bytes
+  received, and for successes the row count and the id range the rows landed in
+  (the only provenance of bulk-loaded rows, and the handle for block-deleting a
+  mistaken upload). Events are visible and filterable in the Django admin; the
+  success response references the event.
+  [(#2362)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2362)
+
 - Bulk upload id contract: after an id-bearing upload the table's id sequence is
   advanced past the loaded ids (so subsequent row inserts cannot collide) and
   never moves backwards; uploads introducing ids above a generous sanity bound

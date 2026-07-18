@@ -8,13 +8,14 @@ SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
+import gzip
 import json
 from datetime import timedelta
 
 from django.utils import timezone
 
 from api.tests import APITestCaseWithTable
-from dataedit.models import Embargo, Table
+from dataedit.models import BulkLoadEvent, Embargo, Table
 from oedb.connection import _get_engine
 
 
@@ -100,6 +101,9 @@ class TestBulkUpload(APITestCaseWithTable):
         )
         self.bulk_upload("id,name\n1,x\n", exp_code=403)
         # note: the table cannot be read back here - the embargo blocks reads too
+        event = BulkLoadEvent.objects.latest("created")
+        self.assertEqual(event.status, BulkLoadEvent.STATUS_EMBARGO)
+        self.assertEqual(event.table_name, self.test_table)
 
     def test_malformed_row_rolls_back_everything(self):
         csv_text = "id,name\n1,ok\nnot_an_int,bad\n3,also_ok\n"
@@ -223,6 +227,253 @@ class TestBulkUpload(APITestCaseWithTable):
         )
         ids = {r["name"]: r["id"] for r in self.get_rows()}
         self.assertGreater(ids["c"], 50)
+
+    def test_successful_upload_creates_event(self):
+        result = self.bulk_upload("id,name\n5,a\n7,b\n", exp_code=201)
+        event = BulkLoadEvent.objects.get(id=result["event_id"])
+        self.assertEqual(event.status, BulkLoadEvent.STATUS_SUCCESS)
+        self.assertEqual(event.table_name, self.test_table)
+        self.assertEqual(event.user_id, self.user.id)
+        self.assertEqual(event.row_count, 2)
+        self.assertEqual(event.id_min, 5)
+        self.assertEqual(event.id_max, 7)
+        self.assertGreater(event.bytes_received, 0)
+
+    def test_sequence_assigned_upload_records_id_range(self):
+        self.bulk_upload("name\na\nb\nc\n", exp_code=201)
+        event = BulkLoadEvent.objects.latest("created")
+        ids = sorted(r["id"] for r in self.get_rows())
+        self.assertEqual(event.id_min, ids[0])
+        self.assertEqual(event.id_max, ids[-1])
+
+    def test_failed_copy_creates_failure_event(self):
+        self.bulk_upload("id,name\n1,ok\nboom,bad\n", exp_code=400)
+        event = BulkLoadEvent.objects.latest("created")
+        self.assertEqual(event.status, BulkLoadEvent.STATUS_COPY_ERROR)
+        self.assertGreater(event.bytes_received, 0)
+        self.assertIn("boom", event.error_message)
+        # the data transaction rolled back, but the event persists
+        self.assertEqual(self.get_rows(), [])
+
+    def test_header_validation_failure_creates_event(self):
+        self.bulk_upload("id,no_such_column\n1,x\n", exp_code=400)
+        event = BulkLoadEvent.objects.latest("created")
+        self.assertEqual(event.status, BulkLoadEvent.STATUS_VALIDATION_ERROR)
+
+    def test_events_registered_in_admin(self):
+        from django.contrib import admin
+
+        self.assertIn(BulkLoadEvent, admin.site._registry)
+        model_admin = admin.site._registry[BulkLoadEvent]
+        self.assertIn("status", model_admin.list_filter)
+
+    def gzip_upload(self, csv_text: str, exp_code: int | None = None) -> dict:
+        url = f"/api/v0/tables/{self.test_table}/bulk-upload/?delimiter=comma"
+        resp = self.client.post(
+            url,
+            data=gzip.compress(csv_text.encode("utf-8")),
+            content_type="text/csv",
+            HTTP_CONTENT_ENCODING="gzip",
+            HTTP_AUTHORIZATION=f"Token {self.token}",
+        )
+        if exp_code is not None:
+            self.assertEqual(resp.status_code, exp_code, resp.content[:500])
+        try:
+            return json.loads(resp.content)
+        except ValueError:
+            return {}
+
+    def test_gzip_upload_matches_plain(self):
+        result = self.gzip_upload("id,name,address\n1,gz,ip\n2,zip,ped\n", 201)
+        self.assertEqual(result["rows"], 2)
+        by_id = {r["id"]: r for r in self.get_rows()}
+        self.assertEqual(by_id[1]["name"], "gz")
+        self.assertEqual(by_id[2]["address"], "ped")
+
+    def test_decompressed_size_cap_rejects_with_413(self):
+        rows = "".join(f"{i},{'x' * 50}\n" for i in range(1, 50))
+        with self.settings(BULK_UPLOAD_MAX_BYTES=500):
+            result = self.bulk_upload("id,name\n" + rows, exp_code=413)
+        self.assertIn("500", json.dumps(result))  # names the cap
+        self.assertEqual(self.get_rows(), [])  # rolled back
+        event = BulkLoadEvent.objects.latest("created")
+        self.assertEqual(event.status, BulkLoadEvent.STATUS_SIZE_CAP)
+
+    def test_gzip_bomb_cut_off_at_cap(self):
+        # several MB of repetitive CSV compress to a few KB; the cap must
+        # stop the expansion, not the wire size (names stay within the
+        # column's varchar(50) so the cap fires, not a data error)
+        bomb_rows = "".join(f"{i},{'a' * 40}\n" for i in range(1, 200_000))
+        with self.settings(BULK_UPLOAD_MAX_BYTES=10_000):
+            self.gzip_upload("id,name\n" + bomb_rows, 413)
+        self.assertEqual(self.get_rows(), [])
+
+    def test_truncated_gzip_mid_body_rolls_back(self):
+        # header parses fine, then the compressed stream ends prematurely
+        # during COPY - must roll back like any other failure
+        csv_text = "id,name\n" + "".join(f"{i},row{i}\n" for i in range(1, 20_000))
+        body = gzip.compress(csv_text.encode("utf-8"))
+        url = f"/api/v0/tables/{self.test_table}/bulk-upload/?delimiter=comma"
+        resp = self.client.post(
+            url,
+            data=body[: len(body) // 2],  # cut mid-stream
+            content_type="text/csv",
+            HTTP_CONTENT_ENCODING="gzip",
+            HTTP_AUTHORIZATION=f"Token {self.token}",
+        )
+        self.assertEqual(resp.status_code, 400, resp.content[:300])
+        self.assertEqual(self.get_rows(), [])
+
+    def test_invalid_gzip_rejected(self):
+        url = f"/api/v0/tables/{self.test_table}/bulk-upload/?delimiter=comma"
+        resp = self.client.post(
+            url,
+            data=b"id,name\n1,not-actually-gzip\n",
+            content_type="text/csv",
+            HTTP_CONTENT_ENCODING="gzip",
+            HTTP_AUTHORIZATION=f"Token {self.token}",
+        )
+        self.assertEqual(resp.status_code, 400, resp.content[:300])
+        self.assertEqual(self.get_rows(), [])
+
+    def test_concurrent_upload_same_user_rejected_429(self):
+        from api.bulk_upload_guard import guard
+
+        guard.acquire(self.user.id)
+        try:
+            url = f"/api/v0/tables/{self.test_table}/bulk-upload/?delimiter=comma"
+            resp = self.client.post(
+                url,
+                data=b"id,name\n1,x\n",
+                content_type="text/csv",
+                HTTP_AUTHORIZATION=f"Token {self.token}",
+            )
+            self.assertEqual(resp.status_code, 429, resp.content[:300])
+            self.assertTrue(resp.has_header("Retry-After"))
+        finally:
+            guard.release(self.user.id)
+        self.assertEqual(self.get_rows(), [])
+
+    def test_global_capacity_full_rejected_429(self):
+        from api.bulk_upload_guard import guard
+
+        with self.settings(BULK_UPLOAD_MAX_CONCURRENT=1):
+            guard.acquire("someone-else")
+            try:
+                self.bulk_upload("id,name\n1,x\n", exp_code=429)
+            finally:
+                guard.release("someone-else")
+        self.assertEqual(self.get_rows(), [])
+
+    def test_stalled_upload_aborted_and_rolled_back(self):
+        # an impossible minimum rate with no grace makes any real upload
+        # count as stalled - the wall-clock variants live in the guard's
+        # unit tests
+        with self.settings(
+            BULK_UPLOAD_MIN_BYTES_PER_SECOND=10**15,
+            BULK_UPLOAD_STALL_GRACE_SECONDS=-1,
+        ):
+            self.bulk_upload("id,name\n1,x\n2,y\n", exp_code=408)
+        self.assertEqual(self.get_rows(), [])
+        event = BulkLoadEvent.objects.latest("created")
+        self.assertEqual(event.status, BulkLoadEvent.STATUS_STALL)
+
+    def test_db_session_timeouts_applied(self):
+        from api.actions import _set_bulk_upload_session_timeouts
+
+        connection = _get_engine().raw_connection()
+        try:
+            cursor = connection.cursor()
+            _set_bulk_upload_session_timeouts(cursor)
+            cursor.execute("SHOW statement_timeout;")
+            self.assertNotIn(cursor.fetchone()[0], ("0", "0ms"))
+            cursor.execute("SHOW idle_in_transaction_session_timeout;")
+            self.assertNotIn(cursor.fetchone()[0], ("0", "0ms"))
+            connection.rollback()
+        finally:
+            connection.close()
+
+    def get_bulk_upload_log_lines(self, logs) -> list:
+        return [
+            record.getMessage()
+            for record in logs.records
+            if record.getMessage().startswith("bulk_upload ")
+        ]
+
+    def test_success_logs_one_structured_line_with_timings(self):
+        with self.assertLogs("oeplatform.bulk_upload", level="INFO") as logs:
+            self.bulk_upload("id,name\n1,a\n2,b\n", exp_code=201)
+        lines = self.get_bulk_upload_log_lines(logs)
+        self.assertEqual(len(lines), 1)
+        line = lines[0]
+        self.assertIn("outcome=success", line)
+        self.assertIn(f"table={self.test_table}", line)
+        self.assertIn("user=MrTest", line)
+        self.assertIn("rows=2", line)
+        self.assertIn("bytes=", line)
+        self.assertIn("total_s=", line)
+        self.assertIn("transfer_s=", line)  # phase timings: transfer vs copy
+        self.assertIn("copy_s=", line)
+        self.assertIn("setval_s=", line)
+
+    def test_validation_error_logged(self):
+        with self.assertLogs("oeplatform.bulk_upload", level="INFO") as logs:
+            self.bulk_upload("id,no_such_column\n1,x\n", exp_code=400)
+        lines = self.get_bulk_upload_log_lines(logs)
+        self.assertEqual(len(lines), 1)
+        self.assertIn("outcome=validation-error", lines[0])
+
+    def test_copy_error_logged(self):
+        with self.assertLogs("oeplatform.bulk_upload", level="INFO") as logs:
+            self.bulk_upload("id,name\n1,ok\nboom,bad\n", exp_code=400)
+        lines = self.get_bulk_upload_log_lines(logs)
+        self.assertEqual(len(lines), 1)
+        self.assertIn("outcome=copy-error", lines[0])
+
+    def test_size_cap_logged(self):
+        rows = "".join(f"{i},{'x' * 40}\n" for i in range(1, 60))
+        with self.settings(BULK_UPLOAD_MAX_BYTES=500):
+            with self.assertLogs("oeplatform.bulk_upload", level="INFO") as logs:
+                self.bulk_upload("id,name\n" + rows, exp_code=413)
+        lines = self.get_bulk_upload_log_lines(logs)
+        self.assertEqual(len(lines), 1)
+        self.assertIn("outcome=size-cap", lines[0])
+
+    def test_stall_logged(self):
+        with self.settings(
+            BULK_UPLOAD_MIN_BYTES_PER_SECOND=10**15,
+            BULK_UPLOAD_STALL_GRACE_SECONDS=-1,
+        ):
+            with self.assertLogs("oeplatform.bulk_upload", level="INFO") as logs:
+                self.bulk_upload("id,name\n1,x\n", exp_code=408)
+        lines = self.get_bulk_upload_log_lines(logs)
+        self.assertEqual(len(lines), 1)
+        self.assertIn("outcome=stall", lines[0])
+
+    def test_busy_rejection_logged(self):
+        from api.bulk_upload_guard import guard
+
+        guard.acquire(self.user.id)
+        try:
+            with self.assertLogs("oeplatform.bulk_upload", level="INFO") as logs:
+                self.bulk_upload("id,name\n1,x\n", exp_code=429)
+        finally:
+            guard.release(self.user.id)
+        lines = self.get_bulk_upload_log_lines(logs)
+        self.assertEqual(len(lines), 1)
+        self.assertIn("outcome=busy", lines[0])
+
+    def test_embargo_logged(self):
+        Embargo.objects.create(
+            table=Table.objects.get(name=self.test_table),
+            date_ended=timezone.now() + timedelta(days=30),
+            duration="6_months",
+        )
+        with self.assertLogs("oeplatform.bulk_upload", level="INFO") as logs:
+            self.bulk_upload("id,name\n1,x\n", exp_code=403)
+        lines = self.get_bulk_upload_log_lines(logs)
+        self.assertEqual(len(lines), 1)
+        self.assertIn("outcome=embargo", lines[0])
 
     def test_no_journal_rows_written(self):
         self.bulk_upload("id,name\n1,x\n2,y\n", exp_code=201)
