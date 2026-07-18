@@ -19,10 +19,19 @@ import BreadcrumbsNavGrid from "../styles/oep-theme/components/breadcrumbsNaviga
 // Import our new sub-components
 import QualitativeView from "./comparison/qualitativeView.jsx";
 import QuantitativeView from "./comparison/quantitativeView.jsx";
+// PROTOTYPE (wayfinder WF-07): multi-source selection variants on the
+// Registry (beta) tab, ?variant=A|B|C|0. Falls back to RegistryComparison in
+// production builds; remove with the prototype.
+import MultiSourcePrototype from "./comparison/prototype_multisource/MultiSourcePrototype.jsx";
+// PROTOTYPE (WF-07 reaction round 6): content for the previously dead
+// "How it works?" button — when the prototype folds into the real view,
+// keep the dialog and re-home it.
+import HowItWorksDialog from "./comparison/prototype_multisource/HowItWorks.jsx";
 
 const ComparisonBoardMain = ({ params }) => {
   const [scenarios, setScenarios] = useState([]);
   const [alignment, setAlignment] = useState("Qualitative");
+  const [howOpen, setHowOpen] = useState(false);
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -52,7 +61,9 @@ const ComparisonBoardMain = ({ params }) => {
       >
         <BreadcrumbsNavGrid subheaderContent="Comparison" />
 
-        <Container maxWidth="lg2">
+        {/* PROTOTYPE (WF-07 reaction, item 1): the Registry workbench needs
+            the full viewport width — the lg2 container blocks it. */}
+        <Container maxWidth={alignment === "Registry" ? false : "lg2"}>
           {/* TOP TOOLBAR */}
           <Toolbar sx={{ marginBottom: (theme) => theme.spacing(4) }}>
             <Grid container justifyContent="space-between" spacing={2}>
@@ -72,9 +83,15 @@ const ComparisonBoardMain = ({ params }) => {
                   variant="text"
                   size="small"
                   startIcon={<ArrowRightIcon />}
+                  onClick={() => setHowOpen(true)}
                 >
                   How it works?
                 </Button>
+                <HowItWorksDialog
+                  open={howOpen}
+                  onClose={() => setHowOpen(false)}
+                  alignment={alignment}
+                />
               </Grid>
               <Grid item xs={4}></Grid>
               <Grid item xs={6}>
@@ -93,6 +110,9 @@ const ComparisonBoardMain = ({ params }) => {
                   <ToggleButton style={{ width: "250px" }} value="Quantitative">
                     <EqualizerIcon /> Quantitative
                   </ToggleButton>
+                  <ToggleButton style={{ width: "250px" }} value="Registry">
+                    <EqualizerIcon /> Registry (beta)
+                  </ToggleButton>
                 </ToggleButtonGroup>
               </Grid>
               <Grid item xs={2}></Grid>
@@ -106,6 +126,7 @@ const ComparisonBoardMain = ({ params }) => {
           {alignment === "Quantitative" && (
             <QuantitativeView scenarios={scenarios} />
           )}
+          {alignment === "Registry" && <MultiSourcePrototype />}
         </Container>
       </Grid>
     )

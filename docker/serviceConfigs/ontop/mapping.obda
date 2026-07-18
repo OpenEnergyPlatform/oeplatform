@@ -8,7 +8,7 @@ foaf:        http://xmlns.com/foaf/0.1/
 obda:        https://w3id.org/obda/vocabulary#
 rdfs:        http://www.w3.org/2000/01/rdf-schema#
 oeo:         https://openenergyplatform.org/ontology/oeo/
-oekg:        http://openenergy-platform.org/ontology/oeo/oekg/
+oekg:        https://openenergyplatform.org/ontology/oeo/oekg/
 llc:         https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/
 
 [MappingDeclaration] @collection [[
@@ -18,183 +18,179 @@ target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} a oeo:IAO
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1"
 
 mappingId       eu_leg_data_2021_rep_table_1_spatial_region_AT
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Austria>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 llc:Austria .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "country_code" = 'AT'
 
 mappingId       eu_leg_data_2021_rep_table_1_spatial_region_BE
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Belgium>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 llc:Belgium .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "country_code" = 'BE'
 
 mappingId       eu_leg_data_2021_rep_table_1_spatial_region_BG
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Bulgaria>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 llc:Bulgaria .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "country_code" = 'BG'
 
 mappingId       eu_leg_data_2021_rep_table_1_spatial_region_CH
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Switzerland>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 llc:Switzerland .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "country_code" = 'CH'
 
 mappingId       eu_leg_data_2021_rep_table_1_spatial_region_CY
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Cyprus>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 llc:Cyprus .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "country_code" = 'CY'
 
 mappingId       eu_leg_data_2021_rep_table_1_spatial_region_CZ
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Czechia>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 llc:Czechia .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "country_code" = 'CZ'
 
 mappingId       eu_leg_data_2021_rep_table_1_spatial_region_DE
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Germany>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 llc:Germany .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "country_code" = 'DE'
 
 mappingId       eu_leg_data_2021_rep_table_1_spatial_region_DK
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Denmark>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 llc:Denmark .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "country_code" = 'DK'
 
 mappingId       eu_leg_data_2021_rep_table_1_spatial_region_EE
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Estonia>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 llc:Estonia .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "country_code" = 'EE'
 
 mappingId       eu_leg_data_2021_rep_table_1_spatial_region_EL
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Greece>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 llc:Greece .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "country_code" = 'EL'
 
 mappingId       eu_leg_data_2021_rep_table_1_spatial_region_ES
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Spain>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 llc:Spain .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "country_code" = 'ES'
 
 mappingId       eu_leg_data_2021_rep_table_1_spatial_region_FI
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Finland>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 llc:Finland .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "country_code" = 'FI'
 
 mappingId       eu_leg_data_2021_rep_table_1_spatial_region_FR
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/France>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 llc:France .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "country_code" = 'FR'
 
 mappingId       eu_leg_data_2021_rep_table_1_spatial_region_GB
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/UnitedKingdomOfGreatBritainAndNorthernIreland>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 llc:UnitedKingdomOfGreatBritainAndNorthernIreland .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "country_code" = 'GB'
 
 mappingId       eu_leg_data_2021_rep_table_1_spatial_region_GR
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Greece>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 llc:Greece .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "country_code" = 'GR'
 
 mappingId       eu_leg_data_2021_rep_table_1_spatial_region_HR
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Croatia>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 llc:Croatia .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "country_code" = 'HR'
 
 mappingId       eu_leg_data_2021_rep_table_1_spatial_region_HU
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Hungary>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 llc:Hungary .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "country_code" = 'HU'
 
 mappingId       eu_leg_data_2021_rep_table_1_spatial_region_IE
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Ireland>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 llc:Ireland .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "country_code" = 'IE'
 
 mappingId       eu_leg_data_2021_rep_table_1_spatial_region_IS
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Iceland>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 llc:Iceland .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "country_code" = 'IS'
 
 mappingId       eu_leg_data_2021_rep_table_1_spatial_region_IT
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Italy>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 llc:Italy .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "country_code" = 'IT'
 
 mappingId       eu_leg_data_2021_rep_table_1_spatial_region_LT
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Lithuania>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 llc:Lithuania .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "country_code" = 'LT'
 
 mappingId       eu_leg_data_2021_rep_table_1_spatial_region_LU
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Luxembourg>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 llc:Luxembourg .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "country_code" = 'LU'
 
 mappingId       eu_leg_data_2021_rep_table_1_spatial_region_LV
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Latvia>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 llc:Latvia .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "country_code" = 'LV'
 
 mappingId       eu_leg_data_2021_rep_table_1_spatial_region_MT
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Malta>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 llc:Malta .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "country_code" = 'MT'
 
 mappingId       eu_leg_data_2021_rep_table_1_spatial_region_NL
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Netherlands>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 llc:Netherlands .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "country_code" = 'NL'
 
 mappingId       eu_leg_data_2021_rep_table_1_spatial_region_NO
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Norway>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 llc:Norway .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "country_code" = 'NO'
 
 mappingId       eu_leg_data_2021_rep_table_1_spatial_region_PL
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Poland>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 llc:Poland .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "country_code" = 'PL'
 
 mappingId       eu_leg_data_2021_rep_table_1_spatial_region_PT
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Portugal>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 llc:Portugal .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "country_code" = 'PT'
 
 mappingId       eu_leg_data_2021_rep_table_1_spatial_region_RO
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Romania>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 llc:Romania .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "country_code" = 'RO'
 
 mappingId       eu_leg_data_2021_rep_table_1_spatial_region_SE
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Sweden>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 llc:Sweden .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "country_code" = 'SE'
 
 mappingId       eu_leg_data_2021_rep_table_1_spatial_region_SI
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Slovenia>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 llc:Slovenia .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "country_code" = 'SI'
 
 mappingId       eu_leg_data_2021_rep_table_1_spatial_region_SK
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/Slovakia>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 llc:Slovakia .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "country_code" = 'SK'
 
 mappingId       eu_leg_data_2021_rep_table_1_spatial_region_UK
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 <https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/UnitedKingdomOfGreatBritainAndNorthernIreland>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020221 llc:UnitedKingdomOfGreatBritainAndNorthernIreland .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "country_code" = 'UK'
-
-mappingId       eu_leg_data_2021_rep_table_1_crf_based_sector_division
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division "{category}" .
-source          SELECT "id", "category" FROM "data"."eu_leg_data_2021_rep_table_1"
 
 mappingId       eu_leg_data_2021_rep_table_1_scenario_year
 target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020224 "{year}" .
 source          SELECT "id", "year" FROM "data"."eu_leg_data_2021_rep_table_1"
 
 mappingId       eu_leg_data_2021_rep_table_1_greenhouse_gas_CH4
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00010121 <http://openenergy-platform.org/ontology/oeo/OEO_00000025>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00010121 oeo:OEO_00000025 .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "gas" = 'CH4'
 
 mappingId       eu_leg_data_2021_rep_table_1_greenhouse_gas_CO2
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00010121 <http://openenergy-platform.org/ontology/oeo/OEO_00000006>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00010121 oeo:OEO_00000006 .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "gas" = 'CO2'
 
 mappingId       eu_leg_data_2021_rep_table_1_greenhouse_gas_N2O
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00010121 <http://openenergy-platform.org/ontology/oeo/OEO_00000027>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00010121 oeo:OEO_00000027 .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "gas" = 'N2O'
 
 mappingId       eu_leg_data_2021_rep_table_1_greenhouse_gas_NF3
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00010121 <http://openenergy-platform.org/ontology/oeo/OEO_00000026>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00010121 oeo:OEO_00000026 .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "gas" = 'NF3'
 
 mappingId       eu_leg_data_2021_rep_table_1_greenhouse_gas_HFC
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00010121 <http://openenergy-platform.org/ontology/oeo/OEO_00000219>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00010121 oeo:OEO_00000219 .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "gas" = 'HFC'
 
 mappingId       eu_leg_data_2021_rep_table_1_greenhouse_gas_PFC
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00010121 <http://openenergy-platform.org/ontology/oeo/OEO_00000322>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00010121 oeo:OEO_00000322 .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "gas" = 'PFC'
 
 mappingId       eu_leg_data_2021_rep_table_1_greenhouse_gas_SF6
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00010121 <http://openenergy-platform.org/ontology/oeo/OEO_00000038>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00010121 oeo:OEO_00000038 .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "gas" = 'SF6'
 
 mappingId       eu_leg_data_2021_rep_table_1_scenario_WEM
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020226 <http://openenergy-platform.org/ontology/oeo/OEO_00020311>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020226 oeo:OEO_00020311 .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "scenario" = 'WEM'
 
 mappingId       eu_leg_data_2021_rep_table_1_scenario_WAM
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020226 <http://openenergy-platform.org/ontology/oeo/OEO_00020312>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020226 oeo:OEO_00020312 .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "scenario" = 'WAM'
 
 mappingId       eu_leg_data_2021_rep_table_1_scenario_WOM
-target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020226 <http://openenergy-platform.org/ontology/oeo/OEO_00020310>.
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00020226 oeo:OEO_00020310 .
 source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "scenario" = 'WOM'
 
 mappingId       eu_leg_data_2021_rep_table_1_unit_of_measurement
@@ -204,5 +200,517 @@ source          SELECT "id", "unit" FROM "data"."eu_leg_data_2021_rep_table_1"
 mappingId       eu_leg_data_2021_rep_table_1_greenhouse_gas_emission_value
 target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:OEO_00140178 "{value}" .
 source          SELECT "id", "value" FROM "data"."eu_leg_data_2021_rep_table_1"
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010038
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010038 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '1 Energy'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010039
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010039 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '1.A Fuel combustion'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010040
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010040 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '1.A.1 Energy industries'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010158
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010158 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '1.A.1.a Public electricity and heat production'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010159
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010159 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '1.A.1.b Petroleum refining'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010160
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010160 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '1.A.1.c Manufacture of solid fuels and other energy industries'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010041
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010041 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '1.A.2 Manufacturing industries and construction'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010042
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010042 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '1.A.3 Transport'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010059
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010059 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '1.A.3.a Domestic aviation'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010060
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010060 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '1.A.3.b Road transportation'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010061
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010061 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '1.A.3.c Railways'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010062
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010062 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '1.A.3.d Domestic navigation'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010063
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010063 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '1.A.3.e Other transportation'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010043
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010043 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '1.A.4 Other sectors'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010052
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010052 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '1.A.4.a Commercial/Institutional'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010053
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010053 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '1.A.4.b Residential'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010054
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010054 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '1.A.4.c Agriculture/Forestry/Fishing'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010044
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010044 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '1.A.5 Other'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010057
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010057 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '1.B Fugitive emissions from fuels'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010161
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010161 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '1.B.1 Solid fuels'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010162
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010162 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '1.B.2 Oil and natural gas and other emissions from energy production'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010058
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010058 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '1.C CO2 transport and storage'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010046
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010046 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '2 Industrial processes'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010164
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010164 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '2.A Mineral Industry'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010165
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010165 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '2.A.1 Cement production'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010166
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010166 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '2.B Chemical industry'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010167
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010167 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '2.C Metal industry'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010168
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010168 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '2.C.1 Iron and steel production'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010169
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010169 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '2.D Non-energy products from fuels and solvent use'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010170
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010170 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '2.E Electronics industry'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010171
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010171 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '2.F Product uses as substitutes for ODS'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010172
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010172 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '2.G Other product manufacture and use'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010173
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010173 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '2.H Other'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010047
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010047 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '3 Agriculture'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010179
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010179 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '3.A Enteric fermentation'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010180
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010180 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '3.B Manure management'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010181
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010181 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '3.C Rice cultivation'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010182
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010182 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '3.D Agricultural soils'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010183
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010183 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '3.E Prescribed burning of savannahs'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010184
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010184 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '3.F Field burning of agricultural residues'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010185
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010185 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '3.G Liming'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010186
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010186 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '3.H Urea application'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010187
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010187 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '3.I Other carbon-containing fertilizers'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010188
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010188 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '3.J Other'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010048
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010048 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '4 Land Use, Land-Use Change and Forestry'
+
+mappingId       eu_leg_data_2021_rep_table_1_category_OEO_00010189
+target          oekg:data-descriptor/eu_leg_data_2021_rep_table_1/{id} oeo:has_sector_division oeo:OEO_00010189 .
+source          SELECT "id" FROM "data"."eu_leg_data_2021_rep_table_1" WHERE "category" = '4.A Forest land'
+
+mappingId       ariadne2_data_with_labels_TargetClass
+target          oekg:data-descriptor/ariadne2_data_with_labels/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "ariadne2_data_with_labels"^^xsd:string .
+source          SELECT "id" FROM "data"."ariadne2_data_with_labels"
+
+mappingId       ariadne2_data_with_labels_scenario_year
+target          oekg:data-descriptor/ariadne2_data_with_labels/{id} oeo:OEO_00020224 "{scenario_year}" .
+source          SELECT "id", "scenario_year" FROM "data"."ariadne2_data_with_labels"
+
+mappingId       ariadne2_data_with_labels_quantity_value
+target          oekg:data-descriptor/ariadne2_data_with_labels/{id} oeo:OEO_00140178 "{value}" .
+source          SELECT "id", "value" FROM "data"."ariadne2_data_with_labels"
+
+mappingId       ariadne2_data_with_labels_unit
+target          oekg:data-descriptor/ariadne2_data_with_labels/{id} oeo:OEO_00040010 "{unit}" .
+source          SELECT "id", "unit" FROM "data"."ariadne2_data_with_labels"
+
+mappingId       ariadne2_data_with_labels_scenario
+target          oekg:data-descriptor/ariadne2_data_with_labels/{id} oekg:scenario "{scenario}" .
+source          SELECT "id", "scenario" FROM "data"."ariadne2_data_with_labels"
+
+mappingId       ariadne2_data_with_labels_quantity_kind
+target          oekg:data-descriptor/ariadne2_data_with_labels/{id} oekg:quantity_kind "{quantity_kind}" .
+source          SELECT "id", split_part("iamc_full_string", ' | ', 1) AS quantity_kind FROM "data"."ariadne2_data_with_labels"
+
+mappingId       ariadne2_data_with_labels_spatial_region_DEU
+target          oekg:data-descriptor/ariadne2_data_with_labels/{id} oeo:OEO_00020221 llc:Germany .
+source          SELECT "id" FROM "data"."ariadne2_data_with_labels" WHERE "region" = 'DEU'
+
+mappingId       ariadne2_data_with_labels_sector_transportation
+target          oekg:data-descriptor/ariadne2_data_with_labels/{id} oeo:IAO_0000136 oeo:OEO_00000422 .
+source          SELECT "id" FROM "data"."ariadne2_data_with_labels" WHERE (' | ' || "iamc_full_string" || ' | ') LIKE '% | transportation | %'
+
+mappingId       ariadne2_data_with_labels_transport_mode_bus
+target          oekg:data-descriptor/ariadne2_data_with_labels/{id} oeo:IAO_0000136 oeo:OEO_00010277 .
+source          SELECT "id" FROM "data"."ariadne2_data_with_labels" WHERE (' | ' || "iamc_full_string" || ' | ') LIKE '% | bus | %'
+
+mappingId       ariadne2_data_with_labels_transport_mode_rail
+target          oekg:data-descriptor/ariadne2_data_with_labels/{id} oeo:IAO_0000136 oeo:OEO_00010280 .
+source          SELECT "id" FROM "data"."ariadne2_data_with_labels" WHERE (' | ' || "iamc_full_string" || ' | ') LIKE '% | rail | %'
+
+mappingId       ariadne2_data_with_labels_transport_mode_truck
+target          oekg:data-descriptor/ariadne2_data_with_labels/{id} oeo:IAO_0000136 oeo:OEO_00010278 .
+source          SELECT "id" FROM "data"."ariadne2_data_with_labels" WHERE (' | ' || "iamc_full_string" || ' | ') LIKE '% | truck | %'
+
+mappingId       ariadne2_data_with_labels_transport_mode_domestic_aviation
+target          oekg:data-descriptor/ariadne2_data_with_labels/{id} oeo:IAO_0000136 oeo:OEO_00010059 .
+source          SELECT "id" FROM "data"."ariadne2_data_with_labels" WHERE (' | ' || "iamc_full_string" || ' | ') LIKE '% | domestic aviation | %'
+
+mappingId       ariadne2_data_with_labels_transport_mode_domestic_navigation
+target          oekg:data-descriptor/ariadne2_data_with_labels/{id} oeo:IAO_0000136 oeo:OEO_00010062 .
+source          SELECT "id" FROM "data"."ariadne2_data_with_labels" WHERE (' | ' || "iamc_full_string" || ' | ') LIKE '% | domestic navigation | %'
+
+mappingId       ariadne2_data_with_labels_technology_bev
+target          oekg:data-descriptor/ariadne2_data_with_labels/{id} oeo:IAO_0000136 oeo:OEO_00010024 .
+source          SELECT "id" FROM "data"."ariadne2_data_with_labels" WHERE (' | ' || "iamc_full_string" || ' | ') LIKE '% | bev | %'
+
+mappingId       ariadne2_data_with_labels_technology_fcev
+target          oekg:data-descriptor/ariadne2_data_with_labels/{id} oeo:IAO_0000136 oeo:OEO_00010025 .
+source          SELECT "id" FROM "data"."ariadne2_data_with_labels" WHERE (' | ' || "iamc_full_string" || ' | ') LIKE '% | fcev | %'
+
+mappingId       ariadne2_data_with_labels_technology_ice
+target          oekg:data-descriptor/ariadne2_data_with_labels/{id} oeo:IAO_0000136 oeo:OEO_00000240 .
+source          SELECT "id" FROM "data"."ariadne2_data_with_labels" WHERE (' | ' || "iamc_full_string" || ' | ') LIKE '% | ice | %'
+
+mappingId       ariadne2_data_with_labels_technology_phev
+target          oekg:data-descriptor/ariadne2_data_with_labels/{id} oeo:IAO_0000136 oeo:OEO_00010030 .
+source          SELECT "id" FROM "data"."ariadne2_data_with_labels" WHERE (' | ' || "iamc_full_string" || ' | ') LIKE '% | phev | %'
+
+mappingId       ariadne2_data_with_labels_technology_overhead_line
+target          oekg:data-descriptor/ariadne2_data_with_labels/{id} oeo:IAO_0000136 oeo:OEO_00000047 .
+source          SELECT "id" FROM "data"."ariadne2_data_with_labels" WHERE (' | ' || "iamc_full_string" || ' | ') LIKE '% | overhead line | %'
+
+mappingId       amiris_germany2019_biogas_awarded_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_biogas/awarded_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_biogas"^^xsd:string ; oeo:OEO_00140178 "{awarded_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140122 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "awarded_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_biogas" WHERE "awarded_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_biogas_offered_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_biogas/offered_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_biogas"^^xsd:string ; oeo:OEO_00140178 "{offered_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140121 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "offered_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_biogas" WHERE "offered_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_biogas_received_money_in_eur
+target          oekg:data-descriptor/amiris_germany2019_biogas/received_money_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_biogas"^^xsd:string ; oeo:OEO_00140178 "{received_money_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020128 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "received_money_in_eur", "time_step" FROM "data"."amiris_germany2019_biogas" WHERE "received_money_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_biogas_variable_costs_in_eur
+target          oekg:data-descriptor/amiris_germany2019_biogas/variable_costs_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_biogas"^^xsd:string ; oeo:OEO_00140178 "{variable_costs_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020145 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "variable_costs_in_eur", "time_step" FROM "data"."amiris_germany2019_biogas" WHERE "variable_costs_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_biogas_fixed_costs_in_eur
+target          oekg:data-descriptor/amiris_germany2019_biogas/fixed_costs_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_biogas"^^xsd:string ; oeo:OEO_00140178 "{fixed_costs_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020168 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "fixed_costs_in_eur", "time_step" FROM "data"."amiris_germany2019_biogas" WHERE "fixed_costs_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_biogas_investment_annuity_in_eur
+target          oekg:data-descriptor/amiris_germany2019_biogas/investment_annuity_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_biogas"^^xsd:string ; oeo:OEO_00140178 "{investment_annuity_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020167 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "investment_annuity_in_eur", "time_step" FROM "data"."amiris_germany2019_biogas" WHERE "investment_annuity_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_conventional_plant_operator_co2_emissions_in_t
+target          oekg:data-descriptor/amiris_germany2019_conventional_plant_operator/co2_emissions_in_t/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_conventional_plant_operator"^^xsd:string ; oeo:OEO_00140178 "{co2_emissions_in_t}" ; oeo:OEO_00040010 "t" ; oeo:IAO_0000136 oeo:OEO_00260007 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "co2_emissions_in_t", "time_step" FROM "data"."amiris_germany2019_conventional_plant_operator" WHERE "co2_emissions_in_t" IS NOT NULL
+
+mappingId       amiris_germany2019_conventional_plant_operator_fuel_consumption_in_thermal_mwh
+target          oekg:data-descriptor/amiris_germany2019_conventional_plant_operator/fuel_consumption_in_thermal_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_conventional_plant_operator"^^xsd:string ; oeo:OEO_00140178 "{fuel_consumption_in_thermal_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00010210 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "fuel_consumption_in_thermal_mwh", "time_step" FROM "data"."amiris_germany2019_conventional_plant_operator" WHERE "fuel_consumption_in_thermal_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_conventional_plant_operator_awarded_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_conventional_plant_operator/awarded_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_conventional_plant_operator"^^xsd:string ; oeo:OEO_00140178 "{awarded_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140122 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "awarded_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_conventional_plant_operator" WHERE "awarded_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_conventional_plant_operator_offered_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_conventional_plant_operator/offered_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_conventional_plant_operator"^^xsd:string ; oeo:OEO_00140178 "{offered_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140121 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "offered_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_conventional_plant_operator" WHERE "offered_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_conventional_plant_operator_received_money_in_eur
+target          oekg:data-descriptor/amiris_germany2019_conventional_plant_operator/received_money_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_conventional_plant_operator"^^xsd:string ; oeo:OEO_00140178 "{received_money_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020128 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "received_money_in_eur", "time_step" FROM "data"."amiris_germany2019_conventional_plant_operator" WHERE "received_money_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_conventional_plant_operator_variable_costs_in_eur
+target          oekg:data-descriptor/amiris_germany2019_conventional_plant_operator/variable_costs_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_conventional_plant_operator"^^xsd:string ; oeo:OEO_00140178 "{variable_costs_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020145 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "variable_costs_in_eur", "time_step" FROM "data"."amiris_germany2019_conventional_plant_operator" WHERE "variable_costs_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_conventional_plant_operator_fixed_costs_in_eur
+target          oekg:data-descriptor/amiris_germany2019_conventional_plant_operator/fixed_costs_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_conventional_plant_operator"^^xsd:string ; oeo:OEO_00140178 "{fixed_costs_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020168 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "fixed_costs_in_eur", "time_step" FROM "data"."amiris_germany2019_conventional_plant_operator" WHERE "fixed_costs_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_conventional_plant_operator_investment_annuity_in_eur
+target          oekg:data-descriptor/amiris_germany2019_conventional_plant_operator/investment_annuity_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_conventional_plant_operator"^^xsd:string ; oeo:OEO_00140178 "{investment_annuity_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020167 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "investment_annuity_in_eur", "time_step" FROM "data"."amiris_germany2019_conventional_plant_operator" WHERE "investment_annuity_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_conventional_trader_offered_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_conventional_trader/offered_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_conventional_trader"^^xsd:string ; oeo:OEO_00140178 "{offered_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140121 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "offered_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_conventional_trader" WHERE "offered_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_conventional_trader_awarded_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_conventional_trader/awarded_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_conventional_trader"^^xsd:string ; oeo:OEO_00140178 "{awarded_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140122 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "awarded_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_conventional_trader" WHERE "awarded_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_conventional_trader_requested_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_conventional_trader/requested_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_conventional_trader"^^xsd:string ; oeo:OEO_00140178 "{requested_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140121 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "requested_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_conventional_trader" WHERE "requested_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_day_ahead_market_single_zone_awarded_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_day_ahead_market_single_zone/awarded_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_day_ahead_market_single_zone"^^xsd:string ; oeo:OEO_00140178 "{awarded_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140122 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "awarded_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_day_ahead_market_single_zone" WHERE "awarded_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_day_ahead_market_single_zone_electricity_price_in_eur_per_mwh
+target          oekg:data-descriptor/amiris_germany2019_day_ahead_market_single_zone/electricity_price_in_eur_per_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_day_ahead_market_single_zone"^^xsd:string ; oeo:OEO_00140178 "{electricity_price_in_eur_per_mwh}" ; oeo:OEO_00040010 "EUR/MWh" ; oeo:IAO_0000136 oeo:OEO_00020117 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "electricity_price_in_eur_per_mwh", "time_step" FROM "data"."amiris_germany2019_day_ahead_market_single_zone" WHERE "electricity_price_in_eur_per_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_day_ahead_market_single_zone_dispatch_system_cost_in_eur
+target          oekg:data-descriptor/amiris_germany2019_day_ahead_market_single_zone/dispatch_system_cost_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_day_ahead_market_single_zone"^^xsd:string ; oeo:OEO_00140178 "{dispatch_system_cost_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020116 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "dispatch_system_cost_in_eur", "time_step" FROM "data"."amiris_germany2019_day_ahead_market_single_zone" WHERE "dispatch_system_cost_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_demand_trader_offered_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_demand_trader/offered_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_demand_trader"^^xsd:string ; oeo:OEO_00140178 "{offered_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140121 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "offered_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_demand_trader" WHERE "offered_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_demand_trader_awarded_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_demand_trader/awarded_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_demand_trader"^^xsd:string ; oeo:OEO_00140178 "{awarded_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140122 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "awarded_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_demand_trader" WHERE "awarded_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_demand_trader_requested_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_demand_trader/requested_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_demand_trader"^^xsd:string ; oeo:OEO_00140178 "{requested_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140121 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "requested_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_demand_trader" WHERE "requested_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_generic_flexibility_trader_received_money_in_eur
+target          oekg:data-descriptor/amiris_germany2019_generic_flexibility_trader/received_money_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_generic_flexibility_trader"^^xsd:string ; oeo:OEO_00140178 "{received_money_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020128 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "received_money_in_eur", "time_step" FROM "data"."amiris_germany2019_generic_flexibility_trader" WHERE "received_money_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_generic_flexibility_trader_offered_charge_price_in_eur_per_mwh
+target          oekg:data-descriptor/amiris_germany2019_generic_flexibility_trader/offered_charge_price_in_eur_per_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_generic_flexibility_trader"^^xsd:string ; oeo:OEO_00140178 "{offered_charge_price_in_eur_per_mwh}" ; oeo:OEO_00040010 "EUR/MWh" ; oeo:IAO_0000136 oeo:OEO_00020117 ; oeo:IAO_0000136 oeo:OEO_00140121 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "offered_charge_price_in_eur_per_mwh", "time_step" FROM "data"."amiris_germany2019_generic_flexibility_trader" WHERE "offered_charge_price_in_eur_per_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_generic_flexibility_trader_offered_discharge_price_in_eur_per_mwh
+target          oekg:data-descriptor/amiris_germany2019_generic_flexibility_trader/offered_discharge_price_in_eur_per_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_generic_flexibility_trader"^^xsd:string ; oeo:OEO_00140178 "{offered_discharge_price_in_eur_per_mwh}" ; oeo:OEO_00040010 "EUR/MWh" ; oeo:IAO_0000136 oeo:OEO_00020117 ; oeo:IAO_0000136 oeo:OEO_00140121 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "offered_discharge_price_in_eur_per_mwh", "time_step" FROM "data"."amiris_germany2019_generic_flexibility_trader" WHERE "offered_discharge_price_in_eur_per_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_generic_flexibility_trader_awarded_charge_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_generic_flexibility_trader/awarded_charge_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_generic_flexibility_trader"^^xsd:string ; oeo:OEO_00140178 "{awarded_charge_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140122 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "awarded_charge_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_generic_flexibility_trader" WHERE "awarded_charge_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_generic_flexibility_trader_awarded_discharge_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_generic_flexibility_trader/awarded_discharge_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_generic_flexibility_trader"^^xsd:string ; oeo:OEO_00140178 "{awarded_discharge_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140122 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "awarded_discharge_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_generic_flexibility_trader" WHERE "awarded_discharge_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_generic_flexibility_trader_stored_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_generic_flexibility_trader/stored_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_generic_flexibility_trader"^^xsd:string ; oeo:OEO_00140178 "{stored_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "stored_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_generic_flexibility_trader" WHERE "stored_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_generic_flexibility_trader_variable_costs_in_eur
+target          oekg:data-descriptor/amiris_germany2019_generic_flexibility_trader/variable_costs_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_generic_flexibility_trader"^^xsd:string ; oeo:OEO_00140178 "{variable_costs_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020145 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "variable_costs_in_eur", "time_step" FROM "data"."amiris_germany2019_generic_flexibility_trader" WHERE "variable_costs_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_generic_flexibility_trader_dispatch_multiplier
+target          oekg:data-descriptor/amiris_germany2019_generic_flexibility_trader/dispatch_multiplier/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_generic_flexibility_trader"^^xsd:string ; oeo:OEO_00140178 "{dispatch_multiplier}" ; oeo:OEO_00040010 "1" ; oeo:IAO_0000136 oeo:OEO_00240016 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "dispatch_multiplier", "time_step" FROM "data"."amiris_germany2019_generic_flexibility_trader" WHERE "dispatch_multiplier" IS NOT NULL
+
+mappingId       amiris_germany2019_generic_flexibility_trader_electricity_price_prediction_in_eur_per_mwh
+target          oekg:data-descriptor/amiris_germany2019_generic_flexibility_trader/electricity_price_prediction_in_eur_per_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_generic_flexibility_trader"^^xsd:string ; oeo:OEO_00140178 "{electricity_price_prediction_in_eur_per_mwh}" ; oeo:OEO_00040010 "EUR/MWh" ; oeo:IAO_0000136 oeo:OEO_00020117 ; oeo:IAO_0000136 oeo:OEO_00000063 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "electricity_price_prediction_in_eur_per_mwh", "time_step" FROM "data"."amiris_germany2019_generic_flexibility_trader" WHERE "electricity_price_prediction_in_eur_per_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_generic_flexibility_trader_offered_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_generic_flexibility_trader/offered_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_generic_flexibility_trader"^^xsd:string ; oeo:OEO_00140178 "{offered_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140121 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "offered_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_generic_flexibility_trader" WHERE "offered_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_generic_flexibility_trader_awarded_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_generic_flexibility_trader/awarded_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_generic_flexibility_trader"^^xsd:string ; oeo:OEO_00140178 "{awarded_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140122 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "awarded_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_generic_flexibility_trader" WHERE "awarded_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_generic_flexibility_trader_requested_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_generic_flexibility_trader/requested_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_generic_flexibility_trader"^^xsd:string ; oeo:OEO_00140178 "{requested_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140121 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "requested_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_generic_flexibility_trader" WHERE "requested_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_no_support_trader_received_support_in_eur
+target          oekg:data-descriptor/amiris_germany2019_no_support_trader/received_support_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_no_support_trader"^^xsd:string ; oeo:OEO_00140178 "{received_support_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020125 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "received_support_in_eur", "time_step" FROM "data"."amiris_germany2019_no_support_trader" WHERE "received_support_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_no_support_trader_refunded_support_in_eur
+target          oekg:data-descriptor/amiris_germany2019_no_support_trader/refunded_support_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_no_support_trader"^^xsd:string ; oeo:OEO_00140178 "{refunded_support_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020125 ; oeo:IAO_0000136 oeo:OEO_00020124 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "refunded_support_in_eur", "time_step" FROM "data"."amiris_germany2019_no_support_trader" WHERE "refunded_support_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_no_support_trader_received_market_revenues
+target          oekg:data-descriptor/amiris_germany2019_no_support_trader/received_market_revenues/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_no_support_trader"^^xsd:string ; oeo:OEO_00140178 "{received_market_revenues}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020128 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "received_market_revenues", "time_step" FROM "data"."amiris_germany2019_no_support_trader" WHERE "received_market_revenues" IS NOT NULL
+
+mappingId       amiris_germany2019_no_support_trader_true_generation_potential_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_no_support_trader/true_generation_potential_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_no_support_trader"^^xsd:string ; oeo:OEO_00140178 "{true_generation_potential_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140139 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "true_generation_potential_in_mwh", "time_step" FROM "data"."amiris_germany2019_no_support_trader" WHERE "true_generation_potential_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_no_support_trader_offered_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_no_support_trader/offered_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_no_support_trader"^^xsd:string ; oeo:OEO_00140178 "{offered_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140121 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "offered_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_no_support_trader" WHERE "offered_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_no_support_trader_awarded_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_no_support_trader/awarded_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_no_support_trader"^^xsd:string ; oeo:OEO_00140178 "{awarded_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140122 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "awarded_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_no_support_trader" WHERE "awarded_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_no_support_trader_requested_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_no_support_trader/requested_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_no_support_trader"^^xsd:string ; oeo:OEO_00140178 "{requested_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140121 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "requested_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_no_support_trader" WHERE "requested_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_renewable_trader_received_support_in_eur
+target          oekg:data-descriptor/amiris_germany2019_renewable_trader/received_support_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_renewable_trader"^^xsd:string ; oeo:OEO_00140178 "{received_support_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020125 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "received_support_in_eur", "time_step" FROM "data"."amiris_germany2019_renewable_trader" WHERE "received_support_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_renewable_trader_refunded_support_in_eur
+target          oekg:data-descriptor/amiris_germany2019_renewable_trader/refunded_support_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_renewable_trader"^^xsd:string ; oeo:OEO_00140178 "{refunded_support_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020125 ; oeo:IAO_0000136 oeo:OEO_00020124 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "refunded_support_in_eur", "time_step" FROM "data"."amiris_germany2019_renewable_trader" WHERE "refunded_support_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_renewable_trader_received_market_revenues
+target          oekg:data-descriptor/amiris_germany2019_renewable_trader/received_market_revenues/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_renewable_trader"^^xsd:string ; oeo:OEO_00140178 "{received_market_revenues}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020128 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "received_market_revenues", "time_step" FROM "data"."amiris_germany2019_renewable_trader" WHERE "received_market_revenues" IS NOT NULL
+
+mappingId       amiris_germany2019_renewable_trader_true_generation_potential_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_renewable_trader/true_generation_potential_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_renewable_trader"^^xsd:string ; oeo:OEO_00140178 "{true_generation_potential_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140139 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "true_generation_potential_in_mwh", "time_step" FROM "data"."amiris_germany2019_renewable_trader" WHERE "true_generation_potential_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_renewable_trader_offered_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_renewable_trader/offered_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_renewable_trader"^^xsd:string ; oeo:OEO_00140178 "{offered_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140121 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "offered_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_renewable_trader" WHERE "offered_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_renewable_trader_awarded_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_renewable_trader/awarded_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_renewable_trader"^^xsd:string ; oeo:OEO_00140178 "{awarded_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140122 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "awarded_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_renewable_trader" WHERE "awarded_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_renewable_trader_requested_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_renewable_trader/requested_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_renewable_trader"^^xsd:string ; oeo:OEO_00140178 "{requested_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140121 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "requested_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_renewable_trader" WHERE "requested_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_sensitivity_forecaster_awarded_energy_forecast_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_sensitivity_forecaster/awarded_energy_forecast_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_sensitivity_forecaster"^^xsd:string ; oeo:OEO_00140178 "{awarded_energy_forecast_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00010411 ; oeo:IAO_0000136 oeo:OEO_00140122 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "awarded_energy_forecast_in_mwh", "time_step" FROM "data"."amiris_germany2019_sensitivity_forecaster" WHERE "awarded_energy_forecast_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_sensitivity_forecaster_electricity_price_forecast_in_eur_per_mwh
+target          oekg:data-descriptor/amiris_germany2019_sensitivity_forecaster/electricity_price_forecast_in_eur_per_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_sensitivity_forecaster"^^xsd:string ; oeo:OEO_00140178 "{electricity_price_forecast_in_eur_per_mwh}" ; oeo:OEO_00040010 "EUR/MWh" ; oeo:IAO_0000136 oeo:OEO_00020117 ; oeo:IAO_0000136 oeo:OEO_00010411 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "electricity_price_forecast_in_eur_per_mwh", "time_step" FROM "data"."amiris_germany2019_sensitivity_forecaster" WHERE "electricity_price_forecast_in_eur_per_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_system_operator_trader_received_support_in_eur
+target          oekg:data-descriptor/amiris_germany2019_system_operator_trader/received_support_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_system_operator_trader"^^xsd:string ; oeo:OEO_00140178 "{received_support_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020125 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "received_support_in_eur", "time_step" FROM "data"."amiris_germany2019_system_operator_trader" WHERE "received_support_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_system_operator_trader_refunded_support_in_eur
+target          oekg:data-descriptor/amiris_germany2019_system_operator_trader/refunded_support_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_system_operator_trader"^^xsd:string ; oeo:OEO_00140178 "{refunded_support_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020125 ; oeo:IAO_0000136 oeo:OEO_00020124 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "refunded_support_in_eur", "time_step" FROM "data"."amiris_germany2019_system_operator_trader" WHERE "refunded_support_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_system_operator_trader_received_market_revenues
+target          oekg:data-descriptor/amiris_germany2019_system_operator_trader/received_market_revenues/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_system_operator_trader"^^xsd:string ; oeo:OEO_00140178 "{received_market_revenues}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020128 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "received_market_revenues", "time_step" FROM "data"."amiris_germany2019_system_operator_trader" WHERE "received_market_revenues" IS NOT NULL
+
+mappingId       amiris_germany2019_system_operator_trader_true_generation_potential_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_system_operator_trader/true_generation_potential_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_system_operator_trader"^^xsd:string ; oeo:OEO_00140178 "{true_generation_potential_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140139 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "true_generation_potential_in_mwh", "time_step" FROM "data"."amiris_germany2019_system_operator_trader" WHERE "true_generation_potential_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_system_operator_trader_offered_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_system_operator_trader/offered_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_system_operator_trader"^^xsd:string ; oeo:OEO_00140178 "{offered_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140121 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "offered_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_system_operator_trader" WHERE "offered_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_system_operator_trader_awarded_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_system_operator_trader/awarded_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_system_operator_trader"^^xsd:string ; oeo:OEO_00140178 "{awarded_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140122 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "awarded_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_system_operator_trader" WHERE "awarded_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_system_operator_trader_requested_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_system_operator_trader/requested_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_system_operator_trader"^^xsd:string ; oeo:OEO_00140178 "{requested_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140121 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "requested_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_system_operator_trader" WHERE "requested_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_variable_renewable_operator_awarded_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_variable_renewable_operator/awarded_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_variable_renewable_operator"^^xsd:string ; oeo:OEO_00140178 "{awarded_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140122 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "awarded_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_variable_renewable_operator" WHERE "awarded_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_variable_renewable_operator_offered_energy_in_mwh
+target          oekg:data-descriptor/amiris_germany2019_variable_renewable_operator/offered_energy_in_mwh/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_variable_renewable_operator"^^xsd:string ; oeo:OEO_00140178 "{offered_energy_in_mwh}" ; oeo:OEO_00040010 "MWh" ; oeo:IAO_0000136 oeo:OEO_00000139 ; oeo:IAO_0000136 oeo:OEO_00140121 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "offered_energy_in_mwh", "time_step" FROM "data"."amiris_germany2019_variable_renewable_operator" WHERE "offered_energy_in_mwh" IS NOT NULL
+
+mappingId       amiris_germany2019_variable_renewable_operator_received_money_in_eur
+target          oekg:data-descriptor/amiris_germany2019_variable_renewable_operator/received_money_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_variable_renewable_operator"^^xsd:string ; oeo:OEO_00140178 "{received_money_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020128 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "received_money_in_eur", "time_step" FROM "data"."amiris_germany2019_variable_renewable_operator" WHERE "received_money_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_variable_renewable_operator_variable_costs_in_eur
+target          oekg:data-descriptor/amiris_germany2019_variable_renewable_operator/variable_costs_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_variable_renewable_operator"^^xsd:string ; oeo:OEO_00140178 "{variable_costs_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020145 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "variable_costs_in_eur", "time_step" FROM "data"."amiris_germany2019_variable_renewable_operator" WHERE "variable_costs_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_variable_renewable_operator_fixed_costs_in_eur
+target          oekg:data-descriptor/amiris_germany2019_variable_renewable_operator/fixed_costs_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_variable_renewable_operator"^^xsd:string ; oeo:OEO_00140178 "{fixed_costs_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020168 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "fixed_costs_in_eur", "time_step" FROM "data"."amiris_germany2019_variable_renewable_operator" WHERE "fixed_costs_in_eur" IS NOT NULL
+
+mappingId       amiris_germany2019_variable_renewable_operator_investment_annuity_in_eur
+target          oekg:data-descriptor/amiris_germany2019_variable_renewable_operator/investment_annuity_in_eur/{id} a oeo:IAO_0000027 ; oeo:OEO_00000504 "amiris_germany2019_variable_renewable_operator"^^xsd:string ; oeo:OEO_00140178 "{investment_annuity_in_eur}" ; oeo:OEO_00040010 "EUR" ; oeo:IAO_0000136 oeo:OEO_00020167 ; oekg:time_step "{time_step}"^^xsd:dateTime ; oeo:OEO_00020224 "2019" .
+source          SELECT "id", "investment_annuity_in_eur", "time_step" FROM "data"."amiris_germany2019_variable_renewable_operator" WHERE "investment_annuity_in_eur" IS NOT NULL
 
 ]]

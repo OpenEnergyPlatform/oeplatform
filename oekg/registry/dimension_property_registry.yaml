@@ -1,0 +1,439 @@
+# =============================================================================
+# Dimension Property Registry
+# -----------------------------------------------------------------------------
+# Single source of truth for the harmonized RDF vocabulary used by the scenario
+# comparison service. It maps each comparable DIMENSION to:
+#   - the CONCEPT it annotates (the class an oemetadata `isAbout` resolves to),
+#   - the PREDICATE used in the generated triple (the object property),
+#   - whether the object is an IRI or a literal (+ datatype),
+#   - and, for controlled vocabularies, the value space (code -> IRI).
+#
+# Read by BOTH:
+#   * the mapping generator (separate repo) -> replaces its hardcoded
+#     `concept -> predicate` lookup; supplies `property_url`.
+#   * the comparison UI (factsheet/frontend/.../quantitativeView.jsx) -> today
+#     these predicates are hardcoded there; the UI should read them from here.
+#
+# RESOLUTION MODEL (what is curated here vs resolved from the TIB TS):
+#   * CURATED HERE  -> the `dimensions` list = dimension -> predicate association.
+#     This is a MODELLING choice, not ontology data: the TIB Terminology Service
+#     cannot derive "which object property attaches a data point to this concept"
+#     (property-by-label search is unreliable). Small + stable -> fine to maintain.
+#   * RESOLVED FROM TS -> all term/concept IRIs (the `value_spaces` below). Do NOT
+#     hand-author these as truth. Use oekg/registry/resolve_terms.py against
+#     https://api.terminology.tib.eu (e.g. /api/search?q=<label>&ontology=oeo).
+#     The block below is a confirmed, re-runnable CACHE, tagged [ts] with its IRI.
+#     Per-dataset cell-value -> IRI mappings ultimately live in oemetadata
+#     `valueReference`, filled by the same resolver and human-confirmed if ambiguous.
+#
+# Provenance tags on every entry:
+#   [confirmed] verbatim from quantitativeView.jsx / *.obda / table oemetadata.
+#   [verify]    inferred or partially known — confirm before relying on it.
+#   [ts]        resolved from the TIB Terminology Service (re-runnable cache).
+#
+# Docs: scripts/oevkg/sem_mapping/ANNOTATION_AND_MAPPING_DESIGN.md  (§5)
+#       Obsidian: "04 - Annotation Contract", "07 - Concept to Predicate",
+#                 "08 - Terminology Service"
+# =============================================================================
+
+version: 0.1.0
+updated: 2026-06-12
+status: seed # Phase 1 — confirm [verify]/[proposed] rows, then promote
+
+# -----------------------------------------------------------------------------
+# Namespaces
+# -----------------------------------------------------------------------------
+# NAMESPACE RULE (correctness gate 10):
+# OEO references ALL terms — native AND imported — under the oeo namespace base
+# https://openenergyplatform.org/ontology/oeo/ . The source ontology is carried in
+# the LOCAL ID prefix: OEO_* (native), IAO_*/BFO_* (imported from IAO/BFO),
+# UO_* (units). So e.g. "is about" = oeo:IAO_0000136. Evidence: mapping.obda itself
+# writes the anchor class as `oeo:IAO_0000027`, and the UI uses this same oeo base.
+# One base -> use `oeo:` for everything; the local-ID prefix signals provenance.
+# The real bug to avoid: the SAME term written two ways. mapping.obda writes
+# gas-species OBJECTS as http://openenergy-platform.org/ontology/oeo/OEO_xxxx
+# (the OLD http+hyphen base) while predicates use the https base -> joins silently
+# fail. ACTION: rewrite those objects to the oeo base + regenerate.
+namespaces:
+  oeo: https://openenergyplatform.org/ontology/oeo/ # [confirmed] base for ALL terms (OEO_*, IAO_*, UO_*, BFO_*)
+  oekg: https://openenergyplatform.org/ontology/oeo/oekg/ # [confirmed]
+  llc: https://www.omg.org/spec/LCC/Countries/ISO3166-1-CountryCodes/ # [confirmed]
+
+# -----------------------------------------------------------------------------
+# Row anchor — how each source row becomes a subject
+# -----------------------------------------------------------------------------
+row_anchor:
+  iri_template: "oekg:data-descriptor/{table}/{id}" # [confirmed] from all *.obda
+  class: oeo:IAO_0000027 # [confirmed] data item / ICE
+  table_name_predicate: oeo:OEO_00000504 # [confirmed] string literal "{table}"
+  requires: { primary_key: id, unique: true } # correctness gate 1
+
+# Generic super-property. Specific predicates below SHOULD be declared
+# rdfs:subPropertyOf this, so a generic "is about" query catches everything
+# while typed predicates still enable dimensional grouping.
+generic_super_property: oeo:IAO_0000136 # "is about"  [confirmed] (interim predicate used by generator)
+
+# -----------------------------------------------------------------------------
+# Dimensions
+# -----------------------------------------------------------------------------
+dimensions:
+  - key: spatial_region
+    concept: oeo:OEO_00020032 # "study region"            [confirmed] (ariadne `region` isAbout)
+    predicate: oeo:OEO_00020221 # "has considered region"   [confirmed] (UI + mapping.obda)
+    object_kind: iri
+    value_space: iso3166_lcc
+
+  - key: scenario_type
+    concept: oeo:OEO_00000364 # "scenario"                [confirmed] (ariadne `scenario` isAbout)
+    predicate: oeo:OEO_00020226 #                           [confirmed] (UI + mapping.obda)
+    object_kind: iri
+    value_space: scenario_type_codes
+
+  # The scenario NAME/identifier (e.g. KN2045_Mix, ExPol) — distinct from the CRF
+  # scenario_type (WEM/WAM/WOM). Dataset-specific free labels → literal.
+  - key: scenario
+    concept: null # a named scenario instance; no global IRI
+    predicate: oekg:scenario # [provisional] scenario name as literal
+    object_kind: literal
+    datatype: xsd:string
+
+  - key: greenhouse_gas
+    concept: oeo:OEO_00000020 # "greenhouse gas"          [confirmed] OEO 2.12 oeo-full.owl
+    predicate: oeo:OEO_00010121 #                           [confirmed] (UI + mapping.obda; ObjectProperty)
+    object_kind: iri
+    value_space: ghg_species_codes
+
+  - key: sector_division
+    concept: oeo:OEO_00030022 # "sector division"         [confirmed] OEO 2.12 (used 72x in OEKG)
+    predicate: oeo:has_sector_division # named prop, NOT OEO_*  [confirmed] (UI + mapping.obda)
+    object_kind: literal
+    datatype: xsd:string # NOTE: currently a free string, not an IRI — candidate to upgrade
+
+  - key: scenario_year
+    concept: oeo:OEO_00020097 # "scenario year"           [confirmed] (ariadne `scenario_year` isAbout)
+    predicate: oeo:OEO_00020224 #                           [confirmed] (UI + mapping.obda)
+    object_kind: literal
+    datatype: xsd:gYear # [verify] mapping.obda emits plain "{year}" — pick gYear vs integer
+
+  - key: unit
+    concept: oeo:UO_0000000 # "unit"  [confirmed] NB ariadne isAbout used obo PURL form -> normalize to oeo base
+    predicate: oeo:OEO_00040010 #                           [confirmed] (UI + mapping.obda)
+    object_kind: literal
+    datatype: xsd:string
+
+  - key: quantity_value
+    concept: oeo:OEO_00000350 # "quantity value"          [confirmed] (ariadne `value` isAbout)
+    predicate: oeo:OEO_00140178 # emission/quantity value   [confirmed] (UI + mapping.obda)
+    object_kind: literal
+    datatype: xsd:double
+
+  # --- IAMC variable dimensions (token-mapping) -----------------------------
+  # These come from decomposing the IAMC `Variable` path. The token dictionary
+  # (per-dataset oemetadata valueReference) supplies token -> {IRI, dimension}.
+  # DECISION (2026-06-12): use the generic `is about` (oeo:IAO_0000136) predicate
+  # for ALL IAMC tokens for now (Philipp's interim). The `key`/`dimension` is kept
+  # so we can later REFINE to typed sub-properties (hasTransportMode, hasTechnology,
+  # …) without re-curating the token dictionary. Each refined predicate should be
+  # rdfs:subPropertyOf oeo:IAO_0000136.
+  # FIXED 2026-06-12: quantity is the TOP IAMC segment (the `quantity_variable`
+  # column: Final Energy, Investment, Emissions…), NOT a token anywhere in the
+  # path. Mapping from the column gives ONE quantity per row (no double-count).
+  # IAMC quantities aren't cleanly in OEO (e.g. "final energy" ≠ "final energy
+  # carrier"), so we keep the raw label as a literal — upgrade to IAMC
+  # common-definitions IRIs later.
+  - key: quantity_kind
+    concept: oeo:OEO_00000435 # "variable"  [confirmed]
+    predicate: oekg:quantity_kind # [provisional] literal label, sourced from quantity_variable
+    object_kind: literal
+    datatype: xsd:string
+
+  # --- AMIRIS facet dimensions (WF-04, 2026-07-09) ---------------------------
+  # One is-about triple per classified concept on a measure column; the enum
+  # sets below are mutually disjoint AND disjoint from iamc_tokens, so the
+  # frontend's enum isolation disambiguates them on the shared predicate.
+  # `substance` is the PRIMARY facet: measure label + unit carrier, single-valued
+  # per column (enforced by the generator — extras are reported, never emitted).
+  # Each substance entry carries `aggregation: sum | mean` (WF-06 decision 4:
+  # extensive quantities sum, intensive quantities average; no hint -> the query
+  # layer must not aggregate).
+  - key: data_role
+    concept: null # epistemic status; absent = realized value
+    predicate: oeo:IAO_0000136 # is about (interim; refine -> hasDataRole)
+    object_kind: iri
+    value_space: amiris_facets
+
+  - key: transaction_role
+    concept: null # market act qualifier
+    predicate: oeo:IAO_0000136 # is about (interim; refine -> hasTransactionRole)
+    object_kind: iri
+    value_space: amiris_facets
+
+  - key: substance
+    concept: null # the measured quantity (primary facet, unit carrier)
+    predicate: oeo:IAO_0000136 # is about (interim; refine -> hasSubstance)
+    object_kind: iri
+    value_space: amiris_facets
+
+  # --- raw time axis (WF-06 decision 1) ---------------------------------------
+  # Hourly (or finer) rows enter the VKG as-is; the generator detects the time
+  # column by its isAbout resolving to `concept` (fallback: timestamp-typed
+  # column). The derived scenario_year is NOT extracted from this — it is a
+  # declared constant per run (WF-06 decision 2, temporal.timeseries block).
+  - key: time_step
+    concept: oeo:OEO_00140043 # "TimeStamp" [confirmed] (AMIRIS time_step isAbout)
+    predicate: oekg:time_step # [provisional] literal, like oekg:scenario
+    object_kind: literal
+    datatype: xsd:dateTime
+
+  - key: sector
+    predicate: oeo:IAO_0000136 # is about (interim; refine -> hasSector)
+    object_kind: iri
+    value_space: iamc_tokens
+
+  - key: transport_mode
+    predicate: oeo:IAO_0000136 # is about (interim; refine -> hasTransportMode)
+    object_kind: iri
+    value_space: iamc_tokens
+
+  - key: technology
+    predicate: oeo:IAO_0000136 # is about (interim; refine -> hasTechnology)
+    object_kind: iri
+    value_space: iamc_tokens
+
+  - key: qualifier
+    predicate: oeo:IAO_0000136 # is about (interim; refine -> hasQualifier); "additional" -> increase of role
+    object_kind: iri
+    value_space: iamc_tokens
+
+# -----------------------------------------------------------------------------
+# Value spaces — controlled vocabularies (code in the DB -> object IRI)
+# These are a CACHE. IRIs are resolvable from the TIB TS (resolve_terms.py); the
+# [confirmed] ones below were already present in the existing .obda mappings.
+# -----------------------------------------------------------------------------
+value_spaces:
+  # [confirmed] from scripts/oevkg/sem_mapping/mapping.obda
+  ghg_species_codes:
+    CO2: oeo:OEO_00000006 # carbon dioxide
+    CH4: oeo:OEO_00000025 # methane
+    N2O: oeo:OEO_00000027 # nitrous oxide
+    NF3: oeo:OEO_00000026 # nitrogen trifluoride
+    HFC: oeo:OEO_00000219 # hydrofluorocarbon
+    PFC: oeo:OEO_00000322 # perfluorocarbon
+    SF6: oeo:OEO_00000038 # sulphur hexafluoride
+
+  # [confirmed] from mapping.obda
+  scenario_type_codes:
+    WEM: oeo:OEO_00020311 # with existing measures
+    WAM: oeo:OEO_00020312 # with additional measures
+    WOM: oeo:OEO_00020310 # without measures
+
+  # [confirmed] code -> LCC English label from mapping.obda.
+  # Quirks preserved verbatim: EL & GR both -> Greece; GB & UK both -> UK.
+  iso3166_lcc:
+    _convention: "llc:<EnglishName> (ISO-3166-1 alpha-2 code -> LCC label)"
+    AT: llc:Austria
+    BE: llc:Belgium
+    BG: llc:Bulgaria
+    CH: llc:Switzerland
+    CY: llc:Cyprus
+    CZ: llc:Czechia
+    DE: llc:Germany
+    DEU: llc:Germany # ISO-3166-1 alpha-3 (ariadne uses 3-letter codes)
+    DK: llc:Denmark
+    EE: llc:Estonia
+    EL: llc:Greece
+    ES: llc:Spain
+    FI: llc:Finland
+    FR: llc:France
+    GB: llc:UnitedKingdomOfGreatBritainAndNorthernIreland
+    GR: llc:Greece
+    HR: llc:Croatia
+    HU: llc:Hungary
+    IE: llc:Ireland
+    IS: llc:Iceland
+    IT: llc:Italy
+    LT: llc:Lithuania
+    LU: llc:Luxembourg
+    LV: llc:Latvia
+    MT: llc:Malta
+    NL: llc:Netherlands
+    "NO": llc:Norway # quoted: bare NO is YAML-1.1 boolean false
+    PL: llc:Poland
+    PT: llc:Portugal
+    RO: llc:Romania
+    SE: llc:Sweden
+    SI: llc:Slovenia
+    SK: llc:Slovakia
+    UK: llc:UnitedKingdomOfGreatBritainAndNorthernIreland
+
+  # IAMC token dictionary (Phase 1, step 2). token (path segment) -> {iri, dimension, name}.
+  # `name` is the human label a curator resolves via the TS; `iri` is the resolved [ts] result.
+  # Resolve with: python oekg/registry/resolve_terms.py  (reads the names, fills iris).
+  # IRIs below tagged [ts] were resolved live against api.terminology.tib.eu (ontology=oeo).
+  iamc_tokens:
+    bev: {
+        iri: "oeo:OEO_00010024",
+        dimension: technology,
+        name: "battery electric vehicle",
+      } # [ts]
+    fcev: {
+        iri: "oeo:OEO_00010025",
+        dimension: technology,
+        name: "fuel cell electric vehicle",
+      } # [ts]
+    ice: {
+        iri: "oeo:OEO_00000240",
+        dimension: technology,
+        name: "internal combustion vehicle",
+      } # [ts]
+    phev: {
+        iri: "oeo:OEO_00010030",
+        dimension: technology,
+        name: "plug-in hybrid electric vehicle",
+      } # [ts]
+    energy demand: {
+        iri: "oeo:OEO_00140146",
+        dimension: quantity_kind,
+        name: "energy demand",
+      } # [ts]
+    investment: {
+        iri: "oeo:OEO_00020167",
+        dimension: quantity_kind,
+        name: "investment cost",
+      } # [ts]
+    transportation: {
+        iri: "oeo:OEO_00000422",
+        dimension: sector,
+        name: "transport sector",
+      } # [ts]
+    bus: { iri: "oeo:OEO_00010277", dimension: transport_mode, name: "bus" } # [ts]
+    rail: { iri: "oeo:OEO_00010280", dimension: transport_mode, name: "train" } # [ts]
+    truck: { iri: "oeo:OEO_00010278", dimension: transport_mode, name: "truck" } # [ts]
+    overhead line: {
+        iri: "oeo:OEO_00000047",
+        dimension: technology,
+        name: "AC-line",
+      } # [ts] matched "AC-line"
+    domestic aviation: {
+        iri: "oeo:OEO_00010059",
+        dimension: transport_mode,
+        name: "CRF sector (IPCC 2006): domestic aviation",
+      } # [ts] OEO individual
+    domestic navigation: {
+        iri: "oeo:OEO_00010062",
+        dimension: transport_mode,
+        name: "CRF sector (IPCC 2006): domestic navigation",
+      } # [ts] OEO individual
+    # --- UNRESOLVED — need a decision (not in released OEO) ---
+    ldv: {
+        iri: null,
+        dimension: transport_mode,
+        name: "light commercial vehicle",
+      } # not in OEO; mint OR unreleased-ontology vocab
+    additional: { iri: null, dimension: qualifier, name: "increase of role" } # only CommonCore match; qualifier semantics open
+
+  # AMIRIS facet enums (WF-04 classification table, resolved against the real
+  # metadata 2026-07-09; cleaned by WF-10). Same structured shape as iamc_tokens:
+  # code -> {iri, dimension, name}. Substance entries additionally carry
+  # `aggregation` (WF-06 decision 4). The generator classifies each oemetadata
+  # isAbout IRI through this table; concepts NOT listed here (e.g. fuel
+  # OEO_00000173) are reported unmapped — never silently emitted.
+  amiris_facets:
+    # data_role — epistemic status; absent = realized value
+    forecast: {
+        iri: "oeo:OEO_00010411",
+        dimension: data_role,
+        name: "forecast",
+      } # [ts]
+    assumption: {
+        iri: "oeo:OEO_00000063",
+        dimension: data_role,
+        name: "assumption",
+      } # [ts]
+    yield_profile: {
+        iri: "oeo:OEO_00140139",
+        dimension: data_role,
+        name: "yield profile",
+      } # [ts] a potential, epistemically like a forecast (WF-04 decision 1)
+    # transaction_role — market act
+    bid: { iri: "oeo:OEO_00140121", dimension: transaction_role, name: "bid" } # [ts]
+    award: {
+        iri: "oeo:OEO_00140122",
+        dimension: transaction_role,
+        name: "award",
+      } # [ts]
+    due: { iri: "oeo:OEO_00020124", dimension: transaction_role, name: "due" } # [ts]
+    # substance — measured quantity (primary facet); aggregation per WF-06:
+    # energy/money/emissions are extensive (sum), prices/factors intensive (mean)
+    electrical_energy: {
+        iri: "oeo:OEO_00000139",
+        dimension: substance,
+        name: "electrical energy",
+        aggregation: sum,
+      } # [ts]
+    electricity_price: {
+        iri: "oeo:OEO_00020117",
+        dimension: substance,
+        name: "electricity price",
+        aggregation: mean,
+      } # [ts]
+    co2_emission: {
+        iri: "oeo:OEO_00260007",
+        dimension: substance,
+        name: "CO2 emission",
+        aggregation: sum,
+      } # [ts]
+    co2_certificate_price: {
+        iri: "oeo:OEO_00010271",
+        dimension: substance,
+        name: "CO2 certificate price",
+        aggregation: mean,
+      } # [ts]
+    market_revenue: {
+        iri: "oeo:OEO_00020128",
+        dimension: substance,
+        name: "market revenue",
+        aggregation: sum,
+      } # [ts]
+    remuneration: {
+        iri: "oeo:OEO_00020125",
+        dimension: substance,
+        name: "remuneration",
+        aggregation: sum,
+      } # [ts]
+    variable_cost: {
+        iri: "oeo:OEO_00020145",
+        dimension: substance,
+        name: "variable cost",
+        aggregation: sum,
+      } # [ts]
+    fixed_cost: {
+        iri: "oeo:OEO_00020168",
+        dimension: substance,
+        name: "fixed cost",
+        aggregation: sum,
+      } # [ts]
+    investment_cost: {
+        iri: "oeo:OEO_00020167",
+        dimension: substance,
+        name: "investment cost",
+        aggregation: sum,
+      } # [ts] same IRI as iamc_tokens `investment` (quantity_kind) — different value space, no is-about collision
+    system_cost: {
+        iri: "oeo:OEO_00020116",
+        dimension: substance,
+        name: "system cost",
+        aggregation: sum,
+      } # [ts]
+    energy_use: {
+        iri: "oeo:OEO_00010210",
+        dimension: substance,
+        name: "energy use",
+        aggregation: sum,
+      } # [ts]
+    net_capacity_factor: {
+        iri: "oeo:OEO_00240016",
+        dimension: substance,
+        name: "net capacity factor",
+        aggregation: mean,
+      } # [ts]
