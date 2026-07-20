@@ -204,3 +204,17 @@
     grid-template-rows: repeat(2, auto);
   }
 }
+
+.index-startpage-info {
+    padding: 2rem 0;
+    max-width: 900px;
+    margin: 0 auto;
+}
+.index-startpage-info h2 {
+    color: #333;
+    margin-top: 1.5rem;
+}
+.index-startpage-info p {
+    line-height: 1.6;
+    color: #555;
+}
