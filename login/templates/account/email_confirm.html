@@ -32,14 +32,14 @@
         {{ redirect_field }}
         <button type="submit" class="login__button">{% trans 'Confirm' %}</button>
       {% endslot %}
-    {% endelement %}
-  {% else %}
-    {% element p %}
-    {% blocktrans %}
+{% endelement %}
+{% else %}
+{% element p %}
+{% blocktrans %}
               Unable to confirm {{ email }} because it is already confirmed by a
               different account.
             {% endblocktrans %}
-  {% endelement %}
+{% endelement %}
 {% endif %}
 {% else %}
 {% url 'account_email' as email_url %}
