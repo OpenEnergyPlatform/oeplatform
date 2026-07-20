@@ -43,7 +43,7 @@
           </div>
           <div class="index-tile index-tile-colored index-tile-color-2">
             <!-- <img src="{% static 'img/welcome/OpenEnergyFamily_Logo_Factsheets_icon.svg' %}"
-      alt="Factsheets"> -->
+              alt="Factsheets"> -->
             <img src="{% static 'img/welcome/bundles.png' %}" alt="Scenario Bundle" />
             <div class="inner-index-tile">
               <div class="panel-description">
@@ -103,9 +103,10 @@
                style="font-size: 16px"
                href="{{ EXTERNAL_URLS.tutorials_index }}">Academy</a>
           </div>
-          <div class="index-startpage-info">
-            {% render_markdown 'startpage-info.md' %}
-          </div>
+        </div>
+        <section class="index-startpage-info" aria-labelledby="release-info-heading">
+          <h2 id="release-info-heading">What’s new in OEP v1.8.0?</h2>
+          {% render_markdown 'dataedit/static/release_info_startpage/release_v1.8.0.md' %}
         </div>
         <!-- /.index-padding -->
       </div>

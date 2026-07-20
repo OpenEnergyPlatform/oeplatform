@@ -174,7 +174,7 @@
 
 .index-tile-container {
   display: grid;
-  grid-template-columns: repeat(5, auto);
+  grid-template-columns: repeat(4, auto);
   grid-gap: 2em;
   padding: 2em 0;
 
@@ -204,17 +204,32 @@
     grid-template-rows: repeat(2, auto);
   }
 }
-
 .index-startpage-info {
-    padding: 2rem 0;
-    max-width: 900px;
-    margin: 0 auto;
+  width: min(900px, calc(100% - 2rem));
+  margin: 0 auto 2rem;
+  padding: 1.5rem 2rem;
+  text-align: left;
+  background-color: var(--white);
+  border: 2px groove var(--primaryColor1);
+  border-radius: 5px;
 }
+
 .index-startpage-info h2 {
-    color: #333;
-    margin-top: 1.5rem;
+  margin-top: 0;
+  color: var(--primaryColor2);
+  text-align: center;
 }
-.index-startpage-info p {
-    line-height: 1.6;
-    color: #555;
+
+.index-startpage-info h3 {
+  color: var(--primaryColor4);
+}
+
+.index-startpage-info p,
+.index-startpage-info li {
+  line-height: 1.6;
+  color: var(--grey1);
+}
+
+.index-startpage-info ul {
+  padding-left: 1.25rem;
 }
