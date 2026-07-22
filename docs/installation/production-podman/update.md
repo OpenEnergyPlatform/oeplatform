@@ -61,21 +61,32 @@ Release steps run **inside the container** automatically on start — you do
 ## Forthcoming: pull published images
 
 Once a tagged release (`v*`) publishes the application and ontop images to the
-registry, the update flow becomes a **pull** instead of a local build:
+registry, the update flow becomes a **pull** instead of a local build. The
+published image is self-contained, so **you do not need the application source
+(no `git pull`) just to get a new image**:
 
 ```sh
 # (forthcoming — not yet available)
-git pull
 podman pull ghcr.io/openenergyplatform/oeplatform-production:latest
 podman pull ghcr.io/openenergyplatform/oeplatform-ontop:latest
 systemctl --user restart oep-oeplatform oep-ontop
 ```
 
+!!! info "When do you still need `git pull`?"
+
+    Only when the **deployment config** in the repo changed — the quadlet unit
+    files, `install.sh`, `oep.env.example`, or the nginx / lookup service configs.
+    Those live in the repo, **not** in the image. If a release touches them,
+    `git pull` and re-run `bash podman/quadlets/install.sh` (and
+    `install-nginx.sh` if the nginx config changed) before restarting. If only the
+    application changed, the two `podman pull`s above are enough.
+
 !!! note "Not enabled yet"
 
-    Until image publishing lands, use the **local build** flow above. The image
-    names shown here are the intended published names; building locally under the
-    same names keeps the switch seamless later.
+    Until image publishing lands, use the **local build** flow above — which
+    **does** require `git pull`, because there the image is built from the
+    checkout. The image names shown here are the intended published names; building
+    locally under the same names keeps the switch seamless later.
 
 ---
 
