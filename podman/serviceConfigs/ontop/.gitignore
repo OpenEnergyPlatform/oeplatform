@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # The ontop image is self-provisioning: the JDBC driver, ontology and mapping
 # are baked in, and the DB connection comes from env vars (see README). Nothing
 # here needs to be provided manually. These entries guard against accidentally
