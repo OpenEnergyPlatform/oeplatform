@@ -76,10 +76,22 @@ Today they are built locally (image publishing is forthcoming — see
 **[Update](update.md)**). The `postgres`, `fuseki` and `lookup` images are
 pulled automatically.
 
+Build them under the **exact image names the Quadlet units reference** (the
+`ghcr.io/…` names). The units use the default pull policy `missing`, so a
+locally-built image tagged with that name is used as-is — no registry pull is
+attempted, and no separate `podman tag` step is needed:
+
 ```sh
-podman build -t localhost/oeplatform:latest -f podman/Dockerfile .
-podman build -t localhost/oep-ontop:latest -f docker/Dockerfile.ontop docker/
+podman build -t ghcr.io/openenergyplatform/oeplatform-production:latest -f podman/Dockerfile .
+podman build -t ghcr.io/openenergyplatform/oeplatform-ontop:latest -f docker/Dockerfile.ontop docker/
 ```
+
+!!! warning "Build under the name the unit expects"
+
+    If you build under a different name (e.g. `localhost/oeplatform:latest`) the service
+    fails to start with **exit code 125** — Podman can't find an image under the name the
+    unit references. Either build under the `ghcr.io/…` name as above, or re-tag
+    afterwards. See [Maintenance](maintenance.md#service-fails-with-exit-code-125).
 
 !!! note "The build is slow the first time"
 

@@ -26,10 +26,11 @@ git checkout <tag-or-branch>
 git pull
 
 # 2. Rebuild the application image (runs collectstatic + asset compression)
-podman build -t localhost/oeplatform:latest -f podman/Dockerfile .
+#    Build under the ghcr name the unit references (see Install) — no re-tag needed.
+podman build -t ghcr.io/openenergyplatform/oeplatform-production:latest -f podman/Dockerfile .
 
 # 3. Rebuild ontop only if its ontology/mapping/driver changed
-podman build -t localhost/oep-ontop:latest -f docker/Dockerfile.ontop docker/
+podman build -t ghcr.io/openenergyplatform/oeplatform-ontop:latest -f docker/Dockerfile.ontop docker/
 
 # 4. Restart the app (postgres and fuseki keep running)
 systemctl --user restart oep-oeplatform
