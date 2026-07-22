@@ -143,7 +143,8 @@
             @extend .mt-2;
         }
 
-        .comment.suggestion--comment {
+        .comment.suggestion--comment,
+        .additional-comment.suggestion--additional-comment {
             @extend .d-inline-block;
             @extend .position-relative;
             @extend .mt-2;
@@ -154,6 +155,7 @@
             @extend .rounded-3;
             @extend .border;
             border-color: $gray-200!important;
+    }
 
             &:before {
                 content: "";

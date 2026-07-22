@@ -237,6 +237,7 @@ EXTERNAL_URLS = {
     "github_openenergyplatform": "https://github.com/OpenEnergyPlatform",
     "ORKG": "https://academy.orkg.org/orkg-academy/main/index.html",
     "open_plan": "https://open-plan-tool.org/",
+    "open_egon": "https://rego-n.org/",
     "open_mastr": "https://open-mastr.readthedocs.io/en/latest/",
     "tutorials_index": "https://openenergyplatform.github.io/academy/",
     "tutorials_faq": "https://openenergyplatform.github.io/academy/questions/",
@@ -464,6 +465,30 @@ AXES_ONLY_USER_FAILURES = True  # Only track failures per user
 
 CAPTCHA_IMAGE_SIZE = (300, 80)  # width, height in pixels
 CAPTCHA_FONT_SIZE = 52
+
+# Maximum DECOMPRESSED bytes accepted per bulk upload request (default 10 GiB).
+# A backstop against gzip bombs and runaway streams, not flow control -
+# clients are expected to split large datasets into several uploads.
+BULK_UPLOAD_MAX_BYTES = int(os.environ.get("BULK_UPLOAD_MAX_BYTES", 10 * 1024**3))
+
+# Bulk upload guards (ADR: synchronous WSGI protected by guards, not infra).
+# Concurrency: at most one running upload per user plus this global cap.
+BULK_UPLOAD_MAX_CONCURRENT = int(os.environ.get("BULK_UPLOAD_MAX_CONCURRENT", 2))
+# Stall guard: abort uploads averaging less than this rate (bytes/second)
+# after the grace period - a trickling client must not pin a worker.
+BULK_UPLOAD_MIN_BYTES_PER_SECOND = int(
+    os.environ.get("BULK_UPLOAD_MIN_BYTES_PER_SECOND", 10 * 1024)
+)
+BULK_UPLOAD_STALL_GRACE_SECONDS = int(
+    os.environ.get("BULK_UPLOAD_STALL_GRACE_SECONDS", 30)
+)
+# Database session timeouts for the upload's transaction (milliseconds).
+BULK_UPLOAD_STATEMENT_TIMEOUT_MS = int(
+    os.environ.get("BULK_UPLOAD_STATEMENT_TIMEOUT_MS", 60 * 60 * 1000)
+)
+BULK_UPLOAD_IDLE_TX_TIMEOUT_MS = int(
+    os.environ.get("BULK_UPLOAD_IDLE_TX_TIMEOUT_MS", 60 * 1000)
+)
 
 # dynamic variable to check if code is run in test or not
 IS_TEST = "test" in sys.argv
