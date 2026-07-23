@@ -1,29 +1,27 @@
+<!--
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+
 # Setup ontop service
 
-The ontop service is mainly use as enabling technology for the quantitative
-scenario comparison as it enables SPARQL queries on SQL databases using semantic
-mappings ontop on the "normal" sql like table definition.
+!!! info "This page has moved"
 
-## Installation
+    The Ontop service is now documented canonically on the
+    **[Ontop page of the Production deployment (Podman) guide](../production-podman/ontop.md)**.
+    That page covers the whole lifecycle in one place.
 
-We offer the pre-configured ontop service as part of the OEP-docker setup for
-development. It comes with a empty semantic mapping template which can be
-extended based on the user needs.
+The ontop service enables **SPARQL queries over the SQL database** using a
+semantic mapping — the enabling technology for quantitative scenario comparison.
 
-The ontop image is self-provisioning — the PostgreSQL JDBC driver, the ontology
-(`ontology.owl`) and the mapping (`mapping.obda`) are all baked into the image
-at build time. No files need to be placed or downloaded manually.
+The image is **self-provisioning**: the PostgreSQL JDBC driver, the ontology and
+an empty default mapping are all baked in at build time, and the database
+connection comes from environment variables (`ONTOP_DB_URL` / `ONTOP_DB_USER` /
+`ONTOP_DB_PASSWORD`). **Nothing needs to be downloaded or placed manually.** Pin
+a different JDBC version at build time with `--build-arg JDBC_VERSION=x.y.z`
+(default `42.7.3`).
 
-- The JDBC driver is fetched from Maven Central during the build. Pin a version
-  with `--build-arg JDBC_VERSION=x.y.z` (default: 42.7.3).
-- The database connection is configured through environment variables (in
-  `oep.env` / `.env`), so there is no `ontop.properties` file to create:
-
-  ```sh
-  ONTOP_DB_URL=jdbc:postgresql://postgres:5432/oedb
-  ONTOP_DB_USER=<postgres user>
-  ONTOP_DB_PASSWORD=<postgres password>
-  ```
-
-To customise the mapping, edit `docker/serviceConfigs/ontop/mapping.obda` and
-rebuild, or bind-mount your own file over `/opt/ontop-config/mapping.obda`.
+➡️ **Full documentation — self-provisioning, the `JDBC_VERSION` build-arg, and
+the repeatable procedure for applying a real mapping — is on the
+[canonical Ontop page](../production-podman/ontop.md).**

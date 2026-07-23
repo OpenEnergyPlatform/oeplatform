@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+
 # Relevant docker components
 
 Depending on if a docker setup is intended for a production or a development
@@ -38,5 +44,8 @@ developed as part of the oepaltform project and more. For development this also
 offers great tooling as you want to be able to use the container and still edit
 its contents like source code files and more. Compose offers a bind mount option
 which will mount you current directory into the container and watch for any file
-changes. To gether with devcontainer its also possible to use your IDE´s
-debugger tool and more. To sum this up compose enables us
+changes. Together with a devcontainer it is also possible to use your IDE´s
+debugger tool and more. To sum this up, compose lets us define and run the whole
+multi-service oeplatform infrastructure — application, databases and supporting
+services — with a single command, on a shared network, with live-editable source
+mounted in for development.

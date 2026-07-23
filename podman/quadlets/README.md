@@ -6,12 +6,14 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 # Quadlets — Podman Systemd Integration
 
-> Alternative to `podman-compose`. Each service is a systemd unit managed
-> directly by `systemctl`. Requires Podman ≥ 4.4 and a rootless Podman setup.
+> The **production** deployment path. Each service is a systemd `--user` unit
+> generated from a `.container` / `.volume` / `.network` file. Requires rootless
+> Podman ≥ 4.4.
 
-Quadlets translate `.container`, `.volume`, and `.network` files into systemd
-units. systemd then manages the full lifecycle: start on boot, restart on
-failure, dependency ordering, and log access via `journalctl`.
+**📖 Canonical guide:** the full install / update / maintenance documentation
+lives in the project docs under **Production deployment (Podman)**
+([`docs/installation/production-podman/`](../../docs/installation/production-podman/index.md)).
+This README is only a quickstart — the guide is the source of truth.
 
 ## Files
 
@@ -28,152 +30,30 @@ failure, dependency ordering, and log access via `journalctl`.
 | `oep-ontop.container`          | container | Ontop SPARQL endpoint                      |
 | `oep-lookup.container`         | container | DBpedia Lookup service                     |
 
-The `Dockerfile`, `apache2.conf`, and `entrypoint.sh` in the parent `podman/`
-directory are shared with the podman-compose setup — both approaches build and
-run the same image.
+## Quickstart
 
-## First-time Setup
-
-Run all commands from the **repository root**.
-
-### 1. Install units and create the environment file
+Run from the **repository root**, as the unprivileged service user:
 
 ```sh
+# 1. Install units + create ~/.config/oeplatform/oep.env
 bash podman/quadlets/install.sh
-```
 
-This copies all unit files to `~/.config/containers/systemd/` and creates
-`~/.config/oeplatform/oep.env` from the example template.
-
-### 2. Fill in credentials
-
-```sh
+# 2. Fill in credentials + the HTTPS block
 $EDITOR ~/.config/oeplatform/oep.env
+
+# 3. Build the two OEP images UNDER THE GHCR NAMES the units reference
+#    (pull policy 'missing' → a local image with that name is used as-is)
+podman build -t ghcr.io/openenergyplatform/oeplatform-production:latest -f podman/Dockerfile .
+podman build -t ghcr.io/openenergyplatform/oeplatform-ontop:latest    -f docker/Dockerfile.ontop docker/
+
+# 4. Enable + start everything
+systemctl --user enable --now oep-postgres oep-fuseki oep-oeplatform oep-ontop oep-lookup
+
+# 5. HTTPS via nginx (needs root) + survive reboot
+sudo bash podman/nginx/install-nginx.sh
+sudo loginctl enable-linger <service-user>
 ```
 
-### 3. Build the application images
-
-```sh
-podman build -t localhost/oeplatform:latest -f podman/Dockerfile .
-podman build -t localhost/oep-ontop:latest -f docker/Dockerfile.ontop docker/
-```
-
-### 4. Enable and start all services
-
-```sh
-systemctl --user enable --now \
-  oep-postgres oep-fuseki oep-oeplatform oep-ontop oep-lookup
-```
-
-Services start in dependency order. `oep-oeplatform` and `oep-ontop` wait for
-`oep-postgres` before starting.
-
-## Serving over HTTPS with nginx
-
-The `oep-oeplatform.container` publishes the app on **`127.0.0.1:8080`** only —
-it is not reachable from outside the server. An nginx reverse proxy on the host
-terminates TLS on **port 443** and forwards to the container.
-
-> **TLS flow.** The public endpoint is an **upstream Apache reverse proxy** that
-> terminates the public TLS and handles authentication, then **re-encrypts to
-> this host** — it opens an HTTPS connection to nginx here on :443. So nginx
-> also terminates TLS (with a certificate) and proxies plain HTTP to the
-> container. nginx runs as root, so binding the privileged port 443 is fine even
-> though the app container is rootless. The backend certificate may be
-> self-signed — `install-nginx.sh` generates one automatically, and Apache's
-> `mod_proxy` does not verify the backend cert by default.
-
-### 1. Tell Django it runs behind HTTPS
-
-In `~/.config/oeplatform/oep.env` set the production block (see
-`oep.env.example`):
-
-```sh
-OEP_DEBUG=False
-OEP_URL=your-domain.org
-OEP_ALLOWED_HOSTS=your-domain.org
-OEP_BEHIND_TLS_PROXY=True
-OEP_CSRF_TRUSTED_ORIGINS=https://your-domain.org
-```
-
-`OEP_BEHIND_TLS_PROXY=True` makes Django trust the `X-Forwarded-Proto` header
-that the upstream sets and this nginx forwards. Restart the app so it picks up
-the new environment file:
-
-```sh
-systemctl --user restart oep-oeplatform
-```
-
-### 2. Install and configure nginx
-
-```sh
-bash podman/nginx/install-nginx.sh
-```
-
-This installs nginx (if needed), **generates a self-signed TLS certificate** (if
-none exists at `/etc/nginx/ssl/oeplatform/`), writes the site config with the
-`server_name` taken from `OEP_URL` in your `oep.env`, enables it, disables the
-default site, and reloads nginx. It is idempotent — re-run it after changing the
-config or domain. To override the domain, pass it explicitly:
-`bash podman/nginx/install-nginx.sh my-domain.org`.
-
-> nginx terminates TLS on `443` and proxies to the container on
-> `127.0.0.1:8080`. The upstream Apache proxy re-encrypts to it, so a
-> self-signed backend cert is fine (Apache does not verify it by default). To
-> use a real certificate instead, drop `fullchain.pem` + `privkey.pem` into
-> `/etc/nginx/ssl/oeplatform/` before running the script.
-
-The platform is now served over HTTPS end-to-end.
-
-## Managing Services
-
-```sh
-# Status
-systemctl --user status oep-oeplatform
-
-# Logs
-journalctl --user -u oep-oeplatform -f
-
-# Restart a single service
-systemctl --user restart oep-oeplatform
-
-# Stop everything
-systemctl --user stop oep-postgres oep-fuseki oep-oeplatform oep-ontop oep-lookup
-```
-
-## Deploy a New Release
-
-```sh
-git checkout master && git pull
-
-# Rebuild the application image
-podman build -t localhost/oeplatform:latest -f podman/Dockerfile .
-
-# Restart the app container — postgres and fuseki keep running
-systemctl --user restart oep-oeplatform
-```
-
-## Repo Path for Lookup
-
-`oep-lookup.container` bind-mounts its config from this repository. The unit
-ships with an `@@OEP_REPO@@` placeholder that `install.sh` replaces with the
-absolute path of your checkout when it installs the units — so it works from any
-location with **no symlink and no manual editing**. Just run `install.sh` from
-the checkout you want to use.
-
-> `oep-ontop.container` needs no repo path at all — its ontology, mapping and
-> JDBC driver are baked into the image and its DB connection comes from
-> `oep.env` (`ONTOP_DB_URL` / `ONTOP_DB_USER` / `ONTOP_DB_PASSWORD`).
-
-## Uninstall
-
-```sh
-systemctl --user disable --now \
-  oep-postgres oep-fuseki oep-oeplatform oep-ontop oep-lookup
-
-rm ~/.config/containers/systemd/oep-*.container
-rm ~/.config/containers/systemd/*.volume
-rm ~/.config/containers/systemd/oep.network
-
-systemctl --user daemon-reload
-```
+See the [canonical guide](../../docs/installation/production-podman/index.md)
+for the architecture, the `oep.env` reference, the Ontop mapping procedure, the
+update flow, and troubleshooting.

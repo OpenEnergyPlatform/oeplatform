@@ -6,6 +6,12 @@ SPDX-License-Identifier: CC0-1.0
 
 # Docker Usage
 
+**Development / CI only.** This Docker Compose setup is for local development,
+testing and CI — **not** the production deployment. For production use the
+rootless **Podman / Quadlets** path documented under **Production deployment
+(Podman)**
+([`docs/installation/production-podman/`](../docs/installation/production-podman/index.md)).
+
 > Works for Linux & MacOS (probably). It is tested with Linux. You also need a
 > working Docker and Docker Compose installation and some basic knowledge about
 > command lines.
@@ -75,8 +81,8 @@ did choose another working directory, make sure to change the path to the
 This can be used, if you want to use a local installation for development and
 don't want to mess with the database setup (which should be the normal case).
 
-First step is to include the OpenEnergyOntology, as described in
-[installation docs, step 3.1](../docs/install-and-documentation/install/installation.md).
+First step is to include the OpenEnergyOntology, as described in the
+[manual installation guide](../docs/installation/guides/installation.md).
 
 We start the database container and expose the database to our host. Afterwards,
 we prepare the `securitysettings.py` with the correct credentials and migrate
