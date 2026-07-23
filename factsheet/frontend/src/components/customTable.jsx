@@ -46,6 +46,7 @@ import conf from "../conf.json";
 // import SelectAllIcon from '@mui/icons-material/SelectAll';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import AddIcon from '@mui/icons-material/Add';
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 // import RuleIcon from '@mui/icons-material/Rule';
 import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles'
 import Tooltip from '@mui/material/Tooltip';
@@ -242,6 +243,15 @@ function EnhancedTableHead(props) {
             </TableSortLabel>
           </StyledTableCell>
         ))}
+        {/* Empty header cell for the expand-details column so the header's
+            column count matches the body's 5 columns (no TableSortLabel here,
+            so no stray sort arrow — see the commented-out more_details headCell). */}
+        <StyledTableCell
+          variant="light"
+          key="more_details_head"
+          aria-hidden="true"
+          sx={{ width: '40px', paddingLeft: '20px' }}
+        />
       </TableRow>
     </TableHead>
   );
@@ -365,7 +375,7 @@ function EnhancedTableToolbar(props) {
           </Grid>
 
           {/* MIDDLE: quick search */}
-          <Grid item xs={12} md={4}>
+          <Grid item xs={12} md={3}>
             <TextField
               size="small"
               fullWidth
@@ -408,7 +418,8 @@ function EnhancedTableToolbar(props) {
             </ToggleButtonGroup>
           </Grid>
 
-          <Grid item xs={6} md={2}>
+          <Grid item xs={6} md={3}>
+            <Stack direction="row" spacing={1} justifyContent="flex-end" alignItems="center">
             <HtmlTooltip
               style={{ marginLeft: '10px' }}
               placement="top"
@@ -435,6 +446,19 @@ function EnhancedTableToolbar(props) {
                 </Button>
               </span>
             </HtmlTooltip>
+              <Button
+                variant="outlined"
+                size="small"
+                key="oekgChatButton"
+                component="a"
+                href="https://oekg-chat.openenergyplatform.org/"
+                target="_blank"
+                rel="noopener noreferrer"
+                startIcon={<ChatBubbleOutlineIcon />}
+              >
+                OEKG Chat
+              </Button>
+            </Stack>
           </Grid>
 
         </Grid>
@@ -822,7 +846,7 @@ export default function CustomTable(props) {
 
             </StyledTableRow>
             <TableRow >
-              <TableCell colSpan={8} >
+              <TableCell colSpan={5} >
                 <Collapse in={open.includes(index)} timeout="auto" unmountOnExit>
                   <Box>
                     <Grid container
