@@ -122,6 +122,36 @@ __all__ = [  # mark imports as "used"
 ]
 
 
+# ── Reverse proxy / HTTPS ─────────────────────────────────────────────────────
+# When the platform runs behind a TLS-terminating reverse proxy (e.g. nginx on
+# the production server), the proxy speaks HTTPS to the client and plain HTTP to
+# the container. These settings let Django recognise the original HTTPS request.
+# Enable by setting OEP_BEHIND_TLS_PROXY=True on the server.
+if os.environ.get("OEP_BEHIND_TLS_PROXY", "False").strip().lower() in (
+    "true",
+    "1",
+    "yes",
+):
+    # The proxy must send this header
+    # (nginx: proxy_set_header X-Forwarded-Proto $scheme;)
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+# Comma-separated list of trusted origins for CSRF checks under HTTPS, e.g.
+# OEP_CSRF_TRUSTED_ORIGINS="https://openenergyplatform.org,www.openenergyplatform.org".
+# Required by Django for unsafe (POST/PUT/…) requests served over HTTPS. Django
+# 4+ requires each origin to include a scheme, so a bare host (e.g. "example.org")
+# is normalised to "https://example.org".
+_csrf_trusted_origins = os.environ.get("OEP_CSRF_TRUSTED_ORIGINS", "").strip()
+if _csrf_trusted_origins:
+    CSRF_TRUSTED_ORIGINS = [
+        origin if "://" in origin else f"https://{origin}"
+        for origin in (o.strip() for o in _csrf_trusted_origins.split(","))
+        if origin
+    ]
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
