@@ -13,6 +13,16 @@ SPDX-License-Identifier: CC0-1.0
 
 ### Features
 
+- Reproducible container deployment (Podman Quadlets): the whole OEP
+  infrastructure - web app, PostgreSQL, Fuseki, Ontop and Lookup - is described
+  as systemd Quadlet units on a shared container network, fronted by an nginx
+  reverse proxy that terminates HTTPS on port 443. The application and Ontop
+  images are self-provisioning (the OEO release, the OEO-extended template and
+  the Ontop PostgreSQL JDBC driver are fetched/baked automatically); all
+  credentials and host/HTTPS settings come from a single env file, and
+  server-specific setup is scripted (`install.sh`, `install-nginx.sh`).
+  [(#2319)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2319)
+
 - Bulk upload observability: every upload attempt emits exactly one structured
   (logfmt) log line - table, user, outcome (success, validation-error,
   copy-error, size-cap, stall, embargo, busy), rows, bytes, and phase timings
@@ -159,6 +169,14 @@ SPDX-License-Identifier: CC0-1.0
   ([#1971](https://github.com/OpenEnergyPlatform/oeplatform/issues/1971))
 
 ## Documentation updates
+
+- New "Production deployment (Podman)" guide (Overview → Install → Ontop →
+  Update → Maintenance) in the project docs, canonical for the rootless
+  Podman/Quadlets production path. The podman READMEs now point at it, the
+  docker/compose docs are marked development/CI-only, and stale/duplicate
+  deployment docs were consolidated (retired the orphan ontop page, fixed broken
+  links, reconciled the stated Postgres version, added missing SPDX headers).
+  [(#2319)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2319)
 
 - Updated the OE Family Steering Committee
   [#2332](https://github.com/OpenEnergyPlatform/oeplatform/pull/2332)
