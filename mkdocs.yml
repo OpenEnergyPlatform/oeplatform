@@ -136,3 +136,4 @@ nav:
               - Technical docs: oeplatform-code/features/open-peer-review-process/technical-docs.md
           - Scenario Bundles:
               - oeplatform-code/features/scenario-bundles/index.md
+              - Architecture & developer guide: oeplatform-code/features/scenario-bundles/architecture.md
