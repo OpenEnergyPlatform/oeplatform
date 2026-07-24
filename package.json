@@ -88,8 +88,8 @@
     "eslint-plugin-react": "^7.37.3",
     "eslint-plugin-react-hooks": "^5.1.0",
     "prettier": "^3.3.2",
-    "vitest": "^3.2.4",
-    "vite": "^8.0.16",
-    "vite-plugin-eslint": "^1.8.1"
+    "vite": "8.0.13",
+    "vite-plugin-eslint": "^1.8.1",
+    "vitest": "^3.2.4"
   }
 }
