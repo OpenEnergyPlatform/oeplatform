@@ -457,7 +457,7 @@ function EnhancedTableToolbar(props) {
                 size="small"
                 key="oekgChatButton"
                 component="a"
-                href="https://oekg-chat.openenergyplatform.org/"
+                href={(typeof window !== 'undefined' && window.OEP_EXTERNAL_URLS && window.OEP_EXTERNAL_URLS.oekg_chat) || 'https://oekg-chat.openenergyplatform.org/'}
                 target="_blank"
                 rel="noopener noreferrer"
                 startIcon={<ChatBubbleOutlineIcon />}

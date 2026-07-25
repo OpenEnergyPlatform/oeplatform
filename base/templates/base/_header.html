@@ -76,7 +76,7 @@
         <a class="dropdown-item" href="{% url 'factsheet:factsheets_index' %}">Scenario Bundle</a>
         <a class="dropdown-item" href="{% url 'oekg:main' %}">OEKG SPARQL-Query</a>
         <a class="dropdown-item"
-           href="https://oekg-chat.openenergyplatform.org/"
+           href="{{ EXTERNAL_URLS.oekg_chat }}"
            target="_blank"
            rel="noopener noreferrer">OEKG Chat</a>
       </div>

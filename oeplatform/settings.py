@@ -216,6 +216,7 @@ MIDDLEWARE = (
 ROOT_URLCONF = "oeplatform.urls"
 
 EXTERNAL_URLS = {
+    "oekg_chat": "https://oekg-chat.openenergyplatform.org/",
     "tutorials_index": "https://openenergyplatform.github.io/academy/",
     "tutorials_faq": "https://openenergyplatform.github.io/academy/questions/",
     "tutorials_api1": "https://openenergyplatform.github.io/academy/tutorials/01_api/01_api_download/",  # noqa E501
