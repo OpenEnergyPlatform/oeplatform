@@ -4,7 +4,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -261,6 +261,39 @@ function Factsheet(props) {
   // OEO sector hierarchy as a tree.
   const [sectorDivisions, setSectorDivisions] = useState([]);
   const [selectedSectorDivisions, setSelectedSectorDivisions] = useState(id !== 'new' ? fsData.sector_divisions || [] : []);
+
+  // Sectors picked from the OEO sector hierarchy (the "Other" row of the edit
+  // form) are shown as that hierarchy in overview mode too; sectors defined by a
+  // sector division have no hierarchy and stay flat chips.
+  const sectorTreeOptions = useMemo(
+    () => sectorDivisions.find(item => item.kind === 'tree')?.options || [],
+    [sectorDivisions]
+  );
+
+  const sectorTreeNodes = useMemo(() => {
+    const flatten = (nodes = [], acc = []) => {
+      nodes.forEach(node => {
+        if (!node) return;
+        acc.push(node);
+        if (node.children) flatten(node.children, acc);
+      });
+      return acc;
+    };
+    return flatten(sectorTreeOptions);
+  }, [sectorTreeOptions]);
+
+  const sectorHierarchyIris = useMemo(
+    () => new Set(sectorTreeNodes.map(node => String(node.iri))),
+    [sectorTreeNodes]
+  );
+
+  const selectedSectorHierarchy = useMemo(() => {
+    const byIri = new Map(sectorTreeNodes.map(node => [String(node.iri), node]));
+    const values = selectedSectors
+      .filter(sector => byIri.has(String(sector.class)))
+      .map(sector => byIri.get(String(sector.class)).value);
+    return filterTree(sectorTreeOptions, values);
+  }, [sectorTreeOptions, sectorTreeNodes, selectedSectors]);
   const [selectedInstitution, setSelectedInstitution] = useState(id !== 'new' ? fsData.institution || [] : []);
   const [selectedFundingSource, setSelectedFundingSource] = useState(id !== 'new' ? fsData.funding_sources || [] : []);
   const [selectedContactPerson, setselectedContactPerson] = useState(id !== 'new' ? fsData.contact_person || [] : []);
@@ -2295,9 +2328,15 @@ const renderScenariosOverview = () => (
               </div>
             </FirstRowTableCell>
             <ContentTableCell>
-              {selectedSectors.map((v, i) => (
-                <span> <span> <Chip label={v.label} size="small" variant="outlined" onClick={() => handleOpenURL(v.class)} /> </span> <span>   <b className="separator-dot">  </b></span> </span>
-              ))}
+              {/* Sectors picked from the OEO hierarchy are shown as that
+                  hierarchy (like the technologies row below); sectors defined by
+                  a sector division have no hierarchy and stay chips. */}
+              {selectedSectors
+                .filter(v => !sectorHierarchyIris.has(String(v.class)))
+                .map((v, i) => (
+                  <span> <span> <Chip label={v.label} size="small" variant="outlined" onClick={() => handleOpenURL(v.class)} /> </span> <span>   <b className="separator-dot">  </b></span> </span>
+                ))}
+              <HierarchyViewer nodes={selectedSectorHierarchy} onLinkClick={handleOpenURL} />
             </ContentTableCell>
           </TableRow>
           <TableRow>

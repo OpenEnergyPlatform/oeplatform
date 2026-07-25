@@ -44,6 +44,9 @@ import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxOutlinedIcon from '@mui/icons-material/CheckBoxOutlined';
+import HierarchyViewer from './HierarchyViewer';
+import handleOpenURL from './handleOnClickTableIRI.jsx';
+import { getCheckedWithParents, filterTree as selectedSubtree } from './treeUtils';
 
 const treeIcons = {
   check: <CheckBoxIcon />,
@@ -83,11 +86,11 @@ const nodeLabel = (node) => String(node.label ?? node.value ?? '');
 
 // Keep the nodes matching `term` plus every ancestor leading to them, and
 // collect the ancestors so the matches are visible without clicking open.
-const filterTree = (nodes = [], term, expanded = []) => {
+const filterTreeBySearch = (nodes = [], term, expanded = []) => {
   const kept = [];
   nodes.forEach((node) => {
     if (!node) return;
-    const children = filterTree(node.children || [], term, expanded);
+    const children = filterTreeBySearch(node.children || [], term, expanded);
     const matches = nodeLabel(node).toLowerCase().includes(term.toLowerCase());
     if (!matches && !children.length) return;
     if (children.length) expanded.push(nodeValue(node));
@@ -195,16 +198,35 @@ export default function SectorSelector({
     if (!filter) return { treeData: options, treeExpanded: expanded };
     const autoExpanded = [];
     return {
-      treeData: filterTree(options, filter, autoExpanded),
+      treeData: filterTreeBySearch(options, filter, autoExpanded),
       treeExpanded: autoExpanded
     };
   }, [treeDivision, filter, expanded]);
 
+  // A sector in the hierarchy is a subdivision of its parent, so picking one
+  // means picking the sectors above it: ticking a node selects its ancestors
+  // (`getCheckedWithParents`, same as the technologies tree does). The mirror
+  // image is that unticking a node drops its whole subtree — without it the
+  // ancestors implied by a still-ticked child would just tick themselves again.
+  //
   // The tree only reports the values checked among the nodes it renders, so the
   // merge is scoped to those: selections in the other divisions — and tree
   // selections currently hidden by the search — must survive.
-  const handleTreeCheck = (checkedValues) => {
+  const handleTreeCheck = (checkedValues, targetNode) => {
     const byValue = new Map(treeNodes.map((node) => [nodeValue(node), node]));
+    let values = checkedValues || [];
+
+    if (targetNode && targetNode.checked === false) {
+      const unticked = treeNodes.find(
+        (node) => nodeValue(node) === String(targetNode.value)
+      );
+      const subtree = new Set(
+        flattenTree(unticked ? [unticked] : []).map(nodeValue)
+      );
+      values = values.filter((value) => !subtree.has(String(value)));
+    }
+
+    const treeOptions = treeDivision ? treeDivision.options || [] : [];
     const visibleIris = new Set(
       flattenTree(treeData).map((node) => String(node.iri))
     );
@@ -212,7 +234,7 @@ export default function SectorSelector({
       (sector) => !visibleIris.has(String(sector.class))
     );
     const picked = [];
-    (checkedValues || []).forEach((value) => {
+    getCheckedWithParents(values, treeOptions).forEach((value) => {
       const node = byValue.get(String(value));
       if (!node) return;
       if (picked.some((item) => String(item.class) === String(node.iri))) return;
@@ -227,6 +249,38 @@ export default function SectorSelector({
       .filter((sector) => byIri.has(String(sector.class)))
       .map((sector) => nodeValue(byIri.get(String(sector.class))));
   }, [treeNodes, selectedSectors]);
+
+  // The picks from the hierarchy are shown *as* the hierarchy (selected nodes
+  // plus the ancestors leading to them), like the technologies overview does;
+  // division members have no hierarchy, so they stay chips grouped by division.
+  const treeSelection = useMemo(
+    () => selectedSubtree(treeDivision ? treeDivision.options || [] : [], treeChecked),
+    [treeDivision, treeChecked]
+  );
+
+  const chipGroups = useMemo(() => {
+    const groups = [];
+    const claimed = new Set(treeNodes.map((node) => String(node.iri)));
+    divisions
+      .filter((division) => division.kind !== 'tree')
+      .forEach((division) => {
+        const iris = new Set((division.options || []).map((o) => String(o.iri)));
+        const sectors = selectedSectors.filter((sector) =>
+          iris.has(String(sector.class))
+        );
+        sectors.forEach((sector) => claimed.add(String(sector.class)));
+        if (sectors.length) {
+          groups.push({ label: division.label || division.name, sectors });
+        }
+      });
+    // Sectors from a division this OEO version no longer serves: still shown,
+    // so a selection can never sit in the payload invisibly.
+    const orphans = selectedSectors.filter(
+      (sector) => !claimed.has(String(sector.class))
+    );
+    if (orphans.length) groups.push({ label: 'Not in the current OEO', sectors: orphans });
+    return groups;
+  }, [divisions, selectedSectors, treeNodes]);
 
   const renderTreeOptions = () => {
     if (!treeData.length) {
@@ -393,18 +447,35 @@ export default function SectorSelector({
         <Typography variant="caption" sx={{ color: 'text.secondary' }}>
           Selected sectors ({selectedSectors.length})
         </Typography>
-        <Box>
-          {selectedSectors.map((sector) => (
-            <Chip
-              key={String(sector.class)}
-              size="small"
-              variant="outlined"
-              label={nodeLabel(sector)}
-              onDelete={() => removeSector(sector)}
-              sx={{ m: 0.5 }}
-            />
-          ))}
-        </Box>
+        {chipGroups.map((group) => (
+          <Box key={group.label} sx={{ mt: 0.5 }}>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+              {group.label}
+            </Typography>
+            <Box>
+              {group.sectors.map((sector) => (
+                <Chip
+                  key={String(sector.class)}
+                  size="small"
+                  variant="outlined"
+                  label={nodeLabel(sector)}
+                  onDelete={() => removeSector(sector)}
+                  sx={{ m: 0.5 }}
+                />
+              ))}
+            </Box>
+          </Box>
+        ))}
+        {treeSelection.length > 0 && (
+          <Box sx={{ mt: 0.5 }}>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+              OEO sector hierarchy — untick in the pane above to remove
+            </Typography>
+            <Box sx={{ typography: 'body2' }}>
+              <HierarchyViewer nodes={treeSelection} onLinkClick={handleOpenURL} />
+            </Box>
+          </Box>
+        )}
       </Box>
     </Box>
   );
