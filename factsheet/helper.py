@@ -340,10 +340,13 @@ def build_sector_dropdowns_from_oeo(g: Graph):
 
 
 # Study descriptors are OEO terms carrying the annotation property
-# "oekg annotation" (OEO_00020425) with the exact value "study descriptor".
-# See the OEKG scenario-bundles wayfinder (WF-03 / WF-04): the match is strict —
-# terms tagged with the inconsistent value "study descriptor tag" are NOT
-# included; that is an ontology data issue to fix upstream in the OEO.
+# "oekg annotation" (OEO_00020425) whose value starts with "study descriptor".
+# See the OEKG scenario-bundles wayfinder (WF-03 / WF-04, amended 2026-07-25):
+# this matches BOTH value variants the OEO currently carries — the canonical
+# "study descriptor" AND the inconsistent "study descriptor tag" — so every term
+# the OEO marks appears (24 + 7 = 31 in OEO 2.12.0). Terms carrying no
+# "oekg annotation" at all (e.g. control area, carbon neutrality) still need to
+# be tagged upstream in the OEO before they can appear.
 OEKG_ANNOTATION = OEO.OEO_00020425
 STUDY_DESCRIPTOR_VALUE = "study descriptor"
 
@@ -353,10 +356,12 @@ _study_descriptors_cache = None
 def build_study_descriptors_from_oeo(g: Graph):
     """Return study descriptors as ``[label, iri, definition]`` triples.
 
-    Strict: only terms annotated with ``OEO_00020425`` ("oekg annotation") whose
-    value is exactly ``"study descriptor"``. Labels come from ``rdfs:label`` and
-    definitions from the ontology (IAO / SKOS / rdfs:comment). Matches the shape
-    of the former hardcoded ``StudyKeywords`` array in the React frontend.
+    Terms annotated with ``OEO_00020425`` ("oekg annotation") whose value starts
+    with ``"study descriptor"`` — i.e. both the canonical ``"study descriptor"``
+    and the inconsistent ``"study descriptor tag"`` variants the OEO carries.
+    Labels come from ``rdfs:label`` and definitions from the ontology
+    (IAO / SKOS / rdfs:comment). Matches the shape of the former hardcoded
+    ``StudyKeywords`` array in the React frontend.
 
     Memoized on first call — the OEO only changes when the process restarts.
     """
@@ -366,7 +371,7 @@ def build_study_descriptors_from_oeo(g: Graph):
 
     descriptors = []
     for term, value in g.subject_objects(OEKG_ANNOTATION):
-        if str(value).strip() != STUDY_DESCRIPTOR_VALUE:
+        if not str(value).strip().startswith(STUDY_DESCRIPTOR_VALUE):
             continue
         label = _label(g, term) or term.n3(g.namespace_manager)
         definition = _definition(g, term)
