@@ -48,6 +48,7 @@ from factsheet.helper import (
     SECTOR_DIVISION,
     TECHNOLOGY,
     build_sector_dropdowns_from_oeo,
+    build_study_descriptors_from_oeo,
     clean_name,
     get_all_sub_classes,
     get_scenario_type_iri,
@@ -1757,6 +1758,7 @@ def populate_factsheets_elements_view(request, *args, **kwargs):
     elements["sectors"] = sectors_list
     elements["scenario_descriptors"] = scenario_subclasses
     elements["technologies"] = technology_subclasses
+    elements["study_descriptors"] = build_study_descriptors_from_oeo(oeo)
 
     # for s, p, o in oeo.triples(( None, RDFS.subClassOf, OEO.OEO_00020003 )):
     #     sl = oeo.value(s, RDFS.label)

@@ -79,7 +79,6 @@ import '../styles/App.css';
 import { TableRow } from '@mui/material';
 import variables from '../styles/oep-theme/variables.js';
 
-import StudyKeywords from './scenarioBundleUtilityComponents/StudyDescriptors.js';
 import handleOpenURL from './scenarioBundleUtilityComponents/handleOnClickTableIRI.jsx';
 
 import { getCheckedWithParents, filterTree } from './scenarioBundleUtilityComponents/treeUtils';
@@ -291,6 +290,9 @@ function Factsheet(props) {
 
   const [scenariosObject, setScenariosObject] = useState({});
   const [selectedStudyKewords, setSelectedStudyKewords] = useState(id !== 'new' ? fsData.study_keywords : []);
+  // Study descriptors, loaded dynamically from the OEO via
+  // populate_factsheets_elements (replaces the former hardcoded StudyKeywords).
+  const [studyKeywords, setStudyKeywords] = useState([]);
   const [selectedModels, setSelectedModels] = useState(id !== 'new' ? fsData.models || [] : []);
   const [selectedFrameworks, setSelectedFrameworks] = useState(id !== 'new' ? fsData.frameworks || [] : []);
   const [removeReport, setRemoveReport] = useState(false);
@@ -399,6 +401,8 @@ function Factsheet(props) {
 
   useEffect(() => {
     populateFactsheetElements().then((data) => {
+
+      setStudyKeywords(data.study_descriptors || []);
 
       function parse(arr) {
         return arr.map(obj => {
@@ -1689,7 +1693,7 @@ function Factsheet(props) {
           <FormGroup>
             <div >
               {
-                StudyKeywords.map((item) =>
+                studyKeywords.map((item) =>
                   <span key={item[0]}>
                     {item[1] !== '' ? <HtmlTooltip
                       style={{ marginLeft: '10px' }}
@@ -2849,7 +2853,7 @@ const renderScenariosOverview = () => (
                       </Grid>
                       <Grid item xs={9} style={{ paddingTop: '10px' }}>
                         {selectedStudyKewords.map((v, i) => {
-                          const match = StudyKeywords.find((it) => it[1] === v) || [v, ""];
+                          const match = studyKeywords.find((it) => it[1] === v) || [v, ""];
                           const [label, url] = match;
                           const variant = url ? "outlined" : "filled";
 

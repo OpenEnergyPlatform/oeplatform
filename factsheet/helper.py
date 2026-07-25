@@ -208,6 +208,44 @@ def build_sector_dropdowns_from_oeo(g: Graph):
     return sector_divisions_list, sectors_list
 
 
+# Study descriptors are OEO terms carrying the annotation property
+# "oekg annotation" (OEO_00020425) with the exact value "study descriptor".
+# See the OEKG scenario-bundles wayfinder (WF-03 / WF-04): the match is strict —
+# terms tagged with the inconsistent value "study descriptor tag" are NOT
+# included; that is an ontology data issue to fix upstream in the OEO.
+OEKG_ANNOTATION = OEO.OEO_00020425
+STUDY_DESCRIPTOR_VALUE = "study descriptor"
+
+_study_descriptors_cache = None
+
+
+def build_study_descriptors_from_oeo(g: Graph):
+    """Return study descriptors as ``[label, iri, definition]`` triples.
+
+    Strict: only terms annotated with ``OEO_00020425`` ("oekg annotation") whose
+    value is exactly ``"study descriptor"``. Labels come from ``rdfs:label`` and
+    definitions from the ontology (IAO / SKOS / rdfs:comment). Matches the shape
+    of the former hardcoded ``StudyKeywords`` array in the React frontend.
+
+    Memoized on first call — the OEO only changes when the process restarts.
+    """
+    global _study_descriptors_cache
+    if _study_descriptors_cache is not None:
+        return _study_descriptors_cache
+
+    descriptors = []
+    for term, value in g.subject_objects(OEKG_ANNOTATION):
+        if str(value).strip() != STUDY_DESCRIPTOR_VALUE:
+            continue
+        label = _label(g, term) or term.n3(g.namespace_manager)
+        definition = _definition(g, term)
+        descriptors.append([label, str(term), definition or ""])
+
+    descriptors.sort(key=lambda d: d[0].lower())
+    _study_descriptors_cache = descriptors
+    return descriptors
+
+
 def parse_dataset_iri(iri: str | None) -> dict:
     """
     Parse internal and external dataset URLs which have ben added to the OEKG to
