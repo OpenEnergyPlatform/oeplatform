@@ -75,6 +75,10 @@
       <div class="dropdown-menu" aria-labelledby="navbarDropdownSB">
         <a class="dropdown-item" href="{% url 'factsheet:factsheets_index' %}">Scenario Bundle</a>
         <a class="dropdown-item" href="{% url 'oekg:main' %}">OEKG SPARQL-Query</a>
+        <a class="dropdown-item"
+           href="{{ EXTERNAL_URLS.oekg_chat }}"
+           target="_blank"
+           rel="noopener noreferrer">OEKG Chat</a>
       </div>
     </li>
     <li class="nav-item dropdown">

@@ -168,6 +168,40 @@ SPDX-License-Identifier: CC0-1.0
   order, which also made a dataset detail test flaky on CI.
   ([#1971](https://github.com/OpenEnergyPlatform/oeplatform/issues/1971))
 
+- Scenario Bundles: sector divisions and their sectors now load dynamically from
+  the Open Energy Ontology (OEO) in the "Sectors and technology" tab of the
+  bundle editor, replacing a hardcoded list - new divisions appear
+  automatically. Selecting a division lists the sectors defined by it (resolving
+  both ways the OEO models that membership), and the "Other" option opens the
+  full OEO sector hierarchy, presented in a master-detail layout with the
+  divisions on the left and their options on the right.
+
+- Scenario Bundles: study descriptors are now populated from the OEO - every
+  term the ontology marks as a study descriptor - instead of a hardcoded list,
+  across the bundle editor, the bundle overview, the all-bundles filter, and the
+  comparison board. Labels come straight from the ontology, so they stay in sync
+  as the OEO evolves.
+
+- Scenario Bundles: added a link to the external OEKG chat assistant
+  (`https://oekg-chat.openenergyplatform.org/`) in the Scenario Bundles navbar
+  dropdown and as a button on the bundles overview.
+
+- Fix the Scenario Bundles overview table layout: the header defined one fewer
+  column than each row (the expand-details column had no header) and the
+  collapsible detail row over-spanned, leaving a ragged empty strip down the
+  right-hand side.
+
+- Make the Scenario Bundles overview toolbar responsive: on smaller screens the
+  search / reset / compare buttons, the quick-search field, the view toggle and
+  the create / OEKG-chat buttons now wrap onto their own rows instead of
+  overlapping.
+
+- Pin Vite to 8.0.13 for the frontend dev build. Vite 8.0.14-8.0.16 have a
+  dependency-optimization regression that breaks the emotion/MUI setup in
+  development ("init_emotion_react_esm is not defined", blank Scenario Bundles
+  page); pinned to the last known-good release until it is fixed upstream
+  ([vitejs/vite#22499](https://github.com/vitejs/vite/issues/22499)).
+
 ## Documentation updates
 
 - New "Production deployment (Podman)" guide (Overview → Install → Ontop →
@@ -180,6 +214,12 @@ SPDX-License-Identifier: CC0-1.0
 
 - Updated the OE Family Steering Committee
   [#2332](https://github.com/OpenEnergyPlatform/oeplatform/pull/2332)
+
+- New Scenario Bundles architecture & developer guide in the project docs
+  (Documentation → Features → Scenario Bundles), mapping how the React frontend,
+  the Django `factsheet` app, the OEKG (Fuseki) and the OEO ontology fit
+  together, with the request/data flow and which form-field lists are
+  OEO-driven; the top-level `oekg` app README was expanded to match.
 
 ## Code Quality
 
