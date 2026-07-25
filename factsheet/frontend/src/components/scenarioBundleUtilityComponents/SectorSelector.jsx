@@ -9,6 +9,13 @@
 // (`kind: "individuals"`) or the OEO sector taxonomy as a tree
 // (`kind: "tree"`, the "Other" row).
 //
+// Both panes are the same fixed-height shell so they line up top and bottom;
+// the detail pane's search field lives *inside* its box for the same reason.
+// That shell is why the tree renders `CheckboxTree` here instead of reusing
+// `CustomTreeViewWithCheckBox` (which brings its own outside-the-box search and
+// chip strip); the icons, css and options match that component so both trees in
+// the form still look alike.
+//
 // Divisions and their options come from the backend
 // (`scenario-bundles/populate_factsheets_elements/` → `sector_divisions`); this
 // component only decides what is rendered and what ends up in the flat
@@ -16,6 +23,9 @@
 // save path expects.
 
 import React, { useEffect, useMemo, useState } from 'react';
+import CheckboxTree from 'react-checkbox-tree';
+import 'react-checkbox-tree/lib/react-checkbox-tree.css';
+import '../../styles/react-checkbox-tree.css';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Checkbox from '@mui/material/Checkbox';
@@ -29,14 +39,33 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Tooltip from '@mui/material/Tooltip';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import CustomTreeViewWithCheckBox from '../customTreeViewWithCheckbox.jsx';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import CheckBoxIcon from '@mui/icons-material/CheckBox';
+import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
+import CheckBoxOutlinedIcon from '@mui/icons-material/CheckBoxOutlined';
 
+const treeIcons = {
+  check: <CheckBoxIcon />,
+  uncheck: <CheckBoxOutlineBlankIcon />,
+  expandClose: <KeyboardArrowRightIcon />,
+  expandOpen: <KeyboardArrowDownIcon />,
+  halfCheck: <CheckBoxOutlinedIcon />
+};
+
+// One shell for both panes: fixed height, its own border, content scrolls inside.
 const paneStyle = (size) => ({
   height: size,
-  overflow: 'auto',
+  display: 'flex',
+  flexDirection: 'column',
+  overflow: 'hidden',
   border: '1px solid #cecece',
   borderRadius: '4px'
 });
+
+const scrollAreaStyle = { flexGrow: 1, overflow: 'auto' };
+
+const emptyNoteStyle = { p: 2, display: 'block', color: 'text.secondary' };
 
 // Flatten a tree of option nodes into a list (the tree pane needs lookups by
 // both node value and IRI).
@@ -51,6 +80,21 @@ const flattenTree = (nodes = [], acc = []) => {
 
 const nodeValue = (node) => String(node.value ?? node.label ?? '');
 const nodeLabel = (node) => String(node.label ?? node.value ?? '');
+
+// Keep the nodes matching `term` plus every ancestor leading to them, and
+// collect the ancestors so the matches are visible without clicking open.
+const filterTree = (nodes = [], term, expanded = []) => {
+  const kept = [];
+  nodes.forEach((node) => {
+    if (!node) return;
+    const children = filterTree(node.children || [], term, expanded);
+    const matches = nodeLabel(node).toLowerCase().includes(term.toLowerCase());
+    if (!matches && !children.length) return;
+    if (children.length) expanded.push(nodeValue(node));
+    kept.push({ ...node, children: children.length ? children : undefined });
+  });
+  return kept;
+};
 
 export default function SectorSelector({
   divisions = [],
@@ -69,7 +113,9 @@ export default function SectorSelector({
 
   const rows = useMemo(() => {
     const byIri = new Map(
-      divisions.filter((d) => d.kind !== 'tree').map((d) => [String(d.iri || d.class), d])
+      divisions
+        .filter((d) => d.kind !== 'tree')
+        .map((d) => [String(d.iri || d.class), d])
     );
     const picked = selectedDivisions.map((selected) => {
       const key = String(selected.iri || selected.class);
@@ -87,8 +133,8 @@ export default function SectorSelector({
   }, [divisions, selectedDivisions, treeDivision]);
 
   const [activeIri, setActiveIri] = useState(null);
-  // Some divisions are long (CRF sectors IPCC 2006 has 108 members); the tree
-  // pane brings its own search field, the checkbox pane gets this one.
+  // Both kinds of detail pane share this one search field; some divisions are
+  // long (CRF sectors IPCC 2006 has 108 members).
   const [filter, setFilter] = useState('');
 
   useEffect(() => {
@@ -133,18 +179,37 @@ export default function SectorSelector({
       selectedSectors.filter((item) => String(item.class) !== String(sector.class))
     );
 
-  // The tree reports the values checked *within the tree*; selections made in
-  // the other divisions must survive, so only tree members are replaced.
   const treeNodes = useMemo(
     () => (treeDivision ? flattenTree(treeDivision.options) : []),
     [treeDivision]
   );
 
+  // Expand the whole tree by default, like the other trees in this form do.
+  const [expanded, setExpanded] = useState([]);
+  useEffect(() => {
+    setExpanded(treeNodes.map(nodeValue));
+  }, [treeNodes]);
+
+  const { treeData, treeExpanded } = useMemo(() => {
+    const options = treeDivision ? treeDivision.options || [] : [];
+    if (!filter) return { treeData: options, treeExpanded: expanded };
+    const autoExpanded = [];
+    return {
+      treeData: filterTree(options, filter, autoExpanded),
+      treeExpanded: autoExpanded
+    };
+  }, [treeDivision, filter, expanded]);
+
+  // The tree only reports the values checked among the nodes it renders, so the
+  // merge is scoped to those: selections in the other divisions — and tree
+  // selections currently hidden by the search — must survive.
   const handleTreeCheck = (checkedValues) => {
     const byValue = new Map(treeNodes.map((node) => [nodeValue(node), node]));
-    const treeIris = new Set(treeNodes.map((node) => String(node.iri)));
+    const visibleIris = new Set(
+      flattenTree(treeData).map((node) => String(node.iri))
+    );
     const kept = selectedSectors.filter(
-      (sector) => !treeIris.has(String(sector.class))
+      (sector) => !visibleIris.has(String(sector.class))
     );
     const picked = [];
     (checkedValues || []).forEach((value) => {
@@ -163,148 +228,164 @@ export default function SectorSelector({
       .map((sector) => nodeValue(byIri.get(String(sector.class))));
   }, [treeNodes, selectedSectors]);
 
-  const renderDetail = () => {
-    if (!activeRow) {
+  const renderTreeOptions = () => {
+    if (!treeData.length) {
       return (
-        <Typography variant="caption" sx={{ p: 2, display: 'block', color: 'text.secondary' }}>
-          Select a sector division above to pick its sectors, or use the
-          &quot;Other&quot; row to browse the whole OEO sector hierarchy.
+        <Typography variant="caption" sx={emptyNoteStyle}>
+          No sector matches &quot;{filter}&quot;.
         </Typography>
       );
     }
-
-    if (activeRow.kind === 'tree') {
-      return (
-        <CustomTreeViewWithCheckBox
-          size={size}
+    return (
+      <Box sx={{ p: 1 }}>
+        <CheckboxTree
+          nodes={treeData}
           checked={treeChecked}
-          handler={handleTreeCheck}
-          data={activeRow.options || []}
+          expanded={treeExpanded}
+          onCheck={handleTreeCheck}
+          onExpand={(nodes) => !filter && setExpanded(nodes)}
+          icons={treeIcons}
+          showNodeIcon={false}
+          optimisticToggle={false}
+          noCascade
         />
-      );
-    }
+      </Box>
+    );
+  };
 
-    const allOptions = activeRow.options || [];
+  const renderCheckboxOptions = (allOptions) => {
     const options = filter
       ? allOptions.filter((option) =>
           nodeLabel(option).toLowerCase().includes(filter.toLowerCase())
         )
       : allOptions;
-    if (!allOptions.length) {
+
+    if (!options.length) {
       return (
-        <Box sx={paneStyle(size)}>
-          <Typography
-            variant="caption"
-            sx={{ p: 2, display: 'block', color: 'text.secondary' }}
-          >
-            The OEO does not define any sectors for this sector division (yet).
-          </Typography>
-        </Box>
+        <Typography variant="caption" sx={emptyNoteStyle}>
+          No sector of this division matches &quot;{filter}&quot;.
+        </Typography>
       );
     }
 
     return (
-      <Box>
-        <TextField
-          label="Search ..."
-          variant="outlined"
-          size="small"
-          fullWidth
-          margin="dense"
-          value={filter}
-          onChange={(event) => setFilter(event.target.value)}
-        />
-        <Box sx={paneStyle(size)}>
-          {!options.length && (
-            <Typography
-              variant="caption"
-              sx={{ p: 2, display: 'block', color: 'text.secondary' }}
-            >
-              No sector of this division matches &quot;{filter}&quot;.
-            </Typography>
-          )}
-          <FormGroup sx={{ px: 1 }}>
-            {options.map((option) => (
-              <Box key={option.iri} sx={{ display: 'flex', alignItems: 'center' }}>
-                <FormControlLabel
-                  sx={{ flexGrow: 1 }}
-                  control={
-                    <Checkbox
-                      size="small"
-                      color="default"
-                      checked={selectedIris.has(String(option.iri))}
-                      onChange={() => toggleOption(option)}
-                    />
-                  }
-                  label={<Typography variant="body2">{nodeLabel(option)}</Typography>}
+      <FormGroup sx={{ px: 1 }}>
+        {options.map((option) => (
+          <Box key={option.iri} sx={{ display: 'flex', alignItems: 'center' }}>
+            <FormControlLabel
+              sx={{ flexGrow: 1 }}
+              control={
+                <Checkbox
+                  size="small"
+                  color="default"
+                  checked={selectedIris.has(String(option.iri))}
+                  onChange={() => toggleOption(option)}
                 />
-                <Tooltip
-                  placement="top"
-                  title={
-                    <Typography variant="caption" color="inherit">
-                      {option.definition || 'No definition in the OEO.'}
-                    </Typography>
-                  }
-                >
-                  <InfoOutlinedIcon sx={{ color: '#708696', fontSize: '18px', mr: 1 }} />
-                </Tooltip>
-              </Box>
-            ))}
-          </FormGroup>
-        </Box>
-      </Box>
+              }
+              label={<Typography variant="body2">{nodeLabel(option)}</Typography>}
+            />
+            <Tooltip
+              placement="top"
+              title={
+                <Typography variant="caption" color="inherit">
+                  {option.definition || 'No definition in the OEO.'}
+                </Typography>
+              }
+            >
+              <InfoOutlinedIcon sx={{ color: '#708696', fontSize: '18px', mr: 1 }} />
+            </Tooltip>
+          </Box>
+        ))}
+      </FormGroup>
     );
+  };
+
+  const renderDetail = () => {
+    if (!activeRow) {
+      return (
+        <Typography variant="caption" sx={emptyNoteStyle}>
+          Select a sector division above to pick its sectors, or use the
+          &quot;Other&quot; row to browse the whole OEO sector hierarchy.
+        </Typography>
+      );
+    }
+    if (activeRow.kind === 'tree') return renderTreeOptions();
+    const options = activeRow.options || [];
+    if (!options.length) {
+      return (
+        <Typography variant="caption" sx={emptyNoteStyle}>
+          The OEO does not define any sectors for this sector division (yet).
+        </Typography>
+      );
+    }
+    return renderCheckboxOptions(options);
+  };
+
+  const detailTitle = () => {
+    if (!activeRow) return 'Sectors';
+    if (activeRow.kind === 'tree') return 'Sectors from the OEO sector hierarchy';
+    return `Sectors of ${activeRow.label || activeRow.name}`;
   };
 
   return (
     <Box>
       <Grid container spacing={2}>
-        <Grid item xs={12} md={5}>
+        <Grid item xs={12} md={5} sx={{ display: 'flex', flexDirection: 'column' }}>
           <Typography variant="caption" sx={{ color: 'text.secondary' }}>
             Sector divisions of this bundle
           </Typography>
           <Box sx={paneStyle(size)}>
-            <List dense disablePadding>
-              {rows.map((row) => {
-                const key = String(row.iri || row.class);
-                const isOther = row.kind === 'tree';
-                return (
-                  <ListItemButton
-                    key={key}
-                    selected={key === String(activeIri)}
-                    onClick={() => {
-                      setActiveIri(key);
-                      setFilter('');
-                    }}
-                    divider
-                  >
-                    <ListItemText
-                      primary={
-                        <Typography variant="body2">
-                          {isOther ? 'Other (all OEO sectors)' : row.label || row.name}
-                        </Typography>
-                      }
-                      secondary={
-                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                          {countSelected(row)} of {countOptions(row)} selected
-                        </Typography>
-                      }
-                    />
-                  </ListItemButton>
-                );
-              })}
-            </List>
+            <Box sx={scrollAreaStyle}>
+              <List dense disablePadding>
+                {rows.map((row) => {
+                  const key = String(row.iri || row.class);
+                  const isOther = row.kind === 'tree';
+                  return (
+                    <ListItemButton
+                      key={key}
+                      selected={key === String(activeIri)}
+                      onClick={() => {
+                        setActiveIri(key);
+                        setFilter('');
+                      }}
+                      divider
+                    >
+                      <ListItemText
+                        primary={
+                          <Typography variant="body2">
+                            {isOther ? 'Other (all OEO sectors)' : row.label || row.name}
+                          </Typography>
+                        }
+                        secondary={
+                          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                            {countSelected(row)} of {countOptions(row)} selected
+                          </Typography>
+                        }
+                      />
+                    </ListItemButton>
+                  );
+                })}
+              </List>
+            </Box>
           </Box>
         </Grid>
-        <Grid item xs={12} md={7}>
+        <Grid item xs={12} md={7} sx={{ display: 'flex', flexDirection: 'column' }}>
           <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            {activeRow
-              ? activeRow.kind === 'tree'
-                ? 'Sectors from the OEO sector hierarchy'
-                : `Sectors of ${activeRow.label || activeRow.name}`
-              : 'Sectors'}
+            {detailTitle()}
           </Typography>
-          {renderDetail()}
+          <Box sx={paneStyle(size)}>
+            <Box sx={{ p: 1, borderBottom: '1px solid #cecece' }}>
+              <TextField
+                label="Search ..."
+                variant="outlined"
+                size="small"
+                fullWidth
+                value={filter}
+                onChange={(event) => setFilter(event.target.value)}
+              />
+            </Box>
+            <Box sx={scrollAreaStyle}>{renderDetail()}</Box>
+          </Box>
         </Grid>
       </Grid>
 
