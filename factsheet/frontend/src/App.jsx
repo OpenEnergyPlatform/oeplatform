@@ -58,7 +58,7 @@ function App() {
     }
     // now matches both '/scenario-bundles/id/new' and '/scenario-bundles/id/<uuid>'
     if (resource === 'scenario-bundles' && route === 'id' && idOrNew) {
-      return <Factsheet id={idOrNew} fsData={factsheet || {}} />
+      return <Factsheet key={idOrNew} id={idOrNew} fsData={factsheet || {}} />
     }
     return null
   }

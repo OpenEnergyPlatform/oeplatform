@@ -22,11 +22,11 @@ import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 
 
-const ColorToggleButton = ({ handleSwap, isOwner, isOwnerLoading }) => {
+const ColorToggleButton = ({ handleSwap, canEdit, isOwnerLoading }) => {
   const [snackbarOpen, setNotTheOwner] = useState(false);
 
   const handleChange = (event, mode) => {
-    if (mode === "edit" && (isOwnerLoading || !isOwner)) {
+    if (mode === "edit" && (isOwnerLoading || !canEdit)) {
       setNotTheOwner(true);
       return;
     }
@@ -62,7 +62,7 @@ const ColorToggleButton = ({ handleSwap, isOwner, isOwnerLoading }) => {
             <Button
               size="small"
               value="edit"
-              disabled={String(window.location.href).split('/').pop() === "new" || !isOwner}
+              disabled={String(window.location.href).split('/').pop() === "new" || isOwnerLoading || !canEdit}
               onClick={(e) => handleChange(e, 'edit')}
             >
               <EditOutlinedIcon sx={{ mr: 1 }} /> <span>Edit</span>

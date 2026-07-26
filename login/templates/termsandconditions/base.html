@@ -1,0 +1,12 @@
+{% extends "base/base-full.html" %}
+{% block title %}{% endblock %}
+{% block after-head %}
+  {% block styles %}{% endblock %}
+{% endblock after-head %}
+{% block main-content-body %}
+  <div class="row">
+    <div class="col-md-10 offset-md-1 col-lg-8 offset-lg-2">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+{% endblock main-content-body %}

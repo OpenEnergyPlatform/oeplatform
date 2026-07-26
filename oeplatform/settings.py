@@ -165,6 +165,7 @@ INSTALLED_APPS = (
     "owlready2",
     "compressor",
     "oekg",
+    "termsandconditions",
 )
 
 MIDDLEWARE = (
@@ -180,6 +181,7 @@ MIDDLEWARE = (
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "allauth.account.middleware.AccountMiddleware",
+    "termsandconditions.middleware.TermsAndConditionsRedirectMiddleware",
 )
 
 ROOT_URLCONF = "oeplatform.urls"
@@ -425,6 +427,24 @@ SOCIALACCOUNT_EMAIL_VERIFICATION = "optional"
 SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
 SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 
+# Drop placeholder OIDC apps until SSO credentials are configured.
+_oidc_providers = SOCIALACCOUNT_PROVIDERS.get("openid_connect", {})
+_oidc_apps = _oidc_providers.get("APPS", [])
+if _oidc_apps:
+    SOCIALACCOUNT_PROVIDERS = {
+        **SOCIALACCOUNT_PROVIDERS,
+        "openid_connect": {
+            **_oidc_providers,
+            "APPS": [
+                app
+                for app in _oidc_apps
+                if app.get("provider_id")
+                and app.get("client_id")
+                and app.get("settings", {}).get("server_url")
+            ],
+        },
+    }
+
 # axes login throttling
 AXES_ENABLED = not DEBUG
 AXES_FAILURE_LIMIT = 5  # Number of allowed attempts
@@ -449,3 +469,17 @@ USE_LOEP = bool(DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL)
 APPROX_ROW_COUNT_DEFAULT_PRECISE_BELOW = 100000
 PSEUDO_TOPIC_DRAFT = "draft"
 TOPIC_SCENARIO = "scenario"
+
+# django-termsandconditions: require one-time acceptance for authenticated users
+TERMS_BASE_TEMPLATE = "termsandconditions/base.html"
+ACCEPT_TERMS_PATH = "/terms/accept/"
+DEFAULT_TERMS_SLUG = "site-terms"
+TERMS_EXCLUDE_URL_PREFIX_LIST = {
+    "/admin",
+    "/terms",
+    "/accounts",
+    "/static",
+    "/captcha",
+}
+TERMS_EXCLUDE_URL_LIST = set()
+TERMS_EXCLUDE_URL_CONTAINS_LIST = set()

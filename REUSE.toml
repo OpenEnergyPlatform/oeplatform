@@ -971,6 +971,22 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
+path = "login/templates/termsandconditions/base.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2026 Open Energy Platform contributors",
+]
+
+[[annotations]]
+path = "login/templates/termsandconditions/tc_accept_terms.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2026 Open Energy Platform contributors",
+]
+
+[[annotations]]
 path = "oekg/static/sparql_ui/vendor/yasgui-4.2.28/js/yasgui.min.js.map"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"

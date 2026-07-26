@@ -78,16 +78,14 @@ def factsheets_index_view(request, *args, **kwargs):
 
 def check_ownership_view(request, bundle_id):
     if bundle_id == "new":
-        return JsonResponse({"isOwner": True})
+        return JsonResponse({"isOwner": True, "canEdit": True})
 
     if not request.user.is_authenticated:
-        return JsonResponse({"isOwner": False}, status=401)
-
-    if request.user.is_admin:
-        return JsonResponse({"isOwner": True})
+        return JsonResponse({"isOwner": False, "canEdit": False}, status=401)
 
     is_owner_flag = is_owner(request.user, bundle_id)
-    return JsonResponse({"isOwner": is_owner_flag})
+    can_edit = is_owner_flag or request.user.is_admin
+    return JsonResponse({"isOwner": is_owner_flag, "canEdit": can_edit})
 
 
 def get_oekg_modifications_view(request, *args, **kwargs):

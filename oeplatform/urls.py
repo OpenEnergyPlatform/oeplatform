@@ -58,4 +58,5 @@ urlpatterns = [
     # external
     re_path(r"^accounts/", include("allauth.urls")),
     re_path(r"^captcha/", include("captcha.urls")),
+    re_path(r"^terms/", include("termsandconditions.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

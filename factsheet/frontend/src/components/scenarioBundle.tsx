@@ -131,6 +131,7 @@ function Factsheet(props) {
   const { id, fsData } = props;
 
   const [isOwner, setIsOwner] = useState(id === "new");
+  const [canEdit, setCanEdit] = useState(id === "new");
   const [isOwnerLoading, setIsOwnerLoading] = useState(id !== "new");
 
   const [openSavedDialog, setOpenSavedDialog] = useState(false);
@@ -167,11 +168,14 @@ function Factsheet(props) {
   useEffect(() => {
     if (!id || id === "new") {
       setIsOwner(true);
+      setCanEdit(true);
       setIsOwnerLoading(false);
       return;
     }
 
     let cancelled = false;
+    setIsOwner(false);
+    setCanEdit(false);
     setIsOwnerLoading(true);
 
     axios
@@ -183,11 +187,13 @@ function Factsheet(props) {
       .then((res) => {
         if (cancelled) return;
         setIsOwner(Boolean(res.data?.isOwner));
+        setCanEdit(Boolean(res.data?.canEdit ?? res.data?.isOwner));
       })
       .catch((err) => {
         if (cancelled) return;
         console.error("Error checking ownership:", err);
         setIsOwner(false);
+        setCanEdit(false);
       })
       .finally(() => {
         if (cancelled) return;
@@ -2511,7 +2517,7 @@ const renderScenariosOverview = () => (
               >
                 <ColorToggleButton
                   handleSwap={handleSwap}
-                  isOwner={isOwner}
+                  canEdit={canEdit}
                   isOwnerLoading={isOwnerLoading}
                 />
                 <div style={{ 'textAlign': 'center' }}>
@@ -2544,7 +2550,7 @@ const renderScenariosOverview = () => (
                       <Button disableElevation={true} size="small" sx={{ mr: 1 }} variant="outlined" color="primary" startIcon={<ShareIcon />} disabled> Share </Button>
                     </span>
                   </Tooltip>
-                  {isOwner && id !== "new" && (
+                  {isOwner && !isOwnerLoading && id !== "new" && (
                     <Tooltip title="Delete factsheet">
                       <span>
                         <Button

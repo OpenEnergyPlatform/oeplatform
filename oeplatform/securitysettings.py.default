@@ -105,18 +105,9 @@ VITE_DEV_SERVER_URL = os.environ.get("VITE_DEV_SERVER_URL" "http://vite:5173")
 
 SOCIALACCOUNT_PROVIDERS = {
     "openid_connect": {
-        # For each OAuth based provider, either add a ``SocialApp``
-        # (``socialaccount`` app) containing the required client
-        # credentials, or list them here:
-        "APPS": [{
-            "provider_id": "",
-            "name": "",
-            "client_id": "",
-            "secret": "",
-            "VERIFIED_EMAIL": True,
-            "EMAIL_AUTHENTICATION": True,
-            "settings": {"server_url": ""},
-        }]
+        # Add provider credentials here when SSO is configured.
+        # See docs/oeplatform-code/apps/login.md for an example entry.
+        "APPS": [],
     }
 }
 
