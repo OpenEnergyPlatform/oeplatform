@@ -203,7 +203,6 @@ class DatasetUpdateSerializer(serializers.Serializer):
     at_id = serializers.URLField(required=False)
 
 
-
 class DatasetAssignTablesSerializer(serializers.Serializer):
     tables = serializers.ListField(
         child=serializers.DictField(child=serializers.CharField()), min_length=1

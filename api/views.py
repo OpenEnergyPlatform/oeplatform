@@ -494,6 +494,7 @@ class AssignDatasetTables(APIView):
         serializer.is_valid(raise_exception=True)
 
         table_refs = serializer.validated_data["tables"]
+
     permission_classes = [IsAuthenticated]
 
     def post(self, request, dataset_name):
