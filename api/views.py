@@ -277,34 +277,6 @@ class TableMetadataAPIView(APIView):
             raise APIError(error)
 
 
-@extend_schema_view(
-    post=extend_schema(
-        summary="Create dataset",
-        description="Creates a new dataset.",
-        request=DatasetCreateSerializer,
-        responses={},
-        examples=[
-            OpenApiExample(
-                "Dataset Example",
-                summary="Example request body for " "creating a dataset",
-                description=(
-                    "Use this JSON object to create a new dataset. "
-                    "The `at_id` field is optional and can contain "
-                    "a persistent identifier."
-                ),
-                value={
-                    "name": "test_dataset",
-                    "title": "Wind Power Dataset Germany",
-                    "description": (
-                        "Contains hourly wind generation " "data for Germany."
-                    ),
-                    "at_id": "https://example.org/datasets/test_dataset",
-                },
-                request_only=True,
-            )
-        ],
-    )
-)
 def assert_dataset_ownership(user, dataset: Dataset) -> None:
     """Datasets are creator-owned: only the creator may modify one."""
     if dataset.creator is None or dataset.creator != user:
@@ -333,6 +305,34 @@ def load_owned_dataset_from_request(request, dataset_name: str):
     return dataset, serializer.validated_data["tables"]
 
 
+@extend_schema_view(
+    post=extend_schema(
+        summary="Create dataset",
+        description="Creates a new dataset.",
+        request=DatasetCreateSerializer,
+        responses={},
+        examples=[
+            OpenApiExample(
+                "Dataset Example",
+                summary="Example request body for " "creating a dataset",
+                description=(
+                    "Use this JSON object to create a new dataset. "
+                    "The `at_id` field is optional and can contain "
+                    "a persistent identifier."
+                ),
+                value={
+                    "name": "test_dataset",
+                    "title": "Wind Power Dataset Germany",
+                    "description": (
+                        "Contains hourly wind generation " "data for Germany."
+                    ),
+                    "at_id": "https://example.org/datasets/test_dataset",
+                },
+                request_only=True,
+            )
+        ],
+    )
+)
 class DatasetsListCreate(generics.ListCreateAPIView):
     queryset = Dataset.objects.prefetch_related("tables")
     permission_classes = [IsAuthenticatedOrReadOnly]
@@ -450,6 +450,8 @@ class AssignDatasetTables(APIView):
     Assign existing OEP tables to an existing dataset.
     """
 
+    permission_classes = [IsAuthenticated]
+
     @extend_schema(
         summary="Assign tables to dataset",
         description=(
@@ -489,14 +491,6 @@ class AssignDatasetTables(APIView):
             )
         ],
     )
-    def post(self, request, dataset_name):
-        serializer = DatasetAssignTablesSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        table_refs = serializer.validated_data["tables"]
-
-    permission_classes = [IsAuthenticated]
-
     def post(self, request, dataset_name):
         dataset, table_refs = load_owned_dataset_from_request(request, dataset_name)
         if table_refs is None:
