@@ -33,6 +33,7 @@ SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
+import os
 import sys
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -121,6 +122,36 @@ __all__ = [  # mark imports as "used"
 ]
 
 
+# ── Reverse proxy / HTTPS ─────────────────────────────────────────────────────
+# When the platform runs behind a TLS-terminating reverse proxy (e.g. nginx on
+# the production server), the proxy speaks HTTPS to the client and plain HTTP to
+# the container. These settings let Django recognise the original HTTPS request.
+# Enable by setting OEP_BEHIND_TLS_PROXY=True on the server.
+if os.environ.get("OEP_BEHIND_TLS_PROXY", "False").strip().lower() in (
+    "true",
+    "1",
+    "yes",
+):
+    # The proxy must send this header
+    # (nginx: proxy_set_header X-Forwarded-Proto $scheme;)
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+# Comma-separated list of trusted origins for CSRF checks under HTTPS, e.g.
+# OEP_CSRF_TRUSTED_ORIGINS="https://openenergyplatform.org,www.openenergyplatform.org".
+# Required by Django for unsafe (POST/PUT/…) requests served over HTTPS. Django
+# 4+ requires each origin to include a scheme, so a bare host (e.g. "example.org")
+# is normalised to "https://example.org".
+_csrf_trusted_origins = os.environ.get("OEP_CSRF_TRUSTED_ORIGINS", "").strip()
+if _csrf_trusted_origins:
+    CSRF_TRUSTED_ORIGINS = [
+        origin if "://" in origin else f"https://{origin}"
+        for origin in (o.strip() for o in _csrf_trusted_origins.split(","))
+        if origin
+    ]
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
@@ -186,6 +217,7 @@ MIDDLEWARE = (
 ROOT_URLCONF = "oeplatform.urls"
 
 EXTERNAL_URLS = {
+    "oekg_chat": "https://oekg-chat.openenergyplatform.org/",
     "tutorials_index": "https://openenergyplatform.github.io/academy/",
     "tutorials_faq": "https://openenergyplatform.github.io/academy/questions/",
     "tutorials_api1": "https://openenergyplatform.github.io/academy/tutorials/01_api/01_api_download/",  # noqa E501
@@ -207,6 +239,7 @@ EXTERNAL_URLS = {
     "github_openenergyplatform": "https://github.com/OpenEnergyPlatform",
     "ORKG": "https://academy.orkg.org/orkg-academy/main/index.html",
     "open_plan": "https://open-plan-tool.org/",
+    "open_egon": "https://rego-n.org/",
     "open_mastr": "https://open-mastr.readthedocs.io/en/latest/",
     "tutorials_index": "https://openenergyplatform.github.io/academy/",
     "tutorials_faq": "https://openenergyplatform.github.io/academy/questions/",
@@ -441,6 +474,30 @@ AXES_ONLY_USER_FAILURES = True  # Only track failures per user
 
 CAPTCHA_IMAGE_SIZE = (300, 80)  # width, height in pixels
 CAPTCHA_FONT_SIZE = 52
+
+# Maximum DECOMPRESSED bytes accepted per bulk upload request (default 10 GiB).
+# A backstop against gzip bombs and runaway streams, not flow control -
+# clients are expected to split large datasets into several uploads.
+BULK_UPLOAD_MAX_BYTES = int(os.environ.get("BULK_UPLOAD_MAX_BYTES", 10 * 1024**3))
+
+# Bulk upload guards (ADR: synchronous WSGI protected by guards, not infra).
+# Concurrency: at most one running upload per user plus this global cap.
+BULK_UPLOAD_MAX_CONCURRENT = int(os.environ.get("BULK_UPLOAD_MAX_CONCURRENT", 2))
+# Stall guard: abort uploads averaging less than this rate (bytes/second)
+# after the grace period - a trickling client must not pin a worker.
+BULK_UPLOAD_MIN_BYTES_PER_SECOND = int(
+    os.environ.get("BULK_UPLOAD_MIN_BYTES_PER_SECOND", 10 * 1024)
+)
+BULK_UPLOAD_STALL_GRACE_SECONDS = int(
+    os.environ.get("BULK_UPLOAD_STALL_GRACE_SECONDS", 30)
+)
+# Database session timeouts for the upload's transaction (milliseconds).
+BULK_UPLOAD_STATEMENT_TIMEOUT_MS = int(
+    os.environ.get("BULK_UPLOAD_STATEMENT_TIMEOUT_MS", 60 * 60 * 1000)
+)
+BULK_UPLOAD_IDLE_TX_TIMEOUT_MS = int(
+    os.environ.get("BULK_UPLOAD_IDLE_TX_TIMEOUT_MS", 60 * 1000)
+)
 
 # dynamic variable to check if code is run in test or not
 IS_TEST = "test" in sys.argv

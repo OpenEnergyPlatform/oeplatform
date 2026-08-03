@@ -167,13 +167,24 @@ class ScenarioBundleScenarioDatasetSerializer(serializers.Serializer):
 
 
 class DatasetReadSerializer(serializers.ModelSerializer):
+    metadata = serializers.SerializerMethodField()
+
     class Meta:
         model = Dataset
         fields = ["uuid", "name", "metadata", "created_at"]
 
+    def get_metadata(self, obj):
+        # resources are never stored on the dataset: assemble them live
+        # from the member tables so reads can not go stale
+        metadata = dict(obj.metadata)
+        metadata["resources"] = obj.resource_entries()
+        return metadata
+
 
 class DatasetCreateSerializer(serializers.Serializer):
-    name = serializers.CharField(help_text="Name of the dataset")
+    # the name is the dataset's permanent identifier (URL key, oemetadata
+    # name) and is immutable after creation
+    name = serializers.SlugField(help_text="Name of the dataset")
     title = serializers.CharField(
         help_text="Anzeigename des Datensatzes, z. B. 'Wind Power Dataset Germany'"
     )
@@ -182,6 +193,15 @@ class DatasetCreateSerializer(serializers.Serializer):
         required=False,
         help_text="Optional: Persistenter Identifier oder URL für den Datensatz",
     )
+
+
+class DatasetUpdateSerializer(serializers.Serializer):
+    # updates touch only the editable dataset-level fields; the name is
+    # immutable and therefore not part of this serializer
+    title = serializers.CharField()
+    description = serializers.CharField()
+    at_id = serializers.URLField(required=False)
+
 
 
 class DatasetAssignTablesSerializer(serializers.Serializer):

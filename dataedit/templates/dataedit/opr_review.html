@@ -25,7 +25,7 @@
       </h1>
       <div class="main-header__wizard">
         <span class="main-header__wizard-process">Review :</span>
-        <span class="main-header__wizard-path"><a href="{% url 'dataedit:topic-list' %}">Tables</a>{{ table }}</span>
+        <span class="main-header__wizard-path"><a href="{% url 'dataedit:topic-list' %}">Tables</a>/{{ table }}</span>
       </div>
     </div>
     <div class="content">
@@ -55,19 +55,37 @@
     </div>
     <div class="content content-finish-review">
       <style>
-      .ok-progress-wrapper { display: flex; justify-content: center; margin-top: 20px; }
-      .ok-progress-circle { width: 130px; height: 130px; position: relative; }
-      .ok-progress-circle svg { width: 130px; height: 130px; transform: rotate(-90deg); }
-      .ok-progress-circle circle { fill: none; stroke-width: 10; r: 52; cx: 65; cy: 65; }
-      .ok-progress-circle circle.bg { stroke: #e6e6e6; }
-      .ok-progress-circle circle.progress { stroke: #4caf50; stroke-linecap: round; stroke-dasharray: 326.72; stroke-dashoffset: 326.72; transition: stroke-dashoffset 0.4s ease; }
-      .percentage-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 22px; font-weight: bold; }
+  .ok-progress-wrapper { display: flex; justify-content: center; margin-top: 20px; }
+  .ok-progress-circle { width: 130px; height: 130px; position: relative; }
+  .ok-progress-circle svg { width: 130px; height: 130px; transform: rotate(-90deg); }
+  .ok-progress-circle circle { fill: none; stroke-width: 10; }
+  .ok-progress-circle circle.bg { stroke: #e6e6e6; }
+  .ok-progress-circle circle.progress { stroke: #4caf50; stroke-linecap: round; stroke-dasharray: 326.72; stroke-dashoffset: 326.72; transition: stroke-dashoffset 0.4s ease; }
+  .percentage-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 22px; font-weight: bold; }
+  .field-suggestion .suggestion--highlight:not(:empty)::before { content: "NEW"; display: inline-block; background: #f0ad4e; color: #fff; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.04em; padding: 0.05rem 0.35rem; border-radius: 0.6rem; margin-right: 0.4rem; vertical-align: middle; }
+  .opr-history { margin-top: 0.75rem; padding: 0.5rem 1rem 0.25rem 1rem; border-top: 1px dashed #e3e8ec; }
+  .opr-history__toggle { background: none; border: none; padding: 0; font-size: 0.8rem; color: #2972A6; cursor: pointer; }
+  .opr-history__toggle:hover { text-decoration: underline; }
+  .opr-history__caret { display: inline-block; transition: transform 0.2s ease; }
+  .opr-history__toggle[aria-expanded="true"] .opr-history__caret { transform: rotate(90deg); }
+  .opr-history__list { list-style: none; margin: 0.6rem 0 0; padding: 0 0 0 0.25rem; }
+  .opr-history__item { border-left: 3px solid #ced4da; padding: 0.45rem 0 0.45rem 0.75rem; margin-bottom: 0.6rem; font-size: 0.82rem; line-height: 1.45; }
+  .opr-history__item:last-child { margin-bottom: 0; }
+  .opr-history__item--ok { border-left-color: #4caf50; }
+  .opr-history__item--suggestion { border-left-color: #f0ad4e; }
+  .opr-history__item--rejected { border-left-color: #d9534f; }
+  .opr-history__role { font-weight: 600; text-transform: capitalize; }
+  .opr-history__state { color: #6c757d; text-transform: capitalize; }
+  .opr-history__previous { color: #6c757d; margin-top: 0.2rem; }
+  .opr-history__value { font-weight: 600; margin-top: 0.1rem; }
+  .opr-history__comment { font-style: italic; color: #495057; margin-top: 0.15rem; }
+  .opr-history__time { display: block; font-size: 0.72rem; color: #adb5bd; margin-top: 0.25rem; }
       </style>
       <div class="ok-progress-wrapper">
         <div class="ok-progress-circle">
-          <svg>
-            <circle class="bg"></circle>
-            <circle class="progress" id="okProgressCircle"></circle>
+          <svg viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg">
+            <circle class="bg" cx="65" cy="65" r="52"></circle>
+            <circle class="progress" id="okProgressCircle" cx="65" cy="65" r="52"></circle>
           </svg>
           <div class="percentage-text" id="okPercentageText">0%</div>
         </div>
@@ -232,12 +250,11 @@
                                      data-category="general">
                                   <p class="review__item-content">
                                     <span class="key">{{ item.display_field|default:item.field|default:"(undefined)" }}</span>
-                                    <span class="value">{{ item.newValue|default:item.value }}</span>
+                                    <span class="value">{{ item.value }}</span>
                                     <span id="reviewerSuggestion_{{ item.field }}"
                                           class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                                     <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                                    <br>
-                                    <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
+                                    <span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span>
                                   </p>
                                 </div>
                               {% endfor %}
@@ -269,12 +286,11 @@
                                                  data-category="general">
                                               <p class="review__item-content">
                                                 <span class="key">{{ item.display_field|default:item.field|default:"(undefined)" }}</span>
-                                                <span class="value">{{ item.newValue|default:item.value }}</span>
+                                                <span class="value">{{ item.value }}</span>
                                                 <span id="reviewerSuggestion_{{ item.field }}"
                                                       class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                                                 <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                                                <br>
-                                                <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
+                                                <span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span>
                                               </p>
                                             </div>
                                           {% endfor %}
@@ -300,12 +316,11 @@
                              data-category="general">
                           <p class="review__item-content">
                             <span class="key">{{ item.display_field|default:item.field|default:"(undefined)" }}</span>
-                            <span class="value">{{ item.newValue|default:item.value }}</span>
+                            <span class="value">{{ item.value }}</span>
                             <span id="reviewerSuggestion_{{ item.field }}"
                                   class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                             <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                            <br>
-                            <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
+                            <span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span>
                           </p>
                         </div>
                       {% endfor %}
@@ -319,12 +334,11 @@
                              data-category="general">
                           <p class="review__item-content">
                             <span class="key">{{ item.label|default:item.field }}</span>
-                            <span class="value">{{ item.newValue|default:item.value }}</span>
+                            <span class="value">{{ item.value }}</span>
                             <span id="reviewerSuggestion_{{ item.field }}"
                                   class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
                             <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                            <br>
-                            <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
+                            <span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span>
                           </p>
                         </div>
                       {% endfor %}
@@ -338,201 +352,9 @@
                    aria-labelledby="spatiotemporal-tab">
                 <div class="review__items">
                   <p class="review__items-cat">Spatial</p>
-                  {# Flat spatial fields #}
-                  {% for item in meta.spatial.flat %}
-                    <div id="field_{{ item.field|default:'undefined' }}"
-                         class="field review__item"
-                         data-fieldkey="{{ item.field|default:'' }}"
-                         data-fieldvalue="{{ item.value|default:'' }}"
-                         data-category="spatial">
-                      <p class="review__item-content">
-                        <span class="key">{{ item.display_field|default:item.field|default:"(undefined)" }}</span>
-                        <span class="value">{{ item.newValue|default:item.value }}</span>
-                        <span id="reviewerSuggestion_{{ item.field }}"
-                              class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                        <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                        <br>
-                        <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
-                      </p>
-                    </div>
-                  {% endfor %}
-                  {# Grouped spatial fields #}
-                  <div class="accordion" id="spatialAccordion">
-                    {% for group_key, group in meta.spatial.grouped.items %}
-                      <div class="accordion-item">
-                        <h2 class="accordion-header" id="heading-spatial-{{ forloop.counter }}">
-                          <button class="accordion-button collapsed"
-                                  type="button"
-                                  data-bs-toggle="collapse"
-                                  data-bs-target="#collapse-spatial-{{ forloop.counter }}"
-                                  aria-expanded="false">
-                            {{ group_key }}
-                          </button>
-                        </h2>
-                        <div id="collapse-spatial-{{ forloop.counter }}"
-                             class="accordion-collapse collapse"
-                             data-bs-parent="#spatialAccordion">
-                          <div class="accordion-body">
-                            {% for item in group.flat %}
-                              <div id="field_{{ item.field|default:'undefined' }}"
-                                   class="field review__item"
-                                   data-fieldkey="{{ item.field|default:'' }}"
-                                   data-fieldvalue="{{ item.value|default:'' }}"
-                                   data-category="spatial">
-                                <p class="review__item-content">
-                                  <span class="key">{{ item.display_field|default:item.field|default:"(undefined)" }}</span>
-                                  <span class="value">{{ item.newValue|default:item.value }}</span>
-                                  <span id="reviewerSuggestion_{{ item.field }}"
-                                        class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                                  <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                                  <br>
-                                  <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
-                                </p>
-                              </div>
-                            {% endfor %}
-                            {% if group.grouped %}
-                              <div class="accordion" id="spatialInnerAccordion_{{ group_key|slugify }}">
-                                {% for sub_key, sub_items in group.grouped.items %}
-                                  <div class="accordion-item">
-                                    <h2 class="accordion-header"
-                                        id="heading-spatial-inner-{{ group_key|slugify }}-{{ forloop.counter }}">
-                                      <button class="accordion-button collapsed"
-                                              type="button"
-                                              data-bs-toggle="collapse"
-                                              data-bs-target="#collapse-spatial-inner-{{ group_key|slugify }}-{{ forloop.counter }}"
-                                              aria-expanded="false">
-                                        {{ sub_key }}
-                                      </button>
-                                    </h2>
-                                    <div id="collapse-spatial-inner-{{ group_key|slugify }}-{{ forloop.counter }}"
-                                         class="accordion-collapse collapse"
-                                         data-bs-parent="#spatialInnerAccordion_{{ group_key|slugify }}">
-                                      <div class="accordion-body">
-                                        {% for item in sub_items.flat %}
-                                          <div id="field_{{ item.field|default:'undefined' }}"
-                                               class="field review__item"
-                                               data-fieldkey="{{ item.field|default:'' }}"
-                                               data-fieldvalue="{{ item.value|default:'' }}"
-                                               data-category="spatial">
-                                            <p class="review__item-content">
-                                              <span class="key">{{ item.display_field|default:item.field|default:"(undefined)" }}</span>
-                                              <span class="value">{{ item.newValue|default:item.value }}</span>
-                                              <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                                              <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                                              <br>
-                                              <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
-                                            </p>
-                                          </div>
-                                        {% endfor %}
-                                      </div>
-                                    </div>
-                                  </div>
-                                {% endfor %}
-                              </div>
-                            {% endif %}
-                          </div>
-                        </div>
-                      </div>
-                    {% endfor %}
-                  </div>
+                  {% include "partials/review_category.html" with cat=meta.spatial category="spatial" acc="spatial" %}
                   <p class="review__items-cat">Temporal</p>
-                  {# Flat temporal fields #}
-                  {% for item in meta.temporal.flat %}
-                    <div id="field_{{ item.field|default:'undefined' }}"
-                         class="field review__item"
-                         data-fieldkey="{{ item.field|default:'' }}"
-                         data-fieldvalue="{{ item.value|default:'' }}"
-                         data-category="temporal">
-                      <p class="review__item-content">
-                        <span class="key">{{ item.display_field|default:item.field|default:"(undefined)" }}</span>
-                        <span class="value">{{ item.newValue|default:item.value }}</span>
-                        <span id="reviewerSuggestion_{{ item.field }}"
-                              class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                        <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                        <br>
-                        <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
-                      </p>
-                    </div>
-                  {% endfor %}
-                  {# Grouped temporal fields #}
-                  <div class="accordion" id="temporalAccordion">
-                    {% for group_key, group in meta.temporal.grouped.items %}
-                      <div class="accordion-item">
-                        <h2 class="accordion-header" id="heading-temporal-{{ forloop.counter }}">
-                          <button class="accordion-button collapsed"
-                                  type="button"
-                                  data-bs-toggle="collapse"
-                                  data-bs-target="#collapse-temporal-{{ forloop.counter }}"
-                                  aria-expanded="false">
-                            {{ group_key }}
-                          </button>
-                        </h2>
-                        <div id="collapse-temporal-{{ forloop.counter }}"
-                             class="accordion-collapse collapse"
-                             data-bs-parent="#temporalAccordion">
-                          <div class="accordion-body">
-                            {% for item in group.flat %}
-                              <div id="field_{{ item.field|default:'undefined' }}"
-                                   class="field review__item"
-                                   data-fieldkey="{{ item.field|default:'' }}"
-                                   data-fieldvalue="{{ item.value|default:'' }}"
-                                   data-category="temporal">
-                                <p class="review__item-content">
-                                  <span class="key">{{ item.display_field|default:item.field|default:"(undefined)" }}</span>
-                                  <span class="value">{{ item.newValue|default:item.value }}</span>
-                                  <span id="reviewerSuggestion_{{ item.field }}"
-                                        class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                                  <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                                  <br>
-                                  <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
-                                </p>
-                              </div>
-                            {% endfor %}
-                            {% if group.grouped %}
-                              <div class="accordion" id="temporalInnerAccordion_{{ group_key|slugify }}">
-                                {% for sub_key, sub_items in group.grouped.items %}
-                                  <div class="accordion-item">
-                                    <h2 class="accordion-header"
-                                        id="heading-temporal-inner-{{ group_key|slugify }}-{{ forloop.counter }}">
-                                      <button class="accordion-button collapsed"
-                                              type="button"
-                                              data-bs-toggle="collapse"
-                                              data-bs-target="#collapse-temporal-inner-{{ group_key|slugify }}-{{ forloop.counter }}"
-                                              aria-expanded="false">
-                                        {{ sub_key }}
-                                      </button>
-                                    </h2>
-                                    <div id="collapse-temporal-inner-{{ group_key|slugify }}-{{ forloop.counter }}"
-                                         class="accordion-collapse collapse"
-                                         data-bs-parent="#temporalInnerAccordion_{{ group_key|slugify }}">
-                                      <div class="accordion-body">
-                                        {% for item in sub_items.flat %}
-                                          <div id="field_{{ item.field|default:'undefined' }}"
-                                               class="field review__item"
-                                               data-fieldkey="{{ item.field|default:'' }}"
-                                               data-fieldvalue="{{ item.value|default:'' }}"
-                                               data-category="temporal">
-                                            <p class="review__item-content">
-                                              <span class="key">{{ item.display_field|default:item.field|default:"(undefined)" }}</span>
-                                              <span class="value">{{ item.newValue|default:item.value }}</span>
-                                              <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                                              <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                                              <br>
-                                              <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
-                                            </p>
-                                          </div>
-                                        {% endfor %}
-                                      </div>
-                                    </div>
-                                  </div>
-                                {% endfor %}
-                              </div>
-                            {% endif %}
-                          </div>
-                        </div>
-                      </div>
-                    {% endfor %}
-                  </div>
+                  {% include "partials/review_category.html" with cat=meta.temporal category="temporal" acc="temporal" %}
                 </div>
               </div>
               <div class="tab-pane fade"
@@ -541,181 +363,23 @@
                    aria-labelledby="source-tab">
                 <div class="review__items">
                   <p class="review__items-cat">Source 1</p>
-                  {# Flat source fields #}
-                  {% for item in meta.source.flat %}
-                    <div id="field_{{ item.field|default:'undefined' }}"
-                         class="field review__item"
-                         data-fieldkey="{{ item.field|default:'' }}"
-                         data-fieldvalue="{{ item.value|default:'' }}"
-                         data-category="source">
-                      <p class="review__item-content">
-                        <span class="key">{{ item.display_field|default:item.field|default:"(undefined)" }}</span>
-                        <span class="value">{{ item.newValue|default:item.value }}</span>
-                        <span id="reviewerSuggestion_{{ item.field }}"
-                              class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                        <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                        <br>
-                        <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
-                      </p>
-                    </div>
-                  {% endfor %}
-                  {# Grouped source fields — outer accordion removed, content rendered directly #}
-                  {% for group_key, group in meta.source.grouped.items %}
-                    {# Render the group's flat fields directly #}
-                    {% for item in group.flat %}
-                      <div id="field_{{ item.field|default:'undefined' }}"
-                           class="field review__item"
-                           data-fieldkey="{{ item.field|default:'' }}"
-                           data-fieldvalue="{{ item.value|default:'' }}"
-                           data-category="source">
-                        <p class="review__item-content">
-                          <span class="key">{{ item.display_field|default:item.field|default:"(undefined)" }}</span>
-                          <span class="value">{{ item.newValue|default:item.value }}</span>
-                          <span id="reviewerSuggestion_{{ item.field }}"
-                                class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                          <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                          <br>
-                          <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
-                        </p>
-                      </div>
-                    {% endfor %}
-                    {# Render the group's inner accordion directly (these are the individual sources) #}
-                    {% if group.grouped %}
-                      <div class="accordion" id="sourceInnerAccordion_{{ group_key|slugify }}">
-                        {% for sub_key, sub_items in group.grouped.items %}
-                          <div class="accordion-item">
-                            <h2 class="accordion-header"
-                                id="heading-source-inner-{{ group_key|slugify }}-{{ forloop.counter }}">
-                              <button class="accordion-button collapsed"
-                                      type="button"
-                                      data-bs-toggle="collapse"
-                                      data-bs-target="#collapse-source-inner-{{ group_key|slugify }}-{{ forloop.counter }}"
-                                      aria-expanded="false">
-                                {{ sub_key }}
-                              </button>
-                            </h2>
-                            <div id="collapse-source-inner-{{ group_key|slugify }}-{{ forloop.counter }}"
-                                 class="accordion-collapse collapse"
-                                 data-bs-parent="#sourceInnerAccordion_{{ group_key|slugify }}">
-                              <div class="accordion-body">
-                                {% for item in sub_items.flat %}
-                                  <div id="field_{{ item.field|default:'undefined' }}"
-                                       class="field review__item"
-                                       data-fieldkey="{{ item.field|default:'' }}"
-                                       data-fieldvalue="{{ item.value|default:'' }}"
-                                       data-category="source">
-                                    <p class="review__item-content">
-                                      <span class="key">{{ item.display_field|default:item.field|default:"(undefined)" }}</span>
-                                      <span class="value">{{ item.newValue|default:item.value }}</span>
-                                      <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                                      <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                                      <br>
-                                      <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
-                                    </p>
-                                  </div>
-                                {% endfor %}
-                              </div>
-                            </div>
-                          </div>
-                        {% endfor %}
-                      </div>
-                    {% endif %}
-                  {% endfor %}
+                  {% include "partials/review_category.html" with cat=meta.source category="source" acc="source" %}
                 </div>
               </div>
-            </div>
-            <div class="tab-pane fade"
-                 id="license"
-                 role="tabpanel"
-                 aria-labelledby="license-tab">
-              <div class="review__items">
-                <p class="review__items-cat">License 1</p>
-                {# Flat license fields #}
-                {% for item in meta.license.flat %}
-                  <div id="field_{{ item.field|default:'undefined' }}"
-                       class="field review__item"
-                       data-fieldkey="{{ item.field|default:'' }}"
-                       data-fieldvalue="{{ item.value|default:'' }}"
-                       data-category="license">
-                    <p class="review__item-content">
-                      <span class="key">{{ item.display_field|default:item.field|default:"(undefined)" }}</span>
-                      <span class="value">{{ item.newValue|default:item.value }}</span>
-                      <span id="reviewerSuggestion_{{ item.field }}"
-                            class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                      <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                      <br>
-                      <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
-                    </p>
-                  </div>
-                {% endfor %}
-                {# Grouped license fields - outer accordion level removed #}
-                {% for group_key, group in meta.license.grouped.items %}
-                  {# Flat items within group #}
-                  {% for item in group.flat %}
-                    <div id="field_{{ item.field|default:'undefined' }}"
-                         class="field review__item"
-                         data-fieldkey="{{ item.field|default:'' }}"
-                         data-fieldvalue="{{ item.value|default:'' }}"
-                         data-category="license">
-                      <p class="review__item-content">
-                        <span class="key">{{ item.display_field|default:item.field|default:"(undefined)" }}</span>
-                        <span class="value">{{ item.newValue|default:item.value }}</span>
-                        <span id="reviewerSuggestion_{{ item.field }}"
-                              class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                        <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                        <br>
-                        <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
-                      </p>
-                    </div>
-                  {% endfor %}
-                  {# Inner accordion shown directly #}
-                  {% if group.grouped %}
-                    <div class="accordion" id="licenseInnerAccordion_{{ group_key|slugify }}">
-                      {% for sub_key, sub_items in group.grouped.items %}
-                        <div class="accordion-item">
-                          <h2 class="accordion-header"
-                              id="heading-license-inner-{{ group_key|slugify }}-{{ forloop.counter }}">
-                            <button class="accordion-button collapsed"
-                                    type="button"
-                                    data-bs-toggle="collapse"
-                                    data-bs-target="#collapse-license-inner-{{ group_key|slugify }}-{{ forloop.counter }}"
-                                    aria-expanded="false">
-                              {{ sub_key }}
-                            </button>
-                          </h2>
-                          <div id="collapse-license-inner-{{ group_key|slugify }}-{{ forloop.counter }}"
-                               class="accordion-collapse collapse"
-                               data-bs-parent="#licenseInnerAccordion_{{ group_key|slugify }}">
-                            <div class="accordion-body">
-                              {% for item in sub_items.flat %}
-                                <div id="field_{{ item.field|default:'undefined' }}"
-                                     class="field review__item"
-                                     data-fieldkey="{{ item.field|default:'' }}"
-                                     data-fieldvalue="{{ item.value|default:'' }}"
-                                     data-category="license">
-                                  <p class="review__item-content">
-                                    <span class="key">{{ item.display_field|default:item.field|default:"(undefined)" }}</span>
-                                    <span class="value">{{ item.newValue|default:item.value }}</span>
-                                    <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-                                    <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
-                                    <br>
-                                    <b><span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span></b>
-                                  </p>
-                                </div>
-                              {% endfor %}
-                            </div>
-                          </div>
-                        </div>
-                      {% endfor %}
-                    </div>
-                  {% endif %}
-                {% endfor %}
+              <div class="tab-pane fade"
+                   id="license"
+                   role="tabpanel"
+                   aria-labelledby="license-tab">
+                <div class="review__items">
+                  <p class="review__items-cat">License 1</p>
+                  {% include "partials/review_category.html" with cat=meta.license category="license" acc="license" %}
+                </div>
               </div>
+              <div class="tab-pane fade"
+                   id="summary"
+                   role="tabpanel"
+                   aria-labelledby="summary-tab"></div>
             </div>
-            <div class="tab-pane fade"
-                 id="summary"
-                 role="tabpanel"
-                 aria-labelledby="summary-tab"></div>
           </div>
           <div class="review__controls">
             <div class="review__box">
@@ -828,7 +492,7 @@
       </div>
     </div>
   </div>
-</main>
+  </main>
 {% endblock main %}
 {% block after-body-bottom-js %}
   <script type="text/javascript">
@@ -837,6 +501,7 @@
     );
     var config = JSON.parse("{{ config|escapejs }}");
     window.state_dict = JSON.parse("{{ state_dict | escapejs }}");
+    window.field_history = JSON.parse("{{ field_history_json | escapejs }}");
     if (window.state_dict && Object.keys(window.state_dict).length > 0) {
       for (let [key, value] of Object.entries(window.state_dict)) {
         let field_id = `#field_${key}`.replace(/\./g, "\\.");

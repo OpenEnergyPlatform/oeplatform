@@ -1,0 +1,32 @@
+{% if picker_tables %}
+  <ul class="list-group">
+    {% for table in picker_tables %}
+      <li class="list-group-item d-flex justify-content-between align-items-start gap-2">
+        <span class="text-truncate">
+          {{ table.human_readable_name|default:table.name }}
+          {% if table.is_publish %}
+            <span class="badge bg-success">Published</span>
+          {% else %}
+            <span class="badge bg-warning text-dark">Draft</span>
+          {% endif %}
+          {% for topic in table.topics.all %}
+            <span class="badge text-bg-light border">{{ topic.name }}</span>
+          {% endfor %}
+        </span>
+        <button type="button"
+                class="btn btn-sm btn-outline-primary flex-shrink-0"
+                hx-post="{% url 'login:dataset-assign' user_id=profile_user.id dataset_name=dataset.name %}"
+                hx-vals='{"table": "{{ table.name }}"}'
+                hx-target="#dataset-card-{{ dataset.name }}"
+                hx-swap="outerHTML">Add</button>
+      </li>
+    {% endfor %}
+  </ul>
+  {% if picker_truncated %}
+    <p class="text-muted small mt-2 mb-0">
+      Showing the first {{ picker_tables|length }} matches &mdash; refine your search to find more tables.
+    </p>
+  {% endif %}
+{% else %}
+  <p class="text-muted">No assignable tables found.</p>
+{% endif %}

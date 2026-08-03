@@ -313,17 +313,17 @@ window.MetaEdit = function (config) {
       var json = config.editor.getValue();
       // create data url
       convertEmptyStringsToNull(json);
-      console.log(json);
       json = JSON.stringify(json, null, 1);
-      ((blob = new Blob([json], { type: "application/json" })),
-        (dataUrl = URL.createObjectURL(blob)));
+      var blob = new Blob([json], { type: "application/json" });
+      var dataUrl = URL.createObjectURL(blob);
       // create link
       var a = document.createElement("a");
       document.body.appendChild(a);
       // assign url and click
       a.style = "display: none";
       a.href = dataUrl;
-      a.download = config.table + ".metadata.json";
+      // config.table is empty in standalone mode; fall back to a generic name
+      a.download = (config.table || "oemetadata") + ".metadata.json";
       a.click();
       // cleanup
       URL.revokeObjectURL(dataUrl);

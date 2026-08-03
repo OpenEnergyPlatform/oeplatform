@@ -3,3 +3,9 @@ env*
 oeplatform/securitysettings.py
 
 node_modules/
+
+# Runtime artifacts — must NOT be copied into the build context. The image bakes
+# the OEO release + oeo_ext.owl itself (see podman/Dockerfile); a local copy here
+# would bloat the context and collide with the baked version.
+ontologies/
+media/

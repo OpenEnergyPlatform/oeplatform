@@ -223,11 +223,11 @@
             {% include 'modelview/editmodel_snippet.html' with field=form.costs class="open_source_no" visible=form.open_source.value|yesno:"none," %}
           </div>
           <div id="open_source_yes">
-            {% include 'modelview/editmodel_snippet.html' with field=form.license               add=form.license_other_text class="open_source_yes" visible=form.open_source.value|yesno:",none" %}
-            {% include 'modelview/editmodel_snippet.html' with field=form.source_code_available                             class="open_source_yes" visible=form.open_source.value|yesno:",none" %}
-            {% include 'modelview/editmodel_snippet.html' with field=form.gitHub                                            class="open_source_yes" visible=form.open_source.value|yesno:",none" %}
-            {% include 'modelview/editmodel_snippet.html' with field=form.link_to_source_code                               class="open_source_yes" visible=form.open_source.value|yesno:",none" %}
-            {% include 'modelview/editmodel_snippet.html' with field=form.data_provided                                     class="open_source_yes" visible=form.open_source.value|yesno:",none" %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.license add=form.license_other_text class="open_source_yes" visible=form.open_source.value|yesno:",none" %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.source_code_available class="open_source_yes" visible=form.open_source.value|yesno:",none" %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.gitHub class="open_source_yes" visible=form.open_source.value|yesno:",none" %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.link_to_source_code class="open_source_yes" visible=form.open_source.value|yesno:",none" %}
+            {% include 'modelview/editmodel_snippet.html' with field=form.data_provided class="open_source_yes" visible=form.open_source.value|yesno:",none" %}
             {% include 'modelview/editmodel_snippet.html' with field=form.cooperative_programming class="open_source_yes" visible=form.open_source.value|yesno:",none" %}
           </div>
         </table>
@@ -271,7 +271,7 @@
             </th>
             <td align="left">
               <table class="modeledTec">
-                {% include 'modelview/editmodel_snippet.html' with     field=form.modeled_technology_renewables  event='onclick' %}
+                {% include 'modelview/editmodel_snippet.html' with field=form.modeled_technology_renewables event='onclick' %}
               </table>
             </td>
           </tr>
@@ -279,7 +279,7 @@
             <td></td>
             <td>
               <table class="checktable" align="right">
-                {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_PV  class='renewable_tec' visible='none' %}
+                {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_PV class='renewable_tec' visible='none' %}
                 {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_wind class='renewable_tec' visible='none' %}
                 {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_hydro class='renewable_tec' visible='none' %}
                 {% include 'modelview/editmodel_snippet.html' with field=form.generation_renewables_bio class='renewable_tec' visible='none' %}
@@ -294,7 +294,7 @@
             <td></td>
             <td align="left">
               <table class="modeledTec">
-                {% include 'modelview/editmodel_snippet.html' with field=form.modeled_technology_conventional  event='onclick' %}
+                {% include 'modelview/editmodel_snippet.html' with field=form.modeled_technology_conventional event='onclick' %}
               </table>
             </td>
           </tr>
@@ -302,12 +302,12 @@
             <td></td>
             <td>
               <table class="checktable" align="right">
-                {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_gas  class='conventional_tec' visible='none' %}
-                {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_lignite   class='conventional_tec' visible='none' %}
-                {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_hard_coal   class='conventional_tec' visible='none' %}
-                {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_oil   class='conventional_tec' visible='none' %}
-                {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_liquid_fuels   class='conventional_tec' visible='none' %}
-                {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_nuclear   class='conventional_tec' visible='none' %}
+                {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_gas class='conventional_tec' visible='none' %}
+                {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_lignite class='conventional_tec' visible='none' %}
+                {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_hard_coal class='conventional_tec' visible='none' %}
+                {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_oil class='conventional_tec' visible='none' %}
+                {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_liquid_fuels class='conventional_tec' visible='none' %}
+                {% include 'modelview/editmodel_snippet.html' with field=form.generation_conventional_nuclear class='conventional_tec' visible='none' %}
               </table>
             </td>
           </tr>

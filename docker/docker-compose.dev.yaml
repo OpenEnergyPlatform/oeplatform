@@ -115,10 +115,16 @@ services:
     container_name: ontop
     ports:
       - "8080:8080"
+    # Ontology, mapping and JDBC driver are baked into the image. The dir is
+    # still mounted so you can live-edit mapping.obda / ontology.owl without a
+    # rebuild. DB connection comes from env — no ontop.properties needed.
     environment:
       ONTOP_MAPPING_FILE: "/opt/ontop-config/mapping.obda"
-      ONTOP_OWL_FILE: "/opt/ontop-config/ontology.owl"
-      ONTOP_PROPERTIES_FILE: "/opt/ontop-config/ontop.properties"
+      ONTOP_ONTOLOGY_FILE: "/opt/ontop-config/ontology.owl"
+      ONTOP_DB_URL: "jdbc:postgresql://postgres:5432/oedb"
+      ONTOP_DB_USER: postgres
+      ONTOP_DB_PASSWORD: postgres
+      ONTOP_WAIT_FOR: postgres:5432
     volumes:
       - ./serviceConfigs/ontop:/opt/ontop-config
     depends_on:

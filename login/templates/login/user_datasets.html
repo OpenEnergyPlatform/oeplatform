@@ -1,0 +1,37 @@
+{% extends "base/base-profile.html" %}
+{% load compress %}
+{% load static %}
+{% block main-content-body %}
+  {% if profile_user == request.user %}
+    {% include "login/user_nav.html" %}
+    {% include "login/partials/datasets_sections.html" %}
+  {% endif %}
+{% endblock %}
+{% block main-right-sidebar-content %}
+  {% include "login/sidebar_user.html" %}
+{% endblock main-right-sidebar-content %}
+{% block after-body-bottom-js %}
+  {% compress js %}
+    <script src="{% static 'ontology/htmx.js' %}"></script>
+  {% endcompress %}
+  <script type="text/javascript">
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.startsWith(name + "=")) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+    document.body.addEventListener("htmx:configRequest", function (event) {
+      event.detail.headers["X-CSRFToken"] = getCookie("csrftoken");
+    });
+  </script>
+{% endblock after-body-bottom-js %}

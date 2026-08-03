@@ -64,11 +64,13 @@ from api.views import (
     OekgSparqlAPIView,
     ScenarioDataTablesListAPIView,
     TableAPIView,
+    TableBulkUploadAPIView,
     TableColumnAPIView,
     TableMetadataAPIView,
     TableMovePublishAPIView,
     TableRowsAPIView,
     TableUnpublishAPIView,
+    UnassignDatasetTables,
     grpprop_api_view,
     oeo_search_api_view,
     oevkg_query_api_view,
@@ -120,6 +122,11 @@ urlpatterns_v0_schema_table = [
         TableRowsAPIView.as_view(),
         {"action": "new"},
         name="api_rows_new",
+    ),
+    re_path(
+        r"^(?P<table>[\w\d_\s]+)/bulk-upload/?$",
+        TableBulkUploadAPIView.as_view(),
+        name="api_bulk_upload",
     ),
     re_path(
         r"^(?P<table>[\w\d_\s]+)/rowcount$",
@@ -323,6 +330,11 @@ urlpatterns_v0 = [
         "datasets/<str:dataset_name>/assign-tables/",
         AssignDatasetTables.as_view(),
         name="dataset-assign-tables",
+    ),
+    path(
+        "datasets/<str:dataset_name>/unassign-tables/",
+        UnassignDatasetTables.as_view(),
+        name="dataset-unassign-tables",
     ),
     path(
         "datasets/<str:dataset_name>/",
