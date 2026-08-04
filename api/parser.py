@@ -383,7 +383,7 @@ def parse_select(d: dict):
                     field = dict(type="column", column=field)
                 col = parse_expression(field)
                 if "as" in field:
-                    col.label(read_pgid(field["as"]))
+                    col = col.label(read_pgid(field["as"]))
                 L.append(col)
         if "from" in d:
             kwargs["from_obj"] = _parse_from_item(get_or_403(d, "from"))
