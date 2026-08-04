@@ -540,6 +540,29 @@ def _parse_column(d: dict, mapper: dict | None = None):
                 return column(name)
 
 
+def _parse_geometry_type(modifier: str) -> "geoalchemy2.Geometry":
+    """Build a Geometry type from the contents of geometry(...).
+
+    The modifier is either a subtype ("Point") or a subtype and an SRID
+    ("Point,4326"). Passing the whole modifier as the subtype used to leave the
+    SRID at the library default, which rendered a third type-modifier value
+    that postgres happens to ignore - so the declared SRID landed by accident.
+    Name the two parts instead.
+    """
+
+    geometry_type, _, srid = modifier.partition(",")
+    type_kwargs = {"geometry_type": geometry_type.strip().upper()}
+
+    srid = srid.strip()
+    if srid:
+        try:
+            type_kwargs["srid"] = int(srid)
+        except ValueError:
+            raise APIError("Invalid SRID in geometry type: '%s'" % srid)
+
+    return geoalchemy2.Geometry(**type_kwargs)
+
+
 def _parse_type(dt_string, **kwargs):
     if isinstance(dt_string, dict):
         dt = _parse_type(
@@ -562,7 +585,7 @@ def _parse_type(dt_string, **kwargs):
         if match:
             dt_string = match.groups()[0]
             if dt_string.lower() == "geometry":
-                return geoalchemy2.Geometry(geometry_type=match.groups()[1]), False
+                return _parse_geometry_type(match.groups()[1]), False
             else:
                 dt_cardinality = map(int, match.groups()[1].replace(" ", "").split(","))
             dt, autoincrement = _parse_type(dt_string)
