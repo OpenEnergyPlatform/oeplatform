@@ -110,8 +110,8 @@ factsheet/static/factsheet/css
 
 /oeo
 ontologies/
-scripts/
-
+script/import_oep_tables_to_local_test.py
+script/log_metrics/*
 site/
 
 # Jenna fuseki graph db installation
@@ -128,3 +128,4 @@ saio/
 
 # local docs symlink
 .claude-docs
+script/log_metrics/*.txt
