@@ -11,7 +11,7 @@ fi
 
 CONTAINER_NAME="$1"
 # Default to 24 hours if a second argument isn't provided
-TIME_WINDOW="${2:-24h}" 
+TIME_WINDOW="${2:-24h}"
 
 # Ensure the docker command is found when running from cron
 export PATH=$PATH:/usr/local/bin:/usr/bin:/bin
@@ -89,7 +89,7 @@ echo ""
 echo " Top 3 Heavy File Transfers (Bandwidth):"
 # Sort numerically (reverse) by column 7 (bytes), take the top 3, format into KB
 sort -k7 -nr "$LOG_FILE" | head -n 3 | awk '{
-    size=$7/1024; 
+    size=$7/1024;
     printf " %.1f KB -> %s\n", size, $4
 }'
 

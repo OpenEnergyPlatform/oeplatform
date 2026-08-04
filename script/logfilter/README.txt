@@ -1,4 +1,4 @@
-A Bash script using grep and awk to filter docker logs 
+A Bash script using grep and awk to filter docker logs
 
 ## Manual Usage
 Run the script directly from the terminal to print insights to your console.
@@ -18,8 +18,8 @@ Example: Run every 2 hours and save to the log_metrics directory
 
 ## Arguments
 1. Container Target : The name of the Docker container to inspect (e.g., oeplatform-web-dev). Do not use container IDs if they are subject to change.
-2. Time Window      : The look-back period passed to Docker's --since flag. 
-                      Format: 5m (minutes), 1h (hours), 24h (days). 
+2. Time Window      : The look-back period passed to Docker's --since flag.
+                      Format: 5m (minutes), 1h (hours), 24h (days).
                       *Crucial: When automating, ensure this window matches your cron schedule so you do not double-count or miss logs.*
 
 ## Troubleshooting
