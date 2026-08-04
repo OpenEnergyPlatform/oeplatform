@@ -1,3 +1,7 @@
+SPDX-FileCopyrightText: 2026 Ariyosena Sutandang  <https://github.com/AriyosenaS> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+
 A Bash script using grep and awk to filter docker logs 
 
 ## Manual Usage
