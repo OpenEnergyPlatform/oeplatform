@@ -41,7 +41,7 @@ from django.urls import reverse
 from django.utils import timezone
 from omi.license import LicenseError, validate_oemetadata_licenses
 
-from api.error import APIError
+from api.error import APIError, reflectable_cause
 from api.parser import parse_table_parts
 from dataedit.utils import get_badge_icon_path, validate_badge_name_match
 from login.permissions import ADMIN_PERM, NO_PERM
@@ -278,7 +278,13 @@ class Table(Tagable):
                 # delete django object which will also automatically clean up
                 # left over oedb tables
                 table_obj.delete()
-            raise APIError(f"Could not create table {name}")
+            # the full exception stays in the log either way; the client only
+            # gets the cause when it is safe to disclose
+            cause = reflectable_cause(exc)
+            message = f"Could not create table {name}"
+            if cause:
+                message = f"{message}: {cause}"
+            raise APIError(message)
 
         return table_obj
 
