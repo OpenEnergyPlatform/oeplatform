@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# SPDX-FileCopyrightText: 2026 Ariyosena Sutandang  <https://github.com/AriyosenaS> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # Exit if no container name is provided
 if [ -z "$1" ]; then
     echo "Error: No Docker container provided."
