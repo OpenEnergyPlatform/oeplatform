@@ -202,6 +202,22 @@ def parse_table_parts(
             else:
                 ccolumns = [constraint["constraint_parameter"]]
             constraints.append(UniqueConstraint(*ccolumns, **kwargs))
+        elif constraint_type == "foreign_key":
+            # Reject rather than silently drop: adding the constraint is a
+            # separate step, and the caller has to know that.
+            raise APIError(
+                "FOREIGN KEY is not supported when creating a table. Create the "
+                "table first, then add the constraint with a POST to the table "
+                "endpoint."
+            )
+        elif constraint_type == "check":
+            raise APIError("CHECK constraints are not supported.")
+        else:
+            raise APIError(
+                "Unsupported constraint_type: '%s'. Supported when creating a "
+                "table: PRIMARY KEY, UNIQUE."
+                % (constraint.get("constraint_type") or constraint.get("type"))
+            )
 
     # autogenerate id column if missing
     if "id" not in columns_by_name:
