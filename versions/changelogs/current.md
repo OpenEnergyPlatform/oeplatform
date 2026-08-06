@@ -202,6 +202,34 @@ SPDX-License-Identifier: CC0-1.0
   page); pinned to the last known-good release until it is fixed upstream
   ([vitejs/vite#22499](https://github.com/vitejs/vite/issues/22499)).
 
+- Fix the `"as"` alias on fields of an advanced search request being parsed and
+  then discarded: a labelled expression came back named after the expression
+  (`ST_AsText_1`) or after its source column, breaking any client that keys
+  results by column name. An invalid alias is now rejected instead of silently
+  falling back to a generated name.
+
+- Creating a table with a `FOREIGN KEY` or `CHECK` constraint no longer returns
+  201 while silently dropping the constraint. The create path now rejects
+  constraint types it cannot apply, naming the supported route: foreign keys are
+  added after creation through the table endpoint, check constraints are not
+  supported.
+
+- Failed table creations and failed spatial queries now report the database's
+  own reason instead of `Could not create table <name>` and `Invalid request`.
+  An unusable column definition (`numeric(1001)`) and a reference system passed
+  as a JSON string rather than a number (`"4326"` instead of `4326`, which makes
+  PostGIS resolve `ST_Transform`'s projection-string overload) are both
+  diagnosable from the response now. Causes that are not established as safe to
+  disclose still report the generic message.
+  ([openego/ding0#405](https://github.com/openego/ding0/issues/405))
+
+- Geometry columns: an SRID declared in the column type (`geometry(Point,4326)`)
+  is parsed as subtype and SRID instead of being passed through as one opaque
+  string, and a non-numeric SRID is now rejected with a named error. The
+  automatic GiST index on geometry columns and the registered subtype/SRID are
+  now covered by tests, so a dependency upgrade cannot silently stop indexing
+  new geo tables.
+
 ## Documentation updates
 
 - New "Production deployment (Podman)" guide (Overview → Install → Ontop →
