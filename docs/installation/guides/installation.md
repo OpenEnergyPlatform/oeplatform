@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+
 # Install and setup the OpenEnergyPlatform Application
 
 Below we describe the manual installation of the oeplatform code and

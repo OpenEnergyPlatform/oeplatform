@@ -1,0 +1,65 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https: //github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+Renders one Open Peer Review category's fields: the flat fields, then a grouped
+accordion (with one nested level). Reused per category so the contributor page no
+longer has empty tabs. Each field uses the shared review_item_snippet.
+
+Params:
+  cat       - meta.<category> dict: {"flat": [...], "grouped": {key: {...}}}
+  category  - category name string (e.g. "spatial") for the snippet's data-category
+  acc       - unique id prefix for this category's accordions (e.g. "spatial")
+{% endcomment %}
+{% for item in cat.flat %}
+  {% include "partials/review_item_snippet.html" with item=item category=category only %}
+{% endfor %}
+{% if cat.grouped %}
+  <div class="accordion" id="{{ acc }}Accordion">
+    {% for group_key, group in cat.grouped.items %}
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="heading-{{ acc }}-{{ forloop.counter }}">
+          <button class="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#collapse-{{ acc }}-{{ forloop.counter }}"
+                  aria-expanded="false">{{ group_key }}</button>
+        </h2>
+        <div id="collapse-{{ acc }}-{{ forloop.counter }}"
+             class="accordion-collapse collapse"
+             data-bs-parent="#{{ acc }}Accordion">
+          <div class="accordion-body">
+            {% for item in group.flat %}
+              {% include "partials/review_item_snippet.html" with item=item category=category only %}
+            {% endfor %}
+            {% if group.grouped %}
+              <div class="accordion" id="{{ acc }}Inner-{{ group_key|slugify }}">
+                {% for sub_key, sub_items in group.grouped.items %}
+                  <div class="accordion-item">
+                    <h2 class="accordion-header"
+                        id="heading-{{ acc }}-inner-{{ group_key|slugify }}-{{ forloop.counter }}">
+                      <button class="accordion-button collapsed"
+                              type="button"
+                              data-bs-toggle="collapse"
+                              data-bs-target="#collapse-{{ acc }}-inner-{{ group_key|slugify }}-{{ forloop.counter }}"
+                              aria-expanded="false">{{ sub_key }}</button>
+                    </h2>
+                    <div id="collapse-{{ acc }}-inner-{{ group_key|slugify }}-{{ forloop.counter }}"
+                         class="accordion-collapse collapse"
+                         data-bs-parent="#{{ acc }}Inner-{{ group_key|slugify }}">
+                      <div class="accordion-body">
+                        {% for item in sub_items.flat %}
+                          {% include "partials/review_item_snippet.html" with item=item category=category only %}
+                        {% endfor %}
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}

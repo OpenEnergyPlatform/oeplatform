@@ -19,6 +19,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 import json
 import logging
 import re
+import uuid
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import TYPE_CHECKING, Literal, Mapping, Union
@@ -33,13 +34,14 @@ from django.db.models import (
     ForeignKey,
     IntegerField,
     JSONField,
+    PositiveIntegerField,
     QuerySet,
 )
 from django.urls import reverse
 from django.utils import timezone
 from omi.license import LicenseError, validate_oemetadata_licenses
 
-from api.error import APIError
+from api.error import APIError, reflectable_cause
 from api.parser import parse_table_parts
 from dataedit.utils import get_badge_icon_path, validate_badge_name_match
 from login.permissions import ADMIN_PERM, NO_PERM
@@ -276,7 +278,13 @@ class Table(Tagable):
                 # delete django object which will also automatically clean up
                 # left over oedb tables
                 table_obj.delete()
-            raise APIError(f"Could not create table {name}")
+            # the full exception stays in the log either way; the client only
+            # gets the cause when it is safe to disclose
+            cause = reflectable_cause(exc)
+            message = f"Could not create table {name}"
+            if cause:
+                message = f"{message}: {cause}"
+            raise APIError(message)
 
         return table_obj
 
@@ -456,6 +464,45 @@ class Table(Tagable):
         )
 
 
+class Dataset(models.Model):
+    """Represents a dataset in the database.
+
+    Datasets are implemented according to oemetadata specification.
+    """
+
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255, unique=True)
+    metadata = models.JSONField(null=False, default=dict)
+    tables = models.ManyToManyField("Table", related_name="datasets", blank=True)
+    # seeded additively from member tables' topics on assign, editable by
+    # the creator; never contains the draft pseudo-topic
+    topics = models.ManyToManyField(Topic, related_name="datasets", blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    # nullable so datasets created before ownership existed survive the migration
+    creator = models.ForeignKey(
+        "login.myuser",
+        on_delete=models.SET_NULL,
+        related_name="datasets_created",
+        null=True,
+        blank=True,
+    )
+
+    def resource_entries(self):
+        """Assemble the oemetadata `resources` list live from member tables.
+
+        The list is never persisted on the dataset: tables own their
+        resource metadata and every read assembles the current state, so
+        dataset reads can not go stale after table metadata edits.
+
+        Ordered by table name, matching the dataset detail page.
+        """
+        return [
+            table.oemetadata["resources"][0]
+            for table in self.tables.order_by("name")
+            if table.oemetadata and table.oemetadata.get("resources")
+        ]
+
+
 class Embargo(models.Model):
     DURATION_CHOICES = [
         ("6_months", "6 Months"),
@@ -555,8 +602,7 @@ class PeerReview(models.Model):
     oemetadata = JSONField(null=False, default=dict)
 
     review_id: QuerySet["PeerReviewManager"]  # related_name, for static type checking
-    prev_review: QuerySet["PeerReviewManager"]  # related_name, for static type checking
-    next_review: QuerySet["PeerReviewManager"]  # related_name, for static type checking
+    rounds: QuerySet["ReviewRound"]  # related_name, for static type checking
 
     # laden
     @classmethod
@@ -605,45 +651,40 @@ class PeerReview(models.Model):
 
     def save(self, *args, **kwargs):
         review_type = kwargs.pop("review_type", None)
-        pm_new = None
 
-        if not self.contributor == self.reviewer:
+        if self.contributor == self.reviewer:
+            raise ValidationError("Contributor and reviewer cannot be the same.")
+
+        super().save(*args, **kwargs)
+
+        if review_type is None:
+            return
+
+        # One PeerReviewManager per review: get_or_create avoids the historical
+        # duplicate-manager bug where every save() created a fresh manager
+        # (which then broke PeerReviewManager.load via .get()).
+        pm, _ = PeerReviewManager.objects.get_or_create(opr=self)
+
+        if review_type == "save":
+            pm.status = ReviewDataStatus.SAVED.value
+            pm.save()
+
+        elif review_type == "submit":
+            result = self.set_version_of_metadata_for_review(table=self.table)
+            logger.info(result[1])
+
+            pm.status = ReviewDataStatus.SUBMITTED.value
+            pm.set_next_reviewer()  # persists the manager
+
+        elif review_type == "finished":
+            result = self.set_version_of_metadata_for_review(table=self.table)
+            logger.info(result[1])
+
+            pm.status = ReviewDataStatus.FINISHED.value
+            self.is_finished = True
+            self.date_finished = timezone.now()
             super().save(*args, **kwargs)
-            # TODO: This causes errors if review list ist empty
-
-            if review_type == "save":
-                pm_new = PeerReviewManager(
-                    opr=self, status=ReviewDataStatus.SAVED.value
-                )
-
-            elif review_type == "submit":
-                result = self.set_version_of_metadata_for_review(table=self.table)
-                if result[0]:
-                    logger.info(result[1])
-                elif result[0] is False:
-                    logger.info(result[1])
-
-                pm_new = PeerReviewManager(
-                    opr=self, status=ReviewDataStatus.SUBMITTED.value
-                )
-                pm_new.set_next_reviewer()
-
-            elif review_type == "finished":
-                result = self.set_version_of_metadata_for_review(table=self.table)
-                if result[0]:
-                    logger.info(result[1])
-                elif result[0] is False:
-                    logger.info(result[1])
-
-                pm_new = PeerReviewManager(
-                    opr=self, status=ReviewDataStatus.FINISHED.value
-                )
-                self.is_finished = True
-                self.date_finished = timezone.now()
-                super().save(*args, **kwargs)
-
-            if pm_new:
-                pm_new.save()
+            pm.save()
 
         else:
             raise ValidationError("Contributor and reviewer cannot be the same.")
@@ -765,8 +806,6 @@ class PeerReviewManager(models.Model):
         current_reviewer (CharField): The current reviewer.
         status (CharField): The current status of the review.
         is_open_since (CharField): How long the review has been open.
-        prev_review (ForeignKey): The previous review in the process.
-        next_review (ForeignKey): The next review in the process.
     """
 
     REVIEW_STATUS = [(status.value, status.name) for status in ReviewDataStatus]
@@ -782,20 +821,9 @@ class PeerReviewManager(models.Model):
         choices=REVIEW_STATUS, max_length=10, default=ReviewDataStatus.SAVED.value
     )
     is_open_since = models.CharField(null=True, max_length=10)
-    prev_review = ForeignKey(
-        PeerReview,
-        on_delete=models.CASCADE,
-        related_name="prev_review",
-        null=True,
-        default=None,
-    )  # TODO: add logic
-    next_review = ForeignKey(
-        PeerReview,
-        on_delete=models.CASCADE,
-        related_name="next_review",
-        null=True,
-        default=None,
-    )  # TODO: add logic
+
+    # Review history (the ping-pong of turns) is modelled by ReviewRound, not by
+    # prev/next FKs on the manager — those were unused and have been removed.
 
     @classmethod
     def load(cls, opr):
@@ -1014,3 +1042,100 @@ class PeerReviewManager(models.Model):
     @staticmethod
     def get_opr_by_id(opr_id) -> PeerReview:
         return PeerReview.objects.get(id=opr_id)
+
+
+class ReviewRound(models.Model):
+    """One immutable turn of a peer review (Phase 1).
+
+    A ReviewRound records a single reviewer/contributor submission. It is the
+    append-only log of the ping-pong; ``PeerReview.review`` is rebuilt from these
+    rows as a derived projection (see ``dataedit.peer_review.projection``).
+
+    Drafts (``reviewType="save"``) do NOT create rounds — only ``submit`` and
+    ``finished`` do. Within a single round every ``field_reviews`` entry's
+    ``fieldReview`` is a single dict (one turn = one contribution); the
+    dict-or-list ambiguity only ever appears in the rebuilt projection, where it
+    is always a list.
+
+    Attributes:
+        opr (ForeignKey): The peer review this round belongs to.
+        sequence (PositiveIntegerField): 1-based turn counter within the opr.
+        role (CharField): Who acted — reviewer or contributor.
+        actor (ForeignKey): The user who submitted (kept on user deletion).
+        action (CharField): SUBMITTED or FINISHED.
+        field_reviews (JSONField): list of {key, category, fieldReview: dict}.
+        sets_finished (BooleanField): Whether this round finished the review.
+        created (DateTimeField): When the round was recorded.
+    """
+
+    REVIEW_STATUS = [(status.value, status.name) for status in ReviewDataStatus]
+    REVIEWER_CHOICES = [(choice.value, choice.name) for choice in Reviewer]
+
+    opr = ForeignKey(
+        PeerReview, on_delete=models.CASCADE, related_name="rounds", null=False
+    )
+    sequence = PositiveIntegerField(null=False)
+    role = CharField(choices=REVIEWER_CHOICES, max_length=20, null=False)
+    actor = ForeignKey(
+        "login.myuser",
+        on_delete=models.SET_NULL,
+        related_name="review_rounds",
+        null=True,
+    )
+    action = CharField(choices=REVIEW_STATUS, max_length=10, null=False)
+    field_reviews = JSONField(default=list)
+    sets_finished = BooleanField(null=False, default=False)
+    created = DateTimeField(null=False, default=timezone.now)
+
+    class Meta:
+        unique_together = ("opr", "sequence")
+        ordering = ["opr", "sequence"]
+
+    def __str__(self) -> str:
+        return f"ReviewRound(opr={self.opr_id}, seq={self.sequence}, {self.role})"
+
+
+class BulkLoadEvent(models.Model):
+    """Audit record of one bulk upload attempt (issue #2362).
+
+    Bulk uploads bypass the per-row edit journal; this event - including the
+    id range the loaded rows landed in - is their only provenance, and the
+    id range is what makes a poisoned or mistaken upload deletable as a
+    block. Failed attempts are recorded too, so retry storms and abuse are
+    visible without log-grepping.
+    """
+
+    STATUS_SUCCESS = "success"
+    STATUS_VALIDATION_ERROR = "validation-error"
+    STATUS_COPY_ERROR = "copy-error"
+    STATUS_EMBARGO = "embargo"
+    STATUS_SIZE_CAP = "size-cap"
+    STATUS_STALL = "stall"
+    STATUS_ERROR = "error"
+    STATUS_CHOICES = [
+        (STATUS_SUCCESS, "Success"),
+        (STATUS_VALIDATION_ERROR, "Validation error"),
+        (STATUS_COPY_ERROR, "Copy error"),
+        (STATUS_EMBARGO, "Embargo"),
+        (STATUS_SIZE_CAP, "Size cap exceeded"),
+        (STATUS_STALL, "Stalled transfer"),
+        (STATUS_ERROR, "Error"),
+    ]
+
+    table_name = CharField(max_length=1000, null=False)
+    user = ForeignKey(
+        "login.myuser",
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="bulk_load_events",
+    )
+    created = DateTimeField(auto_now_add=True)
+    status = CharField(max_length=32, choices=STATUS_CHOICES)
+    error_message = models.TextField(null=True, blank=True)
+    bytes_received = models.BigIntegerField(default=0)
+    row_count = models.BigIntegerField(null=True, blank=True)
+    id_min = models.BigIntegerField(null=True, blank=True)
+    id_max = models.BigIntegerField(null=True, blank=True)
+
+    def __str__(self) -> str:
+        return f"BulkLoadEvent({self.table_name}, {self.status}, {self.created})"

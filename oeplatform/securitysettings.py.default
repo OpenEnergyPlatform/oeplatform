@@ -5,10 +5,12 @@ from pathlib import Path
 SECRET_KEY = '0'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Set OEP_DEBUG=False on production servers.
+DEBUG = os.environ.get("OEP_DEBUG", "True").strip().lower() in ("true", "1", "yes")
 
-# Runs on localhost only
-URL = '127.0.0.1'
+# Public host the platform is served under (without scheme).
+# On localhost this stays 127.0.0.1; in production set OEP_URL to your domain.
+URL = os.environ.get("OEP_URL", "127.0.0.1")
 
 USE_DOCKER = True
 
@@ -25,8 +27,14 @@ DATABASES = {
 }
 
 
-# This is unnecessary as long DEBUG is True
-ALLOWED_HOSTS = [] if DEBUG else ['localhost']
+# Comma-separated list of hosts/domains the site may serve, e.g.
+# OEP_ALLOWED_HOSTS="openenergyplatform.org,www.openenergyplatform.org".
+# When DEBUG is on this can stay empty; in production it must contain your domain.
+_allowed_hosts = os.environ.get("OEP_ALLOWED_HOSTS", "").strip()
+if _allowed_hosts:
+    ALLOWED_HOSTS = [h.strip() for h in _allowed_hosts.split(",") if h.strip()]
+else:
+    ALLOWED_HOSTS = [] if DEBUG else ['localhost']
 
 TIME_OUT = 30
 USER_CONNECTION_LIMIT = 4

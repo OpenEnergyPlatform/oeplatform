@@ -182,9 +182,9 @@
                     data-actions-box="true"
                     iconBase="fa">
               {% for t in all_tags %}
-                <option data-content='<i class="fa fa-circle" style="color: {{ t.color_hex }};"></i> {{ t.name }}' value="{{ t.pk }}"
-                  {% if t.pk in tags %}selected{% endif %}
-                  >{{ t.name }}</option>
+                <option data-content='<i class="fa fa-circle" style="color: {{ t.color_hex }};"></i> {{ t.name }}'
+                        value="{{ t.pk }}"
+                        {% if t.pk in tags %}selected{% endif %}>{{ t.name }}</option>
               {% endfor %}
             </select>
           </div>
