@@ -19,6 +19,7 @@ keys on the response BODY FORMAT so a finding blames the right layer.
 from __future__ import annotations
 
 import http.client
+import io
 import json
 import select
 import ssl
@@ -29,6 +30,87 @@ from urllib.parse import urlsplit
 
 SEND_CHUNK = 1 << 20  # 1 MiB per socket write
 MAX_BODY_CAPTURE = 64 * 1024
+#: how long to wait for the rest of an early rejection once one is detected
+EARLY_DRAIN_SECONDS = 5.0
+
+
+class _BytesSocket:
+    """Socket-shaped wrapper over a buffer, for parsing a response we already read.
+
+    `http.client.HTTPResponse` only ever calls `makefile("rb")` on its socket,
+    so this is all that is needed to reuse the stdlib parser on bytes that were
+    consumed from the wire before `getresponse()` could run.
+    """
+
+    def __init__(self, raw: bytes):
+        self._raw = raw
+
+    def makefile(self, mode="rb", *args, **kwargs):  # noqa: D102
+        return io.BufferedReader(io.BytesIO(self._raw))
+
+
+def peek_early_response(sock) -> bytes:
+    """Return real HTTP bytes if the peer has already answered, else b"".
+
+    `select()` reporting a socket readable does NOT mean an HTTP response is
+    waiting. On a TLS 1.3 connection the server sends `NewSessionTicket`
+    records right after the handshake: the file descriptor goes readable while
+    the SSL layer has no *application* data at all.
+
+    Trusting `select()` alone is what deadlocked this client -- it stopped
+    sending after one chunk, then blocked in `getresponse()` forever while the
+    server waited for the rest of the declared `Content-Length`. Measured
+    against production on 2026-08-10: chunk 1 readable, `SSLWantReadError`;
+    chunks 2-5 not readable.
+
+    So ask the SSL layer itself. `SSLWantReadError` (or `BlockingIOError` on a
+    plain socket) means "TLS bookkeeping only, keep sending".
+    """
+    sock.setblocking(False)
+    try:
+        return sock.recv(MAX_BODY_CAPTURE)
+    except (ssl.SSLWantReadError, ssl.SSLWantWriteError, BlockingIOError):
+        return b""
+    except OSError:
+        # peer reset while we were still writing: treat as an early answer so
+        # the caller stops sending and reports bytes_sent at the failure point
+        return b""
+    finally:
+        try:
+            sock.setblocking(True)
+        except OSError:
+            pass
+
+
+def drain_response(sock, first: bytes, deadline: float = EARLY_DRAIN_SECONDS) -> bytes:
+    """Read the remainder of an early response that `peek_early_response` started."""
+    chunks = [first]
+    total = len(first)
+    end = time.perf_counter() + deadline
+    sock.settimeout(0.5)
+    try:
+        while total < MAX_BODY_CAPTURE and time.perf_counter() < end:
+            try:
+                more = sock.recv(MAX_BODY_CAPTURE - total)
+            except (OSError, ssl.SSLError):
+                break
+            if not more:
+                break
+            chunks.append(more)
+            total += len(more)
+            if b"\r\n\r\n" in b"".join(chunks[-2:]) and total > 0:
+                # headers complete; one more short read is enough for the body
+                try:
+                    tail = sock.recv(MAX_BODY_CAPTURE - total)
+                except (OSError, ssl.SSLError):
+                    tail = b""
+                if tail:
+                    chunks.append(tail)
+                break
+    finally:
+        pass
+    return b"".join(chunks)
+
 
 PLATFORM = "platform"  # a Django/DRF JSON answer
 PROXY = "proxy"  # an Apache/nginx HTML error page
@@ -176,6 +258,33 @@ class BenchClient:
         )
         return result
 
+    def _finish_from_bytes(self, raw: bytes, result: HttpResult) -> HttpResult:
+        """Fill `result` from response bytes already taken off the socket.
+
+        Used only on the early-rejection path, where the peer answered mid-body
+        and `getresponse()` can no longer be used because the first bytes of the
+        response are already consumed.
+        """
+        try:
+            response = http.client.HTTPResponse(_BytesSocket(raw))
+            response.begin()
+            body = response.read(MAX_BODY_CAPTURE)
+            result.status = response.status
+            result.reason = response.reason
+            result.headers = {k: v for k, v in response.getheaders()}
+            result.body = body.decode("utf-8", "replace")
+        except (http.client.HTTPException, OSError, ValueError) as exc:
+            # keep the raw bytes rather than lose the evidence
+            result.body = raw[:MAX_BODY_CAPTURE].decode("utf-8", "replace")
+            result.error += " | unparseable early response: %s: %s" % (
+                type(exc).__name__,
+                exc,
+            )
+        result.responder = classify_responder(
+            result.status, result.headers, result.body
+        )
+        return result
+
     def request(
         self,
         method: str,
@@ -267,6 +376,18 @@ class BenchClient:
         answered (a proxy 413, an Apache 408), sending stops there and the
         answer is read, so the result records how many bytes actually went
         out before the rejection.
+
+        The poll is two-stage on purpose. `select()` alone reports a TLS 1.3
+        socket readable as soon as the server sends a `NewSessionTicket`, with
+        no HTTP response behind it; believing that truncated the body after one
+        chunk and deadlocked every upload above `SEND_CHUNK`. See
+        `peek_early_response`.
+
+        Caveat on `send_seconds`: `conn.send()` returns once the kernel accepts
+        the bytes, so for payloads that fit in the socket buffers this measures
+        buffer fill, not wire time, and understates transfer. It approaches real
+        transfer time once the payload is large enough to keep the buffers full.
+        Treat `connect + send + wait` as the honest end-to-end figure.
         """
         size = payload_path.stat().st_size
         path = "/api/v0/tables/%s/bulk-upload?delimiter=%s" % (table, delimiter)
@@ -289,6 +410,7 @@ class BenchClient:
             send_started = time.perf_counter()
             sent = 0
             early_answer = False
+            early_bytes = b""
             with open(payload_path, "rb") as fh:
                 while True:
                     chunk = fh.read(chunk_size)
@@ -308,16 +430,28 @@ class BenchClient:
                     sent += len(chunk)
                     if on_progress is not None:
                         on_progress(sent, size)
-                    readable, _, _ = select.select([conn.sock], [], [], 0)
-                    if readable:
-                        # the server answered before we finished sending
-                        result.error = (
-                            "server answered after %d/%d bytes sent" % (sent, size)
-                        ).strip()
-                        early_answer = True
-                        break
+                    if not select.select([conn.sock], [], [], 0)[0]:
+                        continue
+                    # Readable does NOT mean answered -- see peek_early_response.
+                    # A TLS 1.3 NewSessionTicket makes the fd readable with no
+                    # application data behind it. Confirm with the SSL layer
+                    # before believing it, or we truncate the body and hang.
+                    peeked = peek_early_response(conn.sock)
+                    if not peeked:
+                        continue  # TLS bookkeeping only: keep sending
+                    result.error = "server answered after %d/%d bytes sent" % (
+                        sent,
+                        size,
+                    )
+                    early_answer = True
+                    early_bytes = drain_response(conn.sock, peeked)
+                    break
             result.send_seconds = time.perf_counter() - send_started
             result.bytes_sent = sent
+            if early_bytes:
+                # the response was consumed off the socket already, so the
+                # stdlib parser has to be pointed at those bytes, not at conn
+                return self._finish_from_bytes(early_bytes, result)
             try:
                 return self._finish(conn, result)
             except (OSError, http.client.HTTPException) as exc:
