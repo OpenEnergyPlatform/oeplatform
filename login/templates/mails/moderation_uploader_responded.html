@@ -1,0 +1,13 @@
+<!-- SPDX-FileCopyrightText: 2026 Open Energy Platform contributors -->
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+{% extends "mails/base.html" %}
+{% block message %}
+  The uploader responded to content report
+  <strong>{{ report.tracking_id }}</strong>
+  for dataset <strong>{{ report.table_name }}</strong>.
+  <br />
+  <br />
+  <pre>{{ report.uploader_response }}</pre>
+  <br />
+  <a href="{{ moderation_url }}">Review in moderation queue</a>
+{% endblock %}

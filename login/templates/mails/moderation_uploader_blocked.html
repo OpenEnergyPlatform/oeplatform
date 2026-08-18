@@ -1,0 +1,19 @@
+<!-- SPDX-FileCopyrightText: 2026 Open Energy Platform contributors -->
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+{% extends "mails/base.html" %}
+{% block message %}
+  A content report was filed against your dataset
+  <strong>{{ report.table_name }}</strong>.
+  <br />
+  <br />
+  <strong>Report ID: {{ report.tracking_id }}</strong>
+  <br />
+  Please quote this ID if you contact the moderation team.
+  <br />
+  The dataset has been temporarily blocked while the report is reviewed.
+  <br />
+  <br />
+  You can respond here:
+  <br />
+  <a href="{{ respond_url }}">{{ respond_url }}</a>
+{% endblock %}

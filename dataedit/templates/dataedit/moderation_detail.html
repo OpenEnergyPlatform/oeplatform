@@ -1,0 +1,66 @@
+<!-- SPDX-FileCopyrightText: 2026 Open Energy Platform contributors -->
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+{% extends "base/base-full.html" %}
+{% load django_bootstrap5 %}
+{% block main-content-body %}
+  <p>
+    <a href="{% url 'dataedit:moderation-queue' %}">&larr; Back to queue</a>
+  </p>
+  <h3>Report {{ report.tracking_id }}</h3>
+  <dl class="row">
+    <dt class="col-sm-3">Report ID</dt>
+    <dd class="col-sm-9"><code>{{ report.tracking_id }}</code></dd>
+    <dt class="col-sm-3">Dataset</dt>
+    <dd class="col-sm-9">
+      {% if report.table %}
+        <a href="{% url 'dataedit:view' table=report.table.name %}">{{ report.table_name }}</a>
+      {% else %}
+        {{ report.table_name }} (deleted)
+      {% endif %}
+    </dd>
+    <dt class="col-sm-3">Status</dt>
+    <dd class="col-sm-9">{{ report.get_status_display }}</dd>
+    <dt class="col-sm-3">Subject</dt>
+    <dd class="col-sm-9">{{ report.subject }}</dd>
+    <dt class="col-sm-3">Reason</dt>
+    <dd class="col-sm-9">{{ report.get_reason_display }}</dd>
+    <dt class="col-sm-3">Reporter</dt>
+    <dd class="col-sm-9">{{ report.reporter }} ({{ report.reporter.email }})</dd>
+    <dt class="col-sm-3">Uploaders</dt>
+    <dd class="col-sm-9">
+      {% for u in uploaders %}
+        {{ u.name }} &lt;{{ u.email }}&gt;{% if not forloop.last %}; {% endif %}
+      {% empty %}
+        —
+      {% endfor %}
+    </dd>
+    <dt class="col-sm-3">Created</dt>
+    <dd class="col-sm-9">{{ report.created }}</dd>
+  </dl>
+
+  <h5>Reporter message</h5>
+  <pre class="border p-3 bg-light">{{ report.message }}</pre>
+
+  <h5>Uploader response</h5>
+  {% if report.uploader_response %}
+    <p class="text-muted">Responded at {{ report.uploader_responded_at }}</p>
+    <pre class="border p-3 bg-light">{{ report.uploader_response }}</pre>
+  {% else %}
+    <p class="text-muted">No response yet.</p>
+  {% endif %}
+
+  {% if report.resolution_note %}
+    <h5>Resolution note</h5>
+    <pre class="border p-3 bg-light">{{ report.resolution_note }}</pre>
+  {% endif %}
+
+  {% if form %}
+    <hr />
+    <h4>Decision</h4>
+    <form method="post" action="">
+      {% csrf_token %}
+      {% bootstrap_form form %}
+      <button type="submit" class="btn btn-primary">Submit decision</button>
+    </form>
+  {% endif %}
+{% endblock %}

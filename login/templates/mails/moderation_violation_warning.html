@@ -1,0 +1,13 @@
+<!-- SPDX-FileCopyrightText: 2026 Open Energy Platform contributors -->
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+{% extends "mails/base.html" %}
+{% block message %}
+  A content-policy violation was confirmed for dataset
+  <strong>{{ report.table_name }}</strong>
+  (report ID <strong>{{ report.tracking_id }}</strong>).
+  <br />
+  The dataset has been deleted and this message is a formal warning.
+  <br />
+  <br />
+  A further violation may result in account deactivation.
+{% endblock %}

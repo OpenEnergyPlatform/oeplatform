@@ -1,0 +1,75 @@
+<!-- SPDX-FileCopyrightText: 2026 Open Energy Platform contributors -->
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+{% extends "base/base-full.html" %}
+{% block main-content-body %}
+  <h3>Content moderation queue</h3>
+  <p class="text-muted">
+    Review reported datasets (typically two to three times per week).
+  </p>
+
+  <h4>Open reports</h4>
+  {% if open_reports %}
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Report ID</th>
+          <th>Created</th>
+          <th>Dataset</th>
+          <th>Subject</th>
+          <th>Status</th>
+          <th>Reporter</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for report in open_reports %}
+          <tr>
+            <td><code>{{ report.tracking_id }}</code></td>
+            <td>{{ report.created }}</td>
+            <td>{{ report.table_name }}</td>
+            <td>{{ report.subject }}</td>
+            <td>{{ report.get_status_display }}</td>
+            <td>{{ report.reporter }}</td>
+            <td>
+              <a href="{% url 'dataedit:moderation-detail' report_id=report.pk %}">Review</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No open reports.</p>
+  {% endif %}
+
+  <h4 class="mt-4">Recently closed</h4>
+  {% if closed_reports %}
+    <table class="table table-sm">
+      <thead>
+        <tr>
+          <th>Report ID</th>
+          <th>Updated</th>
+          <th>Dataset</th>
+          <th>Status</th>
+          <th>Resolved by</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for report in closed_reports %}
+          <tr>
+            <td><code>{{ report.tracking_id }}</code></td>
+            <td>{{ report.updated }}</td>
+            <td>{{ report.table_name }}</td>
+            <td>{{ report.get_status_display }}</td>
+            <td>{{ report.resolved_by }}</td>
+            <td>
+              <a href="{% url 'dataedit:moderation-detail' report_id=report.pk %}">View</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No closed reports yet.</p>
+  {% endif %}
+{% endblock %}

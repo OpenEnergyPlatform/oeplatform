@@ -124,7 +124,7 @@ from api.helper import (
     ModJsonResponse,
     OEPStream,
     api_exception,
-    check_embargo,
+    check_data_restricted,
     conjunction,
     create_ajax_handler,
     date_handler,
@@ -468,11 +468,14 @@ class TableRowsAPIView(APIView):
     ) -> JsonLikeResponse:
         table_obj = table_or_404(table=table)
 
-        if check_embargo(table_obj):
-            return JsonResponse(
-                {"error": "Access to this table is restricted due to embargo."},
-                status=403,
+        restricted, reason = check_data_restricted(table_obj, user=request.user)
+        if restricted:
+            msg = (
+                "Access to this table is restricted due to a moderation review."
+                if reason == "moderation"
+                else "Access to this table is restricted due to embargo."
             )
+            return JsonResponse({"error": msg}, status=403)
 
         columns = request.GET.getlist("column")
 
@@ -628,11 +631,14 @@ class TableRowsAPIView(APIView):
     ) -> JsonLikeResponse:
         table_obj = table_or_404(table=table)
 
-        if check_embargo(table_obj):
-            return JsonResponse(
-                {"error": "Access to this table is restricted due to embargo."},
-                status=403,
+        restricted, reason = check_data_restricted(table_obj, user=request.user)
+        if restricted:
+            msg = (
+                "Access to this table is restricted due to a moderation review."
+                if reason == "moderation"
+                else "Access to this table is restricted due to embargo."
             )
+            return JsonResponse({"error": msg}, status=403)
 
         request_data_dict = get_request_data_dict(request)
         payload_query = request_data_dict["query"]
@@ -659,11 +665,14 @@ class TableRowsAPIView(APIView):
     ) -> JsonLikeResponse:
         table_obj = table_or_404(table=table)
 
-        if check_embargo(table_obj):
-            return JsonResponse(
-                {"error": "Access to this table is restricted due to embargo."},
-                status=403,
+        restricted, reason = check_data_restricted(table_obj, user=request.user)
+        if restricted:
+            msg = (
+                "Access to this table is restricted due to a moderation review."
+                if reason == "moderation"
+                else "Access to this table is restricted due to embargo."
             )
+            return JsonResponse({"error": msg}, status=403)
 
         if action:
             raise APIError(
@@ -705,11 +714,14 @@ class TableRowsAPIView(APIView):
     ) -> JsonLikeResponse:
         table_obj = table_or_404(table=table)
 
-        if check_embargo(table_obj):
-            return JsonResponse(
-                {"error": "Access to this table is restricted due to embargo."},
-                status=403,
+        restricted, reason = check_data_restricted(table_obj, user=request.user)
+        if restricted:
+            msg = (
+                "Access to this table is restricted due to a moderation review."
+                if reason == "moderation"
+                else "Access to this table is restricted due to embargo."
             )
+            return JsonResponse({"error": msg}, status=403)
 
         result = self.__delete_rows(request, table_obj, row_id)
         apply_changes(table_obj)
@@ -719,11 +731,14 @@ class TableRowsAPIView(APIView):
     def __delete_rows(
         self, request: Request, table_obj: Table, row_id: int | None = None
     ):
-        if check_embargo(table_obj):
-            return JsonResponse(
-                {"error": "Access to this table is restricted due to embargo."},
-                status=403,
+        restricted, reason = check_data_restricted(table_obj, user=request.user)
+        if restricted:
+            msg = (
+                "Access to this table is restricted due to a moderation review."
+                if reason == "moderation"
+                else "Access to this table is restricted due to embargo."
             )
+            return JsonResponse({"error": msg}, status=403)
 
         where = request.GET.getlist("where")
         query: dict[str, str | list | dict] = {"table": table_obj.name}
@@ -817,11 +832,14 @@ class TableRowsAPIView(APIView):
         row,
         row_id: int | None = None,
     ) -> dict:
-        if check_embargo(table_obj):
-            raise APIError(
-                "Access to this table is restricted due to embargo.",
-                status=403,
+        restricted, reason = check_data_restricted(table_obj, user=request.user)
+        if restricted:
+            msg = (
+                "Access to this table is restricted due to a moderation review."
+                if reason == "moderation"
+                else "Access to this table is restricted due to embargo."
             )
+            raise APIError(msg, status=403)
 
         request_data_dict = get_request_data_dict(request)
         context = {

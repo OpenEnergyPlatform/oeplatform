@@ -1,0 +1,8 @@
+<!-- SPDX-FileCopyrightText: 2026 Open Energy Platform contributors -->
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+{% extends "mails/base.html" %}
+{% block message %}
+  The content report <strong>{{ report.tracking_id }}</strong> for dataset
+  <strong>{{ report.table_name }}</strong>
+  was reviewed. No violation was found. The temporary block has been cleared.
+{% endblock %}

@@ -1,0 +1,10 @@
+<!-- SPDX-FileCopyrightText: 2026 Open Energy Platform contributors -->
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+{% extends "mails/base.html" %}
+{% block message %}
+  Your account has been deactivated after a repeated content-policy violation
+  related to dataset <strong>{{ report.table_name }}</strong>
+  (report ID <strong>{{ report.tracking_id }}</strong>).
+  <br />
+  Please contact the platform team if you believe this decision is incorrect.
+{% endblock %}

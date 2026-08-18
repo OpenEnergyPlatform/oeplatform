@@ -18,6 +18,12 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 from django.urls import include, path, re_path
 from django.views.generic import RedirectView
 
+from dataedit.moderation_views import (
+    ModerationDetailView,
+    ModerationQueueView,
+    TableReportRespondView,
+    TableReportView,
+)
 from dataedit.views import (
     StandaloneMetaEditView,
     TableCreateGraphView,
@@ -108,6 +114,18 @@ urlpatterns_view_schema = [
         TablePeerReviewContributorView.as_view(),
         name="peer_review_contributor",
     ),
+    re_path(
+        r"^(?P<table>{qual})/report/$".format(qual=pgsql_qualifier),
+        TableReportView.as_view(),
+        name="report-content",
+    ),
+    re_path(
+        r"^(?P<table>{qual})/report/(?P<report_id>\d+)/respond/$".format(
+            qual=pgsql_qualifier
+        ),
+        TableReportRespondView.as_view(),
+        name="report-respond",
+    ),
 ]
 
 urlpatterns_tag = [
@@ -145,6 +163,16 @@ urlpatterns = [
         name="tables-in-topic",
     ),
     re_path(r"^$", topic_view, name="topic-list"),
+    re_path(
+        r"^moderation/$",
+        ModerationQueueView.as_view(),
+        name="moderation-queue",
+    ),
+    re_path(
+        r"^moderation/(?P<report_id>\d+)/$",
+        ModerationDetailView.as_view(),
+        name="moderation-detail",
+    ),
     re_path(
         r"^admin/columns/",
         admin_column_view,

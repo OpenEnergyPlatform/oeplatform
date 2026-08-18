@@ -1,0 +1,15 @@
+<!-- SPDX-FileCopyrightText: 2026 Open Energy Platform contributors -->
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+{% extends "mails/base.html" %}
+{% block message %}
+  Thank you for reporting dataset <strong>{{ report.table_name }}</strong>.
+  <br />
+  <br />
+  Please keep this unique report ID for your records:
+  <br />
+  <strong>Report ID: {{ report.tracking_id }}</strong>
+  <br />
+  <br />
+  The dataset has been temporarily blocked while the moderation team reviews
+  the report. You will receive another email when a decision is made.
+{% endblock %}

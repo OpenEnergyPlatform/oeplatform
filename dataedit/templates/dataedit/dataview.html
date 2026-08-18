@@ -102,7 +102,26 @@
          role="tabpanel"
          aria-labelledby="table-tab"
          tabindex="0">
-      {% if embargo_time_left != "No embargo data available" and embargo_time_left != "The embargo is over" %}
+      {% if is_moderation_blocked %}
+        <div class="alert alert-warning" role="alert">
+          <strong>Temporarily blocked for moderation review.</strong>
+          Data access is restricted while a content report is under review.
+          {% if open_report_for_uploader %}
+            <br />
+            Report ID: <code>{{ open_report_for_uploader.tracking_id }}</code>
+            <br />
+            <a href="{% url 'dataedit:report-respond' table=table report_id=open_report_for_uploader.pk %}">
+              Respond to this report
+            </a>
+          {% endif %}
+          {% if is_platform_admin %}
+            <br />
+            <a href="{% url 'dataedit:moderation-detail' report_id=moderation_hold.report_id %}">
+              Open moderation review
+            </a>
+          {% endif %}
+        </div>
+      {% elif embargo_time_left != "No embargo data available" and embargo_time_left != "The embargo is over" %}
         <div class="embargo-message">
           <p>Data in embargo zone</p>
           {% if embargo_time_left != "No embargo data available" and embargo_time_left != "The embargo is over" %}
@@ -618,6 +637,21 @@ for row in result.json():
         </svg>
         Permissions
       </a>
+      {% if user.is_authenticated and not is_moderation_blocked %}
+        <a href="{% url 'dataedit:report-content' table=table %}"
+           type="button"
+           style="margin-top: 5px;"
+           class="table-sidebar__btn-info">
+          Report data/content
+        </a>
+      {% endif %}
+      {% if is_platform_admin %}
+        <a href="{% url 'dataedit:moderation-queue' %}"
+           type="button"
+           class="table-sidebar__btn-info">
+          Moderation queue
+        </a>
+      {% endif %}
       {% if can_add %}
         {% if not table_obj.is_publish %}
           <button class="table-sidebar__btn-danger {% if not can_add %}disabled{% endif %}"

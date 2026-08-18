@@ -1,0 +1,22 @@
+<!-- SPDX-FileCopyrightText: 2026 Open Energy Platform contributors -->
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+{% extends "mails/base.html" %}
+{% block message %}
+  A new content report was submitted.
+  <br />
+  <br />
+  <strong>Report ID:</strong> {{ report.tracking_id }}
+  <br />
+  <strong>Subject:</strong> {{ report.subject }}
+  <br />
+  <strong>Dataset:</strong> {{ report.table_name }}
+  <br />
+  <strong>Reason:</strong> {{ report.get_reason_display }}
+  <br />
+  <strong>Reporter:</strong> {{ report.reporter }}
+  <br />
+  <br />
+  <pre>{{ report.message }}</pre>
+  <br />
+  <a href="{{ moderation_url }}">Open in moderation queue</a>
+{% endblock %}

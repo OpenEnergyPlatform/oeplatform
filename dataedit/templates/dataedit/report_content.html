@@ -1,0 +1,21 @@
+<!-- SPDX-FileCopyrightText: 2026 Open Energy Platform contributors -->
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+{% extends "base/base-full.html" %}
+{% load django_bootstrap5 %}
+{% block main-content-body %}
+  <h3>Report data / content</h3>
+  <p>
+    Dataset: <strong>{{ table.name }}</strong>
+    {% if table.human_readable_name %}({{ table.human_readable_name }}){% endif %}
+  </p>
+  <p class="text-muted">
+    Submitting this form notifies the moderation team and temporarily blocks
+    access to the dataset data until the report is reviewed.
+  </p>
+  <form method="post" action="">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    <button type="submit" class="btn btn-primary">Submit report</button>
+    <a class="btn btn-light" href="{% url 'dataedit:view' table=table.name %}">Cancel</a>
+  </form>
+{% endblock %}

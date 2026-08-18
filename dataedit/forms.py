@@ -12,7 +12,7 @@ from django import forms
 from django.db import models
 from django.forms import ModelForm
 
-from dataedit.models import View
+from dataedit.models import ContentReport, View
 
 # This structure maps postgresql data types to django forms
 typemap = [
@@ -134,3 +134,49 @@ class GeomViewForm(MapViewForm):
             super(GeomViewForm, self).is_valid()
             and self.options["geom"] in self.columns
         )
+
+
+class ContentReportForm(forms.Form):
+    subject = forms.CharField(
+        required=True,
+        max_length=255,
+        label="Subject",
+    )
+    reason = forms.ChoiceField(
+        required=True,
+        label="Reason",
+        choices=ContentReport.REASON_CHOICES,
+    )
+    message = forms.CharField(
+        required=True,
+        widget=forms.Textarea(attrs={"rows": 10}),
+        label="Description",
+    )
+
+
+class UploaderResponseForm(forms.Form):
+    response = forms.CharField(
+        required=True,
+        widget=forms.Textarea(attrs={"rows": 8}),
+        label="Your response",
+    )
+
+
+class ModerationResolveForm(forms.Form):
+    ACTION_DISMISS = "dismiss"
+    ACTION_VIOLATION = "violation"
+
+    ACTION_CHOICES = [
+        (ACTION_DISMISS, "No violation — make dataset available again"),
+        (
+            ACTION_VIOLATION,
+            "Violation — delete dataset and warn / deactivate uploader",
+        ),
+    ]
+
+    action = forms.ChoiceField(required=True, choices=ACTION_CHOICES, label="Decision")
+    resolution_note = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={"rows": 4}),
+        label="Internal note (optional)",
+    )

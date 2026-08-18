@@ -25,7 +25,7 @@ from typing import TYPE_CHECKING, Literal, Mapping, Union
 
 from django.contrib.postgres.search import SearchVectorField
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 from django.db.models import (
     BooleanField,
     CharField,
@@ -1047,3 +1047,158 @@ class ReviewRound(models.Model):
 
     def __str__(self) -> str:
         return f"ReviewRound(opr={self.opr_id}, seq={self.sequence}, {self.role})"
+
+
+class ContentReport(models.Model):
+    STATUS_OPEN = "open"
+    STATUS_AWAITING_UPLOADER = "awaiting_uploader"
+    STATUS_UNDER_REVIEW = "under_review"
+    STATUS_DISMISSED = "dismissed"
+    STATUS_VIOLATION = "violation"
+
+    STATUS_CHOICES = [
+        (STATUS_OPEN, "Open"),
+        (STATUS_AWAITING_UPLOADER, "Awaiting uploader response"),
+        (STATUS_UNDER_REVIEW, "Under review"),
+        (STATUS_DISMISSED, "No violation"),
+        (STATUS_VIOLATION, "Violation"),
+    ]
+
+    REASON_ILLEGAL = "illegal_content"
+    REASON_COPYRIGHT = "copyright"
+    REASON_OTHER = "other"
+
+    REASON_CHOICES = [
+        (REASON_ILLEGAL, "Potentially illegal content"),
+        (REASON_COPYRIGHT, "Copyright / rights infringement"),
+        (REASON_OTHER, "Other"),
+    ]
+
+    OPEN_STATUSES = (
+        STATUS_OPEN,
+        STATUS_AWAITING_UPLOADER,
+        STATUS_UNDER_REVIEW,
+    )
+
+    table = models.ForeignKey(
+        Table,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="content_reports",
+    )
+    table_name = CharField(max_length=1000)
+    public_id = CharField(max_length=40, unique=True, editable=False)
+    reporter = models.ForeignKey(
+        "login.myuser",
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="content_reports_filed",
+    )
+    subject = CharField(max_length=255)
+    reason = CharField(max_length=32, choices=REASON_CHOICES)
+    message = models.TextField()
+    status = CharField(
+        max_length=32, choices=STATUS_CHOICES, default=STATUS_OPEN, db_index=True
+    )
+    uploader_response = models.TextField(blank=True, default="")
+    uploader_responded_at = DateTimeField(null=True, blank=True)
+    resolved_by = models.ForeignKey(
+        "login.myuser",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="content_reports_resolved",
+    )
+    resolution_note = models.TextField(blank=True, default="")
+    created = DateTimeField(null=False, default=timezone.now)
+    updated = DateTimeField(null=False, default=timezone.now)
+
+    class Meta:
+        ordering = ["-created"]
+
+    def __str__(self) -> str:
+        return f"ContentReport({self.tracking_id}, {self.table_name}, {self.status})"
+
+    @property
+    def tracking_id(self) -> str:
+        return self.public_id
+
+    @classmethod
+    def allocate_public_id(cls, when=None) -> str:
+        when = timezone.localtime(when or timezone.now())
+        prefix = f"RP00/{when:%Y}/{when:%m}/{when:%d}/"
+        existing = cls.objects.select_for_update().filter(
+            public_id__startswith=prefix
+        ).values_list("public_id", flat=True)
+        numbers = []
+        for public_id in existing:
+            suffix = str(public_id)[len(prefix):]
+            if suffix.isdigit():
+                numbers.append(int(suffix))
+        return f"{prefix}{(max(numbers) if numbers else 0) + 1}"
+
+    def save(self, *args, **kwargs):
+        if not self.public_id:
+            with transaction.atomic():
+                self.public_id = self.allocate_public_id(when=self.created)
+                super().save(*args, **kwargs)
+            return
+        super().save(*args, **kwargs)
+
+    @property
+    def is_open(self) -> bool:
+        return self.status in self.OPEN_STATUSES
+
+
+class ModerationHold(models.Model):
+    table = models.OneToOneField(
+        Table, on_delete=models.CASCADE, related_name="moderation_hold"
+    )
+    report = models.ForeignKey(
+        ContentReport,
+        on_delete=models.CASCADE,
+        related_name="holds",
+    )
+    was_published = BooleanField(null=False, default=False)
+    created = DateTimeField(null=False, default=timezone.now)
+    created_by = models.ForeignKey(
+        "login.myuser",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="moderation_holds_created",
+    )
+
+    def __str__(self) -> str:
+        return f"ModerationHold({self.table})"
+
+
+class UserModerationWarning(models.Model):
+    user = models.ForeignKey(
+        "login.myuser",
+        on_delete=models.CASCADE,
+        related_name="moderation_warnings",
+    )
+    report = models.ForeignKey(
+        ContentReport,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="warnings",
+    )
+    note = models.TextField(blank=True, default="")
+    created = DateTimeField(null=False, default=timezone.now)
+    created_by = models.ForeignKey(
+        "login.myuser",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="moderation_warnings_issued",
+    )
+
+    class Meta:
+        ordering = ["-created"]
+
+    def __str__(self) -> str:
+        return f"UserModerationWarning({self.user_id}, report={self.report_id})"

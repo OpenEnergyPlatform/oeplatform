@@ -55,7 +55,7 @@ from api.actions import (
 from api.encode import GeneratorJSONEncoder
 from api.error import APIError
 from api.utils import table_or_404_from_dict
-from dataedit.models import Embargo, Table, Tag
+from dataedit.models import Embargo, ModerationHold, Table, Tag
 
 logger = logging.getLogger("oeplatform")
 
@@ -273,6 +273,20 @@ def check_embargo(table_obj: Table) -> bool:
         return False
     except ObjectDoesNotExist:
         return False
+
+
+def check_moderation_block(table_obj: Table, user=None) -> bool:
+    if user is not None and getattr(user, "is_admin", False):
+        return False
+    return ModerationHold.objects.filter(table=table_obj).exists()
+
+
+def check_data_restricted(table_obj: Table, user=None) -> tuple[bool, str | None]:
+    if check_moderation_block(table_obj, user=user):
+        return True, "moderation"
+    if check_embargo(table_obj):
+        return True, "embargo"
+    return False, None
 
 
 def date_handler(obj):

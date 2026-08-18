@@ -1,0 +1,9 @@
+<!-- SPDX-FileCopyrightText: 2026 Open Energy Platform contributors -->
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+{% extends "mails/base.html" %}
+{% block message %}
+  Thank you for reporting dataset <strong>{{ report.table_name }}</strong>
+  (report ID <strong>{{ report.tracking_id }}</strong>).
+  <br />
+  After review, a content-policy violation was confirmed and the dataset was removed.
+{% endblock %}

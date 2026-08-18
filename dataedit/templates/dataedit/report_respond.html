@@ -1,0 +1,27 @@
+<!-- SPDX-FileCopyrightText: 2026 Open Energy Platform contributors -->
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+{% extends "base/base-full.html" %}
+{% load django_bootstrap5 %}
+{% block main-content-body %}
+  <h3>Respond to content report</h3>
+  <p>
+    Dataset: <strong>{{ report.table_name }}</strong>
+  </p>
+  <p>
+    Report ID: <code>{{ report.tracking_id }}</code>
+  </p>
+  <div class="mb-3">
+    <h5>Report</h5>
+    <p><strong>Subject:</strong> {{ report.subject }}</p>
+    <p><strong>Reason:</strong> {{ report.get_reason_display }}</p>
+    <pre class="border p-3 bg-light">{{ report.message }}</pre>
+  </div>
+  <form method="post" action="">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    <button type="submit" class="btn btn-primary">Send response</button>
+    {% if table %}
+      <a class="btn btn-light" href="{% url 'dataedit:view' table=table.name %}">Cancel</a>
+    {% endif %}
+  </form>
+{% endblock %}

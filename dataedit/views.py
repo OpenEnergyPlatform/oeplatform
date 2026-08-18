@@ -76,11 +76,12 @@ from dataedit.helper import (
 )
 from dataedit.metadata import has_valid_filled_metadata, load_metadata_from_db
 from dataedit.metadata.widget import MetaDataWidget
-from dataedit.models import Embargo
+from dataedit.models import Embargo, ModerationHold
 from dataedit.models import Filter as DBFilter
 from dataedit.models import PeerReview, PeerReviewManager, Table, Tag, Topic
 from dataedit.models import View as DBView
 from dataedit.models import View as DataViewModel
+from dataedit.moderation import get_table_uploaders
 from dataedit.peer_review.metadata_serializer import (
     get_all_field_descriptions,
     sort_in_category,
@@ -695,6 +696,22 @@ class TableDataView(View):
         else:
             embargo_time_left = "No embargo data available"
 
+        moderation_hold = ModerationHold.objects.filter(table=table_obj).select_related(
+            "report"
+        ).first()
+        is_moderation_blocked = moderation_hold is not None
+        open_report_for_uploader = None
+        if (
+            is_moderation_blocked
+            and request.user
+            and not request.user.is_anonymous
+            and moderation_hold
+        ):
+            if request.user in get_table_uploaders(table_obj) or getattr(
+                request.user, "is_admin", False
+            ):
+                open_report_for_uploader = moderation_hold.report
+
         if view_id == "default":
             current_view = default
             current_view.save()
@@ -787,6 +804,14 @@ class TableDataView(View):
             "opr_result": opr_result_context,
             "embargo_time_left": embargo_time_left,
             "has_metadata": has_metadata,
+            "is_moderation_blocked": is_moderation_blocked,
+            "moderation_hold": moderation_hold,
+            "open_report_for_uploader": open_report_for_uploader,
+            "is_platform_admin": bool(
+                request.user
+                and not request.user.is_anonymous
+                and getattr(request.user, "is_admin", False)
+            ),
         }
 
         return render(request, "dataedit/dataview.html", context=context_dict)
