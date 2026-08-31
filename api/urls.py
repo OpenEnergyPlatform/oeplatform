@@ -59,6 +59,7 @@ from api.views import (
     OekgSparqlAPIView,
     ScenarioDataTablesListAPIView,
     TableAPIView,
+    TableBulkUploadAPIView,
     TableColumnAPIView,
     TableMetadataAPIView,
     TableMovePublishAPIView,
@@ -116,6 +117,11 @@ urlpatterns_v0_schema_table = [
         TableRowsAPIView.as_view(),
         {"action": "new"},
         name="api_rows_new",
+    ),
+    re_path(
+        r"^(?P<table>[\w\d_\s]+)/bulk-upload/?$",
+        TableBulkUploadAPIView.as_view(),
+        name="api_bulk_upload",
     ),
     re_path(
         r"^(?P<table>[\w\d_\s]+)/rowcount$",

@@ -1,0 +1,26 @@
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+[Unit]
+Description=OEPlatform web application
+After=oep-postgres.service oep-fuseki.service
+
+[Container]
+Image=ghcr.io/openenergyplatform/oeplatform-production:latest
+ContainerName=oeplatform
+EnvironmentFile=%h/.config/oeplatform/oep.env
+Volume=oeplatform-ontologies.volume:/app/ontologies
+Volume=oeplatform-media.volume:/app/media
+# Bound to localhost only — the nginx reverse proxy on the host proxies here
+# (TLS is terminated by an upstream proxy). Drop the 127.0.0.1 prefix only if
+# you intend to expose the app directly without a proxy.
+PublishPort=127.0.0.1:8080:80
+Network=oep.network
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=120
+
+[Install]
+WantedBy=default.target

@@ -23,15 +23,22 @@ SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> Â© Ã
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
+import csv
+import gzip
+import io
 import json
 import logging
 import re
+import time
+import zlib
+from collections import Counter
 from copy import deepcopy
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, cast
 
 import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import psycopg2
+from django.conf import settings as django_conf_settings
 from django.db.models import Func, Value
 from omi.base import get_metadata_version
 from omi.conversion import convert_metadata
@@ -52,7 +59,8 @@ from sqlalchemy.exc import NoSuchTableError
 from sqlalchemy.sql.expression import Executable, Select
 
 import dataedit.metadata
-from api.error import APIError
+from api.bulk_upload_guard import BulkUploadStalled, default_stall_detector
+from api.error import APIError, reflectable_cause
 from api.parser import (
     get_column_definition_query,
     is_pg_qual,
@@ -75,7 +83,7 @@ from api.utils import (
     table_or_404,
     table_or_404_from_dict,
 )
-from dataedit.models import Embargo, PeerReview, Table
+from dataedit.models import BulkLoadEvent, Embargo, PeerReview, Table
 from login.models import myuser as User
 from login.permissions import DELETE_PERM, WRITE_PERM
 from oedb.connection import (
@@ -1175,30 +1183,14 @@ def execute_sqla(query, cursor: AbstractCursor | Session) -> None:
                     params[key] = dialect._json_serializer(value)
         query = str(compiled)
         _execute(cursor, query, params)
-    except (psycopg2.DataError, exc.IdentifierError, psycopg2.IntegrityError) as e:
+    except exc.IdentifierError as e:
         raise APIError(str(e))
-    except psycopg2.InternalError as e:
-        if re.match(r".*Input geometry has unknown \(\d+\) SRID", str(e)):
-            # Return only SRID errors
-            raise APIError(str(e))
-        else:
-            raise e
-    except psycopg2.ProgrammingError as e:
-        if e.pgcode in [
-            "42703",  # undefined_column
-            "42883",  # undefined_function
-            "42P01",  # undefined_table
-            "42P02",  # undefined_parameter
-            "42704",  # undefined_object
-            "42804",  # datatype mismatch
-        ]:
-            # Return only `function does not exists` errors
-            raise APIError(e.diag.message_primary)
-        else:
-            raise e
-    except psycopg2.DatabaseError as e:
-        # Other DBAPIErrors should not be reflected to the client.
-        raise e
+    except psycopg2.Error as e:
+        cause = reflectable_cause(e)
+        if cause is None:
+            # Other DBAPIErrors should not be reflected to the client.
+            raise
+        raise APIError(cause)
     except Exception:
         raise
 
@@ -1835,6 +1827,464 @@ def data_update(request: dict, context: dict) -> dict:
     result = __change_rows(table_obj, request, context, sa_table_edit, setter)
     apply_changes(table_obj, cursor)
     return result
+
+
+BULK_UPLOAD_DELIMITERS = {"comma": ",", "semicolon": ";", "tab": "\t"}
+_BULK_UPLOAD_HEADER_CHUNK = 8192
+_BULK_UPLOAD_MAX_HEADER_BYTES = 1024 * 1024
+# generous sanity bound for explicitly uploaded ids: far above any real
+# dataset, far below the bigint maximum - a single upload must not be able
+# to exhaust a table's id sequence for every future insert
+BULK_UPLOAD_MAX_ID = 2**48
+
+
+class _BulkUploadTooLarge(Exception):
+    """Raised mid-stream when an upload exceeds the decompressed size cap."""
+
+
+class _ChainedStream:
+    """File-like object serving buffered bytes first, then an inner stream.
+
+    Used to hand the request body to COPY FROM STDIN after the CSV header
+    line has already been consumed from it. Counts the bytes it serves
+    (for the Bulk Load Event audit record) and enforces the decompressed
+    size cap - counting AFTER decompression is what neutralises gzip bombs.
+    """
+
+    def __init__(
+        self,
+        head: bytes,
+        tail,
+        max_bytes=None,
+        initial_bytes: int = 0,
+        stall_detector=None,
+    ):
+        self._head = head
+        self._tail = tail
+        self._max_bytes = max_bytes
+        self._initial_bytes = initial_bytes
+        self._stall_detector = stall_detector
+        self.bytes_served = 0
+        # psycopg2 stringifies exceptions raised in read() into a generic
+        # "error in .read() call" psycopg2.Error, so the caller checks this
+        # flag to recognize a size-cap abort
+        self.too_large = False
+
+        # time spent serving reads = client transfer + decompression, i.e.
+        # the "transfer" phase of the upload (COPY itself is wall - this)
+        self.seconds_serving = 0.0
+
+    def read(self, size: int = -1) -> bytes:
+        started = time.perf_counter()
+        if size is None or size < 0:
+            data, self._head = self._head, b""
+            data += self._tail.read() if self._tail else b""
+        else:
+            data = self._head[:size]
+            self._head = self._head[size:]
+            if len(data) < size and self._tail:
+                data += self._tail.read(size - len(data))
+        self.bytes_served += len(data)
+        self.seconds_serving += time.perf_counter() - started
+        if (
+            self._max_bytes is not None
+            and self._initial_bytes + self.bytes_served > self._max_bytes
+        ):
+            self.too_large = True
+            raise _BulkUploadTooLarge()
+        if self._stall_detector is not None:
+            self._stall_detector.check(self._initial_bytes + self.bytes_served)
+        return data
+
+
+def _attach_bulk_error_info(
+    error: APIError, error_class: str, bytes_received: int, timings: dict | None = None
+):
+    if not hasattr(error, "bulk_error_class"):
+        error.bulk_error_class = error_class
+        error.bulk_bytes_received = bytes_received
+        error.bulk_timings = timings or {}
+    return error
+
+
+def _bulk_gzip_error(
+    e: Exception, bytes_received: int, timings: dict | None = None
+) -> APIError:
+    return _attach_bulk_error_info(
+        APIError("Request body is not valid gzip: %s" % e, 400),
+        BulkLoadEvent.STATUS_VALIDATION_ERROR,
+        bytes_received,
+        timings=timings,
+    )
+
+
+def _read_csv_header(stream) -> tuple[bytes, bytes, int]:
+    """Consume the first line from the stream without buffering the body.
+
+    Returns (header_line_without_newline, remainder_bytes_already_read,
+    bytes_consumed_by_the_header_itself).
+    """
+    buffer = b""
+    while b"\n" not in buffer:
+        chunk = stream.read(_BULK_UPLOAD_HEADER_CHUNK) if stream else b""
+        if not chunk:
+            break
+        buffer += chunk
+        if len(buffer) > _BULK_UPLOAD_MAX_HEADER_BYTES:
+            raise _attach_bulk_error_info(
+                APIError("CSV header line too long", 400),
+                BulkLoadEvent.STATUS_VALIDATION_ERROR,
+                len(buffer),
+            )
+    if not buffer:
+        raise APIError("Bulk upload requires a non-empty CSV body", 400)
+    if buffer.startswith(b"\xef\xbb\xbf"):  # strip UTF-8 BOM (e.g. Excel exports)
+        buffer = buffer[3:]
+    header, _sep, remainder = buffer.partition(b"\n")
+    header_bytes = len(buffer) - len(remainder)
+    return header.rstrip(b"\r"), remainder, header_bytes
+
+
+def _parse_bulk_upload_columns(
+    header_line: bytes, delimiter: str, table_obj: Table
+) -> list:
+    try:
+        header_text = header_line.decode("utf-8")
+    except UnicodeDecodeError:
+        raise APIError("CSV header is not valid UTF-8", 400)
+    columns = next(csv.reader(io.StringIO(header_text), delimiter=delimiter), [])
+    columns = [c.strip() for c in columns if c.strip()]
+    if not columns:
+        raise APIError("CSV header contains no column names", 400)
+
+    duplicates = sorted(c for c, n in Counter(columns).items() if n > 1)
+    if duplicates:
+        raise APIError(
+            "CSV header contains duplicate column names: %s" % ", ".join(duplicates),
+            400,
+        )
+
+    table_columns = describe_columns(table_obj)
+    unknown = [c for c in columns if c not in table_columns]
+    if unknown:
+        raise APIError(
+            "CSV header names columns that do not exist in table '%s': %s"
+            % (table_obj.name, ", ".join(unknown)),
+            400,
+        )
+
+    # NOT NULL columns without a default must be present in the CSV,
+    # otherwise the upload is doomed - reject before streaming the body
+    missing_required = sorted(
+        name
+        for name, info in table_columns.items()
+        if name not in columns
+        and not info.get("is_nullable")
+        and not info.get("column_default")
+    )
+    if missing_required:
+        raise APIError(
+            "CSV header is missing required columns (NOT NULL without default): %s"
+            % ", ".join(missing_required),
+            400,
+        )
+    return columns, table_columns
+
+
+def bulk_upload_csv(
+    table_obj: Table,
+    stream,
+    delimiter_name: str | None,
+    gzipped: bool = False,
+    max_bytes: int | None = None,
+) -> dict:
+    """Bulk Upload (issue #2362): stream a CSV body into the main table.
+
+    Uses COPY FROM STDIN and deliberately bypasses the edit-journal meta
+    tables - bulk-loaded rows have no per-row change history. The whole
+    upload runs in one transaction: it lands completely or not at all.
+    The CSV header (required) maps columns by name; the delimiter must be
+    passed explicitly, it is never inferred. A gzipped body is decompressed
+    in streaming fashion; `max_bytes` caps the DECOMPRESSED size.
+
+    Returns a stats dict: rows, bytes_received (decompressed), id_min,
+    id_max, and phase timings (transfer_s, copy_s, setval_s). On failure
+    raises APIError carrying bulk_error_class, bulk_bytes_received and
+    bulk_timings for the caller's Bulk Load Event record and log line.
+    """
+    header_bytes = 0
+    remainder = b""
+    header_started = time.perf_counter()
+    try:
+        delimiter = BULK_UPLOAD_DELIMITERS.get(delimiter_name or "")
+        if delimiter is None:
+            raise APIError(
+                "Bulk upload requires a 'delimiter' parameter, one of: %s"
+                % ", ".join(sorted(BULK_UPLOAD_DELIMITERS)),
+                400,
+            )
+        if gzipped and stream is not None:
+            # streaming decompression: GzipFile.read(n) pulls compressed
+            # chunks as needed, never materializing the whole body
+            stream = gzip.GzipFile(fileobj=stream, mode="rb")
+        header_line, remainder, header_bytes = _read_csv_header(stream)
+        columns, table_columns = _parse_bulk_upload_columns(
+            header_line, delimiter, table_obj
+        )
+    except (gzip.BadGzipFile, EOFError, zlib.error) as e:
+        raise _bulk_gzip_error(
+            e, 0, timings={"transfer_s": time.perf_counter() - header_started}
+        )
+    except APIError as e:
+        # bytes actually received so far: header plus any body bytes that
+        # arrived in the same chunks (best-effort abuse-visibility signal)
+        raise _attach_bulk_error_info(
+            e,
+            BulkLoadEvent.STATUS_VALIDATION_ERROR,
+            header_bytes + len(remainder),
+            timings={"transfer_s": time.perf_counter() - header_started},
+        )
+    header_seconds = time.perf_counter() - header_started
+
+    # identifiers are safe: whitelisted against the table's actual columns
+    column_list = ", ".join('"%s"' % c.replace('"', '""') for c in columns)
+    sa_table = table_obj.get_oedb_table_proxy(user=None)._main_table.get_sa_table()
+    qualified_table = _quoted_table_name(sa_table)
+    # FORCE_NULL on all uploaded columns: an empty field is NULL whether
+    # quoted or not. Deliberate deviation from COPY's native CSV rule
+    # (quoted "" = empty string) - many writers quote every field and would
+    # silently store empty strings instead of NULLs otherwise.
+    copy_sql = (
+        "COPY %s (%s) FROM STDIN WITH "
+        "(FORMAT csv, DELIMITER '%s', FORCE_NULL (%s))"
+        % (qualified_table, column_list, delimiter, column_list)
+    )
+
+    engine = _get_engine()
+    connection = engine.raw_connection()
+    stall_detector = default_stall_detector()
+    body_stream = _ChainedStream(
+        remainder,
+        stream,
+        max_bytes=max_bytes,
+        initial_bytes=header_bytes,
+        stall_detector=stall_detector,
+    )
+    id_min = id_max = None
+    copy_wall_seconds = setval_seconds = 0.0
+
+    def snapshot_timings():
+        # transfer = header read + time inside stream reads (client I/O and
+        # decompression); copy = COPY wall time minus that transfer share
+        transfer = header_seconds + body_stream.seconds_serving
+        return {
+            "transfer_s": transfer,
+            "copy_s": max(0.0, copy_wall_seconds - body_stream.seconds_serving),
+            "setval_s": setval_seconds,
+        }
+
+    try:
+        cursor = connection.cursor()
+        try:
+            _set_bulk_upload_session_timeouts(cursor)
+            id_uploaded = ID_COLUMN_NAME in columns
+            pre_upload_max_id = None
+            if id_uploaded:
+                pre_upload_max_id = _bulk_upload_table_max_id(cursor, qualified_table)
+            copy_started = time.perf_counter()
+            try:
+                cursor.copy_expert(copy_sql, body_stream)
+            finally:
+                # capture wall time even when COPY raises, so failure log
+                # lines attribute the time truthfully instead of copy_s=0
+                copy_wall_seconds = time.perf_counter() - copy_started
+            row_count = cursor.rowcount
+            setval_started = time.perf_counter()
+            if id_uploaded:
+                _enforce_bulk_upload_id_contract(
+                    cursor, qualified_table, pre_upload_max_id
+                )
+            if ID_COLUMN_NAME in table_columns:
+                id_min, id_max = _bulk_upload_loaded_id_range(cursor, qualified_table)
+            setval_seconds = time.perf_counter() - setval_started
+        finally:
+            cursor.close()
+        connection.commit()
+    except (gzip.BadGzipFile, EOFError, zlib.error) as e:
+        connection.rollback()
+        raise _bulk_gzip_error(
+            e, header_bytes + body_stream.bytes_served, timings=snapshot_timings()
+        )
+    except APIError as e:
+        connection.rollback()
+        raise _attach_bulk_error_info(
+            e,
+            BulkLoadEvent.STATUS_VALIDATION_ERROR,
+            header_bytes + body_stream.bytes_served,
+            timings=snapshot_timings(),
+        )
+    except (psycopg2.Error, _BulkUploadTooLarge, BulkUploadStalled) as e:
+        connection.rollback()
+        # aborts raised inside COPY's read() surface as a generic
+        # psycopg2.Error, so the flags decide which failure this really is
+        if body_stream.too_large:
+            raise _attach_bulk_error_info(
+                APIError(
+                    "Bulk upload exceeds the maximum of %d bytes (decompressed). "
+                    "Nothing was inserted - split the dataset into smaller "
+                    "uploads." % max_bytes,
+                    413,
+                ),
+                BulkLoadEvent.STATUS_SIZE_CAP,
+                header_bytes + body_stream.bytes_served,
+                timings=snapshot_timings(),
+            )
+        if stall_detector.stalled:
+            raise _attach_bulk_error_info(
+                APIError(
+                    "Bulk upload aborted: the transfer rate fell below the "
+                    "required minimum. Nothing was inserted - retry on a "
+                    "faster connection or split the dataset.",
+                    408,
+                ),
+                BulkLoadEvent.STATUS_STALL,
+                header_bytes + body_stream.bytes_served,
+                timings=snapshot_timings(),
+            )
+        raise _attach_bulk_error_info(
+            APIError(_bulk_upload_error_message(e), 400),
+            BulkLoadEvent.STATUS_COPY_ERROR,
+            header_bytes + body_stream.bytes_served,
+            timings=snapshot_timings(),
+        )
+    finally:
+        connection.close()
+    return {
+        "rows": row_count,
+        "bytes_received": header_bytes + body_stream.bytes_served,
+        "id_min": id_min,
+        "id_max": id_max,
+        "timings": snapshot_timings(),
+    }
+
+
+def _set_bulk_upload_session_timeouts(cursor) -> None:
+    """SET LOCAL both timeouts: scoped to the upload's transaction, so the
+    pooled connection is clean for its next user. statement_timeout bounds
+    the COPY itself; idle_in_transaction_session_timeout kills the
+    transaction if the client goes silent between protocol messages."""
+    # fallbacks mirror the settings defaults and must never be 0 (=disabled):
+    # a missing setting must fail closed, not remove the guard
+    cursor.execute(
+        "SET LOCAL statement_timeout = %d; "
+        "SET LOCAL idle_in_transaction_session_timeout = %d;"
+        % (
+            int(
+                getattr(
+                    django_conf_settings,
+                    "BULK_UPLOAD_STATEMENT_TIMEOUT_MS",
+                    60 * 60 * 1000,
+                )
+            ),
+            int(
+                getattr(
+                    django_conf_settings, "BULK_UPLOAD_IDLE_TX_TIMEOUT_MS", 60 * 1000
+                )
+            ),
+        )
+    )
+
+
+def _bulk_upload_loaded_id_range(cursor, qualified_table: str):
+    """min/max id of the rows inserted by the current transaction.
+
+    Identified via xmin, so it is exact for both explicit and
+    sequence-assigned ids. Costs a scan of the table inside the upload's
+    transaction - acceptable for now; revisit if it shows up in the
+    per-attempt phase timings.
+    """
+    cursor.execute(
+        'SELECT min("%s"), max("%s") FROM %s WHERE xmin = pg_current_xact_id()::xid'
+        % (ID_COLUMN_NAME, ID_COLUMN_NAME, qualified_table)
+    )
+    return cursor.fetchone()
+
+
+def _quoted_table_name(sa_table: "SATable") -> str:
+    return '"%s"."%s"' % (
+        str(sa_table.schema).replace('"', '""'),
+        sa_table.name.replace('"', '""'),
+    )
+
+
+def _bulk_upload_table_max_id(cursor, qualified_table: str):
+    cursor.execute('SELECT max("%s") FROM %s' % (ID_COLUMN_NAME, qualified_table))
+    return cursor.fetchone()[0]
+
+
+def _enforce_bulk_upload_id_contract(
+    cursor, qualified_table: str, pre_upload_max_id
+) -> None:
+    """After an id-bearing upload: reject absurd ids, then advance the id
+    sequence past the loaded ids so subsequent row inserts cannot collide.
+
+    Runs inside the upload's transaction on the table's state including the
+    freshly copied rows. The sanity bound only judges ids introduced by THIS
+    upload (a pre-existing id above the bound must not block future uploads).
+    The sequence never moves backwards.
+    """
+    cursor.execute(
+        "SELECT pg_get_serial_sequence(%s, %s)", (qualified_table, ID_COLUMN_NAME)
+    )
+    row = cursor.fetchone()
+    sequence = row[0] if row else None
+    if not sequence:
+        return
+    max_id = _bulk_upload_table_max_id(cursor, qualified_table)
+    if max_id is None:
+        return
+    upload_raised_max = pre_upload_max_id is None or max_id > pre_upload_max_id
+    if max_id > BULK_UPLOAD_MAX_ID and upload_raised_max:
+        raise APIError(
+            "Bulk upload rejected: id %d exceeds the allowed maximum of %d - "
+            "ids this large would exhaust the table's id sequence"
+            % (max_id, BULK_UPLOAD_MAX_ID),
+            400,
+        )
+    # serialize concurrent bulk uploads on this sequence: setval is
+    # non-transactional, so two racing GREATEST reads could otherwise move
+    # the sequence backwards; the advisory lock is released on commit/rollback
+    cursor.execute("SELECT pg_advisory_xact_lock(hashtext(%s))", (sequence,))
+    # sequence name comes from postgres itself (pg_get_serial_sequence),
+    # safe to interpolate; GREATEST keeps the sequence from moving backwards
+    cursor.execute(
+        "SELECT setval(%%s, GREATEST(%%s::bigint, (SELECT last_value FROM %s)))"
+        % sequence,
+        (sequence, max_id),
+    )
+
+
+def _bulk_upload_error_message(e: psycopg2.Error) -> str:
+    """Data-level error message with the CSV location - never raw SQL,
+    server context dumps, or internal paths."""
+    diag = getattr(e, "diag", None)
+    primary = getattr(diag, "message_primary", None)
+    if not primary:
+        # no server diagnostics (e.g. connection lost mid-COPY): str(e) may
+        # contain socket paths or other internals - keep it generic instead
+        primary = "a database error occurred"
+    primary = primary.strip().splitlines()[0]
+    context = getattr(diag, "context", None) or ""
+    location = ""
+    match = re.search(r"COPY [^,]+, line (\d+)(?:, column ([^:]+))?", context)
+    if match:
+        # +1 because postgres counts data lines and the CSV's line 1 is
+        # the header (which never reaches COPY)
+        location = " (CSV line %d" % (int(match.group(1)) + 1)
+        if match.group(2):
+            location += ", column %s" % match.group(2).strip()
+        location += ")"
+    return "Bulk upload failed, nothing was inserted: %s%s" % (primary, location)
 
 
 def has_table(request: dict, context: dict | None = None) -> bool:

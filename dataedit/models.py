@@ -41,7 +41,7 @@ from django.urls import reverse
 from django.utils import timezone
 from omi.license import LicenseError, validate_oemetadata_licenses
 
-from api.error import APIError
+from api.error import APIError, reflectable_cause
 from api.parser import parse_table_parts
 from dataedit.utils import get_badge_icon_path, validate_badge_name_match
 from login.permissions import ADMIN_PERM, NO_PERM
@@ -278,7 +278,13 @@ class Table(Tagable):
                 # delete django object which will also automatically clean up
                 # left over oedb tables
                 table_obj.delete()
-            raise APIError(f"Could not create table {name}")
+            # the full exception stays in the log either way; the client only
+            # gets the cause when it is safe to disclose
+            cause = reflectable_cause(exc)
+            message = f"Could not create table {name}"
+            if cause:
+                message = f"{message}: {cause}"
+            raise APIError(message)
 
         return table_obj
 
@@ -487,10 +493,12 @@ class Dataset(models.Model):
         The list is never persisted on the dataset: tables own their
         resource metadata and every read assembles the current state, so
         dataset reads can not go stale after table metadata edits.
+
+        Ordered by table name, matching the dataset detail page.
         """
         return [
             table.oemetadata["resources"][0]
-            for table in self.tables.all()
+            for table in self.tables.order_by("name")
             if table.oemetadata and table.oemetadata.get("resources")
         ]
 
@@ -1085,3 +1093,49 @@ class ReviewRound(models.Model):
 
     def __str__(self) -> str:
         return f"ReviewRound(opr={self.opr_id}, seq={self.sequence}, {self.role})"
+
+
+class BulkLoadEvent(models.Model):
+    """Audit record of one bulk upload attempt (issue #2362).
+
+    Bulk uploads bypass the per-row edit journal; this event - including the
+    id range the loaded rows landed in - is their only provenance, and the
+    id range is what makes a poisoned or mistaken upload deletable as a
+    block. Failed attempts are recorded too, so retry storms and abuse are
+    visible without log-grepping.
+    """
+
+    STATUS_SUCCESS = "success"
+    STATUS_VALIDATION_ERROR = "validation-error"
+    STATUS_COPY_ERROR = "copy-error"
+    STATUS_EMBARGO = "embargo"
+    STATUS_SIZE_CAP = "size-cap"
+    STATUS_STALL = "stall"
+    STATUS_ERROR = "error"
+    STATUS_CHOICES = [
+        (STATUS_SUCCESS, "Success"),
+        (STATUS_VALIDATION_ERROR, "Validation error"),
+        (STATUS_COPY_ERROR, "Copy error"),
+        (STATUS_EMBARGO, "Embargo"),
+        (STATUS_SIZE_CAP, "Size cap exceeded"),
+        (STATUS_STALL, "Stalled transfer"),
+        (STATUS_ERROR, "Error"),
+    ]
+
+    table_name = CharField(max_length=1000, null=False)
+    user = ForeignKey(
+        "login.myuser",
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="bulk_load_events",
+    )
+    created = DateTimeField(auto_now_add=True)
+    status = CharField(max_length=32, choices=STATUS_CHOICES)
+    error_message = models.TextField(null=True, blank=True)
+    bytes_received = models.BigIntegerField(default=0)
+    row_count = models.BigIntegerField(null=True, blank=True)
+    id_min = models.BigIntegerField(null=True, blank=True)
+    id_max = models.BigIntegerField(null=True, blank=True)
+
+    def __str__(self) -> str:
+        return f"BulkLoadEvent({self.table_name}, {self.status}, {self.created})"

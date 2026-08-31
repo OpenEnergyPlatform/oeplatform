@@ -122,9 +122,10 @@ class DatasetDetailTests(TestCase):
         self.assertEqual(response.status_code, 200)
         document = response.json()
         self.assertEqual(document["title"], "Detailed Dataset")
+        # resource_entries orders by table name
         self.assertEqual(
             [resource["name"] for resource in document["resources"]],
-            ["t_heat_published", "t_heat_draft"],
+            ["t_heat_draft", "t_heat_published"],
         )
 
     def test_created_dataset_document_conforms_to_oemetadata_spec(self):

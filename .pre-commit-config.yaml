@@ -21,7 +21,7 @@ repos:
       - id: flake8
         args: ["--max-line-length=88", "--ignore=E20,W503"] # black compatible
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v10.7.0
+    rev: v10.8.0
     hooks:
       - id: eslint
         additional_dependencies:
@@ -40,7 +40,7 @@ repos:
         files: .*\.(json|md|yaml|yml)$
   - repo: https://github.com/djlint/djLint
     # see https://djlint.com/docs/integrations/
-    rev: v1.40.6
+    rev: v1.43.2
     hooks:
       - id: djlint-reformat-django
         files: .*templates/.*\.html$

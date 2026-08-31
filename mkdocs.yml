@@ -48,7 +48,13 @@ markdown_extensions:
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
   - pymdownx.highlight:
       use_pygments: true
   # support pad width = 2, as formatted with prettier
@@ -78,6 +84,12 @@ nav:
       - Installation Guide: installation/guides/installation-docker-dev.md
       - Development setup: installation/guides/development-setup.md
       - Manual Installation Guide: installation/guides/installation.md
+      - Production deployment (Podman):
+          - installation/production-podman/index.md
+          - Install: installation/production-podman/install.md
+          - Ontop: installation/production-podman/ontop.md
+          - Update: installation/production-podman/update.md
+          - Maintenance & troubleshooting: installation/production-podman/maintenance.md
   - Development:
       - dev/index.md
 
@@ -124,5 +136,6 @@ nav:
               - Technical docs: oeplatform-code/features/open-peer-review-process/technical-docs.md
           - Scenario Bundles:
               - oeplatform-code/features/scenario-bundles/index.md
+              - Architecture & developer guide: oeplatform-code/features/scenario-bundles/architecture.md
           - 🚧 Homepage:
               - oeplatform-code/features/homepage/release-info.md

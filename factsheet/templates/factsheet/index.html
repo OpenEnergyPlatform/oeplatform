@@ -10,4 +10,9 @@
   <div id="root" style="width:100%"></div>
 {% endblock main-content-body %}
 {% block after-body-bottom-js %}
+  <script nonce="{{ request.csp_nonce }}">
+    // Expose selected server-side external URLs to the React app so it does not
+    // hardcode them (kept in sync with settings.EXTERNAL_URLS).
+    window.OEP_EXTERNAL_URLS = { oekg_chat: "{{ EXTERNAL_URLS.oekg_chat }}" };
+  </script>
 {% endblock after-body-bottom-js %}

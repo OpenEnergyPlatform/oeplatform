@@ -6,7 +6,7 @@ import {
 import { LocalizationProvider, DesktopDatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import CustomAutocompleteWithoutAddNew from './customAutocompleteWithoutAddNew';
-import StudyKeywords from './scenarioBundleUtilityComponents/StudyDescriptors';
+import useStudyDescriptors from './scenarioBundleUtilityComponents/useStudyDescriptors';
 import FilterFeedbackBanner from './filterFeedbackBanner';
 
 export default function FactsheetFilterDialog({
@@ -38,6 +38,9 @@ export default function FactsheetFilterDialog({
 }) {
   const [scenarioYearTouched, setScenarioYearTouched] = useState(false);
   const [publicationDateTouched, setPublicationDateTouched] = useState(false);
+  // Study descriptors loaded dynamically from the OEO (same [label, iri, def]
+  // shape as the former hardcoded StudyKeywords).
+  const StudyKeywords = useStudyDescriptors();
 
 
   const handleStudyKeywords = (event) => {

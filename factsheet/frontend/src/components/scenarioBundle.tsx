@@ -4,7 +4,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -54,6 +54,7 @@ import sunburstKapsule from 'sunburst-chart';
 import fromKapsule from 'react-kapsule';
 // import Select from '@mui/material/Select';
 import CustomAutocompleteWithoutAddNew from './customAutocompleteWithoutAddNew.jsx';
+import SectorSelector from './scenarioBundleUtilityComponents/SectorSelector.jsx';
 import IconButton from '@mui/material/IconButton';
 // import Divider from '@mui/material/Divider';
 import BreadcrumbsNavGrid from '../styles/oep-theme/components/breadcrumbsNavigation.jsx';
@@ -79,7 +80,6 @@ import '../styles/App.css';
 import { TableRow } from '@mui/material';
 import variables from '../styles/oep-theme/variables.js';
 
-import StudyKeywords from './scenarioBundleUtilityComponents/StudyDescriptors.js';
 import handleOpenURL from './scenarioBundleUtilityComponents/handleOnClickTableIRI.jsx';
 
 import { getCheckedWithParents, filterTree } from './scenarioBundleUtilityComponents/treeUtils';
@@ -148,7 +148,6 @@ function Factsheet(props) {
   const [studyName, setStudyName] = useState(id !== 'new' ? fsData.study_name : '');
   const [abstract, setAbstract] = useState(id !== 'new' ? fsData.abstract : '');
   const [selectedSectors, setSelectedSectors] = useState(id !== 'new' ? fsData.sectors || [] : []);
-  const [expandedSectors, setExpandedSectors] = useState(id !== 'new' ? [] : []);
   const [expandedTechnologies, setExpandedTechnologies] = useState(id !== 'new' ? [] : []);
 
   const [institutions, setInstitutions] = useState([]);
@@ -257,10 +256,44 @@ function Factsheet(props) {
   // const [sectors, setSectors] = useState(sectors_json);
   const myChartRef = useRef(0);
 
-  const [sectors, setSectors] = useState([]);
+  // Sector divisions come from the OEO (see helper.build_sector_dropdowns_from_oeo):
+  // each entry carries its own options, plus a trailing "Other" entry holding the
+  // OEO sector hierarchy as a tree.
   const [sectorDivisions, setSectorDivisions] = useState([]);
-  const [filteredSectors, setFilteredSectors] = useState([]);
   const [selectedSectorDivisions, setSelectedSectorDivisions] = useState(id !== 'new' ? fsData.sector_divisions || [] : []);
+
+  // Sectors picked from the OEO sector hierarchy (the "Other" row of the edit
+  // form) are shown as that hierarchy in overview mode too; sectors defined by a
+  // sector division have no hierarchy and stay flat chips.
+  const sectorTreeOptions = useMemo(
+    () => sectorDivisions.find(item => item.kind === 'tree')?.options || [],
+    [sectorDivisions]
+  );
+
+  const sectorTreeNodes = useMemo(() => {
+    const flatten = (nodes = [], acc = []) => {
+      nodes.forEach(node => {
+        if (!node) return;
+        acc.push(node);
+        if (node.children) flatten(node.children, acc);
+      });
+      return acc;
+    };
+    return flatten(sectorTreeOptions);
+  }, [sectorTreeOptions]);
+
+  const sectorHierarchyIris = useMemo(
+    () => new Set(sectorTreeNodes.map(node => String(node.iri))),
+    [sectorTreeNodes]
+  );
+
+  const selectedSectorHierarchy = useMemo(() => {
+    const byIri = new Map(sectorTreeNodes.map(node => [String(node.iri), node]));
+    const values = selectedSectors
+      .filter(sector => byIri.has(String(sector.class)))
+      .map(sector => byIri.get(String(sector.class)).value);
+    return filterTree(sectorTreeOptions, values);
+  }, [sectorTreeOptions, sectorTreeNodes, selectedSectors]);
   const [selectedInstitution, setSelectedInstitution] = useState(id !== 'new' ? fsData.institution || [] : []);
   const [selectedFundingSource, setSelectedFundingSource] = useState(id !== 'new' ? fsData.funding_sources || [] : []);
   const [selectedContactPerson, setselectedContactPerson] = useState(id !== 'new' ? fsData.contact_person || [] : []);
@@ -291,6 +324,9 @@ function Factsheet(props) {
 
   const [scenariosObject, setScenariosObject] = useState({});
   const [selectedStudyKewords, setSelectedStudyKewords] = useState(id !== 'new' ? fsData.study_keywords : []);
+  // Study descriptors, loaded dynamically from the OEO via
+  // populate_factsheets_elements (replaces the former hardcoded StudyKeywords).
+  const [studyKeywords, setStudyKeywords] = useState([]);
   const [selectedModels, setSelectedModels] = useState(id !== 'new' ? fsData.models || [] : []);
   const [selectedFrameworks, setSelectedFrameworks] = useState(id !== 'new' ? fsData.frameworks || [] : []);
   const [removeReport, setRemoveReport] = useState(false);
@@ -400,6 +436,8 @@ function Factsheet(props) {
   useEffect(() => {
     populateFactsheetElements().then((data) => {
 
+      setStudyKeywords(data.study_descriptors || []);
+
       function parse(arr) {
         return arr.map(obj => {
           Object.keys(obj).forEach(key => {
@@ -435,35 +473,7 @@ function Factsheet(props) {
 
       // rephrase scenario descriptors to - types
       setScenarioTypes(data.scenario_descriptors);
-      const sectors_with_tooltips = data.sectors.map(item =>
-      ({
-        ...item,
-        label: <span>
-          <HtmlTooltip
-            title={
-              <React.Fragment>
-                <Typography color="inherit" variant="subtitle1">
-                  {item.sector_difinition}
-                  <br />
-                  <a href={item.iri}>More info from Open Energy Ontology (OEO)....</a>
-                </Typography>
-              </React.Fragment>
-            }
-          >
-            <InfoOutlinedIcon sx={{ color: '#708696', marginRight: "7px" }} />
-          </HtmlTooltip>
-          {item.label}
-        </span>
-      })
-      );
-
-      setSectors(sectors_with_tooltips);
-      setFilteredSectors(sectors_with_tooltips);
-      //setFilteredSectors([]);
-
-      const sector_d = data.sector_divisions;
-      sector_d.push({ "label": "Others", "name": "Others", "class": "Others", "value": "Others" });
-      setSectorDivisions(sector_d);
+      setSectorDivisions(data.sector_divisions || []);
 
       myChartRef.current = Sunburst
       const sampleData = {
@@ -518,7 +528,8 @@ function Factsheet(props) {
             contact_person: JSON.stringify(selectedContactPerson),
             sector_divisions: JSON.stringify(selectedSectorDivisions),
             sectors: JSON.stringify(selectedSectors),
-            expanded_sectors: JSON.stringify(expandedSectors),
+            // kept for wire compatibility; the backend ignores it
+            expanded_sectors: JSON.stringify([]),
             technologies: JSON.stringify(selectedTechnologies),
             study_keywords: JSON.stringify(selectedStudyKewords),
             scenarios: JSON.stringify(scenarios),
@@ -570,7 +581,8 @@ function Factsheet(props) {
               contact_person: JSON.stringify(selectedContactPerson),
               sector_divisions: JSON.stringify(selectedSectorDivisions),
               sectors: JSON.stringify(selectedSectors),
-              expanded_sectors: JSON.stringify(expandedSectors),
+              // kept for wire compatibility; the backend ignores it
+              expanded_sectors: JSON.stringify([]),
               technologies: JSON.stringify(selectedTechnologies),
               study_keywords: JSON.stringify(selectedStudyKewords),
               scenarios: JSON.stringify(scenarios),
@@ -1171,12 +1183,9 @@ function Factsheet(props) {
   }
 
   const sectorDivisionsHandler = (sectorDivisionsList) => {
+    // The sectors pane reacts to this list on its own (master-detail), so there
+    // is nothing left to filter here.
     setSelectedSectorDivisions(sectorDivisionsList);
-    let sectorsBasedOnDivisions = sectors.filter(item => sectorDivisionsList.map(item => item.class).includes(item.sector_division));
-    if (sectorDivisionsList.some(e => e.label == 'Others')) {
-      sectorsBasedOnDivisions = sectors;
-    }
-    setFilteredSectors(sectorsBasedOnDivisions);
   };
 
 
@@ -1278,16 +1287,10 @@ function Factsheet(props) {
     setExpandedTechnologyList(zipped);
   };
 
-  const sectorsHandler = (sectorsList, nodes) => {
-    const zipped = []
-    sectorsList.map((v) => zipped.push({ "value": findNestedObj(nodes, 'value', v).value, "label": findNestedObj(nodes, 'value', v).value, "class": findNestedObj(nodes, 'value', v).iri }));
-    setSelectedSectors(zipped);
-  };
-
-  const expandedSectorsHandler = (expandedSectorsList) => {
-    const zipped = []
-    expandedSectorsList.map((v) => zipped.push({ "value": v, "label": v }));
-    setExpandedSectors(zipped);
+  // Sector selection is owned by <SectorSelector />; it hands back the flat
+  // `{value, label, class}` list the save path writes.
+  const sectorsHandler = (sectorsList) => {
+    setSelectedSectors(sectorsList);
   };
 
 
@@ -1689,7 +1692,7 @@ function Factsheet(props) {
           <FormGroup>
             <div >
               {
-                StudyKeywords.map((item) =>
+                studyKeywords.map((item) =>
                   <span key={item[0]}>
                     {item[1] !== '' ? <HtmlTooltip
                       style={{ marginLeft: '10px' }}
@@ -1755,7 +1758,7 @@ function Factsheet(props) {
         renderField={() => (
           <CustomAutocompleteWithoutAddNew
             showSelectedElements={true}
-            optionsSet={sectorDivisions}
+            optionsSet={sectorDivisions.filter(item => item.kind !== 'tree')}
             kind=''
             handler={sectorDivisionsHandler}
             selectedElements={selectedSectorDivisions}
@@ -1769,17 +1772,12 @@ function Factsheet(props) {
         tooltipText="A sector is generically dependent continuant that is a subdivision of a system."
         hrefLink="https://openenergyplatform.org/ontology/oeo/OEO_00000367"
         renderField={() => (
-          <CustomTreeViewWithCheckBox
-            flat={true}
-            showFilter={false}
+          <SectorSelector
+            divisions={sectorDivisions}
+            selectedDivisions={selectedSectorDivisions}
+            selectedSectors={selectedSectors}
+            onSectorsChange={sectorsHandler}
             size="360px"
-            checked={selectedSectors}
-            expanded={expandedSectors}
-            handler={sectorsHandler}
-            expandedHandler={expandedSectorsHandler}
-            data={filteredSectors}
-            title={"Which sectors are considered in the study?"}
-            toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'https://openenergyplatform.org/ontology/oeo/OEO_00000367']}
           />
         )}
         TooltipComponent={HtmlTooltip}
@@ -2330,9 +2328,15 @@ const renderScenariosOverview = () => (
               </div>
             </FirstRowTableCell>
             <ContentTableCell>
-              {selectedSectors.map((v, i) => (
-                <span> <span> <Chip label={v.label} size="small" variant="outlined" onClick={() => handleOpenURL(v.class)} /> </span> <span>   <b className="separator-dot">  </b></span> </span>
-              ))}
+              {/* Sectors picked from the OEO hierarchy are shown as that
+                  hierarchy (like the technologies row below); sectors defined by
+                  a sector division have no hierarchy and stay chips. */}
+              {selectedSectors
+                .filter(v => !sectorHierarchyIris.has(String(v.class)))
+                .map((v, i) => (
+                  <span> <span> <Chip label={v.label} size="small" variant="outlined" onClick={() => handleOpenURL(v.class)} /> </span> <span>   <b className="separator-dot">  </b></span> </span>
+                ))}
+              <HierarchyViewer nodes={selectedSectorHierarchy} onLinkClick={handleOpenURL} />
             </ContentTableCell>
           </TableRow>
           <TableRow>
@@ -2849,7 +2853,7 @@ const renderScenariosOverview = () => (
                       </Grid>
                       <Grid item xs={9} style={{ paddingTop: '10px' }}>
                         {selectedStudyKewords.map((v, i) => {
-                          const match = StudyKeywords.find((it) => it[1] === v) || [v, ""];
+                          const match = studyKeywords.find((it) => it[1] === v) || [v, ""];
                           const [label, url] = match;
                           const variant = url ? "outlined" : "filled";
 
