@@ -137,3 +137,5 @@ nav:
           - Scenario Bundles:
               - oeplatform-code/features/scenario-bundles/index.md
               - Architecture & developer guide: oeplatform-code/features/scenario-bundles/architecture.md
+          - 🚧 Homepage:
+              - oeplatform-code/features/homepage/release-info.md

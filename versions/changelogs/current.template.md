@@ -8,6 +8,13 @@ SPDX-License-Identifier: CC0-1.0
 
 # Changes to the oeplatform code
 
+## Startpage Highlights
+
+<!--
+Add three to five short, user-facing highlights for the OEP start page.
+Avoid technical implementation details.
+-->
+
 ## Changes
 
 ## Features
