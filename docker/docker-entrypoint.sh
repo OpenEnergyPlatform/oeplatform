@@ -11,6 +11,13 @@ set -euo pipefail
 
 sleep 5
 
+if [ -z "${DOCKER_DESKTOP:-}" ] && [ -z "${WSL_DISTRO_NAME:-}" ]; then
+    echo "Linux environment detected → trying to chown ontologies folder (if exists)"
+    chown -R appuser:appuser /home/appuser/app/ontologies || true
+else
+    echo "Windows + Docker Desktop detected → skipping chown on /home/appuser/app/ontologies (this is expected and safe)"
+fi
+
 echo "Checking for Configuration"
 
 FILE=/app/oeplatform/securitysettings.py
