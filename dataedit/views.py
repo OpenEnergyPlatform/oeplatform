@@ -22,7 +22,6 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 import csv
 import json
 from io import TextIOWrapper
-from itertools import chain
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -633,14 +632,14 @@ def table_view_save_view(request: HttpRequest, table: str) -> HttpResponse:
     )
 
 
-def table_view_set_default_view(request: HttpRequest, table: str) -> HttpResponse:
+@require_POST
+def table_view_set_default_view(
+    request: HttpRequest, table: str, view_id: int
+) -> HttpResponse:
     table_obj = table_or_404(table=table)
 
-    # TODO: shouldnt this be POST only?
-    post_id = request.GET.get("id")
-
     for view in DBView.objects.filter(table=table_obj.name):
-        if str(view.pk) == post_id:
+        if str(view.pk) == view_id:
             view.is_default = True
         else:
             view.is_default = False
@@ -648,13 +647,13 @@ def table_view_set_default_view(request: HttpRequest, table: str) -> HttpRespons
     return redirect("dataedit:view", table=table_obj.name)
 
 
-def table_view_delete_view(request: HttpRequest, table: str) -> HttpResponse:
+@require_POST
+def table_view_delete_view(
+    request: HttpRequest, table: str, view_id: int
+) -> HttpResponse:
     table_obj = table_or_404(table=table)
 
-    # TODO: shouldnt this be POST only?
-    post_id = request.GET.get("id")
-
-    view = DBView.objects.get(id=post_id, table=table_obj.name)
+    view = DBView.objects.get(pk=view_id, table=table_obj.name)
     view.delete()
 
     return redirect("dataedit:view", table=table_obj.name)
@@ -788,7 +787,7 @@ class TableDataView(View):
         table_label = table_obj.human_readable_name
 
         table_views = DBView.objects.filter(table=table)
-        default = DBView(name="default", type="table", table=table)
+        default_view = DBView.get_or_create_default(table=table)
         view_id = request.GET.get("view")
 
         embargo = Embargo.objects.filter(table=table_obj).first()
@@ -801,18 +800,13 @@ class TableDataView(View):
         else:
             embargo_time_left = "No embargo data available"
 
-        if view_id == "default":
-            current_view = default
-            current_view.save()
-        else:
-            try:
-                # at first, try to use the view, that is passed as get argument
-                current_view = table_views.get(id=view_id)
-            except ObjectDoesNotExist:
-                current_view = default
-                current_view.save()
+        try:
+            # at first, try to use the view, that is passed as get argument
+            current_view = table_views.get(id=view_id)
+        except ObjectDoesNotExist:
+            current_view = default_view
 
-        table_views = list(chain((default,), table_views))
+        table_views = [default_view, *table_views.exclude(pk=default_view.pk)]
 
         #########################################################
         #   Get open peer review process related metadata       #
