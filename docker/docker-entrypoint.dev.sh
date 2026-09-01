@@ -90,6 +90,9 @@ echo "Ensuring dev user '$DEV_USER' exists…"
 python manage.py create_dev_user "$DEV_USER" "$DEV_USER@mail.com" --password "$DEV_PW" || true
 echo "✅  Dev user '$DEV_USER' password is: $DEV_PW"
 
+echo "Ensuring default terms and conditions exist…"
+python manage.py create_default_terms || true
+
 # ————————————————————
 # 6) Create a example table
 # ————————————————————

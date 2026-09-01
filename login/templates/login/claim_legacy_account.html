@@ -1,0 +1,28 @@
+{% extends "base/base-full.html" %}
+{% block title %}Claim legacy account{% endblock %}
+{% block main-content-body %}
+  <div class="row">
+    <div class="col-md-8 offset-md-2">
+      <h2>Claim a legacy account</h2>
+      <p>
+        If you already had an Open Energy Platform account under a different
+        email, enter that address. We will email a confirmation link there.
+        After you confirm, your social login and data will be attached to that
+        legacy account.
+      </p>
+      <form method="post" action="">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label class="form-label" for="legacy_email">Legacy account email</label>
+          <input class="form-control"
+                 type="email"
+                 id="legacy_email"
+                 name="legacy_email"
+                 required
+                 value="{{ legacy_email|default:'' }}" />
+        </div>
+        <button type="submit" class="btn btn-primary">Send confirmation email</button>
+      </form>
+    </div>
+  </div>
+{% endblock %}

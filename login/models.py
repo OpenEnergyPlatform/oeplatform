@@ -312,6 +312,38 @@ class ActivationToken(models.Model):
     value = models.TextField()
 
 
+class SocialAccountLinkToken(models.Model):
+    """Pending email challenge to link a social login to a legacy local account."""
+
+    token = models.CharField(max_length=64, unique=True, db_index=True)
+    legacy_user = models.ForeignKey(
+        myuser,
+        on_delete=models.CASCADE,
+        related_name="social_link_tokens",
+    )
+    provider = models.CharField(max_length=200)
+    uid = models.CharField(max_length=191)
+    sociallogin_data = models.JSONField(null=True, blank=True)
+    throwaway_user = models.ForeignKey(
+        myuser,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    used_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["provider", "uid"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"SocialAccountLinkToken({self.provider}:{self.uid} -> {self.legacy_user_id})"
+
+
 class UserPermission(TablePermission):
     holder = models.ForeignKey(
         myuser, related_name="table_permissions", on_delete=models.CASCADE

@@ -1,0 +1,18 @@
+{% extends "mails/base.html" %}
+{% block message %}
+  Hello {{ username }},
+  <br />
+  <br />
+  Someone authenticated with a social login and asked to link it to your
+  existing Open Energy Platform account.
+  <br />
+  <br />
+  If this was you, confirm by opening the link below (valid for 48 hours):
+  <br />
+  <br />
+  <a href="{{ url }}">{{ url }}</a>
+  <br />
+  <br />
+  If you did not request this, you can ignore this email. Your account stays
+  unchanged.
+{% endblock %}

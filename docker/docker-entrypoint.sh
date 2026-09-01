@@ -28,6 +28,9 @@ python manage.py migrate
 echo "Migrating local database..."
 python manage.py alembic upgrade head
 
+echo "Ensuring default terms and conditions exist…"
+python manage.py create_default_terms || true
+
 echo "Compress stylesheets & JavaScript"
 python manage.py compress
 

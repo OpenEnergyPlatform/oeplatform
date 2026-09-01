@@ -1,0 +1,15 @@
+{% extends "base/base-full.html" %}
+{% block title %}Account link failed{% endblock %}
+{% block main-content-body %}
+  <div class="row">
+    <div class="col-md-8 offset-md-2">
+      <h2>Could not link accounts</h2>
+      <p>{{ error }}</p>
+      <p>
+        You can
+        <a href="{% url 'login:claim-legacy-account' %}">request a new link</a>
+        or contact support if the problem continues.
+      </p>
+    </div>
+  </div>
+{% endblock %}

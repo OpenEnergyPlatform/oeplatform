@@ -1,5 +1,6 @@
 """
 SPDX-FileCopyrightText: 2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2026 Open Energy Platform contributors
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
@@ -7,10 +8,18 @@ from __future__ import annotations
 
 import typing
 
+from allauth.core.exceptions import ImmediateHttpResponse
 from allauth.account.adapter import DefaultAccountAdapter
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from django.conf import settings
 from django.http import HttpRequest
+from django.shortcuts import redirect
+
+from login.account_linking import (
+    find_legacy_candidate,
+    social_email,
+    start_link_challenge_from_sociallogin,
+)
 
 if typing.TYPE_CHECKING:
     from allauth.socialaccount.models import SocialLogin
@@ -29,7 +38,7 @@ class AccountAdapter(DefaultAccountAdapter):
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
     """
-    Handles logins via 3rd party organizations like ORCID.
+    Handles logins via 3rd party organizations like ORCID / RegApp.
     """
 
     def is_open_for_signup(
@@ -64,3 +73,26 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             new_data["last_name"] = last_name
 
         return super().populate_user(request, sociallogin, data)
+
+    def pre_social_login(self, request: HttpRequest, sociallogin: SocialLogin) -> None:
+        """
+        If the social email matches a legacy local account, require email
+        confirmation to that legacy address before linking.
+        """
+        if sociallogin.is_existing:
+            user = sociallogin.user
+            if user is not None and not user.is_active:
+                user.is_active = True
+                user.save(update_fields=["is_active"])
+            return
+
+        email = social_email(sociallogin)
+        if not email:
+            return
+
+        legacy = find_legacy_candidate(email, provider=sociallogin.account.provider)
+        if legacy is None:
+            return
+
+        start_link_challenge_from_sociallogin(sociallogin, legacy)
+        raise ImmediateHttpResponse(redirect("login:social-link-pending"))

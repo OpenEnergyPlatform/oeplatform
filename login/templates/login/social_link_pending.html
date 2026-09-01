@@ -1,0 +1,22 @@
+{% extends "base/base-full.html" %}
+{% block title %}Confirm account link{% endblock %}
+{% block main-content-body %}
+  <div class="row">
+    <div class="col-md-8 offset-md-2">
+      <h2>Check your email</h2>
+      <p>
+        To prove you own the existing account, we sent a confirmation link to
+        that account's email address.
+      </p>
+      <p>
+        Open the link in that message to finish linking your social login.
+        The link expires after 48 hours.
+      </p>
+      <p>
+        Already use a different email on your social login?
+        <a href="{% url 'login:claim-legacy-account' %}">Claim a legacy account</a>
+        by entering its email address.
+      </p>
+    </div>
+  </div>
+{% endblock %}

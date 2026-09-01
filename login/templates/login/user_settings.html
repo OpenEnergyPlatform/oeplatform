@@ -32,6 +32,12 @@
           <a href="{% url 'account_change_password' %}">Change your password</a>
         </td>
       </tr>
+      <tr>
+        <th>Legacy account</th>
+        <td>
+          <a href="{% url 'login:claim-legacy-account' %}">Claim a legacy account by email</a>
+        </td>
+      </tr>
       {% comment %}
         {# TODO: implement tests before we allow user deletion  #}
         <tr>

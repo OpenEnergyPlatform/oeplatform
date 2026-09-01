@@ -124,3 +124,11 @@ nav:
               - Technical docs: oeplatform-code/features/open-peer-review-process/technical-docs.md
           - Scenario Bundles:
               - oeplatform-code/features/scenario-bundles/index.md
+          - User Agreements:
+              - oeplatform-code/features/user-agreements/index.md
+          - Social Account Linking:
+              - oeplatform-code/features/social-account-linking/index.md
+          - Account Relocation:
+              - oeplatform-code/features/account-relocation/Relocation_Readme.md
+          - Content Moderation:
+              - oeplatform-code/features/content-moderation/index.md

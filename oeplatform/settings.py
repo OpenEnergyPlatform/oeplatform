@@ -424,8 +424,10 @@ SOCIALACCOUNT_ADAPTER = "login.adapters.SocialAccountAdapter"
 SOCIALACCOUNT_EMAIL_VERIFICATION = "optional"
 # https://django-allauth.readthedocs.io/en/latest/forms.html
 # SOCIALACCOUNT_FORMS = {"signup": "login.forms.CreateUserForm"}
-SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
-SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = False
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = False
+SOCIAL_ACCOUNT_LINK_TOKEN_HOURS = 48
 
 # Drop placeholder OIDC apps until SSO credentials are configured.
 _oidc_providers = SOCIALACCOUNT_PROVIDERS.get("openid_connect", {})
@@ -470,7 +472,9 @@ APPROX_ROW_COUNT_DEFAULT_PRECISE_BELOW = 100000
 PSEUDO_TOPIC_DRAFT = "draft"
 TOPIC_SCENARIO = "scenario"
 
-# django-termsandconditions: require one-time acceptance for authenticated users
+# django-termsandconditions: require one-time acceptance for authenticated users.
+# Enforcement is active once at least one TermsAndConditions record has
+# date_active set (seeded by `python manage.py create_default_terms`).
 TERMS_BASE_TEMPLATE = "termsandconditions/base.html"
 ACCEPT_TERMS_PATH = "/terms/accept/"
 DEFAULT_TERMS_SLUG = "site-terms"
@@ -480,6 +484,9 @@ TERMS_EXCLUDE_URL_PREFIX_LIST = {
     "/accounts",
     "/static",
     "/captcha",
+    "/api",
+    "/media",
+    "/user/social-link",
 }
 TERMS_EXCLUDE_URL_LIST = set()
 TERMS_EXCLUDE_URL_CONTAINS_LIST = set()

@@ -971,6 +971,38 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
+path = "login/templates/mails/social_account_link_mail.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2026 Open Energy Platform contributors",
+]
+
+[[annotations]]
+path = "login/templates/login/social_link_pending.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2026 Open Energy Platform contributors",
+]
+
+[[annotations]]
+path = "login/templates/login/social_link_confirm_failed.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2026 Open Energy Platform contributors",
+]
+
+[[annotations]]
+path = "login/templates/login/claim_legacy_account.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2026 Open Energy Platform contributors",
+]
+
+[[annotations]]
 path = "login/templates/termsandconditions/base.html"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"

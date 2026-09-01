@@ -37,6 +37,11 @@ from login.views import (
     token_reset_view,
     user_redirect_view,
 )
+from login.views_linking import (
+    claim_legacy_account_view,
+    social_link_confirm_view,
+    social_link_pending_view,
+)
 
 app_name = "login"
 urlpatterns = [
@@ -154,5 +159,20 @@ urlpatterns = [
         "delete_peer_review/",
         delete_peer_review_simple_view,
         name="delete_peer_review_simple",
+    ),
+    path(
+        "social-link/pending/",
+        social_link_pending_view,
+        name="social-link-pending",
+    ),
+    path(
+        "social-link/confirm/<str:token>/",
+        social_link_confirm_view,
+        name="social-link-confirm",
+    ),
+    path(
+        "social-link/claim/",
+        claim_legacy_account_view,
+        name="claim-legacy-account",
     ),
 ]
