@@ -17,7 +17,6 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 from django.urls import include, path, re_path
 from drf_spectacular.views import (
     SpectacularAPIView,
-    SpectacularRedocView,
     SpectacularSwaggerView,
 )
 
@@ -281,12 +280,6 @@ urlpatterns_v0 = [
         "open-api/",
         SpectacularSwaggerView.as_view(url_name="api:openapi-schema"),
         name="swagger-ui",
-    ),
-    # Redoc UI
-    path(
-        "redoc/",
-        SpectacularRedocView.as_view(url_name="api:openapi-schema"),
-        name="redoc",
     ),
     # PROBLEM: redirect does not work with POST/PUT/..., only GET
     # so we cannot redirect
