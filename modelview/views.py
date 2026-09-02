@@ -79,9 +79,22 @@ def list_sheets_view(request, sheettype):
 
     models = c.objects.all()
 
-    tags = Tag.objects.none()
-    for model in models:
-        tags |= model.tags.all()
+    # The tags actually in use by THIS sheet type, each once, by name.
+    #
+    # This replaces a loop that did `tags |= model.tags.all()` once per
+    # factsheet. `QuerySet.__or__` OR-combines SQL rather than concatenating
+    # results, so 305 iterations built one statement carrying ~305 joins and
+    # returned a row per tag ATTACHMENT -- 12,156 checkboxes on production
+    # where 825 distinct tags are in use, 6.04 MB and 30% of the page.
+    #
+    # Scoping matters most for frameworks: unscoped the page offered 290 tags
+    # where 71 are in use, so 219 of its checkboxes returned nothing when
+    # clicked.
+    #
+    # NOT ordered by `Tag.usage_count`: that field exists and looks apt, but
+    # it is incremented only by table search in `dataedit` and never by
+    # anything here, so it would rank an unrelated quantity.
+    tags = Tag.objects.filter(factsheets__in=models).distinct().order_by("name")
 
     return render(
         request,

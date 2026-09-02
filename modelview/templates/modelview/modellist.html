@@ -49,11 +49,10 @@
   <h3>Tags</h3>
   <div style="display: flex; flex-flow: wrap">
     {% for t in tags %}
-      <label class="tag-checkbox-container form-label {% if t.pk in tags %}tag-checkbox-checked{% endif %}"
+      <label class="tag-checkbox-container form-label"
              style="background:{{ t.color_hex }};
                     color:{% readable_text_color t.color_hex %}">
-        <input {% if t.pk in tags %}checked="checked"{% endif %}
-               type="checkbox"
+        <input type="checkbox"
                class="tag-checkbox"
                name="tags"
                id="select_{{ t.pk }}"
