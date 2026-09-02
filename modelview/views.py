@@ -67,6 +67,57 @@ def log_factsheet_write(sheettype, pk, action, user, tags):
     )
 
 
+#: The prefix the old page put in front of every pk in its CSV link. It is a
+#: DOM id and nothing else now, but links carrying it are in bookmarks and in
+#: mails.
+_LEGACY_TAG_PREFIX = "select_"
+
+
+def tag_filter_pks(value):
+    """The tag primary keys in a `?tags=<pk>,<pk>` value.
+
+    One format, raw pks, shared by the list page's checkbox state and by the
+    CSV download's filter. The two used to disagree: the page built its
+    download link with `?tags=select_<pk>` where the CSV view filters on raw
+    pks, so a filtered download matched nothing and returned a header row with
+    no error -- which reads as "no matches" rather than as a bug (verified
+    live: 0 rows where the correct value returns 59).
+    """
+    return [pk for pk in (part.strip() for part in (value or "").split(",")) if pk]
+
+
+def resolve_legacy_tag_pks(pks):
+    """Accept the prefixed values the old page's CSV link produced.
+
+    Decided explicitly rather than by omission: refusing them would leave
+    every link the old page emitted doing the very thing this fixes -- return
+    an empty file with no error. It is applied *only* here, because only the
+    CSV link ever carried the prefix; the list page had no `?tags=` at all
+    before this.
+
+    Not a bare prefix strip. A tag's primary key is its normalised name, so a
+    real tag can legitimately begin with the prefix -- `Tag.get_name_normalized`
+    maps "Select data" to `select_data` -- and blindly stripping would filter
+    on `data` instead: a wrong answer, silently, which is the very class of
+    failure this ticket exists to kill. The raw value therefore wins whenever
+    it names a real tag, and only the leftovers are unprefixed. Costs one query,
+    and only when a prefixed value actually arrives.
+    """
+    prefixed = [pk for pk in pks if pk.startswith(_LEGACY_TAG_PREFIX)]
+    if not prefixed:
+        return pks
+
+    real = set(Tag.objects.filter(pk__in=prefixed).values_list("pk", flat=True))
+    return [
+        (
+            pk
+            if pk in real or not pk.startswith(_LEGACY_TAG_PREFIX)
+            else pk[len(_LEGACY_TAG_PREFIX) :]
+        )
+        for pk in pks
+    ]
+
+
 def list_sheets_view(request, sheettype):
     """
     Lists all available model, framework factsheet objects.
@@ -118,6 +169,12 @@ def list_sheets_view(request, sheettype):
     # anything here, so it would rank an unrelated quantity.
     tags = Tag.objects.filter(factsheets__in=models).distinct().order_by("name")
 
+    # A set of pks, not a queryset. The template tests each offered tag for
+    # membership, and `in` against a QuerySet is what made this page
+    # quadratic: Django defines no `QuerySet.__contains__`, so it falls back
+    # to iterating the whole result cache once per checkbox.
+    selected_tag_pks = set(tag_filter_pks(request.GET.get("tags")))
+
     return render(
         request,
         "modelview/modellist.html",
@@ -125,6 +182,7 @@ def list_sheets_view(request, sheettype):
             "models": models,
             "label": label,
             "tags": tags,
+            "selected_tag_pks": selected_tag_pks,
             "fields": fields,
             "default": defaults,
             "sheettype": sheettype,
@@ -182,9 +240,7 @@ def model_to_csv_view(request, sheettype):
             "We dropped the scenario factsheets in favor of scenario bundles."
         )
 
-    tag_ids = request.GET.get("tags")
-    if tag_ids:
-        tag_ids = tag_ids.split(",")
+    tag_ids = resolve_legacy_tag_pks(tag_filter_pks(request.GET.get("tags")))
 
     header = list(
         field.attname  # type: ignore because hasattr(field, "attname")

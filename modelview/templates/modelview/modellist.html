@@ -52,11 +52,15 @@
       <label class="tag-checkbox-container form-label"
              style="background:{{ t.color_hex }};
                     color:{% readable_text_color t.color_hex %}">
+        {# `selected_tag_pks` is a SET of pks from `?tags=`, never a queryset: #}
+        {# `in` against a queryset has no `__contains__` to use, so it scans #}
+        {# the whole result cache once per checkbox. #}
         <input type="checkbox"
                class="tag-checkbox"
                name="tags"
                id="select_{{ t.pk }}"
                value="{{ t.pk }}"
+               {% if t.pk in selected_tag_pks %}checked{% endif %}
                onchange="apply_tag_filter(event.target)">
         <span>{{ t.name }}</span>
         <span class="tag-checkbox-icon fas fa-check"></span>
@@ -107,6 +111,14 @@
 {% endblock %}
 {% block after-body-bottom-js %}
   <script src="{% static 'dataedit/jquery.dataTables.min.js' %}"></script><!-- src: https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js -->
+  {# The filter's logic is a real module so it can be tested (vitest, #}
+  {# `modelview/static/modelview/__tests__/`). A module script is deferred, so #}
+  {# it runs before DOMContentLoaded and therefore before jQuery's ready #}
+  {# handler below, which is what needs `tag_filter`. #}
+  <script type="module">
+    import * as tag_filter from "{% static 'modelview/tag_filter.js' %}";
+    window.tag_filter = tag_filter;
+  </script>
   <script>
     var dt;
 
@@ -164,7 +176,12 @@
         {% endfor %}
     };
 
-    var active_tags = [];
+    // Raw tag pks, the same format the URL and the CSV link carry, seeded from
+    // the checkboxes the server rendered out of `?tags=`. The filter's own
+    // logic lives in `modelview/tag_filter.js` -- the module imported above --
+    // because both bugs this filter shipped were browser-side and so invisible
+    // to a Django test.
+    var active_tags = tag_filter.checkedTagValues(document);
 
     var apply_filter = function (sender){
         for (var i in fields[sender.id]) {
@@ -180,23 +197,23 @@
 
 
     var apply_tag_filter = function (sender){
-        if(sender.checked && active_tags.indexOf(sender.id) <0){
-            active_tags.push(sender.id);
-        } else {
-            var id = active_tags.indexOf(sender.id);
-            if(id>=0){
-                active_tags.splice(id, 1);
-            }
-        }
-        set_csv_link();
+        active_tags = tag_filter.toggleTag(active_tags, sender.value, sender.checked);
+        sync_filter_state();
         dt.draw();
     }
 
-    var set_csv_link = function (){
-        var href="{% url 'modelview:download' sheettype %}?";
-        href += 'tags=';
-        href += active_tags.join([separator = ',']);
-        document.getElementById("dlcsv").setAttribute("href", href);
+    // The query string is the canonical home of the filter, so a filtered view
+    // can be reloaded, bookmarked and shared -- and so the CSV link is simply
+    // the page's own `?tags=` value, with no second format to drift out of
+    // step with this one.
+    var sync_filter_state = function (){
+        document.getElementById("dlcsv").setAttribute(
+            "href",
+            "{% url 'modelview:download' sheettype %}"
+                + tag_filter.filterQuery(active_tags));
+        history.replaceState(
+            null, '', tag_filter.filteredUrl(window.location, active_tags));
+        tag_filter.showCheckedTags(document);
     }
 
     $(document).ready( function () {
@@ -204,24 +221,21 @@
         var tags_col = dt.column('tags:name').index();
         $.fn.dataTable.ext.search.push(
         function( settings, data, dataIndex ) {
-            for (var required of active_tags) {
-                var matches = false;
-                var tags = dt.row(dataIndex).data().tags
-                if(tags === undefined){
-                    return false;
-                }
-                for (var tag of tags) {
-                    if (required === 'select_'+tag.pk) {
-                        matches=true
-                    }
-                }
-                if(!matches){
-                    return false;
-                }
-            }
-            return true;
+            return tag_filter.rowMatchesTags(
+                dt.row(dataIndex).data().tags, active_tags);
         }
 );
+
+        // The filter arrived in the URL, so the checkboxes are already
+        // checked and `active_tags` already holds their pks -- but the first
+        // draw happened before the search extension above existed, and the
+        // CSV link has never been built at all. Both need one pass here, or a
+        // shared filtered URL would show the whole table and offer a download
+        // of it.
+        sync_filter_state();
+        if (active_tags.length) {
+            dt.draw();
+        }
 
     } );
 

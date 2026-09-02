@@ -3,15 +3,16 @@ SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
-import re
-
 from base.tests import TestViewsTestCase
 from dataedit.models import Tag
 from modelview.helper import getClasses
 from modelview.tests.corpus import seed_corpus
+from modelview.tests.html import checked_values, offered_values
 
-#: One rendered checkbox per offered tag.
-CHECKBOX = re.compile(r'id="select_([^"]+)"')
+#: The sidebar's tag inputs. The Fields section of the same sidebar
+#: legitimately renders `checked` for the default columns, so scoping by this
+#: class is what keeps these assertions about tags.
+TAG_CHECKBOX = "tag-checkbox"
 
 
 class TagFilterListTestCase(TestViewsTestCase):
@@ -20,7 +21,7 @@ class TagFilterListTestCase(TestViewsTestCase):
         resp = self.get(
             "modelview:modellist", kwargs={"sheettype": sheettype}, query=query
         )
-        return CHECKBOX.findall(resp.content.decode("utf-8"))
+        return offered_values(resp.content.decode("utf-8"), TAG_CHECKBOX)
 
     def tags_in_use(self, sheettype):
         cls, _ = getClasses(sheettype)
@@ -78,15 +79,10 @@ class TestTheFilterListIsTheTagsInUse(TagFilterListTestCase):
         whole-page search would be asserting something else entirely.
         """
         resp = self.get("modelview:modellist", kwargs={"sheettype": "model"})
-        body = resp.content.decode("utf-8")
 
-        checked = [
-            element.split(">")[0]
-            for element in body.split("<input")
-            if 'id="select_' in element.split(">")[0]
-            and "checked" in element.split(">")[0]
-        ]
-        self.assertEqual(checked, [], msg=f"{len(checked)} tag checkboxes pre-checked")
+        checked = checked_values(resp.content.decode("utf-8"), TAG_CHECKBOX)
+
+        self.assertEqual(checked, set(), msg=f"{len(checked)} tag checkboxes checked")
 
 
 class TestTheFilterListIsScopedPerSheetType(TagFilterListTestCase):

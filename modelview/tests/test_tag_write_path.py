@@ -19,31 +19,20 @@ from base.tests import TestViewsTestCase
 from modelview.helper import getClasses
 from modelview.tests.corpus import seed_corpus
 from modelview.tests.form_data import as_post_data, form_values
+from modelview.tests.html import checked_values, offered_values
 
 SHEETTYPES = ("model", "framework")
 
-#: One `<input ...>` element, whole, so the assertions below do not depend on
-#: the order djlint happens to leave the widget's attributes in.
-_INPUT = re.compile(r"<input\b[^>]*>", re.IGNORECASE)
-
-
-def tag_checkboxes(html: str) -> list[tuple[str, bool]]:
-    """Every `name="tags"` checkbox in `html`, as (value, checked)."""
-    boxes = []
-    for element in _INPUT.findall(html):
-        if 'name="tags"' not in element:
-            continue
-        value = re.search(r'value="([^"]*)"', element)
-        boxes.append((value.group(1) if value else "", "checked" in element))
-    return boxes
+#: The tag selector's checkboxes, which post one multi-valued `tags` field.
+TAG_CHECKBOX = "tag-checkbox"
 
 
 def offered_tag_pks(html: str) -> list[str]:
-    return [value for value, _checked in tag_checkboxes(html)]
+    return offered_values(html, TAG_CHECKBOX)
 
 
 def checked_tag_pks(html: str) -> set[str]:
-    return {value for value, checked in tag_checkboxes(html) if checked}
+    return checked_values(html, TAG_CHECKBOX)
 
 
 def current_tag_pills(html: str) -> list[str]:
