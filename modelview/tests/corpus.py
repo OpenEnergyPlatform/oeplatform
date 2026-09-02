@@ -20,7 +20,7 @@ Three traps this encodes, all of them load-bearing:
   moment it was saved, which is why the tag vocabulary has to be larger than
   the detection threshold for a corpus to be able to express corruption.
 
-SPDX-FileCopyrightText: none
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
