@@ -17,12 +17,13 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 import csv
+import logging
 import re
 
 import urllib3
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.cache import never_cache
@@ -40,6 +41,8 @@ from modelview.helper import (
     processPost,
 )
 from modelview.models import BasicFactsheet
+
+logger = logging.getLogger("oeplatform")
 
 
 def list_sheets_view(request, sheettype):
@@ -282,8 +285,27 @@ def fs_delete_view(request, sheettype, pk):
             "We dropped the scenario factsheets in favor of scenario bundles."
         )
 
+    # Checked here and not only in the template: `hx-delete` sends a real
+    # DELETE request, and so does `curl -X DELETE`, so a hidden button is no
+    # protection at all. Deleting is the one irreversible operation in this
+    # app and it leaves no history, hence admins only -- editing stays open to
+    # any account by policy.
+    if not request.user.is_admin:
+        return HttpResponseForbidden("Only administrators may delete a factsheet.")
+
     model = get_object_or_404(c, pk=pk)
+    # Read before the delete: with no audit model, this line is the only
+    # record that will ever exist of what went with it.
+    tag_count = model.tags.count()
     model.delete()
+
+    logger.info(
+        "factsheet_write sheettype=%s pk=%s action=delete user=%s tags=%s ok=1",
+        sheettype,
+        pk,
+        request.user.name,
+        tag_count,
+    )
 
     response_data = {"success": True, "message": "Entry deleted successfully."}
 
