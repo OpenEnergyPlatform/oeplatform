@@ -5,25 +5,19 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import {
   current_review,
-  getAllFieldsAndValues,
   getErrorMsg,
   showToast,
-} from "./peer_review.js";
-import { isEmptyValue, isEffectivelyEmpty, sendJson } from "./utilities.js";
-import { getFieldState } from "./state_current_review.js";
+  snapshotReviewState,
+} from "../core/peer_review.js";
+import { finishReview } from "../api.js";
+import { isReviewerComplete, reviewerHasChanges } from "../core/selectors.js";
 export function finishPeerReview() {
   $("#peer_review-submitting").removeClass("d-none");
 
   var selectedBadge = $('input[name="reviewer-option"]:checked').val();
-  console.log(selectedBadge);
   current_review.badge = selectedBadge;
   current_review.reviewFinished = true;
-  let json = JSON.stringify({
-    reviewType: "finished",
-    reviewData: current_review,
-    reviewBadge: selectedBadge,
-  });
-  sendJson("POST", config.url_peer_review, json)
+  finishReview(config, current_review, selectedBadge)
     .then(function () {
       window.location = config.url_table;
     })
@@ -34,15 +28,39 @@ export function finishPeerReview() {
     });
 }
 export function check_if_review_finished() {
-  if (!checkFieldStates()) {
+  // Reviewer-only flow: contributors never finish / award badges, so this must
+  // not touch their controls (check_if_review_finished also runs on the
+  // contributor page via peerReview()).
+  const marker = document.getElementById("opr-page-marker");
+  if (!marker || marker.dataset.oprPage !== "reviewer") {
     return;
   }
 
-  if (!clientSideReviewFinished) {
-    clientSideReviewFinished = true;
+  // Not every non-empty field has a state yet -> offer nothing special.
+  if (!checkFieldStates()) {
+    hideFinishUI();
+    return;
+  }
+
+  const submitButton = $("#submit_summary");
+
+  // At least one field is suggested or rejected: the contributor has to
+  // respond, so offer "Submit" (the ping-pong) and NOT the finish/badge UI.
+  if (reviewHasChanges()) {
+    hideFinishUI();
+    submitButton.removeClass("disabled").prop("disabled", false);
+    return;
+  }
+
+  // All non-empty fields are accepted: there is nothing to negotiate, so offer
+  // the finish/badge option instead of submitting to the contributor.
+  submitButton.prop("disabled", true);
+
+  if (!window.clientSideReviewFinished) {
+    window.clientSideReviewFinished = true;
     showToast(
       "Review completed!",
-      "You completed the review and can now award a suitable badge!",
+      "All fields are accepted – you can now award a badge and finish the review!",
       "success"
     );
 
@@ -77,35 +95,36 @@ export function check_if_review_finished() {
 
     finishButton.on("click", finishPeerReview);
 
-    if (!config.review_finished) {
-      reviewerDiv.show();
-      $("#submit_summary").prop("disabled", true);
-    } else {
+    if (config.review_finished) {
       reviewerDiv.hide();
       $("#submit_summary").hide();
       $("#peer_review-save").hide();
       $("#review-window").css("visibility", "hidden");
+    } else {
+      reviewerDiv.show();
     }
 
     $(".content-finish-review").append(reviewerDiv);
   }
 }
 
-export function checkFieldStates() {
-  const allFields = getAllFieldsAndValues();
-  for (const { fieldName, fieldValue } of allFields) {
-    console.log(fieldName, fieldValue);
-    if (!isEffectivelyEmpty(fieldName, fieldValue)) {
-      const fieldState = getFieldState(fieldName);
-
-      if (
-        fieldState !== "ok" &&
-        fieldState !== "rejected" &&
-        fieldState !== "suggestion"
-      ) {
-        return false;
-      }
-    }
+// Remove the finish/badge UI if it was shown but the review is no longer in the
+// "all accepted" state (e.g. the reviewer changed a field to suggested).
+function hideFinishUI() {
+  if (window.clientSideReviewFinished) {
+    $("#finish-review-div").remove();
+    window.clientSideReviewFinished = false;
   }
-  return true;
+}
+
+// True if any non-empty field is suggested or rejected (i.e. there is something
+// the contributor needs to respond to). Now via the tested selector.
+function reviewHasChanges() {
+  return reviewerHasChanges(snapshotReviewState());
+}
+
+// True when every non-empty field has a review state. Now via the tested
+// selector (was a duplicated DOM loop).
+export function checkFieldStates() {
+  return isReviewerComplete(snapshotReviewState());
 }

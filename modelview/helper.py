@@ -473,11 +473,11 @@ def processPost(post, c, f, files=None, pk=None, key=None):
             parts = []
             for fi in fields.keys():
                 if (
-                    re.match(r"^{}_\d$".format(field.name), str(fi))
+                    re.match(r"^{}_\d+$".format(field.name), str(fi))
                     and fields[fi]  # noqa
                 ):
                     parts.append(fi)
-            parts.sort()
+            parts.sort(key=lambda k: int(k.rsplit("_", 1)[1]))
             fields[field.name] = ",".join(
                 fields[k].replace(",", ";") for k in parts
             )  # noqa

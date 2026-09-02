@@ -10,7 +10,7 @@ import Typography from "@mui/material/Typography";
 import StudyChip from "../styles/oep-theme/components/studyChip";
 import palette from "../styles/oep-theme/palette.js";
 import variables from "../styles/oep-theme/variables.js";
-import StudyKeywords from "./scenarioBundleUtilityComponents/StudyDescriptors";
+import useStudyDescriptors, { getStudyDescriptors } from "./scenarioBundleUtilityComponents/useStudyDescriptors";
 import handleOpenURL from "./scenarioBundleUtilityComponents/handleOnClickTableIRI.jsx";
 import HtmlTooltip from "../styles/oep-theme/components/tooltipStyles";
 
@@ -90,11 +90,14 @@ function resolveStudyDescriptor(value) {
 
   const v = String(value);
 
-  // StudyKeywords entries look like: [label, iri]
-  const byLabel = StudyKeywords.find(([label]) => label === v);
+  // Study descriptors, loaded dynamically from the OEO (same [label, iri, def]
+  // shape). Empty until the shared fetch resolves — the component subscribes via
+  // useStudyDescriptors() so a re-render re-runs this once the list arrives.
+  const list = getStudyDescriptors();
+  const byLabel = list.find(([label]) => label === v);
   if (byLabel) return { label: byLabel[0], iri: byLabel[1] };
 
-  const byIri = StudyKeywords.find(([, iri]) => iri === v);
+  const byIri = list.find(([, iri]) => iri === v);
   if (byIri) return { label: byIri[0], iri: byIri[1] };
 
   // Fallback: show a human-ish short label, still click the original value if it looks like a URL
@@ -147,6 +150,9 @@ export default function ComparisonBoardItems(props) {
 
   const [state, setState] = useState({ items: elements });
   const [mounted, setMounted] = useState(false);
+  // Load the dynamic study-descriptor list; re-renders once it resolves so the
+  // module-level resolveStudyDescriptor() picks up labels/IRIs.
+  useStudyDescriptors();
 
   useEffect(() => {
     setState({ items: elements });

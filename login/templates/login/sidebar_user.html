@@ -23,9 +23,7 @@
       <div>
         <p class="profile-sidebar__name">{{ profile_user.name }}</p>
       </div>
-      <p>
-        {% if profile_user.fullname %}{{ profile_user.fullname }}{% endif %}
-      </p>
+      <p>{% if profile_user.fullname %}{{ profile_user.fullname }}{% endif %}</p>
       {% if profile_user.affiliation %}
         <div class="profile-sidebar__affiliation">{{ profile_user.affiliation }}</div>
       {% endif %}

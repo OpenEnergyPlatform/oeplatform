@@ -64,7 +64,7 @@
   <div class="d-flex justify-content-between flex-md-wrap">
     {% for project in projects %}
       <a class="logo"
-         href="{% url 'base:project_detail'  project_id=project.id %}">
+         href="{% url 'base:project_detail' project_id=project.id %}">
         {% if project.logo %}
           <img class="flex-item"
                src="{% static 'logos/project/' %}{{ project.logo }}"

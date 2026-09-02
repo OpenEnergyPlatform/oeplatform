@@ -15,10 +15,6 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
-- Fix navigation box during the OPR; show proper information and jump to next
-  field that needs review. Hide start button for OPR if metadata is empty.
-  [(#2310)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2310)
-
 ## Documentation updates
 
 ## Code Quality

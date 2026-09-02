@@ -189,18 +189,18 @@
            target="_blank"><i class="fas fa-external-link-alt"></i>Introducing the Open Energy
           Ontology: Enhancing data interpretation and interfacing in energy
           systems analysis</a>.
-        </p>
-        <p>
-          The
-          <a href="{% url 'ontology:oeo-s-c' %}">OEO steering committee</a> was
-          established in autumn 2019.
-        </p>
-      </div>
+      </p>
+      <p>
+        The
+        <a href="{% url 'ontology:oeo-s-c' %}">OEO steering committee</a> was
+        established in autumn 2019.
+      </p>
     </div>
-    {% compress js %}
-      <script src="{% static 'ontology/htmx.js' %}"></script>
-    {% endcompress %}
-    <script>
+  </div>
+  {% compress js %}
+    <script src="{% static 'ontology/htmx.js' %}"></script>
+  {% endcompress %}
+  <script>
     document.addEventListener("htmx:beforeRequest", function (event) {
       document.getElementById("loading-spinner").style.display = "block";
       document.getElementById("loading-spinner-sidebar").style.display =
@@ -218,5 +218,5 @@
         console.error("Request failed:", event.detail.xhr);
       }
     });
-    </script>
-  {% endblock %}
+  </script>
+{% endblock %}

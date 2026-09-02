@@ -9,7 +9,7 @@ from uuid import UUID
 from django.urls import reverse
 from rest_framework import serializers
 
-from dataedit.models import Table
+from dataedit.models import Dataset, Table
 from modelview.models import Energyframework, Energymodel
 from oeplatform.settings import URL
 
@@ -164,3 +164,55 @@ class ScenarioBundleScenarioDatasetSerializer(serializers.Serializer):
             raise serializers.ValidationError("Dataset names must be unique.")
 
         return value
+
+
+class DatasetReadSerializer(serializers.ModelSerializer):
+    metadata = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Dataset
+        fields = ["uuid", "name", "metadata", "created_at"]
+
+    def get_metadata(self, obj):
+        # resources are never stored on the dataset: assemble them live
+        # from the member tables so reads can not go stale
+        metadata = dict(obj.metadata)
+        metadata["resources"] = obj.resource_entries()
+        return metadata
+
+
+class DatasetCreateSerializer(serializers.Serializer):
+    # the name is the dataset's permanent identifier (URL key, oemetadata
+    # name) and is immutable after creation
+    name = serializers.SlugField()
+    title = serializers.CharField()
+    description = serializers.CharField()
+    at_id = serializers.URLField(required=False)
+
+
+class DatasetUpdateSerializer(serializers.Serializer):
+    # updates touch only the editable dataset-level fields; the name is
+    # immutable and therefore not part of this serializer
+    title = serializers.CharField()
+    description = serializers.CharField()
+    at_id = serializers.URLField(required=False)
+
+
+class DatasetAssignTablesSerializer(serializers.Serializer):
+    tables = serializers.ListField(
+        child=serializers.DictField(child=serializers.CharField()), min_length=1
+    )
+
+    def validate_tables(self, value):
+        for item in value:
+            if "name" not in item:
+                raise serializers.ValidationError("Each table must have 'name'.")
+        return value
+
+
+class DatasetResourceSerializer(serializers.ModelSerializer):
+    schema = serializers.StringRelatedField()
+
+    class Meta:
+        model = Table
+        fields = ["id", "schema", "name", "oemetadata", "human_readable_name"]

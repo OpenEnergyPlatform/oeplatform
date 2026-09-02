@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+[Unit]
+Description=OEPlatform PostgreSQL database
+After=network-online.target
+
+[Container]
+Image=ghcr.io/openenergyplatform/oeplatform-postgres:latest
+ContainerName=postgres
+EnvironmentFile=%h/.config/oeplatform/oep.env
+Volume=pgdata.volume:/var/lib/postgresql/data
+PublishPort=5432:5432
+Network=oep.network
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=300
+
+[Install]
+WantedBy=default.target

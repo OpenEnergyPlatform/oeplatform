@@ -5,8 +5,9 @@
      data-category="{{ category }}">
   <p class="review__item-content">
     <span class="key">{{ item.display_field|default:item.field }}</span>
-    <span class="value">{{ item.newValue|default:item.value }}</span>
+    <span class="value">{{ item.value }}</span>
     <span class="suggestion suggestion--highlight">{{ item.reviewer_suggestion }}</span>
-    <span class="comment">{{ item.suggestion_comment }}</span>
+    <span class="comment suggestion--comment">{{ item.suggestion_comment }}</span>
+    <span class="additional-comment suggestion--additional-comment">{{ item.additional_comment }}</span>
   </p>
 </div>

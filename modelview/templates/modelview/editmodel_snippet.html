@@ -9,7 +9,7 @@
     {% if visible %}style="display:{{ visible }}"{% endif %}>
   <th class="formlabel">
     {% bootstrap_label field.label %}
-    {% if field.field.required  and field|fieldtype != 'CheckboxInput' %}
+    {% if field.field.required and field|fieldtype != 'CheckboxInput' %}
       *
     {% endif %}
     {% if field.help_text and field.help_text != "" %}

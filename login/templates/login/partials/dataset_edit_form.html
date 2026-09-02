@@ -1,0 +1,66 @@
+<div class="card mb-3" id="dataset-card-{{ dataset.name }}">
+  <div class="card-header">
+    Edit dataset &mdash; <strong>{{ dataset.name }}</strong>
+  </div>
+  <div class="card-body">
+    <p class="card-text text-muted">The name is permanent; title and description can change.</p>
+    <form hx-post="{% url 'login:dataset-edit' user_id=profile_user.id dataset_name=dataset.name %}"
+          hx-target="#dataset-card-{{ dataset.name }}"
+          hx-swap="outerHTML">
+      <div class="mb-2">
+        <label class="form-label" for="edit-title-{{ dataset.name }}">Title</label>
+        <input type="text"
+               id="edit-title-{{ dataset.name }}"
+               name="title"
+               class="form-control {% if form_errors.title %}is-invalid{% endif %}"
+               value="{{ form_values.title|default:'' }}"
+               required />
+        {% if form_errors.title %}
+          <div class="invalid-feedback d-block">{{ form_errors.title }}</div>
+        {% endif %}
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="edit-description-{{ dataset.name }}">Description</label>
+        <textarea id="edit-description-{{ dataset.name }}"
+                  name="description"
+                  class="form-control {% if form_errors.description %}is-invalid{% endif %}"
+                  rows="2"
+                  required>{{ form_values.description|default:'' }}</textarea>
+        {% if form_errors.description %}
+          <div class="invalid-feedback d-block">{{ form_errors.description }}</div>
+        {% endif %}
+      </div>
+      <div class="mb-3">
+        <span class="form-label d-block">Topics</span>
+        <div class="border rounded p-2"
+             style="max-height: 10rem;
+                    overflow-y: auto">
+          {% for topic in available_topics %}
+            <div class="form-check form-check-inline">
+              <input class="form-check-input"
+                     type="checkbox"
+                     name="topics"
+                     id="edit-topic-{{ dataset.name }}-{{ topic.name }}"
+                     value="{{ topic.name }}"
+                     {% if topic.name in selected_topics %}checked{% endif %} />
+              <label class="form-check-label"
+                     for="edit-topic-{{ dataset.name }}-{{ topic.name }}">{{ topic.name }}</label>
+            </div>
+          {% empty %}
+            <span class="text-muted small">No topics exist yet.</span>
+          {% endfor %}
+        </div>
+        <div class="form-text">
+          Assigning a table adds its topics automatically; topics you remove
+          here stay removed until a table carrying them is assigned again.
+        </div>
+      </div>
+      <button type="submit" class="btn btn-sm btn-primary">Save</button>
+      <button type="button"
+              class="btn btn-sm btn-outline-secondary"
+              hx-get="{% url 'login:dataset-card' user_id=profile_user.id dataset_name=dataset.name %}"
+              hx-target="#dataset-card-{{ dataset.name }}"
+              hx-swap="outerHTML">Cancel</button>
+    </form>
+  </div>
+</div>

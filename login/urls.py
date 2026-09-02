@@ -20,6 +20,7 @@ from django.urls import path, re_path
 
 from base.views import handler404
 from login.views import (
+    DatasetsView,
     EditUserView,
     GroupManagementView,
     GroupsView,
@@ -30,6 +31,13 @@ from login.views import (
     ReviewsView,
     SettingsView,
     TablesView,
+    dataset_assign_view,
+    dataset_card_view,
+    dataset_delete_view,
+    dataset_edit_view,
+    dataset_manage_view,
+    dataset_table_search_view,
+    dataset_unassign_view,
     delete_peer_review_simple_view,
     group_leave_view,
     group_member_count_view,
@@ -71,9 +79,50 @@ urlpatterns = [
         name="password_reset_complete",
     ),
     re_path(
+        # dataset-first dashboard: the profile opens on the datasets view
         r"^profile/(?P<user_id>[\d]+)$",
-        TablesView.as_view(),
+        DatasetsView.as_view(),
         name="profile",
+    ),
+    re_path(
+        r"^profile/(?P<user_id>[\d]+)/datasets$",
+        DatasetsView.as_view(),
+        name="datasets",
+    ),
+    re_path(
+        r"^profile/(?P<user_id>[\d]+)/datasets/(?P<dataset_name>[\w-]+)/card$",
+        dataset_card_view,
+        name="dataset-card",
+    ),
+    re_path(
+        r"^profile/(?P<user_id>[\d]+)/datasets/(?P<dataset_name>[\w-]+)/edit$",
+        dataset_edit_view,
+        name="dataset-edit",
+    ),
+    re_path(
+        r"^profile/(?P<user_id>[\d]+)/datasets/(?P<dataset_name>[\w-]+)/delete$",
+        dataset_delete_view,
+        name="dataset-delete",
+    ),
+    re_path(
+        r"^profile/(?P<user_id>[\d]+)/datasets/(?P<dataset_name>[\w-]+)/manage$",
+        dataset_manage_view,
+        name="dataset-manage",
+    ),
+    re_path(
+        r"^profile/(?P<user_id>[\d]+)/datasets/(?P<dataset_name>[\w-]+)/table-search$",  # noqa: E501
+        dataset_table_search_view,
+        name="dataset-table-search",
+    ),
+    re_path(
+        r"^profile/(?P<user_id>[\d]+)/datasets/(?P<dataset_name>[\w-]+)/assign$",
+        dataset_assign_view,
+        name="dataset-assign",
+    ),
+    re_path(
+        r"^profile/(?P<user_id>[\d]+)/datasets/(?P<dataset_name>[\w-]+)/unassign$",
+        dataset_unassign_view,
+        name="dataset-unassign",
     ),
     re_path(
         r"^profile/(?P<user_id>[\d]+)/tables$",

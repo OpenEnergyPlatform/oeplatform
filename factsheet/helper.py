@@ -16,7 +16,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 import re
 from urllib.parse import urlparse
 
-from rdflib import Graph, URIRef
+from rdflib import OWL, RDF, Graph, URIRef
 
 from factsheet.models import ScenarioBundleAccessControl
 from factsheet.oekg.connection import oekg, oeo, oeo_owl
@@ -51,7 +51,9 @@ SCENARIO_REGION = OEO.OEO_00020220
 SCENARIO_INTERREG = OEO.OEO_00020222
 SCENARIO_DESCRIPTOR = OEO.OEO_00390073
 
-SECTOR_DIVISION = OEO.OEO_00390079
+# Object property "based on sector division" — NOT the sector-division class
+# (that is OEO_00000368, see SECTOR_DIVISION_CLASS below).
+PROP_BASED_ON_SECTOR_DIVISION = OEO.OEO_00390079
 SECTOR = OEO.OEO_00020439
 TECHNOLOGY = OEO.OEO_00020438
 INSTITUTION_PROP = OEO.OEO_00000510
@@ -66,8 +68,16 @@ PROP_DEFINED_BY = URIRef(
     "https://openenergyplatform.org/ontology/oeo/OEO_00000504"
 )  # "is defined by"
 PROP_DEFINITION = URIRef("http://purl.obolibrary.org/obo/IAO_0000115")
-SECTOR_DEVISIONS = [OEO.OEO_00010056, OEO.OEO_00000242, OEO.OEO_00010304]
-PROP_DEFINITION = URIRef("http://purl.obolibrary.org/obo/IAO_0000115")
+
+# --- Sector divisions -------------------------------------------------------
+# "sector division" is the class OEO_00000368. Concrete divisions (KSG, CRF,
+# ...) are named individuals typed to it, but two of them (NC/BR, EU
+# legislation) are modelled as *classes* inside its subclass tree — both
+# flavours are enumerated, see the OEKG scenario-bundles wayfinder WF-01/WF-06.
+SECTOR_DIVISION_CLASS = OEO.OEO_00000368
+# Root of the sector taxonomy; served as the "Other" division's option tree.
+SECTOR_CLASS = OEO.OEO_00000367
+OTHER_DIVISION_LABEL = "Other"
 
 
 oekg = bind_all_namespaces(graph=oekg)
@@ -171,41 +181,205 @@ def _definition(g: Graph, node: URIRef):
     return None
 
 
+# Members of a division come in two shapes, hence the UNION:
+#   1. ?sector oeo:OEO_00000504 ?division                 (KSG, CRF IPCC 2006, ...)
+#   2. ?sector rdf:type [ owl:onProperty OEO_00000504 ;
+#                         owl:someValuesFrom ?division ]  (NC/BR, EU legislation)
+# The rdfs:subClassOf flavour of (2) fires for no division in OEO 2.12.0; it is
+# kept so future class-modelled sectors are picked up as well. The filter drops
+# a division that asserts "is defined by" itself (CRF sectors IPCC 2006 does).
+SECTOR_MEMBERS_QUERY = """
+PREFIX oeo:  <https://openenergyplatform.org/ontology/oeo/>
+PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:  <http://www.w3.org/2002/07/owl#>
+SELECT DISTINCT ?sector WHERE {
+  {
+    ?sector oeo:OEO_00000504 ?division .
+  }
+  UNION
+  {
+    ?sector rdf:type ?restriction .
+    ?restriction a owl:Restriction ;
+                 owl:onProperty oeo:OEO_00000504 ;
+                 owl:someValuesFrom ?division .
+  }
+  UNION
+  {
+    ?sector rdfs:subClassOf ?restriction2 .
+    ?restriction2 a owl:Restriction ;
+                  owl:onProperty oeo:OEO_00000504 ;
+                  owl:someValuesFrom ?division .
+  }
+  FILTER (?sector != ?division)
+}
+"""
+
+_sector_dropdowns_cache = None
+
+
+def _sector_division_nodes(g: Graph):
+    """All sector-division nodes, sorted by label.
+
+    That is every proper subclass of ``SECTOR_DIVISION_CLASS`` plus every named
+    individual typed to a class in that subclass closure — the class flavour
+    covers NC/BR and EU legislation, the individual flavour KSG, CRF and friends.
+    """
+    classes = {SECTOR_DIVISION_CLASS}
+    stack = [SECTOR_DIVISION_CLASS]
+    while stack:
+        for subclass in g.subjects(RDFS.subClassOf, stack.pop()):
+            if isinstance(subclass, URIRef) and subclass not in classes:
+                classes.add(subclass)
+                stack.append(subclass)
+
+    individuals = {
+        node
+        for cls in classes
+        for node in g.subjects(RDF.type, cls)
+        if isinstance(node, URIRef) and (node, RDF.type, OWL.NamedIndividual) in g
+    }
+
+    nodes = (classes - {SECTOR_DIVISION_CLASS}) | individuals
+    return sorted(nodes, key=lambda node: (_label(g, node) or str(node)).lower())
+
+
+def _division_members(g: Graph, division: URIRef):
+    """The sectors defined by ``division``, sorted by label (both patterns)."""
+    members = {
+        row[0]
+        for row in g.query(SECTOR_MEMBERS_QUERY, initBindings={"division": division})
+        if isinstance(row[0], URIRef)
+    }
+    return sorted(members, key=lambda node: (_label(g, node) or str(node)).lower())
+
+
+def _other_division_entry(g: Graph):
+    """The "Other" pseudo-division: the whole OEO sector taxonomy as a tree."""
+    sector_class = oeo_owl.search_one(iri=str(SECTOR_CLASS))
+    tree = get_all_sub_classes(sector_class) if sector_class is not None else {}
+    return {
+        "label": OTHER_DIVISION_LABEL,
+        "name": OTHER_DIVISION_LABEL,
+        "value": OTHER_DIVISION_LABEL,
+        "iri": str(SECTOR_CLASS),
+        "class": str(SECTOR_CLASS),
+        "kind": "tree",
+        "definition": _definition(g, SECTOR_CLASS),
+        "options": tree.get("children", []),
+    }
+
+
 def build_sector_dropdowns_from_oeo(g: Graph):
+    """Return ``(sector_divisions, sectors)`` for the populate endpoint.
+
+    ``sector_divisions`` is the master-detail payload: one entry per OEO sector
+    division with ``kind: "individuals"`` and its member sectors in ``options``,
+    followed by the ``kind: "tree"`` "Other" entry carrying the OEO_00000367
+    sector taxonomy. *All* divisions are listed, including those the OEO defines
+    no members for — their detail pane just stays empty (WF-04 contract).
+
+    ``sectors`` is the legacy flat list of all division members, kept so older
+    consumers of the endpoint keep working; it cannot express the "Other" tree.
+
+    Memoized: the OEO only changes when the process restarts.
+    """
+    global _sector_dropdowns_cache
+    if _sector_dropdowns_cache is not None:
+        return _sector_dropdowns_cache
+
     sector_divisions_list = []
     sectors_list = []
 
-    for sd in SECTOR_DEVISIONS:
-        sd_label = _label(g, sd) or sd.n3(g.namespace_manager)
-        sd_def = _definition(g, sd)
+    for division in _sector_division_nodes(g):
+        division_label = _label(g, division) or division.n3(g.namespace_manager)
+        division_definition = _definition(g, division)
 
-        # division dropdown option (+ definition)
-        sector_divisions_list.append(
-            {
-                "class": sd,  # TODO; URIRef; cast to str?
-                "label": sd_label,
-                "name": sd_label,
-                "value": sd_label,
-                "sector_division_definition": sd_def,
-            }
-        )
-
-        # sector individuals: ?sector oeo:is_defined_by ?sd
-        for sector in g.subjects(PROP_DEFINED_BY, sd):
-            sec_label = _label(g, sector)  # type: ignore
-            definition = g.value(sector, PROP_DEFINITION)
-
+        options = []
+        for sector in _division_members(g, division):
+            sector_label = _label(g, sector) or str(sector)
+            sector_definition = _definition(g, sector)
+            options.append(
+                {
+                    "label": sector_label,
+                    "name": sector_label,
+                    "value": sector_label,
+                    "iri": str(sector),
+                    "class": str(sector),
+                    "definition": sector_definition,
+                }
+            )
             sectors_list.append(
                 {
-                    "iri": sector,
-                    "label": sec_label,
-                    "value": sec_label,
-                    "sector_division": sd,
-                    "sector_difinition": (str(definition) if definition else None),
+                    "iri": str(sector),
+                    "label": sector_label,
+                    "value": sector_label,
+                    "sector_division": str(division),
+                    "sector_difinition": sector_definition,
                 }
             )
 
-    return sector_divisions_list, sectors_list
+        sector_divisions_list.append(
+            {
+                "class": str(division),
+                "iri": str(division),
+                "label": division_label,
+                "name": division_label,
+                "value": division_label,
+                "kind": "individuals",
+                "definition": division_definition,
+                "sector_division_definition": division_definition,
+                "options": options,
+            }
+        )
+
+    sector_divisions_list.append(_other_division_entry(g))
+
+    _sector_dropdowns_cache = (sector_divisions_list, sectors_list)
+    return _sector_dropdowns_cache
+
+
+# Study descriptors are OEO terms carrying the annotation property
+# "oekg annotation" (OEO_00020425) whose value starts with "study descriptor".
+# See the OEKG scenario-bundles wayfinder (WF-03 / WF-04, amended 2026-07-25):
+# this matches BOTH value variants the OEO currently carries — the canonical
+# "study descriptor" AND the inconsistent "study descriptor tag" — so every term
+# the OEO marks appears (24 + 7 = 31 in OEO 2.12.0). Terms carrying no
+# "oekg annotation" at all (e.g. control area, carbon neutrality) still need to
+# be tagged upstream in the OEO before they can appear.
+OEKG_ANNOTATION = OEO.OEO_00020425
+STUDY_DESCRIPTOR_VALUE = "study descriptor"
+
+_study_descriptors_cache = None
+
+
+def build_study_descriptors_from_oeo(g: Graph):
+    """Return study descriptors as ``[label, iri, definition]`` triples.
+
+    Terms annotated with ``OEO_00020425`` ("oekg annotation") whose value starts
+    with ``"study descriptor"`` — i.e. both the canonical ``"study descriptor"``
+    and the inconsistent ``"study descriptor tag"`` variants the OEO carries.
+    Labels come from ``rdfs:label`` and definitions from the ontology
+    (IAO / SKOS / rdfs:comment). Matches the shape of the former hardcoded
+    ``StudyKeywords`` array in the React frontend.
+
+    Memoized on first call — the OEO only changes when the process restarts.
+    """
+    global _study_descriptors_cache
+    if _study_descriptors_cache is not None:
+        return _study_descriptors_cache
+
+    descriptors = []
+    for term, value in g.subject_objects(OEKG_ANNOTATION):
+        if not str(value).strip().startswith(STUDY_DESCRIPTOR_VALUE):
+            continue
+        label = _label(g, term) or term.n3(g.namespace_manager)
+        definition = _definition(g, term)
+        descriptors.append([label, str(term), definition or ""])
+
+    descriptors.sort(key=lambda d: d[0].lower())
+    _study_descriptors_cache = descriptors
+    return descriptors
 
 
 def parse_dataset_iri(iri: str | None) -> dict:
