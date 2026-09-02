@@ -24,12 +24,12 @@ SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
+import itertools
 import random
 from dataclasses import dataclass, field
 from typing import Any
 
 from django.db import transaction
-from django.utils import timezone
 
 from dataedit.models import Tag
 from modelview.helper import getClasses
@@ -49,6 +49,12 @@ DEFAULT_TAGS = 260
 DEFAULT_HEALTHY_TAGS = 3
 
 DEFAULT_SEED = 20260902
+
+#: `BasicFactsheet.model_name` is UNIQUE, and it sits on the shared parent, so
+#: a factsheet name is unique across BOTH sheet types. Seeding twice in one
+#: test -- which the CSV's query-count assertion does on purpose -- therefore
+#: needs names that never repeat within a process.
+_NAME_SEQUENCE = itertools.count()
 
 
 @dataclass
@@ -120,11 +126,12 @@ def seed_corpus(
     # Multi-table inheritance: every row is two INSERTs and bulk_create is
     # refused, so one transaction keeps the seed cheap anyway.
     with transaction.atomic():
-        for i in range(factsheets):
+        for _ in range(factsheets):
+            n = next(_NAME_SEQUENCE)
             values = {
-                "model_name": "Test %s %04d" % (sheettype, i),
-                "acronym": "T%04d" % i,
-                "contact_email": ["test-%04d@example.org" % i],
+                "model_name": "Test %s %06d" % (sheettype, n),
+                "acronym": "T%06d" % n,
+                "contact_email": ["test-%06d@example.org" % n],
             }
             values.update(_mandatory_values(cls, skip=values))
             corpus.factsheets.append(cls.objects.create(**values))
@@ -169,29 +176,25 @@ def _mandatory_values(cls, skip: dict) -> dict:
     return values
 
 
-_SCALAR_EMPTIES = {
-    "BooleanField": False,
-    "IntegerField": 0,
-    "BigIntegerField": 0,
-    "SmallIntegerField": 0,
-    "FloatField": 0.0,
-    "DecimalField": 0,
-    "CharField": "",
-    "TextField": "",
-    "EmailField": "",
-    "URLField": "",
-}
-
-
 def _empty_value(f):
+    """An empty-but-valid value for one mandatory field.
+
+    Only the three shapes a factsheet actually has are handled. Anything else
+    raises rather than guessing: silently returning `""` for a numeric column
+    would fail later, in the database, with a message that points at the wrong
+    thing.
+    """
     if hasattr(f, "base_field"):  # ArrayField
         return []
     internal = f.get_internal_type()
-    if internal in _SCALAR_EMPTIES:
-        return _SCALAR_EMPTIES[internal]
-    if internal in ("DateField", "DateTimeField"):
-        return timezone.now()
-    return ""
+    if internal in ("CharField", "TextField"):
+        return ""
+    if internal == "BooleanField":
+        return False
+    raise AssertionError(
+        "no empty value known for the mandatory field %r (%s); add one here "
+        "now that a factsheet has a NOT NULL field of that type" % (f.name, internal)
+    )
 
 
 def _through_field_names(through) -> tuple[str, str]:

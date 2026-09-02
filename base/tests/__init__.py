@@ -87,35 +87,47 @@ class TestViewsTestCase(TestCase):
         cls.group.delete()
         super(TestViewsTestCase, cls).tearDownClass()
 
-    def _request_url(
+    def _url(
         self,
         view_name: str,
         args: list | None = None,
         kwargs: dict | None = None,
         query: dict | None = None,
-        logged_in: bool = False,
     ) -> str:
-        """Reverse `view_name`, append `query`, and set up the session."""
+        """Reverse `view_name` and append `query`."""
         url = reverse(view_name, args=args, kwargs=kwargs)
         if query:
             url += f"?{urlencode(query)}"
+        return url
 
+    def _authenticate(self, logged_in: bool) -> None:
+        """Log the test client in as `self.user`, or out."""
         if logged_in:
             self.client.force_login(self.user)
         else:
             self.client.logout()
 
-        return url
-
-    def _check_status(
-        self, resp: HttpResponse, view_name: str, expect_status: int | None
+    def _request(
+        self,
+        method: str,
+        view_name: str,
+        args: list | None = None,
+        kwargs: dict | None = None,
+        query: dict | None = None,
+        logged_in: bool = False,
+        expect_status: int | None = None,
+        **client_kwargs,
     ) -> HttpResponse:
-        """Assert the response status.
+        """Send one request through the test client and assert its status.
 
         `expect_status=None` means "any success", which is what `get()` has
         always asserted. Pass an explicit status to assert a refusal -- a 403
         from a permission check, or a redirect to login.
         """
+        self._authenticate(logged_in)
+        resp = getattr(self.client, method)(
+            self._url(view_name, args, kwargs, query), **client_kwargs
+        )
         if expect_status is None:
             self.assertTrue(resp.status_code < 400, msg=f"{view_name}: {resp}")
         else:
@@ -133,10 +145,9 @@ class TestViewsTestCase(TestCase):
         logged_in: bool = False,
         expect_status: int | None = None,
     ) -> HttpResponse:
-
-        url = self._request_url(view_name, args, kwargs, query, logged_in)
-        resp = self.client.get(url)
-        return self._check_status(resp, view_name, expect_status)
+        return self._request(
+            "get", view_name, args, kwargs, query, logged_in, expect_status
+        )
 
     def post(
         self,
@@ -150,13 +161,21 @@ class TestViewsTestCase(TestCase):
     ) -> HttpResponse:
         """POST `data` to `view_name`.
 
-        A value may be a list, which the test client submits as repeated
-        fields -- that is how a multi-value form field such as a factsheet's
-        `tags` reaches a Django form.
+        `data` goes to Django's test client unchanged, so a list value is sent
+        as a repeated field -- which is what a multi-value form field such as
+        a factsheet's `tags` needs. Whether the view then *receives* those
+        values is a property of the view, not of this helper.
         """
-        url = self._request_url(view_name, args, kwargs, query, logged_in)
-        resp = self.client.post(url, data=data or {})
-        return self._check_status(resp, view_name, expect_status)
+        return self._request(
+            "post",
+            view_name,
+            args,
+            kwargs,
+            query,
+            logged_in,
+            expect_status,
+            data=data or {},
+        )
 
     def delete(
         self,
@@ -173,6 +192,6 @@ class TestViewsTestCase(TestCase):
         `curl -X DELETE` sends -- so hiding a button in a template is never
         evidence that the operation is refused.
         """
-        url = self._request_url(view_name, args, kwargs, query, logged_in)
-        resp = self.client.delete(url)
-        return self._check_status(resp, view_name, expect_status)
+        return self._request(
+            "delete", view_name, args, kwargs, query, logged_in, expect_status
+        )
