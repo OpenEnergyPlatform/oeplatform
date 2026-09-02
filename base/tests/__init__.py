@@ -87,16 +87,15 @@ class TestViewsTestCase(TestCase):
         cls.group.delete()
         super(TestViewsTestCase, cls).tearDownClass()
 
-    def get(
+    def _request_url(
         self,
         view_name: str,
         args: list | None = None,
         kwargs: dict | None = None,
         query: dict | None = None,
         logged_in: bool = False,
-    ) -> HttpResponse:
-
-        # construct url
+    ) -> str:
+        """Reverse `view_name`, append `query`, and set up the session."""
         url = reverse(view_name, args=args, kwargs=kwargs)
         if query:
             url += f"?{urlencode(query)}"
@@ -106,6 +105,74 @@ class TestViewsTestCase(TestCase):
         else:
             self.client.logout()
 
-        resp = self.client.get(url)
-        self.assertTrue(resp.status_code < 400, msg=f"{view_name}: {resp}")
+        return url
+
+    def _check_status(
+        self, resp: HttpResponse, view_name: str, expect_status: int | None
+    ) -> HttpResponse:
+        """Assert the response status.
+
+        `expect_status=None` means "any success", which is what `get()` has
+        always asserted. Pass an explicit status to assert a refusal -- a 403
+        from a permission check, or a redirect to login.
+        """
+        if expect_status is None:
+            self.assertTrue(resp.status_code < 400, msg=f"{view_name}: {resp}")
+        else:
+            self.assertEqual(
+                resp.status_code, expect_status, msg=f"{view_name}: {resp}"
+            )
         return resp
+
+    def get(
+        self,
+        view_name: str,
+        args: list | None = None,
+        kwargs: dict | None = None,
+        query: dict | None = None,
+        logged_in: bool = False,
+        expect_status: int | None = None,
+    ) -> HttpResponse:
+
+        url = self._request_url(view_name, args, kwargs, query, logged_in)
+        resp = self.client.get(url)
+        return self._check_status(resp, view_name, expect_status)
+
+    def post(
+        self,
+        view_name: str,
+        data: dict | None = None,
+        args: list | None = None,
+        kwargs: dict | None = None,
+        query: dict | None = None,
+        logged_in: bool = False,
+        expect_status: int | None = None,
+    ) -> HttpResponse:
+        """POST `data` to `view_name`.
+
+        A value may be a list, which the test client submits as repeated
+        fields -- that is how a multi-value form field such as a factsheet's
+        `tags` reaches a Django form.
+        """
+        url = self._request_url(view_name, args, kwargs, query, logged_in)
+        resp = self.client.post(url, data=data or {})
+        return self._check_status(resp, view_name, expect_status)
+
+    def delete(
+        self,
+        view_name: str,
+        args: list | None = None,
+        kwargs: dict | None = None,
+        query: dict | None = None,
+        logged_in: bool = False,
+        expect_status: int | None = None,
+    ) -> HttpResponse:
+        """Send a real DELETE to `view_name`.
+
+        Real, because that is what an `hx-delete` button sends -- and what
+        `curl -X DELETE` sends -- so hiding a button in a template is never
+        evidence that the operation is refused.
+        """
+        url = self._request_url(view_name, args, kwargs, query, logged_in)
+        resp = self.client.delete(url)
+        return self._check_status(resp, view_name, expect_status)
