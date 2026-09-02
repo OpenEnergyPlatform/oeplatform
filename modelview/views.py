@@ -45,6 +45,28 @@ from modelview.models import BasicFactsheet
 logger = logging.getLogger("oeplatform")
 
 
+def log_factsheet_write(sheettype, pk, action, user, tags):
+    """One logfmt line per factsheet write -- `add`, `update` or `delete`.
+
+    This app keeps no history of any kind, so these lines are the only record
+    that will ever exist of who changed what. They are deliberately one shape:
+    a grep for `factsheet_write` has to find every write, not two thirds of
+    them.
+
+    What a log line cannot do is say what the write *replaced*, so there is
+    still no undo -- and that is exactly the gap that made the tag corruption
+    unrepairable, because the pre-corruption tag state was recorded nowhere.
+    """
+    logger.info(
+        "factsheet_write sheettype=%s pk=%s action=%s user=%s tags=%s ok=1",
+        sheettype,
+        pk,
+        action,
+        user,
+        tags,
+    )
+
+
 def list_sheets_view(request, sheettype):
     """
     Lists all available model, framework factsheet objects.
@@ -207,8 +229,12 @@ def edit_model_view(request, pk, sheettype):
 
     form = f(instance=model)
 
-    tags = Tag.objects.all()
-
+    # No `tags` context variable: this view used to pass `Tag.objects.all()`
+    # under that name, and `tag_selector.html` rendered every one of those
+    # checkboxes `checked` -- so opening any factsheet for editing offered the
+    # platform's whole vocabulary as already attached, and saving attached it
+    # (#2385, #2381). The widget now reads its state off the bound form, which
+    # can only ever carry this factsheet's own tags.
     return render(
         request,
         "modelview/edit{}.html".format(sheettype),
@@ -216,7 +242,6 @@ def edit_model_view(request, pk, sheettype):
             "form": form,
             "name": pk,
             "method": "update",
-            "tags": tags,
         },
     )
 
@@ -243,23 +268,26 @@ class FSAddView(LoginRequiredMixin, View):
         form = processPost(request.POST, c, f, files=request.FILES, pk=pk)
 
         if form.is_valid():
+            # `form.save()` writes the tags too, via `save_m2m()`. What stood
+            # here instead was a `model.tags.clear()` followed by one
+            # `Tag.objects.get()` per `tag_<pk>` field name in the POST: ~1,600
+            # queries for a submit carrying the whole vocabulary (the "veeery
+            # long on submit all" of #2385), and an unconditional wipe for any
+            # submit that did not carry the widget at all.
             model = form.save()
             if hasattr(model, "license") and model.license:
                 if model.license != "Other":
                     model.license_other_text = None
 
-            prefix = "tag_"
-            prefix_len = len(prefix)
-            ids = {
-                field[prefix_len:] for field in request.POST if field.startswith(prefix)
-            }
-
-            model.tags.clear()
-            for tag_id in list(ids):
-                tag = Tag.objects.get(pk=tag_id)
-                model.tags.add(tag)
-
             model.save()
+
+            log_factsheet_write(
+                sheettype,
+                model.pk,
+                "update" if pk else "add",
+                request.user.name,
+                model.tags.count(),
+            )
 
             return redirect(
                 "modelview:show-factsheet",
@@ -312,13 +340,7 @@ def fs_delete_view(request, sheettype, pk):
     tag_count = model.tags.count()
     model.delete()
 
-    logger.info(
-        "factsheet_write sheettype=%s pk=%s action=delete user=%s tags=%s ok=1",
-        sheettype,
-        pk,
-        request.user.name,
-        tag_count,
-    )
+    log_factsheet_write(sheettype, pk, "delete", request.user.name, tag_count)
 
     response_data = {"success": True, "message": "Entry deleted successfully."}
 
