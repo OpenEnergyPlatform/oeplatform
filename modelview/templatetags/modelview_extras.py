@@ -13,7 +13,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 from django import template
 from django.contrib.postgres.forms.array import SimpleArrayField
-from django.utils.html import escape, format_html
+from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 register = template.Library()
@@ -125,28 +125,6 @@ def get_field(instance, field_name):
 @register.simple_tag
 def assign_field(instance, field_name):
     return instance.__dict__[field_name]
-
-
-@register.filter
-def get_model_value(value, arg):
-    return stringify(value.__dict__[arg])
-
-
-def stringify(v):
-    if isinstance(v, str):
-        parts = v.split(" ")
-        max_length = 12
-        if len(parts) > max_length:
-            parts = parts[:max_length] + ["..."]
-        v = " ".join(parts)
-        return mark_safe("'%s'" % escape(v.replace("\n", "").replace("\r", "")))
-    elif isinstance(v, list):
-        return mark_safe("[%s]" % (", ".join(map(stringify, v))))
-    elif v is None:
-        return "null"
-    elif isinstance(v, bool):
-        return "true" if v else "false"
-    return v
 
 
 @register.filter

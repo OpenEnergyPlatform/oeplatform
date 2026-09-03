@@ -49,15 +49,18 @@
   <h3>Tags</h3>
   <div style="display: flex; flex-flow: wrap">
     {% for t in tags %}
-      <label class="tag-checkbox-container form-label {% if t.pk in tags %}tag-checkbox-checked{% endif %}"
+      <label class="tag-checkbox-container form-label"
              style="background:{{ t.color_hex }};
                     color:{% readable_text_color t.color_hex %}">
-        <input {% if t.pk in tags %}checked="checked"{% endif %}
-               type="checkbox"
+        {# `selected_tag_pks` is a SET of pks from `?tags=`, never a queryset: #}
+        {# `in` against a queryset has no `__contains__` to use, so it scans #}
+        {# the whole result cache once per checkbox. #}
+        <input type="checkbox"
                class="tag-checkbox"
                name="tags"
                id="select_{{ t.pk }}"
                value="{{ t.pk }}"
+               {% if t.pk in selected_tag_pks %}checked{% endif %}
                onchange="apply_tag_filter(event.target)">
         <span>{{ t.name }}</span>
         <span class="tag-checkbox-icon fas fa-check"></span>
@@ -108,26 +111,30 @@
 {% endblock %}
 {% block after-body-bottom-js %}
   <script src="{% static 'dataedit/jquery.dataTables.min.js' %}"></script><!-- src: https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js -->
+  {# The filter's logic is a real module so it can be tested (vitest, #}
+  {# `modelview/static/modelview/__tests__/`). A module script is deferred, so #}
+  {# it runs before DOMContentLoaded and therefore before jQuery's ready #}
+  {# handler below, which is what needs `tag_filter`. #}
+  <script type="module">
+    import * as tag_filter from "{% static 'modelview/tag_filter.js' %}";
+    import * as lazy_payload from "{% static 'modelview/lazy_payload.js' %}";
+    window.tag_filter = tag_filter;
+    window.lazy_payload = lazy_payload;
+  </script>
+  {# The rows come from the view; `modelview/list_payload.py` says why. JSON #}
+  {# via `json_script`, never a JS literal: `json_script` escapes `<`, `>` #}
+  {# and `&`, so no field value can close this element. #}
+  {{ rows|json_script:"factsheet-rows" }}
+  {# Which columns those rows already carry, so a toggle of one of them does #}
+  {# not fetch the other 165 for nothing. #}
+  {{ initial_columns|json_script:"factsheet-initial-columns" }}
   <script>
     var dt;
 
-    var full_data = [
-        {% for model in models %}
-            {
-                {% for d in fields.values %}
-                    model_name: '<a href="{{model.id}}">{{model.model_name}}</a>',
-                    tags: [ {% for tag in model.tags.all %} {pk:'{{tag.pk}}', name:'{{tag.name}}', color_hex:'{{tag.color_hex}}',  textcolor_hex:'{% readable_text_color tag.color_hex %}'}, {%endfor%} ],
-
-                    {% for group in d.values %}
-                        {% for field in group %}
-                            {{ field }}: {{model|get_model_value:field}},
-                        {% endfor %}
-                    {% endfor %}
-
-                {% endfor %}
-            },
-        {% endfor %}
-    ]
+    var full_data = JSON.parse(
+        document.getElementById("factsheet-rows").textContent);
+    var initial_columns = JSON.parse(
+        document.getElementById("factsheet-initial-columns").textContent);
 
     var render_tag = function (data, type, row){
         console.log("render_tag", data, type, row)
@@ -142,15 +149,18 @@
     }
 
     var all_columns = [
-        {data: 'model_name', name: 'Name', title: 'Name', visible: true},
+        {# `defaultContent` is mandatory, not tidiness: the table builds a #}
+        {# row cache across EVERY definition, visible or not, so handing 173 #}
+        {# of them rows that carry eight keys throws on the first draw. #}
+        {data: 'model_name', name: 'Name', title: 'Name', visible: true, defaultContent: ''},
         {% for d in fields.values %}
             {% for l, group in d.items %}
                     {% for field in group %}
-                        {data: '{{ field }}', name: '{{ field }}', title: '{{ field|white_out:'_' }}', visible: {% if field in default %} true {% else %} false {%endif %}},
+                        {data: '{{ field }}', name: '{{ field }}', title: '{{ field|white_out:'_' }}', visible: {% if field in default %} true {% else %} false {%endif %}, defaultContent: ''},
                     {% endfor %}
             {% endfor %}
         {% endfor %}
-        {data: 'tags', name: 'tags', title: 'tags', visible: true, render:render_tag },
+        {data: 'tags', name: 'tags', title: 'tags', visible: true, render:render_tag, defaultContent: '' },
     ];
 
     var fields = {
@@ -165,39 +175,71 @@
         {% endfor %}
     };
 
-    var active_tags = [];
+    // Raw tag pks, the same format the URL and the CSV link carry, seeded from
+    // the checkboxes the server rendered out of `?tags=`. The filter's own
+    // logic lives in `modelview/tag_filter.js` -- the module imported above --
+    // because both bugs this filter shipped were browser-side and so invisible
+    // to a Django test.
+    var active_tags = tag_filter.checkedTagValues(document);
+
+    // Fetch the 165 columns the initial payload leaves out -- once, however
+    // often it is asked. The "once" is browser state, so the logic lives in
+    // `modelview/lazy_payload.js` with its own tests.
+    var ensure_full_payload = lazy_payload.createLoader(
+        function () {
+            return fetch("{% url 'modelview:list-payload' sheettype %}")
+                .then(function (response) { return response.json(); });
+        },
+        function (rows) {
+            // Wholesale, in the endpoint's order -- which is the list's own
+            // order, both pinned to the primary key. `draw(false)` because
+            // these are the same rows with more columns: a bare `draw()`
+            // means `draw(true)` in DataTables 1.10 and would throw a reader
+            // on page 4 back to page 1.
+            dt.clear();
+            dt.rows.add(rows);
+            dt.draw(false);
+        });
+
+    // One place to answer a failed fetch. The column is still revealed, empty:
+    // a dead click with no explanation would be worse than empty cells.
+    var request_full_payload = function () {
+        return ensure_full_payload().catch(function (error) {
+            console.error(
+                "the factsheet list could not load its remaining columns", error);
+        });
+    }
 
     var apply_filter = function (sender){
-        for (var i in fields[sender.id]) {
-            var property = fields[sender.id][i]
-            var column = dt.column(property+':name')
-            column.visible( sender.checked );
-        }
-
-
+        lazy_payload.toggleColumns(
+            fields[sender.id], sender.checked, initial_columns,
+            request_full_payload,
+            function (field, visible) {
+                dt.column(field + ':name').visible(visible);
+            });
     }
 
 
 
 
     var apply_tag_filter = function (sender){
-        if(sender.checked && active_tags.indexOf(sender.id) <0){
-            active_tags.push(sender.id);
-        } else {
-            var id = active_tags.indexOf(sender.id);
-            if(id>=0){
-                active_tags.splice(id, 1);
-            }
-        }
-        set_csv_link();
+        active_tags = tag_filter.toggleTag(active_tags, sender.value, sender.checked);
+        sync_filter_state();
         dt.draw();
     }
 
-    var set_csv_link = function (){
-        var href="{% url 'modelview:download' sheettype %}?";
-        href += 'tags=';
-        href += active_tags.join([separator = ',']);
-        document.getElementById("dlcsv").setAttribute("href", href);
+    // The query string is the canonical home of the filter, so a filtered view
+    // can be reloaded, bookmarked and shared -- and so the CSV link is simply
+    // the page's own `?tags=` value, with no second format to drift out of
+    // step with this one.
+    var sync_filter_state = function (){
+        document.getElementById("dlcsv").setAttribute(
+            "href",
+            "{% url 'modelview:download' sheettype %}"
+                + tag_filter.filterQuery(active_tags));
+        history.replaceState(
+            null, '', tag_filter.filteredUrl(window.location, active_tags));
+        tag_filter.showCheckedTags(document);
     }
 
     $(document).ready( function () {
@@ -205,24 +247,28 @@
         var tags_col = dt.column('tags:name').index();
         $.fn.dataTable.ext.search.push(
         function( settings, data, dataIndex ) {
-            for (var required of active_tags) {
-                var matches = false;
-                var tags = dt.row(dataIndex).data().tags
-                if(tags === undefined){
-                    return false;
-                }
-                for (var tag of tags) {
-                    if (required === 'select_'+tag.pk) {
-                        matches=true
-                    }
-                }
-                if(!matches){
-                    return false;
-                }
-            }
-            return true;
+            return tag_filter.rowMatchesTags(
+                dt.row(dataIndex).data().tags, active_tags);
         }
 );
+
+        // The filter arrived in the URL, so the checkboxes are already
+        // checked and `active_tags` already holds their pks -- but the first
+        // draw happened before the search extension above existed, and the
+        // CSV link has never been built at all. Both need one pass here, or a
+        // shared filtered URL would show the whole table and offer a download
+        // of it.
+        // The search box searches hidden columns too, so with eight columns
+        // loaded a search that used to match a model's citation text would
+        // return nothing and explain nothing. One ~200 ms pause on the first
+        // keystroke buys that back; a visitor who never searches never pays.
+        // The box does not exist until the table above has been initialised.
+        lazy_payload.bindSearchTrigger(document, request_full_payload);
+
+        sync_filter_state();
+        if (active_tags.length) {
+            dt.draw();
+        }
 
     } );
 

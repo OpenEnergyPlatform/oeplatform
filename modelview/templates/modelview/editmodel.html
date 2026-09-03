@@ -111,7 +111,9 @@
                   type="button"
                   role="tab"
                   aria-controls="Overview"
-                  aria-selected="false">Tags</button>
+                  aria-selected="false">
+            Tags <span id="tag-selected-count" class="badge bg-secondary">{{ form.selected_tag_pks|length }}</span>
+          </button>
         </li>
         <span onclick="window.onbeforeunload = function (e) {};">
           <input class="btn btn-info right" type="submit" value="Submit all" />

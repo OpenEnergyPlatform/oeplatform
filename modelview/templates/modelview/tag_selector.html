@@ -1,35 +1,98 @@
-<div id="Tags" class="tagcontainer tab-pane fade">
-  {% load dataedit.taghandler %}
-  <h4>Current tags</h4>
-  {% get_tags as all_tags %}
-  {% if not tags %}No tags were added, yet.{% endif %}
-  {% for t in tags %}
-    <a href=""
-       class="btn tag"
-       style="background:{{ t.color_hex }};
-              color:{% readable_text_color t.color_hex %}">{{ t.name }}</a>
-  {% endfor %}
-  <div id="tag_handler">
-    {% csrf_token %}
-    <h4>Choose tags to attach:</h4>
-    {% for t in all_tags %}
-      <span>
-        <input type="checkbox"
-               class="hidden"
-               name="tag_{{ t.pk }}"
-               id="select_{{ t.pk }}"
-               {% if t in tags %}checked{% endif %} />
-        <label class="form-label"
-               style="background:{{ t.color_hex }};
-                      color:{% readable_text_color t.color_hex %}"
-               class="btn tag"
-               for="select_{{ t.pk }}">{{ t.name }}</label>
-      </span>
-    {% endfor %}
-    {% if table %}
-      <input type="hidden" name="table" value="{{ table }}" />
-    {% endif %}
+{% load dataedit.taghandler %}
+{% get_tags as all_tags %}
+{% with selected=form.selected_tag_pks %}
+  <div id="Tags" class="tagcontainer tab-pane fade">
+    <h4>Current tags</h4>
+    {# Rendered from `selected`, so this is the state a submit would save: #}
+    {# the factsheet's own tags on a GET, the user's picks on a re-rendered #}
+    {# invalid POST. The script below keeps it in step with the checkboxes. #}
+    <span id="current-tags">
+      {% for t in all_tags %}
+        {% if t.pk in selected %}
+          <a href=""
+             class="btn tag"
+             style="background:{{ t.color_hex }};
+                    color:{% readable_text_color t.color_hex %}">{{ t.name }}</a>
+        {% endif %}
+      {% endfor %}
+    </span>
+    <span id="tag-selector-empty" {% if selected %}hidden{% endif %}>No tags are attached, yet.</span>
+    <div id="tag_handler">
+      <h4>
+        Choose tags to attach:
+        <button type="button" id="remove-all-tags" class="btn btn-secondary btn-sm">
+          Remove all tags
+        </button>
+      </h4>
+      {% for t in all_tags %}
+        <span>
+          {# One multi-valued field of raw pks, so the ModelForm's own `tags` #}
+          {# field receives them. `select_<pk>` survives as a DOM id only. #}
+          <input type="checkbox"
+                 class="hidden tag-checkbox"
+                 name="tags"
+                 value="{{ t.pk }}"
+                 id="select_{{ t.pk }}"
+                 {% if t.pk in selected %}checked{% endif %} />
+          <label class="form-label"
+                 style="background:{{ t.color_hex }};
+                        color:{% readable_text_color t.color_hex %}"
+                 class="btn tag"
+                 for="select_{{ t.pk }}">{{ t.name }}</label>
+        </span>
+      {% endfor %}
+    </div>
+    <hr />
+    You can also <a href="{% url 'dataedit:topic-list' %}">add new tags</a>
   </div>
-  <hr />
-  You can also <a href="{% url 'dataedit:topic-list' %}">add new tags</a>
-</div>
+{% endwith %}
+<script>
+  // The count on the Tags tab is the cheapest guard against the class of bug
+  // this widget shipped for ten months: 825 attached tags are invisible in a
+  // wall of checkboxes, and obvious as a number beside the tab label.
+  //
+  // "Current tags" is rebuilt from the checkboxes rather than left as the
+  // server rendered it, or "Remove all tags" would leave the pills on screen
+  // beside a "no tags are attached" message. The pills are clones of each
+  // checkbox's own label, so the colours cannot drift apart and no second
+  // copy of the vocabulary is shipped to the browser.
+  (function () {
+    const boxes = Array.from(document.querySelectorAll(".tag-checkbox"));
+    const count = document.getElementById("tag-selected-count");
+    const empty = document.getElementById("tag-selector-empty");
+    const current = document.getElementById("current-tags");
+
+    function pillFor(box) {
+      // The label is the checkbox's sibling inside its own <span>, so this
+      // needs no selector built from a primary key.
+      const pill = box.parentElement.querySelector("label").cloneNode(true);
+      pill.removeAttribute("for");
+      return pill;
+    }
+
+    function refresh() {
+      const checked = boxes.filter((box) => box.checked);
+      if (count) {
+        count.textContent = checked.length;
+      }
+      if (empty) {
+        empty.hidden = checked.length > 0;
+      }
+      if (current) {
+        current.replaceChildren(...checked.map(pillFor));
+      }
+    }
+
+    boxes.forEach((box) => box.addEventListener("change", refresh));
+
+    const removeAll = document.getElementById("remove-all-tags");
+    if (removeAll) {
+      removeAll.addEventListener("click", function () {
+        boxes.forEach((box) => (box.checked = false));
+        refresh();
+      });
+    }
+
+    refresh();
+  })();
+</script>
