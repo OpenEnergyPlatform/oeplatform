@@ -289,6 +289,18 @@ SPDX-License-Identifier: CC0-1.0
   download are unchanged.
   [(#2346)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2346)
 
+- New management command `repair_factsheet_tags`, which repairs the factsheets
+  the old tag editor damaged: 23 of 339 on production carry a copy of the whole
+  tag table, and those 23 hold 95% of every factsheet tag assignment in the
+  database. It reports by default and only changes anything with `--apply`,
+  writes a JSON record of exactly which tags it removed from which factsheet,
+  prints factsheets that sit near the threshold as needing a human decision, and
+  dates each factsheet's damage against the tag table's own history so it is
+  possible to say which backup would still recover its real tags. Repairing a
+  factsheet sets it to zero tags: the handful of genuine tags it had are
+  indistinguishable from the damage, and that loss is deliberate and recorded.
+  [(#2385)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2385)
+
 ## Documentation updates
 
 - New "Production deployment (Podman)" guide (Overview → Install → Ontop →

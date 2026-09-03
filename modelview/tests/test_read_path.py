@@ -11,7 +11,8 @@ from django.test.utils import CaptureQueriesContext
 
 from base.tests import TestViewsTestCase
 from modelview.helper import getClasses
-from modelview.tests.corpus import CORRUPT_THRESHOLD, seed_corpus
+from modelview.models import CORRUPT_TAG_THRESHOLD
+from modelview.tests.corpus import seed_corpus
 
 #: Big enough that a per-factsheet query shows up as a count proportional to
 #: N rather than as noise, small enough to stay CI-cheap. The read-path bounds
@@ -52,7 +53,7 @@ class TestCorpusFactory(TestViewsTestCase):
         corpus = seed_corpus(factsheets=8, tags=210, corrupted=2)
 
         for sheet in corpus.corrupted:
-            self.assertGreater(sheet.tags.count(), CORRUPT_THRESHOLD)
+            self.assertGreater(sheet.tags.count(), CORRUPT_TAG_THRESHOLD)
 
     def test_healthy_factsheets_are_well_under_the_threshold(self):
         corpus = seed_corpus(factsheets=8, tags=210, corrupted=2, healthy_tags=3)

@@ -28,6 +28,15 @@ from django.db.models import (
 
 from dataedit.models import Tag
 
+#: More than this many tags on one factsheet is corruption, not tagging.
+#:
+#: The old tag editor pre-checked every tag on the platform, so saving
+#: attached the lot. The census settled the line outright rather than by
+#: judgement: the distribution is bimodal with a factor-6.6 gap -- healthy
+#: factsheets top out at 106 tags and corrupted ones start at 696 -- so any
+#: threshold between 110 and 690 selects the same 23 factsheets.
+CORRUPT_TAG_THRESHOLD = 200
+
 
 class BasicFactsheet(models.Model):
     model_name = CharField(

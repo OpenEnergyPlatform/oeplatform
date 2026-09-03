@@ -33,14 +33,9 @@ from django.db import transaction
 
 from dataedit.models import Tag
 from modelview.helper import getClasses
+from modelview.models import CORRUPT_TAG_THRESHOLD
 
-#: Production's detection rule for a factsheet corrupted by the tag editor
-#: (WF-03's census: the distribution is bimodal with a factor-6.6 gap --
-#: healthy factsheets top out at 106 tags, corrupted ones start at 696, so any
-#: threshold between 110 and 690 selects the same 23).
-CORRUPT_THRESHOLD = 200
-
-#: Larger than CORRUPT_THRESHOLD on purpose: a corrupted factsheet attaches the
+#: Larger than CORRUPT_TAG_THRESHOLD on purpose: a corrupted factsheet attaches the
 #: whole vocabulary, so a smaller one could not produce a detectable corruption.
 DEFAULT_TAGS = 260
 
@@ -114,10 +109,10 @@ def seed_corpus(
         raise ValueError("unknown sheettype: %r" % (sheettype,))
     if corrupted > factsheets:
         raise ValueError("cannot corrupt %d of %d factsheets" % (corrupted, factsheets))
-    if corrupted and tags <= CORRUPT_THRESHOLD:
+    if corrupted and tags <= CORRUPT_TAG_THRESHOLD:
         raise ValueError(
             "a corrupted factsheet needs a vocabulary larger than the %d-tag "
-            "detection threshold; got %d" % (CORRUPT_THRESHOLD, tags)
+            "detection threshold; got %d" % (CORRUPT_TAG_THRESHOLD, tags)
         )
 
     vocabulary = seed_tags(tags)
