@@ -432,6 +432,19 @@ FRAMEWORK_DEFAULT_COLUMNS = {
 }
 
 
+def view_props(sheettype: str):
+    """The view properties and default columns for a sheet type.
+
+    Two returns rather than two ternaries, because they always travel
+    together and were being paired by copy-paste at every call site -- which
+    is how a list page and the endpoint that completes it could quietly come
+    to disagree about what a row contains.
+    """
+    if sheettype == "framework":
+        return FRAMEWORK_VIEW_PROPS, FRAMEWORK_DEFAULT_COLUMNS
+    return MODEL_VIEW_PROPS, MODEL_DEFAULT_COLUMNS
+
+
 def getClasses(
     sheettype: str,
 ) -> tuple[

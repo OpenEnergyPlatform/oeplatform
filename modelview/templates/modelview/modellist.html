@@ -117,17 +117,24 @@
   {# handler below, which is what needs `tag_filter`. #}
   <script type="module">
     import * as tag_filter from "{% static 'modelview/tag_filter.js' %}";
+    import * as lazy_payload from "{% static 'modelview/lazy_payload.js' %}";
     window.tag_filter = tag_filter;
+    window.lazy_payload = lazy_payload;
   </script>
   {# The rows come from the view; `modelview/list_payload.py` says why. JSON #}
   {# via `json_script`, never a JS literal: `json_script` escapes `<`, `>` #}
   {# and `&`, so no field value can close this element. #}
   {{ rows|json_script:"factsheet-rows" }}
+  {# Which columns those rows already carry, so a toggle of one of them does #}
+  {# not fetch the other 165 for nothing. #}
+  {{ initial_columns|json_script:"factsheet-initial-columns" }}
   <script>
     var dt;
 
     var full_data = JSON.parse(
         document.getElementById("factsheet-rows").textContent);
+    var initial_columns = JSON.parse(
+        document.getElementById("factsheet-initial-columns").textContent);
 
     var render_tag = function (data, type, row){
         console.log("render_tag", data, type, row)
@@ -142,15 +149,18 @@
     }
 
     var all_columns = [
-        {data: 'model_name', name: 'Name', title: 'Name', visible: true},
+        {# `defaultContent` is mandatory, not tidiness: the table builds a #}
+        {# row cache across EVERY definition, visible or not, so handing 173 #}
+        {# of them rows that carry eight keys throws on the first draw. #}
+        {data: 'model_name', name: 'Name', title: 'Name', visible: true, defaultContent: ''},
         {% for d in fields.values %}
             {% for l, group in d.items %}
                     {% for field in group %}
-                        {data: '{{ field }}', name: '{{ field }}', title: '{{ field|white_out:'_' }}', visible: {% if field in default %} true {% else %} false {%endif %}},
+                        {data: '{{ field }}', name: '{{ field }}', title: '{{ field|white_out:'_' }}', visible: {% if field in default %} true {% else %} false {%endif %}, defaultContent: ''},
                     {% endfor %}
             {% endfor %}
         {% endfor %}
-        {data: 'tags', name: 'tags', title: 'tags', visible: true, render:render_tag },
+        {data: 'tags', name: 'tags', title: 'tags', visible: true, render:render_tag, defaultContent: '' },
     ];
 
     var fields = {
@@ -172,14 +182,41 @@
     // to a Django test.
     var active_tags = tag_filter.checkedTagValues(document);
 
+    // Fetch the 165 columns the initial payload leaves out -- once, however
+    // often it is asked. The "once" is browser state, so the logic lives in
+    // `modelview/lazy_payload.js` with its own tests.
+    var ensure_full_payload = lazy_payload.createLoader(
+        function () {
+            return fetch("{% url 'modelview:list-payload' sheettype %}")
+                .then(function (response) { return response.json(); });
+        },
+        function (rows) {
+            // Wholesale, in the endpoint's order -- which is the list's own
+            // order, both pinned to the primary key. `draw(false)` because
+            // these are the same rows with more columns: a bare `draw()`
+            // means `draw(true)` in DataTables 1.10 and would throw a reader
+            // on page 4 back to page 1.
+            dt.clear();
+            dt.rows.add(rows);
+            dt.draw(false);
+        });
+
+    // One place to answer a failed fetch. The column is still revealed, empty:
+    // a dead click with no explanation would be worse than empty cells.
+    var request_full_payload = function () {
+        return ensure_full_payload().catch(function (error) {
+            console.error(
+                "the factsheet list could not load its remaining columns", error);
+        });
+    }
+
     var apply_filter = function (sender){
-        for (var i in fields[sender.id]) {
-            var property = fields[sender.id][i]
-            var column = dt.column(property+':name')
-            column.visible( sender.checked );
-        }
-
-
+        lazy_payload.toggleColumns(
+            fields[sender.id], sender.checked, initial_columns,
+            request_full_payload,
+            function (field, visible) {
+                dt.column(field + ':name').visible(visible);
+            });
     }
 
 
@@ -221,6 +258,13 @@
         // CSV link has never been built at all. Both need one pass here, or a
         // shared filtered URL would show the whole table and offer a download
         // of it.
+        // The search box searches hidden columns too, so with eight columns
+        // loaded a search that used to match a model's citation text would
+        // return nothing and explain nothing. One ~200 ms pause on the first
+        // keystroke buys that back; a visitor who never searches never pays.
+        // The box does not exist until the table above has been initialised.
+        lazy_payload.bindSearchTrigger(document, request_full_payload);
+
         sync_filter_state();
         if (active_tags.length) {
             dt.draw();

@@ -19,7 +19,7 @@ why the query count is a bound in its own right and not a proxy for seconds.
 
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
-"""  # noqa: 501
+"""  # noqa: E501
 
 from django.utils.html import escape, format_html
 
@@ -47,6 +47,21 @@ def leaf_fields(view_props):
         for names in group.values()
         for field in names
     ]
+
+
+def initial_fields(view_props, default_columns):
+    """The leaf fields the *first* payload carries: the default columns.
+
+    `model_name` and `tags` are in `default_columns` too but are not leaf
+    fields -- the builder always emits them -- so they are filtered out here
+    rather than special-cased twice.
+
+    Six of 171 for a model factsheet, three of 41 for a framework. The rest
+    arrive from the full-payload endpoint on the first column toggle or the
+    first search keystroke, because shipping all of them costs 20.1 MB to
+    display eight columns.
+    """
+    return [field for field in leaf_fields(view_props) if field in default_columns]
 
 
 def build_list_payload(queryset, fields):

@@ -13,7 +13,7 @@ reads it.
 
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
-"""  # noqa: 501
+"""  # noqa: E501
 
 import json
 import re
@@ -39,14 +39,6 @@ _PAYLOAD = re.compile(
     r'<script id="%s" type="application/json">(.*?)</script>' % PAYLOAD_ELEMENT_ID,
     re.DOTALL,
 )
-
-
-#: How many model fields each sheet type's view properties name. Asserted
-#: absolutely, because the expected key set below is derived with the *same*
-#: helper the view uses -- so a `leaf_fields` that silently dropped a group
-#: would otherwise agree with itself.
-MODEL_LEAF_FIELDS = 171
-FRAMEWORK_LEAF_FIELDS = 41
 
 
 #: The test client logs in and out around every request, so a raw query
@@ -101,9 +93,25 @@ class ListPayloadTestCase(TestViewsTestCase):
         _html, raw = self.raw_payload(sheettype, query)
         return json.loads(raw, object_pairs_hook=_no_duplicate_keys)
 
+    def full_payload(self, sheettype):
+        """The complete record, from the lazy endpoint.
+
+        The list page ships only the default columns since the payload became
+        page-sized, so every assertion about a non-default field belongs
+        here. Same builder either way -- that is the point of the seam.
+        """
+        resp = self.get("modelview:list-payload", kwargs={"sheettype": sheettype})
+        return json.loads(
+            resp.content.decode("utf-8"), object_pairs_hook=_no_duplicate_keys
+        )
+
     def rows_by_name(self, sheettype, query=None):
-        """The payload keyed by factsheet name."""
+        """The list page's payload, keyed by factsheet name."""
         return {factsheet_name(row): row for row in self.payload(sheettype, query)}
+
+    def full_rows_by_name(self, sheettype):
+        """The complete record, keyed by factsheet name."""
+        return {factsheet_name(row): row for row in self.full_payload(sheettype)}
 
 
 class TestPayloadShape(ListPayloadTestCase):
@@ -139,21 +147,17 @@ class TestPayloadShape(ListPayloadTestCase):
         for sheettype in ("model", "framework"):
             self.payload(sheettype)  # the hook raises on a repeated key
 
-    def test_a_row_carries_every_field_the_view_properties_name(self):
-        """T7 trims this to the eight default columns; today it is all of them."""
+    def test_the_full_payload_carries_every_field_the_view_properties_name(self):
+        """Which columns the *list* ships is bounded in `test_lazy_payload`."""
         cases = (
-            ("model", MODEL_VIEW_PROPS, MODEL_LEAF_FIELDS),
-            ("framework", FRAMEWORK_VIEW_PROPS, FRAMEWORK_LEAF_FIELDS),
+            ("model", MODEL_VIEW_PROPS),
+            ("framework", FRAMEWORK_VIEW_PROPS),
         )
-        for sheettype, props, count in cases:
-            names = leaf_fields(props)
-            self.assertEqual(len(names), count, msg=sheettype)
+        for sheettype, props in cases:
+            row = self.full_payload(sheettype)[0]
 
-            row = self.payload(sheettype)[0]
-
-            self.assertEqual(
-                set(row), set(names) | {"model_name", "tags"}, msg=sheettype
-            )
+            expected = set(leaf_fields(props)) | {"model_name", "tags"}
+            self.assertEqual(set(row), expected, msg=sheettype)
 
     def test_model_name_links_to_the_factsheet(self):
         cls, _ = getClasses("model")
@@ -316,21 +320,25 @@ class TestPayloadEscaping(ListPayloadTestCase):
 
     def test_a_field_carrying_an_onerror_image_cannot_execute(self):
         """The live risk: any logged-in account can edit any factsheet."""
-        self.sheet.costs = '<img src=x onerror="window.pwned=1">'
+        self.sheet.comment_on_geo_resolution = '<img src=x onerror="p=1">'
         self.sheet.save()
 
         row = self.rows_by_name("model")[self.sheet.model_name]
 
-        self.assertNotIn("<img", row["costs"])
-        self.assertIn("&lt;img", row["costs"])
+        self.assertNotIn("<img", row["comment_on_geo_resolution"])
+        self.assertIn("&lt;img", row["comment_on_geo_resolution"])
 
     def test_the_entries_of_an_array_field_are_escaped_too(self):
+        """Through the full payload: array fields are not default columns."""
         self.sheet.institutions = ["<b>bold</b>", "plain"]
         self.sheet.save()
 
-        row = self.rows_by_name("model")[self.sheet.model_name]
+        rows = self.full_rows_by_name("model")
 
-        self.assertEqual(row["institutions"], ["&lt;b&gt;bold&lt;/b&gt;", "plain"])
+        self.assertEqual(
+            rows[self.sheet.model_name]["institutions"],
+            ["&lt;b&gt;bold&lt;/b&gt;", "plain"],
+        )
 
     def test_a_model_name_carrying_markup_is_escaped_inside_the_link(self):
         """`model_name` is the one value the payload wraps in HTML itself."""
@@ -356,7 +364,7 @@ class TestPayloadTruncation(ListPayloadTestCase):
         cls.sheet = corpus.factsheets[0]
         cls.sheet.primary_purpose = " ".join("word%d" % i for i in range(30))
         cls.sheet.institutions = [" ".join("inst%d" % i for i in range(30))]
-        cls.sheet.costs = "short enough"
+        cls.sheet.comment_on_geo_resolution = "short enough"
         cls.sheet.save()
 
     def _row(self):
@@ -373,18 +381,21 @@ class TestPayloadTruncation(ListPayloadTestCase):
         self.assertEqual(len(value.split(" ")), MAX_WORDS + 1)
 
     def test_a_short_string_is_untouched(self):
-        self.assertEqual(self._row()["costs"], "short enough")
+        self.assertEqual(self._row()["comment_on_geo_resolution"], "short enough")
 
     def test_the_entries_of_an_array_field_are_truncated_too(self):
-        entry = self._row()["institutions"][0]
+        """Through the full payload: array fields are not default columns."""
+        entry = self.full_rows_by_name("model")[self.sheet.model_name]["institutions"][
+            0
+        ]
 
         self.assertEqual(len(entry.split(" ")), MAX_WORDS + 1)
 
     def test_newlines_are_stripped(self):
-        self.sheet.costs = "one\ntwo\r\nthree"
+        self.sheet.comment_on_geo_resolution = "one\ntwo\r\nthree"
         self.sheet.save()
 
-        self.assertEqual(self._row()["costs"], "onetwothree")
+        self.assertEqual(self._row()["comment_on_geo_resolution"], "onetwothree")
 
 
 class TestTheTableWiringSurvives(ListPayloadTestCase):

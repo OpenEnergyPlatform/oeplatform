@@ -279,6 +279,16 @@ SPDX-License-Identifier: CC0-1.0
   whose text happens to contain a closing script tag can no longer break the
   page. [(#2346)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2346)
 
+- Model/Framework factsheet overview: the page now sends the columns the table
+  actually shows - eight of 173 for models, five of 43 for frameworks - instead
+  of every field of every factsheet, which on production is a 20 MB page to
+  display eight columns. The remaining columns are fetched once, in the
+  background, the first time a column is switched on or the search box is used,
+  so searching still matches text in hidden columns and a visitor who does
+  neither never waits for them. Sorting, paging, the tag filter and the CSV
+  download are unchanged.
+  [(#2346)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2346)
+
 ## Documentation updates
 
 - New "Production deployment (Podman)" guide (Overview → Install → Ontop →

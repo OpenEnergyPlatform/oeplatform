@@ -23,7 +23,12 @@ import re
 import urllib3
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import Http404, HttpResponse, HttpResponseForbidden
+from django.http import (
+    Http404,
+    HttpResponse,
+    HttpResponseForbidden,
+    JsonResponse,
+)
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.cache import never_cache
@@ -32,15 +37,16 @@ from django.views.generic import View
 
 from dataedit.models import Tag
 from modelview.helper import (
-    FRAMEWORK_DEFAULT_COLUMNS,
-    FRAMEWORK_VIEW_PROPS,
-    MODEL_DEFAULT_COLUMNS,
-    MODEL_VIEW_PROPS,
     getClasses,
     printable,
     processPost,
+    view_props,
 )
-from modelview.list_payload import build_list_payload, leaf_fields
+from modelview.list_payload import (
+    build_list_payload,
+    initial_fields,
+    leaf_fields,
+)
 from modelview.models import BasicFactsheet
 
 logger = logging.getLogger("oeplatform")
@@ -139,12 +145,7 @@ def list_sheets_view(request, sheettype):
     fields = {}
     defaults = set()
 
-    fields = (
-        FRAMEWORK_VIEW_PROPS if sheettype == "framework" else MODEL_VIEW_PROPS
-    )  # noqa
-    defaults = (
-        FRAMEWORK_DEFAULT_COLUMNS if sheettype == "framework" else MODEL_DEFAULT_COLUMNS
-    )
+    fields, defaults = view_props(sheettype)
 
     if sheettype == "framework":
         label = "Framework"
@@ -155,8 +156,18 @@ def list_sheets_view(request, sheettype):
     # without it the payload is one query per factsheet per view-property
     # group. Why the rows are built here rather than in the template is
     # `modelview/list_payload.py`'s docstring.
-    models = c.objects.all().prefetch_related("tags")
-    rows = build_list_payload(models, leaf_fields(fields))
+    #
+    # `order_by` because the lazy payload replaces these rows wholesale, and
+    # no factsheet model declares a `Meta.ordering` -- so today's agreement
+    # between the two is a Postgres accident that an UPDATE can end.
+    models = c.objects.all().order_by("pk").prefetch_related("tags")
+
+    # Page-sized: the default columns for every row, and nothing else. The
+    # other 165 come from `list_payload_view` on the first column toggle or
+    # the first search keystroke. The page has to know which it already holds,
+    # or every toggle would refetch.
+    initial = initial_fields(fields, defaults)
+    rows = build_list_payload(models, initial)
 
     # The tags actually in use by THIS sheet type, each once, by name.
     #
@@ -186,6 +197,7 @@ def list_sheets_view(request, sheettype):
         "modelview/modellist.html",
         {
             "rows": rows,
+            "initial_columns": sorted(defaults),
             "label": label,
             "tags": tags,
             "selected_tag_pks": selected_tag_pks,
@@ -194,6 +206,38 @@ def list_sheets_view(request, sheettype):
             "sheettype": sheettype,
         },
     )
+
+
+@never_cache
+def list_payload_view(request, sheettype):
+    """Every column of every factsheet, for the list page's lazy fetch.
+
+    The list ships the default columns only -- 1.32 MB at production's shape
+    against 20.1 MB for the full record -- and DataTables searches hidden
+    columns, so without this endpoint a search that used to find a model by
+    its citation text would return nothing and say nothing. It is fetched
+    once, on the first toggle or the first keystroke; a visitor who neither
+    toggles nor searches never pays for it.
+
+    Same builder, same queryset, same order as the list, because the table
+    replaces its rows with these wholesale.
+
+    A bare JSON array (`safe=False`), which is public data either way: these
+    are the rows the CSV download already serves to anonymous callers.
+    `never_cache` because a `fetch` GET is cacheable where the HTML page
+    carrying the initial payload is not -- and a stale half of a row set is
+    worse than either half being stale.
+    """
+    c, _ = getClasses(sheettype)
+    if not c:
+        raise Http404(
+            "We dropped the scenario factsheets in favor of scenario bundles."
+        )
+
+    fields, _defaults = view_props(sheettype)
+    models = c.objects.all().order_by("pk").prefetch_related("tags")
+
+    return JsonResponse(build_list_payload(models, leaf_fields(fields)), safe=False)
 
 
 @never_cache
