@@ -184,10 +184,15 @@ class DatasetReadSerializer(serializers.ModelSerializer):
 class DatasetCreateSerializer(serializers.Serializer):
     # the name is the dataset's permanent identifier (URL key, oemetadata
     # name) and is immutable after creation
-    name = serializers.SlugField()
-    title = serializers.CharField()
-    description = serializers.CharField()
-    at_id = serializers.URLField(required=False)
+    name = serializers.SlugField(help_text="Name of the dataset")
+    title = serializers.CharField(
+        help_text="Anzeigename des Datensatzes, z. B. 'Wind Power Dataset Germany'"
+    )
+    description = serializers.CharField(help_text="Kurze Beschreibung des Datensatzes")
+    at_id = serializers.URLField(
+        required=False,
+        help_text="Optional: Persistenter Identifier oder URL für den Datensatz",
+    )
 
 
 class DatasetUpdateSerializer(serializers.Serializer):
