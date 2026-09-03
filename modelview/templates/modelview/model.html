@@ -32,11 +32,11 @@
     </div>
   </div>
   <div class="card-container">
-    <div class="card ">
+    <div class="card">
       <div class="card-header">
         <a class="fill-div" data-bs-toggle="collapse" href="#GeneralInformation">General Information</a>
       </div>
-      <div id="GeneralInformation" class="card-body expand in  in">
+      <div id="GeneralInformation" class="card-body expand in in">
         <table class="profiletable">
           {% include 'modelview/model_snippet.html' with model=model field='model_name' %}
           {% include 'modelview/model_snippet.html' with model=model field='acronym' %}
@@ -84,11 +84,11 @@
         </table>
       </div>
     </div>
-    <div class="card ">
+    <div class="card">
       <div class="card-header">
         <a data-bs-toggle="collapse" href="#Openness">Openness</a>
       </div>
-      <div id="Openness" class="card-body collapse in ">
+      <div id="Openness" class="card-body collapse in">
         <table class="profiletable">
           {% include 'modelview/model_snippet.html' with model=model field='open_source' %}
           {% if not model.open_source %}
@@ -121,11 +121,11 @@
         {% endif %}
       </div>
     </div>
-    <div class="card ">
+    <div class="card">
       <div class="card-header">
         <a href="#Software" data-bs-toggle="collapse">Software</a>
       </div>
-      <div id="Software" class="card-body collapse in ">
+      <div id="Software" class="card-body collapse in">
         <table class="profiletable">
           {% include 'modelview/model_snippet.html' with model=model field='modelling_software' %}
           {% include 'modelview/model_snippet.html' with model=model field='interal_data_processing_software' %}
@@ -135,11 +135,11 @@
         </table>
       </div>
     </div>
-    <div class="card ">
+    <div class="card">
       <div class="card-header">
         <a data-bs-toggle="collapse" href="#Coverage">Coverage</a>
       </div>
-      <div id="Coverage" class="card-body collapse  ">
+      <div id="Coverage" class="card-body collapse">
         <table class="profiletable">
           <tr>
             <td class="sheetlabel">Modeled energy sectors (final energy)</td>
@@ -269,11 +269,11 @@
         </table>
       </div>
     </div>
-    <div class="card ">
+    <div class="card">
       <div class="card-header">
         <a data-bs-toggle="collapse" href="#MathematicalProperties">Mathematical Properties</a>
       </div>
-      <div id="MathematicalProperties" class="card-body collapse ">
+      <div id="MathematicalProperties" class="card-body collapse">
         <table class="profiletable">
           <tr>
             <td class="sheetlabel">Model class (optimisation)</td>
@@ -308,11 +308,11 @@
         </table>
       </div>
     </div>
-    <div class="card ">
+    <div class="card">
       <div class="card-header">
         <a class="fill-div" data-bs-toggle="collapse" href="#Integration">Model Integration</a>
       </div>
-      <div id="Integration" class="card-body collapse in  in">
+      <div id="Integration" class="card-body collapse in in">
         <table class="profiletable">
           {% include 'modelview/model_snippet.html' with model=model field='interfaces' %}
           {% include 'modelview/model_snippet.html' with model=model field='model_file_format' add=model.model_file_format_other_text %}
@@ -323,11 +323,11 @@
         </table>
       </div>
     </div>
-    <div class="card ">
+    <div class="card">
       <div class="card-header">
         <a data-bs-toggle="collapse" href="#References">References</a>
       </div>
-      <div id="References" class="card-body collapse  ">
+      <div id="References" class="card-body collapse">
         <div>
           <table class="profiletable">
             {% include 'modelview/model_snippet.html' with model=model field='citation_reference' %}

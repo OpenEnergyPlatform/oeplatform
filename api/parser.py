@@ -202,6 +202,22 @@ def parse_table_parts(
             else:
                 ccolumns = [constraint["constraint_parameter"]]
             constraints.append(UniqueConstraint(*ccolumns, **kwargs))
+        elif constraint_type == "foreign_key":
+            # Reject rather than silently drop: adding the constraint is a
+            # separate step, and the caller has to know that.
+            raise APIError(
+                "FOREIGN KEY is not supported when creating a table. Create the "
+                "table first, then add the constraint with a POST to the table "
+                "endpoint."
+            )
+        elif constraint_type == "check":
+            raise APIError("CHECK constraints are not supported.")
+        else:
+            raise APIError(
+                "Unsupported constraint_type: '%s'. Supported when creating a "
+                "table: PRIMARY KEY, UNIQUE."
+                % (constraint.get("constraint_type") or constraint.get("type"))
+            )
 
     # autogenerate id column if missing
     if "id" not in columns_by_name:
@@ -383,7 +399,7 @@ def parse_select(d: dict):
                     field = dict(type="column", column=field)
                 col = parse_expression(field)
                 if "as" in field:
-                    col.label(read_pgid(field["as"]))
+                    col = col.label(read_pgid(field["as"]))
                 L.append(col)
         if "from" in d:
             kwargs["from_obj"] = _parse_from_item(get_or_403(d, "from"))
@@ -524,6 +540,29 @@ def _parse_column(d: dict, mapper: dict | None = None):
                 return column(name)
 
 
+def _parse_geometry_type(modifier: str) -> "geoalchemy2.Geometry":
+    """Build a Geometry type from the contents of geometry(...).
+
+    The modifier is either a subtype ("Point") or a subtype and an SRID
+    ("Point,4326"). Passing the whole modifier as the subtype used to leave the
+    SRID at the library default, which rendered a third type-modifier value
+    that postgres happens to ignore - so the declared SRID landed by accident.
+    Name the two parts instead.
+    """
+
+    geometry_type, _, srid = modifier.partition(",")
+    type_kwargs = {"geometry_type": geometry_type.strip().upper()}
+
+    srid = srid.strip()
+    if srid:
+        try:
+            type_kwargs["srid"] = int(srid)
+        except ValueError:
+            raise APIError("Invalid SRID in geometry type: '%s'" % srid)
+
+    return geoalchemy2.Geometry(**type_kwargs)
+
+
 def _parse_type(dt_string, **kwargs):
     if isinstance(dt_string, dict):
         dt = _parse_type(
@@ -546,7 +585,7 @@ def _parse_type(dt_string, **kwargs):
         if match:
             dt_string = match.groups()[0]
             if dt_string.lower() == "geometry":
-                return geoalchemy2.Geometry(geometry_type=match.groups()[1]), False
+                return _parse_geometry_type(match.groups()[1]), False
             else:
                 dt_cardinality = map(int, match.groups()[1].replace(" ", "").split(","))
             dt, autoincrement = _parse_type(dt_string)

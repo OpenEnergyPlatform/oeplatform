@@ -60,7 +60,7 @@ from sqlalchemy.sql.expression import Executable, Select
 
 import dataedit.metadata
 from api.bulk_upload_guard import BulkUploadStalled, default_stall_detector
-from api.error import APIError
+from api.error import APIError, reflectable_cause
 from api.parser import (
     get_column_definition_query,
     is_pg_qual,
@@ -1183,30 +1183,14 @@ def execute_sqla(query, cursor: AbstractCursor | Session) -> None:
                     params[key] = dialect._json_serializer(value)
         query = str(compiled)
         _execute(cursor, query, params)
-    except (psycopg2.DataError, exc.IdentifierError, psycopg2.IntegrityError) as e:
+    except exc.IdentifierError as e:
         raise APIError(str(e))
-    except psycopg2.InternalError as e:
-        if re.match(r".*Input geometry has unknown \(\d+\) SRID", str(e)):
-            # Return only SRID errors
-            raise APIError(str(e))
-        else:
-            raise e
-    except psycopg2.ProgrammingError as e:
-        if e.pgcode in [
-            "42703",  # undefined_column
-            "42883",  # undefined_function
-            "42P01",  # undefined_table
-            "42P02",  # undefined_parameter
-            "42704",  # undefined_object
-            "42804",  # datatype mismatch
-        ]:
-            # Return only `function does not exists` errors
-            raise APIError(e.diag.message_primary)
-        else:
-            raise e
-    except psycopg2.DatabaseError as e:
-        # Other DBAPIErrors should not be reflected to the client.
-        raise e
+    except psycopg2.Error as e:
+        cause = reflectable_cause(e)
+        if cause is None:
+            # Other DBAPIErrors should not be reflected to the client.
+            raise
+        raise APIError(cause)
     except Exception:
         raise
 
