@@ -11,14 +11,16 @@ Two calibrations matter, because they drive the two cost sites the map found:
 * `field_profile.json` - per-column mean character and word count over all
   305 production models, taken from `/factsheets/models/download/`
   (794,853 bytes, 305 x 192, one 0.31 s request). Word count is the one that
-  decides payload: `modelview.templatetags.model_extras.stringify` truncates
-  every string to 12 words, so a 4,532-character field renders as twelve
-  words. Character count only decides what Postgres stores.
+  decides payload: the row builder (`modelview.list_payload`, and before it
+  the template filter it replaced) truncates every string to 12 words, so a
+  4,532-character field renders as twelve words. Character count only decides
+  what Postgres stores.
 
 * `TAG_DISTRIBUTION` - the factsheet->tag edge count per factsheet, from a
   30-sheet sample of detail pages (every ~10th id, 21 s of cheap requests).
-  This is the number the N+1 in `modellist.html:114-128` multiplies by seven,
-  so a corpus that gets it wrong measures the wrong page.
+  This is the number the payload used to multiply by seven -- once per
+  view-property group, each an uncached `model.tags.all` -- so a corpus that
+  gets it wrong measures the wrong page.
 """
 
 from __future__ import annotations

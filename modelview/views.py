@@ -40,6 +40,7 @@ from modelview.helper import (
     printable,
     processPost,
 )
+from modelview.list_payload import build_list_payload, leaf_fields
 from modelview.models import BasicFactsheet
 
 logger = logging.getLogger("oeplatform")
@@ -150,7 +151,12 @@ def list_sheets_view(request, sheettype):
     else:
         label = "Model"
 
-    models = c.objects.all()
+    # The prefetch is a precondition of the builder, not an optimisation:
+    # without it the payload is one query per factsheet per view-property
+    # group. Why the rows are built here rather than in the template is
+    # `modelview/list_payload.py`'s docstring.
+    models = c.objects.all().prefetch_related("tags")
+    rows = build_list_payload(models, leaf_fields(fields))
 
     # The tags actually in use by THIS sheet type, each once, by name.
     #
@@ -179,7 +185,7 @@ def list_sheets_view(request, sheettype):
         request,
         "modelview/modellist.html",
         {
-            "models": models,
+            "rows": rows,
             "label": label,
             "tags": tags,
             "selected_tag_pks": selected_tag_pks,

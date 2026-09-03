@@ -268,6 +268,17 @@ SPDX-License-Identifier: CC0-1.0
   open to every logged-in account, as intended. Every factsheet create, update
   and delete now leaves one structured log line.
 
+- Model/Framework factsheet overview: the table's row data is now built by the
+  server in one pass instead of being assembled in the page template, which
+  takes the page from 2,138 database queries to 3 regardless of how many
+  factsheets exist. The template emitted each row's name and tag list once per
+  field group - seven times per model factsheet - so the page carried 85,092 tag
+  entries for 12,156 actual tag attachments; duplicate entries overwrote each
+  other in the browser, which is why this was never visible. The data is also
+  now delivered as JSON rather than as generated JavaScript, so a factsheet
+  whose text happens to contain a closing script tag can no longer break the
+  page. [(#2346)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2346)
+
 ## Documentation updates
 
 - New "Production deployment (Podman)" guide (Overview → Install → Ontop →
