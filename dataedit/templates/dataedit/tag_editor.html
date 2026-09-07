@@ -15,7 +15,10 @@
       <tr>
         <td style="padding:15px 15px 15px 15px; width:20%;">Name</td>
         <td style="width:80%">
-          <input name="tag_text" type="text" class="form-control" value="{{ name }}" />
+          <input name="tag_text"
+                 type="text"
+                 class="form-control"
+                 value="{{ name }}" />
         </td>
       </tr>
       <tr>
@@ -35,8 +38,12 @@
               This Tag is assigned to at least one object.
             </div>
           {% endif %}
-          <input type="submit" name="submit_save" class="btn btn-success" value="Save" />
-          <a href="{% url 'dataedit:topic-list' %}" class="btn btn-primary">Cancel</a>
+          <input type="submit"
+                 name="submit_save"
+                 class="btn btn-success"
+                 value="Save" />
+          <a href="{% url 'dataedit:topic-list' %}"
+             class="btn btn-primary">Cancel</a>
           {% if pk != None and is_admin %}
             <input type="submit"
                    name="submit_delete"
