@@ -1,100 +1,164 @@
 #!/usr/bin/env bash
 
-# SPDX-FileCopyrightText: 2026 Ariyosena Sutandang  <https://github.com/AriyosenaS> © Reiner Lemoine Institut
+# SPDX-FileCopyrightText: 2026 Ariyosena Sutandang <https://github.com/AriyosenaS> © Reiner Lemoine Institut
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-# Exit if no container name is provided
 if [ -z "$1" ]; then
-    echo "Error: No Docker container provided."
-    echo "Usage: ./logfiltering.sh <container_name_or_id> [time_window]"
-    echo "Example: ./logfiltering.sh web_app 1h    (Analyzes last 1 hour)"
-    echo "Example: ./logfiltering.sh web_app 30m   (Analyzes last 30 minutes)"
+    echo "Error: No container provided." >&2
+    echo "Usage: ./logfiltering.sh <container_name_or_id> [time_window] [output_csv]" >&2
     exit 1
 fi
 
 CONTAINER_NAME="$1"
-# Default to 24 hours if a second argument isn't provided
 TIME_WINDOW="${2:-24h}"
 
-# Ensure the docker command is found when running from cron
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+OUTPUT_CSV="${3:-${REPO_ROOT}/media/log_metrics/metrics_${CONTAINER_NAME}.csv}"
+
+mkdir -p "$(dirname "$OUTPUT_CSV")"
+
 export PATH=$PATH:/usr/local/bin:/usr/bin:/bin
+export USER_ID=$(id -u)
+export XDG_RUNTIME_DIR="/run/user/${USER_ID}"
+export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"
 
-# Create a secure temporary file to store the logs
+if command -v podman >/dev/null 2>&1; then
+    CONTAINER_CLI="podman"
+elif command -v docker >/dev/null 2>&1; then
+    CONTAINER_CLI="docker"
+else
+    echo "Error: Neither podman nor docker CLI found in PATH." >&2
+    exit 1
+fi
+
 LOG_FILE=$(mktemp)
+trap 'rm -f "$LOG_FILE"' EXIT
 
-# Ensure the temp file is deleted when the script exits, even if it crashes
-trap "rm -f $LOG_FILE" EXIT
+$CONTAINER_CLI logs --since "$TIME_WINDOW" "$CONTAINER_NAME" > "$LOG_FILE" 2>&1
 
-# Fetch logs from docker
-# Note: Redirecting both stdout and stderr (2>&1) just in case web logs go to stderr
-docker logs --since "$TIME_WINDOW" "$CONTAINER_NAME" > "$LOG_FILE" 2>&1
-
-# Check if the docker command failed or if the file is empty
 if [ ! -s "$LOG_FILE" ]; then
-    echo "No logs found for container '$CONTAINER_NAME' in the last $TIME_WINDOW or container doesn't exist."
     exit 0
 fi
 
-echo "Server Log Insights"
-echo "======================================================"
-echo "Analyzing container : $CONTAINER_NAME"
-echo "Time window         : Last $TIME_WINDOW"
-echo "------------------------------------------------------"
+TIMESTAMP=$(date -Iseconds)
 
-# --- 1. Overall Traffic & Health ---
-TOTAL_REQS=$(wc -l < "$LOG_FILE" | tr -d ' ')
-echo "Total Requests Processed    : $TOTAL_REQS"
+METRICS=$(awk '
+BEGIN {
+    total_reqs = 0
+    s200 = 0
+    s3xx = 0
+    s4xx = 0
+    s5xx = 0
+    logins = 0
+    dashboards = 0
+    metadata = 0
+    csv_dl = 0
+    dp_dl = 0
+    h1_b = 0; h1_u = ""
+    h2_b = 0; h2_u = ""
+    h3_b = 0; h3_u = ""
+}
+{
+    if (match($0, /"(GET|POST|PUT|DELETE|HEAD|OPTIONS|PATCH) ([^ "]+) HTTP\/[0-9.]+" ([0-9]{3}) ([0-9]+)/, m)) {
+        method = m[1]
+        url = m[2]
+        status = m[3] + 0
+        bytes = m[4] + 0
 
-echo "HTTP Status Codes:"
-# Extract column 6 (Status Code), count unique occurrences, and sort them
-awk '{print $6}' "$LOG_FILE" | sort | uniq -c | sort -nr | while read count status; do
-    echo " $status : $count requests"
-done
+        total_reqs++
 
-echo ""
-# --- 2. User Actions ---
-LOGIN_SUBMISSIONS=$(grep -c "POST /accounts/login/ HTTP" "$LOG_FILE")
-DB_DASHBOARD_HITS=$(grep -c "\"GET /database/ HTTP" "$LOG_FILE")
-METADATA_VIEWS=$(grep -c "GET /database/metadata-viewer/" "$LOG_FILE")
-echo " Login Form Submissions      : $LOGIN_SUBMISSIONS"
-echo " Database Dashboard Visits   : $DB_DASHBOARD_HITS"
-echo " Metadata/Details Views       : $METADATA_VIEWS"
+        if (status == 200) {
+            s200++
+        } else if (status >= 300 && status < 400) {
+            s3xx++
+        } else if (status >= 400 && status < 500) {
+            s4xx++
+        } else if (status >= 500 && status < 600) {
+            s5xx++
+        }
 
-# --- 3. Dynamic Tag Filters ---
-EXTRACTED_TAGS=$(grep "tags=" "$LOG_FILE" | awk -F'tags=' '{print $2}' | awk -F'[ &"]' '{print $1}' | sort -u)
+        if (method == "POST" && url ~ /^\/accounts\/login\/?/) {
+            logins++
+        }
+        if (url ~ /^\/database\/?(\?.*)?$/) {
+            dashboards++
+        }
+        if (url ~ /^\/database\/metadata-viewer\/?/) {
+            metadata++
+        }
 
-if [ ! -z "$EXTRACTED_TAGS" ]; then
-    for TAG_NAME in $EXTRACTED_TAGS; do
-        TAG_HITS=$(grep -c "tags=${TAG_NAME}" "$LOG_FILE")
-        echo " '${TAG_NAME}' Tag Filters       : $TAG_HITS"
-    done
+        if (url ~ /form=csv([& "('\''\?]|$)/) {
+            csv_dl++
+        }
+        if (url ~ /form=datapackage([& "('\''\?]|$)/) {
+            dp_dl++
+        }
+
+        # Use distinct array t_arr for captures to avoid scalar conflicts
+        scan_url = url
+        while (match(scan_url, /tags=([^ &"'\''\?]+)/, t_arr)) {
+            tags[t_arr[1]]++
+            scan_url = substr(scan_url, RSTART + RLENGTH)
+        }
+
+        if (url ~ /\/rows\/\?.*form=/) {
+            if (match(url, /\/api\/v0\/tables\/([^\/\?]+)\/rows\/\?.*form=([^ &"'\''\?]+)/, tbl)) {
+                key = tbl[1] "(" tbl[2] ")"
+                table_dls[key]++
+            }
+        }
+
+        # Keep running top 3 largest transfers
+        if (bytes > h1_b) {
+            h3_b = h2_b; h3_u = h2_u
+            h2_b = h1_b; h2_u = h1_u
+            h1_b = bytes; h1_u = url
+        } else if (bytes > h2_b) {
+            h3_b = h2_b; h3_u = h2_u
+            h2_b = bytes; h2_u = url
+        } else if (bytes > h3_b) {
+            h3_b = bytes; h3_u = url
+        }
+    }
+}
+END {
+    if (total_reqs == 0) {
+        exit 0
+    }
+
+    # Iterate using distinct scalar key names
+    tag_str = ""
+    for (tag_name in tags) {
+        tag_str = (tag_str ? tag_str ";" : "") tag_name ":" tags[tag_name]
+    }
+
+    dl_str = ""
+    for (tbl_name in table_dls) {
+        dl_str = (dl_str ? dl_str ";" : "") tbl_name ":" table_dls[tbl_name]
+    }
+
+    h1 = (h1_b > 0) ? sprintf("%.1f:%s", h1_b / 1024, h1_u) : ""
+    h2 = (h2_b > 0) ? sprintf("%.1f:%s", h2_b / 1024, h2_u) : ""
+    h3 = (h3_b > 0) ? sprintf("%.1f:%s", h3_b / 1024, h3_u) : ""
+
+    printf "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t%s\t%s\t%s\t%s\n",
+        total_reqs, s200, s3xx, s4xx, s5xx, logins, dashboards, metadata,
+        csv_dl, dp_dl, tag_str, dl_str, h1, h2, h3
+}' "$LOG_FILE")
+
+if [ -z "$METRICS" ]; then
+    exit 0
 fi
 
-# --- 4. Download Tracking ---
-echo ""
-echo "Data Exports Initiated:"
-CSV_DOWNLOADS=$(grep -c "form=csv" "$LOG_FILE")
-DATAPACKAGE_DOWNLOADS=$(grep -c "form=datapackage" "$LOG_FILE")
-echo "    CSV Files                : $CSV_DOWNLOADS"
-echo "    Datapackages (ZIP)       : $DATAPACKAGE_DOWNLOADS"
+IFS=$'\t' read -r TOTAL_REQS STATUS_200 STATUS_3XX STATUS_4XX STATUS_5XX \
+    LOGIN_SUBMISSIONS DB_DASHBOARD_HITS METADATA_VIEWS \
+    CSV_DOWNLOADS DATAPACKAGE_DOWNLOADS TAG_COUNTS DOWNLOADED_TABLES \
+    HEAVY_1 HEAVY_2 HEAVY_3 <<< "$METRICS"
 
-# Extract exact table names that were downloaded
-echo "   Detailed Downloads:"
-grep "/rows/?form=" "$LOG_FILE" | awk '{print $4}' | while read url; do
-    # Break down the URL: /api/v0/tables/biomass_capacities/rows/?form=csv
-    TABLE_NAME=$(echo "$url" | awk -F'/' '{print $5}')
-    FILE_TYPE=$(echo "$url" | awk -F'form=' '{print $2}')
-    echo "      - $TABLE_NAME (Format: $FILE_TYPE)"
-done
+if [ ! -f "$OUTPUT_CSV" ]; then
+    echo "timestamp,container,window,total_reqs,status_200,status_3xx,status_4xx,status_5xx,logins,dashboard_hits,metadata_views,csv_downloads,datapackage_downloads,tag_counts,table_downloads,1_heavy_download,2_heavy_download,3_heavy_download" > "$OUTPUT_CSV"
+fi
 
-# --- 5. Performance / Heavy Requests ---
-echo ""
-echo " Top 3 Heavy File Transfers (Bandwidth):"
-# Sort numerically (reverse) by column 7 (bytes), take the top 3, format into KB
-sort -k7 -nr "$LOG_FILE" | head -n 3 | awk '{
-    size=$7/1024;
-    printf " %.1f KB -> %s\n", size, $4
-}'
-
-echo "======================================================"
+echo "${TIMESTAMP},${CONTAINER_NAME},${TIME_WINDOW},${TOTAL_REQS},${STATUS_200},${STATUS_3XX},${STATUS_4XX},${STATUS_5XX},${LOGIN_SUBMISSIONS},${DB_DASHBOARD_HITS},${METADATA_VIEWS},${CSV_DOWNLOADS},${DATAPACKAGE_DOWNLOADS},\"${TAG_COUNTS}\",\"${DOWNLOADED_TABLES}\",\"${HEAVY_1}\",\"${HEAVY_2}\",\"${HEAVY_3}\"" >> "$OUTPUT_CSV"
