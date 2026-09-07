@@ -5,7 +5,6 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 A Bash script using `awk` to extract HTTP access metrics from Django application containers (supporting both **Podman** and **Docker**). It parses access logs via regex matching to ignore startup output and stack traces, appending time-series data to a structured **CSV** file.
 
----
 
 ## Output
 
