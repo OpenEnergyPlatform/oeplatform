@@ -1,5 +1,24 @@
 {% extends "modelview/base.html" %}
 {% load modelview_extras %}
+{% block site-header %}
+  {# The grey band every page is getting, and the way back out of a form #}
+  {# that is 171 fields long: an edit page reached from the overview had no #}
+  {# link back to it, and no heading outside the form's own content. #}
+  <div class="main-header">
+    <h1 class="main-header__title">
+      {% include "modelview/partials/factsheet_icon.html" %}
+      Model Factsheets
+    </h1>
+    <div class="main-header__wizard">
+      <a href="{% url 'modelview:modellist' 'model' %}">Overview</a> /
+      {% if method == "update" %}
+        <a href="{% url 'modelview:show-factsheet' 'model' name %}">{{ form.instance.model_name|default:name }}</a> / Edit
+      {% else %}
+        New model factsheet
+      {% endif %}
+    </div>
+  </div>
+{% endblock site-header %}
 {% block factsheets_content %}
   {% load django_bootstrap5 %}
   {% load static %}
@@ -14,7 +33,6 @@
     }
   </style>
   <link rel="stylesheet" href="{% static 'css/form-style.css' %}" />
-  <h1>Model</h1>
   <sup color="light grey">* required field</sup>
   <form action="{% if method == 'update' %}/factsheets/models/{{ name }}/update/{% else %}/factsheets/models/add/{% endif %}"
         method="post"

@@ -112,6 +112,12 @@ SPDX-License-Identifier: CC0-1.0
   be restored, because this part of the platform keeps no history. The 339
   factsheets that already existed are not affected and stay administrator-only.
 
+- The pages for creating and editing a Model or Framework factsheet now carry
+  the same header band as the rest of the site, with a breadcrumb back to the
+  overview and, when editing, to the factsheet itself. Until now these pages
+  opened straight into a form of well over a hundred fields with no heading and
+  no way back except the browser's own button.
+
 ## Documentation updates
 
 ## Code Quality
