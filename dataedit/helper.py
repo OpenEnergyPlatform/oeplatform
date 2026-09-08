@@ -14,7 +14,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 import re
 
 from django.contrib.postgres.search import SearchQuery
-from django.db.models import Q, QuerySet
+from django.db.models import Count, F, Q, QuerySet
 from django.http import HttpRequest, JsonResponse
 
 import api.parser
@@ -301,6 +301,26 @@ def get_all_tags(table_name: str | None = None) -> QuerySet[Tag]:
         tags = Tag.objects.all()
 
     return tags
+
+
+def get_all_tags_with_usage() -> QuerySet[Tag]:
+    """Every tag, annotated with what actually points at it.
+
+    `tag_usage` counts both consumers -- database tables and factsheets --
+    because the vocabulary is shared and every list of it governs both.
+
+    Deliberately NOT `Tag.usage_count`: that field is incremented only by
+    table search in this app and never by factsheets, so ordering a tag list
+    by it looks apt and ranks an unrelated quantity.
+    """
+    return (
+        Tag.objects.annotate(
+            tag_tables=Count("tables", distinct=True),
+            tag_factsheets=Count("factsheets", distinct=True),
+        )
+        .annotate(tag_usage=F("tag_tables") + F("tag_factsheets"))
+        .order_by("name")
+    )
 
 
 def sort_tags_by_popularity(tags: QuerySet[Tag]) -> QuerySet[Tag]:

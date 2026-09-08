@@ -12,6 +12,7 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     include: [
+      "dataedit/static/dataedit/**/*.test.js",
       "dataedit/static/peer_review/**/*.test.js",
       "modelview/static/modelview/**/*.test.js",
     ],

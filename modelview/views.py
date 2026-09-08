@@ -23,6 +23,7 @@ import re
 import urllib3
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Count
 from django.http import (
     Http404,
     HttpResponse,
@@ -184,7 +185,19 @@ def list_sheets_view(request, sheettype):
     # NOT ordered by `Tag.usage_count`: that field exists and looks apt, but
     # it is incremented only by table search in `dataedit` and never by
     # anything here, so it would rank an unrelated quantity.
-    tags = Tag.objects.filter(factsheets__in=models).distinct().order_by("name")
+    #
+    # `tag_usage` counts the factsheets of THIS sheet type carrying each tag,
+    # so the sidebar can lead with the ones people actually use. It is
+    # deliberately not `Tag.usage_count`: that field is incremented only by
+    # table search in `dataedit` and never by anything here, so ordering by it
+    # would rank an unrelated quantity. The annotation rides on the query that
+    # was already being made, so the page's three-query bound is unchanged.
+    tags = (
+        Tag.objects.filter(factsheets__in=models)
+        .annotate(tag_usage=Count("factsheets", distinct=True))
+        .distinct()
+        .order_by("name")
+    )
 
     # A set of pks, not a queryset. The template tests each offered tag for
     # membership, and `in` against a QuerySet is what made this page

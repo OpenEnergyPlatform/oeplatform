@@ -43,9 +43,31 @@
       one vocabulary, shared with database tables.
     </small>
   </p>
-  <div style="display: flex; flex-flow: wrap">
+  {# The list leads with the tags this sheet type actually uses most and #}
+  {# shows ten; searching reaches the rest without expanding. Rendered in #}
+  {# full either way, so a reader without javascript sees what they saw #}
+  {# before. `dataedit/tag_list.js` does the showing and hiding. #}
+  <div class="d-flex gap-2 mb-2">
+    <label class="visually-hidden" for="tag-filter-search">Search tags</label>
+    <input id="tag-filter-search"
+           data-tag-search
+           type="search"
+           class="form-control form-control-sm"
+           placeholder="Search tags"
+           autocomplete="off">
+    <label class="visually-hidden" for="tag-filter-sort">Sort tags</label>
+    <select id="tag-filter-sort"
+            data-tag-sort
+            class="form-select form-select-sm w-auto">
+      <option value="usage">Most used</option>
+      <option value="name">By name</option>
+    </select>
+  </div>
+  <div data-tag-list style="display: flex; flex-flow: wrap">
     {% for t in tags %}
       <label class="tag-checkbox-container form-label"
+             data-tag-name="{{ t.name }}"
+             data-tag-usage="{{ t.tag_usage }}"
              style="background:{{ t.color_hex }};
                     color:{% readable_text_color t.color_hex %}">
         {# `selected_tag_pks` is a SET of pks from `?tags=`, never a queryset: #}
@@ -63,6 +85,9 @@
       </label>
     {% endfor %}
   </div>
+  <button data-tag-expand type="button" class="btn btn-sm btn-link p-0" hidden>
+    Show all tags
+  </button>
   <hr>
   <h3>Fields</h3>
   <div class="checkbox-container">
@@ -133,6 +158,7 @@
   <script type="module">
     import * as tag_filter from "{% static 'modelview/tag_filter.js' %}";
     import * as lazy_payload from "{% static 'modelview/lazy_payload.js' %}";
+    import { bindTagList } from "{% static 'dataedit/tag_list.js' %}";
 
     var dt;
 
@@ -276,6 +302,11 @@
         }
 
     } );
+
+    // Ten tags, most-used first, with the rest a click or a search away.
+    // Selected tags stay visible past the limit, or a filter arriving in the
+    // URL would be active with nothing on screen to say so.
+    bindTagList(document, {limit: 10, sort: "usage"});
 
     // The sidebar's checkboxes call these through `onchange` attributes,
     // which resolve against `window` and not against this module's scope.

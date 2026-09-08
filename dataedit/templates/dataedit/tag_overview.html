@@ -25,4 +25,13 @@
 {% block after-body-bottom-js %}
   {{ block.super }}
   <script src="{% static 'ontology/htmx.js' %}"></script>
+  {# Re-bound after every htmx swap: the manager fragment replaces the list #}
+  {# wholesale, so the controls would otherwise be wired to elements that no #}
+  {# longer exist. #}
+  <script type="module">
+    import { bindTagList } from "{% static 'dataedit/tag_list.js' %}";
+    const bind = () => bindTagList(document, {limit: 10, sort: "name"});
+    bind();
+    document.body.addEventListener("htmx:afterSwap", bind);
+  </script>
 {% endblock after-body-bottom-js %}

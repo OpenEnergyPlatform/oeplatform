@@ -1,9 +1,27 @@
 {% load dataedit.taghandler %}
 {# Re-rendered with the manager after every save and delete, so the list #}
 {# and the editor can never disagree about what exists. #}
-<ul class="tag-list">
+{# Searching, sorting and collapsing are `dataedit/tag_list.js`, shared with #}
+{# the factsheet editor and the factsheet overview's filter. #}
+<div class="d-flex gap-2 mb-2">
+  <label class="visually-hidden" for="tag-admin-search">Search tags</label>
+  <input id="tag-admin-search"
+         data-tag-search
+         type="search"
+         class="form-control form-control-sm"
+         placeholder="Search tags"
+         autocomplete="off">
+  <label class="visually-hidden" for="tag-admin-sort">Sort tags</label>
+  <select id="tag-admin-sort"
+          data-tag-sort
+          class="form-select form-select-sm w-auto">
+    <option value="name">By name</option>
+    <option value="usage">Most used</option>
+  </select>
+</div>
+<ul class="tag-list" data-tag-list>
   {% for t in tags %}
-    <li>
+    <li data-tag-name="{{ t.name }}" data-tag-usage="{{ t.tag_usage }}">
       <a href="{% url 'dataedit:tags-edit' t.pk %}"
          hx-get="{% url 'dataedit:tags-edit' t.pk %}"
          hx-target="#tag-manager"
@@ -16,3 +34,7 @@
     <li class="text-muted">No tags yet.</li>
   {% endfor %}
 </ul>
+<button data-tag-expand
+        type="button"
+        class="btn btn-sm btn-link p-0 mb-2"
+        hidden>Show all tags</button>

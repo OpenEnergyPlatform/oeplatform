@@ -72,6 +72,7 @@ from dataedit.helper import (
     delete_tag,
     edit_tag,
     find_tables,
+    get_all_tags_with_usage,
     get_cancle_state,
     get_page,
     process_review_data,
@@ -308,7 +309,7 @@ def render_tag_manager(request, editing=None, saved: str = "") -> HttpResponse:
         request,
         "dataedit/partials/tag_manager.html",
         {
-            "tags": Tag.objects.order_by("name"),
+            "tags": get_all_tags_with_usage(),
             "editing": editing,
             "saved": saved,
         },
@@ -325,7 +326,7 @@ def tag_overview_view(request: HttpRequest) -> HttpResponse:
     return render(
         request=request,
         template_name="dataedit/tag_overview.html",
-        context={"tags": Tag.objects.order_by("name")},
+        context={"tags": get_all_tags_with_usage()},
     )
 
 

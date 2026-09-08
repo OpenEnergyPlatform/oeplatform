@@ -1,5 +1,5 @@
 {% load dataedit.taghandler %}
-{% get_tags as all_tags %}
+{% get_tags_with_usage as all_tags %}
 {% with selected=form.selected_tag_pks %}
   <div id="Tags" class="tagcontainer tab-pane fade">
     <h4>Current tags</h4>
@@ -25,28 +25,59 @@
                 id="remove-all-tags"
                 class="btn btn-secondary btn-sm">Remove all tags</button>
       </h4>
-      {% for t in all_tags %}
-        <span>
-          {# One multi-valued field of raw pks, so the ModelForm's own `tags` #}
-          {# field receives them. `select_<pk>` survives as a DOM id only. #}
-          <input type="checkbox"
-                 class="hidden tag-checkbox"
-                 name="tags"
-                 value="{{ t.pk }}"
-                 id="select_{{ t.pk }}"
-                 {% if t.pk in selected %}checked{% endif %} />
-          <label class="form-label"
-                 style="background:{{ t.color_hex }};
-                        color:{% readable_text_color t.color_hex %}"
-                 class="btn tag"
-                 for="select_{{ t.pk }}">{{ t.name }}</label>
-        </span>
-      {% endfor %}
+      {# ~825 checkboxes is a wall. Search and sort make it navigable; there #}
+      {# is deliberately NO collapsed limit here, because this is the place #}
+      {# you come to FIND a tag, and hiding options would defeat it. #}
+      {# `dataedit/tag_list.js`, shared with the other two tag lists. #}
+      <div class="d-flex gap-2 mb-2">
+        <label class="visually-hidden"
+               for="tag-selector-search">Search tags</label>
+        <input id="tag-selector-search"
+               data-tag-search
+               type="search"
+               class="form-control form-control-sm"
+               placeholder="Search tags"
+               autocomplete="off">
+        <label class="visually-hidden" for="tag-selector-sort">Sort tags</label>
+        <select id="tag-selector-sort"
+                data-tag-sort
+                class="form-select form-select-sm w-auto">
+          <option value="usage">Most used</option>
+          <option value="name">By name</option>
+        </select>
+      </div>
+      <div data-tag-list>
+        {% for t in all_tags %}
+          <span data-tag-name="{{ t.name }}" data-tag-usage="{{ t.tag_usage }}">
+            {# One multi-valued field of raw pks, so the ModelForm's own `tags` #}
+            {# field receives them. `select_<pk>` survives as a DOM id only. #}
+            <input type="checkbox"
+                   class="hidden tag-checkbox"
+                   name="tags"
+                   value="{{ t.pk }}"
+                   id="select_{{ t.pk }}"
+                   {% if t.pk in selected %}checked{% endif %} />
+            <label class="form-label"
+                   style="background:{{ t.color_hex }};
+                          color:{% readable_text_color t.color_hex %}"
+                   class="btn tag"
+                   for="select_{{ t.pk }}">{{ t.name }}</label>
+          </span>
+        {% endfor %}
+      </div>
     </div>
     <hr />
     You can also <a href="{% url 'dataedit:topic-list' %}">add new tags</a>
   </div>
 {% endwith %}
+{% load static %}
+<script type="module">
+  // A module, so the import is resolved before the body runs. A classic
+  // script below a module script executes FIRST -- that ordering trap cost
+  // the factsheet list page a live ReferenceError.
+  import { bindTagList } from "{% static 'dataedit/tag_list.js' %}";
+  bindTagList(document.getElementById("Tags"), {sort: "usage"});
+</script>
 <script>
   // The count on the Tags tab is the cheapest guard against the class of bug
   // this widget shipped for ten months: 825 attached tags are invisible in a

@@ -45,6 +45,15 @@ SPDX-License-Identifier: CC0-1.0
   rest of the site, with a breadcrumb back to the overview and to the factsheet
   itself.
 
+- Every list of tags on the platform can now be searched and sorted - the tag
+  administration page, the Tags tab of the factsheet editor, and the tag filter
+  on the factsheet overviews. All three showed the whole vocabulary at once,
+  which at 800+ tags is unreadable. The filter on the overviews additionally
+  starts with the ten tags most used by that sheet type and offers to show the
+  rest; a tag you have already selected stays visible. "Most used" counts what
+  actually carries the tag, and any tag stays reachable by typing part of its
+  name.
+
 ## Features
 
 - New management command `repair_factsheet_tags` repairs the factsheets the old
