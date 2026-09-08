@@ -52,8 +52,8 @@ jobs:
         ports:
           - 3030:3030
         options: >-
-          --name fuseki -e ADMIN_PASSWORD=admin -e FUSEKI_DATASET_1=ds
-          -e FUSEKI_MEM_1=true
+          --name fuseki -e ADMIN_PASSWORD=admin -e FUSEKI_DATASET_1=ds -e
+          FUSEKI_MEM_1=true
 
     strategy:
       matrix:
