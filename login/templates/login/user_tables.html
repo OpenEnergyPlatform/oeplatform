@@ -27,8 +27,7 @@
       {% include "login/partials/tables_sections.html" %}
     </div>
   {% endif %}
-  <div id="topics"
-       style="display: none">{{ topics|json_script:"topics" }}</div>
+  <div id="topics" style="display: none">{{ topics|json_script:"topics" }}</div>
   <!-- Modal for publishing functionality (after pressing publish button) -->
   {% include "login/modals/table_publish.html" %}
 {% endblock %}
