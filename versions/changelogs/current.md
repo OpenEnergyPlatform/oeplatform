@@ -301,6 +301,19 @@ SPDX-License-Identifier: CC0-1.0
   indistinguishable from the damage, and that loss is deliberate and recorded.
   [(#2385)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2385)
 
+- The tag pages under Database now work as one screen: the create/edit form
+  opens beside the tag list instead of on a page of its own with no heading and
+  a "Cancel" that led somewhere unrelated, and a name the platform rejects comes
+  back with what you typed instead of sending you away empty-handed. Tags are
+  one vocabulary shared by database tables and by Model/Framework factsheets,
+  and the form now says so: it reports how many tables and how many factsheets
+  carry a tag before you delete it. Three defects went with it - deleting a tag
+  was possible for any logged-in account (and the button was shown to nobody,
+  not even administrators); creating a tag whose name matched an existing one
+  apart from capitalisation or punctuation silently renamed and recoloured that
+  existing tag everywhere it was used; and a single tag with an unusual internal
+  name made the whole overview page fail to load.
+
 ## Documentation updates
 
 - New "Production deployment (Podman)" guide (Overview → Install → Ontop →
