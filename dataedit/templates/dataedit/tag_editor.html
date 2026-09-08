@@ -4,7 +4,7 @@
   <div class="main-header">
     <h1 class="main-header__title">Database</h1>
     <div class="main-header__wizard">
-      {% if pk %}
+      {% if editing.pk %}
         Edit Tag
       {% else %}
         Create Tag
@@ -20,7 +20,3 @@
     </div>
   </div>
 {% endblock %}
-{% block after-body-bottom-js %}
-  {{ block.super }}
-  <script src="{% static 'ontology/htmx.js' %}"></script>
-{% endblock after-body-bottom-js %}

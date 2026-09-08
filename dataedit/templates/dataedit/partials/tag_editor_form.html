@@ -1,10 +1,13 @@
-{# The one editor, used by the standalone page and by the overview's panel. #}
-{# `hx-post` keeps a rejected name on the page with what the user typed; #}
-{# without htmx the same view answers with a full page that does the same. #}
-<div id="tag-editor" class="card">
+{# The one editor, used by the overview's panel and by the standalone page. #}
+{#                                                                          #}
+{# The hx-* attributes are inert without htmx, and the standalone page      #}
+{# deliberately does not load it -- so there the form submits through       #}
+{# `action` and the view redirects, while in the panel it swaps the manager #}
+{# back in. One template, no flag, no second copy to drift.                 #}
+<div class="card">
   <div class="card-header">
-    {% if pk %}
-      Edit tag &mdash; <strong>{{ name }}</strong>
+    {% if editing.pk %}
+      Edit tag &mdash; <strong>{{ editing.name }}</strong>
     {% else %}
       Create Tag
     {% endif %}
@@ -13,19 +16,23 @@
     <form action="{% url 'dataedit:tags-set' %}"
           method="post"
           hx-post="{% url 'dataedit:tags-set' %}"
-          hx-target="#tag-editor"
+          hx-target="#tag-manager"
           hx-swap="outerHTML">
       {% csrf_token %}
-      {% if pk %}<input name="tag_id" type="hidden" value="{{ pk }}" />{% endif %}
+      {% if editing.pk %}
+        <input name="tag_id" type="hidden" value="{{ editing.pk }}" />
+      {% endif %}
       <div class="mb-3">
         <label class="form-label" for="tag_text">Name</label>
         <input id="tag_text"
                name="tag_text"
                type="text"
-               class="form-control {% if error %}is-invalid{% endif %}"
-               value="{{ name }}"
+               class="form-control {% if editing.error %}is-invalid{% endif %}"
+               value="{{ editing.name }}"
                required />
-        {% if error %}<div class="invalid-feedback d-block">{{ error }}</div>{% endif %}
+        {% if editing.error %}
+          <div class="invalid-feedback d-block">{{ editing.error }}</div>
+        {% endif %}
       </div>
       <div class="mb-3">
         <label class="form-label" for="tag_color">Colour</label>
@@ -33,28 +40,32 @@
                name="tag_color"
                type="color"
                class="form-control form-control-color"
-               value="{{ color_hex }}" />
+               value="{{ editing.color_hex }}" />
       </div>
-      {% if pk %}
+      {% if editing.pk %}
         <p class="text-muted">
-          {% if usage.total %}
-            Assigned to {{ usage.tables }} table{{ usage.tables|pluralize }}
-            and {{ usage.factsheets }} factsheet{{ usage.factsheets|pluralize }}.
+          {% if editing.usage.total %}
+            Assigned to {{ editing.usage.tables }} table{{ editing.usage.tables|pluralize }}
+            and {{ editing.usage.factsheets }} factsheet{{ editing.usage.factsheets|pluralize }}.
             Tags are one vocabulary shared by both, so deleting this tag removes
-            it from all {{ usage.total }} &mdash; and nothing here records that.
+            it from all {{ editing.usage.total }} &mdash; and nothing here records that.
           {% else %}
             Not assigned to any table or factsheet.
           {% endif %}
         </p>
       {% endif %}
       <input type="submit" name="submit_save" class="btn btn-success" value="Save" />
-      <a href="{% url 'dataedit:tags' %}" class="btn btn-secondary">Cancel</a>
-      {% if pk and user.is_admin %}
+      <a href="{% url 'dataedit:tags' %}"
+         hx-get="{% url 'dataedit:tags' %}"
+         hx-target="#tag-manager"
+         hx-swap="outerHTML"
+         class="btn btn-secondary">Cancel</a>
+      {% if editing.pk and user.is_admin %}
         <input type="submit"
                name="submit_delete"
                class="btn btn-warning float-end"
                value="Delete"
-               {% if usage.total %} onclick="return confirm('This removes the tag from {{ usage.total }} object(s). Continue?')"{% endif %} />
+               {% if editing.usage.total %} onclick="return confirm('This removes the tag from {{ editing.usage.total }} object(s). Continue?')"{% endif %} />
       {% endif %}
     </form>
   </div>

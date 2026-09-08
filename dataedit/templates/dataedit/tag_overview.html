@@ -20,22 +20,7 @@
     One vocabulary, shared by database tables and by Model/Framework factsheets.
     Renaming or deleting a tag here affects both.
   </p>
-  <div class="row">
-    <div class="col-lg-7">
-      <h3>Current tags</h3>
-      {% include "dataedit/partials/tag_list.html" %}
-      <a href="{% url 'dataedit:tags-new' %}"
-         hx-get="{% url 'dataedit:tags-new' %}"
-         hx-target="#tag-editor-panel"
-         hx-swap="innerHTML"
-         class="btn btn-info">Create new Tag</a>
-      <a href="{% url 'dataedit:topic-list' %}" class="btn btn-secondary">Back to Database</a>
-    </div>
-    {# The editor loads in here, so the common flow never leaves the page. #}
-    {# Both editor URLs still answer on their own, for a bookmark or a #}
-    {# browser with no javascript. #}
-    <div class="col-lg-5" id="tag-editor-panel"></div>
-  </div>
+  {% include "dataedit/partials/tag_manager.html" %}
 {% endblock %}
 {% block after-body-bottom-js %}
   {{ block.super }}

@@ -351,13 +351,14 @@ class TestTheHtmxPanel(TagPageTestCase):
     def test_the_overview_offers_the_panel_and_the_targets(self):
         html = self.overview()
 
-        self.assertIn('id="tag-editor-panel"', html)
+        self.assertIn('id="tag-manager"', html)
         self.assertIn("hx-get", html)
 
-    def test_an_htmx_request_returns_the_form_alone(self):
+    def test_an_htmx_request_returns_the_fragment_alone(self):
         resp = self.client.get(reverse("dataedit:tags-new"), **self.HTMX)
         html = resp.content.decode("utf-8")
 
+        self.assertTemplateUsed(resp, "dataedit/partials/tag_manager.html")
         self.assertTemplateUsed(resp, "dataedit/partials/tag_editor_form.html")
         self.assertNotIn("<html", html)
 
@@ -366,6 +367,58 @@ class TestTheHtmxPanel(TagPageTestCase):
 
         self.assertTemplateUsed(resp, "dataedit/tag_editor.html")
         self.assertIn("<html", resp.content.decode("utf-8"))
+
+    def test_a_successful_save_over_htmx_returns_the_fragment_not_a_page(self):
+        """The bug this pins: a 302 is followed transparently by htmx, so
+        answering a save with a redirect swapped the ENTIRE rendered site into
+        the editor panel."""
+        resp = self.client.post(
+            reverse("dataedit:tags-set"),
+            data={
+                "submit_save": "Save",
+                "tag_text": "Brand new",
+                "tag_color": "#16AAD9",
+            },
+            **self.HTMX,
+        )
+        html = resp.content.decode("utf-8")
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, "dataedit/partials/tag_manager.html")
+        self.assertNotIn("<html", html)
+        self.assertNotIn("<nav", html)
+        # The new tag is in the list that came back, and the panel is closed.
+        self.assertIn("Brand new", html)
+        self.assertNotIn("submit_save", html)
+
+    def test_a_delete_over_htmx_returns_the_fragment_not_a_page(self):
+        self.user.is_admin = True
+        self.user.save()
+        self.addCleanup(self._reset_admin)
+
+        resp = self.client.post(
+            reverse("dataedit:tags-set"),
+            data={"submit_delete": "Delete", "tag_id": self.tag.pk},
+            **self.HTMX,
+        )
+        html = resp.content.decode("utf-8")
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, "dataedit/partials/tag_manager.html")
+        self.assertNotIn("<html", html)
+        self.assertNotIn(self.tag.name, html)
+
+    def _reset_admin(self):
+        self.user.is_admin = False
+        self.user.save()
+
+    def test_cancel_over_htmx_closes_the_panel(self):
+        resp = self.client.get(reverse("dataedit:tags"), **self.HTMX)
+        html = resp.content.decode("utf-8")
+
+        self.assertTemplateUsed(resp, "dataedit/partials/tag_manager.html")
+        self.assertNotIn("<html", html)
+        self.assertNotIn("submit_save", html)
 
     def test_a_rejected_save_over_htmx_returns_the_form_not_a_page(self):
         resp = self.client.post(
@@ -382,6 +435,7 @@ class TestTheHtmxPanel(TagPageTestCase):
         self.assertTemplateUsed(resp, "dataedit/partials/tag_editor_form.html")
         self.assertNotIn("<html", html)
         self.assertIn("Wind Onshore", html)
+        self.assertIn("submit_save", html)
 
     def setUp(self):
         super().setUp()

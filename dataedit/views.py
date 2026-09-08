@@ -272,18 +272,18 @@ def tag_usage(tag: Tag) -> dict:
 def tag_editor_context(
     tag: Tag | None = None, name: str = "", color_hex: str = "#000000", error: str = ""
 ) -> dict:
-    """The editor's context, whichever of the three paths renders it.
+    """What the editor form needs, as one `editing` object.
 
-    One function because the three used to disagree: the standalone page
-    offered a Delete button gated on an `is_admin` variable no view ever
-    passed, and the failed-save path rendered nothing at all -- it redirected
-    to the overview and dropped what the user had typed.
+    One function because the three render paths used to disagree: the
+    standalone page offered a Delete button gated on an `is_admin` variable no
+    view ever passed, and the failed-save path rendered nothing at all -- it
+    redirected to the overview and dropped what the user had typed.
     """
     if tag is not None:
         return {
             "pk": tag.pk,
-            "name": tag.name,
-            "color_hex": tag.color_hex,
+            "name": name or tag.name,
+            "color_hex": color_hex if error else tag.color_hex,
             "usage": tag_usage(tag),
             "error": error,
         }
@@ -296,9 +296,32 @@ def tag_editor_context(
     }
 
 
+def render_tag_manager(request, editing=None, saved: str = "") -> HttpResponse:
+    """The list and the editor panel, as one fragment.
+
+    Every htmx path answers with exactly this -- the piece it replaces, never
+    a redirect and never a whole page. A redirect is followed transparently by
+    htmx, so answering a save with one put an entire rendered site inside the
+    editor panel. Same shape as `dataset_edit_view` in the login app.
+    """
+    return render(
+        request,
+        "dataedit/partials/tag_manager.html",
+        {
+            "tags": Tag.objects.order_by("name"),
+            "editing": editing,
+            "saved": saved,
+        },
+    )
+
+
 @login_required
 @never_cache
 def tag_overview_view(request: HttpRequest) -> HttpResponse:
+    # Cancel comes back here through htmx to close the panel, so the bare
+    # overview has to be answerable as a fragment too.
+    if _is_htmx(request):
+        return render_tag_manager(request)
     return render(
         request=request,
         template_name="dataedit/tag_overview.html",
@@ -309,23 +332,26 @@ def tag_overview_view(request: HttpRequest) -> HttpResponse:
 @login_required
 @never_cache
 def tag_editor_view(request: HttpRequest, tag_pk: str | None = None) -> HttpResponse:
-    """The create/edit form, as a whole page or as the overview's panel.
+    """The create/edit form: the overview's panel, or a page of its own.
 
-    The panel is the common path and the page is the fallback, so both render
-    the same partial and neither can drift from the other.
+    The panel is the common path and the page is the fallback for a bookmark
+    or a browser without javascript. Both render the same form partial, so
+    neither can drift from the other.
     """
-    context = tag_editor_context(Tag.get_or_none(tag_pk or ""))
-    template = (
-        "dataedit/partials/tag_editor_form.html"
-        if _is_htmx(request)
-        else "dataedit/tag_editor.html"
+    editing = tag_editor_context(Tag.get_or_none(tag_pk or ""))
+    if _is_htmx(request):
+        return render_tag_manager(request, editing=editing)
+    return render(
+        request=request,
+        template_name="dataedit/tag_editor.html",
+        context={"editing": editing},
     )
-    return render(request=request, template_name=template, context=context)
 
 
 @require_POST
 @login_required
 def tag_update_view(request: HttpRequest) -> HttpResponse:
+    htmx = _is_htmx(request)
     tag_id = request.POST.get("tag_id") or None
 
     if "submit_delete" in request.POST:
@@ -338,13 +364,17 @@ def tag_update_view(request: HttpRequest) -> HttpResponse:
         if not getattr(request.user, "is_admin", False):
             return HttpResponseForbidden("Only admins may delete tags.")
         tag = Tag.get_or_none(tag_id or "")
+        done = ""
         if tag:
             removed = tag_usage(tag)
             delete_tag(tag.pk)
-            messages.success(
-                request,
-                "Deleted the tag and removed it from %d object(s)." % removed["total"],
+            done = "Deleted the tag and removed it from %d object(s)." % (
+                removed["total"],
             )
+        if htmx:
+            return render_tag_manager(request, saved=done)
+        if done:
+            messages.success(request, done)
         return redirect(reverse("dataedit:tags"))
 
     name = request.POST.get("tag_text", "")
@@ -361,24 +391,25 @@ def tag_update_view(request: HttpRequest) -> HttpResponse:
         # A name conflict, or a name that normalises to nothing. Come back
         # with what was typed: the redirect this used to do sent the user to
         # the overview and discarded it.
-        error = "That tag name is not valid, or a tag by that name exists."
-        context = tag_editor_context(
-            Tag.get_or_none(tag_id or ""), name=name, color_hex=color, error=error
+        editing = tag_editor_context(
+            Tag.get_or_none(tag_id or ""),
+            name=name,
+            color_hex=color,
+            error="That tag name is not valid, or a tag by that name exists.",
         )
-        if tag_id:
-            context.update({"name": name, "color_hex": color})
-        if _is_htmx(request):
-            return render(
-                request=request,
-                template_name="dataedit/partials/tag_editor_form.html",
-                context=context,
-            )
+        if htmx:
+            return render_tag_manager(request, editing=editing)
         return render(
             request=request,
             template_name="dataedit/tag_editor.html",
-            context=context,
+            context={"editing": editing},
         )
 
+    if htmx:
+        # The panel closes and the list re-renders with the result in it,
+        # which is the confirmation. A Django message would be queued into the
+        # session and surface on some later full page load instead.
+        return render_tag_manager(request, saved="Saved the tag.")
     messages.success(request, "Saved the tag.")
     return redirect(reverse("dataedit:tags"))
 

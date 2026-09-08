@@ -1,13 +1,13 @@
 {% load dataedit.taghandler %}
-{# Swapped whole after every save, create and delete, so the list and the #}
-{# editor panel can never disagree about what exists. #}
-<ul id="tag-list" class="tag-list">
+{# Re-rendered with the manager after every save and delete, so the list #}
+{# and the editor can never disagree about what exists. #}
+<ul class="tag-list">
   {% for t in tags %}
     <li>
       <a href="{% url 'dataedit:tags-edit' t.pk %}"
          hx-get="{% url 'dataedit:tags-edit' t.pk %}"
-         hx-target="#tag-editor-panel"
-         hx-swap="innerHTML"
+         hx-target="#tag-manager"
+         hx-swap="outerHTML"
          class="btn tag"
          style="color:{% readable_text_color t.color_hex %};
                 background:{{ t.color_hex }}">{{ t.name }}</a>
