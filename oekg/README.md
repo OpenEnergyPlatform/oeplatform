@@ -68,6 +68,20 @@ To move the shape, bump `OEKG_SHAPES_PINNED_COMMIT` in `oeplatform/settings.py`
 and redeploy. The image builds (`docker/Dockerfile`, `podman/Dockerfile`) run
 the command at build time, after the OEO release is unpacked.
 
+### Known gap: only half the pair is pinned
+
+The shape is pinned; the **labels are not**, because the OEO they come from is
+not. `podman/Dockerfile` and `docker/docker-entrypoint.dev.sh` both fetch the
+ontology from `releases/latest`, and `podman-compose.yaml` mounts a persistent
+named volume over `/app/ontologies`, so the release the labels are generated
+from can differ between a build and the running container. The command does two
+things about it rather than hiding it: it prints the release it used, and it
+writes that version into `oeo_labels.ttl`, so a moved ontology shows up as an
+`updated` artifact instead of quietly changing what the validator sees. Pass
+`--oeo-version` to pin it explicitly. Pinning the ontology fetch itself is a
+separate job — it is already duplicated across four sites with three URLs and
+inconsistent pinning.
+
 ## Two things are called `oekg`
 
 - **This app** (`oekg/`, repo root) — reusable OEKG query functionality. Extend

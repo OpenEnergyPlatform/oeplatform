@@ -15,14 +15,14 @@ from django.test import SimpleTestCase, override_settings
 from rdflib import Graph
 
 from oekg.shape_artifacts import (
-    EmptyLabelSubsetError,
-    MissingOntologyError,
     NotAShapeError,
     PinnedRef,
     UnpinnedSourceError,
-    extract_label_subset,
-    fetch_shape,
+    UnusableOntologyError,
+    build_label_subset_payload,
+    fetch_shape_payload,
     raw_github_url,
+    write_artifact,
 )
 
 COMMIT = "b4604e02060624b381bdbe2f872df94cfd0f5630"
@@ -162,23 +162,27 @@ class FetchShapeTest(TempArtifactsTestCase):
     def read_ok(self, payload=SHAPE_TTL):
         return lambda url: payload
 
+    def fetch(self, url, destination, *, read_url):
+        """Obtain the shape and land it, the way the command does."""
+        return write_artifact(destination, fetch_shape_payload(url, read_url=read_url))
+
     def test_a_successful_fetch_lands_the_shape(self):
-        result = fetch_shape("http://x/s.ttl", self.shape_path, read_url=self.read_ok())
+        result = self.fetch("http://x/s.ttl", self.shape_path, read_url=self.read_ok())
 
         self.assertEqual(result.status, "created")
         self.assertTrue(result.changed)
         self.assertEqual(self.shape_path.read_bytes(), SHAPE_TTL)
 
     def test_re_running_reports_that_nothing_changed(self):
-        fetch_shape("http://x/s.ttl", self.shape_path, read_url=self.read_ok())
-        result = fetch_shape("http://x/s.ttl", self.shape_path, read_url=self.read_ok())
+        self.fetch("http://x/s.ttl", self.shape_path, read_url=self.read_ok())
+        result = self.fetch("http://x/s.ttl", self.shape_path, read_url=self.read_ok())
 
         self.assertEqual(result.status, "unchanged")
         self.assertFalse(result.changed)
 
     def test_a_moved_pin_reports_an_update(self):
-        fetch_shape("http://x/s.ttl", self.shape_path, read_url=self.read_ok())
-        result = fetch_shape(
+        self.fetch("http://x/s.ttl", self.shape_path, read_url=self.read_ok())
+        result = self.fetch(
             "http://x/s.ttl",
             self.shape_path,
             read_url=self.read_ok(OTHER_SHAPE_TTL),
@@ -189,7 +193,7 @@ class FetchShapeTest(TempArtifactsTestCase):
 
     def test_a_body_that_is_not_a_shape_is_refused(self):
         with self.assertRaises(NotAShapeError):
-            fetch_shape(
+            self.fetch(
                 "http://x/s.ttl",
                 self.shape_path,
                 read_url=self.read_ok(NOT_FOUND_BODY),
@@ -199,7 +203,7 @@ class FetchShapeTest(TempArtifactsTestCase):
 
     def test_turtle_without_a_node_shape_is_refused(self):
         with self.assertRaises(NotAShapeError):
-            fetch_shape(
+            self.fetch(
                 "http://x/s.ttl",
                 self.shape_path,
                 read_url=self.read_ok(b"@prefix ex: <http://example.org/> .\n"),
@@ -208,22 +212,22 @@ class FetchShapeTest(TempArtifactsTestCase):
         self.assertFalse(self.shape_path.exists())
 
     def test_a_failed_fetch_leaves_the_previous_shape_usable(self):
-        fetch_shape("http://x/s.ttl", self.shape_path, read_url=self.read_ok())
+        self.fetch("http://x/s.ttl", self.shape_path, read_url=self.read_ok())
 
         def boom(url):
             raise OSError("connection reset")
 
         with self.assertRaises(OSError):
-            fetch_shape("http://x/s.ttl", self.shape_path, read_url=boom)
+            self.fetch("http://x/s.ttl", self.shape_path, read_url=boom)
 
         self.assertEqual(self.shape_path.read_bytes(), SHAPE_TTL)
         Graph().parse(str(self.shape_path), format="turtle")
 
     def test_a_truncated_body_leaves_the_previous_shape_usable(self):
-        fetch_shape("http://x/s.ttl", self.shape_path, read_url=self.read_ok())
+        self.fetch("http://x/s.ttl", self.shape_path, read_url=self.read_ok())
 
         with self.assertRaises(NotAShapeError):
-            fetch_shape(
+            self.fetch(
                 "http://x/s.ttl",
                 self.shape_path,
                 read_url=self.read_ok(SHAPE_TTL[:60]),
@@ -236,14 +240,17 @@ class FetchShapeTest(TempArtifactsTestCase):
             raise OSError("connection reset")
 
         with self.assertRaises(OSError):
-            fetch_shape("http://x/s.ttl", self.shape_path, read_url=boom)
+            self.fetch("http://x/s.ttl", self.shape_path, read_url=boom)
 
         self.assertEqual(sorted(p.name for p in self.shapes_root.iterdir()), [])
 
 
-class ExtractLabelSubsetTest(TempArtifactsTestCase):
+class LabelSubsetTest(TempArtifactsTestCase):
+    def extract(self, source, destination, version="2.13.0"):
+        return write_artifact(destination, build_label_subset_payload(source, version))
+
     def test_only_labels_on_iri_subjects_survive(self):
-        result = extract_label_subset(self.oeo_full_owl, self.labels_path)
+        result = self.extract(self.oeo_full_owl, self.labels_path)
 
         self.assertEqual(result.status, "created")
         graph = Graph()
@@ -264,18 +271,31 @@ class ExtractLabelSubsetTest(TempArtifactsTestCase):
             },
         )
 
+    def test_the_ontology_version_is_recorded_in_the_file(self):
+        # Two of the three environments fetch the OEO from an unpinned
+        # "latest" release, so a moved ontology must show up as a changed
+        # artifact rather than quietly altering what the validator sees.
+        self.extract(self.oeo_full_owl, self.labels_path, version="2.13.0")
+        first = self.labels_path.read_bytes()
+
+        result = self.extract(self.oeo_full_owl, self.labels_path, version="2.14.0")
+
+        self.assertEqual(result.status, "updated")
+        self.assertNotEqual(self.labels_path.read_bytes(), first)
+        self.assertIn(b"2.14.0", self.labels_path.read_bytes())
+
     def test_re_extracting_reports_that_nothing_changed(self):
-        extract_label_subset(self.oeo_full_owl, self.labels_path)
-        result = extract_label_subset(self.oeo_full_owl, self.labels_path)
+        self.extract(self.oeo_full_owl, self.labels_path)
+        result = self.extract(self.oeo_full_owl, self.labels_path)
 
         self.assertEqual(result.status, "unchanged")
 
     def test_a_missing_ontology_leaves_the_previous_subset_usable(self):
-        extract_label_subset(self.oeo_full_owl, self.labels_path)
+        self.extract(self.oeo_full_owl, self.labels_path)
         before = self.labels_path.read_bytes()
 
-        with self.assertRaises(MissingOntologyError):
-            extract_label_subset(self.oeo_dir / "nope.owl", self.labels_path)
+        with self.assertRaises(UnusableOntologyError):
+            self.extract(self.oeo_dir / "nope.owl", self.labels_path)
 
         self.assertEqual(self.labels_path.read_bytes(), before)
 
@@ -283,8 +303,8 @@ class ExtractLabelSubsetTest(TempArtifactsTestCase):
         empty = self.oeo_dir / "empty.owl"
         Graph().serialize(destination=str(empty), format="xml")
 
-        with self.assertRaises(EmptyLabelSubsetError):
-            extract_label_subset(empty, self.labels_path)
+        with self.assertRaises(UnusableOntologyError):
+            self.extract(empty, self.labels_path)
 
         self.assertFalse(self.labels_path.exists())
 
@@ -381,6 +401,29 @@ class FetchOekgShapesCommandTest(TempArtifactsTestCase):
                     call_command("fetch_oekg_shapes", stdout=io.StringIO())
 
         self.assertEqual(self.shape_path.read_bytes(), before)
+
+    def test_an_unusable_ontology_leaves_both_artifacts_untouched(self):
+        # The pair must move together: a new shape beside a stale label subset
+        # is the half-replaced state the atomic write is supposed to prevent.
+        self.call()
+        shape_before = self.shape_path.read_bytes()
+        labels_before = self.labels_path.read_bytes()
+        self.oeo_full_owl.write_bytes(b"not an ontology at all")
+
+        with self.settings_override():
+            with mock.patch(
+                "oekg.shape_artifacts.read_url_bytes", return_value=OTHER_SHAPE_TTL
+            ):
+                with self.assertRaises(CommandError):
+                    call_command("fetch_oekg_shapes", stdout=io.StringIO())
+
+        self.assertEqual(self.shape_path.read_bytes(), shape_before)
+        self.assertEqual(self.labels_path.read_bytes(), labels_before)
+
+    def test_it_names_the_ontology_release_the_labels_came_from(self):
+        self.call()
+
+        self.assertIn("2.13.0", self.out.getvalue())
 
     def test_a_missing_ontology_is_reported_as_a_command_error(self):
         (self.oeo_full_owl).unlink()

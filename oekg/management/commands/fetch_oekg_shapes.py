@@ -19,9 +19,10 @@ from oekg.shape_artifacts import (
     ArtifactWrite,
     PinnedRef,
     ShapeArtifactError,
-    extract_label_subset,
-    fetch_shape,
+    build_label_subset_payload,
+    fetch_shape_payload,
     raw_github_url,
+    write_artifact,
 )
 from ontology.utils import get_ontology_version
 
@@ -53,42 +54,43 @@ class Command(BaseCommand):
             ),
         )
         parser.add_argument(
-            "--repo",
-            default=settings.OEKG_SHAPES_SOURCE_REPO,
-            help="owner/name of the repository holding the shape.",
-        )
-        parser.add_argument(
             "--oeo-version",
             help=(
                 "OEO release directory to take labels from. Defaults to the "
-                "newest release present under settings.ONTOLOGY_ROOT."
+                "newest release present under settings.ONTOLOGY_ROOT. Worth "
+                "setting explicitly where the ontology itself is fetched from "
+                "an unpinned 'latest' release, which two of the three "
+                "environments do."
             ),
         )
 
     def handle(self, *args, **options):
         ref = self._pinned_ref(options)
-        url = raw_github_url(options["repo"], ref, settings.OEKG_SHAPES_SOURCE_FILE)
-
-        # Resolved before the fetch, so a missing ontology fails without a
-        # network call and without half of the pair being replaced.
-        oeo_full_owl = self._oeo_full_owl(options["oeo_version"])
+        url = raw_github_url(
+            settings.OEKG_SHAPES_SOURCE_REPO, ref, settings.OEKG_SHAPES_SOURCE_FILE
+        )
+        oeo_version, oeo_full_owl = self._oeo_release(options["oeo_version"])
 
         self.stdout.write(f"shape source: {ref} -> {url}")
+        self.stdout.write(f"label source: {oeo_full_owl} (OEO {oeo_version})")
 
+        # Both payloads are obtained before either is written, so a failure on
+        # the second one cannot leave a new shape beside a stale label subset.
         try:
-            shape = fetch_shape(url, Path(settings.OEKG_SHAPES_PATH))
-            labels = extract_label_subset(
-                oeo_full_owl, Path(settings.OEKG_SHAPE_LABELS_PATH)
-            )
+            shape_payload = fetch_shape_payload(url)
+            labels_payload = build_label_subset_payload(oeo_full_owl, oeo_version)
         except ShapeArtifactError as error:
             raise CommandError(str(error)) from error
         except OSError as error:
             # Network and filesystem failures alike: requests' exceptions are
-            # OSError subclasses. Either way the prior artifact is untouched.
+            # OSError subclasses. Nothing has been written at this point.
             raise CommandError(
-                f"Could not obtain the OEKG shape artifacts: {error}. Any "
-                "previously fetched artifact is unchanged."
+                f"Could not obtain the OEKG shape artifacts: {error}. The "
+                "previously fetched artifacts are unchanged."
             ) from error
+
+        shape = write_artifact(Path(settings.OEKG_SHAPES_PATH), shape_payload)
+        labels = write_artifact(Path(settings.OEKG_SHAPE_LABELS_PATH), labels_payload)
 
         self._report("shape", shape)
         self._report("labels", labels)
@@ -114,7 +116,8 @@ class Command(BaseCommand):
         except ShapeArtifactError as error:
             raise CommandError(str(error)) from error
 
-    def _oeo_full_owl(self, version) -> Path:
+    def _oeo_release(self, version) -> tuple:
+        """Return the OEO version to take labels from, and its full owl file."""
         # Resolved from settings at call time rather than from the derived
         # settings constants, so a test can point ONTOLOGY_ROOT elsewhere.
         oeo_root = Path(settings.ONTOLOGY_ROOT) / settings.OPEN_ENERGY_ONTOLOGY_NAME
@@ -132,7 +135,7 @@ class Command(BaseCommand):
                 "generated. Download the ontology release before running this "
                 "command; it never fetches the ontology itself."
             )
-        return oeo_full_owl
+        return version, oeo_full_owl
 
     def _report(self, label: str, write: ArtifactWrite) -> None:
         style = self.style.SUCCESS if write.changed else self.style.NOTICE
