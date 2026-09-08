@@ -13,6 +13,15 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Features
 
+- Add `python manage.py fetch_oekg_shapes`, the single seam through which the
+  platform obtains the canonical OEKG SHACL shape (from a **pinned** revision of
+  the `oekg` repository) and the small `rdfs:label` subset validation needs
+  (generated from the OEO release already on disk -- the ontology itself is
+  never downloaded again). Both artifacts land in the gitignored `shapes/`
+  directory and are baked into the Docker and Podman images at build time. An
+  unpinned or moving revision is refused, because an unpinned fetch would change
+  the validator without a deploy.
+
 ## Bugs
 
 ## Documentation updates

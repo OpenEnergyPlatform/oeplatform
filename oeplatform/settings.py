@@ -367,6 +367,24 @@ OEO_EXT_NAME = "oeox"
 OEO_EXT_OWL_NAME = "oeo_ext.owl"
 OEO_EXT_OWL_PATH = OEO_EXT_PATH / OEO_EXT_OWL_NAME
 
+# The canonical SHACL shape for OEKG scenario bundles, and the small rdfs:label
+# subset validation needs, are build-time artifacts. They are fetched/generated
+# by exactly one seam -- "python manage.py fetch_oekg_shapes" -- and land in a
+# gitignored directory, the way the OEO release does. Nothing else in the
+# platform obtains either file.
+#
+# The source revision is PINNED on purpose: an unpinned fetch would change the
+# validator without a deploy. The command refuses a branch or a "latest" ref.
+OEKG_SHAPES_FOLDER = "shapes"
+OEKG_SHAPES_ROOT = Path(BASE_DIR, OEKG_SHAPES_FOLDER)
+OEKG_SHAPES_PATH = OEKG_SHAPES_ROOT / "oekg_shapes.ttl"
+OEKG_SHAPE_LABELS_PATH = OEKG_SHAPES_ROOT / "oeo_labels.ttl"
+OEKG_SHAPES_SOURCE_REPO = "OpenEnergyPlatform/oekg"
+OEKG_SHAPES_SOURCE_FILE = "oekg/shapes/oekg_shapes.ttl"
+# The oekg repo carries no version tags yet (one unrelated tag), so the interim
+# pin is a commit sha. Bump this line to move the validator.
+OEKG_SHAPES_PINNED_COMMIT = "b4604e02060624b381bdbe2f872df94cfd0f5630"
+
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
