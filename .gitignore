@@ -132,3 +132,7 @@ saio/
 
 # local docs symlink
 .claude-docs
+
+# benchmark output: slices live in --work-dir (default /tmp); the map's
+# real result rows live in the wayfinder assets folder, not in the repo
+benchmarks/results/

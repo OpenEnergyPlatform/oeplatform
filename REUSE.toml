@@ -3547,3 +3547,11 @@ SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
   "2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
+
+[[annotations]]
+path = "benchmarks/**"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
