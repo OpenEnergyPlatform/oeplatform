@@ -64,7 +64,25 @@ if [ ! -f "$SEC" ]; then
 fi
 
 # ————————————————————
-# 3) Migrations
+# 3) OEKG shape artifacts
+# ————————————————————
+# The SHACL shape and the OEO label subset the OEKG API validates against.
+# Needs the ontology from step 1 (the label subset is generated from it) and
+# securitysettings from step 2 (manage.py will not import without it). Guarded
+# like the ontology so a dev boot does not depend on GitHub every time; after
+# bumping OEKG_SHAPES_PINNED_COMMIT in settings.py, re-run
+# "python manage.py fetch_oekg_shapes" by hand or delete this directory.
+SHAPES_DIR=/home/appuser/app/shapes
+if [ ! -f "$SHAPES_DIR/oekg_shapes.ttl" ]; then
+  echo "Fetching OEKG shape artifacts…"
+  python manage.py fetch_oekg_shapes
+
+  chown -R appuser:appgroup "$SHAPES_DIR"
+  chmod -R u+rwX,g+rwX,o+rX "$SHAPES_DIR"
+fi
+
+# ————————————————————
+# 4) Migrations
 # ————————————————————
 echo "Applying Django migrations…"
 python manage.py migrate --no-input
@@ -73,7 +91,7 @@ echo "Applying Alembic migrations…"
 python manage.py alembic upgrade head
 
 # ————————————————————
-# 4) Static & compress
+# 5) Static & compress
 # ————————————————————
 echo "Collecting static files…"
 python manage.py collectstatic --no-input
@@ -82,7 +100,7 @@ echo "Compressing assets…"
 python manage.py compress --force
 
 # ————————————————————
-# 5) Create dev user
+# 6) Create dev user
 # ————————————————————
 DEV_USER=test
 DEV_PW=pass
@@ -91,13 +109,13 @@ python manage.py create_dev_user "$DEV_USER" "$DEV_USER@mail.com" --password "$D
 echo "✅  Dev user '$DEV_USER' password is: $DEV_PW"
 
 # ————————————————————
-# 6) Create a example table
+# 7) Create a example table
 # ————————————————————
 echo "Seeding DataEdit tables…"
 python manage.py create_example_tables
 
 # ————————————————————
-# 7) Launch dev server
+# 8) Launch dev server
 # ————————————————————
 echo "Starting Django dev server…"
 exec "$@"
