@@ -279,6 +279,11 @@ def show_view(request, sheettype, pk):
             "gh_org": org,
             "gh_repo": repo,
             "displaySheetType": sheettype.capitalize(),
+            # One rule, asked once: the template cannot call a method that
+            # takes the user, and a second copy of the condition in two
+            # templates is how the button and the view came to disagree
+            # before.
+            "can_delete": model.deletable_by(request.user),
         },
     )
 
@@ -432,15 +437,17 @@ def fs_delete_view(request, sheettype, pk):
             "We dropped the scenario factsheets in favor of scenario bundles."
         )
 
+    model = get_object_or_404(c, pk=pk)
+
     # Checked here and not only in the template: `hx-delete` sends a real
     # DELETE request, and so does `curl -X DELETE`, so a hidden button is no
-    # protection at all. Deleting is the one irreversible operation in this
-    # app and it leaves no history, hence admins only -- editing stays open to
-    # any account by policy.
-    if not request.user.is_admin:
-        return HttpResponseForbidden("Only administrators may delete a factsheet.")
-
-    model = get_object_or_404(c, pk=pk)
+    # protection at all. The rule itself -- admins always, anyone logged in
+    # during the grace period after creation -- lives on the model, next to
+    # the note explaining what that window costs.
+    if not model.deletable_by(request.user):
+        return HttpResponseForbidden(
+            "This factsheet may only be deleted by an administrator."
+        )
     # Read before the delete: with no audit model, this line is the only
     # record that will ever exist of what went with it.
     tag_count = model.tags.count()

@@ -290,6 +290,13 @@
       {% endfor %}
     </div>
   </div>
+  {# The tag pages had no way in: nothing on the platform linked to them, so #}
+  {# they were reachable only by typing the URL. This is the reciprocal of #}
+  {# the overview's own "Back to Database". #}
+  <p class="text-muted">
+    Tags are a platform-wide vocabulary shared by tables and Model/Framework
+    factsheets. <a href="{% url 'dataedit:tags' %}">Manage tags</a>
+  </p>
   <script type="text/javascript">
   function open_wizzard() {
     location.href = "{% url 'dataedit:wizard_create' %}";

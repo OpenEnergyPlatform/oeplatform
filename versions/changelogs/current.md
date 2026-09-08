@@ -314,6 +314,19 @@ SPDX-License-Identifier: CC0-1.0
   existing tag everywhere it was used; and a single tag with an unusual internal
   name made the whole overview page fail to load.
 
+- The Database topic list and the Model/Framework factsheet overview now link to
+  the tag pages, which nothing on the platform linked to before - they were
+  reachable only by typing the address.
+
+- Deleting a Model/Framework factsheet is possible for any logged-in account for
+  **one week after the factsheet was created**, and for administrators at any
+  time. This gives whoever has just added a duplicate or a test entry a way to
+  remove it without finding an administrator. Note what the window does and does
+  not say: it depends on the factsheet's age, not on who created it, so during
+  that week any logged-in account can delete it - and a deleted factsheet cannot
+  be restored, because this part of the platform keeps no history. The 339
+  factsheets that already existed are not affected and stay administrator-only.
+
 ## Documentation updates
 
 - New "Production deployment (Podman)" guide (Overview → Install → Ontop →

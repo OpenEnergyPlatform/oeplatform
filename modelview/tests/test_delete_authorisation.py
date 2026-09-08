@@ -3,11 +3,15 @@ SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
+from datetime import timedelta
+
 from django.urls import reverse
+from django.utils import timezone
 
 from base.tests import TestViewsTestCase
 from login.models import myuser as User
 from modelview.helper import getClasses
+from modelview.models import DELETE_GRACE_PERIOD, BasicFactsheet
 from modelview.tests.corpus import seed_corpus
 
 SHEETTYPES = ("model", "framework")
@@ -44,6 +48,25 @@ class FactsheetAuthorisationTestCase(TestViewsTestCase):
     def sheet(self, sheettype):
         return self.corpus[sheettype].factsheets[0]
 
+    def age(self, sheet, days=30):
+        """Push a factsheet's creation date out of the grace period.
+
+        `.update()` rather than `.save()`: `created` is `auto_now_add`, so a
+        save would leave it exactly where it is and the test would pass for
+        the wrong reason.
+        """
+        BasicFactsheet.objects.filter(pk=sheet.pk).update(
+            created=timezone.now() - timedelta(days=days)
+        )
+        sheet.refresh_from_db()
+        return sheet
+
+    def strip_created(self, sheet):
+        """The state of the 339 factsheets that predate the column."""
+        BasicFactsheet.objects.filter(pk=sheet.pk).update(created=None)
+        sheet.refresh_from_db()
+        return sheet
+
     def delete_as(self, user, sheettype, pk, expect_status=None):
         if user is None:
             self.client.logout()
@@ -72,12 +95,13 @@ class FactsheetAuthorisationTestCase(TestViewsTestCase):
         return resp
 
 
-class TestDeleteIsAdminOnly(FactsheetAuthorisationTestCase):
-    """The view must refuse, not merely the template hide.
+class TestDeleteOutsideTheGracePeriod(FactsheetAuthorisationTestCase):
+    """Once a factsheet is older than the window, admins only.
 
-    `fs_delete_view` accepts only DELETE, so a browser cannot reach it by
-    navigation -- but `hx-delete` issues a real DELETE, and so does `curl`.
-    Hiding the button protects nothing on its own.
+    The view must refuse, not merely the template hide. `fs_delete_view`
+    accepts only DELETE, so a browser cannot reach it by navigation -- but
+    `hx-delete` issues a real DELETE, and so does `curl`. Hiding the button
+    protects nothing on its own.
 
     (The anonymous case is asserted in `test_read_path.py`, where it also
     exercises the shared `delete()` seam.)
@@ -87,7 +111,22 @@ class TestDeleteIsAdminOnly(FactsheetAuthorisationTestCase):
         for sheettype in SHEETTYPES:
             with self.subTest(sheettype=sheettype):
                 cls, _ = getClasses(sheettype)
-                pk = self.sheet(sheettype).pk
+                pk = self.age(self.sheet(sheettype)).pk
+
+                self.delete_as(self.user, sheettype, pk, expect_status=403)
+
+                self.assertTrue(cls.objects.filter(pk=pk).exists())
+
+    def test_a_factsheet_predating_the_column_is_refused(self):
+        """`created IS NULL` -- the 339 that existed before this shipped.
+
+        They were deliberately not backfilled: a default of "now" would have
+        opened every one of them to any account for a week after the deploy.
+        """
+        for sheettype in SHEETTYPES:
+            with self.subTest(sheettype=sheettype):
+                cls, _ = getClasses(sheettype)
+                pk = self.strip_created(self.sheet(sheettype)).pk
 
                 self.delete_as(self.user, sheettype, pk, expect_status=403)
 
@@ -97,7 +136,7 @@ class TestDeleteIsAdminOnly(FactsheetAuthorisationTestCase):
         for sheettype in SHEETTYPES:
             with self.subTest(sheettype=sheettype):
                 cls, _ = getClasses(sheettype)
-                pk = self.sheet(sheettype).pk
+                pk = self.age(self.sheet(sheettype)).pk
 
                 self.delete_as(self.admin, sheettype, pk, expect_status=200)
 
@@ -110,7 +149,7 @@ class TestDeleteIsAdminOnly(FactsheetAuthorisationTestCase):
         the one line has to carry enough to reconstruct what happened --
         including how many tags went with it.
         """
-        sheet = self.sheet("model")
+        sheet = self.age(self.sheet("model"))
 
         with self.assertLogs("oeplatform", level="INFO") as captured:
             self.delete_as(self.admin, "model", sheet.pk, expect_status=200)
@@ -130,10 +169,92 @@ class TestDeleteIsAdminOnly(FactsheetAuthorisationTestCase):
         `assertNoLogs` rather than `assertLogs`: the latter requires at least
         one record and so fails on silence, which is the thing being asserted.
         """
-        sheet = self.sheet("model")
+        sheet = self.age(self.sheet("model"))
 
         with self.assertNoLogs("oeplatform", level="INFO"):
             self.delete_as(self.user, "model", sheet.pk, expect_status=403)
+
+
+class TestTheGracePeriod(FactsheetAuthorisationTestCase):
+    """For a week after creation, any logged-in account may delete.
+
+    A maintainer's decision (2026-09-08), taken with the objection recorded on
+    `DELETE_GRACE_PERIOD`: the window is keyed to the factsheet's AGE and not
+    to who is asking, so it does let one account delete another's new
+    factsheet. What it buys is the practical case -- somebody who has just
+    created a duplicate or a test entry removes it without finding an admin.
+
+    These tests pin both halves of that trade, so neither can be lost by
+    accident: the window opens, and it closes.
+    """
+
+    def test_a_logged_in_non_admin_can_delete_a_new_factsheet(self):
+        for sheettype in SHEETTYPES:
+            with self.subTest(sheettype=sheettype):
+                cls, _ = getClasses(sheettype)
+                pk = self.sheet(sheettype).pk
+
+                self.delete_as(self.user, sheettype, pk, expect_status=200)
+
+                self.assertFalse(cls.objects.filter(pk=pk).exists())
+
+    def test_the_window_is_open_right_up_to_its_edge(self):
+        sheet = self.age(self.sheet("model"), days=0)
+        BasicFactsheet.objects.filter(pk=sheet.pk).update(
+            created=timezone.now() - DELETE_GRACE_PERIOD + timedelta(minutes=1)
+        )
+
+        self.delete_as(self.user, "model", sheet.pk, expect_status=200)
+
+    def test_the_window_is_shut_just_past_it(self):
+        sheet = self.sheet("model")
+        BasicFactsheet.objects.filter(pk=sheet.pk).update(
+            created=timezone.now() - DELETE_GRACE_PERIOD - timedelta(minutes=1)
+        )
+
+        self.delete_as(self.user, "model", sheet.pk, expect_status=403)
+
+    def test_an_anonymous_caller_is_refused_inside_the_window_too(self):
+        """The window widens *who among the logged in*, and nothing further.
+
+        `@login_required` answers first, so this is a redirect rather than a
+        403 -- what matters is that the factsheet is still there.
+        """
+        for sheettype in SHEETTYPES:
+            with self.subTest(sheettype=sheettype):
+                cls, _ = getClasses(sheettype)
+                pk = self.sheet(sheettype).pk
+
+                self.delete_as(None, sheettype, pk, expect_status=302)
+
+                self.assertTrue(cls.objects.filter(pk=pk).exists())
+
+    def test_a_delete_inside_the_window_is_logged_like_any_other(self):
+        """The log line is the only trace either way, so the cheap path must
+        not be the quiet one."""
+        sheet = self.sheet("model")
+
+        with self.assertLogs("oeplatform", level="INFO") as captured:
+            self.delete_as(self.user, "model", sheet.pk, expect_status=200)
+
+        lines = [m for m in captured.output if "factsheet_write" in m]
+        self.assertEqual(len(lines), 1, msg=captured.output)
+        self.assertIn("action=delete", lines[0])
+        self.assertIn(f"user={self.user.name}", lines[0])
+
+    def test_a_new_factsheet_offers_a_non_admin_the_button(self):
+        for sheettype in SHEETTYPES:
+            with self.subTest(sheettype=sheettype):
+                pk = self.sheet(sheettype).pk
+                resp = self.detail_html(self.user, sheettype, pk)
+
+                self.assertContains(
+                    resp,
+                    reverse(
+                        "modelview:delete-factsheet",
+                        kwargs={"sheettype": sheettype, "pk": pk},
+                    ),
+                )
 
 
 class TestDetailPageActions(FactsheetAuthorisationTestCase):
@@ -156,15 +277,15 @@ class TestDetailPageActions(FactsheetAuthorisationTestCase):
     def test_an_admin_is_offered_delete(self):
         for sheettype in SHEETTYPES:
             with self.subTest(sheettype=sheettype):
-                pk = self.sheet(sheettype).pk
+                pk = self.age(self.sheet(sheettype)).pk
                 resp = self.detail_html(self.admin, sheettype, pk)
 
                 self.assertContains(resp, self.delete_url(sheettype, pk))
 
-    def test_a_non_admin_is_not_offered_delete(self):
+    def test_a_non_admin_is_not_offered_delete_once_it_is_old(self):
         for sheettype in SHEETTYPES:
             with self.subTest(sheettype=sheettype):
-                pk = self.sheet(sheettype).pk
+                pk = self.age(self.sheet(sheettype)).pk
                 resp = self.detail_html(self.user, sheettype, pk)
 
                 self.assertNotContains(resp, self.delete_url(sheettype, pk))
@@ -181,7 +302,12 @@ class TestDetailPageActions(FactsheetAuthorisationTestCase):
 
     def test_an_anonymous_visitor_is_offered_neither(self):
         """Both are affordances that cannot work for a visitor who is not
-        logged in: Delete is refused and Edit only leads to a login form."""
+        logged in: Delete is refused and Edit only leads to a login form.
+
+        Asserted on a BRAND NEW factsheet on purpose -- inside the grace
+        period, which is the one state where the window could leak the button
+        to someone who is not logged in at all.
+        """
         for sheettype in SHEETTYPES:
             with self.subTest(sheettype=sheettype):
                 pk = self.sheet(sheettype).pk
