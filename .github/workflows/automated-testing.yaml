@@ -118,6 +118,11 @@ jobs:
           cp oeplatform/securitysettings.py.default oeplatform/securitysettings.py
           python manage.py collectstatic
           python manage.py compress
+      - name: OEKG shape artifacts
+        # The scenario-bundle API validates against these, so without them its
+        # tests skip and the validation this slice exists for is never checked.
+        # Needs the ontology step above: the label subset is generated from it.
+        run: python manage.py fetch_oekg_shapes
       - name: Migrations & User creation
         run: |
           python manage.py makemigrations --check

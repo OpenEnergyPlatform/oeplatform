@@ -109,8 +109,15 @@ class GraphStore:
 
     @classmethod
     def from_settings(cls, *, graph: Optional[str] = None) -> "GraphStore":
-        """Build the store the platform is configured to talk to."""
+        """Build the store the platform is configured to talk to.
+
+        ``graph`` defaults to ``settings.OEKG_GRAPH``, which is ``None`` -- the
+        default graph, where the platform's bundles live. A test overrides it to
+        work in a graph of its own without having to reach into the views.
+        """
         rdf = settings.RDF_DATABASES["knowledge"]
+        if graph is None:
+            graph = getattr(settings, "OEKG_GRAPH", None)
         base = "http://{host}:{port}/{name}".format(
             host=rdf["host"], port=rdf["port"], name=rdf["name"]
         )

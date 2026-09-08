@@ -13,6 +13,13 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Features
 
+- The OEKG scenario-bundle REST API: `POST /api/v0/scenario-bundles/` creates a
+  bundle and `GET /api/v0/scenario-bundles/<uid>/` reads it back. The server
+  mints the identifier, the acronym is enforced unique, the bundle is validated
+  against the canonical SHACL shape **before** anything is written, and the
+  write is one atomic request. Reads are public; writes need authentication
+  [(#2430)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2430)
+
 - The OEKG REST API gets its own transport to the graph store
   (`oekg/graph_store.py`): one SPARQL request per write, which Fuseki treats as
   one transaction, instead of one committed request per triple. Its tests run

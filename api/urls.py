@@ -72,6 +72,7 @@ from api.views import (
     table_approx_row_count_view,
     usrprop_api_view,
 )
+from oekg.api_views import ScenarioBundleAPIView, ScenarioBundleCollectionAPIView
 
 app_name = "api"
 
@@ -297,6 +298,19 @@ urlpatterns_v0 = [
         r"^scenario-bundle/scenario/manage-datasets/?$",
         ManageOekgScenarioDatasetsAPIView.as_view(),
         name="add-scenario-datasets",
+    ),
+    # The scenario-bundle REST API. Plural, and superseding the singular
+    # manage-datasets route above rather than extending it: that one writes
+    # predicates the canonical shape does not validate.
+    path(
+        "scenario-bundles/",
+        ScenarioBundleCollectionAPIView.as_view(),
+        name="scenario-bundles",
+    ),
+    path(
+        "scenario-bundles/<uid>/",
+        ScenarioBundleAPIView.as_view(),
+        name="scenario-bundle",
     ),
     path(
         "datasets/",

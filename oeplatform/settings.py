@@ -385,6 +385,11 @@ OEKG_SHAPES_SOURCE_FILE = "oekg/shapes/oekg_shapes.ttl"
 # pin is a commit sha. Bump this line to move the validator.
 OEKG_SHAPES_PINNED_COMMIT = "b4604e02060624b381bdbe2f872df94cfd0f5630"
 
+# The named graph the OEKG API reads and writes. None is the default graph,
+# which is where the platform's bundles live today; a test overrides it to work
+# in isolation.
+OEKG_GRAPH = None
+
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
