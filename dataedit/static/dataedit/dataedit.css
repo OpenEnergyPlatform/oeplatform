@@ -341,3 +341,21 @@ This is a fix, because we use modals within a position:fixed context, which is n
 #tags .bootstrap-select .bs-select-all {
   display: none !important;
 }
+
+/* The tag overview's pill list.
+ *
+ * A real list, laid out by flex. It used to be bare <a> elements inside a
+ * <ul> held in place by `float: left`, which is invalid markup and let the
+ * buttons underneath escape the flow. */
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem 0;
+}
+
+.tag-list > li {
+  display: flex;
+}

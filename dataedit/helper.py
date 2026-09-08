@@ -491,8 +491,20 @@ def add_tag(name: str, color: str) -> None:
     Args:
         name(str): max 40 character tag text
         color(str): hexadecimal color code, eg #aaf0f0
+
+    Raises:
+        IntegrityError: if a tag with that normalised name already exists.
+
+    `force_insert` is load-bearing, not decoration. A tag's primary key is its
+    normalised name, and a `save()` on a model whose pk is already set and has
+    no default makes Django try an UPDATE first -- so creating "Wind Onshore"
+    where `wind_onshore` existed silently OVERWROTE that tag's display name and
+    colour, platform-wide, on every table and factsheet carrying it, and the
+    caller's duplicate-name guard never fired because nothing raised. Forcing
+    the INSERT lets the database's own unique constraint answer, which is also
+    the only answer that is safe against a concurrent create.
     """
-    Tag(name=name, color=Tag.color_from_hex(color)).save()
+    Tag(name=name, color=Tag.color_from_hex(color)).save(force_insert=True)
 
 
 def update_keywords_from_tags(table: Table) -> None:

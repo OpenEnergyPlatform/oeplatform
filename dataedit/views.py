@@ -29,6 +29,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import Count, F, Q
 from django.db.utils import IntegrityError
 from django.http import (
@@ -36,6 +37,7 @@ from django.http import (
     HttpRequest,
     HttpResponse,
     HttpResponseBadRequest,
+    HttpResponseForbidden,
     JsonResponse,
 )
 from django.shortcuts import get_object_or_404, redirect, render
@@ -247,70 +249,138 @@ def topic_view(request: HttpRequest) -> HttpResponse:
     )
 
 
+def _is_htmx(request: HttpRequest) -> bool:
+    return "HX-Request" in request.headers
+
+
+def tag_usage(tag: Tag) -> dict:
+    """How many objects would lose this tag if it were deleted.
+
+    Both sides, because `Tag` is ONE vocabulary with two consumers. This page
+    used to ask `tag.tables` alone, so a tag carrying 200 factsheets and no
+    table reported itself unused and offered a Delete button underneath.
+    """
+    tables = tag.tables.count()
+    factsheets = tag.factsheets.count()
+    return {
+        "tables": tables,
+        "factsheets": factsheets,
+        "total": tables + factsheets,
+    }
+
+
+def tag_editor_context(
+    tag: Tag | None = None, name: str = "", color_hex: str = "#000000", error: str = ""
+) -> dict:
+    """The editor's context, whichever of the three paths renders it.
+
+    One function because the three used to disagree: the standalone page
+    offered a Delete button gated on an `is_admin` variable no view ever
+    passed, and the failed-save path rendered nothing at all -- it redirected
+    to the overview and dropped what the user had typed.
+    """
+    if tag is not None:
+        return {
+            "pk": tag.pk,
+            "name": tag.name,
+            "color_hex": tag.color_hex,
+            "usage": tag_usage(tag),
+            "error": error,
+        }
+    return {
+        "pk": None,
+        "name": name,
+        "color_hex": color_hex,
+        "usage": None,
+        "error": error,
+    }
+
+
 @login_required
 @never_cache
 def tag_overview_view(request: HttpRequest) -> HttpResponse:
-    # if rename or adding of tag fails: display error message
-    context = {
-        "errorMsg": (
-            "Tag name is not valid" if request.GET.get("status") == "invalid" else ""
-        )
-    }
-
     return render(
-        request=request, template_name="dataedit/tag_overview.html", context=context
+        request=request,
+        template_name="dataedit/tag_overview.html",
+        context={"tags": Tag.objects.order_by("name")},
     )
 
 
 @login_required
 @never_cache
 def tag_editor_view(request: HttpRequest, tag_pk: str | None = None) -> HttpResponse:
-    tag = Tag.get_or_none(tag_pk or "")
-    if tag:
-        assigned = tag.tables.count() > 0
-        return render(
-            request=request,
-            template_name="dataedit/tag_editor.html",
-            context={
-                "name": tag.name,
-                "pk": tag.pk,
-                "color_hex": tag.color_hex,
-                "assigned": assigned,
-            },
-        )
-    else:
-        return render(
-            request=request,
-            template_name="dataedit/tag_editor.html",
-            context={"name": "", "color_hex": "#000000", "assigned": False},
-        )
+    """The create/edit form, as a whole page or as the overview's panel.
+
+    The panel is the common path and the page is the fallback, so both render
+    the same partial and neither can drift from the other.
+    """
+    context = tag_editor_context(Tag.get_or_none(tag_pk or ""))
+    template = (
+        "dataedit/partials/tag_editor_form.html"
+        if _is_htmx(request)
+        else "dataedit/tag_editor.html"
+    )
+    return render(request=request, template_name=template, context=context)
 
 
 @require_POST
 @login_required
 def tag_update_view(request: HttpRequest) -> HttpResponse:
-    status = ""  # error status if operation fails
+    tag_id = request.POST.get("tag_id") or None
 
-    if "submit_save" in request.POST:
-        try:
-            if "tag_id" in request.POST:
-                id = request.POST["tag_id"]
-                name = request.POST["tag_text"]
-                color = request.POST["tag_color"]
-                edit_tag(id, name, color)
+    if "submit_delete" in request.POST:
+        # Admin-only, checked HERE and not only on the button. The button was
+        # gated on a context variable no view passed, so it rendered for
+        # nobody; the view behind it was gated on nothing but a login, so any
+        # account could delete any tag with a crafted POST -- and a tag is
+        # shared platform-wide, so that strips it from every table and
+        # factsheet carrying it, with no record anywhere.
+        if not getattr(request.user, "is_admin", False):
+            return HttpResponseForbidden("Only admins may delete tags.")
+        tag = Tag.get_or_none(tag_id or "")
+        if tag:
+            removed = tag_usage(tag)
+            delete_tag(tag.pk)
+            messages.success(
+                request,
+                "Deleted the tag and removed it from %d object(s)." % removed["total"],
+            )
+        return redirect(reverse("dataedit:tags"))
+
+    name = request.POST.get("tag_text", "")
+    color = request.POST.get("tag_color", "#000000")
+    try:
+        # The savepoint keeps a rejected insert from poisoning the surrounding
+        # transaction, so the error path below can still read the database.
+        with transaction.atomic():
+            if tag_id:
+                edit_tag(tag_id, name, color)
             else:
-                name = request.POST["tag_text"]
-                color = request.POST["tag_color"]
                 add_tag(name, color)
-        except IntegrityError:
-            # requested changes are not valid because of name conflicts
-            status = "invalid"
+    except IntegrityError:
+        # A name conflict, or a name that normalises to nothing. Come back
+        # with what was typed: the redirect this used to do sent the user to
+        # the overview and discarded it.
+        error = "That tag name is not valid, or a tag by that name exists."
+        context = tag_editor_context(
+            Tag.get_or_none(tag_id or ""), name=name, color_hex=color, error=error
+        )
+        if tag_id:
+            context.update({"name": name, "color_hex": color})
+        if _is_htmx(request):
+            return render(
+                request=request,
+                template_name="dataedit/partials/tag_editor_form.html",
+                context=context,
+            )
+        return render(
+            request=request,
+            template_name="dataedit/tag_editor.html",
+            context=context,
+        )
 
-    elif "submit_delete" in request.POST:
-        id = request.POST["tag_id"]
-        delete_tag(id)
-
-    return redirect(reverse("dataedit:tags") + f"?status={status}")
+    messages.success(request, "Saved the tag.")
+    return redirect(reverse("dataedit:tags"))
 
 
 @require_POST
