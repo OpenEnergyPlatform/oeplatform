@@ -46,21 +46,27 @@
           <option value="name">By name</option>
         </select>
       </div>
-      <div data-tag-list>
+      <div data-tag-list class="tag-picker">
         {% for t in all_tags %}
-          <span data-tag-name="{{ t.name }}" data-tag-usage="{{ t.tag_usage }}">
+          <span class="tag-picker__item"
+                data-tag-name="{{ t.name }}"
+                data-tag-usage="{{ t.tag_usage }}">
             {# One multi-valued field of raw pks, so the ModelForm's own `tags` #}
             {# field receives them. `select_<pk>` survives as a DOM id only. #}
+            {# The box itself is `display: none`; the label is the control. #}
             <input type="checkbox"
-                   class="hidden tag-checkbox"
+                   class="tag-checkbox"
                    name="tags"
                    value="{{ t.pk }}"
                    id="select_{{ t.pk }}"
                    {% if t.pk in selected %}checked{% endif %} />
-            <label class="form-label"
+            {# ONE class attribute. It carried two -- `form-label` and #}
+            {# `btn tag` -- and a duplicate attribute is dropped by the parser, #}
+            {# so the pill styling never applied and every tag rendered as a #}
+            {# bare coloured rectangle. #}
+            <label class="btn tag tag-picker__pill"
                    style="background:{{ t.color_hex }};
                           color:{% readable_text_color t.color_hex %}"
-                   class="btn tag"
                    for="select_{{ t.pk }}">{{ t.name }}</label>
           </span>
         {% endfor %}

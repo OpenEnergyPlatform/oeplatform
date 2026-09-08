@@ -30,6 +30,12 @@ SPDX-License-Identifier: CC0-1.0
   tag, and a "Clear tag filter" button switches the filter back off. The tags
   were rendered as links to nowhere, so a click reloaded the page and looked as
   though filtering had silently failed.
+
+- The tags in the factsheet editor look like tags again. Each was written with
+  two `class` attributes, and a browser keeps only the first, so the styling
+  that gives them their shape was silently discarded and they rendered as bare
+  coloured rectangles pressed against each other. Selecting one no longer
+  resizes it and shifts its neighbours around either.
   [(#2346)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2346)
 
 - Deleting a Model/Framework factsheet is possible for any logged-in account for

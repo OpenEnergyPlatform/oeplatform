@@ -263,6 +263,45 @@ class TestTheFullFormRoundTrip(FactsheetWriteTestCase):
                 self.assert_round_trip(sheettype, values)
 
 
+class TestTheTagPickerMarkup(FactsheetWriteTestCase):
+    """The pill has to actually carry its pill classes.
+
+    It used to be written with TWO `class` attributes -- `form-label` and
+    `btn tag`. A duplicate attribute is dropped by the HTML parser, so the
+    second never applied and every tag rendered as a bare coloured rectangle
+    with no padding, jammed against its neighbours.
+    """
+
+    def pill(self, html):
+        found = re.search(r'<label[^>]*for="select_[^"]*"[^>]*>', html)
+        self.assertIsNotNone(found, msg="no tag pill on the page")
+        return found.group(0)
+
+    def test_a_pill_carries_exactly_one_class_attribute(self):
+        for sheettype in SHEETTYPES:
+            with self.subTest(sheettype=sheettype):
+                pill = self.pill(self.edit_page(sheettype, self.sheet(sheettype).pk))
+
+                self.assertEqual(pill.count("class="), 1)
+
+    def test_that_one_class_attribute_carries_the_pill_styling(self):
+        for sheettype in SHEETTYPES:
+            with self.subTest(sheettype=sheettype):
+                pill = self.pill(self.edit_page(sheettype, self.sheet(sheettype).pk))
+
+                self.assertIn("tag-picker__pill", pill)
+                self.assertIn("tag", pill)
+
+    def test_the_selected_state_no_longer_resizes_the_pill(self):
+        """It was a 3px border in an inline style block, so selecting a tag
+        pushed its neighbours around. The widget owns its own look now."""
+        for sheettype in SHEETTYPES:
+            with self.subTest(sheettype=sheettype):
+                html = self.edit_page(sheettype, self.sheet(sheettype).pk)
+
+                self.assertNotIn("border: 3px solid", html)
+
+
 class TestTheInvalidFormPathKeepsTheSelection(FactsheetWriteTestCase):
     """A missing required field elsewhere must not cost the user their tags."""
 
