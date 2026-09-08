@@ -16,7 +16,6 @@ SPDX-License-Identifier: CC0-1.0
 - `python manage.py fetch_oekg_shapes` obtains the canonical OEKG SHACL shape
   from a pinned revision of the `oekg` repository, and generates the
   `rdfs:label` subset validation needs from the OEO release already on disk.
-  (#PR)
 
 ## Bugs
 
