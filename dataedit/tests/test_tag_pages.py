@@ -442,6 +442,40 @@ class TestTheHtmxPanel(TagPageTestCase):
         self.client.force_login(self.user)
 
 
+class TestTheListDoesNotRunAwayWithThePage(TagPageTestCase):
+    """A vocabulary of 800+ must not decide how long the page is.
+
+    Left to grow, the list pushed the actions below it off the screen -- the
+    longer the vocabulary, the further away "Create new Tag" got. It is boxed
+    and scrollable now, and the actions sit above it.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        for i in range(30):
+            cls.make_tag(name="Tag %02d" % i)
+
+    def test_the_list_is_boxed_and_scrollable(self):
+        self.assertIn("tag-list--scroll", self.overview())
+
+    def test_the_actions_come_before_the_list(self):
+        html = self.overview()
+
+        create = html.index(reverse("dataedit:tags-new"))
+        listing = html.index("tag-list--scroll")
+
+        self.assertLess(create, listing)
+
+    def test_the_whole_vocabulary_is_still_rendered(self):
+        """Scrolling reaches everything, so nothing is withheld -- which is
+        also why this page has no expander."""
+        html = self.overview()
+
+        for i in range(30):
+            self.assertIn("Tag %02d" % i, html)
+        self.assertNotIn("data-tag-expand", html)
+
+
 class TestTheOverviewList(TagPageTestCase):
 
     @classmethod

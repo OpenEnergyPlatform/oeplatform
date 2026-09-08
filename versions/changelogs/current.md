@@ -52,7 +52,10 @@ SPDX-License-Identifier: CC0-1.0
   starts with the ten tags most used by that sheet type and offers to show the
   rest; a tag you have already selected stays visible. "Most used" counts what
   actually carries the tag, and any tag stays reachable by typing part of its
-  name.
+  name. On the administration page the list sits in its own scrollable box with
+  the actions above it, so a growing vocabulary no longer pushes "Create new
+  Tag" off the screen. Sorting by name puts digits in numeric order, so "run 2"
+  comes before "run 10".
 
 ## Features
 

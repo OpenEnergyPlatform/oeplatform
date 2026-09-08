@@ -8,6 +8,18 @@
 {# return the piece you replaced.                                         #}
 <div id="tag-manager" class="row">
   <div class="col-lg-7">
+    {# The actions sit ABOVE the list. Below it they were pushed off the #}
+    {# screen by the vocabulary itself -- the longer it grew, the further #}
+    {# away "Create new Tag" got. #}
+    <div class="d-flex gap-2 mb-3">
+      <a href="{% url 'dataedit:tags-new' %}"
+         hx-get="{% url 'dataedit:tags-new' %}"
+         hx-target="#tag-manager"
+         hx-swap="outerHTML"
+         class="btn btn-info">Create new Tag</a>
+      <a href="{% url 'dataedit:topic-list' %}"
+         class="btn btn-secondary">Back to Database</a>
+    </div>
     <h3>Current tags</h3>
     {% if saved %}
       <p class="text-success">
@@ -15,13 +27,6 @@
       </p>
     {% endif %}
     {% include "dataedit/partials/tag_list.html" %}
-    <a href="{% url 'dataedit:tags-new' %}"
-       hx-get="{% url 'dataedit:tags-new' %}"
-       hx-target="#tag-manager"
-       hx-swap="outerHTML"
-       class="btn btn-info">Create new Tag</a>
-    <a href="{% url 'dataedit:topic-list' %}"
-       class="btn btn-secondary">Back to Database</a>
   </div>
   <div class="col-lg-5">
     {% if editing %}

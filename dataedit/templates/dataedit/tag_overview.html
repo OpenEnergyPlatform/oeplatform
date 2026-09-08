@@ -30,7 +30,7 @@
   {# longer exist. #}
   <script type="module">
     import { bindTagList } from "{% static 'dataedit/tag_list.js' %}";
-    const bind = () => bindTagList(document, {limit: 10, sort: "name"});
+    const bind = () => bindTagList(document, {sort: "name"});
     bind();
     document.body.addEventListener("htmx:afterSwap", bind);
   </script>

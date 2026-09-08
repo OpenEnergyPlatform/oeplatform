@@ -96,6 +96,20 @@ describe("orderItems", () => {
     expect(tied).toEqual(["grid", "Wind"]);
   });
 
+  it("sorts digits inside a name as numbers, not as text", () => {
+    const runs = [
+      { name: "run 10", usage: 0 },
+      { name: "run 2", usage: 0 },
+      { name: "run 1", usage: 0 },
+    ];
+
+    expect(orderItems(runs, "name").map((i) => i.name)).toEqual([
+      "run 1",
+      "run 2",
+      "run 10",
+    ]);
+  });
+
   it("does not modify the array it was given", () => {
     const original = items.map((i) => i.name);
     orderItems(items, "usage");

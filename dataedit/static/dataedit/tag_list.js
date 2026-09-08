@@ -46,8 +46,15 @@ export function matchesQuery(name, query) {
  * @return {{name: string, usage: number}[]} a new, ordered array.
  */
 export function orderItems(items, sort) {
-  const byName = (a, b) =>
-    a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+  // `numeric` so that digits inside a name sort as numbers: "run 2" before
+  // "run 10", which a plain lexicographic compare gets backwards. That covers
+  // alphabetical and numerical ordering with one option instead of two that
+  // are each wrong half the time.
+  const collator = new Intl.Collator(undefined, {
+    numeric: true,
+    sensitivity: "base",
+  });
+  const byName = (a, b) => collator.compare(a.name, b.name);
   return items
     .slice()
     .sort((a, b) => (sort === "usage" ? b.usage - a.usage || byName(a, b) : byName(a, b)));

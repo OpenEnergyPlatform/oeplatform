@@ -19,7 +19,7 @@
     <option value="usage">Most used</option>
   </select>
 </div>
-<ul class="tag-list" data-tag-list>
+<ul class="tag-list tag-list--scroll" data-tag-list>
   {% for t in tags %}
     <li data-tag-name="{{ t.name }}" data-tag-usage="{{ t.tag_usage }}">
       <a href="{% url 'dataedit:tags-edit' t.pk %}"
@@ -34,7 +34,3 @@
     <li class="text-muted">No tags yet.</li>
   {% endfor %}
 </ul>
-<button data-tag-expand
-        type="button"
-        class="btn btn-sm btn-link p-0 mb-2"
-        hidden>Show all tags</button>
