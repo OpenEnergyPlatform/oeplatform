@@ -17,19 +17,29 @@ SPDX-License-Identifier: CC0-1.0
   (`oekg/graph_store.py`): one SPARQL request per write, which Fuseki treats as
   one transaction, instead of one committed request per triple. Its tests run
   against a real store in an isolated named graph, and skip with a stated reason
-  when no store is reachable.
+  when no store is reachable
+  [(#2429)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2429)
 
 - `python manage.py fetch_oekg_shapes` obtains the canonical OEKG SHACL shape
   from a pinned revision of the `oekg` repository, and generates the
-  `rdfs:label` subset validation needs from the OEO release already on disk.
+  `rdfs:label` subset validation needs from the OEO release already on disk
+  [(#2428)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2428)
 
 ## Bugs
+
+- The generated OEO label subset copied labels verbatim, so 1,855 of 2,058
+  carried an `@en` tag and four terms carried two labels. The shape requires
+  `sh:datatype xsd:string` and `sh:maxCount 1` on `rdfs:label`, and a
+  language-tagged literal is `rdf:langString` — so every picked OEO term failed
+  validation. Labels are normalised to one plain string per term
+  [(#2430)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2430)
 
 - The OEKG SPARQL endpoint test patched `oekg.utils.execute_sparql_query` while
   the view binds that function into its own namespace, so the mock never took
   effect and the test made a real network call to a host that only resolves
   inside the compose network. It failed on every local run. Patched at the right
-  name, it is now hermetic.
+  name, it is now hermetic
+  [(#2429)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2429)
 
 ## Documentation updates
 
