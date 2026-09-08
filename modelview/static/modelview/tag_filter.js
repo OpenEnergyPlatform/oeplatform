@@ -119,3 +119,42 @@ export function showCheckedTags(root) {
     box.parentElement.classList.toggle("tag-checkbox-checked", box.checked);
   });
 }
+
+/**
+ * Tick or clear one tag's checkbox in the sidebar.
+ *
+ * The sidebar's checkboxes are the single source of truth for the filter --
+ * `checkedTagValues` seeds the selection from them and `showCheckedTags`
+ * paints their ticks. So anything else that wants to change the filter (a tag
+ * pill clicked in the table, say) drives the checkbox rather than keeping a
+ * second copy of the state that could disagree with it.
+ *
+ * @param {ParentNode} root the element to search, usually `document`.
+ * @param {string} pk the tag's primary key.
+ * @param {boolean} checked what to set it to.
+ * @return {HTMLInputElement|null} the checkbox, or null if the sidebar does
+ *   not offer that tag.
+ */
+export function checkTag(root, pk, checked) {
+  const box = Array.from(root.querySelectorAll(".tag-checkbox")).find(
+    (candidate) => candidate.value === pk
+  );
+  if (!box) {
+    return null;
+  }
+  box.checked = checked;
+  return box;
+}
+
+/**
+ * Clear the whole tag filter.
+ *
+ * @param {ParentNode} root the element to search, usually `document`.
+ * @return {string[]} the now-empty selection, for the caller to adopt.
+ */
+export function clearTags(root) {
+  root.querySelectorAll(".tag-checkbox").forEach((box) => {
+    box.checked = false;
+  });
+  return [];
+}

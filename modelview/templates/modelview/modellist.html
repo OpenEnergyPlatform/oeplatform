@@ -115,6 +115,11 @@
   <button data-tag-expand type="button" class="btn btn-sm btn-link p-0" hidden>
     Show all tags
   </button>
+  <button id="clear-tag-filter"
+          type="button"
+          class="btn btn-sm btn-outline-secondary mt-2"
+          onclick="clear_tag_filter()"
+          {% if not selected_tag_pks %}hidden{% endif %}>Clear tag filter</button>
   <hr>
 {% endblock main-right-sidebar-content %}
 {% block factsheets_content %}
@@ -171,12 +176,22 @@
         document.getElementById("factsheet-initial-columns").textContent);
 
     var render_tag = function (data, type, row){
-        console.log("render_tag", data, type, row)
+        // `href` is the filtered view of this one tag, so the pill works as a
+        // link -- middle-click, "open in new tab", no javascript. The click
+        // handler below intercepts a plain click and filters in place instead.
+        // It used to be `href=""`, which is not "do nothing": an empty href
+        // is the current URL, so clicking a tag reloaded the page and looked
+        // like the filter had silently failed.
         var s = '';
         for(var i in data){
             if(i <= 4) {
                 var tag = data[i];
-                s += '<a href="" class="btn tag" style="background:' + tag.color_hex + '; color:' + tag.textcolor_hex + '; display:inline-block;">' + tag.name + '</a>'
+                s += '<a href="?tags=' + encodeURIComponent(tag.pk) + '"'
+                  + ' data-tag-pk="' + tag.pk + '"'
+                  + ' title="Filter by ' + tag.name + '"'
+                  + ' class="btn tag" style="background:' + tag.color_hex
+                  + '; color:' + tag.textcolor_hex + '; display:inline-block;">'
+                  + tag.name + '</a>'
             }
         }
         return s;
@@ -262,6 +277,27 @@
         dt.draw();
     }
 
+    // Clearing is one control rather than hunting the ticked boxes back down
+    // in a list of 273.
+    var clear_tag_filter = function (){
+        active_tags = tag_filter.clearTags(document);
+        sync_filter_state();
+        dt.draw();
+    }
+
+    // A tag pill in the table toggles that tag's sidebar checkbox and then
+    // goes through the same path a click on the checkbox takes. The checkbox
+    // stays the single source of truth, so the sidebar, the URL and the CSV
+    // link cannot fall out of step with what the table is showing.
+    var toggle_tag_from_pill = function (pk){
+        var box = tag_filter.checkTag(document, pk, active_tags.indexOf(pk) === -1);
+        if (!box) {
+            return false;
+        }
+        apply_tag_filter(box);
+        return true;
+    }
+
     // The query string is the canonical home of the filter, so a filtered view
     // can be reloaded, bookmarked and shared -- and so the CSV link is simply
     // the page's own `?tags=` value, with no second format to drift out of
@@ -274,6 +310,10 @@
         history.replaceState(
             null, '', tag_filter.filteredUrl(window.location, active_tags));
         tag_filter.showCheckedTags(document);
+        var clear = document.getElementById("clear-tag-filter");
+        if (clear) {
+            clear.hidden = active_tags.length === 0;
+        }
     }
 
     $(document).ready( function () {
@@ -299,6 +339,15 @@
         // The box does not exist until the table above has been initialised.
         lazy_payload.bindSearchTrigger(document, request_full_payload);
 
+        // Delegated, because the table redraws its cells constantly -- paging,
+        // sorting, the lazy column fetch -- so a handler bound to the pills
+        // themselves would be lost on the next draw.
+        $('#overview').on('click', 'a[data-tag-pk]', function (event) {
+            if (toggle_tag_from_pill(this.getAttribute('data-tag-pk'))) {
+                event.preventDefault();
+            }
+        });
+
         sync_filter_state();
         if (active_tags.length) {
             dt.draw();
@@ -315,5 +364,6 @@
     // which resolve against `window` and not against this module's scope.
     window.apply_filter = apply_filter;
     window.apply_tag_filter = apply_tag_filter;
+    window.clear_tag_filter = clear_tag_filter;
   </script>
 {% endblock %}

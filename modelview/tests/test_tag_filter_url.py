@@ -247,3 +247,79 @@ class TestTheFilteredCsvDownloadReturnsRows(TagFilterUrlTestCase):
         rows = self.csv_rows("model", "no-such-tag")
 
         self.assertEqual(rows, [])
+
+
+class TestTheTagPillsFilter(TestViewsTestCase):
+    """A tag shown on a row filters by that tag.
+
+    It used to render `href=""`, which is not "do nothing": an empty href is
+    the current URL, so clicking a tag reloaded the page. The filter looked
+    like it had silently failed.
+
+    The click itself is browser behaviour and is covered by the module's own
+    tests (`checkTag`, `clearTags`); what the server must put on the page is
+    the link, the handle the delegated handler matches on, and a way to reset.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.corpus = seed_corpus(sheettype="model", factsheets=3, corrupted=0)
+
+    def html(self, query=None):
+        return self.get(
+            "modelview:modellist", kwargs={"sheettype": "model"}, query=query
+        ).content.decode("utf-8")
+
+    def pill_renderer(self, html):
+        """The body of the DataTables renderer that draws the tag pills.
+
+        Scoped, so the assertions below cannot be satisfied by some other
+        `href` elsewhere on the page -- and matched by shape rather than by a
+        literal, because djlint reflows this template on every commit.
+        """
+        found = re.search(r"var render_tag = function.*?\n    \}", html, re.DOTALL)
+        self.assertIsNotNone(found, msg="no tag renderer on the page")
+        # Comments stripped: this asserts on what the renderer emits, and the
+        # comment above it quotes the very markup being asserted against.
+        return re.sub(r"//[^\n]*", "", found.group(0))
+
+    def test_a_pill_links_to_the_filtered_view(self):
+        """So it still works middle-clicked, or without javascript."""
+        renderer = self.pill_renderer(self.html())
+
+        self.assertIn("?tags=", renderer)
+        self.assertIn("encodeURIComponent(tag.pk)", renderer)
+
+    def test_a_pill_carries_the_handle_the_click_handler_matches(self):
+        self.assertIn("data-tag-pk", self.pill_renderer(self.html()))
+
+    def test_no_pill_is_rendered_with_an_empty_href(self):
+        """The bug: an empty href is the current URL, so a click reloaded the
+        page and the filter looked like it had silently failed."""
+        self.assertNotIn('href=""', self.pill_renderer(self.html()))
+
+    def test_the_click_handler_is_delegated_from_the_table(self):
+        """Bound to the pills themselves it would be lost on the next redraw --
+        paging, sorting and the lazy column fetch all redraw the cells."""
+        html = self.html()
+
+        self.assertIn("a[data-tag-pk]", html)
+
+    def test_the_page_offers_a_way_to_clear_the_filter(self):
+        self.assertIn("clear-tag-filter", self.html())
+
+    def test_the_clear_control_is_hidden_when_no_filter_is_on(self):
+        html = self.html()
+        control = re.search(r"<button id=\"clear-tag-filter\".*?>", html, re.DOTALL)
+
+        self.assertIsNotNone(control)
+        self.assertIn("hidden", control.group(0))
+
+    def test_the_clear_control_is_offered_when_a_filter_arrives_in_the_url(self):
+        tag = self.corpus.factsheets[0].tags.first()
+
+        html = self.html(query={"tags": tag.pk})
+        control = re.search(r"<button id=\"clear-tag-filter\".*?>", html, re.DOTALL)
+
+        self.assertIsNotNone(control)
+        self.assertNotIn("hidden", control.group(0))

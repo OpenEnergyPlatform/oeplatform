@@ -25,6 +25,11 @@ SPDX-License-Identifier: CC0-1.0
 - The tag filter on those overviews is now kept in the page address
   (`?tags=<tag>,<tag>`), so a filtered view can be reloaded, bookmarked and
   shared, and the CSV download follows the same filter. Old links keep working.
+
+- Clicking a tag shown on a row in the factsheet overviews now filters by that
+  tag, and a "Clear tag filter" button switches the filter back off. The tags
+  were rendered as links to nowhere, so a click reloaded the page and looked as
+  though filtering had silently failed.
   [(#2346)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2346)
 
 - Deleting a Model/Framework factsheet is possible for any logged-in account for

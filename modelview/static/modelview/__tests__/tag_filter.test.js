@@ -10,7 +10,9 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
 import {
+  checkTag,
   checkedTagValues,
+  clearTags,
   filterQuery,
   filteredUrl,
   rowMatchesTags,
@@ -217,5 +219,52 @@ describe("showCheckedTags", () => {
         .querySelector(".tag-checkbox-container")
         .classList.contains("tag-checkbox-checked")
     ).toBe(false);
+  });
+});
+
+describe("checkTag", () => {
+  beforeEach(() => {
+    renderSidebar([{ pk: "wind" }, { pk: "solar", checked: true }]);
+  });
+
+  it("ticks a box that was clear and reports it", () => {
+    const box = checkTag(document, "wind", true);
+
+    expect(box.checked).toBe(true);
+    expect(checkedTagValues(document).sort()).toEqual(["solar", "wind"]);
+  });
+
+  it("clears a box that was ticked", () => {
+    checkTag(document, "solar", false);
+
+    expect(checkedTagValues(document)).toEqual([]);
+  });
+
+  it("returns null for a tag the sidebar does not offer", () => {
+    // The table shows a row's every tag, but the sidebar only offers the ones
+    // in use by this sheet type -- normally the same set, but a click must
+    // not throw if they ever diverge.
+    expect(checkTag(document, "not-offered", true)).toBe(null);
+  });
+});
+
+describe("clearTags", () => {
+  it("unticks everything and reports the empty selection", () => {
+    renderSidebar([
+      { pk: "wind", checked: true },
+      { pk: "solar", checked: true },
+      { pk: "grid" },
+    ]);
+
+    const active = clearTags(document);
+
+    expect(active).toEqual([]);
+    expect(checkedTagValues(document)).toEqual([]);
+  });
+
+  it("is harmless when nothing is selected", () => {
+    renderSidebar([{ pk: "wind" }]);
+
+    expect(clearTags(document)).toEqual([]);
   });
 });
