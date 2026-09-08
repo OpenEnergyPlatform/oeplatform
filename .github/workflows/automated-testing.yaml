@@ -39,11 +39,21 @@ jobs:
           --health-cmd pg_isready --health-interval 10s --health-timeout 5s
           --health-retries 5
       fuseki:
-        image: stain/jena-fuseki
+        # ADMIN_PASSWORD must be set: Fuseki serves queries to anyone but
+        # answers UPDATES with 401 unless the credentials are valid, and
+        # securitysettings.py.default expects admin/admin. Without it the OEKG
+        # graph tests skip instead of running, and the claim they exist to
+        # prove -- one update request is one transaction -- is never checked.
+        # Pinned to the version production runs. Note this dataset is the
+        # in-memory backend, not the TDB2 production uses; WF-04 measured the
+        # transaction behaviour to be identical on both, which is what makes
+        # checking it here meaningful.
+        image: stain/jena-fuseki:5.1.0
         ports:
           - 3030:3030
         options: >-
-          --name fuseki -e FUSEKI_DATASET_1=ds -e FUSEKI_MEM_1=true
+          --name fuseki -e ADMIN_PASSWORD=admin -e FUSEKI_DATASET_1=ds -e
+          FUSEKI_MEM_1=true
 
     strategy:
       matrix:

@@ -26,6 +26,9 @@ efficient as it avoids parsing data (like the Graph) to python data types.
 - `shape_artifacts.py` + `management/commands/fetch_oekg_shapes.py` — the single
   seam through which the platform obtains the canonical SHACL shape for scenario
   bundles and the `rdfs:label` subset validation needs. See below.
+- `graph_store.py` — the OEKG REST API's own transport to the graph store, and
+  `tests/__init__.py`'s `OekgGraphTestCase`, the seam its tests run against. See
+  below.
 
 The low-level connection setup — the `SPARQLWrapper` clients (`sparql`,
 `update_endpoint`) and the in-memory OEO ontology graph (`oeo`, `oeo_owl`) —
@@ -81,6 +84,48 @@ writes that version into `oeo_labels.ttl`, so a moved ontology shows up as an
 `--oeo-version` to pin it explicitly. Pinning the ontology fetch itself is a
 separate job — it is already duplicated across four sites with three URLs and
 inconsistent pinning.
+
+## The API's transport to the graph
+
+`graph_store.py` is a query client and an update client — deliberately **not**
+`factsheet/oekg/connection.py`, which the rest of this app still uses. That
+module commits once per triple and parses the whole ontology at import; the
+module docstring records why the boundary moved and what it costs.
+
+The rule: **rdflib builds the graph in memory, `GraphStore` ships it as one
+SPARQL request.**
+
+```python
+store = GraphStore.from_settings()
+store.insert(triples)     # one request
+store.update(op_a, op_b)  # still one request, so still one transaction
+rows = store.select("SELECT ?s WHERE { ?s ?p ?o }")
+```
+
+`insert_data` and `delete_data` build operations scoped to the store's target
+graph. `update` sends what you give it **as written** — an unscoped
+`INSERT DATA` hits the default graph whatever the store targets.
+
+### Testing against a real store
+
+`OekgGraphTestCase` gives each test its own named graph, dropped afterwards, on
+a real store. A substitute was considered and rejected: atomicity is a property
+of the engine, and an in-memory stand-in would pass whatever we taught it.
+
+```bash
+RDF_DATABASE_HOST=localhost python manage.py test oekg
+```
+
+Three things about it are deliberate:
+
+- **No store means a skip, not a failure**, with the reason stated — so a run
+  without the compose network is green.
+- **The availability probe is a write.** Fuseki serves queries to anyone but
+  answers updates with `401` unless credentials are valid, so a read-only probe
+  would call such a store usable and leave every write test failing instead of
+  skipping. It is also why the CI service sets `ADMIN_PASSWORD`.
+- **The tests refuse a store they cannot recognise as local.** They write, and
+  `RDF_DATABASE_HOST` is a local file's setting that could point anywhere.
 
 ## Two things are called `oekg`
 
