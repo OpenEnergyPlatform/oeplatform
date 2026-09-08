@@ -19,10 +19,26 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="basicfactsheet",
             name="created",
-            # Nullable and NOT backfilled. A default of "now" would have
-            # given all 339 existing factsheets a fresh creation date and so
-            # opened every one of them to deletion by any account for a week
-            # after this deploys. NULL reads as "older than the grace period".
             field=models.DateTimeField(auto_now_add=True, null=True),
+        ),
+        # `null=True` is NOT enough to leave existing rows empty.
+        #
+        # Django's schema editor special-cases `auto_now` and `auto_now_add`
+        # in `_effective_default`, so `AddField` fills every existing row with
+        # the moment the migration runs. Measured, not assumed: after the
+        # first run of this migration every pre-existing factsheet carried a
+        # `created` equal to the migration's own timestamp.
+        #
+        # That is the exact outcome the grace period must not have. It would
+        # give all 339 existing factsheets a fresh creation date and open
+        # every one of them to deletion by any logged-in account for a week
+        # after the deploy. NULL reads as "older than the grace period", which
+        # is the honest answer: their real creation date was never recorded.
+        #
+        # At this point in the migration every row is by definition
+        # pre-existing, so clearing the column unconditionally is exact.
+        migrations.RunSQL(
+            sql="UPDATE modelview_basicfactsheet SET created = NULL;",
+            reverse_sql=migrations.RunSQL.noop,
         ),
     ]

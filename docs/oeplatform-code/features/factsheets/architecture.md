@@ -157,9 +157,13 @@ DELETE request and so does `curl`, so a hidden button protects nothing.
     anything to strangers is a `creator` foreign key plus the same window.
     Do not change this back to administrators-only without asking.
 
-    `created` is **nullable and was not backfilled**. A default of "now" would
-    have given every pre-existing factsheet a fresh creation date and opened all
-    of them for a week after deployment.
+    Factsheets that predate the column carry `created = NULL`, which reads as
+    "older than the window". Getting there took an explicit step: `null=True`
+    does **not** stop `AddField` from filling existing rows, because Django's
+    schema editor special-cases `auto_now_add` and writes the migration's own
+    timestamp into every one of them. Migration 0066 therefore clears the
+    column after adding it — without that, every pre-existing factsheet would
+    have been deletable by any account for a week after deployment.
 
 Every create, update and delete emits one structured log line
 (`factsheet_write …`). Those lines are the only record this app keeps.
