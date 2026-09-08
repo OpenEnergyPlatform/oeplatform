@@ -26,6 +26,9 @@ efficient as it avoids parsing data (like the Graph) to python data types.
 - `shape_artifacts.py` + `management/commands/fetch_oekg_shapes.py` — the single
   seam through which the platform obtains the canonical SHACL shape for scenario
   bundles and the `rdfs:label` subset validation needs. See below.
+- `graph_store.py` — the OEKG REST API's own transport to the graph store, and
+  `tests/__init__.py`'s `OekgGraphTestCase`, the seam its tests run against. See
+  below.
 
 The low-level connection setup — the `SPARQLWrapper` clients (`sparql`,
 `update_endpoint`) and the in-memory OEO ontology graph (`oeo`, `oeo_owl`) —
@@ -81,6 +84,65 @@ writes that version into `oeo_labels.ttl`, so a moved ontology shows up as an
 `--oeo-version` to pin it explicitly. Pinning the ontology fetch itself is a
 separate job — it is already duplicated across four sites with three URLs and
 inconsistent pinning.
+
+## The API's transport to the graph
+
+`graph_store.py` is a query client and an update client — deliberately **not**
+`factsheet/oekg/connection.py`, which the rest of this app still uses.
+
+That module exposes the graph as an rdflib `Graph` over a `SPARQLUpdateStore`
+with `autocommit=True`, so every `add()` is its own committed transaction. A
+~200-triple bundle costs ~200 requests and 30 s, and an abort halfway leaves
+half a bundle in the graph. It also parses the full ontology at import (1.3 GB
+resident, ~36 s, per process).
+
+So the boundary sits one step earlier: **keep rdflib for building a graph in
+memory, drop it as transport.** Callers assemble triples in an `rdflib.Graph` —
+which is also what the validator will read — and `GraphStore` ships them as one
+SPARQL request.
+
+```python
+store = GraphStore.from_settings()
+store.insert(triples)                        # one request
+store.update(op_a, op_b)                     # still one request, one transaction
+rows = store.select("SELECT ?s WHERE { ?s ?p ?o }")
+```
+
+**One request is one transaction, across `;`-separated operations.** That was
+established by experiment against Fuseki 5.1.0 on TDB2; it now lives in this
+app's tests, so a store upgrade cannot quietly take it away. It is what makes an
+update-in-place expressible at all — a delete and an insert in one request
+either both apply or neither does.
+
+Two safety properties are built in rather than left to callers:
+
+- **The store's error bodies never escape.** Fuseki answers a bad query with a
+  parser dump that echoes the generated query back. It is logged where operators
+  can read it, and the raised error carries only a status.
+- **`clear()` refuses the default graph.** It exists for tests, and a helper
+  that could empty the graph the platform actually uses is one misconfigured
+  endpoint away from erasing the knowledge graph.
+
+### Testing against a real store
+
+`OekgGraphTestCase` gives each test its own **named graph**, dropped afterwards,
+on a real store. A substitute was considered and rejected: atomicity is a
+property of the engine, and an in-memory stand-in would pass whatever we taught
+it.
+
+A missing store **skips with a stated reason** rather than failing, so a run
+without the compose network is green. Point the tests at a Fuseki of your own
+with:
+
+```bash
+RDF_DATABASE_HOST=localhost python manage.py test oekg
+```
+
+**The availability probe is a write, not a read**, and this is the trap worth
+knowing: Fuseki serves queries to anyone but answers updates with `401` unless
+the credentials are valid. A probe that only read would call such a store usable
+and leave every write test failing instead of skipping. It is also why the CI
+service sets `ADMIN_PASSWORD`.
 
 ## Two things are called `oekg`
 
