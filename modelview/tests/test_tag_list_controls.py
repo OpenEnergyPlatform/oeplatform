@@ -136,6 +136,38 @@ class TestTheFactsheetOverviewSidebar(TagListControlsTestCase):
         self.assertEqual(len(view_queries(captured)), 3)
 
 
+class TestTheSidebarOrder(TagListControlsTestCase):
+    """Whatever grows goes last.
+
+    "Fields" is the column chooser -- the only way to reach the columns the
+    page-sized payload leaves out -- and the tag list above it grows with the
+    number of tags in use (273 on production). Expanding the tags used to push
+    the chooser off the screen.
+    """
+
+    def test_fields_comes_before_tags(self):
+        for sheettype in SHEETTYPES:
+            with self.subTest(sheettype=sheettype):
+                html = self.list_html(sheettype)
+                sidebar = (
+                    html[: html.index("factsheets_content")]
+                    if ("factsheets_content" in html)
+                    else html
+                )
+
+                self.assertLess(
+                    sidebar.index("<h3>Fields</h3>"),
+                    sidebar.index("<h3>Tags</h3>"),
+                )
+
+    def test_both_sections_are_still_there(self):
+        html = self.list_html("model")
+
+        self.assertIn("<h3>Fields</h3>", html)
+        self.assertIn("<h3>Tags</h3>", html)
+        self.assertIn("apply_filter", html)
+
+
 class TestTheFactsheetTagSelector(TagListControlsTestCase):
     """The editor's Tags tab: search and sort, but no collapsed limit.
 

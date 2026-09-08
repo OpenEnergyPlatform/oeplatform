@@ -55,7 +55,9 @@ SPDX-License-Identifier: CC0-1.0
   name. On the administration page the list sits in its own scrollable box with
   the actions above it, so a growing vocabulary no longer pushes "Create new
   Tag" off the screen. Sorting by name puts digits in numeric order, so "run 2"
-  comes before "run 10".
+  comes before "run 10". In the factsheet overviews' sidebar the column chooser
+  now sits above the tag filter, so expanding the tags cannot push it out of
+  view.
 
 ## Features
 

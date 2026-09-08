@@ -34,6 +34,33 @@
     <span class="fas fa-download"></span> Download CSV
   </a>
   <hr>
+  {# Fields ABOVE Tags on purpose: the tag list grows to the number of tags in #}
+  {# use (273 on production) and expanding it would push the column toggles #}
+  {# off the screen. Whatever grows goes last. #}
+  <h3>Fields</h3>
+  <div class="checkbox-container">
+    {% for heading,d in fields.items %}
+      <div class="checkbox-item">
+        <a class="fill-div"
+           data-bs-toggle="collapse"
+           href="#{{ heading.split|join:'_' }}">{{ heading }}</a>
+        <div id="{{ heading.split|join:'_' }}" class="collapse">
+          {% for key,value in d.items %}
+            <div style="display: flex;flex-flow: nowrap;align-items: center">
+              <input type="checkbox"
+                     onchange="apply_filter(event.target)"
+                     id="{{ key }}"
+                     {% if key.split|join:'_' in default %}checked="checked"{% endif %}>
+              <label class="form-label"
+                     style="margin: 0"
+                     for="{{ key }}">{{ key }}</label>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+  <hr>
   <h3>Tags</h3>
   {# These tags are one platform-wide vocabulary shared with database tables, #}
   {# and until now nothing on the site linked to where it is administered. #}
@@ -88,30 +115,6 @@
   <button data-tag-expand type="button" class="btn btn-sm btn-link p-0" hidden>
     Show all tags
   </button>
-  <hr>
-  <h3>Fields</h3>
-  <div class="checkbox-container">
-    {% for heading,d in fields.items %}
-      <div class="checkbox-item">
-        <a class="fill-div"
-           data-bs-toggle="collapse"
-           href="#{{ heading.split|join:'_' }}">{{ heading }}</a>
-        <div id="{{ heading.split|join:'_' }}" class="collapse">
-          {% for key,value in d.items %}
-            <div style="display: flex;flex-flow: nowrap;align-items: center">
-              <input type="checkbox"
-                     onchange="apply_filter(event.target)"
-                     id="{{ key }}"
-                     {% if key.split|join:'_' in default %}checked="checked"{% endif %}>
-              <label class="form-label"
-                     style="margin: 0"
-                     for="{{ key }}">{{ key }}</label>
-            </div>
-          {% endfor %}
-        </div>
-      </div>
-    {% endfor %}
-  </div>
   <hr>
 {% endblock main-right-sidebar-content %}
 {% block factsheets_content %}
