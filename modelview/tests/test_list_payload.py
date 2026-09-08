@@ -418,6 +418,36 @@ class TestTheTableWiringSurvives(ListPayloadTestCase):
         self.assertIn("modelview/tag_filter.js", html)
         self.assertIn('type="module"', html)
 
+    def test_no_classic_script_touches_the_modules(self):
+        """A `<script type="module">` is DEFERRED.
+
+        It runs after the document is parsed, so a classic inline script below
+        it has already executed by then. The page used to import the modules
+        onto `window` in a module and then use them from a classic script,
+        which fails in a real browser at the first statement that touches
+        them -- `tag_filter is not defined`. Every inline script that needs
+        them must therefore be a module itself.
+
+        Not caught by a test that evaluates the scripts by hand in the order
+        it chooses; only the browser's own ordering shows it. So this asserts
+        the structure the browser reacts to.
+        """
+        resp = self.get("modelview:modellist", kwargs={"sheettype": "model"})
+        html = resp.content.decode("utf-8")
+
+        inline = re.findall(
+            r"<script(?![^>]*\bsrc=)([^>]*)>(.*?)</script>", html, re.DOTALL
+        )
+        touching = [
+            attrs
+            for attrs, body in inline
+            if "tag_filter" in body or "lazy_payload" in body
+        ]
+
+        self.assertTrue(touching, msg="nothing on the page uses the modules")
+        for attrs in touching:
+            self.assertIn('type="module"', attrs)
+
     def test_the_search_extension_still_calls_the_filter(self):
         resp = self.get("modelview:modellist", kwargs={"sheettype": "model"})
         html = resp.content.decode("utf-8")

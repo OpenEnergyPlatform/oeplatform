@@ -119,16 +119,6 @@
 {% endblock %}
 {% block after-body-bottom-js %}
   <script src="{% static 'dataedit/jquery.dataTables.min.js' %}"></script><!-- src: https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js -->
-  {# The filter's logic is a real module so it can be tested (vitest, #}
-  {# `modelview/static/modelview/__tests__/`). A module script is deferred, so #}
-  {# it runs before DOMContentLoaded and therefore before jQuery's ready #}
-  {# handler below, which is what needs `tag_filter`. #}
-  <script type="module">
-    import * as tag_filter from "{% static 'modelview/tag_filter.js' %}";
-    import * as lazy_payload from "{% static 'modelview/lazy_payload.js' %}";
-    window.tag_filter = tag_filter;
-    window.lazy_payload = lazy_payload;
-  </script>
   {# The rows come from the view; `modelview/list_payload.py` says why. JSON #}
   {# via `json_script`, never a JS literal: `json_script` escapes `<`, `>` #}
   {# and `&`, so no field value can close this element. #}
@@ -136,7 +126,24 @@
   {# Which columns those rows already carry, so a toggle of one of them does #}
   {# not fetch the other 165 for nothing. #}
   {{ initial_columns|json_script:"factsheet-initial-columns" }}
-  <script>
+  {# ONE module, importing what it needs at the top.                        #}
+  {#                                                                        #}
+  {# It used to be a module that assigned `tag_filter` to `window` followed #}
+  {# by a classic script that used it. That cannot work: a module script is #}
+  {# DEFERRED, so it runs after the document is parsed and therefore after  #}
+  {# the classic script below it has already executed -- `tag_filter is not #}
+  {# defined`, at the first statement that touched it. Inside one module    #}
+  {# the imports resolve before the body runs, so the ordering hazard is    #}
+  {# gone rather than avoided.                                              #}
+  {#                                                                        #}
+  {# jQuery and DataTables are classic scripts loaded above, so they are on #}
+  {# `window` by the time this runs. The two handlers the sidebar's inline  #}
+  {# `onchange` attributes call have to be put back on `window` explicitly, #}
+  {# because a module's top level is not global scope.                      #}
+  <script type="module">
+    import * as tag_filter from "{% static 'modelview/tag_filter.js' %}";
+    import * as lazy_payload from "{% static 'modelview/lazy_payload.js' %}";
+
     var dt;
 
     var full_data = JSON.parse(
@@ -280,6 +287,9 @@
 
     } );
 
-
+    // The sidebar's checkboxes call these through `onchange` attributes,
+    // which resolve against `window` and not against this module's scope.
+    window.apply_filter = apply_filter;
+    window.apply_tag_filter = apply_tag_filter;
   </script>
 {% endblock %}
