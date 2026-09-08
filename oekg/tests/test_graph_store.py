@@ -28,10 +28,19 @@ EX = "https://example.org/oekg-test/"
 UNREACHABLE = "http://127.0.0.1:9/nonexistent.ttl"
 
 
-def triple(subject, label):
+def labelled(subject, label):
+    """A one-triple graph: the smallest thing worth writing."""
     graph = Graph()
     graph.add((URIRef(subject), RDFS.label, Literal(label)))
     return graph
+
+
+def unreachable_store():
+    """Points at the discard port, so every connection is refused at once."""
+    return GraphStore(
+        query_url="http://127.0.0.1:9/ds/query",
+        update_url="http://127.0.0.1:9/ds/update",
+    )
 
 
 class GraphStoreConfigurationTest(SimpleTestCase):
@@ -71,21 +80,11 @@ class GraphStoreConfigurationTest(SimpleTestCase):
         self.assertIsNone(GraphStore.from_settings().auth)
 
     def test_an_unreachable_store_is_reported_not_raised(self):
-        store = GraphStore(
-            query_url="http://127.0.0.1:9/ds/query",
-            update_url="http://127.0.0.1:9/ds/update",
-        )
-
-        self.assertFalse(store.is_available())
+        self.assertFalse(unreachable_store().is_available())
 
     def test_reading_from_an_unreachable_store_raises_unavailable(self):
-        store = GraphStore(
-            query_url="http://127.0.0.1:9/ds/query",
-            update_url="http://127.0.0.1:9/ds/update",
-        )
-
         with self.assertRaises(GraphStoreUnavailable):
-            store.ask("ASK { ?s ?p ?o }")
+            unreachable_store().ask("ASK { ?s ?p ?o }")
 
     def test_clearing_the_default_graph_is_refused(self):
         # A test helper that could DROP the default graph is one misconfigured
@@ -128,7 +127,7 @@ class GraphStoreReadWriteTest(OekgGraphTestCase):
     def test_a_write_is_readable_afterwards(self):
         subject = EX + str(uuid.uuid4())
 
-        self.store.insert(triple(subject, "written and read back"))
+        self.store.insert(labelled(subject, "written and read back"))
 
         rows = self.store.select(
             "SELECT ?label WHERE { <%s> <%s> ?label }" % (subject, RDFS.label)
@@ -138,12 +137,28 @@ class GraphStoreReadWriteTest(OekgGraphTestCase):
     def test_a_construct_returns_the_triples_that_were_written(self):
         subject = URIRef(EX + str(uuid.uuid4()))
 
-        self.store.insert(triple(subject, "constructed"))
+        self.store.insert(labelled(subject, "constructed"))
 
         graph = self.store.construct(
             "CONSTRUCT { <%s> ?p ?o } WHERE { <%s> ?p ?o }" % (subject, subject)
         )
         self.assertEqual(list(graph), [(subject, RDFS.label, Literal("constructed"))])
+
+    def test_a_write_does_not_reach_the_graph_the_platform_uses(self):
+        # What isolation actually has to mean: the store targets a named graph,
+        # so nothing it writes shows up in the default graph a dev environment
+        # serves from.
+        subject = EX + str(uuid.uuid4())
+        default_graph = GraphStore(
+            query_url=self.store.query_url,
+            update_url=self.store.update_url,
+            auth=self.store.auth,
+        )
+
+        self.store.insert(labelled(subject, "confined to this test's graph"))
+
+        self.assertTrue(self.store.ask("ASK { <%s> ?p ?o }" % subject))
+        self.assertFalse(default_graph.ask("ASK { <%s> ?p ?o }" % subject))
 
     def test_the_graph_starts_empty(self):
         # Holds whatever order the suite runs in, because every test cleans up
@@ -151,7 +166,7 @@ class GraphStoreReadWriteTest(OekgGraphTestCase):
         self.assertEqual(self.store.select("SELECT ?s WHERE { ?s ?p ?o }"), [])
 
     def test_clearing_removes_everything_this_test_wrote(self):
-        self.store.insert(triple(EX + "leak-check", "written by one test"))
+        self.store.insert(labelled(EX + "leak-check", "written by one test"))
 
         self.store.clear()
 
@@ -161,14 +176,18 @@ class GraphStoreReadWriteTest(OekgGraphTestCase):
         # Fuseki answers queries to anyone and 401s updates without valid
         # credentials. A probe that only read would call such a store usable
         # and leave every write test failing instead of skipping.
-        read_only = GraphStore(
+        wrong_credentials = GraphStore(
             query_url=self.store.query_url,
             update_url=self.store.update_url,
             auth=("definitely", "wrong"),
         )
 
-        self.assertTrue(read_only.ask("ASK { }"))
-        self.assertFalse(read_only.is_available())
+        self.assertTrue(wrong_credentials.ask("ASK { }"))
+        if wrong_credentials.is_available():
+            self.skipTest(
+                "This store accepts updates without valid credentials, so it "
+                "cannot show the difference between read and write access."
+            )
 
     def test_a_rejected_update_does_not_leak_the_store_response(self):
         # Fuseki answers a bad query with a parser dump that echoes the
@@ -196,7 +215,7 @@ class OneRequestIsOneTransactionTest(OekgGraphTestCase):
 
         with self.assertRaises(GraphUpdateRejected):
             self.store.update(
-                self.store.insert_data(triple(subject, "should not survive")),
+                self.store.insert_data(labelled(subject, "should not survive")),
                 "LOAD <%s>" % UNREACHABLE,
             )
 
@@ -208,7 +227,7 @@ class OneRequestIsOneTransactionTest(OekgGraphTestCase):
         with self.assertRaises(GraphUpdateRejected):
             self.store.update(
                 "LOAD <%s>" % UNREACHABLE,
-                self.store.insert_data(triple(subject, "should never land")),
+                self.store.insert_data(labelled(subject, "should never land")),
             )
 
         self.assertFalse(self.wrote(subject))
@@ -218,17 +237,34 @@ class OneRequestIsOneTransactionTest(OekgGraphTestCase):
         # store that simply refused every update.
         subject = EX + str(uuid.uuid4())
 
-        self.store.insert(triple(subject, "survives, because this is committed"))
+        self.store.insert(labelled(subject, "survives, because this is committed"))
         with self.assertRaises(GraphUpdateRejected):
             self.store.update("LOAD <%s>" % UNREACHABLE)
 
         self.assertTrue(self.wrote(subject))
 
+    def test_a_delete_and_an_insert_in_one_request_replace_a_value(self):
+        # The update-in-place shape: what one-request-one-transaction is FOR.
+        # Without it the API could not change a field without a window in which
+        # the field does not exist.
+        subject = EX + str(uuid.uuid4())
+        self.store.insert(labelled(subject, "before"))
+
+        self.store.update(
+            self.store.delete_data(labelled(subject, "before")),
+            self.store.insert_data(labelled(subject, "after")),
+        )
+
+        rows = self.store.select(
+            "SELECT ?label WHERE { <%s> <%s> ?label }" % (subject, RDFS.label)
+        )
+        self.assertEqual([row["label"] for row in rows], ["after"])
+
     def test_several_writes_in_one_request_all_land(self):
         subjects = [EX + str(uuid.uuid4()) for _ in range(3)]
 
         self.store.update(
-            *[self.store.insert_data(triple(s, "batched")) for s in subjects]
+            *[self.store.insert_data(labelled(s, "batched")) for s in subjects]
         )
 
         for subject in subjects:

@@ -88,61 +88,44 @@ inconsistent pinning.
 ## The API's transport to the graph
 
 `graph_store.py` is a query client and an update client — deliberately **not**
-`factsheet/oekg/connection.py`, which the rest of this app still uses.
+`factsheet/oekg/connection.py`, which the rest of this app still uses. That
+module commits once per triple and parses the whole ontology at import; the
+module docstring records why the boundary moved and what it costs.
 
-That module exposes the graph as an rdflib `Graph` over a `SPARQLUpdateStore`
-with `autocommit=True`, so every `add()` is its own committed transaction. A
-~200-triple bundle costs ~200 requests and 30 s, and an abort halfway leaves
-half a bundle in the graph. It also parses the full ontology at import (1.3 GB
-resident, ~36 s, per process).
-
-So the boundary sits one step earlier: **keep rdflib for building a graph in
-memory, drop it as transport.** Callers assemble triples in an `rdflib.Graph` —
-which is also what the validator will read — and `GraphStore` ships them as one
-SPARQL request.
+The rule: **rdflib builds the graph in memory, `GraphStore` ships it as one
+SPARQL request.**
 
 ```python
 store = GraphStore.from_settings()
-store.insert(triples)                        # one request
-store.update(op_a, op_b)                     # still one request, one transaction
+store.insert(triples)     # one request
+store.update(op_a, op_b)  # still one request, so still one transaction
 rows = store.select("SELECT ?s WHERE { ?s ?p ?o }")
 ```
 
-**One request is one transaction, across `;`-separated operations.** That was
-established by experiment against Fuseki 5.1.0 on TDB2; it now lives in this
-app's tests, so a store upgrade cannot quietly take it away. It is what makes an
-update-in-place expressible at all — a delete and an insert in one request
-either both apply or neither does.
-
-Two safety properties are built in rather than left to callers:
-
-- **The store's error bodies never escape.** Fuseki answers a bad query with a
-  parser dump that echoes the generated query back. It is logged where operators
-  can read it, and the raised error carries only a status.
-- **`clear()` refuses the default graph.** It exists for tests, and a helper
-  that could empty the graph the platform actually uses is one misconfigured
-  endpoint away from erasing the knowledge graph.
+`insert_data` and `delete_data` build operations scoped to the store's target
+graph. `update` sends what you give it **as written** — an unscoped
+`INSERT DATA` hits the default graph whatever the store targets.
 
 ### Testing against a real store
 
-`OekgGraphTestCase` gives each test its own **named graph**, dropped afterwards,
-on a real store. A substitute was considered and rejected: atomicity is a
-property of the engine, and an in-memory stand-in would pass whatever we taught
-it.
-
-A missing store **skips with a stated reason** rather than failing, so a run
-without the compose network is green. Point the tests at a Fuseki of your own
-with:
+`OekgGraphTestCase` gives each test its own named graph, dropped afterwards, on
+a real store. A substitute was considered and rejected: atomicity is a property
+of the engine, and an in-memory stand-in would pass whatever we taught it.
 
 ```bash
 RDF_DATABASE_HOST=localhost python manage.py test oekg
 ```
 
-**The availability probe is a write, not a read**, and this is the trap worth
-knowing: Fuseki serves queries to anyone but answers updates with `401` unless
-the credentials are valid. A probe that only read would call such a store usable
-and leave every write test failing instead of skipping. It is also why the CI
-service sets `ADMIN_PASSWORD`.
+Three things about it are deliberate:
+
+- **No store means a skip, not a failure**, with the reason stated — so a run
+  without the compose network is green.
+- **The availability probe is a write.** Fuseki serves queries to anyone but
+  answers updates with `401` unless credentials are valid, so a read-only probe
+  would call such a store usable and leave every write test failing instead of
+  skipping. It is also why the CI service sets `ADMIN_PASSWORD`.
+- **The tests refuse a store they cannot recognise as local.** They write, and
+  `RDF_DATABASE_HOST` is a local file's setting that could point anywhere.
 
 ## Two things are called `oekg`
 

@@ -44,6 +44,10 @@ jobs:
         # securitysettings.py.default expects admin/admin. Without it the OEKG
         # graph tests skip instead of running, and the claim they exist to
         # prove -- one update request is one transaction -- is never checked.
+        # Pinned to the version production runs. Note this dataset is the
+        # in-memory backend, not the TDB2 production uses; WF-04 measured the
+        # transaction behaviour to be identical on both, which is what makes
+        # checking it here meaningful.
         image: stain/jena-fuseki:5.1.0
         ports:
           - 3030:3030

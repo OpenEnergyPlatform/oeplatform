@@ -50,7 +50,7 @@ CONSTRUCT_RESULTS = "text/turtle"
 # class and decides whether to skip, so it must not stall a suite.
 AVAILABILITY_TIMEOUT_SECONDS = 5
 
-# CLEAR SILENT on a graph nothing uses: a write that changes nothing whatever
+# DROP SILENT on a graph nothing uses: a write that changes nothing whatever
 # the store's state, so the probe is safe against any endpoint.
 AVAILABILITY_PROBE_GRAPH = "urn:oep:graph-store-availability-probe"
 
@@ -58,11 +58,13 @@ AVAILABILITY_PROBE_GRAPH = "urn:oep:graph-store-availability-probe"
 class GraphStoreError(Exception):
     """Base class for every way talking to the graph store can fail.
 
-    ``detail`` is what this kind of failure lets the caller assume about the
-    graph's state. It is appended to the message so the assurance travels with
-    the error rather than living only in this docstring.
+    ``action`` names what was refused and ``detail`` what the caller may assume
+    about the graph's state afterwards. Both live on the class so the message
+    is built from the failure itself rather than from an argument that has to
+    agree with it.
     """
 
+    action = "request"
     detail = ""
 
 
@@ -73,10 +75,13 @@ class GraphStoreUnavailable(GraphStoreError):
 class GraphQueryRejected(GraphStoreError):
     """The store refused a read. Its response body is logged, never carried."""
 
+    action = "query"
+
 
 class GraphUpdateRejected(GraphStoreError):
     """The store refused a write. Its response body is logged, never carried."""
 
+    action = "update"
     detail = "Nothing was changed: one request is one transaction."
 
 
@@ -146,16 +151,17 @@ class GraphStore:
     def update(self, *operations: str) -> None:
         """Send SPARQL update operations as **one** request, so one transaction.
 
-        Operations are the caller's own SPARQL; ``insert_data`` builds the
-        common one already scoped to this store's target graph.
+        The operations are the caller's own SPARQL and are sent as written --
+        **this method does not scope them to the target graph.** Use
+        ``insert_data`` and ``delete_data`` to build scoped operations; reach
+        for a hand-written one only where no builder exists yet, such as a
+        guarded compare-and-set, and scope it yourself. An unscoped
+        ``INSERT DATA`` writes the default graph whatever this store targets.
         """
         if not operations:
             return
         self._post(
-            self.update_url,
-            {"update": " ;\n".join(operations)},
-            GraphUpdateRejected,
-            "update",
+            self.update_url, {"update": " ;\n".join(operations)}, GraphUpdateRejected
         )
 
     def insert(self, triples: Graph) -> None:
@@ -175,14 +181,19 @@ class GraphStore:
         return f"DELETE DATA {{ {self._in_target_graph(triples)} }}"
 
     def clear(self) -> None:
-        """Empty this store's named graph. Refuses on the default graph."""
+        """Remove this store's named graph. Refuses on the default graph.
+
+        DROP rather than CLEAR: CLEAR empties a graph but leaves it in the
+        store, so a persistent dataset would accumulate one empty graph per
+        test per run.
+        """
         if not self.graph:
             raise UnsafeClearError(
                 "Refusing to clear the default graph: this store targets the "
                 "graph the platform itself uses. Build a GraphStore with a "
                 "named graph to clear it."
             )
-        self.update(f"CLEAR SILENT GRAPH <{self.graph}>")
+        self.update(f"DROP SILENT GRAPH <{self.graph}>")
 
     # ---------------------------------------------------------------- probing
 
@@ -200,7 +211,7 @@ class GraphStore:
         try:
             self.session.post(
                 self.update_url,
-                data={"update": f"CLEAR SILENT GRAPH <{AVAILABILITY_PROBE_GRAPH}>"},
+                data={"update": f"DROP SILENT GRAPH <{AVAILABILITY_PROBE_GRAPH}>"},
                 auth=self.auth,
                 timeout=AVAILABILITY_TIMEOUT_SECONDS,
             ).raise_for_status()
@@ -222,16 +233,13 @@ class GraphStore:
             # Scoping by protocol parameter rather than by rewriting the query,
             # so callers write plain SPARQL and the store decides where it runs.
             parameters["default-graph-uri"] = self.graph
-        return self._post(
-            self.query_url, parameters, GraphQueryRejected, "query", accept=accept
-        )
+        return self._post(self.query_url, parameters, GraphQueryRejected, accept=accept)
 
     def _post(
         self,
         url: str,
         data: dict,
         rejection: type,
-        what: str,
         accept: Optional[str] = None,
     ) -> requests.Response:
         headers = {"Accept": accept} if accept else {}
@@ -250,13 +258,13 @@ class GraphStore:
             # error. Log it where operators can read it and raise without it.
             logger.error(
                 "OEKG graph store refused a %s: HTTP %s from %s -- %s",
-                what,
+                rejection.action,
                 response.status_code,
                 url,
                 response.text[:2000],
             )
             raise rejection(
-                f"The OEKG graph store refused this {what} "
+                f"The OEKG graph store refused this {rejection.action} "
                 f"(HTTP {response.status_code}). {rejection.detail}".strip()
             )
         return response

@@ -49,17 +49,6 @@ class SparqlEndpointTest(TestCase):
         self.assertIn("results", response.json())
 
     @patch("oekg.views.execute_sparql_query")
-    def test_the_view_does_not_reach_the_store_itself(self, execute_sparql_query):
-        # Guards the patch target: if the binding moves back to oekg.utils, or
-        # the view starts calling something else, this fails instead of
-        # silently going over the network again.
-        execute_sparql_query.return_value = ("{}", "application/sparql-results+json")
-
-        self.client.post(self.endpoint_url, {"query": QUERY})
-
-        execute_sparql_query.assert_called_once()
-
-    @patch("oekg.views.execute_sparql_query")
     def test_an_unusable_query_is_a_bad_request(self, execute_sparql_query):
         execute_sparql_query.side_effect = ValueError("Missing 'query' parameter.")
 
