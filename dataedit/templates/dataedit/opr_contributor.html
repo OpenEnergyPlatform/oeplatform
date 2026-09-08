@@ -112,9 +112,9 @@
                    class="img-fluid" />
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
-                Close
-              </button>
+              <button type="button"
+                      class="btn btn-primary"
+                      data-bs-dismiss="modal">Close</button>
             </div>
           </div>
         </div>
@@ -177,7 +177,10 @@
             <div class="fullwidth-tabs__save-btn fullwidth-tabs__save-btn--summary">
               <button id="submit_summary" class="disabled">
                 <span class="btn__icon">
-                  <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                  <svg width="16"
+                       height="16"
+                       fill="currentColor"
+                       viewBox="0 0 24 24">
                     <path d="m11.19,16.2v-5.04l-2.71,2.71-1.15-1.15,2.32-2.32c1.53-1.54,2.34-2.32,2.37-2.32s.84.79,2.37,2.32l2.32,2.32-1.15,1.15-2.73-2.73v10.09h-1.65v-5.04h0ZM.12,8.7V2.77h23.75v11.86h-1.65V4.42H1.77v10.21H.12v-5.93Z" />
                   </svg>
                 </span>
@@ -253,7 +256,9 @@
                 {{ field_descriptions_json }}
               </div>
               <div class="review__description" id="review-info">
-                <button type="button" data-bs-toggle="modal" data-bs-target="#myModal">
+                <button type="button"
+                        data-bs-toggle="modal"
+                        data-bs-target="#myModal">
                   Open Peer Review process <i class="fas fa-info-circle"></i>
                 </button>
               </div>
@@ -278,9 +283,9 @@
                 <h2 id="review-field-name" style="display:none"></h2>
                 <div class="review__btns" role="group">
                   <div class="review__btn review__btn--success">
-                    <button type="button" id="ok-button" onclick="selectState('ok');">
-                      Accept
-                    </button>
+                    <button type="button"
+                            id="ok-button"
+                            onclick="selectState('ok');">Accept</button>
                   </div>
                   <div class="review__btn review__btn--suggested">
                     <button type="button"
@@ -290,18 +295,22 @@
                     </button>
                   </div>
                   <div class="review__btn review__btn--denied">
-                    <button type="button" id="rejected-button" onclick="selectState('rejected');">
-                      Deny
-                    </button>
+                    <button type="button"
+                            id="rejected-button"
+                            onclick="selectState('rejected');">Deny</button>
                   </div>
                 </div>
                 <div id="explanation-container"></div>
                 <div class="d-none review__remarks" id="reviewer_remarks">
                   <div class="review__field" id="field-value">
-                    <label for="valuearea" class="form-label">Your value suggestion*</label>
-                    <textarea class="form-control" id="valuearea" rows="2"></textarea>
+                    <label for="valuearea"
+                           class="form-label">Your value suggestion*</label>
+                    <textarea class="form-control"
+                              id="valuearea"
+                              rows="2"></textarea>
                   </div>
-                  <div class="review__field review__field--nolabel" id="field-comment">
+                  <div class="review__field review__field--nolabel"
+                       id="field-comment">
                     <textarea class="form-control"
                               id="commentarea"
                               rows="2"
@@ -312,7 +321,8 @@
                           id="submitButton">Save comment/new value</button>
                 </div>
                 <div class="d-none review__comments" id="reviewer_comments">
-                  <div class="review__field review__field--nolabel" id="field-comment">
+                  <div class="review__field review__field--nolabel"
+                       id="field-comment">
                     <textarea class="form-control"
                               id="comments"
                               rows="2"
@@ -339,7 +349,7 @@
   </main>
 {% endblock main %}
 {% block after-body-bottom-js %}
-  <script type="text/javascript">
+  <script>
     const fieldDescriptionsData = JSON.parse(document.getElementById("field-descriptions-json").textContent);
     var config = JSON.parse("{{ config|escapejs }}");
     window.state_dict = JSON.parse("{{ state_dict | escapejs }}");

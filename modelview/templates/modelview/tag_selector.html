@@ -16,13 +16,14 @@
         {% endif %}
       {% endfor %}
     </span>
-    <span id="tag-selector-empty" {% if selected %}hidden{% endif %}>No tags are attached, yet.</span>
+    <span id="tag-selector-empty"
+          {% if selected %}hidden{% endif %}>No tags are attached, yet.</span>
     <div id="tag_handler">
       <h4>
         Choose tags to attach:
-        <button type="button" id="remove-all-tags" class="btn btn-secondary btn-sm">
-          Remove all tags
-        </button>
+        <button type="button"
+                id="remove-all-tags"
+                class="btn btn-secondary btn-sm">Remove all tags</button>
       </h4>
       {% for t in all_tags %}
         <span>

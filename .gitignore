@@ -133,5 +133,7 @@ saio/
 # local docs symlink
 .claude-docs
 
-# Benchmark output (the harnesses are committed, their results are not)
+# Benchmark output: the harnesses are committed, their results are not.
+# Bulk-upload slices live in --work-dir (default /tmp), and the maps' real
+# result rows live in the wayfinder assets folders, not in the repo.
 benchmarks/results/

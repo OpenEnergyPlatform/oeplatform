@@ -19,6 +19,18 @@ _INPUT = re.compile(r"<input\b[^>]*>", re.IGNORECASE)
 _VALUE = re.compile(r'value="([^"]*)"')
 
 
+def element_with_id(html: str, element_id: str) -> str:
+    """The opening tag of the element carrying `element_id`, whole.
+
+    Whole, so that nothing here depends on the order djlint happens to leave
+    the attributes in -- or on whether it put them on one line. An assertion
+    written as the literal `id="x" hidden` breaks on a purely cosmetic
+    reformat, which is exactly what happened when djlint was updated.
+    """
+    found = re.search(r"<[a-zA-Z][^>]*\bid=\"%s\"[^>]*>" % re.escape(element_id), html)
+    return found.group(0) if found else ""
+
+
 def checkboxes(html: str, css_class: str) -> list[tuple[str, bool]]:
     """Every `<input>` carrying `css_class`, as (value, checked) pairs.
 

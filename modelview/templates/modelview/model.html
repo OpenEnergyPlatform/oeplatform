@@ -36,14 +36,16 @@
     </div>
   </div>
   <div class="card-container">
-    <div class="card ">
+    <div class="card">
       <div class="card-header">
-        <a class="fill-div" data-bs-toggle="collapse" href="#GeneralInformation">General Information</a>
+        <a class="fill-div"
+           data-bs-toggle="collapse"
+           href="#GeneralInformation">General Information</a>
       </div>
-      <div id="GeneralInformation" class="card-body expand in  in">
+      <div id="GeneralInformation" class="card-body expand in in">
         <table class="profiletable">
-          {% include 'modelview/model_snippet.html' with model=model field='model_name' %}
-          {% include 'modelview/model_snippet.html' with model=model field='acronym' %}
+          {% include "modelview/model_snippet.html" with model=model field="model_name" %}
+          {% include "modelview/model_snippet.html" with model=model field="acronym" %}
           <tr>
             <td class="sheetlabel">
               {% get_field_attr model 'methodical_focus_1' 'verbose_name' %}
@@ -58,11 +60,11 @@
               {% if model.methodical_focus_3 %}, {{ model.methodical_focus_3 }}{% endif %}
             </td>
           </tr>
-          {% include 'modelview/model_snippet.html' with model=model field='institutions' %}
-          {% include 'modelview/model_snippet.html' with model=model field='authors' %}
-          {% include 'modelview/model_snippet.html' with model=model field='current_contact_person' %}
-          {% include 'modelview/model_snippet.html' with model=model field='contact_email' %}
-          {% include 'modelview/model_snippet.html' with model=model field='website' %}
+          {% include "modelview/model_snippet.html" with model=model field="institutions" %}
+          {% include "modelview/model_snippet.html" with model=model field="authors" %}
+          {% include "modelview/model_snippet.html" with model=model field="current_contact_person" %}
+          {% include "modelview/model_snippet.html" with model=model field="contact_email" %}
+          {% include "modelview/model_snippet.html" with model=model field="website" %}
           <tr>
             <th>Logo</th>
             <td>
@@ -75,36 +77,36 @@
               {% endif %}
             </td>
           </tr>
-          {% include 'modelview/model_snippet.html' with model=model field='primary_purpose' %}
-          {% include 'modelview/model_snippet.html' with model=model field='primary_outputs' %}
-          {% include 'modelview/model_snippet.html' with model=model field='support' %}
-          {% include 'modelview/model_snippet.html' with model=model field='framework' add=model.framework_yes_text %}
-          {% include 'modelview/model_snippet.html' with model=model field='user_documentation' %}
-          {% include 'modelview/model_snippet.html' with model=model field='code_documentation' %}
-          {% include 'modelview/model_snippet.html' with model=model field='documentation_quality' %}
-          {% include 'modelview/model_snippet.html' with model=model field='source_of_funding' %}
-          {% include 'modelview/model_snippet.html' with model=model field='number_of_developers' %}
-          {% include 'modelview/model_snippet.html' with model=model field='number_of_users' %}
+          {% include "modelview/model_snippet.html" with model=model field="primary_purpose" %}
+          {% include "modelview/model_snippet.html" with model=model field="primary_outputs" %}
+          {% include "modelview/model_snippet.html" with model=model field="support" %}
+          {% include "modelview/model_snippet.html" with model=model field="framework" add=model.framework_yes_text %}
+          {% include "modelview/model_snippet.html" with model=model field="user_documentation" %}
+          {% include "modelview/model_snippet.html" with model=model field="code_documentation" %}
+          {% include "modelview/model_snippet.html" with model=model field="documentation_quality" %}
+          {% include "modelview/model_snippet.html" with model=model field="source_of_funding" %}
+          {% include "modelview/model_snippet.html" with model=model field="number_of_developers" %}
+          {% include "modelview/model_snippet.html" with model=model field="number_of_users" %}
         </table>
       </div>
     </div>
-    <div class="card ">
+    <div class="card">
       <div class="card-header">
         <a data-bs-toggle="collapse" href="#Openness">Openness</a>
       </div>
-      <div id="Openness" class="card-body collapse in ">
+      <div id="Openness" class="card-body collapse in">
         <table class="profiletable">
-          {% include 'modelview/model_snippet.html' with model=model field='open_source' %}
+          {% include "modelview/model_snippet.html" with model=model field="open_source" %}
           {% if not model.open_source %}
-            {% include 'modelview/model_snippet.html' with model=model field='open_up' %}
-            {% include 'modelview/model_snippet.html' with model=model field='costs' %}
+            {% include "modelview/model_snippet.html" with model=model field="open_up" %}
+            {% include "modelview/model_snippet.html" with model=model field="costs" %}
           {% else %}
-            {% include 'modelview/model_snippet.html' with model=model field='license' add=model.license_other_text %}
-            {% include 'modelview/model_snippet.html' with model=model field='source_code_available' %}
-            {% include 'modelview/model_snippet.html' with model=model field='gitHub' %}
-            {% include 'modelview/model_snippet.html' with model=model field='link_to_source_code' %}
-            {% include 'modelview/model_snippet.html' with model=model field='data_provided' %}
-            {% include 'modelview/model_snippet.html' with model=model field='cooperative_programming' %}
+            {% include "modelview/model_snippet.html" with model=model field="license" add=model.license_other_text %}
+            {% include "modelview/model_snippet.html" with model=model field="source_code_available" %}
+            {% include "modelview/model_snippet.html" with model=model field="gitHub" %}
+            {% include "modelview/model_snippet.html" with model=model field="link_to_source_code" %}
+            {% include "modelview/model_snippet.html" with model=model field="data_provided" %}
+            {% include "modelview/model_snippet.html" with model=model field="cooperative_programming" %}
           {% endif %}
         </table>
         {% if model.gitHub %}
@@ -125,25 +127,25 @@
         {% endif %}
       </div>
     </div>
-    <div class="card ">
+    <div class="card">
       <div class="card-header">
         <a href="#Software" data-bs-toggle="collapse">Software</a>
       </div>
-      <div id="Software" class="card-body collapse in ">
+      <div id="Software" class="card-body collapse in">
         <table class="profiletable">
-          {% include 'modelview/model_snippet.html' with model=model field='modelling_software' %}
-          {% include 'modelview/model_snippet.html' with model=model field='interal_data_processing_software' %}
-          {% include 'modelview/model_snippet.html' with model=model field='external_optimizer_yes_text' %}
-          {% include 'modelview/model_snippet.html' with model=model field='additional_software' %}
-          {% include 'modelview/model_snippet.html' with model=model field='gui' %}
+          {% include "modelview/model_snippet.html" with model=model field="modelling_software" %}
+          {% include "modelview/model_snippet.html" with model=model field="interal_data_processing_software" %}
+          {% include "modelview/model_snippet.html" with model=model field="external_optimizer_yes_text" %}
+          {% include "modelview/model_snippet.html" with model=model field="additional_software" %}
+          {% include "modelview/model_snippet.html" with model=model field="gui" %}
         </table>
       </div>
     </div>
-    <div class="card ">
+    <div class="card">
       <div class="card-header">
         <a data-bs-toggle="collapse" href="#Coverage">Coverage</a>
       </div>
-      <div id="Coverage" class="card-body collapse  ">
+      <div id="Coverage" class="card-body collapse">
         <table class="profiletable">
           <tr>
             <td class="sheetlabel">Modeled energy sectors (final energy)</td>
@@ -237,10 +239,10 @@
               </table>
             </td>
           </tr>
-          {% include 'modelview/model_snippet.html' with model=model field='user_behaviour' add=model.user_behaviour_yes_text %}
-          {% include 'modelview/model_snippet.html' with model=model field='changes_in_efficiency' %}
-          {% include 'modelview/model_snippet.html' with model=model field='market_models' %}
-          {% include 'modelview/model_snippet.html' with model=model field='geographical_coverage' %}
+          {% include "modelview/model_snippet.html" with model=model field="user_behaviour" add=model.user_behaviour_yes_text %}
+          {% include "modelview/model_snippet.html" with model=model field="changes_in_efficiency" %}
+          {% include "modelview/model_snippet.html" with model=model field="market_models" %}
+          {% include "modelview/model_snippet.html" with model=model field="geographical_coverage" %}
           <tr>
             <td class="sheetlabel">Geographic (spatial) resolution</td>
             <td>
@@ -255,7 +257,7 @@
               {% checklist model "time_resolution_anual,time_resolution_hour,time_resolution_15_min,time_resolution_1_min,time_resolution_other=time_resolution_other_text" %}
             </td>
           </tr>
-          {% include 'modelview/model_snippet.html' with model=model field='comment_on_geo_resolution' %}
+          {% include "modelview/model_snippet.html" with model=model field="comment_on_geo_resolution" %}
           <tr>
             <td class="sheetlabel">Observation period</td>
             <td>
@@ -273,11 +275,12 @@
         </table>
       </div>
     </div>
-    <div class="card ">
+    <div class="card">
       <div class="card-header">
-        <a data-bs-toggle="collapse" href="#MathematicalProperties">Mathematical Properties</a>
+        <a data-bs-toggle="collapse"
+           href="#MathematicalProperties">Mathematical Properties</a>
       </div>
-      <div id="MathematicalProperties" class="card-body collapse ">
+      <div id="MathematicalProperties" class="card-body collapse">
         <table class="profiletable">
           <tr>
             <td class="sheetlabel">Model class (optimisation)</td>
@@ -291,8 +294,8 @@
               {% checklist model "model_class_simulation_Agentbased,model_class_simulation_System_Dynamics,model_class_simulation_Accounting_Framework,model_class_simulation_Game_Theoretic_Model,model_class_simulation_bottom_up,model_class_simulation_top_down" %}
             </td>
           </tr>
-          {% include 'modelview/model_snippet.html' with model=model field='model_class_other' add=model.model_class_other_text %}
-          {% include 'modelview/model_snippet.html' with model=model field='short_description_of_mathematical_model_class' %}
+          {% include "modelview/model_snippet.html" with model=model field="model_class_other" add=model.model_class_other_text %}
+          {% include "modelview/model_snippet.html" with model=model field="short_description_of_mathematical_model_class" %}
           <tr>
             <td class="sheetlabel">Mathematical objective</td>
             <td>
@@ -305,40 +308,42 @@
               {% checklist model "uncertainty_deterministic,uncertainty_Stochastic,uncertainty_Other=uncertainty_Other_text" %}
             </td>
           </tr>
-          {% include 'modelview/model_snippet.html' with model=model field='montecarlo' %}
-          {% include 'modelview/model_snippet.html' with model=model field='typical_computation_time' %}
-          {% include 'modelview/model_snippet.html' with model=model field='typical_computation_hardware' %}
-          {% include 'modelview/model_snippet.html' with model=model field='technical_data_anchored_in_the_model' %}
+          {% include "modelview/model_snippet.html" with model=model field="montecarlo" %}
+          {% include "modelview/model_snippet.html" with model=model field="typical_computation_time" %}
+          {% include "modelview/model_snippet.html" with model=model field="typical_computation_hardware" %}
+          {% include "modelview/model_snippet.html" with model=model field="technical_data_anchored_in_the_model" %}
         </table>
       </div>
     </div>
-    <div class="card ">
+    <div class="card">
       <div class="card-header">
-        <a class="fill-div" data-bs-toggle="collapse" href="#Integration">Model Integration</a>
+        <a class="fill-div"
+           data-bs-toggle="collapse"
+           href="#Integration">Model Integration</a>
       </div>
-      <div id="Integration" class="card-body collapse in  in">
+      <div id="Integration" class="card-body collapse in in">
         <table class="profiletable">
-          {% include 'modelview/model_snippet.html' with model=model field='interfaces' %}
-          {% include 'modelview/model_snippet.html' with model=model field='model_file_format' add=model.model_file_format_other_text %}
-          {% include 'modelview/model_snippet.html' with model=model field='model_input' add=model.model_input_other_text %}
-          {% include 'modelview/model_snippet.html' with model=model field='model_output' add=model.model_output_other_text %}
-          {% include 'modelview/model_snippet.html' with model=model field='integrating_models' %}
-          {% include 'modelview/model_snippet.html' with model=model field='integrated_models' %}
+          {% include "modelview/model_snippet.html" with model=model field="interfaces" %}
+          {% include "modelview/model_snippet.html" with model=model field="model_file_format" add=model.model_file_format_other_text %}
+          {% include "modelview/model_snippet.html" with model=model field="model_input" add=model.model_input_other_text %}
+          {% include "modelview/model_snippet.html" with model=model field="model_output" add=model.model_output_other_text %}
+          {% include "modelview/model_snippet.html" with model=model field="integrating_models" %}
+          {% include "modelview/model_snippet.html" with model=model field="integrated_models" %}
         </table>
       </div>
     </div>
-    <div class="card ">
+    <div class="card">
       <div class="card-header">
         <a data-bs-toggle="collapse" href="#References">References</a>
       </div>
-      <div id="References" class="card-body collapse  ">
+      <div id="References" class="card-body collapse">
         <div>
           <table class="profiletable">
-            {% include 'modelview/model_snippet.html' with model=model field='citation_reference' %}
-            {% include 'modelview/model_snippet.html' with model=model field='citation_DOI' %}
-            {% include 'modelview/model_snippet.html' with model=model field='references_to_reports_produced_using_the_model' %}
-            {% include 'modelview/model_snippet.html' with model=model field='example_research_questions' %}
-            {% include 'modelview/model_snippet.html' with model=model field='larger_scale_usage' %}
+            {% include "modelview/model_snippet.html" with model=model field="citation_reference" %}
+            {% include "modelview/model_snippet.html" with model=model field="citation_DOI" %}
+            {% include "modelview/model_snippet.html" with model=model field="references_to_reports_produced_using_the_model" %}
+            {% include "modelview/model_snippet.html" with model=model field="example_research_questions" %}
+            {% include "modelview/model_snippet.html" with model=model field="larger_scale_usage" %}
             <tr>
               <td class="sheetlabel">Model validation</td>
               <td>
@@ -347,9 +352,9 @@
                 </table>
               </td>
             </tr>
-            {% include 'modelview/model_snippet.html' with model=model field='example_research_questions' %}
-            {% include 'modelview/model_snippet.html' with model=model field='properties_missed' %}
-            {% include 'modelview/model_snippet.html' with model=model field='model_specific_properties' %}
+            {% include "modelview/model_snippet.html" with model=model field="example_research_questions" %}
+            {% include "modelview/model_snippet.html" with model=model field="properties_missed" %}
+            {% include "modelview/model_snippet.html" with model=model field="model_specific_properties" %}
           </table>
         </div>
       </div>

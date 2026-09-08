@@ -51,7 +51,9 @@
                   <p>{{ description }}</p>
                 </div>
                 <div class="topic-card__btn">
-                  <button type="button" class="btn btn-primary" onclick="open_wizzard()">
+                  <button type="button"
+                          class="btn btn-primary"
+                          onclick="open_wizzard()">
                     <span class="btn__icon">
                       <svg width="16"
                            height="16"
@@ -297,7 +299,7 @@
     Tags are a platform-wide vocabulary shared by tables and Model/Framework
     factsheets. <a href="{% url 'dataedit:tags' %}">Manage tags</a>
   </p>
-  <script type="text/javascript">
+  <script>
   function open_wizzard() {
     location.href = "{% url 'dataedit:wizard_create' %}";
   }

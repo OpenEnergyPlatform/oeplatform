@@ -7,7 +7,7 @@
 <div class="card">
   <div class="card-header">
     {% if editing.pk %}
-      Edit tag &mdash; <strong>{{ editing.name }}</strong>
+      Edit tag — <strong>{{ editing.name }}</strong>
     {% else %}
       Create Tag
     {% endif %}
@@ -48,13 +48,16 @@
             Assigned to {{ editing.usage.tables }} table{{ editing.usage.tables|pluralize }}
             and {{ editing.usage.factsheets }} factsheet{{ editing.usage.factsheets|pluralize }}.
             Tags are one vocabulary shared by both, so deleting this tag removes
-            it from all {{ editing.usage.total }} &mdash; and nothing here records that.
+            it from all {{ editing.usage.total }} — and nothing here records that.
           {% else %}
             Not assigned to any table or factsheet.
           {% endif %}
         </p>
       {% endif %}
-      <input type="submit" name="submit_save" class="btn btn-success" value="Save" />
+      <input type="submit"
+             name="submit_save"
+             class="btn btn-success"
+             value="Save" />
       <a href="{% url 'dataedit:tags' %}"
          hx-get="{% url 'dataedit:tags' %}"
          hx-target="#tag-manager"

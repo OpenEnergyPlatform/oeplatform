@@ -19,7 +19,11 @@ from base.tests import TestViewsTestCase
 from modelview.helper import getClasses
 from modelview.tests.corpus import seed_corpus
 from modelview.tests.form_data import as_post_data, form_values
-from modelview.tests.html import checked_values, offered_values
+from modelview.tests.html import (
+    checked_values,
+    element_with_id,
+    offered_values,
+)
 
 SHEETTYPES = ("model", "framework")
 
@@ -316,7 +320,7 @@ class TestTheTagEditorsControls(FactsheetWriteTestCase):
                 pills = current_tag_pills(html)
 
                 self.assertEqual(pills, [tag.name for tag in chosen])
-                self.assertIn('id="tag-selector-empty" hidden', html)
+                self.assertIn("hidden", element_with_id(html, "tag-selector-empty"))
 
     def test_a_factsheet_with_no_tags_says_so_and_lists_no_pills(self):
         sheet = self.sheet("model")
@@ -325,7 +329,7 @@ class TestTheTagEditorsControls(FactsheetWriteTestCase):
         html = self.edit_page("model", sheet.pk)
 
         self.assertEqual(current_tag_pills(html), [])
-        self.assertNotIn('id="tag-selector-empty" hidden', html)
+        self.assertNotIn("hidden", element_with_id(html, "tag-selector-empty"))
 
     def test_the_dead_table_input_is_gone(self):
         """`tag_selector.html` was lifted from `dataedit`, which posts tags to

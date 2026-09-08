@@ -51,7 +51,7 @@
   {# and until now nothing on the site linked to where it is administered. #}
   <p class="text-muted">
     <small>
-      Filter by tag. <a href="{% url 'dataedit:tags' %}">Manage tags</a> &mdash;
+      Filter by tag. <a href="{% url 'dataedit:tags' %}">Manage tags</a> —
       one vocabulary, shared with database tables.
     </small>
   </p>
@@ -90,7 +90,9 @@
                      onchange="apply_filter(event.target)"
                      id="{{ key }}"
                      {% if key.split|join:'_' in default %}checked="checked"{% endif %}>
-              <label class="form-label" style="margin: 0" for="{{ key }}">{{ key }}</label>
+              <label class="form-label"
+                     style="margin: 0"
+                     for="{{ key }}">{{ key }}</label>
             </div>
           {% endfor %}
         </div>

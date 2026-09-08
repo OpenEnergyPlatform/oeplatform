@@ -67,7 +67,8 @@
     {% endif %}
     {% if form.definition.value %}
       <div class="mb-2">
-        <label for="definition" class="form-label">Optional - Definition:</label>
+        <label for="definition"
+               class="form-label">Optional - Definition:</label>
         {{ form.definition }}
         <div class="invalid-feedback">{{ form.definition.errors }}</div>
       </div>
