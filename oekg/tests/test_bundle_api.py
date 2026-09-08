@@ -124,6 +124,27 @@ class CreateBundleTest(BundleApiTestCase):
 
         self.assertEqual(response.status_code, 404)
 
+    def test_an_identifier_that_is_not_iri_safe_is_a_404(self):
+        # Not a 500: these characters make rdflib refuse to build the IRI, and
+        # that refusal is also what keeps the query free of injection.
+        for uid in ["a b", "a<b", 'a"b', "a|b", "a^b"]:
+            with self.subTest(uid=uid):
+                response = self.client.get(f"/api/v0/scenario-bundles/{uid}/")
+                self.assertEqual(response.status_code, 404)
+
+    def test_an_iri_that_is_not_a_bundle_is_a_404(self):
+        # Minting puts other nodes in the same namespace. Reading one of those
+        # as though it were a bundle would answer 200 with an empty payload.
+        uid = self.create({**VALID_PAYLOAD, "contacts": [{"label": "A contact"}]}).data[
+            READ_ONLY_CONTAINER
+        ]["uid"]
+        contact_iri = self.client.get(self.detail_url(uid)).data["contacts"][0]["iri"]
+        contact_uid = contact_iri.rsplit("/", 1)[-1]
+
+        response = self.client.get(self.detail_url(contact_uid))
+
+        self.assertEqual(response.status_code, 404)
+
 
 class AcronymUniquenessTest(BundleApiTestCase):
     def test_a_duplicate_acronym_is_refused(self):
@@ -145,6 +166,16 @@ class AcronymUniquenessTest(BundleApiTestCase):
                 second = self.create({**VALID_PAYLOAD, "acronym": acronym})
                 self.assertEqual(second.status_code, 409, second.data)
 
+    def test_an_acronym_is_checked_and_stored_as_the_same_value(self):
+        # Checking a stripped value and storing an unstripped one is how a
+        # duplicate slips through.
+        first = self.create({**VALID_PAYLOAD, "acronym": "SPACED "})
+        self.assertEqual(first.status_code, 201, first.data)
+
+        second = self.create({**VALID_PAYLOAD, "acronym": "SPACED"})
+
+        self.assertEqual(second.status_code, 409, second.data)
+
     def test_a_refused_duplicate_writes_nothing(self):
         self.create()
         before = len(self.store.construct("CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }"))
@@ -153,6 +184,51 @@ class AcronymUniquenessTest(BundleApiTestCase):
 
         after = self.store.construct("CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }")
         self.assertEqual(len(after), before)
+
+
+class SharedNodeTest(BundleApiTestCase):
+    """A shared contact or organisation is referenced, never rewritten."""
+
+    def existing_contact(self):
+        uid = self.create(
+            {**VALID_PAYLOAD, "contacts": [{"label": "Institute of Things"}]}
+        ).data[READ_ONLY_CONTAINER]["uid"]
+        read = self.client.get(self.detail_url(uid)).data
+        return read["contacts"][0]["iri"]
+
+    def test_referencing_an_existing_node_writes_no_second_label(self):
+        iri = self.existing_contact()
+
+        response = self.create(
+            {
+                **VALID_PAYLOAD,
+                "acronym": "API-TEST-2",
+                "contacts": [{"iri": iri, "label": "Institute of Things"}],
+            }
+        )
+
+        self.assertEqual(response.status_code, 201, response.data)
+        labels = self.store.select(
+            "SELECT ?l WHERE { <%s> <http://www.w3.org/2000/01/rdf-schema#label> ?l }"
+            % iri
+        )
+        self.assertEqual(len(labels), 1, labels)
+
+    def test_renaming_a_shared_node_is_refused(self):
+        # A shared node is cited by other bundles, so one payload rewriting its
+        # label would change every one of them.
+        iri = self.existing_contact()
+
+        response = self.create(
+            {
+                **VALID_PAYLOAD,
+                "acronym": "API-TEST-2",
+                "contacts": [{"iri": iri, "label": "A different name"}],
+            }
+        )
+
+        self.assertEqual(response.status_code, 400, response.data)
+        self.assertEqual(response.data["conflicts"][0]["iri"], iri)
 
 
 class ShapeValidationTest(BundleApiTestCase):
@@ -222,6 +298,25 @@ class RoundTripTest(BundleApiTestCase):
 
         self.assertEqual(sent_back.status_code, 201, sent_back.data)
 
+    def test_a_bundle_with_every_optional_absent_round_trips(self):
+        # The round trip is the property replace will depend on, and it breaks
+        # on nulls: an absent abstract reads back as null, and a framework
+        # without an iri carries null too.
+        minimal = {key: v for key, v in VALID_PAYLOAD.items() if key != "abstract"}
+        minimal["frameworks"] = [{"label": "A framework with no page"}]
+        uid = self.create(minimal).data[READ_ONLY_CONTAINER]["uid"]
+
+        read = self.client.get(self.detail_url(uid)).data
+        self.assertIsNone(read["abstract"])
+        self.assertIsNone(read["frameworks"][0]["iri"])
+
+        sent_back = self.client.post(
+            self.collection_url,
+            data={**read, "acronym": "API-TEST-MINIMAL"},
+            content_type="application/json",
+        )
+        self.assertEqual(sent_back.status_code, 201, sent_back.data)
+
     def test_reading_twice_gives_the_same_answer(self):
         uid = self.create().data[READ_ONLY_CONTAINER]["uid"]
 
@@ -273,6 +368,11 @@ class ShapeConformanceTest(RequiresShapeArtifactsMixin, SimpleTestCase):
             paths - covered,
             set(),
             "the shape validates properties the serializer has no field for",
+        )
+        self.assertEqual(
+            covered - paths,
+            set(),
+            "the serializer has fields the shape does not validate",
         )
 
     def test_every_serializer_field_is_a_field_the_builder_knows(self):

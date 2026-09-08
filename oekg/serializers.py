@@ -28,7 +28,6 @@ from rest_framework import serializers
 from oekg.bundles import BUNDLE_FIELDS, ENUM
 from oekg.shape import constraint_message, enumeration
 
-
 # Everything read-only lives under one key, and writes ignore it. That is what
 # lets a client send back what it read without stripping anything -- and it
 # keeps the closed check structural instead of an exception list that grows.
@@ -55,7 +54,7 @@ class ClosedSerializer(serializers.Serializer):
 class NodeReferenceSerializer(ClosedSerializer):
     """A contact, organisation or funder: referenced by IRI, or minted here."""
 
-    iri = serializers.CharField(required=False, allow_blank=False)
+    iri = serializers.CharField(required=False, allow_blank=False, allow_null=True)
     label = serializers.CharField()
 
 
@@ -64,8 +63,9 @@ class PartSerializer(ClosedSerializer):
 
     label = serializers.CharField()
     # has-iri is a string on these nodes per the shape -- it points at a
-    # factsheet page and is not the node's identity.
-    iri = serializers.CharField(required=False, allow_blank=True)
+    # factsheet page and is not the node's identity. Nullable because a read of
+    # a framework without one returns null, and a read must be sendable back.
+    iri = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
 
 class EnumeratedListField(serializers.ListField):
@@ -100,7 +100,9 @@ class ScenarioBundleSerializer(ClosedSerializer):
 
     label = serializers.CharField()
     acronym = serializers.CharField()
-    abstract = serializers.CharField(required=False, allow_blank=True)
+    # Nullable for the same reason: an absent abstract reads as null, and the
+    # round trip a client (and, later, replace) depends on has to survive it.
+    abstract = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
     contacts = NodeReferenceSerializer(many=True, required=False)
     organisations = NodeReferenceSerializer(many=True, required=False)

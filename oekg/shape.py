@@ -53,9 +53,7 @@ def enumeration(property_iri: str) -> frozenset:
     Empty for a property the shape does not constrain by enumeration -- which
     a caller must treat as "not enumerated", never as "nothing is allowed".
     """
-    return _enumerations(_fingerprint(Path(settings.OEKG_SHAPES_PATH)))[0].get(
-        property_iri, frozenset()
-    )
+    return _shape_enumerations()[0].get(property_iri, frozenset())
 
 
 def constraint_message(property_iri: str) -> Optional[str]:
@@ -64,9 +62,7 @@ def constraint_message(property_iri: str) -> Optional[str]:
     Used so a rejected pick is explained in the shape's words rather than in a
     second set written here, which could then disagree with it.
     """
-    return _enumerations(_fingerprint(Path(settings.OEKG_SHAPES_PATH)))[1].get(
-        property_iri
-    )
+    return _shape_enumerations()[1].get(property_iri)
 
 
 def message_for(source_shape) -> Optional[str]:
@@ -75,6 +71,10 @@ def message_for(source_shape) -> Optional[str]:
         return None
     message = shape_graph().value(source_shape, SH.resultMessage)
     return str(message) if message is not None else None
+
+
+def _shape_enumerations() -> tuple:
+    return _enumerations(_fingerprint(Path(settings.OEKG_SHAPES_PATH)))
 
 
 def _fingerprint(path: Path) -> tuple:

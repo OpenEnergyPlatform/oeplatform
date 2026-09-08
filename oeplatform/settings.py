@@ -418,7 +418,13 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.BasicAuthentication",
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.TokenAuthentication",
-    )
+    ),
+    # The OEKG bundle API reads publicly, so it carries its own ceiling rather
+    # than relying on there being one somewhere else.
+    "DEFAULT_THROTTLE_RATES": {
+        "oekg_bundles_anon": "60/minute",
+        "oekg_bundles_user": "600/minute",
+    },
 }
 
 AUTHENTICATION_BACKENDS = [

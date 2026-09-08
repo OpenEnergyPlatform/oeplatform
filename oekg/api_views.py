@@ -22,22 +22,26 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 import logging
+import uuid
 
+from django.db import DatabaseError
 from django.urls import reverse
-from rdflib import Literal
+from rdflib import RDFS, Literal, URIRef
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from rest_framework.views import APIView
 
 from factsheet.models import ScenarioBundleAccessControl
 from oekg.bundles import (
     BUNDLE_CLASS,
     DC,
+    build_bundle_graph,
     bundle_iri,
     bundle_payload,
-    build_bundle_graph,
     mint_bundle_uid,
+    referenced_node_iris,
 )
 from oekg.graph_store import GraphStore, GraphStoreError
 from oekg.serializers import READ_ONLY_CONTAINER, ScenarioBundleSerializer
@@ -47,10 +51,21 @@ from oekg.validation import validate_post_state
 logger = logging.getLogger("oeplatform")
 
 
+class ScenarioBundleThrottle(AnonRateThrottle):
+    """Reads are public, so the public endpoint needs a ceiling of its own."""
+
+    scope = "oekg_bundles_anon"
+
+
+class ScenarioBundleUserThrottle(UserRateThrottle):
+    scope = "oekg_bundles_user"
+
+
 class ScenarioBundleCollectionAPIView(APIView):
     """`POST` creates a scenario bundle."""
 
     permission_classes = [IsAuthenticated]
+    throttle_classes = [ScenarioBundleThrottle, ScenarioBundleUserThrottle]
 
     def post(self, request):
         serializer = ScenarioBundleSerializer(data=request.data)
@@ -58,7 +73,10 @@ class ScenarioBundleCollectionAPIView(APIView):
         payload = serializer.validated_data
 
         store = GraphStore.from_settings()
-        acronym = payload["acronym"].strip()
+        # Checked and stored as the same value. Stripping one side only is how
+        # the user interface's check comes to miss duplicates.
+        payload["acronym"] = payload["acronym"].strip()
+        acronym = payload["acronym"]
         try:
             if _acronym_taken(store, acronym):
                 return Response(
@@ -72,8 +90,23 @@ class ScenarioBundleCollectionAPIView(APIView):
                     status=status.HTTP_409_CONFLICT,
                 )
 
+            known_labels = _labels_of(store, referenced_node_iris(payload))
+            renamed = _renames(payload, known_labels)
+            if renamed:
+                return Response(
+                    {
+                        "detail": (
+                            "A shared node cannot be renamed through this API. "
+                            "Reference it by iri and send the label it already "
+                            "has, or omit the iri to mint a new node."
+                        ),
+                        "conflicts": renamed,
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
             uid = mint_bundle_uid()
-            post_state = build_bundle_graph(uid, payload)
+            post_state = build_bundle_graph(uid, payload, known_labels)
 
             violations = validate_post_state(post_state)
             if violations:
@@ -99,18 +132,32 @@ class ScenarioBundleCollectionAPIView(APIView):
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
 
-        # Ownership is recorded now so the creator can edit later. A bundle with
+        # Ownership is recorded now so the creator can edit later: a bundle with
         # no ownership record is administrator-only by design, which would make
-        # every bundle this API creates uneditable by the person who created it.
-        ScenarioBundleAccessControl.objects.create(
-            owner_user=request.user, bundle_id=uid
-        )
+        # every bundle this API creates uneditable by its author.
+        #
+        # The graph and the database cannot share a transaction. The graph has
+        # already committed, so a failure here is logged and named in the
+        # response rather than turned into a 500 that would deny a write that
+        # did happen.
+        owned = True
+        try:
+            ScenarioBundleAccessControl.objects.create(
+                owner_user=request.user, bundle_id=uid
+            )
+        except DatabaseError:
+            owned = False
+            logger.exception(
+                "OEKG bundle %s was written to the graph but its ownership row "
+                "could not be saved. It is administrator-only until repaired.",
+                uid,
+            )
 
         location = reverse("api:scenario-bundle", kwargs={"uid": uid})
-        response = Response(
-            _represent(uid, bundle_payload(post_state, uid)),
-            status=status.HTTP_201_CREATED,
-        )
+        body = _represent(uid, bundle_payload(post_state, uid))
+        if not owned:
+            body[READ_ONLY_CONTAINER]["ownership_recorded"] = False
+        response = Response(body, status=status.HTTP_201_CREATED)
         response["Location"] = location
         return response
 
@@ -119,13 +166,24 @@ class ScenarioBundleAPIView(APIView):
     """`GET` returns one scenario bundle. Public."""
 
     permission_classes = [AllowAny]
+    throttle_classes = [ScenarioBundleThrottle, ScenarioBundleUserThrottle]
 
     def get(self, request, uid):
+        # Identifiers are minted here, so anything that is not one cannot name a
+        # bundle. Checked before it reaches a query, where an IRI-unsafe
+        # character would raise out of rdflib as a 500 rather than a 404.
+        if not _is_minted_identifier(uid):
+            return Response(
+                {"detail": f"No scenario bundle {uid}."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
         store = GraphStore.from_settings()
         try:
             subgraph = store.construct(
                 "CONSTRUCT { ?s ?p ?o } WHERE { "
                 f"  VALUES ?root {{ {bundle_iri(uid).n3()} }} "
+                f"  ?root a {BUNDLE_CLASS.n3()} . "
                 "  { ?root ?p ?o . BIND(?root AS ?s) } "
                 "  UNION "
                 "  { ?root ?q ?s . ?s ?p ?o } "
@@ -144,6 +202,58 @@ class ScenarioBundleAPIView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
         return Response(_represent(uid, bundle_payload(subgraph, uid)))
+
+
+def _is_minted_identifier(uid: str) -> bool:
+    try:
+        uuid.UUID(str(uid))
+    except (ValueError, AttributeError, TypeError):
+        return False
+    return True
+
+
+def _labels_of(store: GraphStore, iris: list) -> dict:
+    """The label each of these nodes already carries, for the ones that exist."""
+    if not iris:
+        return {}
+    values = " ".join(URIRef(iri).n3() for iri in iris)
+    rows = store.select(
+        "SELECT ?node ?label WHERE { VALUES ?node { %s } ?node %s ?label }"
+        % (values, RDFS.label.n3())
+    )
+    return {row["node"]: row["label"] for row in rows}
+
+
+def _renames(payload: dict, known_labels: dict) -> list:
+    """Referenced nodes whose label the payload disagrees with.
+
+    The API offers no rename. Shared IRIs stay shared -- that is the point of a
+    graph -- but a shared contact or organisation is cited by other bundles, so
+    letting one payload rewrite its label would change every one of them.
+    """
+    conflicts = []
+    for iri in referenced_node_iris(payload):
+        if iri not in known_labels:
+            continue
+        for entry in _entries_for(payload, iri):
+            if entry["label"] != known_labels[iri]:
+                conflicts.append(
+                    {
+                        "iri": iri,
+                        "stored_label": known_labels[iri],
+                        "sent_label": entry["label"],
+                    }
+                )
+    return conflicts
+
+
+def _entries_for(payload: dict, iri: str) -> list:
+    return [
+        entry
+        for field_name in ("contacts", "organisations", "funders")
+        for entry in (payload.get(field_name) or [])
+        if entry.get("iri") == iri
+    ]
 
 
 def _acronym_taken(store: GraphStore, acronym: str) -> bool:

@@ -52,10 +52,6 @@ class BundleField:
     node_class: Optional[URIRef] = None
     mint_segment: str = ""
 
-    @property
-    def is_multiple(self) -> bool:
-        return self.kind != LITERAL
-
 
 # The closed bundle field set: these and nothing else.
 BUNDLE_FIELDS = (
@@ -76,8 +72,6 @@ BUNDLE_FIELDS = (
     BundleField("models", HAS_PART, PART, OEO.OEO_00000277, "model"),
 )
 
-FIELDS_BY_NAME = {field.name: field for field in BUNDLE_FIELDS}
-
 
 def mint_bundle_uid() -> str:
     """A new bundle identifier. The server's to give, never the client's."""
@@ -89,12 +83,31 @@ def bundle_iri(uid: str) -> URIRef:
     return OEKG[uid]
 
 
-def build_bundle_graph(uid: str, payload: dict) -> Graph:
+def referenced_node_iris(payload: dict) -> list:
+    """Every existing node IRI the payload points at, across all node fields."""
+    iris = []
+    for field in BUNDLE_FIELDS:
+        if field.kind != NODE:
+            continue
+        for entry in payload.get(field.name) or []:
+            if entry.get("iri"):
+                iris.append(entry["iri"])
+    return iris
+
+
+def build_bundle_graph(uid: str, payload: dict, known_labels: dict = None) -> Graph:
     """Assemble the triples a bundle payload means.
 
     The result is the post-state to validate and, unchanged, the thing to
     write: nothing is added between validating and writing.
+
+    ``known_labels`` maps an already-existing node IRI to the label it already
+    carries. Shared IRIs stay shared -- that is the point of a graph -- so a
+    referenced node keeps its own label and this never writes a second one onto
+    it. Without that, an additive write would leave a contact other bundles
+    cite carrying two labels, violating sh:maxCount 1 for all of them.
     """
+    known_labels = known_labels or {}
     graph = Graph()
     subject = bundle_iri(uid)
     graph.add((subject, RDF.type, BUNDLE_CLASS))
@@ -111,10 +124,19 @@ def build_bundle_graph(uid: str, payload: dict) -> Graph:
                 graph.add((subject, field.predicate, URIRef(iri)))
         elif field.kind == NODE:
             for entry in value:
-                node = _node_for(entry.get("iri"), field)
+                iri = entry.get("iri")
+                node = URIRef(iri) if iri else _minted(field)
                 graph.add((subject, field.predicate, node))
-                graph.add((node, RDF.type, field.node_class))
-                graph.add((node, RDFS.label, Literal(entry["label"])))
+                if iri and iri in known_labels:
+                    # An existing shared node is referenced, never rewritten.
+                    # Its label comes from the graph so the post-state is
+                    # complete for validation, and the write adds nothing to a
+                    # node other bundles depend on.
+                    graph.add((node, RDF.type, field.node_class))
+                    graph.add((node, RDFS.label, Literal(known_labels[iri])))
+                else:
+                    graph.add((node, RDF.type, field.node_class))
+                    graph.add((node, RDFS.label, Literal(entry["label"])))
         elif field.kind == PART:
             for entry in value:
                 node = _minted(field)
@@ -165,21 +187,6 @@ def bundle_payload(graph: Graph, uid: str) -> dict:
                 key=lambda entry: entry["label"],
             )
     return payload
-
-
-def acronym_of(payload: dict) -> str:
-    return (payload.get("acronym") or "").strip()
-
-
-def _node_for(iri: Optional[str], field: BundleField) -> URIRef:
-    """Reference the node the payload names, or mint one.
-
-    Shared IRIs stay shared -- that is the point of a graph -- so a payload may
-    point at an existing contact or organisation. What it may not do is rename
-    one, which is why nothing here writes a label onto a node it did not mint
-    without the caller having said so.
-    """
-    return URIRef(iri) if iri else _minted(field)
 
 
 def _minted(field: BundleField) -> URIRef:
