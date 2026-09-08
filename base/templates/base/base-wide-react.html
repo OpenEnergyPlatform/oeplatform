@@ -18,12 +18,8 @@
           href="{% static 'favicon.ico' %}"
           type="image/x-icon" />
     {% fontawesome_5_static %}
-    <link rel="stylesheet"
-          type="text/css"
-          href="{% static 'css/bootstrap.min.css' %}" />
-    <link rel="stylesheet"
-          type="text/css"
-          href="{% static 'css/base-style.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/base-style.css' %}" />
     {% vite_hmr_client %}
     {% block after-head %}
     {% endblock after-head %}
@@ -37,7 +33,7 @@
     {% block header %}
       <nav class="navbar navbar-expand-lg navbar-dark bg-secondary">
         ^
-        <div class="container-fluid">{% include 'base/_header.html' %}</div>
+        <div class="container-fluid">{% include "base/_header.html" %}</div>
       </nav>
     {% endblock header %}
     <main class="main" style="flex: 1">
@@ -54,7 +50,7 @@
       </div>
     </main>
     {% block footer %}
-      {% include 'base/_footer.html' %}
+      {% include "base/_footer.html" %}
     {% endblock footer %}
     {% block body-bottom-js %}
       {% block before-body-bottom-js %}

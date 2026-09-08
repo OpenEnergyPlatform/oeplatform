@@ -82,7 +82,8 @@
                  value="{{ redirect_field_value }}" />
         {% endif %}
         <!-- Submit -->
-        <button type="submit" class="login__button">{% translate "Sign Up" %}</button>
+        <button type="submit"
+                class="login__button">{% translate "Sign Up" %}</button>
       </form>
       {% if SOCIALACCOUNT_ENABLED %}
         {% include "socialaccount/snippets/login.html" with page_layout="entrance" %}
