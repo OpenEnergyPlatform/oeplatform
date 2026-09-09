@@ -1,0 +1,36 @@
+{# The whole tag manager: the list and the editor panel beside it.        #}
+{#                                                                        #}
+{# ONE swap target. Every htmx endpoint below returns exactly this        #}
+{# fragment -- never a redirect and never a whole page, which is what put #}
+{# a complete rendered site inside the editor panel: a 302 to the         #}
+{# overview is followed transparently by htmx, so the swap received the   #}
+{# entire page. The pattern is `dataset_edit_view`'s in the login app:    #}
+{# return the piece you replaced.                                         #}
+<div id="tag-manager" class="row">
+  <div class="col-lg-7">
+    {# The actions sit ABOVE the list. Below it they were pushed off the #}
+    {# screen by the vocabulary itself -- the longer it grew, the further #}
+    {# away "Create new Tag" got. #}
+    <div class="d-flex gap-2 mb-3">
+      <a href="{% url 'dataedit:tags-new' %}"
+         hx-get="{% url 'dataedit:tags-new' %}"
+         hx-target="#tag-manager"
+         hx-swap="outerHTML"
+         class="btn btn-info">Create new Tag</a>
+      <a href="{% url 'dataedit:topic-list' %}"
+         class="btn btn-secondary">Back to Database</a>
+    </div>
+    <h3>Current tags</h3>
+    {% if saved %}
+      <p class="text-success">
+        <small>{{ saved }}</small>
+      </p>
+    {% endif %}
+    {% include "dataedit/partials/tag_list.html" %}
+  </div>
+  <div class="col-lg-5">
+    {% if editing %}
+      {% include "dataedit/partials/tag_editor_form.html" %}
+    {% endif %}
+  </div>
+</div>
