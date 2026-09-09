@@ -18,7 +18,7 @@ SPDX-License-Identifier: CC0-1.0
   mints the identifier, the acronym is enforced unique, the bundle is validated
   against the canonical SHACL shape **before** anything is written, and the
   write is one atomic request. Reads are public; writes need authentication
-  [(#2430)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2430)
+  [(#2435)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2435)
 
 - The OEKG REST API gets its own transport to the graph store
   (`oekg/graph_store.py`): one SPARQL request per write, which Fuseki treats as
@@ -39,7 +39,7 @@ SPDX-License-Identifier: CC0-1.0
   `sh:datatype xsd:string` and `sh:maxCount 1` on `rdfs:label`, and a
   language-tagged literal is `rdf:langString` — so every picked OEO term failed
   validation. Labels are normalised to one plain string per term
-  [(#2430)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2430)
+  [(#2435)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2435)
 
 - The OEKG SPARQL endpoint test patched `oekg.utils.execute_sparql_query` while
   the view binds that function into its own namespace, so the mock never took
