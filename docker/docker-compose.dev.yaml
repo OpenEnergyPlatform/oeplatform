@@ -69,10 +69,18 @@ services:
       LOCAL_DB_PASSWORD: postgres
       LOCAL_DB_NAME: oedb
       LOCAL_DB_HOST: postgres
+      # The graph store is a service in this network, so name it here rather
+      # than relying on securitysettings.py. That file is each developer's own
+      # and securitysettings.py.default resolves the host to "localhost" -- which
+      # inside this container is the container itself, so the OEKG API would
+      # answer 503 instead of writing. Stated explicitly, the dev stack works
+      # whatever the local settings file happens to say.
+      RDF_DATABASE_HOST: fuseki
       VITE_DEV_MODE: "True"
       VITE_DEV_SERVER_URL: "http://vite:5173"
     depends_on:
       - postgres
+      - fuseki
 
   vite:
     build:

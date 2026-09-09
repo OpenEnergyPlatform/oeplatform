@@ -11,6 +11,13 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- The dev compose stack names the graph store host explicitly
+  (`RDF_DATABASE_HOST: fuseki`) and waits for that service. Previously it relied
+  on the local `securitysettings.py`, whose shipped default resolves the host to
+  `localhost` -- which inside the container is the container itself, so the OEKG
+  API answered `503` instead of writing
+  [(#2435)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2435)
+
 - Model/Framework factsheet overviews load in a fraction of the time. The row
   data is built by the server in one pass instead of being assembled in the page
   template (2,138 database queries down to 3, whatever the number of
