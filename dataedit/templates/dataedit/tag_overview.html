@@ -16,34 +16,22 @@
   </div>
 {% endblock site-header %}
 {% block data_content %}
-  {% load dataedit.taghandler %}
-  {% if errorMsg %}
-    <div class="alert alert-danger">{{ errorMsg }}</div>
-  {% endif %}
-  {% get_tags as all_tags %}
-  <h3>Current Tags:</h3>
-  <div style="overflow: hidden;">
-    <ul>
-      {% for t in all_tags %}
-        <a href="{% url 'dataedit:tags-edit' t.pk %}"
-           class="btn tag"
-           style="margin:0 5px 5px 0;
-                  color:{% readable_text_color t.color_hex %};
-                  display:inline;
-                  float: left;
-                  background:{{ t.color_hex }}">{{ t.name }}</a>
-      {% endfor %}
-    </ul>
-  </div>
-  <br />
-  <div style="float:left; padding-right:15px">
-    <a href="{% url 'dataedit:tags-new' %}"
-       class="btn btn-info">Create new Tag</a>
-  </div>
-  <div style="clear:right">
-    <a style="padding-left:15px;
-              clear:right"
-       href="{% url 'dataedit:topic-list' %}"
-       class="btn btn-primary">Back to Database</a>
-  </div>
+  <p class="text-muted">
+    One vocabulary, shared by database tables and by Model/Framework factsheets.
+    Renaming or deleting a tag here affects both.
+  </p>
+  {% include "dataedit/partials/tag_manager.html" %}
 {% endblock %}
+{% block after-body-bottom-js %}
+  {{ block.super }}
+  <script src="{% static 'ontology/htmx.js' %}"></script>
+  {# Re-bound after every htmx swap: the manager fragment replaces the list #}
+  {# wholesale, so the controls would otherwise be wired to elements that no #}
+  {# longer exist. #}
+  <script type="module">
+    import { bindTagList } from "{% static 'dataedit/tag_list.js' %}";
+    const bind = () => bindTagList(document, {sort: "name"});
+    bind();
+    document.body.addEventListener("htmx:afterSwap", bind);
+  </script>
+{% endblock after-body-bottom-js %}

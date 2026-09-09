@@ -15,18 +15,45 @@ SPDX-FileCopyrightText: 2025 Lara Christmann <https://github.com/solar-c> © Rei
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
+from datetime import timedelta
+
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import (
     BooleanField,
     CharField,
     DateField,
+    DateTimeField,
     EmailField,
     ImageField,
     TextField,
 )
+from django.utils import timezone
 
 from dataedit.models import Tag
+
+#: More than this many tags on one factsheet is corruption, not tagging.
+#:
+#: The old tag editor pre-checked every tag on the platform, so saving
+#: attached the lot. The census settled the line outright rather than by
+#: judgement: the distribution is bimodal with a factor-6.6 gap -- healthy
+#: factsheets top out at 106 tags and corrupted ones start at 696 -- so any
+#: threshold between 110 and 690 selects the same 23 factsheets.
+CORRUPT_TAG_THRESHOLD = 200
+
+
+#: How long after creation any logged-in account may delete a factsheet.
+#:
+#: A maintainer's decision (2026-09-08), taken with the objection on the
+#: record: the window is keyed to the factsheet's AGE, not to who is asking,
+#: so during it any registered account may delete a stranger's new factsheet.
+#: That is the quietest place on the platform to lose one -- nobody has linked
+#: it yet, and this app keeps no history, so `log_factsheet_write` records who
+#: deleted which pk and never what it contained. The trade bought is the
+#: practical one: an author who has just created a duplicate or a test entry
+#: can remove it without finding an admin. Do NOT "fix" this back to
+#: admin-only without asking; it is deliberate.
+DELETE_GRACE_PERIOD = timedelta(days=7)
 
 
 class BasicFactsheet(models.Model):
@@ -323,6 +350,30 @@ class BasicFactsheet(models.Model):
     )
 
     tags = models.ManyToManyField(Tag, related_name="factsheets")
+
+    #: When this factsheet was created, set once and never by a user.
+    #:
+    #: `null=True` on purpose: the 339 factsheets that predate this column get
+    #: NULL rather than a backfilled "now", which would have opened every one
+    #: of them to deletion by any account for a week after the deploy. NULL
+    #: means "older than the grace period" -- see `deletable_by`.
+    created = DateTimeField(null=True, auto_now_add=True)
+
+    def deletable_by(self, user) -> bool:
+        """Whether `user` may delete this factsheet.
+
+        Admins always; anyone logged in during the grace period after
+        creation; nobody else. The window's subject is the factsheet's age and
+        not the caller -- see `DELETE_GRACE_PERIOD` for why that is deliberate
+        and what it costs.
+        """
+        if not getattr(user, "is_authenticated", False):
+            return False
+        if getattr(user, "is_admin", False):
+            return True
+        if self.created is None:
+            return False
+        return timezone.now() - self.created <= DELETE_GRACE_PERIOD
 
 
 class Energymodel(BasicFactsheet):
