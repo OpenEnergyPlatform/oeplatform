@@ -51,7 +51,9 @@
                   <p>{{ description }}</p>
                 </div>
                 <div class="topic-card__btn">
-                  <button type="button" class="btn btn-primary" onclick="open_wizzard()">
+                  <button type="button"
+                          class="btn btn-primary"
+                          onclick="open_wizzard()">
                     <span class="btn__icon">
                       <svg width="16"
                            height="16"
@@ -290,7 +292,14 @@
       {% endfor %}
     </div>
   </div>
-  <script type="text/javascript">
+  {# The tag pages had no way in: nothing on the platform linked to them, so #}
+  {# they were reachable only by typing the URL. This is the reciprocal of #}
+  {# the overview's own "Back to Database". #}
+  <p class="text-muted">
+    Tags are a platform-wide vocabulary shared by tables and Model/Framework
+    factsheets. <a href="{% url 'dataedit:tags' %}">Manage tags</a>
+  </p>
+  <script>
   function open_wizzard() {
     location.href = "{% url 'dataedit:wizard_create' %}";
   }

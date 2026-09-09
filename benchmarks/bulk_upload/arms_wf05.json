@@ -1,0 +1,65 @@
+[
+  {
+    "name": "fat",
+    "source": "/home/jh/github/oep-upload/data/datapackages/example/data/open_modex_bsf_timeseries.csv",
+    "delimiter": "comma",
+    "columns": [
+      {
+        "name": "id",
+        "data_type": "bigint",
+        "primary_key": true,
+        "is_nullable": false
+      },
+      { "name": "timeindex_start", "data_type": "timestamp" },
+      { "name": "timeindex_stop", "data_type": "timestamp" },
+      { "name": "timeindex_resolution", "data_type": "interval" },
+      { "name": "series", "data_type": "varchar" }
+    ],
+    "note": "WF-05 decided schema. series=varchar is the HEADLINE arm; the json control is arm 'fat_json'. PK on id is mandatory (api/parser.py auto-adds and rejects any other)."
+  },
+  {
+    "name": "fat_json",
+    "source": "/home/jh/github/oep-upload/data/datapackages/example/data/open_modex_bsf_timeseries.csv",
+    "delimiter": "comma",
+    "columns": [
+      {
+        "name": "id",
+        "data_type": "bigint",
+        "primary_key": true,
+        "is_nullable": false
+      },
+      { "name": "timeindex_start", "data_type": "timestamp" },
+      { "name": "timeindex_stop", "data_type": "timestamp" },
+      { "name": "timeindex_resolution", "data_type": "interval" },
+      { "name": "series", "data_type": "json" }
+    ],
+    "note": "WF-05 control arm: identical to 'fat' except series=json, so Postgres validates every ~111 KB array. Run at ONE mid rung (~100 MB) only; the delta prices JSON validation."
+  },
+  {
+    "name": "narrow",
+    "source": "/home/jh/github/oep-upload/data/datapackages/example/data/open_modex_bsf_data.csv",
+    "delimiter": "comma",
+    "columns": [
+      {
+        "name": "id",
+        "data_type": "bigint",
+        "primary_key": true,
+        "is_nullable": false
+      },
+      { "name": "scenario_id", "data_type": "integer" },
+      { "name": "region", "data_type": "varchar" },
+      { "name": "input_energy_vector", "data_type": "varchar" },
+      { "name": "output_energy_vector", "data_type": "varchar" },
+      { "name": "parameter_name", "data_type": "varchar" },
+      { "name": "technology", "data_type": "varchar" },
+      { "name": "technology_type", "data_type": "varchar" },
+      { "name": "type", "data_type": "varchar" },
+      { "name": "unit", "data_type": "varchar" },
+      { "name": "tags", "data_type": "varchar" },
+      { "name": "method", "data_type": "varchar" },
+      { "name": "source", "data_type": "varchar" },
+      { "name": "comment", "data_type": "varchar" }
+    ],
+    "note": "WF-05 decided schema. region/tags MUST stay varchar: \"['DE']\" is a Python list literal, not valid JSON. unit contains '€/MW', so UTF-8 is required end to end."
+  }
+]

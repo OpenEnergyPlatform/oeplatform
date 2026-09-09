@@ -25,7 +25,8 @@
       </div>
       <div>
         In the academy you can learn about how to
-        <a href="{{ create_database_conform_data }}" target="_blank">create database conform CSV data</a>
+        <a href="{{ create_database_conform_data }}"
+           target="_blank">create database conform CSV data</a>
         and how to work with the
         <a href="{{ wizard_academy_link }}{% if can_add %}#upload-a-csv-file-using-the-wizard{% endif %}"
            target="_blank">upload wizard</a>.
@@ -168,7 +169,8 @@
             </div>
             <div class="row mt-3">
               <div class="col-12">
-                <div id="wizard-table-create-msg" class="invisible wizard-status">
+                <div id="wizard-table-create-msg"
+                     class="invisible wizard-status">
                   <span class="spinner spinner-border spinner-border-sm"></span>
                   <span class="message"></span>
                 </div>
@@ -243,7 +245,9 @@
               </h5>
             </div>
             <div class="row collapse my-3" id="wizard-csv-example-container">
-              <textarea class="form-control mx-3" id="wizard-csv-example" readonly></textarea>
+              <textarea class="form-control mx-3"
+                        id="wizard-csv-example"
+                        readonly></textarea>
             </div>
             <div class="row my-3">
               <h4>Select csv file</h4>
@@ -266,7 +270,9 @@
               </h5>
             </div>
             <div class="row collapse" id="wizard-csv-text-container">
-              <textarea class="form-control mx-3" id="wizard-csv-text" readonly></textarea>
+              <textarea class="form-control mx-3"
+                        id="wizard-csv-text"
+                        readonly></textarea>
             </div>
             <div class="row my-3">
               <h4>Configure column mapping</h4>
@@ -345,7 +351,8 @@
                 </button>
               </div>
               <div class="col-10 align-self-end">
-                <div id="wizard-table-upload-msg" class="invisible wizard-status">
+                <div id="wizard-table-upload-msg"
+                     class="invisible wizard-status">
                   <span class="spinner spinner-border spinner-border-sm"></span>
                   <span class="message"></span>
                   <span class="progress">
@@ -370,12 +377,10 @@
           Do you want to delete the table (including data and metadata)?
         </div>
         <div class="modal-body">
-          <button class="btn btn-sm btn-dark me-2" id="wizard-confirm-delete-delete">
-            delete
-          </button>
-          <button class="btn btn-sm btn-light" id="wizard-confirm-delete-cancel">
-            cancel
-          </button>
+          <button class="btn btn-sm btn-dark me-2"
+                  id="wizard-confirm-delete-delete">delete</button>
+          <button class="btn btn-sm btn-light"
+                  id="wizard-confirm-delete-cancel">cancel</button>
         </div>
       </div>
     </div>
