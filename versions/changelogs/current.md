@@ -11,6 +11,12 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- The dev image caches pip downloads and built wheels in a BuildKit cache mount
+  instead of discarding them. A single new line in `requirements.txt` used to
+  re-download and re-compile all ~47 packages, several minutes of it building
+  `psycopg2`, `shapely` and `owlready2` from source. The image stays the same
+  size, because the cache lives outside it
+
 ## Features
 
 - The OEKG REST API gets its own transport to the graph store
