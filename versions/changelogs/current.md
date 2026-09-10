@@ -86,6 +86,22 @@ SPDX-License-Identifier: CC0-1.0
   write is one atomic request. Reads are public; writes need authentication
   [(#2435)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2435)
 
+- `PATCH /api/v0/scenario-bundles/<uid>/` changes single fields of a scenario
+  bundle without sending the rest. A field the payload does not name is left
+  alone; a set-valued field it does name is replaced whole, and emptying one the
+  shape requires is refused rather than silently applied. Only an owner may
+  write - a bundle with no recorded owner stays administrator-only. Every bundle
+  now carries a version, returned as an `ETag` on reads, and a write must send
+  it back as `If-Match`: without it the request is refused (`428`), with a
+  version that is no longer current it is refused (`412`), and if the bundle
+  moves while the request is being prepared nothing is written and the answer is
+  `409`. The version check is part of the write itself, so two clients cannot
+  both succeed against the same version
+
+- Creating a bundle now binds the acronym uniqueness check inside the write, so
+  two simultaneous creates can no longer both take an acronym both of them found
+  free
+
 - New management command `repair_factsheet_tags` repairs the factsheets the old
   tag editor damaged - on production 23 of 339 carry a copy of the whole tag
   table, holding 95% of all factsheet tag assignments. It reports by default and

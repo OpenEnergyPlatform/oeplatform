@@ -94,6 +94,10 @@ class UnsafeClearError(GraphStoreError):
     """Refused to empty the default graph."""
 
 
+class NothingToModifyError(GraphStoreError):
+    """A guarded modification was asked for with no triples to change."""
+
+
 @dataclass(frozen=True)
 class GraphStore:
     """A query client and an update client, and no pretence of being a graph.
@@ -167,10 +171,10 @@ class GraphStore:
 
         The operations are the caller's own SPARQL and are sent as written --
         **this method does not scope them to the target graph.** Use
-        ``insert_data`` and ``delete_data`` to build scoped operations; reach
-        for a hand-written one only where no builder exists yet, such as a
-        guarded compare-and-set, and scope it yourself. An unscoped
-        ``INSERT DATA`` writes the default graph whatever this store targets.
+        ``insert_data``, ``delete_data`` and ``guarded_modification`` to build
+        scoped operations; reach for a hand-written one only where no builder
+        exists yet, and scope it yourself. An unscoped ``INSERT DATA`` writes
+        the default graph whatever this store targets.
         """
         if not operations:
             return
@@ -193,6 +197,44 @@ class GraphStore:
     def delete_data(self, triples: Graph) -> str:
         """The DELETE DATA operation for ``triples``, scoped to the target graph."""
         return f"DELETE DATA {{ {self._in_target_graph(triples)} }}"
+
+    def guarded_modification(
+        self,
+        where: str,
+        delete: Optional[Graph] = None,
+        insert: Optional[Graph] = None,
+    ) -> str:
+        """A DELETE/INSERT/WHERE operation, scoped to the target graph.
+
+        ``where`` is the guard, and it is part of the write rather than a check
+        in front of it: SPARQL applies the templates only if the pattern
+        matches, so a compare-and-set cannot be overtaken between the test and
+        the change. The price is that a guard that does not match is
+        indistinguishable from one that does -- the store answers ``200`` and
+        changes nothing either way -- so the caller has to read back for the
+        signal. That is not a shortcoming of this method; it is what SPARQL
+        update offers.
+
+        Scoping is by ``WITH``, which makes the target graph the default for
+        every unqualified pattern in all three clauses at once. Writing
+        ``GRAPH`` blocks instead would put the same decision in three places,
+        and forgetting one of them writes the default graph -- in production,
+        the graph the platform serves.
+        """
+        clauses = []
+        if delete is not None and len(delete):
+            clauses.append(f"DELETE {{ {delete.serialize(format='nt')} }}")
+        if insert is not None and len(insert):
+            clauses.append(f"INSERT {{ {insert.serialize(format='nt')} }}")
+        if not clauses:
+            # A guard with nothing behind it would still be a valid request the
+            # store answers 200 to, which is the one answer a caller must never
+            # read as "the guard held".
+            raise NothingToModifyError(
+                "A guarded modification needs triples to delete or to insert."
+            )
+        prefix = f"WITH <{self.graph}>\n" if self.graph else ""
+        return f"{prefix}{' '.join(clauses)} WHERE {{ {where} }}"
 
     def clear(self) -> None:
         """Remove this store's named graph. Refuses on the default graph.
