@@ -114,7 +114,6 @@ def guarded_operation(
     token: str,
     delete: Optional[Graph] = None,
     insert: Optional[Graph] = None,
-    also_require: Optional[str] = None,
 ) -> str:
     """One update operation that applies ``delete``/``insert`` at ``version``.
 
@@ -122,10 +121,11 @@ def guarded_operation(
     cannot come apart: one request is one transaction, and the guard is the
     request's own ``WHERE``.
 
-    ``also_require`` is a further pattern the write must satisfy, for a
-    condition the version cannot express. Uniqueness is one: two bundles being
-    patched at the same moment each satisfy their own version guard, so an
-    acronym they both claim has to be tested in the same request that takes it.
+    The guard is the version and the bundle's existence, and nothing else. A
+    condition the version cannot express -- uniqueness, say, where two bundles
+    each satisfy their own version guard while claiming the same value -- needs
+    to be bound into this ``WHERE`` too, by the caller that has one. None does
+    yet; ``GraphStore.guarded_modification`` takes the pattern directly.
     """
     node = version_iri(uid)
     bundle = bundle_iri(uid)
@@ -166,9 +166,6 @@ def guarded_operation(
             # triple per write and make the next read-back ambiguous the other
             # way round.
             to_delete.add((node, WRITE_TOKEN, Literal(version.token)))
-
-    if also_require:
-        where = f"{where} {also_require}"
 
     to_insert += version_triples(uid, version.number + 1, token)
     return store.guarded_modification(where, delete=to_delete, insert=to_insert)

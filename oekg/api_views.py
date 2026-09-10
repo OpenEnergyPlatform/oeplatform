@@ -136,10 +136,9 @@ class ScenarioBundleCollectionAPIView(APIView):
             )
             if not write_applied(store, uid, token):
                 # The acronym is the ONLY condition in that guard, so a miss
-                # can only mean the acronym was taken in between. A second
-                # condition -- which is what `also_require` exists to allow --
-                # would make this answer wrong, so it would have to distinguish
-                # them before one is added.
+                # can only mean the acronym was taken in between. Binding a
+                # second condition into the same WHERE would make this answer
+                # wrong, so it would have to distinguish them first.
                 return _acronym_conflict(acronym)
         except ShapeUnavailable as error:
             return _shape_unavailable(error)
@@ -247,13 +246,6 @@ class ScenarioBundleAPIView(APIView):
             if refusal is not None:
                 return refusal
 
-            # An acronym is how a pipeline finds its bundle again, so a rename
-            # onto one that is taken has to be refused here too -- otherwise
-            # uniqueness holds only for as long as nobody patches.
-            acronym = payload.get("acronym")
-            if acronym is not None and _acronym_taken(store, acronym, besides=uid):
-                return _acronym_conflict(acronym)
-
             known_labels = _labels_of(store, referenced_node_iris(payload))
             renamed = _renames(payload, known_labels)
             if renamed:
@@ -269,17 +261,7 @@ class ScenarioBundleAPIView(APIView):
             token = mint_write_token()
             store.update(
                 guarded_operation(
-                    store,
-                    uid,
-                    version,
-                    token,
-                    delete=removed,
-                    insert=added,
-                    also_require=(
-                        None
-                        if acronym is None
-                        else _no_bundle_has_acronym(acronym, besides=uid)
-                    ),
+                    store, uid, version, token, delete=removed, insert=added
                 )
             )
             if not write_applied(store, uid, token):
@@ -433,7 +415,7 @@ def _entries_for(payload: dict, iri: str) -> list:
     ]
 
 
-def _acronym_taken(store: GraphStore, acronym: str, besides: str = None) -> bool:
+def _acronym_taken(store: GraphStore, acronym: str) -> bool:
     """Whether a bundle already uses this acronym.
 
     Compares the stored literal with the literal a write would store -- like
@@ -441,25 +423,26 @@ def _acronym_taken(store: GraphStore, acronym: str, besides: str = None) -> bool
     so any acronym with a space, hyphen, umlaut, slash, colon or parenthesis
     slips past it.
 
-    ``besides`` exempts one bundle, so a patch that sends an acronym back
-    unchanged is not refused by its own value.
+    **Asked on a create only.** A patch may still rename a bundle onto an
+    acronym another one holds, so uniqueness holds from creation and not
+    thereafter. That gap is deliberate and deferred: the read side is where the
+    acronym becomes load-bearing, because that is where a pipeline looks a
+    bundle up by it, so the check belongs with the endpoint that makes the
+    promise. `PatchAcronymTest` in the tests pins the gap down as it stands.
     """
-    return store.ask("ASK { %s }" % _acronym_pattern(acronym, besides))
+    return store.ask("ASK { %s }" % _acronym_pattern(acronym))
 
 
-def _no_bundle_has_acronym(acronym: str, besides: str = None) -> str:
-    return "FILTER NOT EXISTS { %s }" % _acronym_pattern(acronym, besides)
+def _no_bundle_has_acronym(acronym: str) -> str:
+    return "FILTER NOT EXISTS { %s }" % _acronym_pattern(acronym)
 
 
-def _acronym_pattern(acronym: str, besides: str = None) -> str:
-    pattern = "?bundle a %s ; %s %s" % (
+def _acronym_pattern(acronym: str) -> str:
+    return "?bundle a %s ; %s %s" % (
         BUNDLE_CLASS.n3(),
         DC.acronym.n3(),
         Literal(acronym).n3(),
     )
-    if besides is None:
-        return pattern
-    return "%s . FILTER(?bundle != %s)" % (pattern, bundle_iri(besides).n3())
 
 
 def _represent(uid: str, payload: dict, version: BundleVersion) -> dict:

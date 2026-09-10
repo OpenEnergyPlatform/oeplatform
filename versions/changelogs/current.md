@@ -81,9 +81,10 @@ SPDX-License-Identifier: CC0-1.0
 
 - The OEKG scenario-bundle REST API: `POST /api/v0/scenario-bundles/` creates a
   bundle and `GET /api/v0/scenario-bundles/<uid>/` reads it back. The server
-  mints the identifier, the acronym is enforced unique, the bundle is validated
-  against the canonical SHACL shape **before** anything is written, and the
-  write is one atomic request. Reads are public; writes need authentication
+  mints the identifier, the acronym is enforced unique on creation, the bundle
+  is validated against the canonical SHACL shape **before** anything is written,
+  and the write is one atomic request. Reads are public; writes need
+  authentication
   [(#2435)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2435)
 
 - `PATCH /api/v0/scenario-bundles/<uid>/` changes single fields of a scenario
@@ -96,7 +97,9 @@ SPDX-License-Identifier: CC0-1.0
   version that is no longer current it is refused (`412`), and if the bundle
   moves while the request is being prepared nothing is written and the answer is
   `409`. The version check is part of the write itself, so two clients cannot
-  both succeed against the same version
+  both succeed against the same version. Note that acronym uniqueness is
+  enforced when a bundle is created but not when one is renamed, so a patch can
+  still give two bundles the same acronym
   [(#2438)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2438)
 
 - Creating a bundle now binds the acronym uniqueness check inside the write, so
