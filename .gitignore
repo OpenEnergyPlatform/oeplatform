@@ -114,6 +114,7 @@ factsheet/static/factsheet/css
 
 /oeo
 ontologies/
+script/import_oep_tables_to_local_test.py
 
 # Build-time OEKG SHACL shape + OEO label subset (manage.py fetch_oekg_shapes)
 /shapes/
