@@ -54,9 +54,9 @@ class BundleApiTestCase(OekgGraphAPITestCase):
         self.assertEqual(response.status_code, 201, response.data)
         return response.data[READ_ONLY_CONTAINER]["uid"], response["ETag"]
 
-    def patch(self, uid, payload, if_match=None, authenticate=True):
+    def patch(self, uid, payload, if_match=None, authenticate=True, as_user=None):
         if authenticate:
-            self.client.force_login(self.user)
+            self.client.force_login(as_user or self.user)
         headers = {} if if_match is None else {"HTTP_IF_MATCH": if_match}
         return self.client.patch(
             self.detail_url(uid),

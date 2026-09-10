@@ -57,12 +57,10 @@ from oekg.bundles import (
     BUNDLE_CLASS,
     DC,
     build_bundle_graph,
-    bundle_field,
+    bundle_delta,
     bundle_iri,
     bundle_payload,
     bundle_subgraph,
-    field_triples,
-    linked_field_triples,
     mint_bundle_uid,
     referenced_node_iris,
 )
@@ -77,16 +75,11 @@ from oekg.versioning import (
     guarded_operation,
     mint_write_token,
     read_version,
-    stamped,
     version_triples,
+    write_applied,
 )
 
 logger = logging.getLogger("oeplatform")
-
-# `If-Match: *` names no version. It is a legal header value, but it satisfies
-# the letter of the precondition while withholding the one thing the
-# precondition is for, so it is treated as absent rather than as a match.
-ANY_VERSION = object()
 
 
 class ScenarioBundleThrottle(AnonRateThrottle):
@@ -111,9 +104,9 @@ class ScenarioBundleCollectionAPIView(APIView):
         payload = serializer.validated_data
 
         store = GraphStore.from_settings()
-        # Checked and stored as the same value. Stripping one side only is how
-        # the user interface's check comes to miss duplicates.
-        payload["acronym"] = payload["acronym"].strip()
+        # One value, checked and stored. The serializer has already trimmed
+        # it, so the check and the write cannot compare different things --
+        # which is the whole of the user interface's bug.
         acronym = payload["acronym"]
         try:
             if _acronym_taken(store, acronym):
@@ -141,7 +134,12 @@ class ScenarioBundleCollectionAPIView(APIView):
                     insert=post_state + version_triples(uid, FIRST_VERSION, token),
                 )
             )
-            if not stamped(store, uid, token):
+            if not write_applied(store, uid, token):
+                # The acronym is the ONLY condition in that guard, so a miss
+                # can only mean the acronym was taken in between. A second
+                # condition -- which is what `also_require` exists to allow --
+                # would make this answer wrong, so it would have to distinguish
+                # them before one is added.
                 return _acronym_conflict(acronym)
         except ShapeUnavailable as error:
             return _shape_unavailable(error)
@@ -210,7 +208,7 @@ class ScenarioBundleAPIView(APIView):
         except GraphStoreError as error:
             return _store_unavailable(error, "read")
 
-        return _representation(uid, bundle_payload(subgraph, uid), version)
+        return _bundle_response(uid, bundle_payload(subgraph, uid), version)
 
     def patch(self, request, uid):
         if not _is_minted_identifier(uid):
@@ -230,11 +228,6 @@ class ScenarioBundleAPIView(APIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
-        if "acronym" in payload:
-            # Stripped here as it is on a create, because the check and the
-            # write have to compare the same value.
-            payload["acronym"] = payload["acronym"].strip()
 
         store = GraphStore.from_settings()
         try:
@@ -266,7 +259,7 @@ class ScenarioBundleAPIView(APIView):
             if renamed:
                 return _rename_refused(renamed)
 
-            removed, added = _delta(uid, payload, pre_state, known_labels)
+            removed, added = bundle_delta(uid, payload, pre_state, known_labels)
             post_state = bundle_subgraph(pre_state - removed + added, uid)
 
             violations = validate_post_state(post_state)
@@ -289,7 +282,7 @@ class ScenarioBundleAPIView(APIView):
                     ),
                 )
             )
-            if not stamped(store, uid, token):
+            if not write_applied(store, uid, token):
                 # The guard held nothing back that the client could have known
                 # about: the bundle moved -- or went away -- after the read this
                 # request had to make.
@@ -309,29 +302,13 @@ class ScenarioBundleAPIView(APIView):
             return _store_unavailable(error, "written to")
 
         written = BundleVersion(version.number + 1, token)
-        return _representation(uid, bundle_payload(post_state, uid), written)
-
-
-def _delta(uid: str, payload: dict, pre_state: Graph, known_labels: dict) -> tuple:
-    """What a patch removes and what it adds -- per named field, nothing else.
-
-    A set-valued field named in the payload is replaced whole: its links go and
-    the payload's take their place. Emptying such a field is therefore a real
-    change, which the shape then judges -- an empty list on a field the shape
-    requires is a rejection, never a silent wipe.
-    """
-    removed, added = Graph(), Graph()
-    for name, value in payload.items():
-        field = bundle_field(name)
-        removed += linked_field_triples(pre_state, uid, field)
-        added += field_triples(uid, field, value, known_labels)
-    return removed, added
+        return _bundle_response(uid, bundle_payload(post_state, uid), written)
 
 
 def _precondition_refusal(request, version: BundleVersion) -> Optional[Response]:
     """Why this request may not proceed on its precondition, if it may not."""
     named = _versions_named(request)
-    if named is None or named is ANY_VERSION:
+    if named is None:
         return Response(
             {
                 "detail": (
@@ -358,11 +335,15 @@ def _precondition_refusal(request, version: BundleVersion) -> Optional[Response]
 
 
 def _versions_named(request):
-    """The versions an ``If-Match`` names: a list, ``ANY_VERSION``, or ``None``.
+    """The versions an ``If-Match`` names, or ``None`` if it names none.
 
     Lenient in what it accepts and strict in what it emits: a weak validator or
     a bare number is read as the version it plainly is, while a value that is
     not a version simply matches nothing and is refused as stale.
+
+    ``*`` names no version. It is a legal header value, and it satisfies the
+    letter of the precondition while withholding the one thing the precondition
+    is for, so it reads here as an absent header rather than as a match.
     """
     header = request.headers.get("If-Match")
     if header is None:
@@ -371,7 +352,7 @@ def _versions_named(request):
     for entry in header.split(","):
         entry = entry.strip()
         if entry == "*":
-            return ANY_VERSION
+            return None
         if entry.startswith("W/"):
             entry = entry[2:].strip()
         named.append(entry.strip('"'))
@@ -493,7 +474,8 @@ def _represent(uid: str, payload: dict, version: BundleVersion) -> dict:
     }
 
 
-def _representation(uid: str, payload: dict, version: BundleVersion) -> Response:
+def _bundle_response(uid: str, payload: dict, version: BundleVersion) -> Response:
+    """The body, plus the entity tag every read has to carry."""
     response = Response(_represent(uid, payload, version))
     response["ETag"] = version.etag
     return response

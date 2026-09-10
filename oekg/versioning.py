@@ -145,7 +145,15 @@ def guarded_operation(
             bundle.n3(),
         )
     else:
-        where = "%s %s %s ; %s %s ." % (
+        # The bundle's own existence is asserted alongside the version, and it
+        # is not redundant: the version node points AT the bundle, so a delete
+        # that removes the bundle's outgoing triples -- which is exactly what
+        # the user interface's delete does -- leaves the version node behind.
+        # On the version alone the guard would then match a bundle that is
+        # gone, and the write would resurrect it as untyped orphan triples.
+        where = "%s a %s . %s %s %s ; %s %s ." % (
+            bundle.n3(),
+            BUNDLE_CLASS.n3(),
             node.n3(),
             VERSION_OF.n3(),
             bundle.n3(),
@@ -166,7 +174,7 @@ def guarded_operation(
     return store.guarded_modification(where, delete=to_delete, insert=to_insert)
 
 
-def stamped(store: GraphStore, uid: str, token: str) -> bool:
+def write_applied(store: GraphStore, uid: str, token: str) -> bool:
     """Whether the write that stamped ``token`` is the one that applied.
 
     The signal the guarded update cannot give. ``False`` means the bundle moved

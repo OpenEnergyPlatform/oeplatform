@@ -440,14 +440,19 @@ class InterleavedWriteTest(BundleApiTestCase):
 
         return patch.object(GraphStore, "update", update_after_a_competitor)
 
+    def someone_else_patches(self, uid, label="Theirs"):
+        """A competitor that relabels the bundle, using the API's own guard."""
+
+        def competitor(real_update):
+            other = GraphStore.from_settings(graph=self.graph_name)
+            real_update(other, guarded_bump(other, uid, label))
+
+        return competitor
+
     def test_two_writes_against_the_same_version_cannot_both_succeed(self):
         uid, etag = self.created()
 
-        def someone_else_patches(real_update):
-            other = GraphStore.from_settings(graph=self.graph_name)
-            real_update(other, guarded_bump(other, uid, "Theirs"))
-
-        with self.interleave(someone_else_patches):
+        with self.interleave(self.someone_else_patches(uid)):
             response = self.patch(uid, {"label": "Mine"}, if_match=etag)
 
         self.assertEqual(response.status_code, 409, response.data)
@@ -456,11 +461,7 @@ class InterleavedWriteTest(BundleApiTestCase):
     def test_the_losing_write_leaves_the_version_where_the_winner_put_it(self):
         uid, etag = self.created()
 
-        def someone_else_patches(real_update):
-            other = GraphStore.from_settings(graph=self.graph_name)
-            real_update(other, guarded_bump(other, uid, "Theirs"))
-
-        with self.interleave(someone_else_patches):
+        with self.interleave(self.someone_else_patches(uid)):
             self.patch(uid, {"label": "Mine"}, if_match=etag)
 
         self.assertEqual(read_version(self.store, uid).number, 2)
@@ -483,6 +484,33 @@ class InterleavedWriteTest(BundleApiTestCase):
 
         self.assertEqual(response.status_code, 409, response.data)
         self.assertFalse(self.store.ask("ASK { ?s ?p ?o }"))
+
+    def test_a_bundle_deleted_the_way_the_interface_deletes_is_not_resurrected(
+        self,
+    ):
+        # The version node points AT the bundle, so the user interface's delete
+        # -- `oekg.remove((bundle, None, None))`, outgoing triples only --
+        # leaves it behind. On the version alone the guard would match a bundle
+        # that is gone and write its fields back as untyped orphans.
+        uid, etag = self.created()
+
+        def someone_else_deletes_the_bundle(real_update):
+            other = GraphStore.from_settings(graph=self.graph_name)
+            real_update(
+                other,
+                f"WITH <{self.graph_name}> DELETE {{ {bundle_iri(uid).n3()} ?p ?o }} "
+                f"WHERE {{ {bundle_iri(uid).n3()} ?p ?o }}",
+            )
+
+        with self.interleave(someone_else_deletes_the_bundle):
+            response = self.patch(uid, {"label": "Mine"}, if_match=etag)
+
+        self.assertEqual(response.status_code, 409, response.data)
+        self.assertFalse(
+            self.store.ask("ASK { %s ?p ?o }" % bundle_iri(uid).n3()),
+            "the guarded write resurrected a bundle that had been deleted",
+        )
+        self.assertEqual(self.client.get(self.detail_url(uid)).status_code, 404)
 
     def test_two_patches_cannot_both_take_the_same_acronym(self):
         # Each satisfies its own version guard, so the version alone does not
@@ -575,13 +603,9 @@ class OwnershipTest(BundleApiTestCase):
 
     def test_a_non_owner_is_refused(self):
         uid, etag = self.created()
-        self.client.force_login(self.other_user())
 
-        response = self.client.patch(
-            self.detail_url(uid),
-            data={"label": "Renamed"},
-            content_type="application/json",
-            HTTP_IF_MATCH=etag,
+        response = self.patch(
+            uid, {"label": "Renamed"}, if_match=etag, as_user=self.other_user()
         )
 
         self.assertEqual(response.status_code, 403, response.data)
@@ -593,14 +617,8 @@ class OwnershipTest(BundleApiTestCase):
         uid, etag = self.created()
         second = self.other_user()
         ScenarioBundleAccessControl.objects.create(owner_user=second, bundle_id=uid)
-        self.client.force_login(second)
 
-        response = self.client.patch(
-            self.detail_url(uid),
-            data={"label": "Renamed"},
-            content_type="application/json",
-            HTTP_IF_MATCH=etag,
-        )
+        response = self.patch(uid, {"label": "Renamed"}, if_match=etag, as_user=second)
 
         self.assertEqual(response.status_code, 200, response.data)
 
@@ -620,14 +638,8 @@ class OwnershipTest(BundleApiTestCase):
         admin = self.other_user(name="an-admin", email="admin@example.org")
         admin.is_admin = True
         admin.save()
-        self.client.force_login(admin)
 
-        response = self.client.patch(
-            self.detail_url(uid),
-            data={"label": "Renamed"},
-            content_type="application/json",
-            HTTP_IF_MATCH=etag,
-        )
+        response = self.patch(uid, {"label": "Renamed"}, if_match=etag, as_user=admin)
 
         self.assertEqual(response.status_code, 200, response.data)
 

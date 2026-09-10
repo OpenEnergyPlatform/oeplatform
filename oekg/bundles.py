@@ -196,6 +196,28 @@ def linked_field_triples(graph: Graph, uid: str, field: BundleField) -> Graph:
     return triples
 
 
+def bundle_delta(
+    uid: str, payload: dict, pre_state: Graph, known_labels: dict = None
+) -> tuple:
+    """What a patch of ``payload`` removes and what it adds. Nothing else.
+
+    Per named field, so a field the payload does not mention contributes to
+    neither side and is genuinely untouched -- not deleted and rewritten
+    identically, which would churn every minted node in the bundle.
+
+    A set-valued field that *is* named is replaced whole: its links go and the
+    payload's take their place. Emptying such a field is therefore a real
+    change, which the shape then judges -- an empty list on a field the shape
+    requires is a rejection, never a silent wipe.
+    """
+    removed, added = Graph(), Graph()
+    for name, value in payload.items():
+        field = bundle_field(name)
+        removed += linked_field_triples(pre_state, uid, field)
+        added += field_triples(uid, field, value, known_labels)
+    return removed, added
+
+
 def bundle_subgraph(graph: Graph, uid: str) -> Graph:
     """``graph`` narrowed to the bundle and one hop out, as a read returns it.
 
