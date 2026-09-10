@@ -97,10 +97,11 @@ SPDX-License-Identifier: CC0-1.0
   moves while the request is being prepared nothing is written and the answer is
   `409`. The version check is part of the write itself, so two clients cannot
   both succeed against the same version
+  [(#2438)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2438)
 
 - Creating a bundle now binds the acronym uniqueness check inside the write, so
   two simultaneous creates can no longer both take an acronym both of them found
-  free
+  free [(#2438)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2438)
 
 - New management command `repair_factsheet_tags` repairs the factsheets the old
   tag editor damaged - on production 23 of 339 carry a copy of the whole tag
