@@ -84,6 +84,12 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
+- Pin `vite` to 8.0.13. From 8.0.14 the dependency pre-bundler emits chunks that
+  reference an initialiser another chunk no longer defines, so any page using
+  MUI with `@emotion/react` — the scenario-bundle UI among them — dies on
+  `Uncaught ReferenceError: init_emotion_react_esm is not defined`. Upstream:
+  vitejs/vite#22499, rooted in rolldown#9502
+
 - The factsheet tag editor no longer attaches every tag on the platform. Opening
   a factsheet for editing pre-checked all ~825 tags, so saving attached the
   lot - one query per tag, which is what made saving take minutes. It now shows

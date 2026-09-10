@@ -89,7 +89,7 @@
     "eslint-plugin-react-hooks": "^5.1.0",
     "happy-dom": "^20.13.2",
     "prettier": "^3.3.2",
-    "vite": "8.0.16",
+    "vite": "8.0.13",
     "vite-plugin-eslint": "^1.8.1",
     "vitest": "^5.0.0"
   }
