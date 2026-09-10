@@ -54,6 +54,11 @@ AVAILABILITY_TIMEOUT_SECONDS = 5
 # the store's state, so the probe is safe against any endpoint.
 AVAILABILITY_PROBE_GRAPH = "urn:oep:graph-store-availability-probe"
 
+# Distinguishes "use whatever is configured" from an explicit "the default
+# graph". Without it, asking for the default graph would silently pick up a
+# test's override instead.
+USE_CONFIGURED_GRAPH = object()
+
 
 class GraphStoreError(Exception):
     """Base class for every way talking to the graph store can fail.
@@ -108,9 +113,18 @@ class GraphStore:
     )
 
     @classmethod
-    def from_settings(cls, *, graph: Optional[str] = None) -> "GraphStore":
-        """Build the store the platform is configured to talk to."""
+    def from_settings(cls, *, graph=USE_CONFIGURED_GRAPH) -> "GraphStore":
+        """Build the store the platform is configured to talk to.
+
+        ``graph`` defaults to ``settings.OEKG_GRAPH``, which is ``None`` -- the
+        default graph, where the platform's bundles live. A test overrides that
+        setting to work in a graph of its own without reaching into the views.
+        Passing ``graph=None`` explicitly means the default graph and ignores
+        the setting.
+        """
         rdf = settings.RDF_DATABASES["knowledge"]
+        if graph is USE_CONFIGURED_GRAPH:
+            graph = getattr(settings, "OEKG_GRAPH", None)
         base = "http://{host}:{port}/{name}".format(
             host=rdf["host"], port=rdf["port"], name=rdf["name"]
         )

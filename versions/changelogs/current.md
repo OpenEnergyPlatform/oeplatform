@@ -11,6 +11,13 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- The dev compose stack names the graph store host explicitly
+  (`RDF_DATABASE_HOST: fuseki`) and waits for that service. Previously it relied
+  on the local `securitysettings.py`, whose shipped default resolves the host to
+  `localhost` -- which inside the container is the container itself, so the OEKG
+  API answered `503` instead of writing
+  [(#2435)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2435)
+
 - Model/Framework factsheet overviews load in a fraction of the time. The row
   data is built by the server in one pass instead of being assembled in the page
   template (2,138 database queries down to 3, whatever the number of
@@ -72,6 +79,13 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Features
 
+- The OEKG scenario-bundle REST API: `POST /api/v0/scenario-bundles/` creates a
+  bundle and `GET /api/v0/scenario-bundles/<uid>/` reads it back. The server
+  mints the identifier, the acronym is enforced unique, the bundle is validated
+  against the canonical SHACL shape **before** anything is written, and the
+  write is one atomic request. Reads are public; writes need authentication
+  [(#2435)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2435)
+
 - New management command `repair_factsheet_tags` repairs the factsheets the old
   tag editor damaged - on production 23 of 339 carry a copy of the whole tag
   table, holding 95% of all factsheet tag assignments. It reports by default and
@@ -114,17 +128,27 @@ SPDX-License-Identifier: CC0-1.0
   (`oekg/graph_store.py`): one SPARQL request per write, which Fuseki treats as
   one transaction, instead of one committed request per triple. Its tests run
   against a real store in an isolated named graph, and skip with a stated reason
-  when no store is reachable.
+  when no store is reachable
+  [(#2429)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2429)
 
 - `python manage.py fetch_oekg_shapes` obtains the canonical OEKG SHACL shape
   from a pinned revision of the `oekg` repository, and generates the
-  `rdfs:label` subset validation needs from the OEO release already on disk.
+  `rdfs:label` subset validation needs from the OEO release already on disk
+  [(#2428)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2428)
+
+- The generated OEO label subset copied labels verbatim, so 1,855 of 2,058
+  carried an `@en` tag and four terms carried two labels. The shape requires
+  `sh:datatype xsd:string` and `sh:maxCount 1` on `rdfs:label`, and a
+  language-tagged literal is `rdf:langString` — so every picked OEO term failed
+  validation. Labels are normalised to one plain string per term
+  [(#2435)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2435)
 
 - The OEKG SPARQL endpoint test patched `oekg.utils.execute_sparql_query` while
   the view binds that function into its own namespace, so the mock never took
   effect and the test made a real network call to a host that only resolves
   inside the compose network. It failed on every local run. Patched at the right
-  name, it is now hermetic.
+  name, it is now hermetic
+  [(#2429)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2429)
 
 ## Documentation updates
 

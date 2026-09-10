@@ -49,6 +49,10 @@ django-fontawesome-5==1.0.18
 omi==1.1.0
 zipstream-new==1.1.8
 rdflib==7.0.0
+# SHACL validation for the OEKG API. 0.28.1 is the newest release that still
+# accepts rdflib>=6.3.2; 0.29 and later require rdflib>=7.1.1, which would drag
+# the pin above with them and every consumer of it.
+pyshacl==0.28.1
 pyparsing==2.4.7 # <3 otherwise: sparql queries as text cannot be parsed
 django-better-admin-arrayfield==1.4.2
 SPARQLWrapper==1.8.5

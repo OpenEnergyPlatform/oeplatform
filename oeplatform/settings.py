@@ -385,6 +385,11 @@ OEKG_SHAPES_SOURCE_FILE = "oekg/shapes/oekg_shapes.ttl"
 # pin is a commit sha. Bump this line to move the validator.
 OEKG_SHAPES_PINNED_COMMIT = "b4604e02060624b381bdbe2f872df94cfd0f5630"
 
+# The named graph the OEKG API reads and writes. None is the default graph,
+# which is where the platform's bundles live today; a test overrides it to work
+# in isolation.
+OEKG_GRAPH = None
+
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
@@ -413,7 +418,13 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.BasicAuthentication",
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.TokenAuthentication",
-    )
+    ),
+    # The OEKG bundle API reads publicly, so it carries its own ceiling rather
+    # than relying on there being one somewhere else.
+    "DEFAULT_THROTTLE_RATES": {
+        "oekg_bundles_anon": "60/minute",
+        "oekg_bundles_user": "600/minute",
+    },
 }
 
 AUTHENTICATION_BACKENDS = [
