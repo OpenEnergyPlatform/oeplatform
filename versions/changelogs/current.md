@@ -129,6 +129,11 @@ SPDX-License-Identifier: CC0-1.0
   pipeline needs; a bundle `PATCH` still cannot reach into one, so no call can
   drop a scenario by leaving it out. Writes use the containing bundle's version
   and ownership, and a read of a scenario carries the bundle's `ETag`
+  [(#2444)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2444)
+
+- A read of a scenario bundle now includes its scenarios, so what you read is
+  what a create accepts back
+  [(#2444)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2444)
 
 - New management command `repair_factsheet_tags` repairs the factsheets the old
   tag editor damaged - on production 23 of 339 carry a copy of the whole tag
