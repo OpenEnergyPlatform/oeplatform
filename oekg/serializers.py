@@ -25,7 +25,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 from rest_framework import serializers
 
-from oekg.bundles import BUNDLE_FIELDS, ENUM
+from oekg.bundles import BUNDLE_FIELDS, ENUM, SCENARIO_FIELDS
 from oekg.shape import constraint_message, enumeration
 
 # Everything read-only lives under one key, and writes ignore it. That is what
@@ -95,7 +95,48 @@ class EnumeratedListField(serializers.ListField):
         return values
 
 
-class ScenarioBundleSerializer(ClosedSerializer):
+class EnumeratedFieldsMixin:
+    """Declares the enumerated fields from the same table that builds triples.
+
+    Read from the shape at runtime rather than copied into Python: the lists
+    are still moving in the shape's repository, and a rejection quotes the
+    shape's own message rather than a second wording that could disagree.
+    """
+
+    field_table = ()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.field_table:
+            if field.kind == ENUM:
+                self.fields[field.name] = EnumeratedListField(
+                    field.predicate, required=False
+                )
+
+
+class ScenarioSerializer(EnumeratedFieldsMixin, ClosedSerializer):
+    """One scenario factsheet -- a sub-resource, not a field of its bundle.
+
+    What makes it one is the shape: it carries its own has-uuid. That uuid is
+    **not** a field here, because the server mints it; a client supplies no
+    identifier anywhere in this API.
+    """
+
+    field_table = SCENARIO_FIELDS
+
+    label = serializers.CharField()
+    acronym = serializers.CharField()
+    abstract = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+
+    study_regions = NodeReferenceSerializer(many=True, required=False)
+    interacting_regions = NodeReferenceSerializer(many=True, required=False)
+    # The shape types these as xsd:dateTime, so they are parsed rather than
+    # passed through: a value that is not a date is this layer's to refuse, not
+    # the store's.
+    years = serializers.ListField(child=serializers.DateTimeField(), required=False)
+
+
+class ScenarioBundleSerializer(EnumeratedFieldsMixin, ClosedSerializer):
     """The closed bundle field set -- these and nothing else."""
 
     label = serializers.CharField()
@@ -115,12 +156,17 @@ class ScenarioBundleSerializer(ClosedSerializer):
     frameworks = PartSerializer(many=True, required=False)
     models = PartSerializer(many=True, required=False)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # The enumerated fields are declared from the same table that builds the
-        # triples, so a field cannot exist in one direction and not the other.
-        for field in BUNDLE_FIELDS:
-            if field.kind == ENUM:
-                self.fields[field.name] = EnumeratedListField(
-                    field.predicate, required=False
-                )
+    field_table = BUNDLE_FIELDS
+
+
+class ScenarioBundleCreateSerializer(ScenarioBundleSerializer):
+    """The bundle field set **plus** nested scenarios, for `POST` only.
+
+    The asymmetry is the whole point and it is structural rather than a flag: a
+    bundle `POST` builds its scenarios with it, and a bundle `PATCH` uses the
+    class above, which has no such key and therefore refuses one. That is what
+    lets a pipeline create a whole bundle in one call without giving any call
+    the power to drop its parts by omitting them.
+    """
+
+    scenarios = ScenarioSerializer(many=True, required=False)

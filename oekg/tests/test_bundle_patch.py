@@ -25,12 +25,13 @@ from factsheet.models import ScenarioBundleAccessControl
 from login.models import myuser
 from oekg.bundles import (
     BUNDLE_CLASS,
+    BUNDLE_FIELDS,
     DC,
     HAS_PART,
     OEO,
     build_bundle_graph,
-    bundle_field,
     bundle_iri,
+    field_named,
     field_triples,
     linked_field_triples,
 )
@@ -559,7 +560,7 @@ def guarded_bump(store, uid, label):
 
 
 def _guarded_field(store, uid, name, value):
-    field = bundle_field(name)
+    field = field_named(BUNDLE_FIELDS, name)
     return guarded_operation(
         store,
         uid,
@@ -567,10 +568,10 @@ def _guarded_field(store, uid, name, value):
         mint_write_token(),
         delete=linked_field_triples(
             store.construct("CONSTRUCT { ?s ?p ?o } WHERE { ?s ?p ?o }"),
-            uid,
+            bundle_iri(uid),
             field,
         ),
-        insert=field_triples(uid, field, value),
+        insert=field_triples(bundle_iri(uid), field, value),
     )
 
 
