@@ -1,8 +1,15 @@
-"""A scenario bundle, as triples and as a payload.
+"""A scenario bundle and its parts, as triples and as payloads.
 
-One field table drives both directions, so a read returns exactly what a write
-accepts and neither can drift from the other. The table is traceable to the
-shape: every entry names the property the shape validates.
+One field table per resource drives both directions, so a read returns exactly
+what a write accepts and neither can drift from the other. Each table is
+traceable to the shape: every entry names the property the shape validates.
+
+The machinery below is written against a *subject and a table*, not against the
+bundle, because a scenario factsheet is the same problem one level down -- a
+closed set of fields, some literal, some picked from the shape's own lists,
+some minted nodes. Two tables today; study reports and dataset links make four,
+and that is the point at which the machinery should probably move into a module
+of its own.
 
 Three decisions are worth stating here rather than leaving to be inferred:
 
@@ -34,18 +41,28 @@ OBO = Namespace("http://purl.obolibrary.org/obo/")
 DC = Namespace("http://purl.org/dc/terms/")
 
 BUNDLE_CLASS = OEO.OEO_00020227
+SCENARIO_CLASS = OEO.OEO_00000365
 HAS_PART = OBO.BFO_0000051
 HAS_IRI = OEO.OEO_00390094
+HAS_UUID = OEO.OEO_00390095
+
+# How deep a resource's own graph goes. Bundle -> scenario -> study region ->
+# reference is the longest chain the shape allows, so a read that goes three
+# hops sees a whole bundle and a read that goes fewer does not. Bounded rather
+# than a transitive closure: this is a public endpoint, and a fixed depth
+# cannot be talked into walking somewhere large.
+BUNDLE_DEPTH = 3
 
 # Kinds of field, which decide how a value becomes triples and back again.
-LITERAL = "literal"  # a plain string on the bundle
+LITERAL = "literal"  # a plain string on the resource
 ENUM = "enum"  # IRIs picked from one of the shape's sh:in lists
 NODE = "node"  # a referenced or minted node: {iri, label}
-PART = "part"  # a bundle-local node reached by has-part: {label, iri}
+PART = "part"  # a resource-local node reached by has-part: {label, iri}
+DATES = "dates"  # a set of xsd:dateTime literals
 
 
 @dataclass(frozen=True)
-class BundleField:
+class ResourceField:
     name: str
     predicate: URIRef
     kind: str
@@ -55,24 +72,45 @@ class BundleField:
 
 # The closed bundle field set: these and nothing else.
 BUNDLE_FIELDS = (
-    BundleField("label", RDFS.label, LITERAL),
-    BundleField("acronym", DC.acronym, LITERAL),
-    BundleField("abstract", DC.abstract, LITERAL),
-    BundleField("descriptors", OEO.OEO_00390071, ENUM),
-    BundleField("sector_divisions", OEO.OEO_00390079, ENUM),
-    BundleField("sectors", OEO.OEO_00020439, ENUM),
-    BundleField("technologies", OEO.OEO_00020438, ENUM),
-    BundleField("energy_carriers", OEO.OEO_00020432, ENUM),
-    BundleField("contacts", OEO.OEO_00000508, NODE, OEO.OEO_00000107, "contact"),
-    BundleField(
+    ResourceField("label", RDFS.label, LITERAL),
+    ResourceField("acronym", DC.acronym, LITERAL),
+    ResourceField("abstract", DC.abstract, LITERAL),
+    ResourceField("descriptors", OEO.OEO_00390071, ENUM),
+    ResourceField("sector_divisions", OEO.OEO_00390079, ENUM),
+    ResourceField("sectors", OEO.OEO_00020439, ENUM),
+    ResourceField("technologies", OEO.OEO_00020438, ENUM),
+    ResourceField("energy_carriers", OEO.OEO_00020432, ENUM),
+    ResourceField("contacts", OEO.OEO_00000508, NODE, OEO.OEO_00000107, "contact"),
+    ResourceField(
         "organisations", OEO.OEO_00000510, NODE, OEO.OEO_00030022, "organisation"
     ),
-    BundleField("funders", OEO.OEO_00000509, NODE, OEO.OEO_00090001, "funder"),
-    BundleField("frameworks", HAS_PART, PART, OEO.OEO_00000172, "framework"),
-    BundleField("models", HAS_PART, PART, OEO.OEO_00000277, "model"),
+    ResourceField("funders", OEO.OEO_00000509, NODE, OEO.OEO_00090001, "funder"),
+    ResourceField("frameworks", HAS_PART, PART, OEO.OEO_00000172, "framework"),
+    ResourceField("models", HAS_PART, PART, OEO.OEO_00000277, "model"),
 )
 
-_FIELDS_BY_NAME = {field.name: field for field in BUNDLE_FIELDS}
+# The closed scenario-factsheet field set. A scenario carries its own has-uuid,
+# which is what makes it addressable rather than a field of its parent -- and
+# that uuid is the server's to mint, so it is not in this table: no client
+# supplies an identifier anywhere in this API.
+SCENARIO_FIELDS = (
+    ResourceField("label", RDFS.label, LITERAL),
+    ResourceField("acronym", DC.acronym, LITERAL),
+    ResourceField("abstract", DC.abstract, LITERAL),
+    ResourceField("scenario_types", OEO.OEO_00390073, ENUM),
+    ResourceField("study_regions", OEO.OEO_00020220, NODE, OEO.OEO_00020032, "region"),
+    ResourceField(
+        "interacting_regions", OEO.OEO_00020222, NODE, OEO.OEO_00020036, "region"
+    ),
+    ResourceField("years", OEO.OEO_00020440, DATES),
+)
+
+# Keyed by the table itself -- tuples of frozen dataclasses are hashable, so a
+# caller asks in the table it already holds rather than naming it twice.
+_BY_NAME = {
+    table: {field.name: field for field in table}
+    for table in (BUNDLE_FIELDS, SCENARIO_FIELDS)
+}
 
 
 def mint_bundle_uid() -> str:
@@ -85,25 +123,75 @@ def bundle_iri(uid: str) -> URIRef:
     return OEKG[uid]
 
 
-def referenced_node_iris(payload: dict) -> list:
+def mint_scenario_uid() -> str:
+    """A new scenario identifier. The server's to give, never the client's."""
+    return str(uuid.uuid4())
+
+
+def scenario_iri(sid: str) -> URIRef:
+    """The IRI a scenario this API minted lives at.
+
+    Derived, but **not** the identity: the identity is the has-uuid literal, so
+    a scenario the user interface wrote -- whose IRI this API did not choose --
+    is still reachable by the same identifier its URL carries.
+    """
+    return OEKG[f"scenario/{sid}"]
+
+
+def scenario_nodes(graph: Graph, uid: str) -> list:
+    """Every scenario factsheet hanging off this bundle, in the graph given."""
+    return [
+        node
+        for node in graph.objects(bundle_iri(uid), HAS_PART)
+        if (node, RDF.type, SCENARIO_CLASS) in graph
+    ]
+
+
+def scenario_uid(graph: Graph, node: URIRef) -> Optional[str]:
+    """The identifier a scenario node carries, as the shape requires it to."""
+    value = graph.value(node, HAS_UUID)
+    return None if value is None else str(value)
+
+
+def find_scenario(graph: Graph, uid: str, sid: str) -> Optional[URIRef]:
+    """The scenario of this bundle with identifier ``sid``, if it has one.
+
+    By the has-uuid literal rather than by rebuilding the IRI, so a scenario
+    written before this API existed is addressable too.
+    """
+    for node in scenario_nodes(graph, uid):
+        if scenario_uid(graph, node) == sid:
+            return node
+    return None
+
+
+def referenced_node_iris(payload: dict, fields: tuple = BUNDLE_FIELDS) -> list:
     """Every existing node IRI the payload points at, across all node fields."""
     iris = []
-    for field in BUNDLE_FIELDS:
+    for field in fields:
         if field.kind != NODE:
             continue
         for entry in payload.get(field.name) or []:
             if entry.get("iri"):
                 iris.append(entry["iri"])
+    for scenario in payload.get("scenarios") or []:
+        iris += referenced_node_iris(scenario, SCENARIO_FIELDS)
     return iris
 
 
-def bundle_field(name: str) -> BundleField:
-    """The one entry in the field table called ``name``."""
-    return _FIELDS_BY_NAME[name]
+def field_named(fields: tuple, name: str) -> ResourceField:
+    """The one entry in ``fields`` called ``name``."""
+    return _BY_NAME[fields][name]
 
 
-def build_bundle_graph(uid: str, payload: dict, known_labels: dict = None) -> Graph:
-    """Assemble the triples a bundle payload means.
+def resource_triples(
+    subject: URIRef,
+    node_class: URIRef,
+    fields: tuple,
+    payload: dict,
+    known_labels: dict = None,
+) -> Graph:
+    """Assemble the triples one resource's payload means.
 
     The result is the post-state to validate and, unchanged, the thing to
     write: nothing is added between validating and writing.
@@ -115,15 +203,52 @@ def build_bundle_graph(uid: str, payload: dict, known_labels: dict = None) -> Gr
     cite carrying two labels, violating sh:maxCount 1 for all of them.
     """
     graph = Graph()
-    graph.add((bundle_iri(uid), RDF.type, BUNDLE_CLASS))
-    for field in BUNDLE_FIELDS:
+    graph.add((subject, RDF.type, node_class))
+    for field in fields:
         if field.name in payload:
-            graph += field_triples(uid, field, payload[field.name], known_labels)
+            graph += field_triples(subject, field, payload[field.name], known_labels)
+    return graph
+
+
+def build_bundle_graph(uid: str, payload: dict, known_labels: dict = None) -> Graph:
+    """A whole bundle, including any scenarios nested in the payload.
+
+    Nesting is accepted here and nowhere else on the write path: a bundle
+    `POST` builds its scenarios with it, while a bundle `PATCH` cannot reach
+    one. That asymmetry is what lets a pipeline create a whole bundle in one
+    call without giving any call the power to drop its parts by omission.
+    """
+    graph = resource_triples(
+        bundle_iri(uid), BUNDLE_CLASS, BUNDLE_FIELDS, payload, known_labels
+    )
+    for scenario in payload.get("scenarios") or []:
+        graph += build_scenario_graph(
+            bundle_iri(uid), mint_scenario_uid(), scenario, known_labels
+        )
+    return graph
+
+
+def build_scenario_graph(
+    bundle: URIRef, sid: str, payload: dict, known_labels: dict = None
+) -> Graph:
+    """One scenario factsheet, linked to its bundle and carrying its identity.
+
+    The uuid goes in twice on purpose: once as the literal the shape requires
+    and the URL names, and once inside the minted IRI. The literal is the
+    identity -- a scenario the user interface wrote has an IRI this API did not
+    choose, and a lookup by literal finds it anyway.
+    """
+    node = scenario_iri(sid)
+    graph = resource_triples(
+        node, SCENARIO_CLASS, SCENARIO_FIELDS, payload, known_labels
+    )
+    graph.add((bundle, HAS_PART, node))
+    graph.add((node, HAS_UUID, Literal(sid)))
     return graph
 
 
 def field_triples(
-    uid: str, field: BundleField, value, known_labels: dict = None
+    subject: URIRef, field: ResourceField, value, known_labels: dict = None
 ) -> Graph:
     """The triples one field's value means, and nothing else.
 
@@ -134,13 +259,15 @@ def field_triples(
     """
     known_labels = known_labels or {}
     graph = Graph()
-    subject = bundle_iri(uid)
     if field.kind == LITERAL:
         if value is not None and value != "":
             graph.add((subject, field.predicate, Literal(value)))
     elif field.kind == ENUM:
         for iri in value:
             graph.add((subject, field.predicate, URIRef(iri)))
+    elif field.kind == DATES:
+        for moment in value:
+            graph.add((subject, field.predicate, Literal(moment)))
     elif field.kind == NODE:
         for entry in value:
             iri = entry.get("iri")
@@ -168,8 +295,8 @@ def field_triples(
     return graph
 
 
-def linked_field_triples(graph: Graph, uid: str, field: BundleField) -> Graph:
-    """The triples that currently attach ``field``'s values to the bundle.
+def linked_field_triples(graph: Graph, subject: URIRef, field: ResourceField) -> Graph:
+    """The triples that currently attach ``field``'s values to ``subject``.
 
     What a patch of that field removes -- **the links only.** A referenced
     contact, organisation or funder is shared with other bundles, and a
@@ -187,7 +314,6 @@ def linked_field_triples(graph: Graph, uid: str, field: BundleField) -> Graph:
     Frameworks and models share the has-part predicate, so the type is what
     tells them apart. Deleting by predicate alone would take both.
     """
-    subject = bundle_iri(uid)
     triples = Graph()
     for obj in graph.objects(subject, field.predicate):
         if field.kind == PART and (obj, RDF.type, field.node_class) not in graph:
@@ -196,8 +322,12 @@ def linked_field_triples(graph: Graph, uid: str, field: BundleField) -> Graph:
     return triples
 
 
-def bundle_delta(
-    uid: str, payload: dict, pre_state: Graph, known_labels: dict = None
+def resource_delta(
+    subject: URIRef,
+    fields: tuple,
+    payload: dict,
+    pre_state: Graph,
+    known_labels: dict = None,
 ) -> tuple:
     """What a patch of ``payload`` removes and what it adds. Nothing else.
 
@@ -212,39 +342,57 @@ def bundle_delta(
     """
     removed, added = Graph(), Graph()
     for name, value in payload.items():
-        field = bundle_field(name)
-        removed += linked_field_triples(pre_state, uid, field)
-        added += field_triples(uid, field, value, known_labels)
+        field = field_named(fields, name)
+        removed += linked_field_triples(pre_state, subject, field)
+        added += field_triples(subject, field, value, known_labels)
     return removed, added
 
 
+def bundle_delta(
+    uid: str, payload: dict, pre_state: Graph, known_labels: dict = None
+) -> tuple:
+    """``resource_delta`` for a bundle."""
+    return resource_delta(
+        bundle_iri(uid), BUNDLE_FIELDS, payload, pre_state, known_labels
+    )
+
+
 def bundle_subgraph(graph: Graph, uid: str) -> Graph:
-    """``graph`` narrowed to the bundle and one hop out, as a read returns it.
+    """``graph`` narrowed to the bundle, as deep as a read goes.
 
     Applied to a patch's post-state, this is what makes "validate the
     post-state" mean the state that will actually read back: a node a patch
     unlinked is no longer part of the bundle, so it is no longer part of what
     the shape is asked about.
+
+    It walks to the same depth the read query does, because the two have to
+    agree: the post-state validated must be the state a subsequent read
+    returns, and a pruner that stopped shorter would hide a scenario's regions
+    from the validator.
     """
-    subject = bundle_iri(uid)
     narrowed = Graph()
-    for predicate, obj in graph.predicate_objects(subject):
-        narrowed.add((subject, predicate, obj))
-        if isinstance(obj, URIRef):
-            for node_predicate, node_object in graph.predicate_objects(obj):
-                narrowed.add((obj, node_predicate, node_object))
+    reached = {bundle_iri(uid)}
+    frontier = {bundle_iri(uid)}
+    for _ in range(BUNDLE_DEPTH + 1):
+        beyond = set()
+        for subject in frontier:
+            for predicate, obj in graph.predicate_objects(subject):
+                narrowed.add((subject, predicate, obj))
+                if isinstance(obj, URIRef) and obj not in reached:
+                    reached.add(obj)
+                    beyond.add(obj)
+        frontier = beyond
     return narrowed
 
 
-def bundle_payload(graph: Graph, uid: str) -> dict:
-    """Read a bundle subgraph back into exactly what a write would accept."""
-    subject = bundle_iri(uid)
+def resource_payload(graph: Graph, subject: URIRef, fields: tuple) -> dict:
+    """Read one resource's triples back into exactly what a write would accept."""
     payload = {}
-    for field in BUNDLE_FIELDS:
+    for field in fields:
         if field.kind == LITERAL:
             value = graph.value(subject, field.predicate)
             payload[field.name] = None if value is None else str(value)
-        elif field.kind == ENUM:
+        elif field.kind in (ENUM, DATES):
             payload[field.name] = sorted(
                 str(obj) for obj in graph.objects(subject, field.predicate)
             )
@@ -275,7 +423,23 @@ def bundle_payload(graph: Graph, uid: str) -> dict:
     return payload
 
 
-def _minted(field: BundleField) -> URIRef:
+def bundle_payload(graph: Graph, uid: str) -> dict:
+    """A bundle's own fields. **Scenarios are not in here.**
+
+    They have their own URLs, so a bundle read names them rather than nesting
+    them -- the same asymmetry as the write side, from the other direction. The
+    view adds that naming; keeping it out of this function is what lets a read
+    be sent straight back to `POST`, where `scenarios` means *create these*.
+    """
+    return resource_payload(graph, bundle_iri(uid), BUNDLE_FIELDS)
+
+
+def scenario_payload(graph: Graph, node: URIRef) -> dict:
+    """One scenario factsheet's fields."""
+    return resource_payload(graph, node, SCENARIO_FIELDS)
+
+
+def _minted(field: ResourceField) -> URIRef:
     return OEKG[f"{field.mint_segment}/{uuid.uuid4()}"]
 
 

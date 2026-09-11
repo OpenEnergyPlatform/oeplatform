@@ -123,6 +123,13 @@ SPDX-License-Identifier: CC0-1.0
   and read as coming from before the API
   [(#2441)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2441)
 
+- Scenario factsheets are now addressable through the REST API: `POST`, `GET`
+  and `PATCH` under `/api/v0/scenario-bundles/<uid>/scenarios/`. A bundle can
+  also be created with its scenarios in a single call, which is what a modelling
+  pipeline needs; a bundle `PATCH` still cannot reach into one, so no call can
+  drop a scenario by leaving it out. Writes use the containing bundle's version
+  and ownership, and a read of a scenario carries the bundle's `ETag`
+
 - New management command `repair_factsheet_tags` repairs the factsheets the old
   tag editor damaged - on production 23 of 339 carry a copy of the whole tag
   table, holding 95% of all factsheet tag assignments. It reports by default and

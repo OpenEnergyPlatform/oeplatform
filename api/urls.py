@@ -74,6 +74,7 @@ from api.views import (
 )
 from oekg.api_views import ScenarioBundleAPIView, ScenarioBundleCollectionAPIView
 from oekg.history_views import ScenarioBundleHistoryAPIView
+from oekg.scenario_views import ScenarioAPIView, ScenarioCollectionAPIView
 
 app_name = "api"
 
@@ -317,6 +318,18 @@ urlpatterns_v0 = [
         "scenario-bundles/<uid>/history/",
         ScenarioBundleHistoryAPIView.as_view(),
         name="scenario-bundle-history",
+    ),
+    # Scenario factsheets are sub-resources because the shape gives them their
+    # own has-uuid. Plural, like the bundle collection above it.
+    path(
+        "scenario-bundles/<uid>/scenarios/",
+        ScenarioCollectionAPIView.as_view(),
+        name="scenario-bundle-scenarios",
+    ),
+    path(
+        "scenario-bundles/<uid>/scenarios/<sid>/",
+        ScenarioAPIView.as_view(),
+        name="scenario-bundle-scenario",
     ),
     path(
         "datasets/",
