@@ -60,7 +60,9 @@ from oekg.api_support import (
 )
 from oekg.bundles import (
     BUNDLE_CLASS,
+    BUNDLE_FIELDS,
     DC,
+    SCENARIO_FIELDS,
     build_bundle_graph,
     bundle_delta,
     bundle_iri,
@@ -88,7 +90,7 @@ from oekg.versioning import (
     version_triples,
     write_applied,
 )
-from oekg.writes import Refused, open_write
+from oekg.writes import open_bundle, refuse_renames
 
 logger = logging.getLogger("oeplatform")
 
@@ -113,10 +115,10 @@ class ScenarioBundleCollectionAPIView(APIView):
             if _acronym_taken(store, acronym):
                 return _acronym_conflict(acronym)
 
-            known_labels = labels_of(store, referenced_node_iris(payload))
-            renamed = _renames(payload, known_labels)
-            if renamed:
-                return _rename_refused(renamed)
+            known_labels = labels_of(store, _all_referenced_iris(payload))
+            refuse_renames(payload, known_labels, BUNDLE_FIELDS)
+            for scenario in payload.get("scenarios") or []:
+                refuse_renames(scenario, known_labels, SCENARIO_FIELDS)
 
             uid = mint_bundle_uid()
             post_state = build_bundle_graph(uid, payload, known_labels)
@@ -246,16 +248,13 @@ class ScenarioBundleAPIView(APIView):
             )
 
         try:
-            write = open_write(request, uid)
+            write = open_bundle(request, uid)
+            write.require_write(request)
             known_labels = write.labels_of(referenced_node_iris(payload))
-            renamed = _renames(payload, known_labels)
-            if renamed:
-                return _rename_refused(renamed)
+            refuse_renames(payload, known_labels, BUNDLE_FIELDS)
 
             removed, added = bundle_delta(uid, payload, write.pre_state, known_labels)
             write.apply(removed=removed, added=added, verb=UPDATE)
-        except Refused as refusal:
-            return refusal.response
         except ShapeUnavailable as error:
             return shape_unavailable(error)
         except GraphStoreError as error:
@@ -269,36 +268,12 @@ class ScenarioBundleAPIView(APIView):
         )
 
 
-def _renames(payload: dict, known_labels: dict) -> list:
-    """Referenced nodes whose label the payload disagrees with.
-
-    The API offers no rename. Shared IRIs stay shared -- that is the point of a
-    graph -- but a shared contact or organisation is cited by other bundles, so
-    letting one payload rewrite its label would change every one of them.
-    """
-    conflicts = []
-    for iri in referenced_node_iris(payload):
-        if iri not in known_labels:
-            continue
-        for entry in _entries_for(payload, iri):
-            if entry["label"] != known_labels[iri]:
-                conflicts.append(
-                    {
-                        "iri": iri,
-                        "stored_label": known_labels[iri],
-                        "sent_label": entry["label"],
-                    }
-                )
-    return conflicts
-
-
-def _entries_for(payload: dict, iri: str) -> list:
-    return [
-        entry
-        for field_name in ("contacts", "organisations", "funders")
-        for entry in (payload.get(field_name) or [])
-        if entry.get("iri") == iri
-    ]
+def _all_referenced_iris(payload: dict) -> list:
+    """Existing node IRIs a create points at, its nested scenarios included."""
+    iris = referenced_node_iris(payload, BUNDLE_FIELDS)
+    for scenario in payload.get("scenarios") or []:
+        iris += referenced_node_iris(scenario, SCENARIO_FIELDS)
+    return iris
 
 
 def _acronym_taken(store: GraphStore, acronym: str) -> bool:
@@ -331,9 +306,7 @@ def _acronym_pattern(acronym: str) -> str:
     )
 
 
-def _represent(
-    uid: str, graph: Graph, version: BundleVersion, scenarios: bool = True
-) -> dict:
+def _represent(uid: str, graph: Graph, version: BundleVersion) -> dict:
     """A read returns exactly what a write accepts, plus read-only data.
 
     **Scenarios are nested here and rejected on `PATCH`.** That looks
@@ -351,8 +324,7 @@ def _represent(
             "version": version.number,
         },
     }
-    if scenarios:
-        body["scenarios"] = scenario_bodies(graph, uid)
+    body["scenarios"] = scenario_bodies(graph, uid)
     return body
 
 
@@ -391,18 +363,4 @@ def _acronym_conflict(acronym: str) -> Response:
             )
         },
         status=status.HTTP_409_CONFLICT,
-    )
-
-
-def _rename_refused(renamed: list) -> Response:
-    return Response(
-        {
-            "detail": (
-                "A shared node cannot be renamed through this API. Reference "
-                "it by iri and send the label it already has, or omit the iri "
-                "to mint a new node."
-            ),
-            "conflicts": renamed,
-        },
-        status=status.HTTP_400_BAD_REQUEST,
     )

@@ -27,6 +27,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 from django.urls import reverse
 from rdflib import Graph
 from rest_framework import status
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -54,7 +55,15 @@ from oekg.graph_store import GraphStoreError
 from oekg.history import CREATE, UPDATE
 from oekg.serializers import READ_ONLY_CONTAINER, ScenarioSerializer
 from oekg.shape import ShapeUnavailable
-from oekg.writes import BundleWrite, Refused, open_write
+from oekg.writes import BundleWrite, open_bundle, refuse_renames
+
+
+class ScenarioPagination(PageNumberPagination):
+    """A ceiling, not a default: no public collection has an unbounded mode."""
+
+    page_size = 50
+    page_size_query_param = "page_size"
+    max_page_size = 200
 
 
 class ScenarioCollectionAPIView(APIView):
@@ -69,12 +78,10 @@ class ScenarioCollectionAPIView(APIView):
 
     def get(self, request, uid):
         try:
-            write = open_write(request, uid, read_only=True)
-        except Refused as refusal:
-            return refusal.response
+            write = open_bundle(request, uid)
         except GraphStoreError as error:
             return store_unavailable(error, "read")
-        return _listing(write)
+        return _listing(request, write)
 
     def post(self, request, uid):
         serializer = ScenarioSerializer(data=request.data)
@@ -82,10 +89,12 @@ class ScenarioCollectionAPIView(APIView):
 
         sid = mint_scenario_uid()
         try:
-            write = open_write(request, uid)
+            write = open_bundle(request, uid)
+            write.require_write(request)
             known_labels = write.labels_of(
                 referenced_node_iris(serializer.validated_data, SCENARIO_FIELDS)
             )
+            refuse_renames(serializer.validated_data, known_labels, SCENARIO_FIELDS)
             write.apply(
                 removed=Graph(),
                 added=build_scenario_graph(
@@ -95,8 +104,6 @@ class ScenarioCollectionAPIView(APIView):
                 resource_type=SCENARIO_CLASS,
                 resource_uuid=sid,
             )
-        except Refused as refusal:
-            return refusal.response
         except ShapeUnavailable as error:
             return shape_unavailable(error)
         except GraphStoreError as error:
@@ -119,9 +126,7 @@ class ScenarioAPIView(APIView):
 
     def get(self, request, uid, sid):
         try:
-            write = open_write(request, uid, read_only=True)
-        except Refused as refusal:
-            return refusal.response
+            write = open_bundle(request, uid)
         except GraphStoreError as error:
             return store_unavailable(error, "read")
         if find_scenario(write.pre_state, uid, sid) is None:
@@ -145,14 +150,20 @@ class ScenarioAPIView(APIView):
             )
 
         try:
-            write = open_write(request, uid)
+            write = open_bundle(request, uid)
+            # Existence of the part before the precondition for the whole: a
+            # request for a scenario that is not there should hear that,
+            # rather than be told its If-Match is missing for something that
+            # does not exist.
             node = find_scenario(write.pre_state, uid, sid)
             if node is None:
                 return _no_such_scenario(sid)
+            write.require_write(request)
 
             known_labels = write.labels_of(
                 referenced_node_iris(payload, SCENARIO_FIELDS)
             )
+            refuse_renames(payload, known_labels, SCENARIO_FIELDS)
             removed, added = resource_delta(
                 node, SCENARIO_FIELDS, payload, write.pre_state, known_labels
             )
@@ -163,8 +174,6 @@ class ScenarioAPIView(APIView):
                 resource_type=SCENARIO_CLASS,
                 resource_uuid=sid,
             )
-        except Refused as refusal:
-            return refusal.response
         except ShapeUnavailable as error:
             return shape_unavailable(error)
         except GraphStoreError as error:
@@ -180,9 +189,18 @@ def scenario_bodies(graph: Graph, uid: str) -> list:
     return bodies
 
 
-def _listing(write: BundleWrite) -> Response:
+def _listing(request, write: BundleWrite) -> Response:
+    """The bundle's scenarios, paginated.
+
+    Paginated even though a bundle's scenarios are bounded by the bundle: this
+    is a public collection, and "no unbounded mode" is the rule for all of
+    them. The nested form inside a bundle read is the exception, and it is one
+    on purpose -- that one has to be complete, because a client sends it back.
+    """
     scenarios = scenario_bodies(write.pre_state, write.uid)
-    response = Response({"count": len(scenarios), "results": scenarios})
+    paginator = ScenarioPagination()
+    page = paginator.paginate_queryset(scenarios, request, view=None)
+    response = paginator.get_paginated_response(page)
     response["ETag"] = write.version.etag
     return response
 

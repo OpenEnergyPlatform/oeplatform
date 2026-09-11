@@ -390,6 +390,139 @@ class ScenarioGuardTest(ScenarioTestCase):
         self.assertIn(response.status_code, (401, 403))
 
 
+class SharedRegionTest(ScenarioTestCase):
+    """A region cited by two scenarios is shared, and shared means unrenameable.
+
+    The rename refusal used to be driven by a hardcoded list of bundle field
+    names, so it did not see regions at all: a payload could cite an existing
+    region with a different label and be accepted. It is driven by the field
+    tables now, which is why this is the test that fails if that regresses.
+    """
+
+    def existing_region(self):
+        uid, etag = self.created()
+        added = self.add_scenario(
+            uid, etag, {**VALID_SCENARIO, "study_regions": [{"label": "Germany"}]}
+        )
+        sid = added.data[READ_ONLY_CONTAINER]["uid"]
+        region = self.client.get(self.scenario_url(uid, sid)).data["study_regions"][0]
+        return uid, added["ETag"], region["iri"]
+
+    def test_a_region_may_be_referenced_by_a_second_scenario(self):
+        uid, etag, iri = self.existing_region()
+
+        response = self.add_scenario(
+            uid,
+            etag,
+            {
+                **VALID_SCENARIO,
+                "acronym": "SECOND",
+                "study_regions": [{"iri": iri, "label": "Germany"}],
+            },
+        )
+
+        self.assertEqual(response.status_code, 201, response.data)
+
+    def test_referencing_it_writes_no_second_label(self):
+        uid, etag, iri = self.existing_region()
+
+        self.add_scenario(
+            uid,
+            etag,
+            {
+                **VALID_SCENARIO,
+                "acronym": "SECOND",
+                "study_regions": [{"iri": iri, "label": "Germany"}],
+            },
+        )
+
+        labels = self.store.select(
+            "SELECT ?l WHERE { <%s> <http://www.w3.org/2000/01/rdf-schema#label> ?l }"
+            % iri
+        )
+        self.assertEqual(len(labels), 1, labels)
+
+    def test_renaming_a_region_through_a_scenario_is_refused(self):
+        uid, etag, iri = self.existing_region()
+
+        response = self.add_scenario(
+            uid,
+            etag,
+            {
+                **VALID_SCENARIO,
+                "acronym": "SECOND",
+                "study_regions": [{"iri": iri, "label": "Deutschland"}],
+            },
+        )
+
+        self.assertEqual(response.status_code, 400, response.data)
+        self.assertEqual(response.data["conflicts"][0]["iri"], iri)
+
+    def test_renaming_a_region_through_a_patch_is_refused(self):
+        uid, etag, iri = self.existing_region()
+        sid = self.client.get(self.scenarios_url(uid)).data["results"][0][
+            READ_ONLY_CONTAINER
+        ]["uid"]
+
+        response = self.patch_scenario(
+            uid, sid, {"study_regions": [{"iri": iri, "label": "Deutschland"}]}, etag
+        )
+
+        self.assertEqual(response.status_code, 400, response.data)
+
+    def test_renaming_a_region_nested_in_a_bundle_create_is_refused(self):
+        _, _, iri = self.existing_region()
+
+        response = self.create(
+            {
+                **VALID_PAYLOAD,
+                "acronym": "NESTED",
+                "scenarios": [
+                    {
+                        **VALID_SCENARIO,
+                        "study_regions": [{"iri": iri, "label": "Deutschland"}],
+                    }
+                ],
+            }
+        )
+
+        self.assertEqual(response.status_code, 400, response.data)
+
+
+class ScenarioNotFoundTest(ScenarioTestCase):
+    """Existence is asked before the precondition, one level down as well."""
+
+    def test_an_unknown_scenario_is_a_404_even_without_a_precondition(self):
+        # Not a 428: telling a client its If-Match is missing for something
+        # that does not exist sends it to look for a version it cannot use.
+        uid, _ = self.created()
+        self.client.force_login(self.user)
+
+        response = self.client.patch(
+            self.scenario_url(uid, "no-such-scenario"),
+            data={"label": "Renamed"},
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 404, response.data)
+
+    def test_an_unknown_scenario_is_a_404_with_a_stale_precondition(self):
+        uid, _ = self.created()
+
+        response = self.patch_scenario(
+            uid, "no-such-scenario", {"label": "Renamed"}, '"99"'
+        )
+
+        self.assertEqual(response.status_code, 404, response.data)
+
+    def test_an_unknown_bundle_is_still_a_404_before_anything_else(self):
+        response = self.patch_scenario(
+            "11111111-2222-3333-4444-555555555555", "any", {"label": "x"}, None
+        )
+
+        self.assertEqual(response.status_code, 404, response.data)
+
+
 class ScenarioHistoryTest(ScenarioTestCase):
     def entries(self, uid):
         return list(OEKG_Modifications.objects.filter(bundle_id=uid).order_by("id"))
@@ -511,3 +644,42 @@ class ScenarioShapeConformanceTest(RequiresShapeArtifactsMixin, SimpleTestCase):
         # never be in the serializer: no client supplies an identifier here.
         self.assertNotIn("uid", ScenarioSerializer().fields)
         self.assertNotIn("uuid", ScenarioSerializer().fields)
+
+
+class ReadDepthTest(ScenarioTestCase):
+    """The read and the post-state pruner have to agree about how deep a
+    bundle goes.
+
+    If the pruner stopped shorter than the read, the shape would be asked
+    about a bundle the client never sees; if it went deeper, a write could be
+    refused over a node no read returns. Both walk to `BUNDLE_DEPTH`, and this
+    is the test that says so against a bundle that actually uses the depth.
+    """
+
+    def test_a_node_three_hops_out_is_both_read_and_validated(self):
+        # bundle -> scenario -> study region is two hops, and the region's own
+        # triples are the third. A one-hop read returns none of it.
+        uid, etag = self.created()
+        added = self.add_scenario(
+            uid, etag, {**VALID_SCENARIO, "study_regions": [{"label": "Germany"}]}
+        )
+        sid = added.data[READ_ONLY_CONTAINER]["uid"]
+
+        read = self.client.get(self.scenario_url(uid, sid)).data
+
+        self.assertEqual(read["study_regions"][0]["label"], "Germany")
+
+    def test_the_pruner_keeps_what_the_read_returns(self):
+        from oekg.bundles import bundle_subgraph
+        from oekg.graph_store import GraphStore
+        from oekg.reads import read_bundle
+
+        uid, etag = self.created()
+        self.add_scenario(
+            uid, etag, {**VALID_SCENARIO, "study_regions": [{"label": "Germany"}]}
+        )
+
+        as_read = read_bundle(GraphStore.from_settings(), uid)
+        as_pruned = bundle_subgraph(as_read, uid)
+
+        self.assertEqual(len(as_pruned), len(as_read))

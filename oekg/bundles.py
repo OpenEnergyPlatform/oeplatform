@@ -31,6 +31,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 import uuid
 from dataclasses import dataclass
+from functools import lru_cache
 from typing import Optional
 
 from rdflib import RDF, RDFS, Graph, Literal, Namespace, URIRef
@@ -105,13 +106,6 @@ SCENARIO_FIELDS = (
     ResourceField("years", OEO.OEO_00020440, DATES),
 )
 
-# Keyed by the table itself -- tuples of frozen dataclasses are hashable, so a
-# caller asks in the table it already holds rather than naming it twice.
-_BY_NAME = {
-    table: {field.name: field for field in table}
-    for table in (BUNDLE_FIELDS, SCENARIO_FIELDS)
-}
-
 
 def mint_bundle_uid() -> str:
     """A new bundle identifier. The server's to give, never the client's."""
@@ -166,7 +160,12 @@ def find_scenario(graph: Graph, uid: str, sid: str) -> Optional[URIRef]:
 
 
 def referenced_node_iris(payload: dict, fields: tuple = BUNDLE_FIELDS) -> list:
-    """Every existing node IRI the payload points at, across all node fields."""
+    """Every existing node IRI this payload points at, for **this** table.
+
+    One table, one level. Nesting is the caller's business, because only the
+    caller knows which key holds what -- a table that reached for a key by name
+    would keep looking for it after being handed a table that has no such key.
+    """
     iris = []
     for field in fields:
         if field.kind != NODE:
@@ -174,14 +173,19 @@ def referenced_node_iris(payload: dict, fields: tuple = BUNDLE_FIELDS) -> list:
         for entry in payload.get(field.name) or []:
             if entry.get("iri"):
                 iris.append(entry["iri"])
-    for scenario in payload.get("scenarios") or []:
-        iris += referenced_node_iris(scenario, SCENARIO_FIELDS)
     return iris
+
+
+@lru_cache(maxsize=None)
+def _by_name(fields: tuple) -> dict:
+    """A table's lookup, built once. Cached rather than listed, so adding a
+    table is adding a table and nothing else."""
+    return {field.name: field for field in fields}
 
 
 def field_named(fields: tuple, name: str) -> ResourceField:
     """The one entry in ``fields`` called ``name``."""
-    return _BY_NAME[fields][name]
+    return _by_name(fields)[name]
 
 
 def resource_triples(
