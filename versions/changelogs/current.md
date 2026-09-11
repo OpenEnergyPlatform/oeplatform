@@ -106,6 +106,16 @@ SPDX-License-Identifier: CC0-1.0
   two simultaneous creates can no longer both take an acronym both of them found
   free [(#2438)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2438)
 
+- Every write to a scenario bundle through the REST API now leaves a record, and
+  `GET /api/v0/scenario-bundles/<uid>/history/` reads it back. Previously only
+  the browser's edit path recorded anything, so creates and API writes were
+  silent. An entry says which operation it was, who made it, when, which version
+  it produced, and which triples changed; the reader renders those as field
+  names and returns the raw triples on `?expand=triples`. The history is public
+  but per bundle and paginated, and names the actor by username rather than by
+  internal id. Entries written before this release are kept exactly as they are
+  and read as coming from before the API
+
 - New management command `repair_factsheet_tags` repairs the factsheets the old
   tag editor damaged - on production 23 of 339 carry a copy of the whole tag
   table, holding 95% of all factsheet tag assignments. It reports by default and

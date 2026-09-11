@@ -65,12 +65,14 @@ from oekg.bundles import (
     referenced_node_iris,
 )
 from oekg.graph_store import GraphStore, GraphStoreError
+from oekg.history import CREATE, UPDATE, record_write
 from oekg.permissions import may_write_bundle
 from oekg.serializers import READ_ONLY_CONTAINER, ScenarioBundleSerializer
 from oekg.shape import ShapeUnavailable
 from oekg.validation import validate_post_state
 from oekg.versioning import (
     FIRST_VERSION,
+    UNVERSIONED,
     BundleVersion,
     guarded_operation,
     mint_write_token,
@@ -143,7 +145,7 @@ class ScenarioBundleCollectionAPIView(APIView):
         except ShapeUnavailable as error:
             return _shape_unavailable(error)
         except GraphStoreError as error:
-            return _store_unavailable(error, "written to")
+            return store_unavailable(error, "written to")
 
         # Ownership is recorded now so the creator can edit later: a bundle with
         # no ownership record is administrator-only by design, which would make
@@ -166,10 +168,24 @@ class ScenarioBundleCollectionAPIView(APIView):
                 uid,
             )
 
+        # The graph has committed. From here nothing may turn a successful
+        # write into an error -- a failure is reported alongside the success it
+        # qualifies, never instead of it.
+        recorded = record_write(
+            bundle_uid=uid,
+            verb=CREATE,
+            actor=request.user,
+            version_before=UNVERSIONED,
+            version_after=FIRST_VERSION,
+            added=post_state,
+        )
+
         version = BundleVersion(FIRST_VERSION, token)
         body = _represent(uid, bundle_payload(post_state, uid), version)
         if not owned:
             body[READ_ONLY_CONTAINER]["ownership_recorded"] = False
+        if not recorded:
+            body[READ_ONLY_CONTAINER]["history_recorded"] = False
         response = Response(body, status=status.HTTP_201_CREATED)
         response["Location"] = reverse("api:scenario-bundle", kwargs={"uid": uid})
         response["ETag"] = version.etag
@@ -196,22 +212,22 @@ class ScenarioBundleAPIView(APIView):
         # bundle. Checked before it reaches a query, where an IRI-unsafe
         # character would raise out of rdflib as a 500 rather than a 404.
         if not _is_minted_identifier(uid):
-            return _no_such_bundle(uid)
+            return no_such_bundle(uid)
 
         store = GraphStore.from_settings()
         try:
             subgraph = _read_bundle(store, uid)
             if subgraph is None:
-                return _no_such_bundle(uid)
+                return no_such_bundle(uid)
             version = read_version(store, uid)
         except GraphStoreError as error:
-            return _store_unavailable(error, "read")
+            return store_unavailable(error, "read")
 
         return _bundle_response(uid, bundle_payload(subgraph, uid), version)
 
     def patch(self, request, uid):
         if not _is_minted_identifier(uid):
-            return _no_such_bundle(uid)
+            return no_such_bundle(uid)
 
         serializer = ScenarioBundleSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -236,7 +252,7 @@ class ScenarioBundleAPIView(APIView):
             # not.
             pre_state = _read_bundle(store, uid)
             if pre_state is None:
-                return _no_such_bundle(uid)
+                return no_such_bundle(uid)
 
             if not may_write_bundle(request.user, uid):
                 return _not_the_owner()
@@ -281,10 +297,24 @@ class ScenarioBundleAPIView(APIView):
         except ShapeUnavailable as error:
             return _shape_unavailable(error)
         except GraphStoreError as error:
-            return _store_unavailable(error, "written to")
+            return store_unavailable(error, "written to")
 
         written = BundleVersion(version.number + 1, token)
-        return _bundle_response(uid, bundle_payload(post_state, uid), written)
+        recorded = record_write(
+            bundle_uid=uid,
+            verb=UPDATE,
+            actor=request.user,
+            version_before=version.number,
+            version_after=written.number,
+            removed=removed,
+            added=added,
+        )
+        return _bundle_response(
+            uid,
+            bundle_payload(post_state, uid),
+            written,
+            history_recorded=recorded,
+        )
 
 
 def _precondition_refusal(request, version: BundleVersion) -> Optional[Response]:
@@ -339,6 +369,28 @@ def _versions_named(request):
             entry = entry[2:].strip()
         named.append(entry.strip('"'))
     return named
+
+
+def bundle_exists(uid: str) -> bool:
+    """Whether there is a bundle at ``uid``. Asked of the graph, not of a table.
+
+    Shared with the history endpoint, which must not answer 404 for a real
+    bundle that simply has no entries yet -- every bundle the user interface
+    wrote is one of those.
+
+    Raises ``GraphStoreError`` rather than answering ``False`` when the store
+    cannot be reached: "there is no such bundle" and "I could not find out" are
+    different answers, and a caller has to be able to say 503 instead of 404.
+
+    An ASK rather than the read a GET does -- this asks whether the bundle is
+    there, and pulling its whole subgraph across to answer that would make
+    every history read pay for data it throws away.
+    """
+    if not _is_minted_identifier(uid):
+        return False
+    return GraphStore.from_settings().ask(
+        "ASK { %s a %s }" % (bundle_iri(uid).n3(), BUNDLE_CLASS.n3())
+    )
 
 
 def _read_bundle(store: GraphStore, uid: str) -> Optional[Graph]:
@@ -457,14 +509,27 @@ def _represent(uid: str, payload: dict, version: BundleVersion) -> dict:
     }
 
 
-def _bundle_response(uid: str, payload: dict, version: BundleVersion) -> Response:
-    """The body, plus the entity tag every read has to carry."""
-    response = Response(_represent(uid, payload, version))
+def _bundle_response(
+    uid: str,
+    payload: dict,
+    version: BundleVersion,
+    history_recorded: bool = True,
+) -> Response:
+    """The body, plus the entity tag every read has to carry.
+
+    ``history_recorded`` appears only when it is ``False``. A client should not
+    have to check a key on every response to learn that the ordinary thing
+    happened; it is there to name the exception.
+    """
+    body = _represent(uid, payload, version)
+    if not history_recorded:
+        body[READ_ONLY_CONTAINER]["history_recorded"] = False
+    response = Response(body)
     response["ETag"] = version.etag
     return response
 
 
-def _no_such_bundle(uid: str) -> Response:
+def no_such_bundle(uid: str) -> Response:
     return Response(
         {"detail": f"No scenario bundle {uid}."}, status=status.HTTP_404_NOT_FOUND
     )
@@ -528,7 +593,7 @@ def _shape_unavailable(error: Exception) -> Response:
     )
 
 
-def _store_unavailable(error: Exception, action: str) -> Response:
+def store_unavailable(error: Exception, action: str) -> Response:
     logger.error("OEKG API %s failed: %s", action, error)
     return Response(
         {"detail": f"The OEKG graph store could not be {action}."},
