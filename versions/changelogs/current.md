@@ -11,6 +11,12 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- The scenario-bundle changelog page under Factsheets now also lists changes
+  made through the REST API. Those rows show who changed what and when, but no
+  side-by-side diff: the API records what changed in a newer form that this page
+  does not read yet
+  [(#2441)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2441)
+
 - The dev compose stack names the graph store host explicitly
   (`RDF_DATABASE_HOST: fuseki`) and waits for that service. Previously it relied
   on the local `securitysettings.py`, whose shipped default resolves the host to
@@ -115,6 +121,7 @@ SPDX-License-Identifier: CC0-1.0
   but per bundle and paginated, and names the actor by username rather than by
   internal id. Entries written before this release are kept exactly as they are
   and read as coming from before the API
+  [(#2441)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2441)
 
 - New management command `repair_factsheet_tags` repairs the factsheets the old
   tag editor damaged - on production 23 of 339 carry a copy of the whole tag
