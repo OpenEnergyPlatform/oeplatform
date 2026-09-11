@@ -59,9 +59,9 @@ class OEKG_Modifications(models.Model):
     row.
     """
 
-    bundle_id = CharField(max_length=400, default="none", db_index=True)
-    old_state = JSONField(null=True, blank=True)
-    new_state = JSONField(null=True, blank=True)
+    bundle_id = CharField(max_length=400, default="none")
+    old_state = JSONField()
+    new_state = JSONField()
     user = ForeignKey("login.myuser", on_delete=models.CASCADE, null=True)
     timestamp = DateTimeField(default=timezone.now)
 
@@ -73,6 +73,14 @@ class OEKG_Modifications(models.Model):
     version_after = IntegerField(null=True, blank=True)
     removed = JSONField(null=True, blank=True)
     added = JSONField(null=True, blank=True)
+
+    class Meta:
+        # A plain btree, declared here rather than as `db_index=True` on the
+        # field: on a CharField that shortcut also creates a second index with
+        # varchar_pattern_ops, for the LIKE queries nothing here makes. One
+        # index is the one this table needs -- it is queried by bundle and had
+        # none at all.
+        indexes = [models.Index(fields=["bundle_id"], name="oekg_mod_bundle_idx")]
 
     @property
     def era(self) -> str:

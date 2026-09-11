@@ -29,7 +29,7 @@ import json
 import logging
 from typing import Optional
 
-from django.db import DatabaseError, transaction
+from django.db import transaction
 from rdflib import RDF, Graph, URIRef
 
 from factsheet.models import EMPTY_LEGACY_PAYLOAD, OEKG_Modifications
@@ -59,9 +59,12 @@ def record_write(
 ) -> bool:
     """Record one write. Returns whether it was recorded.
 
-    Never raises: the caller's graph write has already committed, so there is
-    nothing left to undo and nothing useful to tell the client beyond the fact
-    that this note was lost.
+    **Never raises**, and that is load-bearing rather than polite: the caller's
+    graph write has already committed, so there is nothing left to undo and
+    nothing useful to tell the client beyond the fact that this note was lost.
+    Anything raised from here would become a 500 for a write that succeeded --
+    the one outcome the whole ordering exists to avoid -- so the net is cast
+    around every failure and not only around the database's.
     """
     if verb not in VERBS:
         # Not a runtime guard against clients -- they cannot reach this. It
@@ -70,9 +73,8 @@ def record_write(
     try:
         # The savepoint keeps a rejected insert from poisoning the surrounding
         # transaction. Without it a real database error would be caught here
-        # and then raised again by the next query -- turning a write that
-        # succeeded into a 500, which is the one outcome this whole ordering
-        # exists to avoid.
+        # and then raised again by the next query -- which would produce the
+        # same 500 by a slower route.
         with transaction.atomic():
             OEKG_Modifications.objects.create(
                 bundle_id=bundle_uid,
@@ -89,7 +91,11 @@ def record_write(
                 old_state=EMPTY_LEGACY_PAYLOAD,
                 new_state=EMPTY_LEGACY_PAYLOAD,
             )
-    except DatabaseError:
+    except Exception:
+        # Deliberately every exception, not just the database's: serialising
+        # the diff runs in here too, and an rdflib failure would otherwise
+        # escape and undo the guarantee this function's contract makes.
+        #
         # One structured line, the house format, so the gap is greppable. It is
         # the only place this becomes visible: there is no Django admin on this
         # platform to inspect the table through.
@@ -114,19 +120,30 @@ def changed_fields(uid: str, removed: Graph, added: Graph) -> list:
     triples it describes and a shape change never re-interprets an old row.
 
     A triple this cannot attribute to a field -- the type and label a minted
-    contact brings with it, say -- is reported under a ``None`` field rather
+    contact brings with it, say -- is reported with a ``None`` field rather
     than dropped. Dropping it would make the summary look complete when it is
     not, which is the one thing a history must not do.
+
+    **Every change names its predicate**, attributed or not. Without it an
+    unattributed entry would be a list of bare values with nothing saying what
+    they were values of, which is only marginally better than dropping them.
     """
-    fields = {}
+    changes = {}
     for side, graph in (("removed", removed), ("added", added)):
         for subject, predicate, obj in graph:
-            name = _field_name(uid, subject, predicate, obj, graph)
-            entry = fields.setdefault(name, {"removed": [], "added": []})
+            key = (_field_name(uid, subject, predicate, obj, graph), str(predicate))
+            entry = changes.setdefault(key, {"removed": [], "added": []})
             entry[side].append(str(obj))
     return [
-        {"field": name, "removed": sides["removed"], "added": sides["added"]}
-        for name, sides in sorted(fields.items(), key=lambda item: (item[0] or "",))
+        {
+            "field": name,
+            "predicate": predicate,
+            "removed": sides["removed"],
+            "added": sides["added"],
+        }
+        for (name, predicate), sides in sorted(
+            changes.items(), key=lambda item: (item[0][0] or "", item[0][1])
+        )
     ]
 
 

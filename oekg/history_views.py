@@ -27,7 +27,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from factsheet.models import API_ERA, OEKG_Modifications
-from oekg.api_views import (
+from oekg.api_support import (
     ScenarioBundleThrottle,
     ScenarioBundleUserThrottle,
     bundle_exists,

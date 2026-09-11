@@ -419,7 +419,15 @@ class ChangedFieldsTest(SimpleTestCase):
         changes = changed_fields("u1", removed, added)
 
         self.assertEqual(
-            changes, [{"field": "abstract", "removed": [], "added": ["neu"]}]
+            changes,
+            [
+                {
+                    "field": "abstract",
+                    "predicate": str(DC.abstract),
+                    "removed": [],
+                    "added": ["neu"],
+                }
+            ],
         )
 
     def test_both_sides_of_one_field_are_one_change(self):
@@ -464,6 +472,16 @@ class ChangedFieldsTest(SimpleTestCase):
         changes = changed_fields("u1", Graph(), added)
 
         self.assertEqual(changes[0]["field"], None)
+
+    def test_an_unattributed_change_still_says_what_it_was_about(self):
+        # A bare list of values with no predicate would be barely better than
+        # dropping them.
+        added = Graph()
+        added.add((URIRef("https://example.org/c1"), RDFS.label, Literal("A contact")))
+
+        changes = changed_fields("u1", Graph(), added)
+
+        self.assertEqual(changes[0]["predicate"], str(RDFS.label))
 
     def test_nothing_changed_renders_as_nothing(self):
         self.assertEqual(changed_fields("u1", Graph(), Graph()), [])
