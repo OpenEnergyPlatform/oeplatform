@@ -16,6 +16,7 @@ from oekg.graph_store import (
     GraphStore,
     GraphStoreUnavailable,
     GraphUpdateRejected,
+    NothingToModifyError,
     UnsafeClearError,
 )
 from oekg.tests import OekgGraphTestCase
@@ -269,3 +270,77 @@ class OneRequestIsOneTransactionTest(OekgGraphTestCase):
 
         for subject in subjects:
             self.assertTrue(self.wrote(subject))
+
+
+class GuardedModificationTest(OekgGraphTestCase):
+    """A compare-and-set: the guard is inside the write, not in front of it."""
+
+    def label_of(self, subject):
+        rows = self.store.select(
+            "SELECT ?label WHERE { <%s> <%s> ?label }" % (subject, RDFS.label)
+        )
+        return [row["label"] for row in rows]
+
+    def test_it_applies_when_the_guard_matches(self):
+        subject = EX + str(uuid.uuid4())
+        self.store.insert(labelled(subject, "before"))
+
+        self.store.update(
+            self.store.guarded_modification(
+                "<%s> <%s> %s" % (subject, RDFS.label, Literal("before").n3()),
+                delete=labelled(subject, "before"),
+                insert=labelled(subject, "after"),
+            )
+        )
+
+        self.assertEqual(self.label_of(subject), ["after"])
+
+    def test_it_applies_nothing_when_the_guard_does_not_match(self):
+        subject = EX + str(uuid.uuid4())
+        self.store.insert(labelled(subject, "before"))
+
+        self.store.update(
+            self.store.guarded_modification(
+                "<%s> <%s> %s" % (subject, RDFS.label, Literal("stale").n3()),
+                delete=labelled(subject, "before"),
+                insert=labelled(subject, "after"),
+            )
+        )
+
+        self.assertEqual(self.label_of(subject), ["before"])
+
+    def test_a_guard_that_does_not_match_is_still_a_success(self):
+        # The reason every caller has to read back: the store cannot tell us
+        # whether the guard held, and it does not consider the difference an
+        # error.
+        subject = EX + str(uuid.uuid4())
+
+        self.store.update(
+            self.store.guarded_modification(
+                "<%s> <%s> %s" % (subject, RDFS.label, Literal("absent").n3()),
+                insert=labelled(subject, "should not land"),
+            )
+        )
+
+        self.assertEqual(self.label_of(subject), [])
+
+    def test_it_writes_only_this_store_s_graph(self):
+        # Scoped by WITH. Unscoped, the same operation would write the default
+        # graph -- in production, the graph the platform serves.
+        subject = EX + str(uuid.uuid4())
+
+        self.store.update(
+            self.store.guarded_modification(
+                "FILTER(true)", insert=labelled(subject, "isolated")
+            )
+        )
+
+        default_graph = GraphStore.from_settings(graph=None)
+        self.assertFalse(default_graph.ask("ASK { <%s> ?p ?o }" % subject))
+        self.assertEqual(self.label_of(subject), ["isolated"])
+
+    def test_a_modification_with_nothing_to_change_is_refused(self):
+        # Such a request is valid SPARQL the store answers 200 to, which is the
+        # one answer a guarded write must never produce without having written.
+        with self.assertRaises(NothingToModifyError):
+            self.store.guarded_modification("FILTER(true)")

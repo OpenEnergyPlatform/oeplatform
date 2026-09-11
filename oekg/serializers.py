@@ -99,7 +99,12 @@ class ScenarioBundleSerializer(ClosedSerializer):
     """The closed bundle field set -- these and nothing else."""
 
     label = serializers.CharField()
-    acronym = serializers.CharField()
+    # The trim is stated rather than inherited, because uniqueness depends on
+    # it: the value the uniqueness check compares and the value the write
+    # stores are this one, so normalising here normalises both at once. The
+    # user interface's check normalises one side only, which is exactly why it
+    # misses duplicates.
+    acronym = serializers.CharField(trim_whitespace=True)
     # Nullable for the same reason: an absent abstract reads as null, and the
     # round trip a client (and, later, replace) depends on has to survive it.
     abstract = serializers.CharField(required=False, allow_blank=True, allow_null=True)

@@ -6,12 +6,10 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 from unittest.mock import patch
 
 from django.test import SimpleTestCase
-from django.urls import reverse
 from rdflib import RDF, RDFS, Graph, Literal
 from rdflib.namespace import SH
 
 from factsheet.models import ScenarioBundleAccessControl
-from login.models import myuser
 from oekg.bundles import (
     BUNDLE_CLASS,
     BUNDLE_FIELDS,
@@ -28,39 +26,8 @@ from oekg.bundles import (
 from oekg.graph_store import GraphStore
 from oekg.serializers import READ_ONLY_CONTAINER, ScenarioBundleSerializer
 from oekg.shape import enumeration, shape_graph
-from oekg.tests import OekgGraphAPITestCase, RequiresShapeArtifactsMixin
-
-# Real picks from the shape's own sh:in lists -- the four the shape requires.
-VALID_PAYLOAD = {
-    "label": "A scenario bundle written by the API",
-    "acronym": "API-TEST",
-    "abstract": "Created by the test suite.",
-    "descriptors": [str(OEO.OEO_00000143)],
-    "sector_divisions": [str(OEO.OEO_00000368)],
-    "sectors": [str(OEO.OEO_00000367)],
-    "technologies": [str(OEO.OEO_00000407)],
-}
-
-
-class BundleApiTestCase(OekgGraphAPITestCase):
-    def setUp(self):
-        super().setUp()
-        self.user = myuser.objects.create_user(
-            name="bundle-author", email="author@example.org", affiliation=""
-        )
-        self.collection_url = reverse("api:scenario-bundles")
-
-    def create(self, payload=None, authenticate=True):
-        if authenticate:
-            self.client.force_login(self.user)
-        return self.client.post(
-            self.collection_url,
-            data=payload if payload is not None else VALID_PAYLOAD,
-            content_type="application/json",
-        )
-
-    def detail_url(self, uid):
-        return reverse("api:scenario-bundle", kwargs={"uid": uid})
+from oekg.tests import RequiresShapeArtifactsMixin
+from oekg.tests.bundle_fixtures import VALID_PAYLOAD, BundleApiTestCase
 
 
 class CreateBundleTest(BundleApiTestCase):
