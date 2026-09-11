@@ -11,6 +11,12 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- The scenario-bundle changelog page under Factsheets now also lists changes
+  made through the REST API. Those rows show who changed what and when, but no
+  side-by-side diff: the API records what changed in a newer form that this page
+  does not read yet
+  [(#2441)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2441)
+
 - The dev compose stack names the graph store host explicitly
   (`RDF_DATABASE_HOST: fuseki`) and waits for that service. Previously it relied
   on the local `securitysettings.py`, whose shipped default resolves the host to
@@ -105,6 +111,17 @@ SPDX-License-Identifier: CC0-1.0
 - Creating a bundle now binds the acronym uniqueness check inside the write, so
   two simultaneous creates can no longer both take an acronym both of them found
   free [(#2438)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2438)
+
+- Every write to a scenario bundle through the REST API now leaves a record, and
+  `GET /api/v0/scenario-bundles/<uid>/history/` reads it back. Previously only
+  the browser's edit path recorded anything, so creates and API writes were
+  silent. An entry says which operation it was, who made it, when, which version
+  it produced, and which triples changed; the reader renders those as field
+  names and returns the raw triples on `?expand=triples`. The history is public
+  but per bundle and paginated, and names the actor by username rather than by
+  internal id. Entries written before this release are kept exactly as they are
+  and read as coming from before the API
+  [(#2441)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2441)
 
 - New management command `repair_factsheet_tags` repairs the factsheets the old
   tag editor damaged - on production 23 of 339 carry a copy of the whole tag

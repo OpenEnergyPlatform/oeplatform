@@ -73,6 +73,7 @@ from api.views import (
     usrprop_api_view,
 )
 from oekg.api_views import ScenarioBundleAPIView, ScenarioBundleCollectionAPIView
+from oekg.history_views import ScenarioBundleHistoryAPIView
 
 app_name = "api"
 
@@ -311,6 +312,11 @@ urlpatterns_v0 = [
         "scenario-bundles/<uid>/",
         ScenarioBundleAPIView.as_view(),
         name="scenario-bundle",
+    ),
+    path(
+        "scenario-bundles/<uid>/history/",
+        ScenarioBundleHistoryAPIView.as_view(),
+        name="scenario-bundle-history",
     ),
     path(
         "datasets/",
