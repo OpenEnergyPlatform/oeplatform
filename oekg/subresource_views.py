@@ -15,6 +15,9 @@ one:
   a lost history entry is named beside the success it qualifies rather than
   instead of it.
 - **No collection has an unbounded mode.** These are public endpoints.
+- **A delete answers with a body, not a `204`.** The typed containment walk can
+  decide that a node something else still cites is unlinked rather than
+  deleted, and no status code can say that.
 
 `part_views` builds the two addressable *parts* of a bundle on top of this;
 `dataset_link_views` builds the links that hang off a scenario, which are not
@@ -67,6 +70,28 @@ class SubResourceViewMixin:
         response = Response(body, status=code)
         response["ETag"] = write.version.etag
         return response
+
+    def removed(self, removal, write: BundleWrite, **meta) -> Response:
+        """What a delete came to, rather than a bare `204`.
+
+        `204` would be the obvious answer and it is the wrong one here: the
+        guard clause can decide that a node something else still cites is
+        unlinked rather than deleted, and that outcome is not inferable from a
+        status code. A body is the only place it can be said.
+
+        Only the **downgraded** nodes are listed as unlinked. Every delete also
+        unlinks the shared nodes its subject pointed at -- regions, authors,
+        contacts, ontology terms -- and listing those would bury the one line
+        that is news under the rule that always applies.
+        """
+        return self.represented(
+            {
+                "deleted": list(removal.deleted),
+                "unlinked": list(removal.unlinked),
+                READ_ONLY_CONTAINER: {"bundle": write.uid, **meta},
+            },
+            write,
+        )
 
     def paginated(self, request, bodies: list, write: BundleWrite) -> Response:
         """A collection, paginated, carrying the bundle's entity tag.

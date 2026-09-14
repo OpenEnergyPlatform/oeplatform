@@ -115,6 +115,7 @@ def guarded_operation(
     token: str,
     delete: Optional[Graph] = None,
     insert: Optional[Graph] = None,
+    condition: str = "",
 ) -> str:
     """One update operation that applies ``delete``/``insert`` at ``version``.
 
@@ -122,11 +123,16 @@ def guarded_operation(
     cannot come apart: one request is one transaction, and the guard is the
     request's own ``WHERE``.
 
-    The guard is the version and the bundle's existence, and nothing else. A
-    condition the version cannot express -- uniqueness, say, where two bundles
-    each satisfy their own version guard while claiming the same value -- needs
-    to be bound into this ``WHERE`` too, by the caller that has one. None does
-    yet; ``GraphStore.guarded_modification`` takes the pattern directly.
+    The guard is the version and the bundle's existence, plus whatever
+    ``condition`` a caller adds. A condition the version cannot express has to
+    be bound in here, because the version only moves when *this* bundle is
+    written: a delete asserting that nothing outside still cites the nodes it
+    is removing is answering a question about the rest of the graph, and no
+    amount of versioning this bundle would notice that changing.
+
+    The cost of a second condition is that a failed guard no longer has one
+    cause. That is why the refusal says "read it again and retry" rather than
+    naming which half fired -- which is the right advice for either.
     """
     node = version_iri(uid)
     bundle = bundle_iri(uid)
@@ -169,6 +175,8 @@ def guarded_operation(
             to_delete.add((node, WRITE_TOKEN, Literal(version.token)))
 
     to_insert += version_triples(uid, version.number + 1, token)
+    if condition:
+        where = f"{where} {condition}"
     return store.guarded_modification(where, delete=to_delete, insert=to_insert)
 
 

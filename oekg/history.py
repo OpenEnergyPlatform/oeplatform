@@ -46,10 +46,11 @@ logger = logging.getLogger("oeplatform.oekg_history")
 
 CREATE = "POST"
 UPDATE = "PATCH"
-# Deletes join this list with the slice that implements them, not before: a
-# verb named here but never written would say the history records something it
-# does not.
-VERBS = (CREATE, UPDATE)
+# A partial delete records; a whole-bundle delete deliberately will not carry a
+# payload when it arrives. Both are this verb -- what differs is what the row
+# holds, not what happened.
+DELETE = "DELETE"
+VERBS = (CREATE, UPDATE, DELETE)
 
 
 def record_write(

@@ -169,6 +169,20 @@ SPDX-License-Identifier: CC0-1.0
   writes relations the canonical shape does not validate and no identifier at
   all [(#2452)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2452)
 
+- A scenario factsheet, a study report or a dataset link can now be removed
+  through the REST API: `DELETE` on its own URL, carrying the bundle's version
+  as `If-Match` and nothing else - the retyped acronym guards a whole-bundle
+  delete and nothing smaller. What goes with it is bounded by type: the part
+  itself and, recursively, only the parts nested inside it, so a scenario's
+  dataset links go with the scenario rather than being left behind unreachable.
+  Everything else it pointed at - regions, authors, contacts, organisations,
+  funders, cited documents, models, frameworks and every picked ontology term -
+  is unlinked and never deleted, because other bundles cite those same nodes and
+  removing one would make their records invalid. Before anything is removed the
+  server checks whether something outside this bundle still points at it; if so
+  the node is kept and only unlinked, and the response says which. Every delete
+  is recorded in the bundle's history with the triples it removed
+
 - Changing a scenario bundle through the REST API is now judged by what the
   change adds, not by whether the whole bundle is perfect. Bundles written
   before the API exists often miss fields the shape requires - a sector, a
