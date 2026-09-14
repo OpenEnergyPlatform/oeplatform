@@ -21,8 +21,9 @@ SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
+from collections import Counter
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from pyshacl import validate as pyshacl_validate
 from rdflib import RDF, Graph
@@ -68,6 +69,30 @@ def validate_post_state(post_state: Graph) -> List[ShapeViolation]:
     # Sorted so the same invalid payload always reports in the same order:
     # pyshacl walks the report graph, whose iteration order is not stable.
     return sorted(violations, key=lambda v: (v.path or "", v.message))
+
+
+def introduced_violations(before: Graph, after: Graph) -> Tuple[List, int]:
+    """What ``after`` violates that ``before`` did not, and how many it inherited.
+
+    A write is judged by what it **adds**. The alternative -- the post-state must
+    conform, full stop -- sounds stricter and is, but it makes an existing defect
+    unfixable through this API: the fields most often missing are the ones a
+    person would supply by patching, and the patch would be refused for the very
+    thing it came to fix. The promise that matters survives either way, because
+    nothing invalid is written *by this API*.
+
+    Compared as a **multiset**, so a bundle already missing one required field
+    may not come out missing two. And by violation identity -- message, focus
+    node, path and value together -- so swapping one violation for another
+    counts as introducing one, which comparing counts alone would miss.
+
+    Both graphs must be assembled the same way. Hand this the pruned pre-state,
+    not the raw read, or the two differ by how they were built rather than by
+    what the write did, and that shows up as violations nobody introduced.
+    """
+    inherited = Counter(validate_post_state(before))
+    arrived = Counter(validate_post_state(after))
+    return list((arrived - inherited).elements()), sum(inherited.values())
 
 
 def _violation(report: Graph, result) -> ShapeViolation:

@@ -47,12 +47,10 @@ from rdflib import Graph, Literal
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from factsheet.models import ScenarioBundleAccessControl
 from oekg.api_support import (
-    ScenarioBundleThrottle,
-    ScenarioBundleUserThrottle,
+    OekgAPIView,
     is_minted_identifier,
     no_such_bundle,
     shape_unavailable,
@@ -95,11 +93,10 @@ from oekg.writes import open_bundle, refuse_renames
 logger = logging.getLogger("oeplatform")
 
 
-class ScenarioBundleCollectionAPIView(APIView):
+class ScenarioBundleCollectionAPIView(OekgAPIView):
     """`POST` creates a scenario bundle."""
 
     permission_classes = [IsAuthenticated]
-    throttle_classes = [ScenarioBundleThrottle, ScenarioBundleUserThrottle]
 
     def post(self, request):
         serializer = ScenarioBundleCreateSerializer(data=request.data)
@@ -198,10 +195,8 @@ class ScenarioBundleCollectionAPIView(APIView):
         return response
 
 
-class ScenarioBundleAPIView(APIView):
+class ScenarioBundleAPIView(OekgAPIView):
     """`GET` returns one scenario bundle, publicly. `PATCH` changes a field."""
-
-    throttle_classes = [ScenarioBundleThrottle, ScenarioBundleUserThrottle]
 
     def get_permissions(self):
         # The safe methods are named and everything else is closed, rather than

@@ -30,11 +30,9 @@ from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from oekg.api_support import (
-    ScenarioBundleThrottle,
-    ScenarioBundleUserThrottle,
+    OekgAPIView,
     shape_unavailable,
     store_unavailable,
 )
@@ -66,10 +64,8 @@ class ScenarioPagination(PageNumberPagination):
     max_page_size = 200
 
 
-class ScenarioCollectionAPIView(APIView):
+class ScenarioCollectionAPIView(OekgAPIView):
     """`GET` lists a bundle's scenarios. `POST` adds one."""
-
-    throttle_classes = [ScenarioBundleThrottle, ScenarioBundleUserThrottle]
 
     def get_permissions(self):
         if self.request.method in ("GET", "HEAD", "OPTIONS"):
@@ -114,10 +110,8 @@ class ScenarioCollectionAPIView(APIView):
         return response
 
 
-class ScenarioAPIView(APIView):
+class ScenarioAPIView(OekgAPIView):
     """`GET` reads one scenario. `PATCH` changes the keys it names."""
-
-    throttle_classes = [ScenarioBundleThrottle, ScenarioBundleUserThrottle]
 
     def get_permissions(self):
         if self.request.method in ("GET", "HEAD", "OPTIONS"):

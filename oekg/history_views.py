@@ -24,12 +24,10 @@ from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from factsheet.models import API_ERA, OEKG_Modifications
 from oekg.api_support import (
-    ScenarioBundleThrottle,
-    ScenarioBundleUserThrottle,
+    OekgAPIView,
     bundle_exists,
     no_such_bundle,
     store_unavailable,
@@ -48,11 +46,10 @@ class HistoryPagination(PageNumberPagination):
     max_page_size = 100
 
 
-class ScenarioBundleHistoryAPIView(APIView):
+class ScenarioBundleHistoryAPIView(OekgAPIView):
     """`GET` returns one bundle's change history."""
 
     permission_classes = [AllowAny]
-    throttle_classes = [ScenarioBundleThrottle, ScenarioBundleUserThrottle]
 
     def get(self, request, uid):
         expand = request.query_params.get("expand")

@@ -21,11 +21,34 @@ import uuid
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
+from rest_framework.views import APIView
 
 from oekg.bundles import BUNDLE_CLASS, bundle_iri
 from oekg.graph_store import GraphStore
 
 logger = logging.getLogger("oeplatform")
+
+
+class Refused(Exception):
+    """A refusal, raised where it is decided and returned as it stands.
+
+    It carries a whole ``Response`` rather than a detail, and `OekgAPIView`
+    hands that back untouched. Both halves of that are deliberate:
+
+    - **Raised, not returned.** A helper that returned either a value or a
+      refusal would make every call site test which it got, and one forgotten
+      test is a refusal silently ignored.
+    - **A Response, not an ``APIException``.** The obvious alternative is to
+      subclass ``APIException`` and let the framework render it -- but the
+      framework rewrites every scalar in an error body through
+      ``ErrorDetail``, so ``None`` comes out as the string ``"None"`` and a
+      count as a string. This API's refusals carry structured data with
+      nullable fields, so that would corrupt them. Measured, not assumed.
+    """
+
+    def __init__(self, response: Response):
+        super().__init__(getattr(response, "status_code", "refused"))
+        self.response = response
 
 
 class ScenarioBundleThrottle(AnonRateThrottle):
@@ -36,6 +59,22 @@ class ScenarioBundleThrottle(AnonRateThrottle):
 
 class ScenarioBundleUserThrottle(UserRateThrottle):
     scope = "oekg_bundles_user"
+
+
+class OekgAPIView(APIView):
+    """The base every OEKG endpoint shares: one ceiling, one way to refuse.
+
+    Handling `Refused` here rather than in each view means a new endpoint
+    cannot forget to, and a refusal decided three calls deep still reaches the
+    client as the response it was written as.
+    """
+
+    throttle_classes = [ScenarioBundleThrottle, ScenarioBundleUserThrottle]
+
+    def handle_exception(self, exc):
+        if isinstance(exc, Refused):
+            return exc.response
+        return super().handle_exception(exc)
 
 
 def is_minted_identifier(uid: str) -> bool:
