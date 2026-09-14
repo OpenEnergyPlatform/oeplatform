@@ -37,7 +37,8 @@ from rest_framework import status
 from rest_framework.response import Response
 
 from oekg.api_support import Refused, bundle_exists
-from oekg.bundles import BUNDLE_CLASS, NODE, bundle_subgraph
+from oekg.bundles import BUNDLE_CLASS, bundle_subgraph
+from oekg.fields import NODE
 from oekg.graph_store import GraphStore
 from oekg.history import record_write
 from oekg.permissions import may_write_bundle

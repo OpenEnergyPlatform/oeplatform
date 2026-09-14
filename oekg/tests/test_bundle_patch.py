@@ -26,11 +26,13 @@ from login.models import myuser
 from oekg.bundles import (
     BUNDLE_CLASS,
     BUNDLE_FIELDS,
+    build_bundle_graph,
+    bundle_iri,
+)
+from oekg.fields import (
     DC,
     HAS_PART,
     OEO,
-    build_bundle_graph,
-    bundle_iri,
     field_named,
     field_triples,
     linked_field_triples,

@@ -13,16 +13,11 @@ from factsheet.models import ScenarioBundleAccessControl
 from oekg.bundles import (
     BUNDLE_CLASS,
     BUNDLE_FIELDS,
-    DC,
-    ENUM,
-    LITERAL,
-    NODE,
-    OEO,
-    PART,
     build_bundle_graph,
     bundle_iri,
     bundle_payload,
 )
+from oekg.fields import DC, ENUM, LITERAL, NODE, OEO, PART
 from oekg.graph_store import GraphStore
 from oekg.serializers import READ_ONLY_CONTAINER, ScenarioBundleSerializer
 from oekg.shape import enumeration, shape_graph

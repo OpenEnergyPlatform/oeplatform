@@ -77,8 +77,13 @@ from api.views import (
     usrprop_api_view,
 )
 from oekg.api_views import ScenarioBundleAPIView, ScenarioBundleCollectionAPIView
+from oekg.dataset_link_views import DatasetLinkAPIView, DatasetLinkCollectionAPIView
 from oekg.history_views import ScenarioBundleHistoryAPIView
 from oekg.scenario_views import ScenarioAPIView, ScenarioCollectionAPIView
+from oekg.study_report_views import (
+    StudyReportAPIView,
+    StudyReportCollectionAPIView,
+)
 
 app_name = "api"
 
@@ -335,17 +340,45 @@ urlpatterns_v0 = [
         ScenarioBundleHistoryAPIView.as_view(),
         name="scenario-bundle-history",
     ),
-    # Scenario factsheets are sub-resources because the shape gives them their
-    # own has-uuid. Plural, like the bundle collection above it.
+    # Scenario factsheets and study reports are sub-resources because the shape
+    # gives them their own has-uuid. Plural, like the bundle collection above
+    # them. `pid` is the part a URL addresses -- one name, because one
+    # implementation serves both; where a scenario is the PARENT of what a URL
+    # addresses, as it is for the dataset links below, it keeps its own `sid`.
     path(
         "scenario-bundles/<uid>/scenarios/",
         ScenarioCollectionAPIView.as_view(),
         name="scenario-bundle-scenarios",
     ),
     path(
-        "scenario-bundles/<uid>/scenarios/<sid>/",
+        "scenario-bundles/<uid>/scenarios/<pid>/",
         ScenarioAPIView.as_view(),
         name="scenario-bundle-scenario",
+    ),
+    path(
+        "scenario-bundles/<uid>/study-reports/",
+        StudyReportCollectionAPIView.as_view(),
+        name="scenario-bundle-study-reports",
+    ),
+    path(
+        "scenario-bundles/<uid>/study-reports/<pid>/",
+        StudyReportAPIView.as_view(),
+        name="scenario-bundle-study-report",
+    ),
+    # An OEKG input/output dataset: the link from a scenario to data held on
+    # this platform. NOT the OEP Dataset catalogue entity, and NOT the tables
+    # of the scenario topic -- the nested path is what disambiguates the three.
+    # Add-and-remove only, so no `PATCH`: every field is derived from the
+    # link's type, target and name.
+    path(
+        "scenario-bundles/<uid>/scenarios/<sid>/datasets/",
+        DatasetLinkCollectionAPIView.as_view(),
+        name="scenario-bundle-dataset-links",
+    ),
+    path(
+        "scenario-bundles/<uid>/scenarios/<sid>/datasets/<did>/",
+        DatasetLinkAPIView.as_view(),
+        name="scenario-bundle-dataset-link",
     ),
     path(
         "datasets/",

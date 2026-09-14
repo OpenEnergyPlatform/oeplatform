@@ -24,7 +24,9 @@ from rdflib.namespace import SH
 
 from factsheet.models import OEKG_Modifications, ScenarioBundleAccessControl
 from login.models import myuser
-from oekg.bundles import HAS_UUID, OEO, SCENARIO_CLASS, SCENARIO_FIELDS, bundle_iri
+from oekg.bundles import SCENARIO_CLASS, SCENARIO_FIELDS, bundle_iri
+from oekg.dataset_links import DIRECTIONS
+from oekg.fields import HAS_UUID, OEO
 from oekg.history import CREATE, UPDATE
 from oekg.serializers import READ_ONLY_CONTAINER, ScenarioSerializer
 from oekg.shape import shape_graph
@@ -44,7 +46,7 @@ class ScenarioTestCase(BundleApiTestCase):
         return reverse("api:scenario-bundle-scenarios", kwargs={"uid": uid})
 
     def scenario_url(self, uid, sid):
-        return reverse("api:scenario-bundle-scenario", kwargs={"uid": uid, "sid": sid})
+        return reverse("api:scenario-bundle-scenario", kwargs={"uid": uid, "pid": sid})
 
     def add_scenario(self, uid, etag, payload=None, as_user=None):
         self.client.force_login(as_user or self.user)
@@ -606,15 +608,6 @@ class ScenarioShapeConformanceTest(RequiresShapeArtifactsMixin, SimpleTestCase):
     quietly ignoring it.
     """
 
-    # Two predicates the shape validates that this slice deliberately does not
-    # build: dataset links are the next slice's resource, with their own URLs.
-    # Named here rather than silently passed over, so that slice deletes this
-    # list instead of discovering the gap.
-    DEFERRED = {
-        str(OEO.OEO_00020437),  # has information input -> input dataset
-        str(OEO.OEO_00020436),  # has information output -> output dataset
-    }
-
     def test_every_scenario_property_in_the_shape_is_covered(self):
         shape = shape_graph()
         node = shape.value(predicate=SH.targetClass, object=SCENARIO_CLASS)
@@ -628,9 +621,13 @@ class ScenarioShapeConformanceTest(RequiresShapeArtifactsMixin, SimpleTestCase):
         # The uuid is the server's to mint, so it is an identity rather than a
         # field -- covered by the builder, absent from the serializer.
         covered.add(str(HAS_UUID))
+        # A scenario's input and output datasets are not fields of it: they are
+        # sub-resources with their own URLs, so they are covered by the dataset
+        # link builder rather than by this table.
+        covered |= {str(direction.predicate) for direction in DIRECTIONS}
 
         self.assertTrue(paths, "the shape declares no scenario properties")
-        self.assertEqual(paths - covered - self.DEFERRED, set())
+        self.assertEqual(paths - covered, set())
         self.assertEqual(covered - paths, set())
 
     def test_the_serializer_and_the_builder_agree(self):

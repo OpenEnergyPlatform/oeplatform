@@ -44,7 +44,8 @@ from typing import Optional
 
 from rdflib import Graph, Literal, URIRef
 
-from oekg.bundles import BUNDLE_CLASS, OEKG, bundle_iri
+from oekg.bundles import BUNDLE_CLASS, bundle_iri
+from oekg.fields import OEKG
 from oekg.graph_store import GraphStore
 
 VERSION = OEKG.version

@@ -33,7 +33,14 @@ from django.db import transaction
 from rdflib import RDF, Graph, URIRef
 
 from factsheet.models import EMPTY_LEGACY_PAYLOAD, OEKG_Modifications
-from oekg.bundles import BUNDLE_CLASS, BUNDLE_FIELDS, PART, bundle_iri
+from oekg.bundles import (
+    BUNDLE_CLASS,
+    FIELDS_BY_CLASS,
+    PART_BY_CLASS,
+    bundle_iri,
+    part_iri,
+)
+from oekg.fields import PART
 
 logger = logging.getLogger("oeplatform.oekg_history")
 
@@ -113,11 +120,26 @@ def record_write(
     return True
 
 
-def changed_fields(uid: str, removed: Graph, added: Graph) -> list:
+def changed_fields(
+    uid: str,
+    removed: Graph,
+    added: Graph,
+    resource_type=None,
+    resource_uuid: Optional[str] = None,
+) -> list:
     """The diff, in the vocabulary a client writes in.
 
     Computed on every read rather than stored, so it cannot drift from the
     triples it describes and a shape change never re-interprets an old row.
+
+    ``resource_type`` and ``resource_uuid`` are the class and identifier the
+    write was about, both of which the entry already records. Together they say
+    **which** vocabulary to render in and **which** subject in the diff is the
+    thing being described: a change to a study report is named in the study
+    report's field names, not in the bundle's, and the two tables share `label`
+    while agreeing about almost nothing else. An entry naming no class is read
+    as a bundle write, which is what every row written before sub-resources
+    existed is.
 
     A triple this cannot attribute to a field -- the type and label a minted
     contact brings with it, say -- is reported with a ``None`` field rather
@@ -128,10 +150,16 @@ def changed_fields(uid: str, removed: Graph, added: Graph) -> list:
     unattributed entry would be a list of bare values with nothing saying what
     they were values of, which is only marginally better than dropping them.
     """
+    node_class = URIRef(resource_type) if resource_type else BUNDLE_CLASS
+    fields = FIELDS_BY_CLASS.get(node_class, ())
+    subject_of = _subjects(uid, node_class, resource_uuid)
     changes = {}
     for side, graph in (("removed", removed), ("added", added)):
         for subject, predicate, obj in graph:
-            key = (_field_name(uid, subject, predicate, obj, graph), str(predicate))
+            key = (
+                _field_name(subject, predicate, obj, graph, subject_of, fields),
+                str(predicate),
+            )
             entry = changes.setdefault(key, {"removed": [], "added": []})
             entry[side].append(str(obj))
     return [
@@ -147,25 +175,55 @@ def changed_fields(uid: str, removed: Graph, added: Graph) -> list:
     ]
 
 
-def _field_name(uid, subject, predicate, obj, graph) -> Optional[str]:
-    """Which bundle field a triple belongs to, if any.
+def _field_name(subject, predicate, obj, graph, subject_of, fields):
+    """Which field of the written resource a triple belongs to, if any.
 
-    Two predicates in the field table are shared between fields -- frameworks
-    and models both hang off has-part -- so the object's type decides. An added
-    part carries its type in the same diff; a removed one does not, because a
-    patch unlinks and never deletes, and then the field is honestly unknown.
+    Two predicates in the bundle's table are shared between fields --
+    frameworks and models both hang off has-part -- so the object's type
+    decides. An added part carries its type in the same diff; a removed one
+    does not, because a patch unlinks and never deletes, and then the field is
+    honestly unknown.
     """
-    if subject != bundle_iri(uid):
+    if not fields or not subject_of(subject, graph):
         return None
-    candidates = [
-        field for field in BUNDLE_FIELDS if field.predicate == URIRef(predicate)
-    ]
+    candidates = [field for field in fields if field.predicate == URIRef(predicate)]
     if len(candidates) == 1:
         return candidates[0].name
     for field in candidates:
         if field.kind == PART and (obj, RDF.type, field.node_class) in graph:
             return field.name
     return None
+
+
+def _subjects(uid: str, node_class, resource_uuid: Optional[str]):
+    """A test for whether a triple is the written resource's own.
+
+    It has to be a test and not a guess, because `label` is a field name on the
+    bundle, on a scenario and on a study report, while a minted contact, region
+    or author carries an `rdfs:label` of its own into the very same diff.
+    Attributing one of those would say a report was renamed when an author was
+    added.
+
+    So a subject counts only when it is positively identified, by one of three
+    exact routes, and never by elimination:
+
+    - the bundle is the bundle's IRI;
+    - a part a write **created** carries its own `rdf:type` in the same diff;
+    - a part a write **changed** brings no type with it, but the entry records
+      which part it was, and this API mints a part's IRI from that identifier.
+
+    What that last route does not reach is a patch of a part the user interface
+    wrote, whose IRI this API did not choose. Those render as unattributed,
+    which is what the history has always done when it cannot know.
+    """
+    if node_class == BUNDLE_CLASS:
+        return lambda subject, graph: subject == bundle_iri(uid)
+
+    part = PART_BY_CLASS.get(node_class)
+    minted = part_iri(part, resource_uuid) if part and resource_uuid else None
+    return lambda subject, graph: (
+        subject == minted or (subject, RDF.type, node_class) in graph
+    )
 
 
 def _as_json(graph: Optional[Graph]):
