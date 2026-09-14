@@ -28,8 +28,6 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 from django.urls import reverse
 from rdflib import Graph
 from rest_framework import status
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from oekg.api_support import OekgAPIView, shape_unavailable, store_unavailable
@@ -38,55 +36,33 @@ from oekg.bundles import (
     build_part_graph,
     bundle_iri,
     find_part,
-    mint_part_uid,
     part_nodes,
     part_payload,
     part_uid,
 )
-from oekg.fields import referenced_node_iris, resource_delta
+from oekg.fields import mint_identifier, referenced_node_iris, resource_delta
 from oekg.graph_store import GraphStoreError
 from oekg.history import CREATE, UPDATE
 from oekg.serializers import READ_ONLY_CONTAINER
 from oekg.shape import ShapeUnavailable
+from oekg.subresource_views import SubResourceViewMixin
 from oekg.writes import BundleWrite, open_bundle, refuse_renames
 
 
-class SubResourcePagination(PageNumberPagination):
-    """A ceiling, not a default: no public collection has an unbounded mode."""
-
-    page_size = 50
-    page_size_query_param = "page_size"
-    max_page_size = 200
-
-
-class BundlePartViewMixin:
-    """What both endpoints of a part need: which part, and who may write it."""
+class BundlePartViewMixin(SubResourceViewMixin):
+    """What both endpoints of a part need: which part it is."""
 
     part: BundlePart = None
     serializer_class = None
 
-    def get_permissions(self):
-        if self.request.method in ("GET", "HEAD", "OPTIONS"):
-            return [AllowAny()]
-        return [IsAuthenticated()]
-
-    def represented(
+    def part_response(
         self, write: BundleWrite, pid: str, code: int = status.HTTP_200_OK
     ) -> Response:
-        """One part, carrying the **bundle's** entity tag.
-
-        Its own, because a sub-resource write bumps the bundle's version and
-        the next write has to send that back -- handing out anything else here
-        would guarantee a `412` on the very next call.
-        """
-        state = write.post_state if write.post_state is not None else write.pre_state
+        state = self.state_of(write)
         node = find_part(state, write.uid, self.part, pid)
-        body = part_body(state, node, write.uid, self.part)
-        if not write.history_recorded:
-            body[READ_ONLY_CONTAINER]["history_recorded"] = False
-        response = Response(body, status=code)
-        response["ETag"] = write.version.etag
-        return response
+        return self.represented(
+            part_body(state, node, write.uid, self.part), write, code
+        )
 
     def not_found(self, pid: str) -> Response:
         return Response(
@@ -103,13 +79,15 @@ class BundlePartCollectionAPIView(BundlePartViewMixin, OekgAPIView):
             write = open_bundle(request, uid)
         except GraphStoreError as error:
             return store_unavailable(error, "read")
-        return self._listing(request, write)
+        return self.paginated(
+            request, part_bodies(write.pre_state, write.uid, self.part), write
+        )
 
     def post(self, request, uid):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        pid = mint_part_uid()
+        pid = mint_identifier()
         try:
             write = open_bundle(request, uid)
             write.require_write(request)
@@ -135,27 +113,10 @@ class BundlePartCollectionAPIView(BundlePartViewMixin, OekgAPIView):
         except GraphStoreError as error:
             return store_unavailable(error, "written to")
 
-        response = self.represented(write, pid, status.HTTP_201_CREATED)
+        response = self.part_response(write, pid, status.HTTP_201_CREATED)
         response["Location"] = reverse(
             self.part.detail_route, kwargs={"uid": uid, "pid": pid}
         )
-        return response
-
-    def _listing(self, request, write: BundleWrite) -> Response:
-        """The bundle's parts of this kind, paginated.
-
-        Paginated even though a bundle's parts are bounded by the bundle: this
-        is a public collection, and "no unbounded mode" is the rule for all of
-        them. The nested form inside a bundle read is the exception, and it is
-        one on purpose -- that one has to be complete, because a client sends
-        it back.
-        """
-        paginator = SubResourcePagination()
-        page = paginator.paginate_queryset(
-            part_bodies(write.pre_state, write.uid, self.part), request, view=None
-        )
-        response = paginator.get_paginated_response(page)
-        response["ETag"] = write.version.etag
         return response
 
 
@@ -169,7 +130,7 @@ class BundlePartAPIView(BundlePartViewMixin, OekgAPIView):
             return store_unavailable(error, "read")
         if find_part(write.pre_state, uid, self.part, pid) is None:
             return self.not_found(pid)
-        return self.represented(write, pid)
+        return self.part_response(write, pid)
 
     def patch(self, request, uid, pid):
         serializer = self.serializer_class(data=request.data, partial=True)
@@ -217,7 +178,7 @@ class BundlePartAPIView(BundlePartViewMixin, OekgAPIView):
         except GraphStoreError as error:
             return store_unavailable(error, "written to")
 
-        return self.represented(write, pid)
+        return self.part_response(write, pid)
 
 
 def part_bodies(graph: Graph, uid: str, part: BundlePart) -> list:

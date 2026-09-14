@@ -25,7 +25,6 @@ SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
-import uuid
 from dataclasses import dataclass
 from typing import Optional
 
@@ -45,6 +44,7 @@ from oekg.fields import (
     OEO,
     PART,
     ResourceField,
+    mint_identifier,
     resource_delta,
     resource_payload,
     resource_triples,
@@ -157,19 +157,9 @@ STUDY_REPORT = BundlePart(
 BUNDLE_PARTS = (SCENARIO, STUDY_REPORT)
 
 
-def mint_bundle_uid() -> str:
-    """A new bundle identifier. The server's to give, never the client's."""
-    return str(uuid.uuid4())
-
-
 def bundle_iri(uid: str) -> URIRef:
     """The IRI a bundle lives at -- the same one the user interface reads."""
     return OEKG[uid]
-
-
-def mint_part_uid() -> str:
-    """A new sub-resource identifier. The server's to give, never the client's."""
-    return str(uuid.uuid4())
 
 
 def part_iri(part: BundlePart, pid: str) -> URIRef:
@@ -245,7 +235,7 @@ def build_bundle_graph(uid: str, payload: dict, known_labels: dict = None) -> Gr
     for part in BUNDLE_PARTS:
         for nested in payload.get(part.payload_key) or []:
             graph += build_part_graph(
-                part, bundle_iri(uid), mint_part_uid(), nested, known_labels
+                part, bundle_iri(uid), mint_identifier(), nested, known_labels
             )
     return graph
 

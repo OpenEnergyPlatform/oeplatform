@@ -342,7 +342,9 @@ urlpatterns_v0 = [
     ),
     # Scenario factsheets and study reports are sub-resources because the shape
     # gives them their own has-uuid. Plural, like the bundle collection above
-    # them, and `pid` throughout for the part a URL addresses.
+    # them. `pid` is the part a URL addresses -- one name, because one
+    # implementation serves both; where a scenario is the PARENT of what a URL
+    # addresses, as it is for the dataset links below, it keeps its own `sid`.
     path(
         "scenario-bundles/<uid>/scenarios/",
         ScenarioCollectionAPIView.as_view(),

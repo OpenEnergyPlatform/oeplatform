@@ -24,14 +24,17 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 from django.test import SimpleTestCase
 from django.urls import reverse
+from rdflib import RDF, RDFS, Graph, Literal, URIRef
 from rdflib.namespace import SH
 
 from factsheet.models import OEKG_Modifications
 from login.models import myuser
-from oekg.bundles import SCENARIO_CLASS
+from oekg.bundles import SCENARIO, SCENARIO_CLASS, find_part
 from oekg.dataset_links import DIRECTION_BY_NAME, reference_kind
 from oekg.fields import HAS_IRI, HAS_UUID, OEO
+from oekg.graph_store import GraphStore
 from oekg.history import CREATE
+from oekg.reads import read_bundle
 from oekg.serializers import READ_ONLY_CONTAINER, DatasetLinkSerializer
 from oekg.shape import shape_graph
 from oekg.tests import RequiresShapeArtifactsMixin
@@ -166,6 +169,31 @@ class DatasetLinkWriteTest(DatasetLinkTestCase):
         self.assertEqual(response.status_code, 400, response.data)
         self.assertIn("not a possible OEP table name", response.data["detail"])
 
+    def test_a_bad_name_on_a_bundle_that_is_not_there_answers_404(self):
+        # One order for the whole API: the bundle, then the scenario, then the
+        # right to write, and only then the payload's own problems.
+        self.client.force_login(self.user)
+
+        response = self.client.post(
+            self.links_url("11111111-2222-3333-4444-555555555555", "no-scenario"),
+            data={**TABLE_LINK, "name": "not a table"},
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 404, response.data)
+
+    def test_a_bad_name_from_a_stranger_answers_403(self):
+        uid, sid, etag = self.with_one_scenario()
+        stranger = myuser.objects.create_user(
+            name="stranger", email="stranger@example.org", affiliation=""
+        )
+
+        response = self.add_link(
+            uid, sid, etag, {**TABLE_LINK, "name": "not a table"}, as_user=stranger
+        )
+
+        self.assertEqual(response.status_code, 403, response.data)
+
     def test_an_unknown_reference_kind_is_refused(self):
         uid, sid, etag = self.with_one_scenario()
 
@@ -222,6 +250,73 @@ class DatasetLinkWriteTest(DatasetLinkTestCase):
         response = self.add_link(uid, "no-such-scenario", etag)
 
         self.assertEqual(response.status_code, 404, response.data)
+
+
+class LinkWrittenElsewhereTest(DatasetLinkTestCase):
+    """A link this API did not write, as the browser and its ancestors wrote it.
+
+    The writable payload is `{type, ref, name}`, and `ref` is inferred from the
+    URL. A link pointing at an address this platform has no route for therefore
+    cannot be expressed in that payload at all -- so it reads back with `ref`
+    null, and `_meta.target_iri` says where it actually points. Pinned here
+    because it is a property of the payload the resource model fixed, not an
+    accident, and the replace endpoint inherits it.
+    """
+
+    EXTERNAL = "https://databus.openenergyplatform.org/koubaa/LLEC_Dataset/WS_23_24"
+
+    def with_an_external_link(self):
+        uid, sid, etag = self.with_one_scenario()
+        scenario = find_part(
+            read_bundle(GraphStore.from_settings(), uid), uid, SCENARIO, sid
+        )
+        node = URIRef("https://openenergyplatform.org/ontology/oekg/dataset/legacy")
+        triples = Graph()
+        triples.add((scenario, DIRECTION_BY_NAME["input"].predicate, node))
+        triples.add((node, RDF.type, INPUT_CLASS))
+        triples.add((node, RDFS.label, Literal("WS_23_24")))
+        triples.add((node, HAS_IRI, Literal(self.EXTERNAL)))
+        triples.add((node, HAS_UUID, Literal("legacy")))
+        self.store.insert(triples)
+        return uid, sid
+
+    def test_it_is_listed_rather_than_hidden(self):
+        uid, sid = self.with_an_external_link()
+
+        listed = self.client.get(self.links_url(uid, sid)).data
+
+        self.assertEqual(listed["count"], 1)
+        self.assertEqual(listed["results"][0]["name"], "WS_23_24")
+
+    def test_its_reference_kind_reads_back_as_null(self):
+        # Honest rather than guessed: it is neither an OEP table nor an OEP
+        # dataset, and saying "table" would be a fabrication.
+        uid, sid = self.with_an_external_link()
+
+        read = self.client.get(self.link_url(uid, sid, "legacy")).data
+
+        self.assertIsNone(read["ref"])
+
+    def test_where_it_points_is_still_reported(self):
+        uid, sid = self.with_an_external_link()
+
+        read = self.client.get(self.link_url(uid, sid, "legacy")).data
+
+        self.assertEqual(read[READ_ONLY_CONTAINER]["target_iri"], self.EXTERNAL)
+
+    def test_such_a_body_is_not_accepted_back(self):
+        # The consequence, stated: a read of this link is not round-trippable,
+        # because the payload has no way to say "an address of its own".
+        uid, sid = self.with_an_external_link()
+        read = self.client.get(self.link_url(uid, sid, "legacy")).data
+        etag = self.client.get(self.link_url(uid, sid, "legacy"))["ETag"]
+
+        response = self.add_link(
+            uid, sid, etag, {key: read[key] for key in ("type", "ref", "name")}
+        )
+
+        self.assertEqual(response.status_code, 400, response.data)
+        self.assertIn("ref", response.data)
 
 
 class DatasetLinkReadTest(DatasetLinkTestCase):

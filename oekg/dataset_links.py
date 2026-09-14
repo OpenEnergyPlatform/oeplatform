@@ -30,9 +30,9 @@ SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
-import uuid
 from dataclasses import dataclass
 from typing import Optional
+from urllib.parse import urlsplit
 
 from django.urls import NoReverseMatch, reverse
 from rdflib import RDF, RDFS, Graph, Literal, URIRef
@@ -82,11 +82,6 @@ class UnaddressableTarget(Exception):
     """The name given cannot be part of a URL for this kind of target."""
 
 
-def mint_dataset_link_uid() -> str:
-    """A new link identifier. The server's to give, never the client's."""
-    return str(uuid.uuid4())
-
-
 def dataset_link_iri(did: str) -> URIRef:
     """The IRI a dataset link this API minted lives at.
 
@@ -96,6 +91,20 @@ def dataset_link_iri(did: str) -> URIRef:
     which is one of the reasons it is superseded rather than extended.
     """
     return OEKG[f"dataset/{did}"]
+
+
+def target_iri(request, payload: dict) -> str:
+    """The address this link points at, as it will be stored.
+
+    Absolute, because the graph is read by things that are not this server --
+    and built from the request, as the platform already does for a table's own
+    identifier, so a deployment under another name says its own name. The
+    consequence is that the stored URL is not the link's identity: two links to
+    the same table written through two host names differ as strings. Identity
+    is the three answers a client gives, and everything that compares links
+    compares those.
+    """
+    return request.build_absolute_uri(target_path(payload["ref"], payload["name"]))
 
 
 def target_path(ref: str, name: str) -> str:
@@ -128,8 +137,9 @@ def reference_kind(iri: str) -> Optional[str]:
     one written before these routes existed. That is reported as it is rather
     than guessed at.
     """
+    path = urlsplit(iri).path
     for target in TARGETS:
-        if _prefix(target) in iri:
+        if path.startswith(_prefix(target)):
             return target.name
     return None
 
@@ -158,23 +168,6 @@ def build_dataset_link_graph(
     return graph
 
 
-def dataset_link_triples(graph: Graph, scenario: URIRef, node: URIRef) -> Graph:
-    """Everything a link is made of, for a delete: its own triples and its link.
-
-    Unlike a contact or a framework, a dataset link is nobody else's: this API
-    mints one node per link, so removing it removes nothing another bundle can
-    see. The link from the scenario goes with it, or the node would survive as
-    an orphan the shape still targets.
-    """
-    triples = Graph()
-    for direction in DIRECTIONS:
-        if (scenario, direction.predicate, node) in graph:
-            triples.add((scenario, direction.predicate, node))
-    for predicate, obj in graph.predicate_objects(node):
-        triples.add((node, predicate, obj))
-    return triples
-
-
 def dataset_link_nodes(graph: Graph, scenario: URIRef) -> list:
     """Every dataset link of this scenario, as (direction, node) pairs."""
     return [
@@ -182,6 +175,12 @@ def dataset_link_nodes(graph: Graph, scenario: URIRef) -> list:
         for direction in DIRECTIONS
         for node in graph.objects(scenario, direction.predicate)
     ]
+
+
+def stored_iri(graph: Graph, node: URIRef) -> Optional[str]:
+    """The address this link actually points at, as stored."""
+    value = graph.value(node, HAS_IRI)
+    return None if value is None else str(value)
 
 
 def dataset_link_uid(graph: Graph, node: URIRef) -> Optional[str]:
@@ -204,10 +203,10 @@ def dataset_link_payload(graph: Graph, node: URIRef, direction: LinkDirection) -
     ``ref`` can come back ``None`` for a link this API did not write; that is
     honest rather than a guess, and the name and direction are still true.
     """
-    iri = graph.value(node, HAS_IRI)
+    iri = stored_iri(graph, node)
     return {
         "type": direction.name,
-        "ref": None if iri is None else reference_kind(str(iri)),
+        "ref": None if iri is None else reference_kind(iri),
         "name": str(graph.value(node, RDFS.label) or ""),
     }
 

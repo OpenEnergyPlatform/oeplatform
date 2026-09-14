@@ -270,9 +270,19 @@ def resource_payload(graph: Graph, subject: URIRef, fields: tuple) -> dict:
     return payload
 
 
+def mint_identifier() -> str:
+    """A new identifier for anything this API creates.
+
+    One function rather than one per resource: **no client supplies an
+    identifier anywhere in this API**, and that rule is easier to keep true
+    where there is a single place it is expressed.
+    """
+    return str(uuid.uuid4())
+
+
 def minted(field: ResourceField) -> URIRef:
     """A new IRI for a node this API is creating, under the field's segment."""
-    return OEKG[f"{field.mint_segment}/{uuid.uuid4()}"]
+    return OEKG[f"{field.mint_segment}/{mint_identifier()}"]
 
 
 def optional(node) -> Optional[str]:

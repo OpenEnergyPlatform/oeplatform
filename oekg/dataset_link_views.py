@@ -22,10 +22,14 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 from django.urls import reverse
 from rdflib import Graph
 from rest_framework import status
-from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from oekg.api_support import OekgAPIView, shape_unavailable, store_unavailable
+from oekg.api_support import (
+    OekgAPIView,
+    Refused,
+    shape_unavailable,
+    store_unavailable,
+)
 from oekg.bundles import SCENARIO, find_part
 from oekg.dataset_links import (
     DIRECTION_BY_NAME,
@@ -35,56 +39,51 @@ from oekg.dataset_links import (
     dataset_link_payload,
     dataset_link_uid,
     find_dataset_link,
-    mint_dataset_link_uid,
-    target_path,
+    stored_iri,
+    target_iri,
 )
-from oekg.fields import HAS_IRI
+from oekg.fields import mint_identifier
 from oekg.graph_store import GraphStoreError
 from oekg.history import CREATE
-from oekg.part_views import SubResourcePagination
 from oekg.serializers import READ_ONLY_CONTAINER, DatasetLinkSerializer
 from oekg.shape import ShapeUnavailable
+from oekg.subresource_views import SubResourceViewMixin
 from oekg.writes import BundleWrite, open_bundle
 
 
-class DatasetLinkViewMixin:
-    """What both endpoints need: the scenario, and who may write through it."""
+class DatasetLinkViewMixin(SubResourceViewMixin):
+    """What both endpoints need: the scenario these links hang off."""
 
-    def get_permissions(self):
-        if self.request.method in ("GET", "HEAD", "OPTIONS"):
-            return [AllowAny()]
-        return [IsAuthenticated()]
+    def scenario_of(self, write: BundleWrite, sid: str):
+        """The scenario named by the URL, or a `404`. Raises ``Refused``.
 
-    def scenario_or_404(self, write: BundleWrite, sid: str):
+        Raised rather than returned, as everywhere else in this API: a helper
+        that handed back either a value or a refusal would make every call site
+        test which it got, and one forgotten test is a refusal ignored.
+        """
         node = find_part(write.pre_state, write.uid, SCENARIO, sid)
         if node is None:
-            return None, Response(
-                {"detail": f"No scenario {sid} in this bundle."},
-                status=status.HTTP_404_NOT_FOUND,
+            raise Refused(
+                Response(
+                    {"detail": f"No scenario {sid} in this bundle."},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
             )
-        return node, None
+        return node
 
-    def represented(
+    def link_response(
         self,
         write: BundleWrite,
         sid: str,
         did: str,
         code: int = status.HTTP_200_OK,
     ) -> Response:
-        """One link, carrying the **bundle's** entity tag.
-
-        The bundle's, because writing a link bumps the bundle's version and the
-        next write has to send that back.
-        """
-        state = write.post_state if write.post_state is not None else write.pre_state
+        state = self.state_of(write)
         scenario = find_part(state, write.uid, SCENARIO, sid)
         direction, node = find_dataset_link(state, scenario, did)
-        body = _link_body(state, node, direction, write.uid, sid)
-        if not write.history_recorded:
-            body[READ_ONLY_CONTAINER]["history_recorded"] = False
-        response = Response(body, status=code)
-        response["ETag"] = write.version.etag
-        return response
+        return self.represented(
+            _link_body(state, node, direction, write.uid, sid), write, code
+        )
 
 
 class DatasetLinkCollectionAPIView(DatasetLinkViewMixin, OekgAPIView):
@@ -95,52 +94,44 @@ class DatasetLinkCollectionAPIView(DatasetLinkViewMixin, OekgAPIView):
             write = open_bundle(request, uid)
         except GraphStoreError as error:
             return store_unavailable(error, "read")
-        scenario, refusal = self.scenario_or_404(write, sid)
-        if refusal is not None:
-            return refusal
-
-        paginator = SubResourcePagination()
-        page = paginator.paginate_queryset(
-            _link_bodies(write.pre_state, scenario, write.uid, sid), request, view=None
+        scenario = self.scenario_of(write, sid)
+        return self.paginated(
+            request, _link_bodies(write.pre_state, scenario, write.uid, sid), write
         )
-        response = paginator.get_paginated_response(page)
-        response["ETag"] = write.version.etag
-        return response
 
     def post(self, request, uid, sid):
         serializer = DatasetLinkSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         payload = serializer.validated_data
 
-        did = mint_dataset_link_uid()
+        did = mint_identifier()
         try:
-            iri = request.build_absolute_uri(
-                target_path(payload["ref"], payload["name"])
-            )
-        except UnaddressableTarget as error:
-            return Response({"detail": str(error)}, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
+            # The bundle, then the scenario, then the caller's right to write,
+            # and only then the payload's own problems: one order for the whole
+            # API, so a name that cannot be part of a URL never answers 400 for
+            # a bundle that is not there.
             write = open_bundle(request, uid)
-            scenario, refusal = self.scenario_or_404(write, sid)
-            if refusal is not None:
-                return refusal
+            scenario = self.scenario_of(write, sid)
             write.require_write(request)
-            if _already_linked(write.pre_state, scenario, payload, iri):
+            if _already_linked(write.pre_state, scenario, payload):
                 return _duplicate(payload)
             write.apply(
                 removed=Graph(),
-                added=build_dataset_link_graph(scenario, did, payload, iri),
+                added=build_dataset_link_graph(
+                    scenario, did, payload, target_iri(request, payload)
+                ),
                 verb=CREATE,
                 resource_type=_direction_of(payload).node_class,
                 resource_uuid=did,
             )
+        except UnaddressableTarget as error:
+            return Response({"detail": str(error)}, status=status.HTTP_400_BAD_REQUEST)
         except ShapeUnavailable as error:
             return shape_unavailable(error)
         except GraphStoreError as error:
             return store_unavailable(error, "written to")
 
-        response = self.represented(write, sid, did, status.HTTP_201_CREATED)
+        response = self.link_response(write, sid, did, status.HTTP_201_CREATED)
         response["Location"] = reverse(
             "api:scenario-bundle-dataset-link",
             kwargs={"uid": uid, "sid": sid, "did": did},
@@ -156,16 +147,14 @@ class DatasetLinkAPIView(DatasetLinkViewMixin, OekgAPIView):
             write = open_bundle(request, uid)
         except GraphStoreError as error:
             return store_unavailable(error, "read")
-        scenario, refusal = self.scenario_or_404(write, sid)
-        if refusal is not None:
-            return refusal
+        scenario = self.scenario_of(write, sid)
         _, node = find_dataset_link(write.pre_state, scenario, did)
         if node is None:
             return Response(
                 {"detail": f"No dataset link {did} on this scenario."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        return self.represented(write, sid, did)
+        return self.link_response(write, sid, did)
 
 
 def _link_bodies(graph: Graph, scenario, uid: str, sid: str) -> list:
@@ -178,12 +167,22 @@ def _link_bodies(graph: Graph, scenario, uid: str, sid: str) -> list:
 
 
 def _link_body(graph: Graph, node, direction, uid: str, sid: str) -> dict:
+    """One link: the three keys a write accepts, and the rest read-only.
+
+    ``target_iri`` is in `_meta` rather than in the payload because a client
+    does not send it -- it is derived. It is there because it is the only thing
+    that stays true when `ref` comes back null: a link written before this API
+    existed can point at an address this platform has no route for, and then
+    the writable payload genuinely cannot express it. Saying where it points is
+    better than leaving a reader with a name and no target.
+    """
     return {
         **dataset_link_payload(graph, node, direction),
         READ_ONLY_CONTAINER: {
             "uid": dataset_link_uid(graph, node),
             "iri": str(node),
             "type": str(direction.node_class),
+            "target_iri": stored_iri(graph, node),
             "bundle": uid,
             "scenario": sid,
         },
@@ -194,7 +193,7 @@ def _direction_of(payload: dict):
     return DIRECTION_BY_NAME[payload["type"]]
 
 
-def _already_linked(graph: Graph, scenario, payload: dict, iri: str) -> bool:
+def _already_linked(graph: Graph, scenario, payload: dict) -> bool:
     """Whether this scenario already links that target in that direction.
 
     A second identical link would be two nodes saying one thing, and the
@@ -202,17 +201,16 @@ def _already_linked(graph: Graph, scenario, payload: dict, iri: str) -> bool:
     took. Refused rather than silently skipped, so a client learns what
     happened -- the existing route's answer of `200` with a "skipped" list
     leaves a pipeline unable to distinguish "added" from "already there".
+
+    Compared on the three answers a link *is*, not on the URL they produce: the
+    stored URL carries the host the request arrived on, so two links written
+    through different names for this platform would otherwise both be kept.
     """
-    direction = _direction_of(payload)
+    wanted = {key: payload[key] for key in ("type", "ref", "name")}
     return any(
-        found is direction and _iri_of(graph, node) == iri
-        for found, node in dataset_link_nodes(graph, scenario)
+        dataset_link_payload(graph, node, direction) == wanted
+        for direction, node in dataset_link_nodes(graph, scenario)
     )
-
-
-def _iri_of(graph: Graph, node):
-    value = graph.value(node, HAS_IRI)
-    return None if value is None else str(value)
 
 
 def _duplicate(payload: dict) -> Response:

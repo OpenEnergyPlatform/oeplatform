@@ -64,9 +64,8 @@ from oekg.bundles import (
     bundle_delta,
     bundle_iri,
     bundle_payload,
-    mint_bundle_uid,
 )
-from oekg.fields import DC, referenced_node_iris
+from oekg.fields import DC, mint_identifier, referenced_node_iris
 from oekg.graph_store import GraphStore, GraphStoreError
 from oekg.history import CREATE, UPDATE, record_write
 from oekg.part_views import part_bodies
@@ -117,7 +116,7 @@ class ScenarioBundleCollectionAPIView(OekgAPIView):
                 for nested in payload.get(part.payload_key) or []:
                     refuse_renames(nested, known_labels, part.fields)
 
-            uid = mint_bundle_uid()
+            uid = mint_identifier()
             post_state = build_bundle_graph(uid, payload, known_labels)
 
             violations = validate_post_state(post_state)
