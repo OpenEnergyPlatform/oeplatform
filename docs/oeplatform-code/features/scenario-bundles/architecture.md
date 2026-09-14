@@ -135,33 +135,65 @@ Both patterns are established in the codebase; pick per use case:
 
 ## The OEO-driven form fields
 
-Several form fields offer terms from the OEO. How each list is currently
-sourced:
+Several form fields offer terms from the OEO. All of them are now sourced from
+the ontology; the payload is assembled by `populate_factsheets_elements_view`
+and served at `scenario-bundles/populate_factsheets_elements/`.
 
-| Field                      | Sourced from                                                                                                             | Dynamic?        |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------ | --------------- |
-| Sectors (under a division) | OEO graph via `is defined by` (`OEO_00000504`), `factsheet/helper.py`                                                    | ✅ queried live |
-| Sector **divisions**       | Hardcoded IRI list `SECTOR_DEVISIONS`, `factsheet/helper.py`                                                             | ❌ fixed list   |
-| Study **descriptors**      | Hardcoded `StudyKeywords` array, `factsheet/frontend/src/components/scenarioBundleUtilityComponents/StudyDescriptors.js` | ❌ fixed list   |
-| Technologies               | OEO graph, served by `populate_factsheets_elements_view`                                                                 | ✅ queried live |
+| Field                      | Sourced from                                                                                                                  | Dynamic?        |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| Sectors (under a division) | OEO graph via `is defined by` (`OEO_00000504`), `factsheet/helper.py`                                                         | ✅ queried live |
+| Sector **divisions**       | OEO graph, `build_sector_dropdowns_from_oeo`, `factsheet/helper.py`                                                           | ✅ queried live |
+| Study **descriptors**      | OEO graph, terms annotated `oekg annotation` (`OEO_00020425`) with a value starting `study descriptor`, `factsheet/helper.py` | ✅ queried live |
+| Technologies               | OEO graph, served by `populate_factsheets_elements_view`                                                                      | ✅ queried live |
 
-Study descriptors are consumed in four places, all importing the same
-`StudyKeywords` array — keep them in sync when changing the shape:
+Both builders are **memoized at module level** on first call, because the OEO
+only changes when the process restarts.
 
-- bundle **edit** checkboxes — `scenarioBundle.tsx`
-- bundle **overview** chips — `scenarioBundle.tsx`
-- the all-bundles **filter** dialog — `FactsheetFilterDialog.jsx` (driven by
-  `customTable.jsx`)
+### Sector divisions
+
+`build_sector_dropdowns_from_oeo` returns `(divisions, sectors)`. Two things
+about it are easy to get wrong and are pinned by
+`factsheet/tests/test_sector_dropdowns.py`:
+
+- **Divisions are modelled two ways in the OEO.** Some carry their members as
+  individuals (KSG, CRF 2006); others are classes whose members declare the
+  division through an `rdf:type` restriction (NC/BR, EU legislation). An
+  individual-only query misses the second kind entirely — which is what the
+  former hardcoded list papered over. Each division reports which it is via
+  `kind` (`individuals` or `tree`).
+- **A division with no members is still listed** (NACE has none), and the
+  division asserting `is defined by` about itself is filtered out of its own
+  options — CRF 2006 offers 108, not 109.
+
+The last entry is the `Other` division, which carries the full sector tree
+rather than a flat list. The legacy flat `sectors` list is still served
+alongside, so older consumers keep working.
+
+### Study descriptors
+
+Served as `study_descriptors`, an array of `[label, iri, definition]` triples —
+the same shape as the former hardcoded `StudyKeywords` array, so consumers did
+not have to change their rendering. The annotation match is deliberately a
+prefix, because the OEO carries both `study descriptor` and the inconsistent
+`study descriptor tag`.
+
+Three places consume the list, by **two different routes** — worth knowing
+before changing the shape:
+
+- bundle **edit** checkboxes and **overview** chips — `scenarioBundle.tsx`,
+  which already fetches the populate endpoint for its other fields and reads
+  `data.study_descriptors` straight off that payload
+- the all-bundles **filter** dialog — `FactsheetFilterDialog.jsx`
 - the **comparison** board — `comparisonBoardItems.jsx`
 
-!!! info "In progress — making these dynamic"
+The latter two use the `useStudyDescriptors` hook
+(`scenarioBundleUtilityComponents/useStudyDescriptors.js`), which holds a
+module-level cache and a shared in-flight promise, so N mounts trigger one
+request. It also exports `getStudyDescriptors()` for plain helper functions,
+returning `[]` until the fetch resolves.
 
-    Two of the lists above are hardcoded and are being migrated to load
-    dynamically from the OEO (so new sector divisions / study-descriptor terms
-    appear automatically as the ontology grows), plus a richer "Other" →
-    Sector-Entity hierarchy interaction. This is planned in the *Scenario Bundles
-    frontend* wayfinder map (maintainer's vault). Update this table as each piece
-    lands.
+`customTable.jsx` is not a consumer: it holds the selected-keyword state and
+passes it down to the filter dialog, which resolves the labels itself.
 
 ## Related surfaces
 
