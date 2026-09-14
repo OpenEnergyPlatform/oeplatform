@@ -186,12 +186,12 @@ class DatasetCreateSerializer(serializers.Serializer):
     # name) and is immutable after creation
     name = serializers.SlugField(help_text="Name of the dataset")
     title = serializers.CharField(
-        help_text="Anzeigename des Datensatzes, z. B. 'Wind Power Dataset Germany'"
+        help_text="Display name of the dataset, e.g. 'Wind Power Dataset Germany'"
     )
-    description = serializers.CharField(help_text="Kurze Beschreibung des Datensatzes")
+    description = serializers.CharField(help_text="Short description of the dataset")
     at_id = serializers.URLField(
         required=False,
-        help_text="Optional: Persistenter Identifier oder URL für den Datensatz",
+        help_text="Optional: persistent identifier or URL for the dataset",
     )
 
 

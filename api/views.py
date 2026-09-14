@@ -310,7 +310,10 @@ def load_owned_dataset_from_request(request, dataset_name: str):
         summary="Create dataset",
         description="Creates a new dataset.",
         request=DatasetCreateSerializer,
-        responses={},
+        responses={
+            201: OpenApiResponse(description="Dataset created"),
+            400: OpenApiResponse(description="The payload was rejected."),
+        },
         examples=[
             OpenApiExample(
                 "Dataset Example",

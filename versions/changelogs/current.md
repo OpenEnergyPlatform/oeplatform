@@ -85,6 +85,15 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Features
 
+- The REST API now describes itself. `GET /api/v0/schema/` returns an OpenAPI
+  description generated from the code itself, and `/api/v0/open-api/` renders it
+  as a browsable Swagger page you can read the endpoints from. Because it is
+  generated rather than written by hand, it cannot fall behind the API it
+  describes: every endpoint appears the moment it is routed. The dataset
+  endpoints additionally carry summaries, request examples and documented
+  responses, and related endpoints are grouped so the page can be navigated
+  [(#2398)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2398)
+
 - The OEKG scenario-bundle REST API: `POST /api/v0/scenario-bundles/` creates a
   bundle and `GET /api/v0/scenario-bundles/<uid>/` reads it back. The server
   mints the identifier, the acronym is enforced unique on creation, the bundle
