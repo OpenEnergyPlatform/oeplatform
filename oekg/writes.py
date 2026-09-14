@@ -6,9 +6,11 @@ order, and gets them wrong in the same ways if it does them itself:
 1. the bundle has to exist, or there is nothing to write to;
 2. the caller has to own it;
 3. the caller has to say which version it is editing;
-4. the **whole bundle** with the change in it has to satisfy the shape --
-   every constraint in the shape is bundle-local, so a part on its own is not
-   a unit the shape can judge;
+4. the **whole bundle** with the change in it has to satisfy the shape -- every
+   constraint in the shape is bundle-local, so a part on its own is not a unit
+   the shape can judge -- **but only as far as this write is responsible for
+   it**: a violation the bundle already had is not this caller's to answer for,
+   and refusing it would make an inherited defect unfixable through the API;
 5. the write has to be guarded on that version from inside, and read back,
    because the store answers `200` whether or not the guard held.
 
@@ -32,16 +34,16 @@ from typing import Optional
 
 from rdflib import Graph, URIRef
 from rest_framework import status
-from rest_framework.exceptions import APIException
+from rest_framework.response import Response
 
-from oekg.api_support import bundle_exists
+from oekg.api_support import Refused, bundle_exists
 from oekg.bundles import BUNDLE_CLASS, NODE, bundle_subgraph
 from oekg.graph_store import GraphStore
 from oekg.history import record_write
 from oekg.permissions import may_write_bundle
 from oekg.preconditions import precondition_refusal
 from oekg.reads import labels_of, read_bundle
-from oekg.validation import validate_post_state
+from oekg.validation import introduced_violations
 from oekg.versioning import (
     BundleVersion,
     guarded_operation,
@@ -49,21 +51,6 @@ from oekg.versioning import (
     read_version,
     write_applied,
 )
-
-
-class Refused(APIException):
-    """A refusal, raised where it is decided and rendered by the framework.
-
-    An ``APIException`` rather than a plain one so that no view needs a clause
-    to catch it: the framework turns it into the response it already carries.
-    A helper that *returned* a refusal would make every call site test which of
-    the two things it got, and one forgotten test is a refusal silently
-    ignored.
-    """
-
-    def __init__(self, detail, status_code: int):
-        self.status_code = status_code
-        super().__init__(detail)
 
 
 @dataclass
@@ -85,18 +72,20 @@ class BundleWrite:
         """
         if not may_write_bundle(request.user, self.uid):
             raise Refused(
-                {
-                    "detail": (
-                        "Only an owner of this scenario bundle may change it. "
-                        "A bundle with no recorded owner can be changed by an "
-                        "administrator only."
-                    )
-                },
-                status.HTTP_403_FORBIDDEN,
+                Response(
+                    {
+                        "detail": (
+                            "Only an owner of this scenario bundle may change it. "
+                            "A bundle with no recorded owner can be changed by an "
+                            "administrator only."
+                        )
+                    },
+                    status=status.HTTP_403_FORBIDDEN,
+                )
             )
         refusal = precondition_refusal(request, self.version)
         if refusal is not None:
-            raise Refused(refusal.data, refusal.status_code)
+            raise Refused(refusal)
 
     def labels_of(self, iris: list) -> dict:
         """Labels for referenced nodes, answered from the bundle where possible."""
@@ -113,11 +102,11 @@ class BundleWrite:
     ) -> None:
         """Validate the post-state, write it under the guard, record it.
 
-        Raises ``Refused`` with a `400` if the shape objects and with a `409`
-        if the guard did not hold. Nothing is written in either case, and
-        nothing on this object is updated either -- a caller that catches a
-        refusal must not find a post-state describing a write that did not
-        happen.
+        Raises ``Refused`` with a `400` if the shape objects **to something this
+        write introduced**, and with a `409` if the guard did not hold. Nothing
+        is written in either case, and nothing on this object is updated either
+        -- a caller that catches a refusal must not find a post-state
+        describing a write that did not happen.
         """
         if self.post_state is not None:
             raise RuntimeError(
@@ -126,15 +115,28 @@ class BundleWrite:
                 "first, and would silently undo it."
             )
 
+        # Both sides through the same pruner: otherwise they differ by how they
+        # were assembled rather than by what the write did, and that difference
+        # reads as violations nobody introduced.
         post_state = bundle_subgraph(self.pre_state - removed + added, self.uid)
-        violations = validate_post_state(post_state)
-        if violations:
+        introduced, inherited = introduced_violations(
+            bundle_subgraph(self.pre_state, self.uid), post_state
+        )
+        if introduced:
             raise Refused(
-                {
-                    "detail": "The bundle does not conform to the OEKG shape.",
-                    "violations": [v.as_dict() for v in violations],
-                },
-                status.HTTP_400_BAD_REQUEST,
+                Response(
+                    {
+                        "detail": (
+                            "This change would add violations of the OEKG shape."
+                        ),
+                        "violations": [v.as_dict() for v in introduced],
+                        # Named rather than hidden: the bundle is not clean, and a
+                        # caller should be able to learn that without being blamed
+                        # for it.
+                        "pre_existing_violations": inherited,
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
             )
 
         token = mint_write_token()
@@ -150,14 +152,16 @@ class BundleWrite:
         )
         if not write_applied(self.store, self.uid, token):
             raise Refused(
-                {
-                    "detail": (
-                        "The bundle changed while this request was being "
-                        "prepared, so nothing was written. Read it again, "
-                        "apply the change to what you get back, and retry."
-                    )
-                },
-                status.HTTP_409_CONFLICT,
+                Response(
+                    {
+                        "detail": (
+                            "The bundle changed while this request was being "
+                            "prepared, so nothing was written. Read it again, "
+                            "apply the change to what you get back, and retry."
+                        )
+                    },
+                    status=status.HTTP_409_CONFLICT,
+                )
             )
 
         # Only now: everything above could still have refused, and a refusal
@@ -195,14 +199,20 @@ def open_bundle(request, uid: str) -> BundleWrite:
     """
     if not bundle_exists(uid):
         raise Refused(
-            {"detail": f"No scenario bundle {uid}."}, status.HTTP_404_NOT_FOUND
+            Response(
+                {"detail": f"No scenario bundle {uid}."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
         )
 
     store = GraphStore.from_settings()
     pre_state = read_bundle(store, uid)
     if pre_state is None:
         raise Refused(
-            {"detail": f"No scenario bundle {uid}."}, status.HTTP_404_NOT_FOUND
+            Response(
+                {"detail": f"No scenario bundle {uid}."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
         )
 
     return BundleWrite(
@@ -241,13 +251,15 @@ def refuse_renames(payload: dict, known_labels: dict, fields: tuple) -> None:
     ]
     if conflicts:
         raise Refused(
-            {
-                "detail": (
-                    "A shared node cannot be renamed through this API. "
-                    "Reference it by iri and send the label it already has, or "
-                    "omit the iri to mint a new node."
-                ),
-                "conflicts": conflicts,
-            },
-            status.HTTP_400_BAD_REQUEST,
+            Response(
+                {
+                    "detail": (
+                        "A shared node cannot be renamed through this API. "
+                        "Reference it by iri and send the label it already has, or "
+                        "omit the iri to mint a new node."
+                    ),
+                    "conflicts": conflicts,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         )

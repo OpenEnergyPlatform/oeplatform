@@ -135,6 +135,15 @@ SPDX-License-Identifier: CC0-1.0
   what a create accepts back
   [(#2444)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2444)
 
+- Changing a scenario bundle through the REST API is now judged by what the
+  change adds, not by whether the whole bundle is perfect. Bundles written
+  before the API exists often miss fields the shape requires - a sector, a
+  technology, an author - and those are exactly the fields somebody would add by
+  editing. Previously the edit was refused for the very thing it came to fix, so
+  none of the existing bundles could be changed at all. A write that adds a new
+  problem is still refused, and the refusal now also says how many problems the
+  bundle already had. Creating a bundle still has to be complete
+
 - New management command `repair_factsheet_tags` repairs the factsheets the old
   tag editor damaged - on production 23 of 339 carry a copy of the whole tag
   table, holding 95% of all factsheet tag assignments. It reports by default and
@@ -146,6 +155,11 @@ SPDX-License-Identifier: CC0-1.0
   [(#2385)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2385)
 
 ## Bugs
+
+- Error responses from the scenario-bundle API carried the text `"None"` where
+  they should have carried an empty value, and would have turned numbers into
+  text. Introduced in the previous release cycle and not shipped
+  [(#2447)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2447)
 
 - Pin `vite` to 8.0.13. From 8.0.14 the dependency pre-bundler emits chunks that
   reference an initialiser another chunk no longer defines, so any page using
