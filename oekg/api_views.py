@@ -59,19 +59,18 @@ from oekg.api_support import (
 from oekg.bundles import (
     BUNDLE_CLASS,
     BUNDLE_FIELDS,
-    DC,
-    SCENARIO_FIELDS,
+    BUNDLE_PARTS,
     build_bundle_graph,
     bundle_delta,
     bundle_iri,
     bundle_payload,
     mint_bundle_uid,
-    referenced_node_iris,
 )
+from oekg.fields import DC, referenced_node_iris
 from oekg.graph_store import GraphStore, GraphStoreError
 from oekg.history import CREATE, UPDATE, record_write
+from oekg.part_views import part_bodies
 from oekg.reads import labels_of, read_bundle
-from oekg.scenario_views import scenario_bodies
 from oekg.serializers import (
     READ_ONLY_CONTAINER,
     ScenarioBundleCreateSerializer,
@@ -114,8 +113,9 @@ class ScenarioBundleCollectionAPIView(OekgAPIView):
 
             known_labels = labels_of(store, _all_referenced_iris(payload))
             refuse_renames(payload, known_labels, BUNDLE_FIELDS)
-            for scenario in payload.get("scenarios") or []:
-                refuse_renames(scenario, known_labels, SCENARIO_FIELDS)
+            for part in BUNDLE_PARTS:
+                for nested in payload.get(part.payload_key) or []:
+                    refuse_renames(nested, known_labels, part.fields)
 
             uid = mint_bundle_uid()
             post_state = build_bundle_graph(uid, payload, known_labels)
@@ -245,7 +245,7 @@ class ScenarioBundleAPIView(OekgAPIView):
         try:
             write = open_bundle(request, uid)
             write.require_write(request)
-            known_labels = write.labels_of(referenced_node_iris(payload))
+            known_labels = write.labels_of(referenced_node_iris(payload, BUNDLE_FIELDS))
             refuse_renames(payload, known_labels, BUNDLE_FIELDS)
 
             removed, added = bundle_delta(uid, payload, write.pre_state, known_labels)
@@ -264,10 +264,11 @@ class ScenarioBundleAPIView(OekgAPIView):
 
 
 def _all_referenced_iris(payload: dict) -> list:
-    """Existing node IRIs a create points at, its nested scenarios included."""
+    """Existing node IRIs a create points at, its nested parts included."""
     iris = referenced_node_iris(payload, BUNDLE_FIELDS)
-    for scenario in payload.get("scenarios") or []:
-        iris += referenced_node_iris(scenario, SCENARIO_FIELDS)
+    for part in BUNDLE_PARTS:
+        for nested in payload.get(part.payload_key) or []:
+            iris += referenced_node_iris(nested, part.fields)
     return iris
 
 
@@ -304,12 +305,12 @@ def _acronym_pattern(acronym: str) -> str:
 def _represent(uid: str, graph: Graph, version: BundleVersion) -> dict:
     """A read returns exactly what a write accepts, plus read-only data.
 
-    **Scenarios are nested here and rejected on `PATCH`.** That looks
+    **Sub-resources are nested here and rejected on `PATCH`.** That looks
     inconsistent until you notice which write each is for: a read sent back to
-    `POST` copies the whole bundle, scenarios included, and later the replace
-    endpoint takes exactly this shape -- while a `PATCH` is partial by nature
-    and nobody sends a whole read to one. Nesting on read is what lets a client
-    send back what it read without stripping anything.
+    `POST` copies the whole bundle, scenarios and study reports included, and
+    later the replace endpoint takes exactly this shape -- while a `PATCH` is
+    partial by nature and nobody sends a whole read to one. Nesting on read is
+    what lets a client send back what it read without stripping anything.
     """
     body = {
         **bundle_payload(graph, uid),
@@ -319,7 +320,8 @@ def _represent(uid: str, graph: Graph, version: BundleVersion) -> dict:
             "version": version.number,
         },
     }
-    body["scenarios"] = scenario_bodies(graph, uid)
+    for part in BUNDLE_PARTS:
+        body[part.payload_key] = part_bodies(graph, uid, part)
     return body
 
 

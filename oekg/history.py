@@ -33,7 +33,8 @@ from django.db import transaction
 from rdflib import RDF, Graph, URIRef
 
 from factsheet.models import EMPTY_LEGACY_PAYLOAD, OEKG_Modifications
-from oekg.bundles import BUNDLE_CLASS, BUNDLE_FIELDS, PART, bundle_iri
+from oekg.bundles import BUNDLE_CLASS, BUNDLE_FIELDS, bundle_iri
+from oekg.fields import PART
 
 logger = logging.getLogger("oeplatform.oekg_history")
 

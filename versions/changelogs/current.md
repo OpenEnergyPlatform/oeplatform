@@ -144,6 +144,15 @@ SPDX-License-Identifier: CC0-1.0
   what a create accepts back
   [(#2444)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2444)
 
+- Study reports - the publications a scenario bundle is written up in - are now
+  addressable through the REST API: `POST`, `GET` and `PATCH` under
+  `/api/v0/scenario-bundles/<uid>/study-reports/`, and accepted nested on a
+  bundle create like scenarios are. An author may be shared between reports and
+  between bundles, so a write may reference an existing one by its identifier
+  but can never rename it - renaming would change every bundle citing that
+  person. The link to the published document is stored as the document's own
+  address rather than as text beside it
+
 - Changing a scenario bundle through the REST API is now judged by what the
   change adds, not by whether the whole bundle is perfect. Bundles written
   before the API exists often miss fields the shape requires - a sector, a

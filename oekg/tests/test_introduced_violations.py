@@ -22,7 +22,8 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 from rdflib import Graph
 
 from factsheet.models import ScenarioBundleAccessControl
-from oekg.bundles import OEO, build_bundle_graph
+from oekg.bundles import build_bundle_graph
+from oekg.fields import OEO
 from oekg.tests.bundle_fixtures import VALID_PAYLOAD, BundleApiTestCase
 
 # The shape requires at least one technology. A bundle without one is exactly

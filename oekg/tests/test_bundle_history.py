@@ -29,7 +29,8 @@ from rdflib.namespace import RDFS
 
 from factsheet.models import API_ERA, PRE_API_ERA, OEKG_Modifications
 from login.models import myuser
-from oekg.bundles import BUNDLE_CLASS, DC, HAS_PART, OEO, bundle_iri
+from oekg.bundles import BUNDLE_CLASS, bundle_iri
+from oekg.fields import DC, HAS_PART, OEO
 from oekg.history import CREATE, UPDATE, changed_fields, record_write
 from oekg.serializers import READ_ONLY_CONTAINER
 from oekg.tests.bundle_fixtures import VALID_PAYLOAD, BundleApiTestCase

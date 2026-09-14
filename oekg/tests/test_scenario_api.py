@@ -24,7 +24,8 @@ from rdflib.namespace import SH
 
 from factsheet.models import OEKG_Modifications, ScenarioBundleAccessControl
 from login.models import myuser
-from oekg.bundles import HAS_UUID, OEO, SCENARIO_CLASS, SCENARIO_FIELDS, bundle_iri
+from oekg.bundles import SCENARIO_CLASS, SCENARIO_FIELDS, bundle_iri
+from oekg.fields import HAS_UUID, OEO
 from oekg.history import CREATE, UPDATE
 from oekg.serializers import READ_ONLY_CONTAINER, ScenarioSerializer
 from oekg.shape import shape_graph
@@ -44,7 +45,7 @@ class ScenarioTestCase(BundleApiTestCase):
         return reverse("api:scenario-bundle-scenarios", kwargs={"uid": uid})
 
     def scenario_url(self, uid, sid):
-        return reverse("api:scenario-bundle-scenario", kwargs={"uid": uid, "sid": sid})
+        return reverse("api:scenario-bundle-scenario", kwargs={"uid": uid, "pid": sid})
 
     def add_scenario(self, uid, etag, payload=None, as_user=None):
         self.client.force_login(as_user or self.user)

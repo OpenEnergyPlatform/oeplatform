@@ -12,7 +12,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 from django.urls import reverse
 
 from login.models import myuser
-from oekg.bundles import OEO
+from oekg.fields import OEO
 from oekg.serializers import READ_ONLY_CONTAINER
 from oekg.tests import OekgGraphAPITestCase
 

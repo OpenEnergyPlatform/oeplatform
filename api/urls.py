@@ -79,6 +79,10 @@ from api.views import (
 from oekg.api_views import ScenarioBundleAPIView, ScenarioBundleCollectionAPIView
 from oekg.history_views import ScenarioBundleHistoryAPIView
 from oekg.scenario_views import ScenarioAPIView, ScenarioCollectionAPIView
+from oekg.study_report_views import (
+    StudyReportAPIView,
+    StudyReportCollectionAPIView,
+)
 
 app_name = "api"
 
@@ -335,17 +339,28 @@ urlpatterns_v0 = [
         ScenarioBundleHistoryAPIView.as_view(),
         name="scenario-bundle-history",
     ),
-    # Scenario factsheets are sub-resources because the shape gives them their
-    # own has-uuid. Plural, like the bundle collection above it.
+    # Scenario factsheets and study reports are sub-resources because the shape
+    # gives them their own has-uuid. Plural, like the bundle collection above
+    # them, and `pid` throughout for the part a URL addresses.
     path(
         "scenario-bundles/<uid>/scenarios/",
         ScenarioCollectionAPIView.as_view(),
         name="scenario-bundle-scenarios",
     ),
     path(
-        "scenario-bundles/<uid>/scenarios/<sid>/",
+        "scenario-bundles/<uid>/scenarios/<pid>/",
         ScenarioAPIView.as_view(),
         name="scenario-bundle-scenario",
+    ),
+    path(
+        "scenario-bundles/<uid>/study-reports/",
+        StudyReportCollectionAPIView.as_view(),
+        name="scenario-bundle-study-reports",
+    ),
+    path(
+        "scenario-bundles/<uid>/study-reports/<pid>/",
+        StudyReportAPIView.as_view(),
+        name="scenario-bundle-study-report",
     ),
     path(
         "datasets/",

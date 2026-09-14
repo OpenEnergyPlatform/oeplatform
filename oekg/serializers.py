@@ -25,7 +25,8 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 from rest_framework import serializers
 
-from oekg.bundles import BUNDLE_FIELDS, ENUM, SCENARIO_FIELDS
+from oekg.bundles import BUNDLE_FIELDS, SCENARIO_FIELDS, STUDY_REPORT_FIELDS
+from oekg.fields import ENUM
 from oekg.shape import constraint_message, enumeration
 
 # Everything read-only lives under one key, and writes ignore it. That is what
@@ -159,14 +160,46 @@ class ScenarioBundleSerializer(EnumeratedFieldsMixin, ClosedSerializer):
     field_table = BUNDLE_FIELDS
 
 
+class StudyReportSerializer(EnumeratedFieldsMixin, ClosedSerializer):
+    """One study report -- the publication a bundle is written up in.
+
+    A sub-resource for the same reason a scenario is: the shape gives it its
+    own has-uuid, which the server mints, so it is not a field here.
+
+    What the shape requires of one, and therefore what is required here: a
+    label, at least one author, and exactly one publication date. The doi and
+    the reference are optional, and the reference is singular because the shape
+    allows at most one.
+    """
+
+    field_table = STUDY_REPORT_FIELDS
+
+    label = serializers.CharField()
+    doi = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    # The shape types this as xsd:dateTime, so it is parsed rather than passed
+    # through: a value that is not a date is this layer's to refuse.
+    publication_date = serializers.DateTimeField()
+    authors = NodeReferenceSerializer(many=True)
+    # A URL, and the node's IRI rather than a literal on it: the thing this
+    # points at is the cited document. Not a NodeReferenceSerializer, because
+    # there is no label to send and no node to mint.
+    reference = serializers.URLField(required=False, allow_blank=True, allow_null=True)
+
+
 class ScenarioBundleCreateSerializer(ScenarioBundleSerializer):
-    """The bundle field set **plus** nested scenarios, for `POST` only.
+    """The bundle field set **plus** its nested sub-resources, for `POST` only.
 
     The asymmetry is the whole point and it is structural rather than a flag: a
-    bundle `POST` builds its scenarios with it, and a bundle `PATCH` uses the
-    class above, which has no such key and therefore refuses one. That is what
-    lets a pipeline create a whole bundle in one call without giving any call
-    the power to drop its parts by omitting them.
+    bundle `POST` builds its scenarios and study reports with it, and a bundle
+    `PATCH` uses the class above, which has no such key and therefore refuses
+    one. That is what lets a pipeline create a whole bundle in one call without
+    giving any call the power to drop its parts by omitting them.
+
+    Dataset links are deliberately **not** here. They hang off a scenario
+    rather than off the bundle, and they are add-and-remove only, so there is
+    no partial update of one to reason about -- nesting them would make a
+    create the one place their fields could be written together.
     """
 
     scenarios = ScenarioSerializer(many=True, required=False)
+    study_reports = StudyReportSerializer(many=True, required=False)
