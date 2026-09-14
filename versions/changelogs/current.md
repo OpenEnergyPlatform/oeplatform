@@ -152,6 +152,7 @@ SPDX-License-Identifier: CC0-1.0
   but can never rename it - renaming would change every bundle citing that
   person. The link to the published document is stored as the document's own
   address rather than as text beside it
+  [(#2452)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2452)
 
 - A scenario's input and output datasets can now be linked through the REST API:
   `POST` and `GET` under
@@ -166,7 +167,7 @@ SPDX-License-Identifier: CC0-1.0
   somebody else's data hostage. The same target cannot be linked twice in the
   same direction. This supersedes the older `manage-datasets/` route, which
   writes relations the canonical shape does not validate and no identifier at
-  all
+  all [(#2452)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2452)
 
 - Changing a scenario bundle through the REST API is now judged by what the
   change adds, not by whether the whole bundle is perfect. Bundles written
@@ -191,6 +192,7 @@ SPDX-License-Identifier: CC0-1.0
   parts changed. Previously only a change to the bundle's own fields was named;
   a change to a scenario factsheet or a study report read back as a list of raw
   predicates, which is what the history exists not to be
+  [(#2452)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2452)
 
 ## Bugs
 
