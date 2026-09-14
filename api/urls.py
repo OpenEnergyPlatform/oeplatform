@@ -76,6 +76,9 @@ from api.views import (
     table_approx_row_count_view,
     usrprop_api_view,
 )
+from oekg.api_views import ScenarioBundleAPIView, ScenarioBundleCollectionAPIView
+from oekg.history_views import ScenarioBundleHistoryAPIView
+from oekg.scenario_views import ScenarioAPIView, ScenarioCollectionAPIView
 
 app_name = "api"
 
@@ -313,6 +316,36 @@ urlpatterns_v0 = [
         r"^scenario-bundle/scenario/manage-datasets/?$",
         ManageOekgScenarioDatasetsAPIView.as_view(),
         name="add-scenario-datasets",
+    ),
+    # The scenario-bundle REST API. Plural, and superseding the singular
+    # manage-datasets route above rather than extending it: that one writes
+    # predicates the canonical shape does not validate.
+    path(
+        "scenario-bundles/",
+        ScenarioBundleCollectionAPIView.as_view(),
+        name="scenario-bundles",
+    ),
+    path(
+        "scenario-bundles/<uid>/",
+        ScenarioBundleAPIView.as_view(),
+        name="scenario-bundle",
+    ),
+    path(
+        "scenario-bundles/<uid>/history/",
+        ScenarioBundleHistoryAPIView.as_view(),
+        name="scenario-bundle-history",
+    ),
+    # Scenario factsheets are sub-resources because the shape gives them their
+    # own has-uuid. Plural, like the bundle collection above it.
+    path(
+        "scenario-bundles/<uid>/scenarios/",
+        ScenarioCollectionAPIView.as_view(),
+        name="scenario-bundle-scenarios",
+    ),
+    path(
+        "scenario-bundles/<uid>/scenarios/<sid>/",
+        ScenarioAPIView.as_view(),
+        name="scenario-bundle-scenario",
     ),
     path(
         "datasets/",

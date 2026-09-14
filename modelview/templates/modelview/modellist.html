@@ -13,19 +13,7 @@
 {% block site-header %}
   <div class="main-header">
     <h1 class="main-header__title">
-      <svg xmlns="http://www.w3.org/2000/svg"
-           width="16"
-           height="16"
-           viewBox="0 0 24 24">
-        <path d="m22.06,4.25L17.83,0H7.45h0v1.23h-2.42v2.07h-2.39v20.7h15.53v-2.07h2.39v-2.24h1.49V4.25Zm-3.91-2.36l2.04,2.04h-2.04V1.89Zm-1.07,21.01H3.73V4.4h1.29v17.53h12.05v.97Zm2.39-2.07H6.12V2.33h1.33v17.36h12.02v1.14Zm-10.92-2.24V1.11h8.51v3.92h3.9v13.56h-12.41Z" fill="#293B46">
-        </path>
-        <rect x="10.77" y="10.41" width="7.57" height="1.1" fill="#293B46" />
-        <rect x="10.77" y="12.78" width="7.57" height="1.1" fill="#293B46" />
-        <rect x="10.77" y="15.17" width="7.57" height="1.1" fill="#293B46" />
-        <rect x="10.68" y="4.18" width="1.09" height="4.19" fill="#293B46" />
-        <rect x="12.58" y="3.16" width="1.09" height="5.2" fill="#293B46" />
-        <rect x="14.48" y="6.14" width="1.09" height="2.23" fill="#293B46" />
-      </svg>
+      {% include "modelview/partials/factsheet_icon.html" %}
       {{ label }} Factsheets
     </h1>
     <div class="main-header__wizard">Overview</div>
@@ -46,25 +34,9 @@
     <span class="fas fa-download"></span> Download CSV
   </a>
   <hr>
-  <h3>Tags</h3>
-  <div style="display: flex; flex-flow: wrap">
-    {% for t in tags %}
-      <label class="tag-checkbox-container form-label {% if t.pk in tags %}tag-checkbox-checked{% endif %}"
-             style="background:{{ t.color_hex }};
-                    color:{% readable_text_color t.color_hex %}">
-        <input {% if t.pk in tags %}checked="checked"{% endif %}
-               type="checkbox"
-               class="tag-checkbox"
-               name="tags"
-               id="select_{{ t.pk }}"
-               value="{{ t.pk }}"
-               onchange="apply_tag_filter(event.target)">
-        <span>{{ t.name }}</span>
-        <span class="tag-checkbox-icon fas fa-check"></span>
-      </label>
-    {% endfor %}
-  </div>
-  <hr>
+  {# Fields ABOVE Tags on purpose: the tag list grows to the number of tags in #}
+  {# use (273 on production) and expanding it would push the column toggles #}
+  {# off the screen. Whatever grows goes last. #}
   <h3>Fields</h3>
   <div class="checkbox-container">
     {% for heading,d in fields.items %}
@@ -79,13 +51,75 @@
                      onchange="apply_filter(event.target)"
                      id="{{ key }}"
                      {% if key.split|join:'_' in default %}checked="checked"{% endif %}>
-              <label class="form-label" style="margin: 0" for="{{ key }}">{{ key }}</label>
+              <label class="form-label"
+                     style="margin: 0"
+                     for="{{ key }}">{{ key }}</label>
             </div>
           {% endfor %}
         </div>
       </div>
     {% endfor %}
   </div>
+  <hr>
+  <h3>Tags</h3>
+  {# These tags are one platform-wide vocabulary shared with database tables, #}
+  {# and until now nothing on the site linked to where it is administered. #}
+  <p class="text-muted">
+    <small>
+      Filter by tag. <a href="{% url 'dataedit:tags' %}">Manage tags</a> —
+      one vocabulary, shared with database tables.
+    </small>
+  </p>
+  {# The list leads with the tags this sheet type actually uses most and #}
+  {# shows ten; searching reaches the rest without expanding. Rendered in #}
+  {# full either way, so a reader without javascript sees what they saw #}
+  {# before. `dataedit/tag_list.js` does the showing and hiding. #}
+  <div class="d-flex gap-2 mb-2">
+    <label class="visually-hidden" for="tag-filter-search">Search tags</label>
+    <input id="tag-filter-search"
+           data-tag-search
+           type="search"
+           class="form-control form-control-sm"
+           placeholder="Search tags"
+           autocomplete="off">
+    <label class="visually-hidden" for="tag-filter-sort">Sort tags</label>
+    <select id="tag-filter-sort"
+            data-tag-sort
+            class="form-select form-select-sm w-auto">
+      <option value="usage">Most used</option>
+      <option value="name">By name</option>
+    </select>
+  </div>
+  <div data-tag-list style="display: flex; flex-flow: wrap">
+    {% for t in tags %}
+      <label class="tag-checkbox-container form-label"
+             data-tag-name="{{ t.name }}"
+             data-tag-usage="{{ t.tag_usage }}"
+             style="background:{{ t.color_hex }};
+                    color:{% readable_text_color t.color_hex %}">
+        {# `selected_tag_pks` is a SET of pks from `?tags=`, never a queryset: #}
+        {# `in` against a queryset has no `__contains__` to use, so it scans #}
+        {# the whole result cache once per checkbox. #}
+        <input type="checkbox"
+               class="tag-checkbox"
+               name="tags"
+               id="select_{{ t.pk }}"
+               value="{{ t.pk }}"
+               {% if t.pk in selected_tag_pks %}checked{% endif %}
+               onchange="apply_tag_filter(event.target)">
+        <span>{{ t.name }}</span>
+        <span class="tag-checkbox-icon fas fa-check"></span>
+      </label>
+    {% endfor %}
+  </div>
+  <button data-tag-expand type="button" class="btn btn-sm btn-link p-0" hidden>
+    Show all tags
+  </button>
+  <button id="clear-tag-filter"
+          type="button"
+          class="btn btn-sm btn-outline-secondary mt-2"
+          onclick="clear_tag_filter()"
+          {% if not selected_tag_pks %}hidden{% endif %}>Clear tag filter</button>
   <hr>
 {% endblock main-right-sidebar-content %}
 {% block factsheets_content %}
@@ -108,49 +142,74 @@
 {% endblock %}
 {% block after-body-bottom-js %}
   <script src="{% static 'dataedit/jquery.dataTables.min.js' %}"></script><!-- src: https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js -->
-  <script>
+  {# The rows come from the view; `modelview/list_payload.py` says why. JSON #}
+  {# via `json_script`, never a JS literal: `json_script` escapes `<`, `>` #}
+  {# and `&`, so no field value can close this element. #}
+  {{ rows|json_script:"factsheet-rows" }}
+  {# Which columns those rows already carry, so a toggle of one of them does #}
+  {# not fetch the other 165 for nothing. #}
+  {{ initial_columns|json_script:"factsheet-initial-columns" }}
+  {# ONE module, importing what it needs at the top.                        #}
+  {#                                                                        #}
+  {# It used to be a module that assigned `tag_filter` to `window` followed #}
+  {# by a classic script that used it. That cannot work: a module script is #}
+  {# DEFERRED, so it runs after the document is parsed and therefore after  #}
+  {# the classic script below it has already executed -- `tag_filter is not #}
+  {# defined`, at the first statement that touched it. Inside one module    #}
+  {# the imports resolve before the body runs, so the ordering hazard is    #}
+  {# gone rather than avoided.                                              #}
+  {#                                                                        #}
+  {# jQuery and DataTables are classic scripts loaded above, so they are on #}
+  {# `window` by the time this runs. The two handlers the sidebar's inline  #}
+  {# `onchange` attributes call have to be put back on `window` explicitly, #}
+  {# because a module's top level is not global scope.                      #}
+  <script type="module">
+    import * as tag_filter from "{% static 'modelview/tag_filter.js' %}";
+    import * as lazy_payload from "{% static 'modelview/lazy_payload.js' %}";
+    import { bindTagList } from "{% static 'dataedit/tag_list.js' %}";
+
     var dt;
 
-    var full_data = [
-        {% for model in models %}
-            {
-                {% for d in fields.values %}
-                    model_name: '<a href="{{model.id}}">{{model.model_name}}</a>',
-                    tags: [ {% for tag in model.tags.all %} {pk:'{{tag.pk}}', name:'{{tag.name}}', color_hex:'{{tag.color_hex}}',  textcolor_hex:'{% readable_text_color tag.color_hex %}'}, {%endfor%} ],
-
-                    {% for group in d.values %}
-                        {% for field in group %}
-                            {{ field }}: {{model|get_model_value:field}},
-                        {% endfor %}
-                    {% endfor %}
-
-                {% endfor %}
-            },
-        {% endfor %}
-    ]
+    var full_data = JSON.parse(
+        document.getElementById("factsheet-rows").textContent);
+    var initial_columns = JSON.parse(
+        document.getElementById("factsheet-initial-columns").textContent);
 
     var render_tag = function (data, type, row){
-        console.log("render_tag", data, type, row)
+        // `href` is the filtered view of this one tag, so the pill works as a
+        // link -- middle-click, "open in new tab", no javascript. The click
+        // handler below intercepts a plain click and filters in place instead.
+        // It used to be `href=""`, which is not "do nothing": an empty href
+        // is the current URL, so clicking a tag reloaded the page and looked
+        // like the filter had silently failed.
         var s = '';
         for(var i in data){
             if(i <= 4) {
                 var tag = data[i];
-                s += '<a href="" class="btn tag" style="background:' + tag.color_hex + '; color:' + tag.textcolor_hex + '; display:inline-block;">' + tag.name + '</a>'
+                s += '<a href="?tags=' + encodeURIComponent(tag.pk) + '"'
+                  + ' data-tag-pk="' + tag.pk + '"'
+                  + ' title="Filter by ' + tag.name + '"'
+                  + ' class="btn tag" style="background:' + tag.color_hex
+                  + '; color:' + tag.textcolor_hex + '; display:inline-block;">'
+                  + tag.name + '</a>'
             }
         }
         return s;
     }
 
     var all_columns = [
-        {data: 'model_name', name: 'Name', title: 'Name', visible: true},
+        {# `defaultContent` is mandatory, not tidiness: the table builds a #}
+        {# row cache across EVERY definition, visible or not, so handing 173 #}
+        {# of them rows that carry eight keys throws on the first draw. #}
+        {data: 'model_name', name: 'Name', title: 'Name', visible: true, defaultContent: ''},
         {% for d in fields.values %}
             {% for l, group in d.items %}
                     {% for field in group %}
-                        {data: '{{ field }}', name: '{{ field }}', title: '{{ field|white_out:'_' }}', visible: {% if field in default %} true {% else %} false {%endif %}},
+                        {data: '{{ field }}', name: '{{ field }}', title: '{{ field|white_out:'_' }}', visible: {% if field in default %} true {% else %} false {%endif %}, defaultContent: ''},
                     {% endfor %}
             {% endfor %}
         {% endfor %}
-        {data: 'tags', name: 'tags', title: 'tags', visible: true, render:render_tag },
+        {data: 'tags', name: 'tags', title: 'tags', visible: true, render:render_tag, defaultContent: '' },
     ];
 
     var fields = {
@@ -165,39 +224,96 @@
         {% endfor %}
     };
 
-    var active_tags = [];
+    // Raw tag pks, the same format the URL and the CSV link carry, seeded from
+    // the checkboxes the server rendered out of `?tags=`. The filter's own
+    // logic lives in `modelview/tag_filter.js` -- the module imported above --
+    // because both bugs this filter shipped were browser-side and so invisible
+    // to a Django test.
+    var active_tags = tag_filter.checkedTagValues(document);
+
+    // Fetch the 165 columns the initial payload leaves out -- once, however
+    // often it is asked. The "once" is browser state, so the logic lives in
+    // `modelview/lazy_payload.js` with its own tests.
+    var ensure_full_payload = lazy_payload.createLoader(
+        function () {
+            return fetch("{% url 'modelview:list-payload' sheettype %}")
+                .then(function (response) { return response.json(); });
+        },
+        function (rows) {
+            // Wholesale, in the endpoint's order -- which is the list's own
+            // order, both pinned to the primary key. `draw(false)` because
+            // these are the same rows with more columns: a bare `draw()`
+            // means `draw(true)` in DataTables 1.10 and would throw a reader
+            // on page 4 back to page 1.
+            dt.clear();
+            dt.rows.add(rows);
+            dt.draw(false);
+        });
+
+    // One place to answer a failed fetch. The column is still revealed, empty:
+    // a dead click with no explanation would be worse than empty cells.
+    var request_full_payload = function () {
+        return ensure_full_payload().catch(function (error) {
+            console.error(
+                "the factsheet list could not load its remaining columns", error);
+        });
+    }
 
     var apply_filter = function (sender){
-        for (var i in fields[sender.id]) {
-            var property = fields[sender.id][i]
-            var column = dt.column(property+':name')
-            column.visible( sender.checked );
-        }
-
-
+        lazy_payload.toggleColumns(
+            fields[sender.id], sender.checked, initial_columns,
+            request_full_payload,
+            function (field, visible) {
+                dt.column(field + ':name').visible(visible);
+            });
     }
 
 
 
 
     var apply_tag_filter = function (sender){
-        if(sender.checked && active_tags.indexOf(sender.id) <0){
-            active_tags.push(sender.id);
-        } else {
-            var id = active_tags.indexOf(sender.id);
-            if(id>=0){
-                active_tags.splice(id, 1);
-            }
-        }
-        set_csv_link();
+        active_tags = tag_filter.toggleTag(active_tags, sender.value, sender.checked);
+        sync_filter_state();
         dt.draw();
     }
 
-    var set_csv_link = function (){
-        var href="{% url 'modelview:download' sheettype %}?";
-        href += 'tags=';
-        href += active_tags.join([separator = ',']);
-        document.getElementById("dlcsv").setAttribute("href", href);
+    // Clearing is one control rather than hunting the ticked boxes back down
+    // in a list of 273.
+    var clear_tag_filter = function (){
+        active_tags = tag_filter.clearTags(document);
+        sync_filter_state();
+        dt.draw();
+    }
+
+    // A tag pill in the table toggles that tag's sidebar checkbox and then
+    // goes through the same path a click on the checkbox takes. The checkbox
+    // stays the single source of truth, so the sidebar, the URL and the CSV
+    // link cannot fall out of step with what the table is showing.
+    var toggle_tag_from_pill = function (pk){
+        var box = tag_filter.checkTag(document, pk, active_tags.indexOf(pk) === -1);
+        if (!box) {
+            return false;
+        }
+        apply_tag_filter(box);
+        return true;
+    }
+
+    // The query string is the canonical home of the filter, so a filtered view
+    // can be reloaded, bookmarked and shared -- and so the CSV link is simply
+    // the page's own `?tags=` value, with no second format to drift out of
+    // step with this one.
+    var sync_filter_state = function (){
+        document.getElementById("dlcsv").setAttribute(
+            "href",
+            "{% url 'modelview:download' sheettype %}"
+                + tag_filter.filterQuery(active_tags));
+        history.replaceState(
+            null, '', tag_filter.filteredUrl(window.location, active_tags));
+        tag_filter.showCheckedTags(document);
+        var clear = document.getElementById("clear-tag-filter");
+        if (clear) {
+            clear.hidden = active_tags.length === 0;
+        }
     }
 
     $(document).ready( function () {
@@ -205,27 +321,49 @@
         var tags_col = dt.column('tags:name').index();
         $.fn.dataTable.ext.search.push(
         function( settings, data, dataIndex ) {
-            for (var required of active_tags) {
-                var matches = false;
-                var tags = dt.row(dataIndex).data().tags
-                if(tags === undefined){
-                    return false;
-                }
-                for (var tag of tags) {
-                    if (required === 'select_'+tag.pk) {
-                        matches=true
-                    }
-                }
-                if(!matches){
-                    return false;
-                }
-            }
-            return true;
+            return tag_filter.rowMatchesTags(
+                dt.row(dataIndex).data().tags, active_tags);
         }
 );
 
+        // The filter arrived in the URL, so the checkboxes are already
+        // checked and `active_tags` already holds their pks -- but the first
+        // draw happened before the search extension above existed, and the
+        // CSV link has never been built at all. Both need one pass here, or a
+        // shared filtered URL would show the whole table and offer a download
+        // of it.
+        // The search box searches hidden columns too, so with eight columns
+        // loaded a search that used to match a model's citation text would
+        // return nothing and explain nothing. One ~200 ms pause on the first
+        // keystroke buys that back; a visitor who never searches never pays.
+        // The box does not exist until the table above has been initialised.
+        lazy_payload.bindSearchTrigger(document, request_full_payload);
+
+        // Delegated, because the table redraws its cells constantly -- paging,
+        // sorting, the lazy column fetch -- so a handler bound to the pills
+        // themselves would be lost on the next draw.
+        $('#overview').on('click', 'a[data-tag-pk]', function (event) {
+            if (toggle_tag_from_pill(this.getAttribute('data-tag-pk'))) {
+                event.preventDefault();
+            }
+        });
+
+        sync_filter_state();
+        if (active_tags.length) {
+            dt.draw();
+        }
+
     } );
 
+    // Ten tags, most-used first, with the rest a click or a search away.
+    // Selected tags stay visible past the limit, or a filter arriving in the
+    // URL would be active with nothing on screen to say so.
+    bindTagList(document, {limit: 10, sort: "usage"});
 
+    // The sidebar's checkboxes call these through `onchange` attributes,
+    // which resolve against `window` and not against this module's scope.
+    window.apply_filter = apply_filter;
+    window.apply_tag_filter = apply_tag_filter;
+    window.clear_tag_filter = clear_tag_filter;
   </script>
 {% endblock %}

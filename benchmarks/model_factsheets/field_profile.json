@@ -1,0 +1,962 @@
+{
+  "id": {
+    "fill": 1.0,
+    "chars": 2.8,
+    "words": 1
+  },
+  "model_name": {
+    "fill": 1.0,
+    "chars": 37.6,
+    "words": 4.9
+  },
+  "acronym": {
+    "fill": 0.948,
+    "chars": 7.6,
+    "words": 1.1
+  },
+  "institutions": {
+    "fill": 0.826,
+    "chars": 47.6,
+    "words": 5.6
+  },
+  "authors": {
+    "fill": 0.534,
+    "chars": 110.2,
+    "words": 14.0
+  },
+  "current_contact_person": {
+    "fill": 0.797,
+    "chars": 17.6,
+    "words": 2.5
+  },
+  "contact_email": {
+    "fill": 1.0,
+    "chars": 28.4,
+    "words": 1.0
+  },
+  "contact_phone": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "website": {
+    "fill": 0.659,
+    "chars": 50.1,
+    "words": 1.1
+  },
+  "logo": {
+    "fill": 0.118,
+    "chars": 26.6,
+    "words": 1
+  },
+  "primary_purpose": {
+    "fill": 0.826,
+    "chars": 326.9,
+    "words": 46.4
+  },
+  "primary_outputs": {
+    "fill": 0.577,
+    "chars": 201.3,
+    "words": 28.4
+  },
+  "support": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "framework": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "framework_yes_text": {
+    "fill": 0.184,
+    "chars": 27.5,
+    "words": 3.1
+  },
+  "user_documentation": {
+    "fill": 0.426,
+    "chars": 48.5,
+    "words": 1.7
+  },
+  "code_documentation": {
+    "fill": 0.361,
+    "chars": 41.9,
+    "words": 1.4
+  },
+  "documentation_quality": {
+    "fill": 1.0,
+    "chars": 9.1,
+    "words": 1.1
+  },
+  "source_of_funding": {
+    "fill": 0.403,
+    "chars": 44.3,
+    "words": 5.9
+  },
+  "open_source": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "open_up": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "costs": {
+    "fill": 0.118,
+    "chars": 31.1,
+    "words": 5.2
+  },
+  "license": {
+    "fill": 1.0,
+    "chars": 12.5,
+    "words": 2.0
+  },
+  "license_other_text": {
+    "fill": 0.056,
+    "chars": 27.2,
+    "words": 4.3
+  },
+  "source_code_available": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "gitHub": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "link_to_source_code": {
+    "fill": 0.433,
+    "chars": 40.6,
+    "words": 1.0
+  },
+  "data_provided": {
+    "fill": 1.0,
+    "chars": 5.6,
+    "words": 1.2
+  },
+  "cooperative_programming": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "number_of_developers": {
+    "fill": 0.587,
+    "chars": 12.2,
+    "words": 3
+  },
+  "number_of_users": {
+    "fill": 0.508,
+    "chars": 12.9,
+    "words": 3
+  },
+  "modelling_software": {
+    "fill": 0.787,
+    "chars": 18.9,
+    "words": 2.3
+  },
+  "interal_data_processing_software": {
+    "fill": 0.338,
+    "chars": 18.6,
+    "words": 2.1
+  },
+  "external_optimizer": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "external_optimizer_yes_text": {
+    "fill": 0.105,
+    "chars": 17.8,
+    "words": 2.1
+  },
+  "additional_software": {
+    "fill": 0.177,
+    "chars": 33.6,
+    "words": 4.5
+  },
+  "gui": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "citation_reference": {
+    "fill": 0.38,
+    "chars": 348.8,
+    "words": 44.8
+  },
+  "citation_DOI": {
+    "fill": 0.282,
+    "chars": 61.2,
+    "words": 2.3
+  },
+  "references_to_reports_produced_using_the_model": {
+    "fill": 0.269,
+    "chars": 411.9,
+    "words": 43.9
+  },
+  "larger_scale_usage": {
+    "fill": 0.187,
+    "chars": 58.9,
+    "words": 7.8
+  },
+  "tags": {
+    "fill": 1.0,
+    "chars": 17,
+    "words": 1
+  },
+  "basicfactsheet_ptr_id": {
+    "fill": 1.0,
+    "chars": 2.8,
+    "words": 1
+  },
+  "energy_sectors_electricity": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "energy_sectors_heat": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "energy_sectors_liquid_fuels": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "energy_sectors_gas": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "energy_sectors_others": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "energy_sectors_others_text": {
+    "fill": 0.144,
+    "chars": 19.0,
+    "words": 2.5
+  },
+  "methodical_focus_1": {
+    "fill": 0.577,
+    "chars": 16.3,
+    "words": 1.8
+  },
+  "methodical_focus_2": {
+    "fill": 0.23,
+    "chars": 18.4,
+    "words": 2.1
+  },
+  "methodical_focus_3": {
+    "fill": 0.144,
+    "chars": 19.4,
+    "words": 2.2
+  },
+  "demand_sectors_households": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "demand_sectors_industry": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "demand_sectors_commercial_sector": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "demand_sectors_transport": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "energy_carrier_gas_natural_gas": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "energy_carrier_gas_biogas": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "energy_carrier_gas_hydrogen": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "energy_carrier_liquids_petrol": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "energy_carrier_liquids_diesel": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "energy_carrier_liquids_ethanol": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "energy_carrier_solid_hard_coal": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "energy_carrier_solid_hard_lignite": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "energy_carrier_solid_hard_uranium": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "energy_carrier_solid_hard_biomass": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "energy_carrier_renewables_sun": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "energy_carrier_renewables_wind": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "energy_carrier_renewables_hydro": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "energy_carrier_renewables_geothermal_heat": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "generation_renewables_PV": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "generation_renewables_wind": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "generation_renewables_hydro": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "generation_renewables_biomass": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "generation_renewables_biogas": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "generation_renewables_bio": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "generation_renewables_solar_thermal": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "generation_renewables_geothermal": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "generation_renewables_others": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "generation_renewables_others_text": {
+    "fill": 0.069,
+    "chars": 23.7,
+    "words": 3.1
+  },
+  "generation_conventional_gas": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "generation_conventional_coal": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "generation_conventional_lignite": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "generation_conventional_hard_coal": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "generation_conventional_oil": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "generation_conventional_liquid_fuels": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "generation_conventional_nuclear": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "generation_CHP": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "modeled_technology_renewables": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "modeled_technology_conventional": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "transfer_electricity": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "transfer_electricity_distribution": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "transfer_electricity_transition": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "transfer_gas": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "transfer_gas_distribution": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "transfer_gas_transition": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "transfer_heat": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "transfer_heat_distribution": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "transfer_heat_transition": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "network_coverage_AC": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "network_coverage_DC": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "network_coverage_TM": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "network_coverage_SN": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "network_coverage_other": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "network_coverage_other_text": {
+    "fill": 0.046,
+    "chars": 38.6,
+    "words": 4.7
+  },
+  "storage_electricity_battery": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "storage_electricity_kinetic": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "storage_electricity_CAES": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "storage_electricity_PHS": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "storage_electricity_chemical": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "storage_heat": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "storage_gas": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "user_behaviour": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "user_behaviour_yes_text": {
+    "fill": 0.157,
+    "chars": 153.0,
+    "words": 22
+  },
+  "changes_in_efficiency": {
+    "fill": 0.161,
+    "chars": 80.2,
+    "words": 11.3
+  },
+  "market_models": {
+    "fill": 0.108,
+    "chars": 16.9,
+    "words": 2
+  },
+  "geographical_coverage": {
+    "fill": 0.197,
+    "chars": 39.6,
+    "words": 5.4
+  },
+  "geo_resolution_global": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "geo_resolution_continents": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "geo_resolution_national_states": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "geo_resolution_TSO_regions": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "geo_resolution_federal_states": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "geo_resolution_regions": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "geo_resolution_NUTS_3": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "geo_resolution_municipalities": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "geo_resolution_districts": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "geo_resolution_households": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "geo_resolution_power_stations": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "geo_resolution_others": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "geo_resolution_others_text": {
+    "fill": 0.056,
+    "chars": 30.6,
+    "words": 4.9
+  },
+  "comment_on_geo_resolution": {
+    "fill": 0.272,
+    "chars": 118.1,
+    "words": 18.1
+  },
+  "time_resolution_anual": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "time_resolution_hour": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "time_resolution_15_min": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "time_resolution_1_min": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "observation_period_more_1_year": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "observation_period_less_1_year": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "observation_period_1_year": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "observation_period_other": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "observation_period_other_text": {
+    "fill": 0.118,
+    "chars": 29.0,
+    "words": 5.0
+  },
+  "time_resolution_other": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "time_resolution_other_text": {
+    "fill": 0.128,
+    "chars": 29.5,
+    "words": 4.8
+  },
+  "additional_dimensions_sector_ecological": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "additional_dimensions_sector_ecological_text": {
+    "fill": 0.128,
+    "chars": 29.4,
+    "words": 4.0
+  },
+  "additional_dimensions_sector_economic": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "additional_dimensions_sector_economic_text": {
+    "fill": 0.138,
+    "chars": 43.7,
+    "words": 6.1
+  },
+  "additional_dimensions_sector_social": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "additional_dimensions_sector_social_text": {
+    "fill": 0.036,
+    "chars": 83.8,
+    "words": 11.5
+  },
+  "additional_dimensions_sector_others": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "additional_dimensions_sector_others_text": {
+    "fill": 0.033,
+    "chars": 17,
+    "words": 2.4
+  },
+  "model_class_optimization_LP": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "model_class_optimization_MILP": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "model_class_optimization_Nonlinear": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "model_class_optimization_LP_MILP_Nonlinear_text": {
+    "fill": 0.046,
+    "chars": 25.8,
+    "words": 3.3
+  },
+  "model_class_simulation_Agentbased": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "model_class_simulation_System_Dynamics": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "model_class_simulation_Accounting_Framework": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "model_class_simulation_Game_Theoretic_Model": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "model_class_simulation_bottom_up": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "model_class_simulation_top_down": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "model_class_other": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "model_class_other_text": {
+    "fill": 0.072,
+    "chars": 33.4,
+    "words": 4.2
+  },
+  "short_description_of_mathematical_model_class": {
+    "fill": 0.213,
+    "chars": 151.2,
+    "words": 21.7
+  },
+  "mathematical_objective_cO2": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "mathematical_objective_costs": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "mathematical_objective_rEshare": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "mathematical_objective_other": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "mathematical_objective_other_text": {
+    "fill": 0.098,
+    "chars": 40.2,
+    "words": 5.4
+  },
+  "uncertainty_deterministic": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "uncertainty_Stochastic": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "uncertainty_Other": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "uncertainty_Other_text": {
+    "fill": 0.075,
+    "chars": 55.8,
+    "words": 7.2
+  },
+  "montecarlo": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "typical_computation_time": {
+    "fill": 0.587,
+    "chars": 16.3,
+    "words": 4
+  },
+  "typical_computation_hardware": {
+    "fill": 0.348,
+    "chars": 28.7,
+    "words": 5.4
+  },
+  "technical_data_anchored_in_the_model": {
+    "fill": 0.125,
+    "chars": 46,
+    "words": 7.7
+  },
+  "validation_models": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "validation_measurements": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "validation_others": {
+    "fill": 0.0,
+    "chars": 0,
+    "words": 0
+  },
+  "validation_others_text": {
+    "fill": 0.026,
+    "chars": 38.6,
+    "words": 5.5
+  },
+  "model_specific_properties": {
+    "fill": 0.22,
+    "chars": 217.1,
+    "words": 30.5
+  },
+  "example_research_questions": {
+    "fill": 0.328,
+    "chars": 185.9,
+    "words": 27.1
+  },
+  "properties_missed": {
+    "fill": 0.046,
+    "chars": 319.6,
+    "words": 43.1
+  },
+  "interfaces": {
+    "fill": 0.203,
+    "chars": 41.6,
+    "words": 6.3
+  },
+  "model_file_format": {
+    "fill": 1.0,
+    "chars": 4.0,
+    "words": 1
+  },
+  "model_file_format_other_text": {
+    "fill": 0.187,
+    "chars": 11.7,
+    "words": 2.4
+  },
+  "model_input": {
+    "fill": 1.0,
+    "chars": 4.2,
+    "words": 1
+  },
+  "model_input_other_text": {
+    "fill": 0.203,
+    "chars": 14.5,
+    "words": 2.5
+  },
+  "model_output": {
+    "fill": 1.0,
+    "chars": 4.2,
+    "words": 1
+  },
+  "model_output_other_text": {
+    "fill": 0.216,
+    "chars": 17.5,
+    "words": 3.0
+  },
+  "integrating_models": {
+    "fill": 0.144,
+    "chars": 59.9,
+    "words": 6.9
+  },
+  "integrated_models": {
+    "fill": 0.102,
+    "chars": 81.7,
+    "words": 9.7
+  }
+}

@@ -140,12 +140,14 @@
                           Details
                         </button>
                       </p>
-                      <div class="collapse" id="collapseWarningDetails{{ table.name }}">
+                      <div class="collapse"
+                           id="collapseWarningDetails{{ table.name }}">
                         License check failed because of:
                         {{ license_status.error }}
                         <br />
                         <br />
-                        <a href="{{ EXTERNAL_URLS.spdx_licenses }}" class="card-link">Please use a SPDX license identifier.</a>
+                        <a href="{{ EXTERNAL_URLS.spdx_licenses }}"
+                           class="card-link">Please use a SPDX license identifier.</a>
                         <br />
                         <br />
                         Please revisit your metadata and check the license

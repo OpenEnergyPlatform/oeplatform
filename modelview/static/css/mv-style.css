@@ -92,3 +92,42 @@
 .card-container .card-body {
   padding-top: 0.5em;
 }
+
+/* The factsheet editor's tag picker.
+ *
+ * The pills used to carry two `class` attributes -- `form-label` and
+ * `btn tag` -- and a duplicate attribute is dropped by the parser, so the
+ * second never applied: no padding, no height, just a coloured rectangle
+ * jammed against its neighbours. These rules replace what `.tag` was meant to
+ * give them, and add the spacing and the selected state the widget needs.
+ *
+ * The selected state used to be `border: 3px solid` from an inline <style> on
+ * each edit page, which pushed the pill's neighbours around every time one was
+ * clicked. An inset outline changes nothing about the box. */
+.tag-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4em;
+  align-items: center;
+}
+
+.tag-picker__pill {
+  display: inline-flex;
+  align-items: center;
+  height: auto;
+  padding: 0.25em 0.6em;
+  margin: 0;
+  border-radius: 0.5em;
+  cursor: pointer;
+  line-height: 1.3;
+}
+
+.tag-checkbox:checked + .tag-picker__pill {
+  font-weight: 600;
+  box-shadow: inset 0 0 0 2px currentColor;
+}
+
+.tag-checkbox:focus-visible + .tag-picker__pill {
+  outline: 2px solid #2972a6;
+  outline-offset: 2px;
+}

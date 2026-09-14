@@ -114,6 +114,10 @@ factsheet/static/factsheet/css
 
 /oeo
 ontologies/
+
+# Build-time OEKG SHACL shape + OEO label subset (manage.py fetch_oekg_shapes)
+/shapes/
+
 scripts/
 
 site/
@@ -132,3 +136,15 @@ saio/
 
 # local docs symlink
 .claude-docs
+
+# Agent context files. Deliberately untracked -- they hold working notes and
+# absolute paths into the maintainer's vault, not project documentation. Named
+# here so that a `git add -A` cannot pick them up again, which is how they
+# reached the remote once.
+CLAUDE.md
+CONTEXT.md
+
+# Benchmark output: the harnesses are committed, their results are not.
+# Bulk-upload slices live in --work-dir (default /tmp), and the maps' real
+# result rows live in the wayfinder assets folders, not in the repo.
+benchmarks/results/

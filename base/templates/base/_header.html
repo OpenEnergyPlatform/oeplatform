@@ -25,7 +25,8 @@
          aria-haspopup="true"
          aria-expanded="false">Database</a>
       <div class="dropdown-menu" aria-labelledby="navbarDropdownDatabase">
-        <a class="dropdown-item" href="{% url 'dataedit:topic-list' %}">Database</a>
+        <a class="dropdown-item"
+           href="{% url 'dataedit:topic-list' %}">Database</a>
         <a class="dropdown-item" href="{% url 'dataedit:wizard_create' %}">
           Add dataset
         </a>
@@ -47,7 +48,8 @@
            href="{{ EXTERNAL_URLS.oedatamodel }}"
            target="_blank"><i class="fas fa-external-link-alt"></i> OEDataModel
         </a>
-        <a class="dropdown-item" href="{% url 'dataedit:oemetabuilder' %}">OEMetaBuilder Tool</a>
+        <a class="dropdown-item"
+           href="{% url 'dataedit:oemetabuilder' %}">OEMetaBuilder Tool</a>
       </div>
     </li>
     <li class="nav-item dropdown">
@@ -61,7 +63,8 @@
       <div class="dropdown-menu" aria-labelledby="navbarDropdownFS">
         <a class="dropdown-item"
            href="{% url 'modelview:modellist' 'framework' %}">Framework Factsheet</a>
-        <a class="dropdown-item" href="{% url 'modelview:modellist' 'model' %}">Model Factsheet</a>
+        <a class="dropdown-item"
+           href="{% url 'modelview:modellist' 'model' %}">Model Factsheet</a>
       </div>
     </li>
     <li class="nav-item dropdown">
@@ -73,8 +76,10 @@
          aria-haspopup="true"
          aria-expanded="false">Scenario Bundles</a>
       <div class="dropdown-menu" aria-labelledby="navbarDropdownSB">
-        <a class="dropdown-item" href="{% url 'factsheet:factsheets_index' %}">Scenario Bundle</a>
-        <a class="dropdown-item" href="{% url 'oekg:main' %}">OEKG SPARQL-Query</a>
+        <a class="dropdown-item"
+           href="{% url 'factsheet:factsheets_index' %}">Scenario Bundle</a>
+        <a class="dropdown-item"
+           href="{% url 'oekg:main' %}">OEKG SPARQL-Query</a>
         <a class="dropdown-item"
            href="{{ EXTERNAL_URLS.oekg_chat }}"
            target="_blank"
@@ -91,12 +96,14 @@
          aria-expanded="false">Ontology</a>
       <div class="dropdown-menu" aria-labelledby="navbarDropdownOntology">
         <a class="dropdown-item" href="{% url 'ontology:index' %}">Overview</a>
-        <a class="dropdown-item" href="{% url 'oeo_viewer:index' %}">OEO Viewer</a>
+        <a class="dropdown-item"
+           href="{% url 'oeo_viewer:index' %}">OEO Viewer</a>
         <a class="dropdown-item"
            href="{% url 'ontology:ontology-entity-search' 'oeo' %}">OEO Search</a>
         <a class="dropdown-item"
            href="{% url 'ontology:oeo-class-detail' 'oeo' 'BFO_0000001' %}">OEO Entities</a>
-        <a class="dropdown-item" href="{% url 'ontology:oeo-s-c' %}">OEO Steering Committee</a>
+        <a class="dropdown-item"
+           href="{% url 'ontology:oeo-s-c' %}">OEO Steering Committee</a>
         <a class="dropdown-item"
            href="{{ EXTERNAL_URLS.tib_terminology_service }}"
            target="_blank"
@@ -122,7 +129,9 @@
            href="{{ EXTERNAL_URLS.tutorials_faq }}"
            target="_blank"><i class="fas fa-external-link-alt"></i> Questions
         </a>
-        <a class="dropdown-item" href="{{ EXTERNAL_URLS.ORKG }}" target="_blank"><i class="fas fa-external-link-alt"></i> ORKG
+        <a class="dropdown-item"
+           href="{{ EXTERNAL_URLS.ORKG }}"
+           target="_blank"><i class="fas fa-external-link-alt"></i> ORKG
         </a>
       </div>
     </li>
@@ -156,7 +165,8 @@
          aria-expanded="false">About</a>
       <div class="dropdown-menu" aria-labelledby="navbarDropdownAbout">
         <a class="dropdown-item" href="{% url 'base:about' %}">Overview</a>
-        <a class="dropdown-item" href="{% url 'base:oefamily-sc' %}">Open Energy Family Steering Committee</a>
+        <a class="dropdown-item"
+           href="{% url 'base:oefamily-sc' %}">Open Energy Family Steering Committee</a>
         <a class="dropdown-item"
            href="{{ EXTERNAL_URLS.compendium }}"
            target="_blank"><i class="fas fa-external-link-alt"></i> Compendium</a>
@@ -183,9 +193,11 @@
   {% else %}
     {% if ACCOUNT_ALLOW_REGISTRATION %}
       {# URL provided by django-allauth/account/urls.py #}
-      <a href="{% url 'account_signup' %}" class="btn btn-info btn-sm m-1">{% translate "Sign Up" %}</a>
+      <a href="{% url 'account_signup' %}"
+         class="btn btn-info btn-sm m-1">{% translate "Sign Up" %}</a>
     {% endif %}
     {# URL provided by django-allauth/account/urls.py #}
-    <a class="btn btn-info btn-sm m-1" href="{% url 'account_login' %}">{% translate "Sign In" %}</a>
+    <a class="btn btn-info btn-sm m-1"
+       href="{% url 'account_login' %}">{% translate "Sign In" %}</a>
   {% endif %}
 </div>

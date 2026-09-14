@@ -4,16 +4,14 @@
 {% load compress %}
 {% block after-head %}
   {% compress css %}
-    <link rel="stylesheet"
-          type="text/css"
-          href="{% static 'css/index-style.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/index-style.css' %}" />
   {% endcompress %}
 {% endblock %}
 {% block main %}
   <div class="index-home">
     <div class="index-group">
       <div class="index-padding">
-        {% include 'base/messages.html' %}
+        {% include "base/messages.html" %}
         <h3>Open Energy Platform</h3>
         <span class="subheader">Make your energy system modelling process transparent!</span>
         <div class="index-tile-container">
@@ -43,7 +41,8 @@
           <div class="index-tile index-tile-colored index-tile-color-2">
             <!-- <img src="{% static 'img/welcome/OpenEnergyFamily_Logo_Factsheets_icon.svg' %}"
       alt="Factsheets"> -->
-            <img src="{% static 'img/welcome/bundles.png' %}" alt="Scenario Bundle" />
+            <img src="{% static 'img/welcome/bundles.png' %}"
+                 alt="Scenario Bundle" />
             <div class="inner-index-tile">
               <div class="panel-description">
                 <h2>Scenario Bundles</h2>
@@ -108,7 +107,8 @@
     <div class="index-about-container-background">
       <div class="index-about-container">
         <div class="index-about-column">
-          <img src="{% static 'img/welcome/about-process-modelling.svg' %}" alt="" />
+          <img src="{% static 'img/welcome/about-process-modelling.svg' %}"
+               alt="" />
           <b>API</b>
           <span class="alternative">
             Learn how to download and publish open data on the OEP using the
