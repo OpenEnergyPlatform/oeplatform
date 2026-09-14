@@ -26,6 +26,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 from rest_framework import serializers
 
 from oekg.bundles import BUNDLE_FIELDS, SCENARIO_FIELDS, STUDY_REPORT_FIELDS
+from oekg.dataset_links import DIRECTIONS, TARGETS
 from oekg.fields import ENUM
 from oekg.shape import constraint_message, enumeration
 
@@ -203,3 +204,25 @@ class ScenarioBundleCreateSerializer(ScenarioBundleSerializer):
 
     scenarios = ScenarioSerializer(many=True, required=False)
     study_reports = StudyReportSerializer(many=True, required=False)
+
+
+class DatasetLinkSerializer(ClosedSerializer):
+    """A scenario's link to data on this platform: three keys, all required.
+
+    Not a field table, because a dataset link has no fields of its own: the
+    label, the URL and the identifier the shape requires are all derived from
+    these three. That is also why there is no partial form of this serializer --
+    a link is added or removed, never edited.
+    """
+
+    # "input" or "output": which way the data flowed.
+    type = serializers.ChoiceField(choices=[d.name for d in DIRECTIONS])
+    # "table" or "dataset": whether this points at one OEP Table or at an OEP
+    # Dataset catalogue entry. The two are not equivalent -- a table reference
+    # is reproducible, a dataset reference stays current as its membership
+    # changes -- and choosing between them is the client's call.
+    ref = serializers.ChoiceField(choices=[t.name for t in TARGETS])
+    # The name of that table or dataset on this platform. Not checked against
+    # the platform: a link may outlive what it points at, and a read says
+    # whether it still resolves.
+    name = serializers.CharField()

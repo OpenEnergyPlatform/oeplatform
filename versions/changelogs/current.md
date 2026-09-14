@@ -153,6 +153,21 @@ SPDX-License-Identifier: CC0-1.0
   person. The link to the published document is stored as the document's own
   address rather than as text beside it
 
+- A scenario's input and output datasets can now be linked through the REST API:
+  `POST` and `GET` under
+  `/api/v0/scenario-bundles/<uid>/scenarios/<sid>/datasets/`. A link says which
+  direction it is and whether it points at one OEP table or at a whole OEP
+  dataset - the first is the reproducible citation, the second stays current as
+  the dataset's membership changes. There is deliberately no way to edit a link:
+  everything it holds follows from those three answers, so it is added or
+  removed. A link is never checked against what it points at and never stops
+  anyone deleting it: a bundle is a published record, so "this scenario used
+  that table" stays on the record afterwards, and nobody's citation can hold
+  somebody else's data hostage. The same target cannot be linked twice in the
+  same direction. This supersedes the older `manage-datasets/` route, which
+  writes relations the canonical shape does not validate and no identifier at
+  all
+
 - Changing a scenario bundle through the REST API is now judged by what the
   change adds, not by whether the whole bundle is perfect. Bundles written
   before the API exists often miss fields the shape requires - a sector, a

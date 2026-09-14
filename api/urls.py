@@ -77,6 +77,7 @@ from api.views import (
     usrprop_api_view,
 )
 from oekg.api_views import ScenarioBundleAPIView, ScenarioBundleCollectionAPIView
+from oekg.dataset_link_views import DatasetLinkAPIView, DatasetLinkCollectionAPIView
 from oekg.history_views import ScenarioBundleHistoryAPIView
 from oekg.scenario_views import ScenarioAPIView, ScenarioCollectionAPIView
 from oekg.study_report_views import (
@@ -361,6 +362,21 @@ urlpatterns_v0 = [
         "scenario-bundles/<uid>/study-reports/<pid>/",
         StudyReportAPIView.as_view(),
         name="scenario-bundle-study-report",
+    ),
+    # An OEKG input/output dataset: the link from a scenario to data held on
+    # this platform. NOT the OEP Dataset catalogue entity, and NOT the tables
+    # of the scenario topic -- the nested path is what disambiguates the three.
+    # Add-and-remove only, so no `PATCH`: every field is derived from the
+    # link's type, target and name.
+    path(
+        "scenario-bundles/<uid>/scenarios/<sid>/datasets/",
+        DatasetLinkCollectionAPIView.as_view(),
+        name="scenario-bundle-dataset-links",
+    ),
+    path(
+        "scenario-bundles/<uid>/scenarios/<sid>/datasets/<did>/",
+        DatasetLinkAPIView.as_view(),
+        name="scenario-bundle-dataset-link",
     ),
     path(
         "datasets/",
