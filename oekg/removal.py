@@ -97,6 +97,13 @@ def plan_removal(store: GraphStore, subgraph: Graph, target: URIRef) -> Removal:
     and if it has stopped being true nothing is written and the caller gets a
     `409`. The bundle's own version cannot cover this: a write to *another*
     bundle does not move it.
+
+    **That is a deliberate departure from the design note**, which expected the
+    guard to be one `ASK` riding inside the atomic update at no extra round
+    trip. It cannot be only that and also report which nodes were downgraded,
+    and the note asks for both. So the enforcement is where the note put it --
+    in the write's own ``WHERE``, atomic -- and the report costs one additional
+    `SELECT`, next to the subgraph read every write on this path already makes.
     """
     candidates = _candidates(subgraph, target)
     incoming = _incoming_references(store, candidates)

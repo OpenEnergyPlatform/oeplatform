@@ -502,7 +502,7 @@ class GuardClauseTest(SubResourceDeleteTestCase):
             self.reference_from_outside(scenario)
             return removal
 
-        with mock.patch("oekg.part_views.plan_removal", plan_then_interfere):
+        with mock.patch("oekg.subresource_views.plan_removal", plan_then_interfere):
             response = self.delete(self.scenario_url(uid, sid), etag)
 
         self.assertEqual(response.status_code, 409, response.data)
@@ -523,7 +523,7 @@ class GuardClauseTest(SubResourceDeleteTestCase):
             self.reference_from_outside(scenario)
             return removal
 
-        with mock.patch("oekg.part_views.plan_removal", plan_then_interfere):
+        with mock.patch("oekg.subresource_views.plan_removal", plan_then_interfere):
             conflict = self.delete(self.scenario_url(uid, sid), etag)
         self.assertEqual(conflict.status_code, 409, conflict.data)
 

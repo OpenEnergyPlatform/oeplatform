@@ -21,7 +21,6 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 from django.urls import reverse
-from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rdflib import Graph
 from rest_framework import status
 from rest_framework.response import Response
@@ -46,11 +45,10 @@ from oekg.dataset_links import (
 )
 from oekg.fields import mint_identifier
 from oekg.graph_store import GraphStoreError
-from oekg.history import CREATE, DELETE
-from oekg.removal import plan_removal
+from oekg.history import CREATE
 from oekg.serializers import READ_ONLY_CONTAINER, DatasetLinkSerializer
 from oekg.shape import ShapeUnavailable
-from oekg.subresource_views import SubResourceViewMixin
+from oekg.subresource_views import SubResourceViewMixin, describes_a_removal
 from oekg.writes import BundleWrite, open_bundle
 
 
@@ -161,16 +159,7 @@ class DatasetLinkAPIView(DatasetLinkViewMixin, OekgAPIView):
             return _no_such_link(did)
         return self.link_response(write, sid, did)
 
-    @extend_schema(
-        responses={
-            200: OpenApiResponse(
-                description=(
-                    "Removed. The body names what was deleted and what was "
-                    "only unlinked, which no status code can say."
-                )
-            )
-        }
-    )
+    @describes_a_removal
     def delete(self, request, uid, sid, did):
         """Remove one link. Its target is not touched and never was.
 
@@ -188,27 +177,17 @@ class DatasetLinkAPIView(DatasetLinkViewMixin, OekgAPIView):
             if node is None:
                 return _no_such_link(did)
             write.require_write(request)
-
-            removal = plan_removal(write.store, write.pre_state, node)
-            write.apply(
-                removed=removal.removed,
-                added=Graph(),
-                verb=DELETE,
-                guard=removal.guard,
+            return self.removed(
+                write,
+                node,
                 resource_type=direction.node_class,
                 resource_uuid=did,
+                scenario=sid,
             )
         except ShapeUnavailable as error:
             return shape_unavailable(error)
         except GraphStoreError as error:
             return store_unavailable(error, "written to")
-
-        return self.removed(
-            removal,
-            write,
-            scenario=sid,
-            resource={"type": str(direction.node_class), "uid": did},
-        )
 
 
 def _no_such_link(did: str) -> Response:
