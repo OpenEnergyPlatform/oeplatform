@@ -156,6 +156,11 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
+- Error responses from the scenario-bundle API carried the text `"None"` where
+  they should have carried an empty value, and would have turned numbers into
+  text. Introduced in the previous release cycle and not shipped
+  [(#2447)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2447)
+
 - Pin `vite` to 8.0.13. From 8.0.14 the dependency pre-bundler emits chunks that
   reference an initialiser another chunk no longer defines, so any page using
   MUI with `@emotion/react` — the scenario-bundle UI among them — dies on
