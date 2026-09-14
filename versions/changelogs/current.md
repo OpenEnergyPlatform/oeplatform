@@ -144,6 +144,15 @@ SPDX-License-Identifier: CC0-1.0
   problem is still refused, and the refusal now also says how many problems the
   bundle already had. Creating a bundle still has to be complete
 
+- New management command `repair_oekg_shape_violations` fixes the
+  scenario-bundle data that no longer matches the shape it is validated
+  against - as far as a machine can. It reports by default and changes nothing
+  without `--apply`, and writes a JSON record of every change before making it.
+  Only the safe repair runs by default; the two that lose or invent information
+  have to be asked for by name, and the command says which entry it dropped and
+  which date it made up
+  [(#2449)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2449)
+
 - New management command `repair_factsheet_tags` repairs the factsheets the old
   tag editor damaged - on production 23 of 339 carry a copy of the whole tag
   table, holding 95% of all factsheet tag assignments. It reports by default and
