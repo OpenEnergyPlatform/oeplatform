@@ -233,8 +233,26 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Documentation updates
 
+- The scenario-bundle developer documentation said the sector-division and
+  study-descriptor dropdowns were hardcoded lists. Both have been served from
+  the OEO for some time; the page now describes where each list actually comes
+  from, that a division can be modelled either as individuals or as a class
+  whose members point back at it, and which components read the descriptors and
+  by which route
+  [(#2450)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2450)
+
+- Scenario Bundles and Model & Framework Factsheets list both of their pages in
+  the navigation. The overview page was the section's own landing page and so
+  had no entry of its own, which left each section looking as though it held a
+  single sub-page
+  [(#2450)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2450)
+
 - New feature documentation for Model/Framework factsheets on mkdocs: what the
   pages do and who may do what, plus an architecture page recording how the list
   page is built, the release order for the tag repair, and the test seams.
 
 ## Code Quality
+
+- Remove `StudyDescriptors.js`, the hardcoded study-descriptor array replaced by
+  the OEO-served list. Nothing imported it any more
+  [(#2450)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2450)
