@@ -114,7 +114,13 @@ def _changes(entry: OEKG_Modifications, uid: str):
     """
     if entry.era != API_ERA:
         return None
-    return changed_fields(uid, _graph(entry.removed), _graph(entry.added))
+    return changed_fields(
+        uid,
+        _graph(entry.removed),
+        _graph(entry.added),
+        entry.resource_type,
+        entry.resource_uuid,
+    )
 
 
 def _triples(entry: OEKG_Modifications) -> dict:

@@ -402,6 +402,20 @@ class DatasetLinkHistoryTest(DatasetLinkTestCase):
         self.assertEqual(entry.resource_type, str(INPUT_CLASS))
         self.assertEqual(entry.bundle_id, uid)
 
+    def test_a_links_changes_name_no_fields_because_it_has_none(self):
+        # Not a gap: a dataset link has no fields -- everything it holds
+        # follows from its type, target and name, which is the same fact that
+        # gives it no PATCH. A change to one is the link, whole, and the entry
+        # already names which link it was.
+        uid, _, did, _ = self.with_one_link()
+
+        results = self.client.get(
+            reverse("api:scenario-bundle-history", kwargs={"uid": uid})
+        ).data["results"]
+
+        self.assertEqual({c["field"] for c in results[0]["changes"]}, {None})
+        self.assertEqual(results[0]["resource"]["uid"], did)
+
     def test_the_history_reads_the_link_back(self):
         uid, _, did, _ = self.with_one_link()
 

@@ -429,6 +429,36 @@ class StudyReportHistoryTest(StudyReportTestCase):
         )
         self.assertEqual(verbs, [CREATE, UPDATE])
 
+    def test_the_history_names_the_field_that_changed(self):
+        # In the study report's vocabulary, not the bundle's: the two tables
+        # share `label` and agree about almost nothing else.
+        uid, rid, etag = self.with_one_report()
+        self.patch_report(uid, rid, {"doi": "10.1000/abc"}, etag)
+
+        results = self.client.get(
+            reverse("api:scenario-bundle-history", kwargs={"uid": uid})
+        ).data["results"]
+
+        self.assertEqual(
+            [(c["field"], c["added"]) for c in results[0]["changes"]],
+            [("doi", ["10.1000/abc"])],
+        )
+
+    def test_an_authors_own_label_is_not_read_as_the_reports_label(self):
+        # The trap this rendering has to avoid: a minted author carries an
+        # rdfs:label into the same diff, and `label` is a field of the report.
+        # Attributing it would say the report was renamed when an author was
+        # added.
+        uid, rid, etag = self.with_one_report()
+        self.patch_report(uid, rid, {"authors": [{"label": "Grace Hopper"}]}, etag)
+
+        results = self.client.get(
+            reverse("api:scenario-bundle-history", kwargs={"uid": uid})
+        ).data["results"]
+
+        named = {c["field"] for c in results[0]["changes"] if c["field"]}
+        self.assertEqual(named, {"authors"})
+
     def test_the_history_reads_the_report_back(self):
         uid, rid, _ = self.with_one_report()
 

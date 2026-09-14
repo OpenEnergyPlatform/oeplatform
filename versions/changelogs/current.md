@@ -187,6 +187,11 @@ SPDX-License-Identifier: CC0-1.0
   recorded.
   [(#2385)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2385)
 
+- A scenario bundle's change history now names the fields a write to one of its
+  parts changed. Previously only a change to the bundle's own fields was named;
+  a change to a scenario factsheet or a study report read back as a list of raw
+  predicates, which is what the history exists not to be
+
 ## Bugs
 
 - Error responses from the scenario-bundle API carried the text `"None"` where

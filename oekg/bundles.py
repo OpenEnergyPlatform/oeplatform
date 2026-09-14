@@ -156,6 +156,21 @@ STUDY_REPORT = BundlePart(
 # Every part a bundle can carry, in the order a create builds them.
 BUNDLE_PARTS = (SCENARIO, STUDY_REPORT)
 
+# Which table's names describe a change to which resource. The history knows
+# the class each write was about and needs the field names for it; without
+# this it could only name the bundle's fields, and every write to a part would
+# read back as a list of bare predicates.
+#
+# A dataset link is deliberately absent. It has no field table because it has
+# no fields -- everything it holds follows from its type, target and name,
+# which is the same fact that gives it no `PATCH`. A change to one is the link,
+# whole.
+FIELDS_BY_CLASS = {
+    BUNDLE_CLASS: BUNDLE_FIELDS,
+    **{part.node_class: part.fields for part in BUNDLE_PARTS},
+}
+PART_BY_CLASS = {part.node_class: part for part in BUNDLE_PARTS}
+
 
 def bundle_iri(uid: str) -> URIRef:
     """The IRI a bundle lives at -- the same one the user interface reads."""
