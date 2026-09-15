@@ -57,6 +57,7 @@ from factsheet.models import ScenarioBundleAccessControl
 from oekg.acronyms import acronym_conflict, acronym_is_free, acronym_taken
 from oekg.api_support import (
     OekgAPIView,
+    expansions,
     is_minted_identifier,
     no_such_bundle,
     shape_unavailable,
@@ -73,6 +74,7 @@ from oekg.bundles import (
 from oekg.fields import mint_identifier, referenced_node_iris
 from oekg.graph_store import GraphStore, GraphStoreError
 from oekg.history import CREATE, UPDATE, record_write
+from oekg.labels import LABELS, labelled
 from oekg.part_views import part_bodies
 from oekg.reads import labels_of, read_bundle
 from oekg.serializers import (
@@ -125,6 +127,12 @@ class ScenarioBundleCollectionAPIView(OekgAPIView):
         holding no state between runs finds its own bundle again, and the
         `_meta` it gets back carries the version its next write must send.
         """
+        # The listing offers no expansion, and the refusal says so rather than
+        # ignoring the parameter. Expanding a listing is the thing a summary
+        # exists not to be: the expensive path would live on the public,
+        # unauthenticated endpoint, and eventually be pointed at the whole
+        # corpus. A resource read is where a term gets resolved.
+        expansions(request, ())
         filters = SummaryFilters.from_query(request.query_params)
         paginator = ScenarioBundlePagination()
         try:
@@ -246,6 +254,7 @@ class ScenarioBundleAPIView(OekgAPIView):
         return [IsAuthenticated()]
 
     def get(self, request, uid):
+        labels = LABELS in expansions(request, (LABELS,))
         # Identifiers are minted here, so anything that is not one cannot name a
         # bundle. Checked before it reaches a query, where an IRI-unsafe
         # character would raise out of rdflib as a 500 rather than a 404.
@@ -261,7 +270,7 @@ class ScenarioBundleAPIView(OekgAPIView):
         except GraphStoreError as error:
             return store_unavailable(error, "read")
 
-        return _bundle_response(uid, subgraph, version)
+        return _bundle_response(uid, subgraph, version, labels=labels)
 
     def patch(self, request, uid):
         serializer = ScenarioBundleSerializer(data=request.data, partial=True)
@@ -327,7 +336,9 @@ def _all_referenced_iris(payload: dict) -> list:
     return iris
 
 
-def _represent(uid: str, graph: Graph, version: BundleVersion) -> dict:
+def _represent(
+    uid: str, graph: Graph, version: BundleVersion, labels: bool = False
+) -> dict:
     """A read returns exactly what a write accepts, plus read-only data.
 
     **Sub-resources are nested here and rejected on `PATCH`.** That looks
@@ -337,16 +348,20 @@ def _represent(uid: str, graph: Graph, version: BundleVersion) -> dict:
     partial by nature and nobody sends a whole read to one. Nesting on read is
     what lets a client send back what it read without stripping anything.
     """
-    body = {
-        **bundle_payload(graph, uid),
-        READ_ONLY_CONTAINER: {
-            "uid": uid,
-            "iri": str(bundle_iri(uid)),
-            "version": version.number,
+    body = labelled(
+        {
+            **bundle_payload(graph, uid),
+            READ_ONLY_CONTAINER: {
+                "uid": uid,
+                "iri": str(bundle_iri(uid)),
+                "version": version.number,
+            },
         },
-    }
+        BUNDLE_FIELDS,
+        labels,
+    )
     for part in BUNDLE_PARTS:
-        body[part.payload_key] = part_bodies(graph, uid, part)
+        body[part.payload_key] = part_bodies(graph, uid, part, labels)
     return body
 
 
@@ -367,9 +382,10 @@ def _bundle_response(
     graph: Graph,
     version: BundleVersion,
     history_recorded: bool = True,
+    labels: bool = False,
 ) -> Response:
     """The body, plus the entity tag every read has to carry."""
-    body = _note_history_gap(_represent(uid, graph, version), history_recorded)
+    body = _note_history_gap(_represent(uid, graph, version, labels), history_recorded)
     response = Response(body)
     response["ETag"] = version.etag
     return response

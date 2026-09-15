@@ -32,7 +32,12 @@ from rdflib import Graph
 from rest_framework import status
 from rest_framework.response import Response
 
-from oekg.api_support import OekgAPIView, shape_unavailable, store_unavailable
+from oekg.api_support import (
+    OekgAPIView,
+    expansions,
+    shape_unavailable,
+    store_unavailable,
+)
 from oekg.bundles import (
     BundlePart,
     build_part_graph,
@@ -45,6 +50,7 @@ from oekg.bundles import (
 from oekg.fields import mint_identifier, referenced_node_iris, resource_delta
 from oekg.graph_store import GraphStoreError
 from oekg.history import CREATE, UPDATE
+from oekg.labels import LABELS, labelled
 from oekg.serializers import READ_ONLY_CONTAINER
 from oekg.shape import ShapeUnavailable
 from oekg.subresource_views import SubResourceViewMixin, describes_a_removal
@@ -63,8 +69,14 @@ class BundlePartViewMixin(SubResourceViewMixin):
         state = self.state_of(write)
         node = find_part(state, write.uid, self.part, pid)
         return self.represented(
-            part_body(state, node, write.uid, self.part), write, code
+            part_body(state, node, write.uid, self.part, self.resolving()),
+            write,
+            code,
         )
+
+    def resolving(self) -> bool:
+        """Whether this request asked for its picked terms to be resolved."""
+        return LABELS in expansions(self.request, (LABELS,))
 
     def not_found(self, pid: str) -> Response:
         return Response(
@@ -82,7 +94,9 @@ class BundlePartCollectionAPIView(BundlePartViewMixin, OekgAPIView):
         except GraphStoreError as error:
             return store_unavailable(error, "read")
         return self.paginated(
-            request, part_bodies(write.pre_state, write.uid, self.part), write
+            request,
+            part_bodies(write.pre_state, write.uid, self.part, self.resolving()),
+            write,
         )
 
     def post(self, request, uid):
@@ -214,22 +228,29 @@ class BundlePartAPIView(BundlePartViewMixin, OekgAPIView):
             return store_unavailable(error, "written to")
 
 
-def part_bodies(graph: Graph, uid: str, part: BundlePart) -> list:
+def part_bodies(graph: Graph, uid: str, part: BundlePart, labels: bool = False) -> list:
     """Every part of this kind, in the form a write accepts them nested."""
     bodies = [
-        part_body(graph, node, uid, part) for node in part_nodes(graph, uid, part)
+        part_body(graph, node, uid, part, labels)
+        for node in part_nodes(graph, uid, part)
     ]
     bodies.sort(key=lambda body: body[part.sort_field] or "")
     return bodies
 
 
-def part_body(graph: Graph, node, uid: str, part: BundlePart) -> dict:
-    return {
-        **part_payload(graph, node, part),
-        READ_ONLY_CONTAINER: {
-            "uid": part_uid(graph, node),
-            "iri": str(node),
-            "type": str(part.node_class),
-            "bundle": uid,
+def part_body(
+    graph: Graph, node, uid: str, part: BundlePart, labels: bool = False
+) -> dict:
+    return labelled(
+        {
+            **part_payload(graph, node, part),
+            READ_ONLY_CONTAINER: {
+                "uid": part_uid(graph, node),
+                "iri": str(node),
+                "type": str(part.node_class),
+                "bundle": uid,
+            },
         },
-    }
+        part.fields,
+        labels,
+    )

@@ -20,15 +20,14 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 import json
 
 from rdflib import Graph
-from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
 
 from factsheet.models import API_ERA, OEKG_Modifications
 from oekg.api_support import (
     OekgAPIView,
     bundle_exists,
+    expansions,
     no_such_bundle,
     store_unavailable,
 )
@@ -52,17 +51,7 @@ class ScenarioBundleHistoryAPIView(OekgAPIView):
     permission_classes = [AllowAny]
 
     def get(self, request, uid):
-        expand = request.query_params.get("expand")
-        if expand not in (None, "", TRIPLES):
-            return Response(
-                {
-                    "detail": (
-                        f"{expand!r} is not something this endpoint can expand. "
-                        f"The only value is {TRIPLES!r}."
-                    )
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        asked = expansions(request, (TRIPLES,))
 
         # Existence is asked of the graph, not of the history: a bundle with no
         # entries is a real bundle the user interface wrote, and answering 404
@@ -85,7 +74,7 @@ class ScenarioBundleHistoryAPIView(OekgAPIView):
         paginator = HistoryPagination()
         page = paginator.paginate_queryset(entries, request, view=self)
         return paginator.get_paginated_response(
-            [_represent(entry, uid, with_triples=expand == TRIPLES) for entry in page]
+            [_represent(entry, uid, with_triples=TRIPLES in asked) for entry in page]
         )
 
 

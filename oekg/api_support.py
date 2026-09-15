@@ -7,8 +7,9 @@ scenarios, study reports, dataset links, delete, replace. Left where they were,
 `api_views` would become a utility module by accident, and would change
 whenever any endpoint's conventions changed.
 
-What belongs here: throttling, the refusals more than one endpoint gives, and
-the existence check they all make first. What does not: anything specific to
+What belongs here: throttling, the refusals more than one endpoint gives, the
+existence check they all make first, and the reading of the one query parameter
+more than one endpoint answers. What does not: anything specific to
 one resource, which stays with that resource's view.
 
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
@@ -75,6 +76,43 @@ class OekgAPIView(APIView):
         if isinstance(exc, Refused):
             return exc.response
         return super().handle_exception(exc)
+
+
+def expansions(request, allowed: tuple) -> frozenset:
+    """The expansions this request asked for, refusing one nobody offers.
+
+    `?expand=` is the one query parameter more than one endpoint reads, so the
+    rule for an unrecognised value lives here rather than being written again
+    per endpoint with a slightly different wording. It is the same rule an
+    unknown key gets on a write: refused, not ignored -- a client that
+    misspells `labels` should be told, not handed the unresolved
+    representation and left to work out why the labels are missing.
+
+    Comma-separated, so asking for two is asking once. Raises ``Refused``.
+    """
+    asked = frozenset(
+        value.strip()
+        for value in (request.query_params.get("expand") or "").split(",")
+        if value.strip()
+    )
+    unknown = sorted(asked - set(allowed))
+    if unknown:
+        raise Refused(
+            Response(
+                {
+                    "detail": (
+                        "%s is not something this endpoint can expand. It "
+                        "offers %s."
+                        % (
+                            ", ".join(repr(value) for value in unknown),
+                            ", ".join(repr(value) for value in allowed) or "nothing",
+                        )
+                    )
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        )
+    return asked
 
 
 def is_minted_identifier(uid: str) -> bool:
