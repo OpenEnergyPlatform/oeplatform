@@ -756,9 +756,33 @@ paths:
         '200':
           description: No response body
   /api/v0/scenario-bundles/:
+    get:
+      operationId: scenario_bundles_list
+      description: |-
+        A page of summaries: identifier, acronym, label, version and counts.
+
+        Not bundles. A listing that returned whole bundles would carry every
+        client the whole corpus, and would drag the relational resolution a
+        dataset link needs across every link of every bundle on a public
+        endpoint -- which is how the two listings next door on this platform
+        became unusable.
+
+        `?acronym=` is the filter the contract depends on: it is how a pipeline
+        holding no state between runs finds its own bundle again, and the
+        `_meta` it gets back carries the version its next write must send.
+      tags:
+      - scenario-bundles
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
     post:
       operationId: scenario_bundles_create
-      description: '`POST` creates a scenario bundle.'
+      description: '`GET` lists scenario bundles as summaries. `POST` creates one.'
       tags:
       - scenario-bundles
       security:
@@ -771,9 +795,17 @@ paths:
   /api/v0/scenario-bundles/{uid}/:
     get:
       operationId: scenario_bundles_retrieve
-      description: '`GET` returns one scenario bundle, publicly. `PATCH` changes a
-        field.'
+      description: '`GET` reads one, publicly. `PATCH` changes a field. `DELETE` removes
+        it.'
       parameters:
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+          - json-ld
+          - turtle
       - in: path
         name: uid
         schema:
@@ -791,8 +823,8 @@ paths:
           description: No response body
     patch:
       operationId: scenario_bundles_partial_update
-      description: '`GET` returns one scenario bundle, publicly. `PATCH` changes a
-        field.'
+      description: '`GET` reads one, publicly. `PATCH` changes a field. `DELETE` removes
+        it.'
       parameters:
       - in: path
         name: uid
@@ -808,6 +840,52 @@ paths:
       responses:
         '200':
           description: No response body
+    delete:
+      operationId: scenario_bundles_destroy
+      description: |-
+        Delete this bundle, in the second of two steps.
+
+        The first step is the read a client needs anyway: it returns the
+        version to guard on and the acronym to retype. This step requires both,
+        and they defend different accidents -- the version catches a bundle
+        that changed since it was read, the acronym catches the wrong bundle
+        entirely, which is the realistic failure for a pipeline looping over
+        identifiers and the one a version cannot see.
+
+        **The order of the refusals is the contract**, not an implementation
+        detail: existence, then ownership, then the version, then the
+        confirmation. A repeated delete therefore answers `404`, and a client
+        may treat that as success. Answering `204` to it instead would swallow
+        the wrong-identifier delete -- a bundle that is gone has no acronym
+        left to check a confirmation against, so a blanket success would
+        confirm anything.
+
+        `200` with a body rather than `204`, as for a part: the typed
+        containment walk can decide that a node another bundle still cites is
+        unlinked rather than deleted, and no status code can say that.
+      parameters:
+      - in: query
+        name: confirm
+        schema:
+          type: string
+        description: 'The bundle''s acronym, retyped. It guards the accident the version
+          cannot: right verb, wrong identifier.'
+        required: true
+      - in: path
+        name: uid
+        schema:
+          type: string
+        required: true
+      tags:
+      - scenario-bundles
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          description: Deleted. The body names what was deleted and what was only
+            unlinked, which no status code can say.
   /api/v0/scenario-bundles/{uid}/history/:
     get:
       operationId: scenario_bundles_history_retrieve
