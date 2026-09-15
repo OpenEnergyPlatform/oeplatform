@@ -279,6 +279,19 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Documentation updates
 
+- The scenario-bundle architecture guide now documents the **second** write
+  path. The feature has had two since the REST API landed - the browser's, which
+  writes triple by triple, and the API's, which validates the whole bundle
+  against the canonical shape and then writes it in one atomic request - but
+  only the first was described. The new section explains what differs before
+  someone changes it (one request is one transaction, the shape is checked on
+  the result rather than on the change, a write is refused only for problems it
+  adds, and every write is guarded by the bundle's version) and generates the
+  module reference from the source, so it cannot drift. The reference for the
+  browser's views is no longer generated on two pages at once; the feature
+  overview links to the guide that owns it
+  [(#2458)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2458)
+
 - The scenario-bundle developer documentation said the sector-division and
   study-descriptor dropdowns were hardcoded lists. Both have been served from
   the OEO for some time; the page now describes where each list actually comes
