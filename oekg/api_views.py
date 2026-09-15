@@ -80,9 +80,8 @@ from oekg.fields import DC, mint_identifier, referenced_node_iris
 from oekg.graph_store import GraphStore, GraphStoreError
 from oekg.history import CREATE, UPDATE, record_write
 from oekg.part_views import part_bodies
-from oekg.preconditions import CONFIRM, confirmation_refusal
+from oekg.preconditions import CONFIRM
 from oekg.reads import labels_of, read_bundle
-from oekg.removal import plan_bundle_removal
 from oekg.serializers import (
     READ_ONLY_CONTAINER,
     ScenarioBundleCreateSerializer,
@@ -319,34 +318,25 @@ class ScenarioBundleAPIView(OekgAPIView):
         try:
             write = open_bundle(request, uid)
             write.require_write(request)
-            acronym = write.pre_state.value(bundle_iri(uid), DC.acronym)
-            refusal = confirmation_refusal(
-                request, str(acronym) if acronym is not None else None
-            )
-            if refusal is not None:
-                return refusal
-
+            acronym = write.confirm_deletion(request)
             version_before = write.version.number
-            removal = plan_bundle_removal(write.store, write.pre_state, uid)
-            write.destroy(removal, str(acronym))
+            removal = write.destroy(acronym)
         except GraphStoreError as error:
             return store_unavailable(error, "written to")
 
-        body = {
-            "deleted": list(removal.deleted),
-            "unlinked": list(removal.unlinked),
-            READ_ONLY_CONTAINER: {
-                "uid": uid,
-                "iri": str(bundle_iri(uid)),
-                "acronym": str(acronym),
-                "version_before": version_before,
-            },
-        }
-        if not write.history_recorded:
-            body[READ_ONLY_CONTAINER]["history_recorded"] = False
-        if not write.ownership_forgotten:
-            body[READ_ONLY_CONTAINER]["ownership_forgotten"] = False
-        return Response(body)
+        return Response(
+            {
+                "deleted": list(removal.deleted),
+                "unlinked": list(removal.unlinked),
+                READ_ONLY_CONTAINER: {
+                    "uid": uid,
+                    "iri": str(bundle_iri(uid)),
+                    "acronym": acronym,
+                    "version_before": version_before,
+                    **write.gaps,
+                },
+            }
+        )
 
 
 def _all_referenced_iris(payload: dict) -> list:

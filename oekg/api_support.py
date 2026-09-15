@@ -105,9 +105,18 @@ def bundle_exists(uid: str) -> bool:
     """
     if not is_minted_identifier(uid):
         return False
-    return GraphStore.from_settings().ask(
-        "ASK { %s a %s }" % (bundle_iri(uid).n3(), BUNDLE_CLASS.n3())
-    )
+    return bundle_in(GraphStore.from_settings(), uid)
+
+
+def bundle_in(store: GraphStore, uid: str) -> bool:
+    """The same question, asked of a store the caller already has.
+
+    Separate from `bundle_exists` because a delete has to ask it of **its own**
+    store, inside its own request, and because the two must not drift: a write
+    reads this back to find out whether its delete applied, and a query that
+    had drifted would report a success that did not happen.
+    """
+    return store.ask("ASK { %s a %s }" % (bundle_iri(uid).n3(), BUNDLE_CLASS.n3()))
 
 
 def no_such_bundle(uid: str) -> Response:

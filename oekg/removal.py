@@ -42,6 +42,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 from dataclasses import dataclass
+from typing import Tuple
 
 from rdflib import RDF, Graph, URIRef
 
@@ -152,8 +153,8 @@ def _plan(
     store: GraphStore,
     subgraph: Graph,
     target: URIRef,
-    candidates: tuple,
-    pinned: tuple = (),
+    candidates: Tuple[URIRef, ...],
+    pinned: Tuple[URIRef, ...] = (),
 ) -> Removal:
     """The fixpoint both plans share: shrink the doomed set until it is safe.
 

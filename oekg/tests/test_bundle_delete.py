@@ -121,7 +121,7 @@ class BundleDeleteTestCase(SubResourceDeleteTestCase):
             self.reference_from_outside(scenario)
             return removal
 
-        with mock.patch("oekg.api_views.plan_bundle_removal", plan_then_interfere):
+        with mock.patch("oekg.writes.plan_bundle_removal", plan_then_interfere):
             return self.delete_bundle(uid, etag)
 
     def forget_the_version_node(self, uid) -> None:

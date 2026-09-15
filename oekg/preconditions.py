@@ -112,39 +112,27 @@ def confirmation_refusal(request, acronym: str) -> Optional[Response]:
         # check meaning what it says; the way out is to give the bundle an
         # acronym with a `PATCH`, which is allowed precisely because the
         # missing one is a violation this caller did not introduce.
-        return Response(
-            {
-                "detail": (
-                    "This scenario bundle has no acronym, so there is nothing "
-                    "to confirm a delete with. Give it one with a PATCH first, "
-                    "then delete it."
-                )
-            },
-            status=status.HTTP_400_BAD_REQUEST,
+        return _bad_request(
+            "This scenario bundle has no acronym, so there is nothing to "
+            "confirm a delete with. Give it one with a PATCH first, then "
+            "delete it."
         )
     given = request.query_params.get(CONFIRM)
     if given is None:
-        return Response(
-            {
-                "detail": (
-                    "Deleting a whole scenario bundle is irreversible, so it "
-                    f"has to be confirmed: repeat the bundle's acronym as "
-                    f"?{CONFIRM}=<acronym>. Read the bundle first -- the "
-                    "acronym is in the response, and so is the version this "
-                    "delete also needs."
-                )
-            },
-            status=status.HTTP_400_BAD_REQUEST,
+        return _bad_request(
+            "Deleting a whole scenario bundle is irreversible, so it has to be "
+            f"confirmed: repeat the bundle's acronym as ?{CONFIRM}=<acronym>. "
+            "Read the bundle first -- the acronym is in the response, and so "
+            "is the version this delete also needs."
         )
     if given != acronym:
-        return Response(
-            {
-                "detail": (
-                    f"The confirmation {given!r} is not this bundle's acronym, "
-                    "so nothing was deleted. Check that this is the bundle you "
-                    "meant to delete before retrying."
-                )
-            },
-            status=status.HTTP_400_BAD_REQUEST,
+        return _bad_request(
+            f"The confirmation {given!r} is not this bundle's acronym, so "
+            "nothing was deleted. Check that this is the bundle you meant to "
+            "delete before retrying."
         )
     return None
+
+
+def _bad_request(detail: str) -> Response:
+    return Response({"detail": detail}, status=status.HTTP_400_BAD_REQUEST)
