@@ -93,7 +93,7 @@ Pinning the ontology fetch itself is a separate job. It is duplicated across
 | `docker/docker-entrypoint.dev.sh:33`           | `releases/latest/…`                        | no                  |
 | `podman/Dockerfile:54`                         | `releases/latest/…`                        | no                  |
 | `podman/entrypoint.sh:17`                      | `releases/latest/…`                        | no                  |
-| `.github/workflows/automated-testing.yaml:102` | `openenergyplatform.org/…/oeo-full.owl`    | n/a, different host |
+| `.github/workflows/automated-testing.yaml:112` | `openenergyplatform.org/…/oeo-full.owl`    | n/a, different host |
 
 ## The API's transport to the graph
 
