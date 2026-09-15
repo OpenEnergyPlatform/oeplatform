@@ -42,39 +42,10 @@ r = requests.post(url=sparql_endpoint, json=payload, headers=HEADER)
 print(r.json())
 ```
 
-## Open API
+## The rest of the API
 
-Below you see a draft version of the OpenAPI-based. It is the documentation for
-all HTTP-API endpoints and in the future it can be used to test out the API.
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>API Documentation</title>
-    <link rel="stylesheet" type="text/css" href="../dist/swagger-ui.css">
-    <script src="../dist/swagger-ui-bundle.js"></script>
-    <script src="../dist/swagger-ui-standalone-preset.js"></script>
-</head>
-<body>
-<div id="swagger-ui"></div>
-<script>
-    window.onload = function() {
-      // Initialize SwaggerUI
-      const ui = SwaggerUIBundle({
-        url: "./oekg.yaml",
-        dom_id: '#swagger-ui',
-        deepLinking: true,
-        presets: [
-          SwaggerUIBundle.presets.apis,
-          SwaggerUIStandalonePreset
-        ],
-        plugins: [
-          SwaggerUIBundle.plugins.DownloadUrl
-        ],
-        layout: "StandaloneLayout"
-      })
-    }
-</script>
-</body>
-</html>
+The SPARQL endpoint above is a passthrough: it hands a query to the graph store
+and returns what comes back. The OEKG's own CRUD endpoints -- creating and
+reading scenario bundles, their scenarios, study reports and dataset links --
+are described together with the rest of `api/v0` in the
+[API Reference](../api-reference.md).
