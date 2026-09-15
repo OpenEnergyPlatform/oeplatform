@@ -1,4 +1,4 @@
-"""What a delete of one part actually removes, and what it only unlinks.
+"""What a delete actually removes, and what it only unlinks.
 
 This is the most dangerous piece of arithmetic in the API, so it is written
 down on its own rather than inside a view.
@@ -31,15 +31,27 @@ The guard also settles the descent: a node that is kept is still reachable, so
 its children are still reachable, and they are kept with it -- which falls out
 of the fixpoint below rather than needing a rule of its own.
 
+**One walk serves both deletes.** A part's delete starts at the part; a whole
+bundle's starts at the bundle's children and takes the bundle itself with
+them. Written as one fixpoint with two entry points rather than as two walks,
+because the dangerous half is what the walk reaches -- and two spellings of
+that would eventually reach different things.
+
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 from dataclasses import dataclass
+from typing import Tuple
 
 from rdflib import RDF, Graph, URIRef
 
-from oekg.bundles import SCENARIO_CLASS, STUDY_REPORT_CLASS
+from oekg.bundles import (
+    BUNDLE_CLASS,
+    SCENARIO_CLASS,
+    STUDY_REPORT_CLASS,
+    bundle_iri,
+)
 from oekg.dataset_links import DIRECTION_BY_NAME
 from oekg.graph_store import GraphStore
 
@@ -105,11 +117,55 @@ def plan_removal(store: GraphStore, subgraph: Graph, target: URIRef) -> Removal:
     in the write's own ``WHERE``, atomic -- and the report costs one additional
     `SELECT`, next to the subgraph read every write on this path already makes.
     """
-    candidates = _candidates(subgraph, target)
+    return _plan(store, subgraph, target, _candidates(subgraph, target))
+
+
+def plan_bundle_removal(store: GraphStore, subgraph: Graph, uid: str) -> Removal:
+    """Work out what deleting the whole bundle ``uid`` removes.
+
+    The same walk as `plan_removal`, rooted one level up, so the two cannot
+    come to disagree about what "bundle-local" means. Two things differ, and
+    both follow from the bundle being the top of its own containment rather
+    than a node inside it:
+
+    - **The bundle itself is a certainty, not a candidate.** The guard exists
+      to stop one bundle's delete destroying a node another bundle shares;
+      applying it to the bundle would leave the request with nothing to do and
+      no honest way to say so, and a bundle that cannot be deleted is a worse
+      outcome than one deleted while something cited it. Nothing in the OEKG
+      model cites a bundle. So the bundle is deleted and left out of the guard,
+      and only its children can be downgraded to an unlink.
+    - **Its version node is not in here.** It points *at* the bundle rather
+      than away from it, so a read never sees it: it is bookkeeping, and
+      `BundleWrite.destroy` removes it alongside this plan. Leaving it behind
+      is exactly the residue the browser's own delete leaves (issue #2440) --
+      a node saying a bundle is at version 4 when there is no bundle.
+    """
+    bundle = bundle_iri(uid)
+    children = _candidates(
+        subgraph,
+        *(node for node in subgraph.objects(bundle, None) if isinstance(node, URIRef)),
+    )
+    return _plan(store, subgraph, bundle, children, pinned=(bundle,))
+
+
+def _plan(
+    store: GraphStore,
+    subgraph: Graph,
+    target: URIRef,
+    candidates: Tuple[URIRef, ...],
+    pinned: Tuple[URIRef, ...] = (),
+) -> Removal:
+    """The fixpoint both plans share: shrink the doomed set until it is safe.
+
+    ``pinned`` nodes are deleted whatever else points at them, and take no part
+    in the guard. Only a whole-bundle delete has one -- see
+    `plan_bundle_removal` for why the bundle is not a node the guard may save.
+    """
     incoming = _incoming_references(store, candidates)
     unlink = _links_into(subgraph, target)
 
-    doomed = set(candidates)
+    doomed = set(candidates) | set(pinned)
     while True:
         removed = _removed_triples(subgraph, doomed, unlink)
         # Shrinking `doomed` shrinks `removed`, so a node can only ever move
@@ -117,7 +173,8 @@ def plan_removal(store: GraphStore, subgraph: Graph, target: URIRef) -> Removal:
         kept = {
             node
             for node in doomed
-            if any(triple not in removed for triple in incoming if triple[2] == node)
+            if node not in pinned
+            and any(triple not in removed for triple in incoming if triple[2] == node)
         }
         if not kept:
             break
@@ -127,17 +184,22 @@ def plan_removal(store: GraphStore, subgraph: Graph, target: URIRef) -> Removal:
         removed=removed,
         deleted=_described(subgraph, doomed),
         unlinked=_described(subgraph, set(candidates) - doomed),
-        guard=_still_unreferenced(doomed, removed),
+        guard=_still_unreferenced(doomed - set(pinned), removed),
     )
 
 
-def _candidates(subgraph: Graph, target: URIRef) -> tuple:
-    """``target`` and every bundle-local node reachable from it.
+def _candidates(subgraph: Graph, *start: URIRef) -> tuple:
+    """Every bundle-local node reachable from ``start``, ``start`` included.
 
     Optimistic: this is what *could* be deleted if nothing else cited it. The
     guard decides what actually is.
+
+    Several starting points rather than one, because a whole-bundle delete
+    begins at the bundle's children -- the bundle itself is not a node the
+    allowlist describes, and asking whether it is would be asking the wrong
+    question of the wrong list.
     """
-    found, frontier = [], [target]
+    found, frontier = [], list(start)
     seen = set()
     while frontier:
         node = frontier.pop()
@@ -246,7 +308,11 @@ def _described(subgraph: Graph, nodes: set) -> tuple:
 
 
 def _type_of(subgraph: Graph, node: URIRef):
+    # The bundle is reported alongside the classes it contains even though it
+    # is not one of them: it is the one node a whole-bundle delete names, and a
+    # response listing it with no type would read as a node nobody recognised.
+    reported = BUNDLE_LOCAL_CLASSES | {BUNDLE_CLASS}
     for node_class in subgraph.objects(node, RDF.type):
-        if node_class in BUNDLE_LOCAL_CLASSES:
+        if node_class in reported:
             return str(node_class)
     return None

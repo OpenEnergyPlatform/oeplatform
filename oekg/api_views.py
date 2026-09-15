@@ -1,4 +1,4 @@
-"""The OEKG scenario-bundle API: create one, read one, change one field.
+"""The OEKG scenario-bundle API: create one, read one, change it, delete it.
 
 The order of operations in a create is the whole point, so it is worth stating
 plainly:
@@ -27,13 +27,30 @@ things and get three statuses:
 - **409** the server's own guard fired -- the bundle moved between the read and
   the write. Re-read, re-apply, retry.
 
+A patch that renames a bundle answers for the acronym's uniqueness the same
+way a create does, and for the same reason: the acronym is how a stateless
+pipeline finds its bundle again, so two bundles sharing one is not untidy, it
+is a pipeline writing into a stranger's record. See `oekg/acronyms.py`.
+
 A patch touches only the keys it names. A key that is absent is untouched --
 not read and rewritten, genuinely untouched -- which is also what stops an
 unrelated patch from re-minting every framework and model in the bundle.
 
+A delete is deliberately awkward, because it is the one irreversible thing this
+API does. It takes **two steps**: the read a client needs anyway, which returns
+the version and the acronym, and then the delete carrying both. They guard
+different accidents -- the version catches a bundle that moved since it was
+read, the retyped acronym catches the wrong bundle entirely -- and the second
+is the one a version cannot give, because a pipeline looping over identifiers
+holds the correct current version of the wrong bundle. What a delete actually
+removes is bounded by type, in `oekg.removal`, so a bundle's delete can never
+destroy what another bundle shares with it.
+
 Reads need no authentication: the SPARQL endpoint already serves the same data,
 so requiring a token here would protect nothing while making public research
-records awkward to read.
+records awkward to read. A read also serves the bundle's subgraph as RDF on
+`Accept: text/turtle` or `application/ld+json` -- the lossless form, and nearly
+free, because the read has constructed that subgraph anyway.
 
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
@@ -43,21 +60,23 @@ import logging
 
 from django.db import DatabaseError
 from django.urls import reverse
-from rdflib import Graph, Literal
+from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
+from rdflib import Graph
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from factsheet.models import ScenarioBundleAccessControl
+from oekg.acronyms import acronym_conflict, acronym_is_free, acronym_taken
 from oekg.api_support import (
     OekgAPIView,
     is_minted_identifier,
+    is_safe,
     no_such_bundle,
     shape_unavailable,
     store_unavailable,
 )
 from oekg.bundles import (
-    BUNDLE_CLASS,
     BUNDLE_FIELDS,
     BUNDLE_PARTS,
     build_bundle_graph,
@@ -65,17 +84,25 @@ from oekg.bundles import (
     bundle_iri,
     bundle_payload,
 )
-from oekg.fields import DC, mint_identifier, referenced_node_iris
+from oekg.fields import mint_identifier, referenced_node_iris
 from oekg.graph_store import GraphStore, GraphStoreError
 from oekg.history import CREATE, UPDATE, record_write
+from oekg.labels import LABELS, labelled
 from oekg.part_views import part_bodies
+from oekg.preconditions import CONFIRM
 from oekg.reads import labels_of, read_bundle
+from oekg.renderers import RDF_FORMATS, RDF_RENDERERS
 from oekg.serializers import (
     READ_ONLY_CONTAINER,
     ScenarioBundleCreateSerializer,
     ScenarioBundleSerializer,
 )
 from oekg.shape import ShapeUnavailable
+from oekg.summaries import (
+    BundleSummaries,
+    ScenarioBundlePagination,
+    SummaryFilters,
+)
 from oekg.validation import validate_post_state
 from oekg.versioning import (
     FIRST_VERSION,
@@ -92,9 +119,45 @@ logger = logging.getLogger("oeplatform")
 
 
 class ScenarioBundleCollectionAPIView(OekgAPIView):
-    """`POST` creates a scenario bundle."""
+    """`GET` lists scenario bundles as summaries. `POST` creates one."""
 
-    permission_classes = [IsAuthenticated]
+    # Nothing, and the refusal says so rather than ignoring the parameter.
+    # Expanding a listing is the thing a summary exists not to be: the
+    # expensive path would then live on the public, unauthenticated endpoint
+    # and eventually be pointed at the whole corpus. A resource read is where
+    # a term gets resolved.
+    offers_expansions = ()
+
+    def get_permissions(self):
+        if is_safe(self.request):
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+    # Named, because a collection read and a detail read would otherwise both
+    # generate `scenario_bundles_retrieve` and the description would resolve
+    # the collision with a numeral -- a name no reader could map back.
+    @extend_schema(operation_id="scenario_bundles_list")
+    def get(self, request):
+        """A page of summaries: identifier, acronym, label, version and counts.
+
+        Not bundles. A listing that returned whole bundles would carry every
+        client the whole corpus, and would drag the relational resolution a
+        dataset link needs across every link of every bundle on a public
+        endpoint -- which is how the two listings next door on this platform
+        became unusable.
+
+        `?acronym=` is the filter the contract depends on: it is how a pipeline
+        holding no state between runs finds its own bundle again, and the
+        `_meta` it gets back carries the version its next write must send.
+        """
+        filters = SummaryFilters.from_query(request.query_params)
+        paginator = ScenarioBundlePagination()
+        try:
+            summaries = BundleSummaries(GraphStore.from_settings(), filters)
+            page = paginator.paginate_queryset(summaries, request, view=self)
+        except GraphStoreError as error:
+            return store_unavailable(error, "read")
+        return paginator.get_paginated_response(page)
 
     def post(self, request):
         serializer = ScenarioBundleCreateSerializer(data=request.data)
@@ -107,8 +170,8 @@ class ScenarioBundleCollectionAPIView(OekgAPIView):
         # which is the whole of the user interface's bug.
         acronym = payload["acronym"]
         try:
-            if _acronym_taken(store, acronym):
-                return _acronym_conflict(acronym)
+            if acronym_taken(store, acronym):
+                return acronym_conflict(acronym)
 
             known_labels = labels_of(store, _all_referenced_iris(payload))
             refuse_renames(payload, known_labels, BUNDLE_FIELDS)
@@ -135,16 +198,16 @@ class ScenarioBundleCollectionAPIView(OekgAPIView):
             token = mint_write_token()
             store.update(
                 store.guarded_modification(
-                    _no_bundle_has_acronym(acronym),
+                    acronym_is_free(acronym),
                     insert=post_state + version_triples(uid, FIRST_VERSION, token),
                 )
             )
             if not write_applied(store, uid, token):
                 # The acronym is the ONLY condition in that guard, so a miss
-                # can only mean the acronym was taken in between. Binding a
-                # second condition into the same WHERE would make this answer
-                # wrong, so it would have to distinguish them first.
-                return _acronym_conflict(acronym)
+                # can only mean the acronym was taken in between. A patch
+                # cannot answer this precisely, because its guard carries the
+                # version too -- see there.
+                return acronym_conflict(acronym)
         except ShapeUnavailable as error:
             return shape_unavailable(error)
         except GraphStoreError as error:
@@ -195,17 +258,27 @@ class ScenarioBundleCollectionAPIView(OekgAPIView):
 
 
 class ScenarioBundleAPIView(OekgAPIView):
-    """`GET` returns one scenario bundle, publicly. `PATCH` changes a field."""
+    """`GET` reads one, publicly. `PATCH` changes a field. `DELETE` removes it."""
+
+    offers_expansions = (LABELS,)
 
     def get_permissions(self):
-        # The safe methods are named and everything else is closed, rather than
-        # the other way round: a verb a later slice adds is then authenticated
-        # by default instead of public until somebody remembers. The price is
-        # that an unsupported verb answers 401 before it can answer 405, which
-        # is the cheaper of the two mistakes.
-        if self.request.method in ("GET", "HEAD", "OPTIONS"):
+        if is_safe(self.request):
             return [AllowAny()]
         return [IsAuthenticated()]
+
+    def get_renderers(self):
+        """RDF is offered on reads only.
+
+        A write is structured data because the serializers are the validation
+        layer, so a `PATCH` asking for turtle gets a `406` -- which is the
+        truthful answer, rather than a write whose response silently arrives in
+        a form its request could not have been sent in.
+        """
+        renderers = super().get_renderers()
+        if is_safe(self.request):
+            renderers += [renderer() for renderer in RDF_RENDERERS]
+        return renderers
 
     def get(self, request, uid):
         # Identifiers are minted here, so anything that is not one cannot name a
@@ -223,7 +296,14 @@ class ScenarioBundleAPIView(OekgAPIView):
         except GraphStoreError as error:
             return store_unavailable(error, "read")
 
-        return _bundle_response(uid, subgraph, version)
+        if request.accepted_renderer.format in RDF_FORMATS:
+            # The stored form, served as stored. `expand` has nothing to do
+            # here: resolution is a property of the structured representation,
+            # and the triples a bundle holds are already what they are.
+            response = Response(subgraph)
+            response["ETag"] = version.etag
+            return response
+        return _bundle_response(uid, subgraph, version, expand=self.expand)
 
     def patch(self, request, uid):
         serializer = ScenarioBundleSerializer(data=request.data, partial=True)
@@ -244,11 +324,29 @@ class ScenarioBundleAPIView(OekgAPIView):
         try:
             write = open_bundle(request, uid)
             write.require_write(request)
+
+            # A rename is a write that can change an acronym, so it answers for
+            # uniqueness like a create does -- asked here for a message that
+            # names the acronym, and bound into the write below for the answer
+            # that cannot be overtaken. A bundle never counts against itself,
+            # so sending back what was read is not refused by its own value.
+            renaming = "acronym" in payload
+            if renaming and acronym_taken(write.store, payload["acronym"], uid):
+                return acronym_conflict(payload["acronym"])
+
             known_labels = write.labels_of(referenced_node_iris(payload, BUNDLE_FIELDS))
             refuse_renames(payload, known_labels, BUNDLE_FIELDS)
 
             removed, added = bundle_delta(uid, payload, write.pre_state, known_labels)
-            write.apply(removed=removed, added=added, verb=UPDATE)
+            write.apply(
+                removed=removed,
+                added=added,
+                verb=UPDATE,
+                # Unlike a create, this guard also carries the version, so a
+                # miss has two possible causes and the refusal names neither.
+                # That is the right advice for both: read it again and retry.
+                guard=acronym_is_free(payload["acronym"], uid) if renaming else "",
+            )
         except ShapeUnavailable as error:
             return shape_unavailable(error)
         except GraphStoreError as error:
@@ -261,6 +359,71 @@ class ScenarioBundleAPIView(OekgAPIView):
             history_recorded=write.history_recorded,
         )
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name=CONFIRM,
+                required=True,
+                description=(
+                    "The bundle's acronym, retyped. It guards the accident the "
+                    "version cannot: right verb, wrong identifier."
+                ),
+            )
+        ],
+        responses={
+            200: OpenApiResponse(
+                description=(
+                    "Deleted. The body names what was deleted and what was "
+                    "only unlinked, which no status code can say."
+                )
+            )
+        },
+    )
+    def delete(self, request, uid):
+        """Delete this bundle, in the second of two steps.
+
+        The first step is the read a client needs anyway: it returns the
+        version to guard on and the acronym to retype. This step requires both,
+        and they defend different accidents -- the version catches a bundle
+        that changed since it was read, the acronym catches the wrong bundle
+        entirely, which is the realistic failure for a pipeline looping over
+        identifiers and the one a version cannot see.
+
+        **The order of the refusals is the contract**, not an implementation
+        detail: existence, then ownership, then the version, then the
+        confirmation. A repeated delete therefore answers `404`, and a client
+        may treat that as success. Answering `204` to it instead would swallow
+        the wrong-identifier delete -- a bundle that is gone has no acronym
+        left to check a confirmation against, so a blanket success would
+        confirm anything.
+
+        `200` with a body rather than `204`, as for a part: the typed
+        containment walk can decide that a node another bundle still cites is
+        unlinked rather than deleted, and no status code can say that.
+        """
+        try:
+            write = open_bundle(request, uid)
+            write.require_write(request)
+            acronym = write.confirm_deletion(request)
+            version_before = write.version.number
+            removal = write.destroy(acronym)
+        except GraphStoreError as error:
+            return store_unavailable(error, "written to")
+
+        return Response(
+            {
+                "deleted": list(removal.deleted),
+                "unlinked": list(removal.unlinked),
+                READ_ONLY_CONTAINER: {
+                    "uid": uid,
+                    "iri": str(bundle_iri(uid)),
+                    "acronym": acronym,
+                    "version_before": version_before,
+                    **write.gaps,
+                },
+            }
+        )
+
 
 def _all_referenced_iris(payload: dict) -> list:
     """Existing node IRIs a create points at, its nested parts included."""
@@ -271,37 +434,12 @@ def _all_referenced_iris(payload: dict) -> list:
     return iris
 
 
-def _acronym_taken(store: GraphStore, acronym: str) -> bool:
-    """Whether a bundle already uses this acronym.
-
-    Compares the stored literal with the literal a write would store -- like
-    with like. The user interface's check normalises one side and not the other,
-    so any acronym with a space, hyphen, umlaut, slash, colon or parenthesis
-    slips past it.
-
-    **Asked on a create only.** A patch may still rename a bundle onto an
-    acronym another one holds, so uniqueness holds from creation and not
-    thereafter. That gap is deliberate and deferred: the read side is where the
-    acronym becomes load-bearing, because that is where a pipeline looks a
-    bundle up by it, so the check belongs with the endpoint that makes the
-    promise. `PatchAcronymTest` in the tests pins the gap down as it stands.
-    """
-    return store.ask("ASK { %s }" % _acronym_pattern(acronym))
-
-
-def _no_bundle_has_acronym(acronym: str) -> str:
-    return "FILTER NOT EXISTS { %s }" % _acronym_pattern(acronym)
-
-
-def _acronym_pattern(acronym: str) -> str:
-    return "?bundle a %s ; %s %s" % (
-        BUNDLE_CLASS.n3(),
-        DC.acronym.n3(),
-        Literal(acronym).n3(),
-    )
-
-
-def _represent(uid: str, graph: Graph, version: BundleVersion) -> dict:
+def _represent(
+    uid: str,
+    graph: Graph,
+    version: BundleVersion,
+    expand: frozenset = frozenset(),
+) -> dict:
     """A read returns exactly what a write accepts, plus read-only data.
 
     **Sub-resources are nested here and rejected on `PATCH`.** That looks
@@ -311,16 +449,20 @@ def _represent(uid: str, graph: Graph, version: BundleVersion) -> dict:
     partial by nature and nobody sends a whole read to one. Nesting on read is
     what lets a client send back what it read without stripping anything.
     """
-    body = {
-        **bundle_payload(graph, uid),
-        READ_ONLY_CONTAINER: {
-            "uid": uid,
-            "iri": str(bundle_iri(uid)),
-            "version": version.number,
+    body = labelled(
+        {
+            **bundle_payload(graph, uid),
+            READ_ONLY_CONTAINER: {
+                "uid": uid,
+                "iri": str(bundle_iri(uid)),
+                "version": version.number,
+            },
         },
-    }
+        BUNDLE_FIELDS,
+        expand,
+    )
     for part in BUNDLE_PARTS:
-        body[part.payload_key] = part_bodies(graph, uid, part)
+        body[part.payload_key] = part_bodies(graph, uid, part, expand)
     return body
 
 
@@ -341,22 +483,10 @@ def _bundle_response(
     graph: Graph,
     version: BundleVersion,
     history_recorded: bool = True,
+    expand: frozenset = frozenset(),
 ) -> Response:
     """The body, plus the entity tag every read has to carry."""
-    body = _note_history_gap(_represent(uid, graph, version), history_recorded)
+    body = _note_history_gap(_represent(uid, graph, version, expand), history_recorded)
     response = Response(body)
     response["ETag"] = version.etag
     return response
-
-
-def _acronym_conflict(acronym: str) -> Response:
-    return Response(
-        {
-            "detail": (
-                f"A scenario bundle with the acronym {acronym!r} already "
-                "exists. Acronyms identify a bundle to a pipeline, so they "
-                "have to be unique."
-            )
-        },
-        status=status.HTTP_409_CONFLICT,
-    )

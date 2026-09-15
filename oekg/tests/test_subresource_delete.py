@@ -117,6 +117,19 @@ class SubResourceDeleteTestCase(DatasetLinkTestCase, StudyReportTestCase):
     def node_of(self, response) -> URIRef:
         return URIRef(response.data[READ_ONLY_CONTAINER]["iri"])
 
+    def reference_from_outside(self, node) -> None:
+        """Another bundle's part pointing at this node.
+
+        On the shared case rather than on the guard tests: the whole-bundle
+        delete faces the same guard one level up, and two spellings of "what
+        an outside reference looks like" would let the two drift.
+        """
+        outside = Graph()
+        outside.add(
+            (URIRef("urn:oep:test:another-bundle"), HAS_PART, URIRef(str(node)))
+        )
+        self.store.insert(outside)
+
     def with_scenario_regions(self, payload=None):
         """A bundle plus one scenario citing two shared regions."""
         uid, etag = self.created(payload)
@@ -423,14 +436,6 @@ class GuardClauseTest(SubResourceDeleteTestCase):
     globally, or claimed by two bundles, and the guard is what keeps that from
     becoming somebody else's data loss.
     """
-
-    def reference_from_outside(self, node) -> None:
-        """Another bundle's part pointing at this node."""
-        outside = Graph()
-        outside.add(
-            (URIRef("urn:oep:test:another-bundle"), HAS_PART, URIRef(str(node)))
-        )
-        self.store.insert(outside)
 
     def test_a_scenario_another_bundle_cites_is_unlinked_not_deleted(self):
         uid, sid, etag = self.with_one_scenario()

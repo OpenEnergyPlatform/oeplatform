@@ -46,10 +46,17 @@ from oekg.dataset_links import (
 from oekg.fields import mint_identifier
 from oekg.graph_store import GraphStoreError
 from oekg.history import CREATE
+from oekg.labels import labelled
 from oekg.serializers import READ_ONLY_CONTAINER, DatasetLinkSerializer
 from oekg.shape import ShapeUnavailable
 from oekg.subresource_views import SubResourceViewMixin, describes_a_removal
 from oekg.writes import BundleWrite, open_bundle
+
+# A dataset link has no field table, because it has no fields: everything it
+# holds follows from its type, its target and its name. That is the same fact
+# that gives it no `PATCH`, and it is why resolving its picked ontology terms
+# is an empty answer rather than a refusal.
+NO_PICKED_TERMS = ()
 
 
 class DatasetLinkViewMixin(SubResourceViewMixin):
@@ -83,7 +90,9 @@ class DatasetLinkViewMixin(SubResourceViewMixin):
         scenario = find_part(state, write.uid, SCENARIO, sid)
         direction, node = find_dataset_link(state, scenario, did)
         return self.represented(
-            _link_body(state, node, direction, write.uid, sid), write, code
+            _link_body(state, node, direction, write.uid, sid, self.resolving()),
+            write,
+            code,
         )
 
 
@@ -97,7 +106,9 @@ class DatasetLinkCollectionAPIView(DatasetLinkViewMixin, OekgAPIView):
             return store_unavailable(error, "read")
         scenario = self.scenario_of(write, sid)
         return self.paginated(
-            request, _link_bodies(write.pre_state, scenario, write.uid, sid), write
+            request,
+            _link_bodies(write.pre_state, scenario, write.uid, sid, self.resolving()),
+            write,
         )
 
     def post(self, request, uid, sid):
@@ -197,16 +208,20 @@ def _no_such_link(did: str) -> Response:
     )
 
 
-def _link_bodies(graph: Graph, scenario, uid: str, sid: str) -> list:
+def _link_bodies(
+    graph: Graph, scenario, uid: str, sid: str, expand: frozenset = frozenset()
+) -> list:
     bodies = [
-        _link_body(graph, node, direction, uid, sid)
+        _link_body(graph, node, direction, uid, sid, expand)
         for direction, node in dataset_link_nodes(graph, scenario)
     ]
     bodies.sort(key=lambda body: (body["type"], body["name"]))
     return bodies
 
 
-def _link_body(graph: Graph, node, direction, uid: str, sid: str) -> dict:
+def _link_body(
+    graph: Graph, node, direction, uid: str, sid: str, expand: frozenset = frozenset()
+) -> dict:
     """One link: the three keys a write accepts, and the rest read-only.
 
     ``target_iri`` is in `_meta` rather than in the payload because a client
@@ -216,17 +231,21 @@ def _link_body(graph: Graph, node, direction, uid: str, sid: str) -> dict:
     the writable payload genuinely cannot express it. Saying where it points is
     better than leaving a reader with a name and no target.
     """
-    return {
-        **dataset_link_payload(graph, node, direction),
-        READ_ONLY_CONTAINER: {
-            "uid": dataset_link_uid(graph, node),
-            "iri": str(node),
-            "type": str(direction.node_class),
-            "target_iri": stored_iri(graph, node),
-            "bundle": uid,
-            "scenario": sid,
+    return labelled(
+        {
+            **dataset_link_payload(graph, node, direction),
+            READ_ONLY_CONTAINER: {
+                "uid": dataset_link_uid(graph, node),
+                "iri": str(node),
+                "type": str(direction.node_class),
+                "target_iri": stored_iri(graph, node),
+                "bundle": uid,
+                "scenario": sid,
+            },
         },
-    }
+        NO_PICKED_TERMS,
+        expand,
+    )
 
 
 def _direction_of(payload: dict):

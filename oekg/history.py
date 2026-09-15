@@ -46,9 +46,9 @@ logger = logging.getLogger("oeplatform.oekg_history")
 
 CREATE = "POST"
 UPDATE = "PATCH"
-# A partial delete records; a whole-bundle delete deliberately will not carry a
-# payload when it arrives. Both are this verb -- what differs is what the row
-# holds, not what happened.
+# A partial delete records its triples; a whole-bundle delete deliberately
+# records none -- see `record_bundle_deletion`. Both are this verb: what differs
+# is what the row holds, not what happened.
 DELETE = "DELETE"
 VERBS = (CREATE, UPDATE, DELETE)
 
@@ -115,6 +115,74 @@ def record_write(
             getattr(actor, "name", None) or "-",
             version_before,
             version_after,
+            exc_info=True,
+        )
+        return False
+    return True
+
+
+def record_bundle_deletion(
+    *,
+    bundle_uid: str,
+    acronym: str,
+    actor,
+    version_before: int,
+) -> bool:
+    """Record that a bundle was deleted, and prune what it used to hold.
+
+    **One event-only line, and no payload.** Every other write stores the
+    triples it changed, because a reader needs to know what the change was. A
+    whole-bundle delete stores none, because the triples it removed are the
+    whole bundle: a diff would make the ledger a copy of the thing that was
+    deleted, and deleting would not delete. So the line records that it
+    happened -- who, when, which identifier, which acronym, from which version
+    -- and nothing about what was in it.
+
+    **And the same reasoning reaches backwards.** The bundle's earlier entries
+    keep their structured columns, so the record of *how it changed* survives,
+    but their payloads go: a history that kept them would let anyone rebuild a
+    deleted bundle from the account of its own deletion. Legacy rows are pruned
+    too, and they are the ones that matter most -- a browser write stored the
+    bundle's whole state, not a diff.
+
+    Pruning and the event line are one transaction, because a pruned bundle
+    with no line saying why reads as tampering, and a line with the payloads
+    still under it has not deleted anything.
+
+    **Never raises**, for the same reason `record_write` does not: the graph
+    write has already committed, and there is nothing left to undo.
+    """
+    try:
+        with transaction.atomic():
+            entries = OEKG_Modifications.objects.filter(bundle_id=bundle_uid)
+            entries.update(
+                removed=None,
+                added=None,
+                old_state=EMPTY_LEGACY_PAYLOAD,
+                new_state=EMPTY_LEGACY_PAYLOAD,
+            )
+            OEKG_Modifications.objects.create(
+                bundle_id=bundle_uid,
+                user=actor if getattr(actor, "is_authenticated", False) else None,
+                verb=DELETE,
+                resource_type=str(BUNDLE_CLASS),
+                acronym=acronym,
+                version_before=version_before,
+                # There is no version after: the node counting them went with
+                # the bundle. NULL says that; 0 would claim a version.
+                version_after=None,
+                old_state=EMPTY_LEGACY_PAYLOAD,
+                new_state=EMPTY_LEGACY_PAYLOAD,
+            )
+    except Exception:
+        logger.error(
+            "oekg_history bundle=%s verb=%s user=%s acronym=%s version=%s->gone "
+            "outcome=not_recorded",
+            bundle_uid,
+            DELETE,
+            getattr(actor, "name", None) or "-",
+            acronym,
+            version_before,
             exc_info=True,
         )
         return False

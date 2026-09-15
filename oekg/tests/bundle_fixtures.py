@@ -45,6 +45,17 @@ class BundleApiTestCase(OekgGraphAPITestCase):
             content_type="application/json",
         )
 
+    def other_user(self, **kwargs):
+        """A second account, for the tests that need somebody who is not the
+        owner. Here rather than on one test class because ownership is asked by
+        every mutating endpoint, and so is tested by every one of them."""
+        return myuser.objects.create_user(
+            name=kwargs.pop("name", "someone-else"),
+            email=kwargs.pop("email", "else@example.org"),
+            affiliation="",
+            **kwargs,
+        )
+
     def detail_url(self, uid):
         return reverse("api:scenario-bundle", kwargs={"uid": uid})
 

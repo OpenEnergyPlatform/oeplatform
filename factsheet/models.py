@@ -74,6 +74,13 @@ class OEKG_Modifications(models.Model):
     removed = JSONField(null=True, blank=True)
     added = JSONField(null=True, blank=True)
 
+    # Set on a whole-bundle delete and on nothing else. Every other row's
+    # acronym can be read off the bundle it names; a deleted bundle's cannot,
+    # and the name it went by is the only thing about it a reader of the ledger
+    # can still recognise. It is not a payload -- it is the identifier in the
+    # form a person uses, which is what an event line is for.
+    acronym = CharField(max_length=400, null=True, blank=True)
+
     class Meta:
         # A plain btree, declared here rather than as `db_index=True` on the
         # field: on a CharField that shortcut also creates a second index with
