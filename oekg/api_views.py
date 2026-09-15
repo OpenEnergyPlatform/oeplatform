@@ -69,6 +69,17 @@ from rest_framework.response import Response
 
 from factsheet.models import ScenarioBundleAccessControl
 from oekg.acronyms import acronym_conflict, acronym_is_free, acronym_taken
+from oekg.api_description import (
+    ALWAYS,
+    EXPAND_LABELS,
+    CollectionSchema,
+    a_page_of,
+    describes_a_creation,
+    describes_a_guarded_write,
+    describes_a_public_read,
+    json_body,
+    paging,
+)
 from oekg.api_support import (
     OekgAPIView,
     is_minted_identifier,
@@ -93,15 +104,6 @@ from oekg.part_views import part_bodies
 from oekg.preconditions import CONFIRM
 from oekg.reads import labels_of, read_bundle
 from oekg.renderers import RDF_FORMATS, RDF_RENDERERS
-from oekg.schema import (
-    ALWAYS,
-    EXPAND_LABELS,
-    describes,
-    describes_a_creation,
-    describes_a_guarded_write,
-    describes_a_public_read,
-    paging,
-)
 from oekg.serializers import (
     READ_ONLY_CONTAINER,
     ScenarioBundleCreateSerializer,
@@ -132,6 +134,8 @@ logger = logging.getLogger("oeplatform")
 class ScenarioBundleCollectionAPIView(OekgAPIView):
     """`GET` lists scenario bundles as summaries. `POST` creates one."""
 
+    schema = CollectionSchema()
+
     # Nothing, and the refusal says so rather than ignoring the parameter.
     # Expanding a listing is the thing a summary exists not to be: the
     # expensive path would then live on the public, unauthenticated endpoint
@@ -144,24 +148,17 @@ class ScenarioBundleCollectionAPIView(OekgAPIView):
             return [AllowAny()]
         return [IsAuthenticated()]
 
-    # Named, because a collection read and a detail read would otherwise both
-    # generate `scenario_bundles_retrieve` and the description would resolve
-    # the collision with a numeral -- a name no reader could map back.
     @describes_a_public_read(
-        describes(
+        a_page_of(
             "A page of summaries. Each carries the two fields a human "
             "recognises a bundle by at the top level -- `label` and `acronym` "
             "-- and everything a client cannot write in `_meta`: the "
             "identifier, the version, and the number of scenarios and study "
             "reports the bundle holds."
         ),
-        operation_id="scenario_bundles_list",
         parameters=[
             *LISTING_FILTERS,
-            *paging(
-                ScenarioBundlePagination.page_size,
-                ScenarioBundlePagination.max_page_size,
-            ),
+            *paging(ScenarioBundlePagination),
         ],
         # No `404`: a filter matching nothing is an empty page, not a missing
         # collection. No entity tag either -- a listing is not one bundle's
@@ -193,7 +190,7 @@ class ScenarioBundleCollectionAPIView(OekgAPIView):
 
     @describes_a_creation(
         {
-            201: describes(
+            201: json_body(
                 "Created. The body is the bundle as it now stands -- exactly "
                 "what a write accepts, plus `_meta`. `Location` names its URL "
                 "and `ETag` the version the next write has to send back."
@@ -201,7 +198,7 @@ class ScenarioBundleCollectionAPIView(OekgAPIView):
         },
         request=ScenarioBundleCreateSerializer,
         responses={
-            409: describes(
+            409: json_body(
                 "Another bundle already has this acronym, so nothing was "
                 "written. The acronym is how a stateless pipeline finds its "
                 "own bundle again, so two bundles sharing one is not untidy: "
@@ -373,6 +370,8 @@ class ScenarioBundleAPIView(OekgAPIView):
             ),
         ),
         parameters=[EXPAND_LABELS],
+        # The success is served in three forms; a refusal never is.
+        refusals_in="application/json",
     )
     def get(self, request, uid):
         """Read one bundle, publicly.
@@ -406,7 +405,7 @@ class ScenarioBundleAPIView(OekgAPIView):
 
     @describes_a_guarded_write(
         {
-            200: describes(
+            200: json_body(
                 "Changed. The body is the bundle as it now stands and `ETag` "
                 "is its new version -- so a pipeline chains writes without "
                 "reading again."
@@ -415,7 +414,7 @@ class ScenarioBundleAPIView(OekgAPIView):
         request=ScenarioBundleSerializer,
         parameters=[EXPAND_LABELS],
         responses={
-            409: describes(
+            409: json_body(
                 "Either the bundle moved between the read this write was "
                 "prepared from and the write itself, or -- on a rename -- "
                 "another bundle took the acronym. The guard carries both "
@@ -511,7 +510,7 @@ class ScenarioBundleAPIView(OekgAPIView):
 
     @describes_a_guarded_write(
         {
-            200: describes(
+            200: json_body(
                 "Deleted. The body names what was **deleted** and what was "
                 "only **unlinked**, which no status code can say: a node "
                 "another bundle still cites is kept and detached rather than "
@@ -537,7 +536,7 @@ class ScenarioBundleAPIView(OekgAPIView):
             )
         ],
         responses={
-            400: describes(
+            400: json_body(
                 "The confirmation was missing, or was not this bundle's "
                 "acronym, so nothing was deleted. `400` rather than `412`: "
                 "nothing here is a precondition on the bundle's state, and it "
@@ -545,14 +544,14 @@ class ScenarioBundleAPIView(OekgAPIView):
                 "acronym at all cannot be confirmed and so cannot be deleted "
                 "through this API -- give it one with a `PATCH` first."
             ),
-            404: describes(
+            404: json_body(
                 "No such scenario bundle. A **repeated** delete answers this, "
                 "and a client may treat it as success. `204` instead would "
                 "swallow the wrong-identifier delete: a bundle that is gone "
                 "has no acronym left to check a confirmation against, so a "
                 "blanket success would confirm anything."
             ),
-            409: describes(
+            409: json_body(
                 "The bundle moved between the read this delete was prepared "
                 "from and the delete itself, or something outside it started "
                 "citing a node this delete was about to remove. Nothing was "

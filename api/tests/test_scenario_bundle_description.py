@@ -355,6 +355,29 @@ class ScenarioBundleDescriptionTest(SimpleTestCase):
                     self.advice(path, method, "claims to take a request body."),
                 )
 
+    def test_no_refusal_is_offered_in_a_form_it_cannot_arrive_in(self):
+        """The bundle read serves three forms. Its refusals serve one.
+
+        `GraphRenderer` hands an error body to JSON and corrects the response's
+        own content type, so a `404` never arrives as turtle. The generator
+        applies a view's renderers to every response it declares, which is what
+        makes this worth pinning: the honest document takes an extra argument.
+        """
+        for path, method, operation in self.operations:
+            for code, response in operation.get("responses", {}).items():
+                if code[0] not in "45":
+                    continue
+                self.assertEqual(
+                    ["application/json"],
+                    list(response.get("content", {})) or ["application/json"],
+                    self.advice(
+                        path,
+                        method,
+                        f"offers its {code} in a form an error body is never "
+                        "rendered in.",
+                    ),
+                )
+
     def test_the_bundle_read_offers_the_rdf_forms_it_serves(self):
         operation = dict(
             ((path, method), operation) for path, method, operation in self.operations

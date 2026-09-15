@@ -30,6 +30,13 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
 
 from factsheet.models import API_ERA, OEKG_Modifications
+from oekg.api_description import (
+    CollectionSchema,
+    a_page_of,
+    describes_a_public_read,
+    expands,
+    paging,
+)
 from oekg.api_support import (
     OekgAPIView,
     bundle_exists,
@@ -38,7 +45,6 @@ from oekg.api_support import (
 )
 from oekg.graph_store import GraphStoreError
 from oekg.history import changed_fields
-from oekg.schema import describes, describes_a_public_read, expands, paging
 
 TRIPLES = "triples"
 
@@ -56,9 +62,10 @@ class ScenarioBundleHistoryAPIView(OekgAPIView):
 
     permission_classes = [AllowAny]
     offers_expansions = (TRIPLES,)
+    schema = CollectionSchema()
 
     @describes_a_public_read(
-        describes(
+        a_page_of(
             "A page of entries, newest first -- a history is read from the "
             "present backwards. Each names the verb, the actor as a username, "
             "the resource, the versions either side of the write, and the "
@@ -67,7 +74,6 @@ class ScenarioBundleHistoryAPIView(OekgAPIView):
             "changed, and what is known is that nothing recorded *what* "
             "changed."
         ),
-        operation_id="scenario_bundles_history_list",
         parameters=[
             expands(
                 TRIPLES,
@@ -76,7 +82,7 @@ class ScenarioBundleHistoryAPIView(OekgAPIView):
                     "a legible summary never becomes the only account."
                 ),
             ),
-            *paging(HistoryPagination.page_size, HistoryPagination.max_page_size),
+            *paging(HistoryPagination),
         ],
         # A history carries no entity tag: it is a ledger of events, not a
         # state a write could be guarded against.

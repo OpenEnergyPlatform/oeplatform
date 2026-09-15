@@ -32,6 +32,16 @@ from rdflib import Graph
 from rest_framework import status
 from rest_framework.response import Response
 
+from oekg.api_description import (
+    EXPAND_LABELS,
+    CollectionSchema,
+    a_page_of,
+    describes_a_guarded_write,
+    describes_a_public_read,
+    describes_a_removal,
+    json_body,
+    paging,
+)
 from oekg.api_support import OekgAPIView, shape_unavailable, store_unavailable
 from oekg.bundles import (
     BundlePart,
@@ -46,14 +56,6 @@ from oekg.fields import mint_identifier, referenced_node_iris, resource_delta
 from oekg.graph_store import GraphStoreError
 from oekg.history import CREATE, UPDATE
 from oekg.labels import labelled
-from oekg.schema import (
-    EXPAND_LABELS,
-    describes,
-    describes_a_guarded_write,
-    describes_a_public_read,
-    describes_a_removal,
-    paging,
-)
 from oekg.serializers import READ_ONLY_CONTAINER
 from oekg.shape import ShapeUnavailable
 from oekg.subresource_views import SubResourcePagination, SubResourceViewMixin
@@ -87,17 +89,17 @@ class BundlePartViewMixin(SubResourceViewMixin):
 class BundlePartCollectionAPIView(BundlePartViewMixin, OekgAPIView):
     """`GET` lists a bundle's parts of one kind. `POST` adds one."""
 
+    schema = CollectionSchema()
+
     @describes_a_public_read(
-        describes(
+        a_page_of(
             "A page of this bundle's parts of one kind, each in the form a "
             "write accepts it nested. `ETag` carries the **bundle's** version: "
             "a part has none of its own."
         ),
         parameters=[
             EXPAND_LABELS,
-            *paging(
-                SubResourcePagination.page_size, SubResourcePagination.max_page_size
-            ),
+            *paging(SubResourcePagination),
         ],
     )
     def get(self, request, uid):
@@ -120,7 +122,7 @@ class BundlePartCollectionAPIView(BundlePartViewMixin, OekgAPIView):
 
     @describes_a_guarded_write(
         {
-            201: describes(
+            201: json_body(
                 "Created. The body is the part as it now stands, `Location` "
                 "names its URL and `ETag` the **bundle's** new version."
             )
@@ -182,7 +184,7 @@ class BundlePartAPIView(BundlePartViewMixin, OekgAPIView):
     """`GET` reads one. `PATCH` changes the keys it names. `DELETE` removes it."""
 
     @describes_a_public_read(
-        describes(
+        json_body(
             "The part: what a write accepts, plus `_meta`. `ETag` carries the "
             "**bundle's** version, which is what a write to this part has to "
             "send back."
@@ -201,7 +203,7 @@ class BundlePartAPIView(BundlePartViewMixin, OekgAPIView):
 
     @describes_a_guarded_write(
         {
-            200: describes(
+            200: json_body(
                 "Changed. The body is the part as it now stands and `ETag` is "
                 "the bundle's new version."
             )

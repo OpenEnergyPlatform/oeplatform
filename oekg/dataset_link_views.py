@@ -31,6 +31,16 @@ from rdflib import Graph
 from rest_framework import status
 from rest_framework.response import Response
 
+from oekg.api_description import (
+    EXPAND_LABELS,
+    CollectionSchema,
+    a_page_of,
+    describes_a_guarded_write,
+    describes_a_public_read,
+    describes_a_removal,
+    json_body,
+    paging,
+)
 from oekg.api_support import (
     OekgAPIView,
     Refused,
@@ -55,14 +65,6 @@ from oekg.graph_store import GraphStoreError
 from oekg.history import CREATE
 from oekg.labels import labelled
 from oekg.resolution import resolve
-from oekg.schema import (
-    EXPAND_LABELS,
-    describes,
-    describes_a_guarded_write,
-    describes_a_public_read,
-    describes_a_removal,
-    paging,
-)
 from oekg.serializers import READ_ONLY_CONTAINER, DatasetLinkSerializer
 from oekg.shape import ShapeUnavailable
 from oekg.subresource_views import SubResourcePagination, SubResourceViewMixin
@@ -125,14 +127,13 @@ class DatasetLinkViewMixin(SubResourceViewMixin):
 class DatasetLinkCollectionAPIView(DatasetLinkViewMixin, OekgAPIView):
     """`GET` lists a scenario's dataset links. `POST` adds one."""
 
+    schema = CollectionSchema()
+
     @describes_a_public_read(
-        describes("A page of this scenario's dataset links. " + RESOLUTION),
-        operation_id="scenario_bundles_scenarios_datasets_list",
+        a_page_of("A page of this scenario's dataset links. " + RESOLUTION),
         parameters=[
             EXPAND_LABELS,
-            *paging(
-                SubResourcePagination.page_size, SubResourcePagination.max_page_size
-            ),
+            *paging(SubResourcePagination),
         ],
     )
     def get(self, request, uid, sid):
@@ -150,7 +151,7 @@ class DatasetLinkCollectionAPIView(DatasetLinkViewMixin, OekgAPIView):
 
     @describes_a_guarded_write(
         {
-            201: describes(
+            201: json_body(
                 "Created. `Location` names the link's URL and `ETag` the "
                 "bundle's new version. " + RESOLUTION
             )
@@ -158,13 +159,13 @@ class DatasetLinkCollectionAPIView(DatasetLinkViewMixin, OekgAPIView):
         request=DatasetLinkSerializer,
         parameters=[EXPAND_LABELS],
         responses={
-            400: describes(
+            400: json_body(
                 "The payload named a key this link does not have, or a `type` "
                 "or `ref` outside the two values each allows -- or the target "
                 "named cannot be addressed on this platform. Nothing was "
                 "written."
             ),
-            409: describes(
+            409: json_body(
                 "This scenario already links that target in that direction, "
                 "or the bundle moved while this write was being prepared. A "
                 "duplicate is refused rather than silently skipped: two nodes "
@@ -239,8 +240,7 @@ class DatasetLinkAPIView(DatasetLinkViewMixin, OekgAPIView):
     """
 
     @describes_a_public_read(
-        describes("One dataset link. " + RESOLUTION),
-        operation_id="scenario_bundles_scenarios_datasets_retrieve",
+        json_body("One dataset link. " + RESOLUTION),
         parameters=[EXPAND_LABELS],
     )
     def get(self, request, uid, sid, did):
