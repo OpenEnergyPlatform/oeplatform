@@ -74,16 +74,26 @@ the command at build time, after the OEO release is unpacked.
 ### Known gap: only half the pair is pinned
 
 The shape is pinned; the **labels are not**, because the OEO they come from is
-not. `podman/Dockerfile` and `docker/docker-entrypoint.dev.sh` both fetch the
-ontology from `releases/latest`, and `podman-compose.yaml` mounts a persistent
-named volume over `/app/ontologies`, so the release the labels are generated
-from can differ between a build and the running container. The command does two
-things about it rather than hiding it: it prints the release it used, and it
-writes that version into `oeo_labels.ttl`, so a moved ontology shows up as an
-`updated` artifact instead of quietly changing what the validator sees. Pass
-`--oeo-version` to pin it explicitly. Pinning the ontology fetch itself is a
-separate job — it is already duplicated across four sites with three URLs and
-inconsistent pinning.
+not. `podman/Dockerfile`, `podman/entrypoint.sh` and
+`docker/docker-entrypoint.dev.sh` all fetch the ontology from `releases/latest`,
+and `podman-compose.yaml` mounts a persistent named volume over
+`/app/ontologies`, so the release the labels are generated from can differ
+between a build and the running container. The command does two things about it
+rather than hiding it: it prints the release it used, and it writes that version
+into `oeo_labels.ttl`, so a moved ontology shows up as an `updated` artifact
+instead of quietly changing what the validator sees. Pass `--oeo-version` to pin
+it explicitly.
+
+Pinning the ontology fetch itself is a separate job. It is duplicated across
+**five sites with three URLs** and inconsistent pinning:
+
+| Site                                           | URL                                        | Pinned?             |
+| ---------------------------------------------- | ------------------------------------------ | ------------------- |
+| `docker/Dockerfile:20`                         | `releases/download/v2.5.0/build-files.zip` | yes                 |
+| `docker/docker-entrypoint.dev.sh:33`           | `releases/latest/…`                        | no                  |
+| `podman/Dockerfile:54`                         | `releases/latest/…`                        | no                  |
+| `podman/entrypoint.sh:17`                      | `releases/latest/…`                        | no                  |
+| `.github/workflows/automated-testing.yaml:112` | `openenergyplatform.org/…/oeo-full.owl`    | n/a, different host |
 
 ## The API's transport to the graph
 

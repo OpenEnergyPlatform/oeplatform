@@ -371,6 +371,14 @@ SPDX-License-Identifier: CC0-1.0
   and now points at the reference for the rest
   [(#2474)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2474)
 
+- The OEKG shape guide undercounted the places this repo fetches the ontology
+  from: four, where there are five - `podman/entrypoint.sh` was missed. The
+  count is the argument for pinning that fetch behind one seam the way the shape
+  already is, so the sentence is replaced by a table naming each site, its URL
+  and whether it is pinned - one of the five is, and two of the others are the
+  same container's build and its entrypoint
+  [(#2476)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2476)
+
 - The scenario-bundle architecture guide now documents the **second** write
   path. The feature has had two since the REST API landed - the browser's, which
   writes triple by triple, and the API's, which validates the whole bundle
