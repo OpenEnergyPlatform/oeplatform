@@ -108,6 +108,59 @@ def mint_write_token() -> str:
     return str(uuid.uuid4())
 
 
+def version_guard(uid: str, version: BundleVersion) -> str:
+    """The pattern that holds exactly while ``uid`` is a bundle at ``version``.
+
+    Written once because two writes need it and they are not the same write: an
+    ordinary change bumps the version inside this guard, and a whole-bundle
+    delete removes the node the guard tests. Spelled out at both, the two would
+    drift, and a guard that has drifted still answers `200`.
+
+    **The bundle's own existence is asserted alongside the version**, and it is
+    not redundant: the version node points AT the bundle, so a delete that
+    removes only the bundle's outgoing triples -- which is exactly what the
+    browser's delete does -- leaves the version node behind. On the version
+    alone the guard would then match a bundle that is gone, and the write would
+    resurrect it as untyped orphan triples.
+    """
+    bundle = bundle_iri(uid)
+    if version.number == UNVERSIONED:
+        # Bootstrapping a bundle the user interface wrote. The guard is the
+        # absence of a version node, so two first writes cannot both see it
+        # missing and both apply.
+        return "%s a %s . FILTER NOT EXISTS { ?node %s %s }" % (
+            bundle.n3(),
+            BUNDLE_CLASS.n3(),
+            VERSION_OF.n3(),
+            bundle.n3(),
+        )
+    return "%s a %s . %s %s %s ; %s %s ." % (
+        bundle.n3(),
+        BUNDLE_CLASS.n3(),
+        version_iri(uid).n3(),
+        VERSION_OF.n3(),
+        bundle.n3(),
+        VERSION.n3(),
+        Literal(version.number).n3(),
+    )
+
+
+def version_node_triples(uid: str, version: BundleVersion) -> Graph:
+    """The version node as it currently stands -- what a delete has to remove.
+
+    Built from the version a read already holds rather than fetched again: the
+    node has at most these three triples, and the read that produced
+    ``version`` saw all of them.
+
+    Empty for an unversioned bundle, because there is no node yet. Deleting the
+    triples anyway would be harmless and would also say, wrongly, that this API
+    knows of a node it has never written.
+    """
+    if version.number == UNVERSIONED:
+        return Graph()
+    return version_triples(uid, version.number, version.token)
+
+
 def guarded_operation(
     store: GraphStore,
     uid: str,
@@ -135,38 +188,13 @@ def guarded_operation(
     naming which half fired -- which is the right advice for either.
     """
     node = version_iri(uid)
-    bundle = bundle_iri(uid)
     # Copies: the version bookkeeping is added here, and a caller's own delta
     # graph should not come back carrying it.
     to_delete = _copy(delete)
     to_insert = _copy(insert)
 
-    if version.number == UNVERSIONED:
-        # Bootstrapping a bundle the user interface wrote. The guard is the
-        # absence of a version node, so two first writes cannot both see it
-        # missing and both apply.
-        where = "%s a %s . FILTER NOT EXISTS { ?node %s %s }" % (
-            bundle.n3(),
-            BUNDLE_CLASS.n3(),
-            VERSION_OF.n3(),
-            bundle.n3(),
-        )
-    else:
-        # The bundle's own existence is asserted alongside the version, and it
-        # is not redundant: the version node points AT the bundle, so a delete
-        # that removes the bundle's outgoing triples -- which is exactly what
-        # the user interface's delete does -- leaves the version node behind.
-        # On the version alone the guard would then match a bundle that is
-        # gone, and the write would resurrect it as untyped orphan triples.
-        where = "%s a %s . %s %s %s ; %s %s ." % (
-            bundle.n3(),
-            BUNDLE_CLASS.n3(),
-            node.n3(),
-            VERSION_OF.n3(),
-            bundle.n3(),
-            VERSION.n3(),
-            Literal(version.number).n3(),
-        )
+    where = version_guard(uid, version)
+    if version.number != UNVERSIONED:
         to_delete.add((node, VERSION, Literal(version.number)))
         if version.token is not None:
             # Left behind, the previous writer's token would accumulate one

@@ -8,6 +8,8 @@ one:
 - **Reads are public, writes are not**, named by the safe methods rather than
   by listing the unsafe ones -- so a verb a later slice adds is authenticated
   by default instead of public until somebody remembers.
+- **`?expand=` means the same thing at all of them**, and an unrecognised value
+  is refused rather than ignored.
 - **The entity tag returned is the bundle's**, always. A sub-resource has no
   version of its own, and a write to one bumps the bundle's, so handing out
   anything else here would guarantee a `412` on the very next call.
@@ -34,7 +36,9 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
+from oekg.api_support import is_safe
 from oekg.history import DELETE
+from oekg.labels import LABELS
 from oekg.removal import plan_removal
 from oekg.serializers import READ_ONLY_CONTAINER
 from oekg.writes import BundleWrite
@@ -65,9 +69,20 @@ class SubResourceViewMixin:
     """Permissions, the entity tag, and which state a response describes."""
 
     def get_permissions(self):
-        if self.request.method in ("GET", "HEAD", "OPTIONS"):
+        if is_safe(self.request):
             return [AllowAny()]
         return [IsAuthenticated()]
+
+    # Every endpoint below a bundle offers the same one. A resource that picks
+    # no ontology terms -- a dataset link -- answers with an empty map rather
+    # than a refusal: "resolve the picked terms" is a reasonable thing to ask
+    # of a resource that has none, and a client appending the parameter to
+    # every read should not meet one endpoint that breaks.
+    offers_expansions = (LABELS,)
+
+    def resolving(self) -> frozenset:
+        """What this request asked to be expanded, settled before dispatch."""
+        return self.expand
 
     def state_of(self, write: BundleWrite) -> Graph:
         """The graph a response should be built from.
@@ -81,8 +96,7 @@ class SubResourceViewMixin:
         self, body: dict, write: BundleWrite, code: int = status.HTTP_200_OK
     ) -> Response:
         """One sub-resource, carrying the bundle's entity tag."""
-        if not write.history_recorded:
-            body[READ_ONLY_CONTAINER]["history_recorded"] = False
+        body[READ_ONLY_CONTAINER].update(write.gaps)
         response = Response(body, status=code)
         response["ETag"] = write.version.etag
         return response

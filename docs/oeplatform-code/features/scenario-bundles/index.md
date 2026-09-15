@@ -44,11 +44,11 @@ Database
 
 ### Django view for the scenario bundles
 
-!!! note
-
-    Some of the information on this page may be changed in the future. To review the most recent information, please revisit.
-
-#### ::: factsheet.views
+The generated reference for `factsheet.views` lives on the
+[architecture & developer guide](architecture.md#api-reference), so that one
+page owns it. That guide also documents the **second** write path — the OEKG
+REST API under `/api/v0/scenario-bundles/` — in
+[The API write path](architecture.md#the-api-write-path).
 
 ### The scenario bundle object construction and API in django
 

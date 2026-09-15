@@ -112,9 +112,7 @@ SPDX-License-Identifier: CC0-1.0
   version that is no longer current it is refused (`412`), and if the bundle
   moves while the request is being prepared nothing is written and the answer is
   `409`. The version check is part of the write itself, so two clients cannot
-  both succeed against the same version. Note that acronym uniqueness is
-  enforced when a bundle is created but not when one is renamed, so a patch can
-  still give two bundles the same acronym
+  both succeed against the same version
   [(#2438)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2438)
 
 - Creating a bundle now binds the acronym uniqueness check inside the write, so
@@ -169,6 +167,47 @@ SPDX-License-Identifier: CC0-1.0
   writes relations the canonical shape does not validate and no identifier at
   all [(#2452)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2452)
 
+- Scenario bundles can now be listed and searched through the REST API:
+  `GET /api/v0/scenario-bundles/`. An entry says what it takes to choose a
+  bundle - its acronym, its label, its identifier, its version and how many
+  scenarios and study reports it holds - and not the bundles themselves, so the
+  listing stays the same size as the corpus grows. `?acronym=` finds one bundle
+  by the name it is known under, which is how a script that keeps nothing
+  between runs finds the bundle it wrote last time, and the answer carries the
+  version its next write has to send. The filters the scenario-bundle search
+  offers carry over - organisation, funder, author, study descriptor, scenario
+  year and publication year - named the way the API names those fields
+  elsewhere, and either end of a year range now works on its own. The listing is
+  paginated and there is no way to ask for all of it at once
+  [(#2472)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2472)
+
+- A read of a scenario bundle, a scenario, a study report or a dataset link can
+  ask for the ontology terms it picks to be resolved to their names:
+  `?expand=labels`. The names come from the small label subset the platform
+  already keeps beside the shape, never from the full ontology, and they arrive
+  beside the payload rather than in it, so what you read can still be sent
+  straight back. A term with no name in the subset is reported as such rather
+  than left out. An `expand` value no endpoint offers is refused rather than
+  ignored, so a misspelling is not silently answered with an unresolved
+  representation
+  [(#2472)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2472)
+
+- A scenario bundle can now be fetched as RDF: `Accept: text/turtle` or
+  `application/ld+json` on its own URL returns the bundle's subgraph as the
+  graph store holds it, carrying the same version tag the JSON read does. Writes
+  stay JSON - that is where the payload is validated - so a write that asks for
+  RDF back is refused rather than answered in a form it could not have been sent
+  in [(#2472)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2472)
+
+- Renaming a scenario bundle onto an acronym another bundle already holds is now
+  refused. Uniqueness was enforced when a bundle was created and not afterwards,
+  which left a rename able to make a lookup by acronym ambiguous - and a lookup
+  by acronym is how a pipeline finds its own bundle. The check is part of the
+  write itself, so two simultaneous renames cannot both take the same acronym,
+  and a bundle never counts against itself, so sending back the acronym you just
+  read is not refused by its own value
+  [(#2472)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2472)
+
 - A scenario's dataset links now say whether what they cite is still there.
   Every read of a link reports whether the named OEP table or dataset still
   exists, which tables the citation resolves to today, and whether each of those
@@ -203,6 +242,25 @@ SPDX-License-Identifier: CC0-1.0
   the node is kept and only unlinked, and the response says which. Every delete
   is recorded in the bundle's history with the triples it removed
   [(#2456)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2456)
+
+- A whole scenario bundle can now be deleted through the REST API, in two
+  deliberate steps: read it, then `DELETE` its URL carrying both the version as
+  `If-Match` and the bundle's acronym retyped as `?confirm=<acronym>`. The two
+  guard different mistakes - the version catches a bundle somebody changed since
+  you looked, the acronym catches the wrong bundle entirely, which is what a
+  script looping over identifiers actually gets wrong. Deleting a bundle that is
+  already gone answers "not found", which a client may treat as success after a
+  lost response. What goes with it is bounded by type, as for a part: the
+  bundle's own scenarios, study reports and dataset links, while regions,
+  authors, contacts, organisations, funders, cited documents, models, frameworks
+  and every picked ontology term are unlinked and never deleted - and anything
+  another bundle still points at is kept, with the response saying which. The
+  bundle's ownership records go with it, and the version bookkeeping the
+  browser's own delete leaves behind is removed too. In the history the bundle
+  keeps one line saying who deleted it, when, and under which acronym, while the
+  contents of its earlier entries are pruned - so deleting really deletes, and
+  the record that it happened survives
+  [(#2470)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2470)
 
 - Changing a scenario bundle through the REST API is now judged by what the
   change adds, not by whether the whole bundle is perfect. Bundles written
@@ -298,6 +356,19 @@ SPDX-License-Identifier: CC0-1.0
   [(#2429)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2429)
 
 ## Documentation updates
+
+- The scenario-bundle architecture guide now documents the **second** write
+  path. The feature has had two since the REST API landed - the browser's, which
+  writes triple by triple, and the API's, which validates the whole bundle
+  against the canonical shape and then writes it in one atomic request - but
+  only the first was described. The new section explains what differs before
+  someone changes it (one request is one transaction, the shape is checked on
+  the result rather than on the change, a write is refused only for problems it
+  adds, and every write is guarded by the bundle's version) and generates the
+  module reference from the source, so it cannot drift. The reference for the
+  browser's views is no longer generated on two pages at once; the feature
+  overview links to the guide that owns it
+  [(#2458)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2458)
 
 - The scenario-bundle developer documentation said the sector-division and
   study-descriptor dropdowns were hardcoded lists. Both have been served from

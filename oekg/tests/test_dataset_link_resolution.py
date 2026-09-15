@@ -39,6 +39,7 @@ from oekg.dataset_links import (
 )
 from oekg.fields import HAS_IRI, HAS_UUID
 from oekg.graph_store import GraphStore
+from oekg.labels import LABELS
 from oekg.reads import read_bundle
 from oekg.resolution import RESOLVERS, REVIEW_FINISHED, REVIEW_IN_PROGRESS
 from oekg.serializers import READ_ONLY_CONTAINER
@@ -485,3 +486,36 @@ class UnroutableTargetTest(SimpleTestCase):
         self.assertEqual(
             reference_target("https://databus.example.org/x/y"), (None, None)
         )
+
+
+class ResolutionAndLabelExpansionTest(ResolutionTestCase):
+    """Both read-only additions land in `_meta`, and neither displaces the other.
+
+    Resolution (#2469) and label expansion (#2472) were built in parallel
+    against the same two functions, and both write into the same container.
+    Nothing else asserts they coexist, which is exactly the property a merge
+    resolution can break without any test noticing.
+    """
+
+    def test_a_resolved_link_expanded_carries_both(self):
+        Table.objects.create(name="abbb_emob")
+        uid, sid, did, _ = self.with_one_link()
+
+        meta = self.client.get(self.link_url(uid, sid, did), {"expand": LABELS}).data[
+            READ_ONLY_CONTAINER
+        ]
+
+        self.assertIn(LABELS, meta)
+        self.assertIs(meta["resolvable"], True)
+        self.assertEqual([row["name"] for row in meta["tables"]], ["abbb_emob"])
+
+    def test_resolution_is_there_without_asking_for_labels(self):
+        # Resolution is not an expansion: it costs a bounded few queries and a
+        # reader needs it to tell a live citation from a dead one, so it is
+        # never opt-in.
+        uid, sid, did, _ = self.with_one_link()
+
+        meta = self.client.get(self.link_url(uid, sid, did)).data[READ_ONLY_CONTAINER]
+
+        self.assertNotIn(LABELS, meta)
+        self.assertIs(meta["resolvable"], False)

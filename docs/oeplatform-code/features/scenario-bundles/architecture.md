@@ -218,6 +218,91 @@ passes it down to the filter dialog, which resolves the labels itself.
 - **Rebuild the frontend:** `npm run build` (Vite; output under `assets/`,
   served via django-vite). See the
   [frontend workflow](../../../dev/frontend/workflow.md).
+- **Add an addressable sub-resource to the REST API:** add a field table and a
+  `BundlePart` entry, then a route. The machinery works against a subject plus a
+  table rather than against the bundle, so a new part is a table entry and a
+  route — not a module. See [The API write path](#the-api-write-path).
+
+## The API write path
+
+The feature has **two** write paths, and everything above this section describes
+the first one: the UI's. Session-authenticated RPC endpoints in `factsheet/`
+build the bundle triple by triple through rdflib, which is a thin client over
+Fuseki — so a create writing ~200 triples is ~200 HTTP requests, and it is not
+atomic.
+
+The second is the **OEKG REST API** under `/api/v0/scenario-bundles/`, in the
+`oekg` app. It is a standalone surface built beside the UI's rather than on top
+of it, and it differs from the UI path in four ways a contributor needs to know
+before touching it:
+
+- **One request, one transaction.** The API does not use rdflib as transport. It
+  builds the graph in memory and sends **one** SPARQL update request, and one
+  update request is one transaction across `;`-separated operations. A write
+  therefore either lands whole or not at all.
+- **The shape is enforced before the write.** The canonical SHACL shape comes
+  from the [`oekg` repository](https://github.com/OpenEnergyPlatform/oekg) as a
+  build-time artifact — `manage.py fetch_oekg_shapes` — and the API validates
+  the bundle's **post-state** in-process before committing. Validating a `PATCH`
+  diff instead would pass vacuously, because nothing targets an untyped node.
+- **A write is judged by what it _introduces_.** The pre-state is validated too,
+  and only violations the write adds are refused. Without this the API could not
+  write to any bundle the browser had created. A create has no pre-state and so
+  stays strict.
+- **Writes are guarded by a version.** Every mutating request carries the
+  version it believes it is editing; the guard binds that version _and the
+  bundle's existence_ into the update's `WHERE`, and reads a write token back to
+  tell a winner from a loser.
+
+Two constraints hold for anything added here. The API **must not import**
+`factsheet/oekg/connection.py`, which parses the full OEO at module import; and
+the graph store and Postgres cannot share a transaction, so **the graph commits
+first** and a failed history write is reported rather than rolled back.
+
+### The write sequence
+
+The sequence every mutating endpoint shares — exists, owned, precondition,
+validate the whole bundle, guard, read back, record — lives in one place, so an
+endpoint is a payload and a field table rather than a repetition of that order.
+
+#### ::: oekg.writes
+
+#### ::: oekg.preconditions
+
+#### ::: oekg.permissions
+
+### Validation and the shape
+
+#### ::: oekg.validation
+
+#### ::: oekg.shape
+
+### Versioning
+
+#### ::: oekg.versioning
+
+### Transport to the graph store
+
+#### ::: oekg.graph_store
+
+### Payloads and triples
+
+One field table per resource drives both directions, so a field is declared once
+rather than written twice.
+
+#### ::: oekg.bundles
+
+#### ::: oekg.fields
+
+#### ::: oekg.reads
+
+### History
+
+#### ::: oekg.history
+
+### Shared endpoint behaviour
+
+#### ::: oekg.api_support
 
 ## API reference
 
