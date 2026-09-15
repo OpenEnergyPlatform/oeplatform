@@ -291,7 +291,7 @@ SPDX-License-Identifier: CC0-1.0
   OEKG page's own OpenAPI file is retired with it -- it described the SPARQL
   passthrough rather than the endpoints, and that page keeps its SPARQL example
   and now points at the reference for the rest
-  [(#2457)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2457)
+  [(#2474)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2474)
 
 - The scenario-bundle architecture guide now documents the **second** write
   path. The feature has had two since the REST API landed - the browser's, which
