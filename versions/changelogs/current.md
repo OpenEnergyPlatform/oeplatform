@@ -363,7 +363,7 @@ SPDX-License-Identifier: CC0-1.0
   already is, so the sentence is replaced by a table naming each site, its URL
   and whether it is pinned - one of the five is, and two of the others are the
   same container's build and its entrypoint
-  [(#2474)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2474)
+  [(#2476)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2476)
 
 - The scenario-bundle architecture guide now documents the **second** write
   path. The feature has had two since the REST API landed - the browser's, which
