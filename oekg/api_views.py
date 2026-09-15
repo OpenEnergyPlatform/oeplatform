@@ -60,8 +60,8 @@ from factsheet.models import ScenarioBundleAccessControl
 from oekg.acronyms import acronym_conflict, acronym_is_free, acronym_taken
 from oekg.api_support import (
     OekgAPIView,
-    expansions,
     is_minted_identifier,
+    is_safe,
     no_such_bundle,
     shape_unavailable,
     store_unavailable,
@@ -110,11 +110,15 @@ logger = logging.getLogger("oeplatform")
 class ScenarioBundleCollectionAPIView(OekgAPIView):
     """`GET` lists scenario bundles as summaries. `POST` creates one."""
 
+    # Nothing, and the refusal says so rather than ignoring the parameter.
+    # Expanding a listing is the thing a summary exists not to be: the
+    # expensive path would then live on the public, unauthenticated endpoint
+    # and eventually be pointed at the whole corpus. A resource read is where
+    # a term gets resolved.
+    offers_expansions = ()
+
     def get_permissions(self):
-        # The safe methods are named and everything else is closed, as
-        # everywhere else in this API: a verb a later slice adds is
-        # authenticated by default rather than public until somebody remembers.
-        if self.request.method in ("GET", "HEAD", "OPTIONS"):
+        if is_safe(self.request):
             return [AllowAny()]
         return [IsAuthenticated()]
 
@@ -135,12 +139,6 @@ class ScenarioBundleCollectionAPIView(OekgAPIView):
         holding no state between runs finds its own bundle again, and the
         `_meta` it gets back carries the version its next write must send.
         """
-        # The listing offers no expansion, and the refusal says so rather than
-        # ignoring the parameter. Expanding a listing is the thing a summary
-        # exists not to be: the expensive path would live on the public,
-        # unauthenticated endpoint, and eventually be pointed at the whole
-        # corpus. A resource read is where a term gets resolved.
-        expansions(request, ())
         filters = SummaryFilters.from_query(request.query_params)
         paginator = ScenarioBundlePagination()
         try:
@@ -251,13 +249,10 @@ class ScenarioBundleCollectionAPIView(OekgAPIView):
 class ScenarioBundleAPIView(OekgAPIView):
     """`GET` returns one scenario bundle, publicly. `PATCH` changes a field."""
 
+    offers_expansions = (LABELS,)
+
     def get_permissions(self):
-        # The safe methods are named and everything else is closed, rather than
-        # the other way round: a verb a later slice adds is then authenticated
-        # by default instead of public until somebody remembers. The price is
-        # that an unsupported verb answers 401 before it can answer 405, which
-        # is the cheaper of the two mistakes.
-        if self._is_safe():
+        if is_safe(self.request):
             return [AllowAny()]
         return [IsAuthenticated()]
 
@@ -270,15 +265,11 @@ class ScenarioBundleAPIView(OekgAPIView):
         a form its request could not have been sent in.
         """
         renderers = super().get_renderers()
-        if self._is_safe():
+        if is_safe(self.request):
             renderers += [renderer() for renderer in RDF_RENDERERS]
         return renderers
 
-    def _is_safe(self) -> bool:
-        return self.request.method in ("GET", "HEAD", "OPTIONS")
-
     def get(self, request, uid):
-        labels = LABELS in expansions(request, (LABELS,))
         # Identifiers are minted here, so anything that is not one cannot name a
         # bundle. Checked before it reaches a query, where an IRI-unsafe
         # character would raise out of rdflib as a 500 rather than a 404.
@@ -301,7 +292,7 @@ class ScenarioBundleAPIView(OekgAPIView):
             response = Response(subgraph)
             response["ETag"] = version.etag
             return response
-        return _bundle_response(uid, subgraph, version, labels=labels)
+        return _bundle_response(uid, subgraph, version, expand=self.expand)
 
     def patch(self, request, uid):
         serializer = ScenarioBundleSerializer(data=request.data, partial=True)
@@ -368,7 +359,10 @@ def _all_referenced_iris(payload: dict) -> list:
 
 
 def _represent(
-    uid: str, graph: Graph, version: BundleVersion, labels: bool = False
+    uid: str,
+    graph: Graph,
+    version: BundleVersion,
+    expand: frozenset = frozenset(),
 ) -> dict:
     """A read returns exactly what a write accepts, plus read-only data.
 
@@ -389,10 +383,10 @@ def _represent(
             },
         },
         BUNDLE_FIELDS,
-        labels,
+        expand,
     )
     for part in BUNDLE_PARTS:
-        body[part.payload_key] = part_bodies(graph, uid, part, labels)
+        body[part.payload_key] = part_bodies(graph, uid, part, expand)
     return body
 
 
@@ -413,10 +407,10 @@ def _bundle_response(
     graph: Graph,
     version: BundleVersion,
     history_recorded: bool = True,
-    labels: bool = False,
+    expand: frozenset = frozenset(),
 ) -> Response:
     """The body, plus the entity tag every read has to carry."""
-    body = _note_history_gap(_represent(uid, graph, version, labels), history_recorded)
+    body = _note_history_gap(_represent(uid, graph, version, expand), history_recorded)
     response = Response(body)
     response["ETag"] = version.etag
     return response

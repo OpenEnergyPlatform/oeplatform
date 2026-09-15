@@ -33,8 +33,12 @@ from oekg.shape import label_graph
 LABELS = "labels"
 
 
-def labelled(body: dict, fields: tuple, asked: bool) -> dict:
+def labelled(body: dict, fields: tuple, expand: frozenset) -> dict:
     """Add this body's resolved labels to its read-only container, if asked.
+
+    Takes the whole set of expansions rather than a flag, so a second one is
+    added where it is answered rather than by widening six signatures that
+    thread a boolean from the view down to here.
 
     ``fields`` is the resource's own field table, so what counts as a picked
     term is decided by the same table that writes it -- a field the shape later
@@ -43,7 +47,7 @@ def labelled(body: dict, fields: tuple, asked: bool) -> dict:
     rather than refusing: "resolve the picked terms" is a sensible thing to ask
     of a resource that picks none.
     """
-    if asked:
+    if LABELS in expand:
         body[READ_ONLY_CONTAINER][LABELS] = term_labels(picked_terms(body, fields))
     return body
 

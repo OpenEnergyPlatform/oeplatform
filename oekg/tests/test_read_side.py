@@ -15,7 +15,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 from django.urls import reverse
 from rdflib import RDF, Graph
 
-from oekg.bundles import BUNDLE_CLASS, SCENARIO, bundle_iri, find_part
+from oekg.bundles import BUNDLE_CLASS, BUNDLE_FIELDS, SCENARIO, bundle_iri, find_part
 from oekg.fields import DC, OEO
 from oekg.labels import LABELS, picked_terms, term_labels
 from oekg.serializers import READ_ONLY_CONTAINER
@@ -117,8 +117,6 @@ class ExpandLabelsTest(ReadSideTestCase):
     def test_only_enumerated_fields_count_as_picked_terms(self):
         # A minted contact's IRI is not an ontology term and is not in the
         # subset, so resolving it would put a permanent null in every answer.
-        from oekg.bundles import BUNDLE_FIELDS
-
         picked = picked_terms(
             {
                 "sectors": [str(OEO.OEO_00000367)],
@@ -162,6 +160,38 @@ class UnknownExpansionTest(ReadSideTestCase):
         # A summary is what the listing is for. An expanded listing would put
         # the expensive path on the public endpoint.
         response = self.client.get(self.collection_url, {"expand": LABELS})
+
+        self.assertEqual(response.status_code, 400)
+
+    def test_an_unknown_value_refuses_a_write_before_it_writes(self):
+        # The refusal has to come before the handler, not after it. Read at the
+        # end of a `POST`, it would create the scenario, record the history and
+        # bump the version -- and then answer 400, a refusal that refused
+        # nothing.
+        uid, etag = self.created()
+
+        response = self.client.post(
+            self.scenarios_url(uid) + "?expand=bogus",
+            data=VALID_SCENARIO,
+            content_type="application/json",
+            HTTP_IF_MATCH=etag,
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(self.read(self.detail_url(uid))["scenarios"], [])
+        self.assertEqual(
+            self.client.get(self.detail_url(uid))["ETag"],
+            etag,
+            "nothing was written, so the version did not move",
+        )
+
+    def test_a_bad_expansion_is_refused_before_the_store_is_read(self):
+        # Ahead of the resource's existence, unlike a payload's problems: an
+        # expansion nobody offers is wrong whether or not the bundle is there.
+        response = self.client.get(
+            self.detail_url("11111111-2222-3333-4444-555555555555"),
+            {"expand": "bogus"},
+        )
 
         self.assertEqual(response.status_code, 400)
 

@@ -72,10 +72,45 @@ class OekgAPIView(APIView):
 
     throttle_classes = [ScenarioBundleThrottle, ScenarioBundleUserThrottle]
 
+    # What `?expand=` may name at this endpoint. Empty means it may name
+    # nothing, which is itself an answer -- see the listing.
+    offers_expansions: tuple = ()
+
+    def initial(self, request, *args, **kwargs):
+        """Settle the request's own problems before the handler runs.
+
+        `?expand=` is read **here**, not in each handler, and that is not
+        tidiness: a handler that reads it after writing would create the
+        resource, record the history, bump the version and *then* answer `400`
+        -- a refusal that refused nothing. Reading it before dispatch makes
+        "nothing was written" true of every `400` this API gives, and makes it
+        true structurally rather than by each endpoint remembering.
+
+        It is checked ahead of the resource's existence, unlike a payload's
+        problems: an expansion nobody offers is wrong whether or not the
+        bundle is there, and the store should not be read for a response that
+        cannot be given.
+        """
+        super().initial(request, *args, **kwargs)
+        self.expand = expansions(request, self.offers_expansions)
+
     def handle_exception(self, exc):
         if isinstance(exc, Refused):
             return exc.response
         return super().handle_exception(exc)
+
+
+def is_safe(request) -> bool:
+    """Whether this request only reads.
+
+    Asked by every endpoint that is public to read and closed to write, and
+    asked here so all of them ask the same question. The safe methods are
+    named and everything else is closed, rather than the other way round: a
+    verb a later slice adds is then authenticated by default instead of public
+    until somebody remembers. The price is that an unsupported verb answers
+    `401` before it can answer `405`, which is the cheaper of the two mistakes.
+    """
+    return request.method in ("GET", "HEAD", "OPTIONS")
 
 
 def expansions(request, allowed: tuple) -> frozenset:

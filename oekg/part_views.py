@@ -32,12 +32,7 @@ from rdflib import Graph
 from rest_framework import status
 from rest_framework.response import Response
 
-from oekg.api_support import (
-    OekgAPIView,
-    expansions,
-    shape_unavailable,
-    store_unavailable,
-)
+from oekg.api_support import OekgAPIView, shape_unavailable, store_unavailable
 from oekg.bundles import (
     BundlePart,
     build_part_graph,
@@ -50,7 +45,7 @@ from oekg.bundles import (
 from oekg.fields import mint_identifier, referenced_node_iris, resource_delta
 from oekg.graph_store import GraphStoreError
 from oekg.history import CREATE, UPDATE
-from oekg.labels import LABELS, labelled
+from oekg.labels import labelled
 from oekg.serializers import READ_ONLY_CONTAINER
 from oekg.shape import ShapeUnavailable
 from oekg.subresource_views import SubResourceViewMixin, describes_a_removal
@@ -73,10 +68,6 @@ class BundlePartViewMixin(SubResourceViewMixin):
             write,
             code,
         )
-
-    def resolving(self) -> bool:
-        """Whether this request asked for its picked terms to be resolved."""
-        return LABELS in expansions(self.request, (LABELS,))
 
     def not_found(self, pid: str) -> Response:
         return Response(
@@ -239,7 +230,7 @@ def part_bodies(graph: Graph, uid: str, part: BundlePart, labels: bool = False) 
 
 
 def part_body(
-    graph: Graph, node, uid: str, part: BundlePart, labels: bool = False
+    graph: Graph, node, uid: str, part: BundlePart, expand: frozenset = frozenset()
 ) -> dict:
     return labelled(
         {
@@ -252,5 +243,5 @@ def part_body(
             },
         },
         part.fields,
-        labels,
+        expand,
     )

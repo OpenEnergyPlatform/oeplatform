@@ -6,7 +6,10 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 from unittest.mock import patch
 
-from oekg.fields import OEO
+from rdflib import Graph, Literal
+
+from oekg.bundles import bundle_iri
+from oekg.fields import DC, OEO
 from oekg.graph_store import GraphStore
 from oekg.serializers import READ_ONLY_CONTAINER
 from oekg.summaries import ScenarioBundlePagination
@@ -83,6 +86,21 @@ class BundleSummaryTest(BundleListTestCase):
         self.client.logout()
 
         self.assertEqual(self.client.get(self.collection_url).status_code, 200)
+
+    def test_a_bundle_the_shape_would_refuse_still_takes_one_row(self):
+        # No live bundle conforms, so the listing has to survive one that does
+        # not. A second acronym would take two rows out of a page while the
+        # total counts the bundle once -- the page would then be longer than
+        # the total claims, and the next window would shift under it.
+        uid, _ = self.created()
+        second = Graph()
+        second.add((bundle_iri(uid), DC.acronym, Literal("A-SECOND-ACRONYM")))
+        self.store.insert(second)
+
+        data = self.listed()
+
+        self.assertEqual(data["count"], 1)
+        self.assertEqual(len(data["results"]), 1)
 
     def test_counts_are_not_multiplied_by_a_filter(self):
         # Two organisations on one bundle join to two rows before grouping. A

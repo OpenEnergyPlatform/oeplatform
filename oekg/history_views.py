@@ -27,7 +27,6 @@ from factsheet.models import API_ERA, OEKG_Modifications
 from oekg.api_support import (
     OekgAPIView,
     bundle_exists,
-    expansions,
     no_such_bundle,
     store_unavailable,
 )
@@ -49,10 +48,9 @@ class ScenarioBundleHistoryAPIView(OekgAPIView):
     """`GET` returns one bundle's change history."""
 
     permission_classes = [AllowAny]
+    offers_expansions = (TRIPLES,)
 
     def get(self, request, uid):
-        asked = expansions(request, (TRIPLES,))
-
         # Existence is asked of the graph, not of the history: a bundle with no
         # entries is a real bundle the user interface wrote, and answering 404
         # for it would say it does not exist.
@@ -74,7 +72,10 @@ class ScenarioBundleHistoryAPIView(OekgAPIView):
         paginator = HistoryPagination()
         page = paginator.paginate_queryset(entries, request, view=self)
         return paginator.get_paginated_response(
-            [_represent(entry, uid, with_triples=TRIPLES in asked) for entry in page]
+            [
+                _represent(entry, uid, with_triples=TRIPLES in self.expand)
+                for entry in page
+            ]
         )
 
 

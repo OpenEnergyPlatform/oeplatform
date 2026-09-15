@@ -182,24 +182,37 @@ def _summary(row: dict) -> dict:
 def _page_query(filters: SummaryFilters, offset: int, limit: int) -> str:
     """One page of summaries, counts included, in one query.
 
-    The counts are `COUNT(DISTINCT ...)` because the filters join: a bundle
-    matching two of the three organisations asked for appears twice before
-    grouping, and a count that did not say DISTINCT would report twice as many
-    scenarios for it than it has.
+    **Grouped by the bundle alone, and everything else sampled.** Grouping by
+    the label and the acronym as well would be one row per *combination*, so a
+    bundle carrying two acronyms -- which the shape forbids and the live graph
+    nonetheless contains, none of its bundles conforming -- would take two rows
+    out of a page while the total counted it once. The page would then be
+    longer than the total claims and the window would shift under the next
+    page. Sampling picks one and the page stays one row per bundle.
+
+    The counts are `COUNT(DISTINCT ...)` for the sibling reason: the filters
+    join, so a bundle matching two of the organisations asked for appears twice
+    before grouping, and a count that did not say DISTINCT would report twice
+    as many scenarios for it as it has.
     """
     return """
-        SELECT ?bundle ?acronym ?label ?version
+        SELECT ?bundle
+               (SAMPLE(?acronymValue) AS ?acronym)
+               (SAMPLE(?labelValue) AS ?label)
+               (SAMPLE(?versionValue) AS ?version)
                (COUNT(DISTINCT ?scenarioPart) AS ?scenarios)
                (COUNT(DISTINCT ?reportPart) AS ?study_reports)
         WHERE {
           %(where)s
-          OPTIONAL { ?bundle %(acronym)s ?acronym }
-          OPTIONAL { ?bundle %(label)s ?label }
-          OPTIONAL { ?versionNode %(versionOf)s ?bundle ; %(version)s ?version }
+          OPTIONAL { ?bundle %(acronym)s ?acronymValue }
+          OPTIONAL { ?bundle %(label)s ?labelValue }
+          OPTIONAL {
+            ?versionNode %(versionOf)s ?bundle ; %(version)s ?versionValue
+          }
           OPTIONAL { ?bundle %(hasPart)s ?scenarioPart . ?scenarioPart a %(scenario)s }
           OPTIONAL { ?bundle %(hasPart)s ?reportPart . ?reportPart a %(report)s }
         }
-        GROUP BY ?bundle ?acronym ?label ?version
+        GROUP BY ?bundle
         ORDER BY ?acronym ?bundle
         LIMIT %(limit)d OFFSET %(offset)d
     """ % {

@@ -45,7 +45,9 @@ ACRONYM = DC.acronym
 HOLDER = "?acronymHolder"
 
 
-def acronym_taken(store: GraphStore, acronym: str, excluding: Optional[str] = None):
+def acronym_taken(
+    store: GraphStore, acronym: str, excluding: Optional[str] = None
+) -> bool:
     """Whether another bundle already uses this acronym.
 
     ``excluding`` names a bundle that does not count against itself, so a write
