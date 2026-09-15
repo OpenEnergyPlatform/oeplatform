@@ -298,6 +298,12 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
+- `PATCH /api/v0/scenario-bundles/<uid>/?expand=labels` now resolves the
+  ontology terms it was asked to. Every other write below a bundle answers with
+  its resolved representation; this one accepted the parameter and then dropped
+  it, so a client got a `200` carrying no labels and nothing saying why
+  [(#2475)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2475)
+
 - Error responses from the scenario-bundle API carried the text `"None"` where
   they should have carried an empty value, and would have turned numbers into
   text. Introduced in the previous release cycle and not shipped

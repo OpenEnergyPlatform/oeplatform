@@ -352,11 +352,16 @@ class ScenarioBundleAPIView(OekgAPIView):
         except GraphStoreError as error:
             return store_unavailable(error, "written to")
 
+        # Expanded like every other write below a bundle. Each of those
+        # answers with its resolved representation already; this one dropped
+        # the parameter it had accepted, so a client asking for labels got a
+        # `200` with none and nothing saying why.
         return _bundle_response(
             uid,
             write.post_state,
             write.version,
             history_recorded=write.history_recorded,
+            expand=self.expand,
         )
 
     @extend_schema(

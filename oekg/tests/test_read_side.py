@@ -89,6 +89,34 @@ class ExpandLabelsTest(ReadSideTestCase):
             VALID_SCENARIO["scenario_types"][0], self.labels_of(body["scenarios"][0])
         )
 
+    def test_a_bundle_patch_resolves_what_it_was_asked_to(self):
+        # Every other write below a bundle answers with its resolved
+        # representation. This one accepted `?expand=labels` -- the parameter
+        # is parsed for the whole view -- and then dropped it, so a client
+        # asking for labels got a `200` carrying none and nothing saying why.
+        uid, etag = self.created()
+        self.client.force_login(self.user)
+
+        response = self.client.patch(
+            f"{self.detail_url(uid)}?expand={LABELS}",
+            data={"label": "Renamed by a resolving patch"},
+            content_type="application/json",
+            HTTP_IF_MATCH=etag,
+        )
+
+        self.assertEqual(response.status_code, 200, response.data)
+        self.assertEqual(
+            self.labels_of(response.data)[VALID_PAYLOAD["sectors"][0]], "sector"
+        )
+
+    def test_a_bundle_patch_still_resolves_nothing_unasked(self):
+        uid, etag = self.created()
+
+        response = self.patch(uid, {"label": "Renamed"}, if_match=etag)
+
+        self.assertEqual(response.status_code, 200, response.data)
+        self.assertNotIn(LABELS, response.data[READ_ONLY_CONTAINER])
+
     def test_a_scenario_read_at_its_own_url_resolves_too(self):
         uid, sid, _ = self.with_one_scenario()
 
