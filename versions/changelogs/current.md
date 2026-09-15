@@ -179,6 +179,7 @@ SPDX-License-Identifier: CC0-1.0
   year and publication year - named the way the API names those fields
   elsewhere, and either end of a year range now works on its own. The listing is
   paginated and there is no way to ask for all of it at once
+  [(#2472)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2472)
 
 - A read of a scenario bundle, a scenario, a study report or a dataset link can
   ask for the ontology terms it picks to be resolved to their names:
@@ -189,13 +190,14 @@ SPDX-License-Identifier: CC0-1.0
   than left out. An `expand` value no endpoint offers is refused rather than
   ignored, so a misspelling is not silently answered with an unresolved
   representation
+  [(#2472)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2472)
 
 - A scenario bundle can now be fetched as RDF: `Accept: text/turtle` or
   `application/ld+json` on its own URL returns the bundle's subgraph as the
   graph store holds it, carrying the same version tag the JSON read does. Writes
   stay JSON - that is where the payload is validated - so a write that asks for
   RDF back is refused rather than answered in a form it could not have been sent
-  in
+  in [(#2472)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2472)
 
 - Renaming a scenario bundle onto an acronym another bundle already holds is now
   refused. Uniqueness was enforced when a bundle was created and not afterwards,
@@ -204,6 +206,7 @@ SPDX-License-Identifier: CC0-1.0
   write itself, so two simultaneous renames cannot both take the same acronym,
   and a bundle never counts against itself, so sending back the acronym you just
   read is not refused by its own value
+  [(#2472)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2472)
 
 - A scenario factsheet, a study report or a dataset link can now be removed
   through the REST API: `DELETE` on its own URL, carrying the bundle's version
