@@ -404,6 +404,23 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Code Quality
 
+- The test run no longer buries itself in debug logging. The shipped
+  `securitysettings.py.default` set the root logger to `DEBUG`, which was
+  harmless until the OEKG tests began talking to a real graph store over HTTP --
+  since then every SPARQL query and update wrote a line, so a continuous
+  integration run produced tens of thousands of them and anything worth reading
+  was lost among them. The root level is `INFO` and `urllib3` is pinned to
+  `WARNING` in its own right, so raising the root back to `DEBUG` to trace our
+  own code does not bring the flood back. An existing local
+  `securitysettings.py` is not affected and can be updated by hand
+
+- The repair command's tests quiet the rdflib warning they provoke on purpose.
+  They write a year-only value typed as a timestamp -- the very defect the
+  `year-dates` repair exists for -- and rdflib logged a warning with a traceback
+  each time it parsed it, which is on every read. It is silenced where the value
+  is written deliberately, so the same warning coming from real data is still
+  visible
+
 - Remove `StudyDescriptors.js`, the hardcoded study-descriptor array replaced by
   the OEO-served list. Nothing imported it any more
   [(#2450)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2450)
