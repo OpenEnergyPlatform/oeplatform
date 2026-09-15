@@ -46,9 +46,17 @@ from oekg.fields import mint_identifier, referenced_node_iris, resource_delta
 from oekg.graph_store import GraphStoreError
 from oekg.history import CREATE, UPDATE
 from oekg.labels import labelled
+from oekg.schema import (
+    EXPAND_LABELS,
+    describes,
+    describes_a_guarded_write,
+    describes_a_public_read,
+    describes_a_removal,
+    paging,
+)
 from oekg.serializers import READ_ONLY_CONTAINER
 from oekg.shape import ShapeUnavailable
-from oekg.subresource_views import SubResourceViewMixin, describes_a_removal
+from oekg.subresource_views import SubResourcePagination, SubResourceViewMixin
 from oekg.writes import BundleWrite, open_bundle, refuse_renames
 
 
@@ -79,7 +87,27 @@ class BundlePartViewMixin(SubResourceViewMixin):
 class BundlePartCollectionAPIView(BundlePartViewMixin, OekgAPIView):
     """`GET` lists a bundle's parts of one kind. `POST` adds one."""
 
+    @describes_a_public_read(
+        describes(
+            "A page of this bundle's parts of one kind, each in the form a "
+            "write accepts it nested. `ETag` carries the **bundle's** version: "
+            "a part has none of its own."
+        ),
+        parameters=[
+            EXPAND_LABELS,
+            *paging(
+                SubResourcePagination.page_size, SubResourcePagination.max_page_size
+            ),
+        ],
+    )
     def get(self, request, uid):
+        """List this bundle's parts of one kind.
+
+        Paginated, although the collection is bounded by its bundle: this is a
+        public endpoint and no public collection here has an unbounded mode.
+        The nested form inside a bundle read is the exception, and a deliberate
+        one -- that one has to be complete, because a client sends it back.
+        """
         try:
             write = open_bundle(request, uid)
         except GraphStoreError as error:
@@ -90,7 +118,30 @@ class BundlePartCollectionAPIView(BundlePartViewMixin, OekgAPIView):
             write,
         )
 
+    @describes_a_guarded_write(
+        {
+            201: describes(
+                "Created. The body is the part as it now stands, `Location` "
+                "names its URL and `ETag` the **bundle's** new version."
+            )
+        },
+        parameters=[EXPAND_LABELS],
+    )
     def post(self, request, uid):
+        """Add one part to this bundle.
+
+        The identifier is minted by the server, as everywhere in this API, and
+        returned in `Location`. What is validated is the **whole bundle with
+        this part in it**: every constraint in the OEKG shape is bundle-local,
+        so a part on its own is not a unit the shape can judge, and validating
+        one alone would pass vacuously in the places that matter.
+
+        The version guarded, the ownership asked and the entity tag returned
+        are all the bundle's. Two clients editing two different parts of one
+        bundle therefore do conflict -- the price of one version per bundle,
+        and deliberate: conflict granularity follows the aggregate root, and a
+        part is not one.
+        """
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -130,7 +181,16 @@ class BundlePartCollectionAPIView(BundlePartViewMixin, OekgAPIView):
 class BundlePartAPIView(BundlePartViewMixin, OekgAPIView):
     """`GET` reads one. `PATCH` changes the keys it names. `DELETE` removes it."""
 
+    @describes_a_public_read(
+        describes(
+            "The part: what a write accepts, plus `_meta`. `ETag` carries the "
+            "**bundle's** version, which is what a write to this part has to "
+            "send back."
+        ),
+        parameters=[EXPAND_LABELS],
+    )
     def get(self, request, uid, pid):
+        """Read one part of a bundle, publicly."""
         try:
             write = open_bundle(request, uid)
         except GraphStoreError as error:
@@ -139,7 +199,27 @@ class BundlePartAPIView(BundlePartViewMixin, OekgAPIView):
             return self.not_found(pid)
         return self.part_response(write, pid)
 
+    @describes_a_guarded_write(
+        {
+            200: describes(
+                "Changed. The body is the part as it now stands and `ETag` is "
+                "the bundle's new version."
+            )
+        },
+        parameters=[EXPAND_LABELS],
+    )
     def patch(self, request, uid, pid):
+        """Change the fields this payload names, without touching its siblings.
+
+        A key the payload does not mention is genuinely untouched. The part's
+        existence is checked **before** the precondition, so a request for a
+        part that is not there hears that rather than being told its `If-Match`
+        is missing for something that does not exist.
+
+        Like every write here it is judged by what it **introduces**: a
+        violation the bundle already carried is reported in
+        `pre_existing_violations` and does not refuse the write.
+        """
         serializer = self.serializer_class(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         payload = dict(serializer.validated_data)
