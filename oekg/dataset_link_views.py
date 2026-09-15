@@ -16,6 +16,12 @@ no field to change without changing what the link is. Editing one is adding a
 different one and removing this one, which says plainly what happened -- and
 `DELETE` is what makes that reachable, so the pair is the whole contract.
 
+**Every read resolves.** A link is a citation with nothing enforcing it, so a
+read says what the citation means now: whether the named target is still there
+and, for a catalogue reference, which tables it groups today. That is computed
+per read and never stored -- see `oekg.resolution` for why, and for what the
+nulls mean.
+
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
@@ -40,6 +46,7 @@ from oekg.dataset_links import (
     dataset_link_payload,
     dataset_link_uid,
     find_dataset_link,
+    reference_target,
     stored_iri,
     target_iri,
 )
@@ -47,6 +54,7 @@ from oekg.fields import mint_identifier
 from oekg.graph_store import GraphStoreError
 from oekg.history import CREATE
 from oekg.labels import labelled
+from oekg.resolution import resolve
 from oekg.serializers import READ_ONLY_CONTAINER, DatasetLinkSerializer
 from oekg.shape import ShapeUnavailable
 from oekg.subresource_views import SubResourceViewMixin, describes_a_removal
@@ -89,11 +97,9 @@ class DatasetLinkViewMixin(SubResourceViewMixin):
         state = self.state_of(write)
         scenario = find_part(state, write.uid, SCENARIO, sid)
         direction, node = find_dataset_link(state, scenario, did)
-        return self.represented(
-            _link_body(state, node, direction, write.uid, sid, self.resolving()),
-            write,
-            code,
-        )
+        body = _link_body(state, node, direction, write.uid, sid, self.resolving())
+        _resolve_into(state, [(node, body)])
+        return self.represented(body, write, code)
 
 
 class DatasetLinkCollectionAPIView(DatasetLinkViewMixin, OekgAPIView):
@@ -211,12 +217,35 @@ def _no_such_link(did: str) -> Response:
 def _link_bodies(
     graph: Graph, scenario, uid: str, sid: str, expand: frozenset = frozenset()
 ) -> list:
-    bodies = [
-        _link_body(graph, node, direction, uid, sid, expand)
+    pairs = [
+        (node, _link_body(graph, node, direction, uid, sid, expand))
         for direction, node in dataset_link_nodes(graph, scenario)
     ]
-    bodies.sort(key=lambda body: (body["type"], body["name"]))
-    return bodies
+    pairs.sort(key=lambda pair: (pair[1]["type"], pair[1]["name"]))
+    _resolve_into(graph, pairs)
+    return [body for _, body in pairs]
+
+
+def _resolve_into(graph: Graph, pairs: list) -> None:
+    """Say, for every one of these links, what it points at right now.
+
+    Done to the whole list at once and never to one link at a time: resolution
+    costs a fixed few relational queries for any number of links, and a
+    per-link version of this would put a query per citation on a public
+    endpoint. A single link is simply a list of one.
+
+    What is looked up comes from each link's stored **URL**, not from the
+    `name` in its body. The two agree for every link this API wrote, because
+    the URL was built from the name -- but the existing route takes them as two
+    separate values from a client, so a legacy link can carry a real table's
+    URL beside a human-readable title. Resolving by that title would report a
+    table that is plainly there as deleted.
+    """
+    resolutions = resolve(
+        [reference_target(stored_iri(graph, node) or "") for node, _ in pairs]
+    )
+    for (_, body), resolution in zip(pairs, resolutions):
+        body[READ_ONLY_CONTAINER].update(resolution.as_meta())
 
 
 def _link_body(

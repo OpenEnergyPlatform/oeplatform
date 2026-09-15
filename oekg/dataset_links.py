@@ -17,7 +17,8 @@ whose meaning anybody would have to reason about.
 **A link is never checked against its target, and never blocked by it.** A
 bundle is a published research record: "this scenario used table X" stays true
 after X is deleted, so the link outlives the thing it cites and a read says
-whether it still resolves. Writing a link therefore touches no table and no
+whether it still resolves -- `oekg.resolution` is where that answer is worked
+out. Writing a link therefore touches no table and no
 catalogue entry, and a table's owner can still delete it while somebody else's
 bundle cites it.
 
@@ -32,7 +33,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 from dataclasses import dataclass
 from typing import Optional
-from urllib.parse import urlsplit
+from urllib.parse import unquote, urlsplit
 
 from django.urls import NoReverseMatch, reverse
 from rdflib import RDF, RDFS, Graph, Literal, URIRef
@@ -137,11 +138,32 @@ def reference_kind(iri: str) -> Optional[str]:
     one written before these routes existed. That is reported as it is rather
     than guessed at.
     """
+    return reference_target(iri)[0]
+
+
+def reference_target(iri: str) -> tuple:
+    """Which kind of thing a stored link points at, and *which one*.
+
+    The name comes from the URL and never from the label, and that is the
+    whole reason this exists beside `reference_kind`. For a link this API
+    wrote the two agree, because the URL was built from the name. For a link
+    the existing route wrote they are independent values a client supplied
+    separately -- the label is a human-readable title and the URL is the
+    pointer -- so resolving by label would report a table that is plainly
+    there as deleted, which is the fabrication this module refuses everywhere
+    else.
+
+    ``(None, None)`` when the path is not one of these pages at all, a URL
+    reaching past a target's own page (a table's permissions page, say)
+    included: a link to a page *about* a table is not a link to the table.
+    """
     path = urlsplit(iri).path
     for target in TARGETS:
-        if path.startswith(_prefix(target)):
-            return target.name
-    return None
+        prefix = _prefix(target)
+        if path.startswith(prefix):
+            name = unquote(path[len(prefix) :])
+            return (target.name, name) if name and "/" not in name else (None, None)
+    return None, None
 
 
 def build_dataset_link_graph(
