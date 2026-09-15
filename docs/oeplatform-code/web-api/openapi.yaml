@@ -1,0 +1,2910 @@
+openapi: 3.0.3
+info:
+  title: Open Energy Platform API
+  version: v0
+  description: OpenAPI schema for the Open Energy Platform REST API.
+paths:
+  /api/v0/advanced/connection/close:
+    post:
+      operationId: advanced_connection_close_create
+      tags:
+      - 'Advanced: Connection'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/advanced/connection/close_all:
+    get:
+      operationId: advanced_connection_close_all_retrieve
+      description: Verify that the current user is authenticated.
+      tags:
+      - 'Advanced: Connection'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/advanced/connection/commit:
+    post:
+      operationId: advanced_connection_commit_create
+      tags:
+      - 'Advanced: Connection'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/advanced/connection/open:
+    post:
+      operationId: advanced_connection_open_create
+      tags:
+      - 'Advanced: Connection'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/advanced/connection/rollback:
+    post:
+      operationId: advanced_connection_rollback_create
+      tags:
+      - 'Advanced: Connection'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/advanced/cursor/close:
+    post:
+      operationId: advanced_cursor_close_create
+      tags:
+      - 'Advanced: Cursor'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/advanced/cursor/fetch_all:
+    post:
+      operationId: advanced_cursor_fetch_all_create
+      tags:
+      - 'Advanced: Cursor'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/advanced/cursor/fetch_many:
+    post:
+      operationId: advanced_cursor_fetch_many_create
+      tags:
+      - 'Advanced: Cursor'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/advanced/cursor/fetch_one:
+    post:
+      operationId: advanced_cursor_fetch_one_create
+      tags:
+      - 'Advanced: Cursor'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/advanced/cursor/open:
+    post:
+      operationId: advanced_cursor_open_create
+      tags:
+      - 'Advanced: Cursor'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/advanced/delete:
+    post:
+      operationId: advanced_delete_create
+      tags:
+      - Advanced
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/advanced/do_begin_twophase:
+    post:
+      operationId: advanced_do_begin_twophase_create
+      tags:
+      - 'Advanced: Two phase'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/advanced/do_commit_twophase:
+    post:
+      operationId: advanced_do_commit_twophase_create
+      tags:
+      - 'Advanced: Two phase'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/advanced/do_prepare_twophase:
+    post:
+      operationId: advanced_do_prepare_twophase_create
+      tags:
+      - 'Advanced: Two phase'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/advanced/do_recover_twophase:
+    post:
+      operationId: advanced_do_recover_twophase_create
+      tags:
+      - 'Advanced: Two phase'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/advanced/do_rollback_twophase:
+    post:
+      operationId: advanced_do_rollback_twophase_create
+      tags:
+      - 'Advanced: Two phase'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/advanced/get_columns:
+    post:
+      operationId: advanced_get_columns_create
+      tags:
+      - Advanced
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/advanced/get_foreign_keys:
+    post:
+      operationId: advanced_get_foreign_keys_create
+      tags:
+      - Advanced
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/advanced/get_indexes:
+    post:
+      operationId: advanced_get_indexes_create
+      tags:
+      - Advanced
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/advanced/get_isolation_level:
+    post:
+      operationId: advanced_get_isolation_level_create
+      tags:
+      - Advanced
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/advanced/get_pk_constraint:
+    post:
+      operationId: advanced_get_pk_constraint_create
+      tags:
+      - Advanced
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/advanced/get_schema_names:
+    post:
+      operationId: advanced_get_schema_names_create
+      tags:
+      - Advanced
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/advanced/get_table_names:
+    post:
+      operationId: advanced_get_table_names_create
+      tags:
+      - Advanced
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/advanced/get_unique_constraints:
+    post:
+      operationId: advanced_get_unique_constraints_create
+      tags:
+      - Advanced
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/advanced/get_view_definition:
+    post:
+      operationId: advanced_get_view_definition_create
+      tags:
+      - Advanced
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/advanced/get_view_names:
+    post:
+      operationId: advanced_get_view_names_create
+      tags:
+      - Advanced
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/advanced/has_schema:
+    post:
+      operationId: advanced_has_schema_create
+      tags:
+      - Advanced
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/advanced/has_table:
+    post:
+      operationId: advanced_has_table_create
+      tags:
+      - Advanced
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/advanced/insert:
+    post:
+      operationId: advanced_insert_create
+      tags:
+      - Advanced
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/advanced/search:
+    post:
+      operationId: advanced_search_create
+      tags:
+      - Advanced
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/advanced/set_isolation_level:
+    post:
+      operationId: advanced_set_isolation_level_create
+      tags:
+      - Advanced
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/advanced/update:
+    post:
+      operationId: advanced_update_create
+      tags:
+      - Advanced
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/datasets/:
+    get:
+      operationId: datasets_list
+      tags:
+      - datasets
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DatasetRead'
+          description: ''
+    post:
+      operationId: datasets_create
+      description: Creates a new dataset.
+      summary: Create dataset
+      tags:
+      - datasets
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DatasetCreate'
+            examples:
+              DatasetExample:
+                value:
+                  name: test_dataset
+                  title: Wind Power Dataset Germany
+                  description: Contains hourly wind generation data for Germany.
+                  at_id: https://example.org/datasets/test_dataset
+                summary: Example request body for creating a dataset
+                description: Use this JSON object to create a new dataset. The `at_id`
+                  field is optional and can contain a persistent identifier.
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DatasetCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DatasetCreate'
+        required: true
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '201':
+          description: Dataset created
+        '400':
+          description: The payload was rejected.
+  /api/v0/datasets/{dataset_name}/:
+    get:
+      operationId: datasets_retrieve
+      description: Returns metadata for a single dataset.
+      summary: Get dataset
+      parameters:
+      - in: path
+        name: dataset_name
+        schema:
+          type: string
+        required: true
+      tags:
+      - datasets
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatasetRead'
+          description: ''
+    put:
+      operationId: datasets_update
+      description: Updates metadata for an existing dataset.
+      summary: Update dataset
+      parameters:
+      - in: path
+        name: dataset_name
+        schema:
+          type: string
+        required: true
+      tags:
+      - datasets
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DatasetCreate'
+            examples:
+              UpdateDatasetExample:
+                value:
+                  name: test_dataset
+                  title: Updated Wind Power Dataset Germany
+                  description: Updated description with more details.
+                  at_id: https://example.org/datasets/test_dataset
+                summary: Example request body for updating a dataset
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DatasetCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DatasetCreate'
+        required: true
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          description: Dataset updated
+    delete:
+      operationId: datasets_destroy
+      description: Deletes the specified dataset.
+      summary: Delete dataset
+      parameters:
+      - in: path
+        name: dataset_name
+        schema:
+          type: string
+        required: true
+      tags:
+      - datasets
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '204':
+          description: Dataset deleted
+  /api/v0/datasets/{dataset_name}/assign-tables/:
+    post:
+      operationId: datasets_assign_tables_create
+      description: Assigns existing OEP tables to an existing dataset. The dataset
+        must already exist and the referenced tables must already exist. After assignment,
+        the dataset resources are updated from the table metadata.
+      summary: Assign tables to dataset
+      parameters:
+      - in: path
+        name: dataset_name
+        schema:
+          type: string
+        description: 'Name of the dataset to which the tables should be assigned.
+          Example: `test_dataset`.'
+        required: true
+      tags:
+      - datasets
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DatasetAssignTables'
+            examples:
+              AssignTablesExample:
+                value:
+                  tables:
+                  - name: germany_wind_hourly
+                  - name: germany_wind_daily
+                summary: Example request body for assigning tables
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DatasetAssignTables'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DatasetAssignTables'
+        required: true
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          description: Tables were assigned to the dataset.
+        '404':
+          description: Dataset was not found.
+  /api/v0/datasets/{dataset_name}/resources/:
+    get:
+      operationId: datasets_resources_list
+      description: Returns the tables/resources that belong to a dataset.
+      summary: List dataset resources
+      parameters:
+      - in: path
+        name: dataset_name
+        schema:
+          type: string
+        required: true
+      tags:
+      - datasets
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DatasetResource'
+          description: ''
+  /api/v0/datasets/{dataset_name}/unassign-tables/:
+    post:
+      operationId: datasets_unassign_tables_create
+      parameters:
+      - in: path
+        name: dataset_name
+        schema:
+          type: string
+        required: true
+      tags:
+      - datasets
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v0/datasets/list_all/scenario/:
+    get:
+      operationId: datasets_list_all_scenario_list
+      description: |-
+        Used for the scenario bundles react app to be able to populate
+        form select options with existing datasets from scenario topic.
+      tags:
+      - datasets
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ScenarioDataTables'
+          description: ''
+  /api/v0/db/table-sizes/:
+    get:
+      operationId: db_table_sizes_retrieve
+      description: |-
+        GET /api/v0/db/table-sizes/?stopic=<stopic>&table=<table>
+        - table -> single relation (detailed)
+        - none  -> all tables
+      tags:
+      - db
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/factsheet/frameworks/:
+    get:
+      operationId: factsheet_frameworks_list
+      description: |-
+        Used for the scenario bundles react app to be able to select a existing
+        framework or model factsheet.
+      tags:
+      - factsheet
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Energyframework'
+          description: ''
+  /api/v0/factsheet/models/:
+    get:
+      operationId: factsheet_models_list
+      description: |-
+        Used for the scenario bundles react app to be able to select a existing
+        framework or model factsheet.
+      tags:
+      - factsheet
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Energymodel'
+          description: ''
+  /api/v0/oekg/sparql/:
+    post:
+      operationId: oekg_sparql_create
+      tags:
+      - oekg
+      security:
+      - tokenAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v0/scenario-bundle/scenario/manage-datasets/:
+    post:
+      operationId: scenario_bundle_scenario_manage_datasets_create
+      tags:
+      - scenario-bundle
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v0/scenario-bundles/:
+    get:
+      operationId: scenario_bundles_list
+      description: |-
+        A page of summaries: identifier, acronym, label, version and counts.
+
+        Not bundles. A listing that returned whole bundles would carry every
+        client the whole corpus, and would drag the relational resolution a
+        dataset link needs across every link of every bundle on a public
+        endpoint -- which is how the two listings next door on this platform
+        became unusable.
+
+        `?acronym=` is the filter the contract depends on: it is how a pipeline
+        holding no state between runs finds its own bundle again, and the
+        `_meta` it gets back carries the version its next write must send.
+      tags:
+      - scenario-bundles
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: scenario_bundles_create
+      description: '`GET` lists scenario bundles as summaries. `POST` creates one.'
+      tags:
+      - scenario-bundles
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v0/scenario-bundles/{uid}/:
+    get:
+      operationId: scenario_bundles_retrieve
+      description: '`GET` reads one, publicly. `PATCH` changes a field. `DELETE` removes
+        it.'
+      parameters:
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+          - json-ld
+          - turtle
+      - in: path
+        name: uid
+        schema:
+          type: string
+        required: true
+      tags:
+      - scenario-bundles
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    patch:
+      operationId: scenario_bundles_partial_update
+      description: '`GET` reads one, publicly. `PATCH` changes a field. `DELETE` removes
+        it.'
+      parameters:
+      - in: path
+        name: uid
+        schema:
+          type: string
+        required: true
+      tags:
+      - scenario-bundles
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: scenario_bundles_destroy
+      description: |-
+        Delete this bundle, in the second of two steps.
+
+        The first step is the read a client needs anyway: it returns the
+        version to guard on and the acronym to retype. This step requires both,
+        and they defend different accidents -- the version catches a bundle
+        that changed since it was read, the acronym catches the wrong bundle
+        entirely, which is the realistic failure for a pipeline looping over
+        identifiers and the one a version cannot see.
+
+        **The order of the refusals is the contract**, not an implementation
+        detail: existence, then ownership, then the version, then the
+        confirmation. A repeated delete therefore answers `404`, and a client
+        may treat that as success. Answering `204` to it instead would swallow
+        the wrong-identifier delete -- a bundle that is gone has no acronym
+        left to check a confirmation against, so a blanket success would
+        confirm anything.
+
+        `200` with a body rather than `204`, as for a part: the typed
+        containment walk can decide that a node another bundle still cites is
+        unlinked rather than deleted, and no status code can say that.
+      parameters:
+      - in: query
+        name: confirm
+        schema:
+          type: string
+        description: 'The bundle''s acronym, retyped. It guards the accident the version
+          cannot: right verb, wrong identifier.'
+        required: true
+      - in: path
+        name: uid
+        schema:
+          type: string
+        required: true
+      tags:
+      - scenario-bundles
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          description: Deleted. The body names what was deleted and what was only
+            unlinked, which no status code can say.
+  /api/v0/scenario-bundles/{uid}/history/:
+    get:
+      operationId: scenario_bundles_history_retrieve
+      description: '`GET` returns one bundle''s change history.'
+      parameters:
+      - in: path
+        name: uid
+        schema:
+          type: string
+        required: true
+      tags:
+      - scenario-bundles
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/scenario-bundles/{uid}/scenarios/:
+    get:
+      operationId: scenario_bundles_scenarios_retrieve
+      description: '`GET` lists a bundle''s parts of one kind. `POST` adds one.'
+      parameters:
+      - in: path
+        name: uid
+        schema:
+          type: string
+        required: true
+      tags:
+      - scenario-bundles
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Scenario'
+          description: ''
+    post:
+      operationId: scenario_bundles_scenarios_create
+      description: '`GET` lists a bundle''s parts of one kind. `POST` adds one.'
+      parameters:
+      - in: path
+        name: uid
+        schema:
+          type: string
+        required: true
+      tags:
+      - scenario-bundles
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Scenario'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Scenario'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Scenario'
+        required: true
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Scenario'
+          description: ''
+  /api/v0/scenario-bundles/{uid}/scenarios/{pid}/:
+    get:
+      operationId: scenario_bundles_scenarios_retrieve_2
+      description: '`GET` reads one. `PATCH` changes the keys it names. `DELETE` removes
+        it.'
+      parameters:
+      - in: path
+        name: pid
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: uid
+        schema:
+          type: string
+        required: true
+      tags:
+      - scenario-bundles
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Scenario'
+          description: ''
+    patch:
+      operationId: scenario_bundles_scenarios_partial_update
+      description: '`GET` reads one. `PATCH` changes the keys it names. `DELETE` removes
+        it.'
+      parameters:
+      - in: path
+        name: pid
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: uid
+        schema:
+          type: string
+        required: true
+      tags:
+      - scenario-bundles
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedScenario'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedScenario'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedScenario'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Scenario'
+          description: ''
+    delete:
+      operationId: scenario_bundles_scenarios_destroy
+      description: |-
+        Remove this part, and with it what only it holds.
+
+        The same order as a patch -- bundle, part, caller, precondition -- and
+        the same write path, because a delete is a write like any other: it is
+        validated against the shape, guarded on the bundle's version and
+        recorded in the history. What differs is the arithmetic in front of it,
+        which is `oekg.removal`'s.
+
+        No retyped confirmation token, unlike the whole-bundle delete. Ceremony
+        is proportional to blast radius: this removes one bounded part that can
+        be created again, and the history says what it held.
+      parameters:
+      - in: path
+        name: pid
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: uid
+        schema:
+          type: string
+        required: true
+      tags:
+      - scenario-bundles
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          description: Removed. The body names what was deleted and what was only
+            unlinked, which no status code can say.
+  /api/v0/scenario-bundles/{uid}/scenarios/{sid}/datasets/:
+    get:
+      operationId: scenario_bundles_scenarios_datasets_retrieve
+      description: '`GET` lists a scenario''s dataset links. `POST` adds one.'
+      parameters:
+      - in: path
+        name: sid
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: uid
+        schema:
+          type: string
+        required: true
+      tags:
+      - scenario-bundles
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: scenario_bundles_scenarios_datasets_create
+      description: '`GET` lists a scenario''s dataset links. `POST` adds one.'
+      parameters:
+      - in: path
+        name: sid
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: uid
+        schema:
+          type: string
+        required: true
+      tags:
+      - scenario-bundles
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v0/scenario-bundles/{uid}/scenarios/{sid}/datasets/{did}/:
+    get:
+      operationId: scenario_bundles_scenarios_datasets_retrieve_2
+      description: |-
+        `GET` reads one dataset link, `DELETE` removes it. No `PATCH`.
+
+        Add and remove is the whole contract, so the remove is the other half of
+        the design rather than an extra: with no way to edit a link, a client that
+        got one wrong has nothing else to reach for.
+      parameters:
+      - in: path
+        name: did
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: sid
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: uid
+        schema:
+          type: string
+        required: true
+      tags:
+      - scenario-bundles
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: scenario_bundles_scenarios_datasets_destroy
+      description: |-
+        Remove one link. Its target is not touched and never was.
+
+        A link is the only removable thing in this API with no children and
+        nothing shared beneath it -- what it points at is an OEP table or
+        dataset, which lives in Postgres and which no graph write may reach. It
+        still goes through the typed walk, because the guard clause is what
+        decides whether *this* node is only claimed by this scenario, and that
+        is not a question the class alone answers.
+      parameters:
+      - in: path
+        name: did
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: sid
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: uid
+        schema:
+          type: string
+        required: true
+      tags:
+      - scenario-bundles
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          description: Removed. The body names what was deleted and what was only
+            unlinked, which no status code can say.
+  /api/v0/scenario-bundles/{uid}/study-reports/:
+    get:
+      operationId: scenario_bundles_study_reports_retrieve
+      description: '`GET` lists a bundle''s parts of one kind. `POST` adds one.'
+      parameters:
+      - in: path
+        name: uid
+        schema:
+          type: string
+        required: true
+      tags:
+      - scenario-bundles
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudyReport'
+          description: ''
+    post:
+      operationId: scenario_bundles_study_reports_create
+      description: '`GET` lists a bundle''s parts of one kind. `POST` adds one.'
+      parameters:
+      - in: path
+        name: uid
+        schema:
+          type: string
+        required: true
+      tags:
+      - scenario-bundles
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudyReport'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StudyReport'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StudyReport'
+        required: true
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudyReport'
+          description: ''
+  /api/v0/scenario-bundles/{uid}/study-reports/{pid}/:
+    get:
+      operationId: scenario_bundles_study_reports_retrieve_2
+      description: '`GET` reads one. `PATCH` changes the keys it names. `DELETE` removes
+        it.'
+      parameters:
+      - in: path
+        name: pid
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: uid
+        schema:
+          type: string
+        required: true
+      tags:
+      - scenario-bundles
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudyReport'
+          description: ''
+    patch:
+      operationId: scenario_bundles_study_reports_partial_update
+      description: '`GET` reads one. `PATCH` changes the keys it names. `DELETE` removes
+        it.'
+      parameters:
+      - in: path
+        name: pid
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: uid
+        schema:
+          type: string
+        required: true
+      tags:
+      - scenario-bundles
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedStudyReport'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedStudyReport'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedStudyReport'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudyReport'
+          description: ''
+    delete:
+      operationId: scenario_bundles_study_reports_destroy
+      description: |-
+        Remove this part, and with it what only it holds.
+
+        The same order as a patch -- bundle, part, caller, precondition -- and
+        the same write path, because a delete is a write like any other: it is
+        validated against the shape, guarded on the bundle's version and
+        recorded in the history. What differs is the arithmetic in front of it,
+        which is `oekg.removal`'s.
+
+        No retyped confirmation token, unlike the whole-bundle delete. Ceremony
+        is proportional to blast radius: this removes one bounded part that can
+        be created again, and the history says what it held.
+      parameters:
+      - in: path
+        name: pid
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: uid
+        schema:
+          type: string
+        required: true
+      tags:
+      - scenario-bundles
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          description: Removed. The body names what was deleted and what was only
+            unlinked, which no status code can say.
+  /api/v0/schema/:
+    get:
+      operationId: schema_retrieve
+      description: |-
+        OpenApi3 schema for this API. Format can be selected via content negotiation.
+
+        - YAML: application/vnd.oai.openapi
+        - JSON: application/vnd.oai.openapi+json
+      parameters:
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+          - yaml
+      - in: query
+        name: lang
+        schema:
+          type: string
+          enum:
+          - af
+          - ar
+          - ar-dz
+          - ast
+          - az
+          - be
+          - bg
+          - bn
+          - br
+          - bs
+          - ca
+          - ckb
+          - cs
+          - cy
+          - da
+          - de
+          - dsb
+          - el
+          - en
+          - en-au
+          - en-gb
+          - eo
+          - es
+          - es-ar
+          - es-co
+          - es-mx
+          - es-ni
+          - es-ve
+          - et
+          - eu
+          - fa
+          - fi
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - he
+          - hi
+          - hr
+          - hsb
+          - hu
+          - hy
+          - ia
+          - id
+          - ig
+          - io
+          - is
+          - it
+          - ja
+          - ka
+          - kab
+          - kk
+          - km
+          - kn
+          - ko
+          - ky
+          - lb
+          - lt
+          - lv
+          - mk
+          - ml
+          - mn
+          - mr
+          - ms
+          - my
+          - nb
+          - ne
+          - nl
+          - nn
+          - os
+          - pa
+          - pl
+          - pt
+          - pt-br
+          - ro
+          - ru
+          - sk
+          - sl
+          - sq
+          - sr
+          - sr-latn
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - tk
+          - tr
+          - tt
+          - udm
+          - ug
+          - uk
+          - ur
+          - uz
+          - vi
+          - zh-hans
+          - zh-hant
+      tags:
+      - schema
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/vnd.oai.openapi:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/yaml:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/vnd.oai.openapi+json:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v0/schema/[\w\d_]/tables/{table}/:
+    get:
+      operationId: schema_[\w\d_]_tables_retrieve
+      description: Handles the creation of tables and serves information on existing
+        tables
+      parameters:
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - schema
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: schema_[\w\d_]_tables_create
+      description: Handles the creation of tables and serves information on existing
+        tables
+      parameters:
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - schema
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    put:
+      operationId: schema_[\w\d_]_tables_update
+      description: Handles the creation of tables and serves information on existing
+        tables
+      parameters:
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - schema
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: schema_[\w\d_]_tables_destroy
+      description: Handles the creation of tables and serves information on existing
+        tables
+      parameters:
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - schema
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/v0/schema/[\w\d_]/tables/{table}/bulk-upload/:
+    post:
+      operationId: schema_[\w\d_]_tables_bulk_upload_create
+      description: |-
+        Bulk Upload (issue #2362): the request body IS the CSV.
+
+        Append-only, all-or-nothing; rows go directly into the main table
+        without edit-journal records. The delimiter parameter is required.
+        Every attempt that reaches the upload itself - i.e. authenticated,
+        authorized, existing table, free guard slot - leaves a BulkLoadEvent,
+        the upload's only provenance. Denials at the decorator level
+        (401/403/404) and guard rejections (429) deliberately create no
+        events: anonymous requests must not write database rows, and busy
+        rejections are cheap pre-work denials. Every attempt reaching this
+        endpoint body additionally emits one structured log line (see
+        _log_bulk_upload_attempt for the format).
+      parameters:
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - schema
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/schema/[\w\d_]/tables/{table}/columns/{column}:
+    get:
+      operationId: schema_[\w\d_]_tables_columns_retrieve
+      parameters:
+      - in: path
+        name: column
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - schema
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: schema_[\w\d_]_tables_columns_create
+      parameters:
+      - in: path
+        name: column
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - schema
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    put:
+      operationId: schema_[\w\d_]_tables_columns_update
+      parameters:
+      - in: path
+        name: column
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - schema
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/schema/[\w\d_]/tables/{table}/meta/:
+    get:
+      operationId: schema_[\w\d_]_tables_meta_retrieve
+      description: |-
+        Important note:
+        oemetadata v2 introduces datasets which are not relevant on a table level
+        always query for metadata["resources"][0]. Keeping the complete oemetadata v2 JSON
+        makes it easy to integrate as no further changes to validation are required for now.
+        Datasets are handled in the model.Datasets & api views.
+      parameters:
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - 'Schema: Meta'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: schema_[\w\d_]_tables_meta_create
+      description: |-
+        Important note:
+        oemetadata v2 introduces datasets which are not relevant on a table level
+        always query for metadata["resources"][0]. Keeping the complete oemetadata v2 JSON
+        makes it easy to integrate as no further changes to validation are required for now.
+        Datasets are handled in the model.Datasets & api views.
+      parameters:
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - 'Schema: Meta'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/schema/[\w\d_]/tables/{table}/move_publish/{topic}/:
+    post:
+      operationId: schema_[\w\d_]_tables_move_publish_create
+      parameters:
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      - in: path
+        name: topic
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - schema
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/schema/[\w\d_]/tables/{table}/rows/{row_id}:
+    get:
+      operationId: schema_[\w\d_]_tables_rows_retrieve
+      parameters:
+      - in: path
+        name: row_id
+        schema:
+          type: string
+          pattern: ^[\d]+$
+        required: true
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - schema
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: schema_[\w\d_]_tables_rows_create
+      parameters:
+      - in: path
+        name: row_id
+        schema:
+          type: string
+          pattern: ^[\d]+$
+        required: true
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - schema
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    put:
+      operationId: schema_[\w\d_]_tables_rows_update
+      parameters:
+      - in: path
+        name: row_id
+        schema:
+          type: string
+          pattern: ^[\d]+$
+        required: true
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - schema
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: schema_[\w\d_]_tables_rows_destroy
+      parameters:
+      - in: path
+        name: row_id
+        schema:
+          type: string
+          pattern: ^[\d]+$
+        required: true
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - schema
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/v0/schema/[\w\d_]/tables/{table}/rows/new:
+    get:
+      operationId: schema_[\w\d_]_tables_rows_new_retrieve
+      parameters:
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - schema
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: schema_[\w\d_]_tables_rows_new_create
+      parameters:
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - schema
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    put:
+      operationId: schema_[\w\d_]_tables_rows_new_update
+      parameters:
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - schema
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: schema_[\w\d_]_tables_rows_new_destroy
+      parameters:
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - schema
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/v0/schema/[\w\d_]/tables/{table}/unpublish:
+    post:
+      operationId: schema_[\w\d_]_tables_unpublish_create
+      parameters:
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - schema
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/tables/{table}/:
+    get:
+      operationId: tables_retrieve
+      description: Handles the creation of tables and serves information on existing
+        tables
+      parameters:
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - tables
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: tables_create
+      description: Handles the creation of tables and serves information on existing
+        tables
+      parameters:
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - tables
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    put:
+      operationId: tables_update
+      description: Handles the creation of tables and serves information on existing
+        tables
+      parameters:
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - tables
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: tables_destroy
+      description: Handles the creation of tables and serves information on existing
+        tables
+      parameters:
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - tables
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/v0/tables/{table}/bulk-upload/:
+    post:
+      operationId: tables_bulk_upload_create
+      description: |-
+        Bulk Upload (issue #2362): the request body IS the CSV.
+
+        Append-only, all-or-nothing; rows go directly into the main table
+        without edit-journal records. The delimiter parameter is required.
+        Every attempt that reaches the upload itself - i.e. authenticated,
+        authorized, existing table, free guard slot - leaves a BulkLoadEvent,
+        the upload's only provenance. Denials at the decorator level
+        (401/403/404) and guard rejections (429) deliberately create no
+        events: anonymous requests must not write database rows, and busy
+        rejections are cheap pre-work denials. Every attempt reaching this
+        endpoint body additionally emits one structured log line (see
+        _log_bulk_upload_attempt for the format).
+      parameters:
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - tables
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/tables/{table}/columns/{column}:
+    get:
+      operationId: tables_columns_retrieve
+      parameters:
+      - in: path
+        name: column
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - tables
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: tables_columns_create
+      parameters:
+      - in: path
+        name: column
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - tables
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    put:
+      operationId: tables_columns_update
+      parameters:
+      - in: path
+        name: column
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - tables
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/tables/{table}/meta/:
+    get:
+      operationId: tables_meta_retrieve
+      description: |-
+        Important note:
+        oemetadata v2 introduces datasets which are not relevant on a table level
+        always query for metadata["resources"][0]. Keeping the complete oemetadata v2 JSON
+        makes it easy to integrate as no further changes to validation are required for now.
+        Datasets are handled in the model.Datasets & api views.
+      parameters:
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - 'Schema: Meta'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: tables_meta_create
+      description: |-
+        Important note:
+        oemetadata v2 introduces datasets which are not relevant on a table level
+        always query for metadata["resources"][0]. Keeping the complete oemetadata v2 JSON
+        makes it easy to integrate as no further changes to validation are required for now.
+        Datasets are handled in the model.Datasets & api views.
+      parameters:
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - 'Schema: Meta'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/tables/{table}/move_publish/{topic}/:
+    post:
+      operationId: tables_move_publish_create
+      parameters:
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      - in: path
+        name: topic
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - tables
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v0/tables/{table}/rows/{row_id}:
+    get:
+      operationId: tables_rows_retrieve
+      parameters:
+      - in: path
+        name: row_id
+        schema:
+          type: string
+          pattern: ^[\d]+$
+        required: true
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - tables
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: tables_rows_create
+      parameters:
+      - in: path
+        name: row_id
+        schema:
+          type: string
+          pattern: ^[\d]+$
+        required: true
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - tables
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    put:
+      operationId: tables_rows_update
+      parameters:
+      - in: path
+        name: row_id
+        schema:
+          type: string
+          pattern: ^[\d]+$
+        required: true
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - tables
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: tables_rows_destroy
+      parameters:
+      - in: path
+        name: row_id
+        schema:
+          type: string
+          pattern: ^[\d]+$
+        required: true
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - tables
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/v0/tables/{table}/rows/new:
+    get:
+      operationId: tables_rows_new_retrieve
+      parameters:
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - tables
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: tables_rows_new_create
+      parameters:
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - tables
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    put:
+      operationId: tables_rows_new_update
+      parameters:
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - tables
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: tables_rows_new_destroy
+      parameters:
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - tables
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/v0/tables/{table}/unpublish:
+    post:
+      operationId: tables_unpublish_create
+      parameters:
+      - in: path
+        name: table
+        schema:
+          type: string
+          pattern: ^[\w\d_\s]+$
+        required: true
+      tags:
+      - tables
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+components:
+  schemas:
+    DatasetAssignTables:
+      type: object
+      properties:
+        tables:
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              type: string
+          minItems: 1
+      required:
+      - tables
+    DatasetCreate:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the dataset
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          type: string
+          description: Display name of the dataset, e.g. 'Wind Power Dataset Germany'
+        description:
+          type: string
+          description: Short description of the dataset
+        at_id:
+          type: string
+          format: uri
+          description: 'Optional: persistent identifier or URL for the dataset'
+      required:
+      - description
+      - name
+      - title
+    DatasetRead:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        metadata:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - metadata
+      - name
+      - uuid
+    DatasetResource:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        schema:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          maxLength: 1000
+        oemetadata:
+          nullable: true
+        human_readable_name:
+          type: string
+          nullable: true
+          maxLength: 1000
+      required:
+      - id
+      - name
+      - schema
+    Energyframework:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        model_name:
+          type: string
+          title: Name
+          description: What is the full model name?
+          maxLength: 1000
+        acronym:
+          type: string
+          nullable: true
+          description: What is the abbreviation?
+          maxLength: 20
+        url:
+          type: string
+          readOnly: true
+        license:
+          allOf:
+          - $ref: '#/components/schemas/LicenseEnum'
+          description: |-
+            Under which license is the framework published?
+
+            * `Academic Free License v3.0` - Academic Free License v3.0
+            * `Apache license 2.0` - Apache license 2.0
+            * `Artistic license 2.0` - Artistic license 2.0
+            * `Boost Software License 1.0` - Boost Software License 1.0
+            * `BSD 2-clause "Simplified" license` - BSD 2-clause "Simplified" license
+            * `BSD 3-clause Clear license` - BSD 3-clause Clear license
+            * `Creative Commons license family` - Creative Commons license family
+            * `Creative Commons Zero v1.0 Universal` - Creative Commons Zero v1.0 Universal
+            * `Creative Commons Attribution 4.0` - Creative Commons Attribution 4.0
+            * `Creative Commons Attribution Share Alike 4.0` - Creative Commons Attribution Share Alike 4.0
+            * `Do What The F*ck You Want To Public License` - Do What The F*ck You Want To Public License
+            * `Educational Community License v2.0` - Educational Community License v2.0
+            * `Eclipse Public License 1.0` - Eclipse Public License 1.0
+            * `European Union Public License 1.1` - European Union Public License 1.1
+            * `GNU Affero General Public License v3.0` - GNU Affero General Public License v3.0
+            * `GNU General Public License family` - GNU General Public License family
+            * `GNU General Public License v2.0` - GNU General Public License v2.0
+            * `GNU General Public License v3.0` - GNU General Public License v3.0
+            * `GNU Lesser General Public License family` - GNU Lesser General Public License family
+            * `GNU Lesser General Public License v2.1` - GNU Lesser General Public License v2.1
+            * `GNU Lesser General Public License v3.0` - GNU Lesser General Public License v3.0
+            * `ISC` - ISC
+            * `LaTeX Project Public License v1.3c` - LaTeX Project Public License v1.3c
+            * `Microsoft Public License` - Microsoft Public License
+            * `MIT` - MIT
+            * `Mozilla Public License 2.0` - Mozilla Public License 2.0
+            * `Open Software License 3.0` - Open Software License 3.0
+            * `PostgreSQL License` - PostgreSQL License
+            * `SIL Open Font License 1.1` - SIL Open Font License 1.1
+            * `University of Illinois/NCSA Open Source License` - University of Illinois/NCSA Open Source License
+            * `The Unlicense` - The Unlicense
+            * `zLib License` - zLib License
+            * `BSD 3-clause 'New' or 'Revised' license` - BSD 3-clause 'New' or 'Revised' license
+            * `Other` - Other
+            * `Unknown` - Unknown
+        institutions:
+          type: array
+          items:
+            type: string
+            maxLength: 1000
+          nullable: true
+          title: Institution(s)
+          description: Which institutions develop(ed) the model?
+      required:
+      - id
+      - model_name
+      - url
+    Energymodel:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        model_name:
+          type: string
+          title: Name
+          description: What is the full model name?
+          maxLength: 1000
+        acronym:
+          type: string
+          nullable: true
+          description: What is the abbreviation?
+          maxLength: 20
+        url:
+          type: string
+          readOnly: true
+        license:
+          allOf:
+          - $ref: '#/components/schemas/LicenseEnum'
+          description: |-
+            Under which license is the framework published?
+
+            * `Academic Free License v3.0` - Academic Free License v3.0
+            * `Apache license 2.0` - Apache license 2.0
+            * `Artistic license 2.0` - Artistic license 2.0
+            * `Boost Software License 1.0` - Boost Software License 1.0
+            * `BSD 2-clause "Simplified" license` - BSD 2-clause "Simplified" license
+            * `BSD 3-clause Clear license` - BSD 3-clause Clear license
+            * `Creative Commons license family` - Creative Commons license family
+            * `Creative Commons Zero v1.0 Universal` - Creative Commons Zero v1.0 Universal
+            * `Creative Commons Attribution 4.0` - Creative Commons Attribution 4.0
+            * `Creative Commons Attribution Share Alike 4.0` - Creative Commons Attribution Share Alike 4.0
+            * `Do What The F*ck You Want To Public License` - Do What The F*ck You Want To Public License
+            * `Educational Community License v2.0` - Educational Community License v2.0
+            * `Eclipse Public License 1.0` - Eclipse Public License 1.0
+            * `European Union Public License 1.1` - European Union Public License 1.1
+            * `GNU Affero General Public License v3.0` - GNU Affero General Public License v3.0
+            * `GNU General Public License family` - GNU General Public License family
+            * `GNU General Public License v2.0` - GNU General Public License v2.0
+            * `GNU General Public License v3.0` - GNU General Public License v3.0
+            * `GNU Lesser General Public License family` - GNU Lesser General Public License family
+            * `GNU Lesser General Public License v2.1` - GNU Lesser General Public License v2.1
+            * `GNU Lesser General Public License v3.0` - GNU Lesser General Public License v3.0
+            * `ISC` - ISC
+            * `LaTeX Project Public License v1.3c` - LaTeX Project Public License v1.3c
+            * `Microsoft Public License` - Microsoft Public License
+            * `MIT` - MIT
+            * `Mozilla Public License 2.0` - Mozilla Public License 2.0
+            * `Open Software License 3.0` - Open Software License 3.0
+            * `PostgreSQL License` - PostgreSQL License
+            * `SIL Open Font License 1.1` - SIL Open Font License 1.1
+            * `University of Illinois/NCSA Open Source License` - University of Illinois/NCSA Open Source License
+            * `The Unlicense` - The Unlicense
+            * `zLib License` - zLib License
+            * `BSD 3-clause 'New' or 'Revised' license` - BSD 3-clause 'New' or 'Revised' license
+            * `Other` - Other
+            * `Unknown` - Unknown
+        institutions:
+          type: array
+          items:
+            type: string
+            maxLength: 1000
+          nullable: true
+          title: Institution(s)
+          description: Which institutions develop(ed) the model?
+      required:
+      - id
+      - model_name
+      - url
+    LicenseEnum:
+      enum:
+      - Academic Free License v3.0
+      - Apache license 2.0
+      - Artistic license 2.0
+      - Boost Software License 1.0
+      - BSD 2-clause "Simplified" license
+      - BSD 3-clause Clear license
+      - Creative Commons license family
+      - Creative Commons Zero v1.0 Universal
+      - Creative Commons Attribution 4.0
+      - Creative Commons Attribution Share Alike 4.0
+      - Do What The F*ck You Want To Public License
+      - Educational Community License v2.0
+      - Eclipse Public License 1.0
+      - European Union Public License 1.1
+      - GNU Affero General Public License v3.0
+      - GNU General Public License family
+      - GNU General Public License v2.0
+      - GNU General Public License v3.0
+      - GNU Lesser General Public License family
+      - GNU Lesser General Public License v2.1
+      - GNU Lesser General Public License v3.0
+      - ISC
+      - LaTeX Project Public License v1.3c
+      - Microsoft Public License
+      - MIT
+      - Mozilla Public License 2.0
+      - Open Software License 3.0
+      - PostgreSQL License
+      - SIL Open Font License 1.1
+      - University of Illinois/NCSA Open Source License
+      - The Unlicense
+      - zLib License
+      - BSD 3-clause 'New' or 'Revised' license
+      - Other
+      - Unknown
+      type: string
+      description: |-
+        * `Academic Free License v3.0` - Academic Free License v3.0
+        * `Apache license 2.0` - Apache license 2.0
+        * `Artistic license 2.0` - Artistic license 2.0
+        * `Boost Software License 1.0` - Boost Software License 1.0
+        * `BSD 2-clause "Simplified" license` - BSD 2-clause "Simplified" license
+        * `BSD 3-clause Clear license` - BSD 3-clause Clear license
+        * `Creative Commons license family` - Creative Commons license family
+        * `Creative Commons Zero v1.0 Universal` - Creative Commons Zero v1.0 Universal
+        * `Creative Commons Attribution 4.0` - Creative Commons Attribution 4.0
+        * `Creative Commons Attribution Share Alike 4.0` - Creative Commons Attribution Share Alike 4.0
+        * `Do What The F*ck You Want To Public License` - Do What The F*ck You Want To Public License
+        * `Educational Community License v2.0` - Educational Community License v2.0
+        * `Eclipse Public License 1.0` - Eclipse Public License 1.0
+        * `European Union Public License 1.1` - European Union Public License 1.1
+        * `GNU Affero General Public License v3.0` - GNU Affero General Public License v3.0
+        * `GNU General Public License family` - GNU General Public License family
+        * `GNU General Public License v2.0` - GNU General Public License v2.0
+        * `GNU General Public License v3.0` - GNU General Public License v3.0
+        * `GNU Lesser General Public License family` - GNU Lesser General Public License family
+        * `GNU Lesser General Public License v2.1` - GNU Lesser General Public License v2.1
+        * `GNU Lesser General Public License v3.0` - GNU Lesser General Public License v3.0
+        * `ISC` - ISC
+        * `LaTeX Project Public License v1.3c` - LaTeX Project Public License v1.3c
+        * `Microsoft Public License` - Microsoft Public License
+        * `MIT` - MIT
+        * `Mozilla Public License 2.0` - Mozilla Public License 2.0
+        * `Open Software License 3.0` - Open Software License 3.0
+        * `PostgreSQL License` - PostgreSQL License
+        * `SIL Open Font License 1.1` - SIL Open Font License 1.1
+        * `University of Illinois/NCSA Open Source License` - University of Illinois/NCSA Open Source License
+        * `The Unlicense` - The Unlicense
+        * `zLib License` - zLib License
+        * `BSD 3-clause 'New' or 'Revised' license` - BSD 3-clause 'New' or 'Revised' license
+        * `Other` - Other
+        * `Unknown` - Unknown
+    NodeReference:
+      type: object
+      description: 'A contact, organisation or funder: referenced by IRI, or minted
+        here.'
+      properties:
+        iri:
+          type: string
+          nullable: true
+        label:
+          type: string
+      required:
+      - label
+    PatchedScenario:
+      type: object
+      description: |-
+        One scenario factsheet -- a sub-resource, not a field of its bundle.
+
+        What makes it one is the shape: it carries its own has-uuid. That uuid is
+        **not** a field here, because the server mints it; a client supplies no
+        identifier anywhere in this API.
+      properties:
+        label:
+          type: string
+        acronym:
+          type: string
+        abstract:
+          type: string
+          nullable: true
+        study_regions:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeReference'
+        interacting_regions:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeReference'
+        years:
+          type: array
+          items:
+            type: string
+            format: date-time
+        scenario_types:
+          type: array
+          items:
+            type: string
+    PatchedStudyReport:
+      type: object
+      description: |-
+        One study report -- the publication a bundle is written up in.
+
+        A sub-resource for the same reason a scenario is: the shape gives it its
+        own has-uuid, which the server mints, so it is not a field here.
+
+        What the shape requires of one, and therefore what is required here: a
+        label, at least one author, and exactly one publication date. The doi and
+        the reference are optional, and the reference is singular because the shape
+        allows at most one.
+      properties:
+        label:
+          type: string
+        doi:
+          type: string
+          nullable: true
+        publication_date:
+          type: string
+          format: date-time
+        authors:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeReference'
+        reference:
+          type: string
+          format: uri
+          nullable: true
+    Scenario:
+      type: object
+      description: |-
+        One scenario factsheet -- a sub-resource, not a field of its bundle.
+
+        What makes it one is the shape: it carries its own has-uuid. That uuid is
+        **not** a field here, because the server mints it; a client supplies no
+        identifier anywhere in this API.
+      properties:
+        label:
+          type: string
+        acronym:
+          type: string
+        abstract:
+          type: string
+          nullable: true
+        study_regions:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeReference'
+        interacting_regions:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeReference'
+        years:
+          type: array
+          items:
+            type: string
+            format: date-time
+        scenario_types:
+          type: array
+          items:
+            type: string
+      required:
+      - acronym
+      - label
+    ScenarioDataTables:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 1000
+        human_readable_name:
+          type: string
+          nullable: true
+          maxLength: 1000
+        url:
+          type: string
+          readOnly: true
+      required:
+      - id
+      - name
+      - url
+    StudyReport:
+      type: object
+      description: |-
+        One study report -- the publication a bundle is written up in.
+
+        A sub-resource for the same reason a scenario is: the shape gives it its
+        own has-uuid, which the server mints, so it is not a field here.
+
+        What the shape requires of one, and therefore what is required here: a
+        label, at least one author, and exactly one publication date. The doi and
+        the reference are optional, and the reference is singular because the shape
+        allows at most one.
+      properties:
+        label:
+          type: string
+        doi:
+          type: string
+          nullable: true
+        publication_date:
+          type: string
+          format: date-time
+        authors:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeReference'
+        reference:
+          type: string
+          format: uri
+          nullable: true
+      required:
+      - authors
+      - label
+      - publication_date
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+    tokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Token-based authentication with required prefix "Token"
