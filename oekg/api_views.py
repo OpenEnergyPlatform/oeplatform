@@ -60,7 +60,8 @@ import logging
 
 from django.db import DatabaseError
 from django.urls import reverse
-from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiParameter, OpenApiResponse
 from rdflib import Graph
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -92,6 +93,15 @@ from oekg.part_views import part_bodies
 from oekg.preconditions import CONFIRM
 from oekg.reads import labels_of, read_bundle
 from oekg.renderers import RDF_FORMATS, RDF_RENDERERS
+from oekg.schema import (
+    ALWAYS,
+    EXPAND_LABELS,
+    describes,
+    describes_a_creation,
+    describes_a_guarded_write,
+    describes_a_public_read,
+    paging,
+)
 from oekg.serializers import (
     READ_ONLY_CONTAINER,
     ScenarioBundleCreateSerializer,
@@ -99,6 +109,7 @@ from oekg.serializers import (
 )
 from oekg.shape import ShapeUnavailable
 from oekg.summaries import (
+    LISTING_FILTERS,
     BundleSummaries,
     ScenarioBundlePagination,
     SummaryFilters,
@@ -136,7 +147,28 @@ class ScenarioBundleCollectionAPIView(OekgAPIView):
     # Named, because a collection read and a detail read would otherwise both
     # generate `scenario_bundles_retrieve` and the description would resolve
     # the collision with a numeral -- a name no reader could map back.
-    @extend_schema(operation_id="scenario_bundles_list")
+    @describes_a_public_read(
+        describes(
+            "A page of summaries. Each carries the two fields a human "
+            "recognises a bundle by at the top level -- `label` and `acronym` "
+            "-- and everything a client cannot write in `_meta`: the "
+            "identifier, the version, and the number of scenarios and study "
+            "reports the bundle holds."
+        ),
+        operation_id="scenario_bundles_list",
+        parameters=[
+            *LISTING_FILTERS,
+            *paging(
+                ScenarioBundlePagination.page_size,
+                ScenarioBundlePagination.max_page_size,
+            ),
+        ],
+        # No `404`: a filter matching nothing is an empty page, not a missing
+        # collection. No entity tag either -- a listing is not one bundle's
+        # state, and each summary carries its own version in `_meta` instead.
+        refusals=(400, *ALWAYS),
+        entity_tag=False,
+    )
     def get(self, request):
         """A page of summaries: identifier, acronym, label, version and counts.
 
@@ -159,7 +191,48 @@ class ScenarioBundleCollectionAPIView(OekgAPIView):
             return store_unavailable(error, "read")
         return paginator.get_paginated_response(page)
 
+    @describes_a_creation(
+        {
+            201: describes(
+                "Created. The body is the bundle as it now stands -- exactly "
+                "what a write accepts, plus `_meta`. `Location` names its URL "
+                "and `ETag` the version the next write has to send back."
+            )
+        },
+        request=ScenarioBundleCreateSerializer,
+        responses={
+            409: describes(
+                "Another bundle already has this acronym, so nothing was "
+                "written. The acronym is how a stateless pipeline finds its "
+                "own bundle again, so two bundles sharing one is not untidy: "
+                "it is a pipeline writing into a stranger's record."
+            )
+        },
+    )
     def post(self, request):
+        """Create a whole scenario bundle, its scenarios and study reports with it.
+
+        Nothing is written until the payload has been checked for structure,
+        the acronym for uniqueness and the assembled **post-state** against the
+        OEKG shape -- so an invalid payload leaves the graph untouched, not
+        mostly untouched. The write itself is one request, which the store
+        makes one transaction, and the acronym check is bound inside it: two
+        concurrent creates cannot both take an acronym they both found free.
+
+        **The server mints the identifier.** A client sends none anywhere in
+        this API, and `uid` is a rejected key rather than an ignored one. A
+        pipeline that keeps no state re-identifies its bundle afterwards with
+        `GET /api/v0/scenario-bundles/?acronym=...`.
+
+        Nested `scenarios` and `study_reports` are accepted here and **only**
+        here: a `PATCH` refuses them, so no single call can drop a bundle's
+        parts by omitting them. Dataset links are not accepted -- they hang off
+        a scenario and have their own endpoint.
+
+        Unlike every other write, a create is judged strictly: there is no
+        pre-state, so there is nothing it can have inherited and every
+        violation of the shape is its own.
+        """
         serializer = ScenarioBundleCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         payload = serializer.validated_data
@@ -280,7 +353,33 @@ class ScenarioBundleAPIView(OekgAPIView):
             renderers += [renderer() for renderer in RDF_RENDERERS]
         return renderers
 
+    @describes_a_public_read(
+        OpenApiResponse(
+            # Not a JSON schema: this one response is served in three forms,
+            # two of them text. `Accept: text/turtle` or `application/ld+json`
+            # returns the bundle's subgraph as it is stored -- lossless, and
+            # nearly free, because the read has constructed that subgraph
+            # anyway. The structured form is canonical for writes, because the
+            # serializers are this API's validation layer.
+            response=OpenApiTypes.ANY,
+            description=(
+                "The bundle: exactly what a write accepts, plus `_meta`, with "
+                "its scenarios and study reports nested so that a client can "
+                "send back what it read without stripping anything. `ETag` "
+                "carries the version the next write has to send. On `Accept: "
+                "text/turtle` or `application/ld+json` the same bundle comes "
+                "back as its stored subgraph instead; `expand` has nothing to "
+                "do there, because triples are already what they are."
+            ),
+        ),
+        parameters=[EXPAND_LABELS],
+    )
     def get(self, request, uid):
+        """Read one bundle, publicly.
+
+        Dataset links are **not** in this body: they hang off a scenario and
+        are read at their own endpoint.
+        """
         # Identifiers are minted here, so anything that is not one cannot name a
         # bundle. Checked before it reaches a query, where an IRI-unsafe
         # character would raise out of rdflib as a 500 rather than a 404.
@@ -305,7 +404,53 @@ class ScenarioBundleAPIView(OekgAPIView):
             return response
         return _bundle_response(uid, subgraph, version, expand=self.expand)
 
+    @describes_a_guarded_write(
+        {
+            200: describes(
+                "Changed. The body is the bundle as it now stands and `ETag` "
+                "is its new version -- so a pipeline chains writes without "
+                "reading again."
+            )
+        },
+        request=ScenarioBundleSerializer,
+        parameters=[EXPAND_LABELS],
+        responses={
+            409: describes(
+                "Either the bundle moved between the read this write was "
+                "prepared from and the write itself, or -- on a rename -- "
+                "another bundle took the acronym. The guard carries both "
+                "conditions, so this refusal names neither; the advice is the "
+                "same for both. Nothing was written."
+            )
+        },
+    )
     def patch(self, request, uid):
+        """Change the fields this payload names, and no others.
+
+        A key the payload does not mention is **genuinely untouched** -- not
+        read and written back -- which is also what stops an unrelated patch
+        from re-minting every framework and model in the bundle. An empty list
+        is how a multi-valued key is cleared, which is why omission cannot
+        mean the same thing.
+
+        Sub-resources are not accepted here, though a read nests them: a
+        `PATCH` is partial by nature and nobody sends a whole read to one, so
+        accepting `scenarios` would give a single call the power to drop a
+        bundle's parts by omitting them. They have their own endpoints.
+
+        A rename answers for the acronym's uniqueness the same way a create
+        does, and for the same reason. A shared node -- a contact, an
+        organisation, a funder, a region -- may be referenced by `iri` but
+        never renamed: other bundles cite it, and one payload may not rewrite
+        their labels.
+
+        **This write is judged by what it introduces.** Most bundles in the
+        graph were written by the browser and do not conform to the shape; a
+        violation this payload did not add is not this caller's to answer for,
+        and `pre_existing_violations` reports how many were found. Refusing
+        them would make the missing fields -- which are what a human would add
+        by patching -- unfixable through this API.
+        """
         serializer = ScenarioBundleSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         payload = dict(serializer.validated_data)
@@ -359,24 +504,56 @@ class ScenarioBundleAPIView(OekgAPIView):
             history_recorded=write.history_recorded,
         )
 
-    @extend_schema(
+    @describes_a_guarded_write(
+        {
+            200: describes(
+                "Deleted. The body names what was **deleted** and what was "
+                "only **unlinked**, which no status code can say: a node "
+                "another bundle still cites is kept and detached rather than "
+                "destroyed. No `ETag`, because there is no bundle left to have "
+                "a version. The bundle's history survives and stays readable "
+                "at its own URL -- one line saying who removed it, when, and "
+                "under which acronym."
+            )
+        },
+        # No entity tag on the response, for the reason the body gives.
+        entity_tag=False,
         parameters=[
             OpenApiParameter(
                 name=CONFIRM,
                 required=True,
                 description=(
                     "The bundle's acronym, retyped. It guards the accident the "
-                    "version cannot: right verb, wrong identifier."
+                    "version cannot: right verb, wrong identifier. Compared "
+                    "**exactly** -- normalising it away would let `api-test` "
+                    "confirm the deletion of `API-TEST`, which is the "
+                    "confusion the check exists to catch."
                 ),
             )
         ],
         responses={
-            200: OpenApiResponse(
-                description=(
-                    "Deleted. The body names what was deleted and what was "
-                    "only unlinked, which no status code can say."
-                )
-            )
+            400: describes(
+                "The confirmation was missing, or was not this bundle's "
+                "acronym, so nothing was deleted. `400` rather than `412`: "
+                "nothing here is a precondition on the bundle's state, and it "
+                "is exactly as the caller last read it. A bundle with no "
+                "acronym at all cannot be confirmed and so cannot be deleted "
+                "through this API -- give it one with a `PATCH` first."
+            ),
+            404: describes(
+                "No such scenario bundle. A **repeated** delete answers this, "
+                "and a client may treat it as success. `204` instead would "
+                "swallow the wrong-identifier delete: a bundle that is gone "
+                "has no acronym left to check a confirmation against, so a "
+                "blanket success would confirm anything."
+            ),
+            409: describes(
+                "The bundle moved between the read this delete was prepared "
+                "from and the delete itself, or something outside it started "
+                "citing a node this delete was about to remove. Nothing was "
+                "deleted. Read it again, check it is still the one you meant, "
+                "and retry."
+            ),
         },
     )
     def delete(self, request, uid):

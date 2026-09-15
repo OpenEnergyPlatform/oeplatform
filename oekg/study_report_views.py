@@ -18,16 +18,30 @@ SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
+from drf_spectacular.utils import extend_schema, extend_schema_view
+
 from oekg.bundles import STUDY_REPORT
 from oekg.part_views import BundlePartAPIView, BundlePartCollectionAPIView
 from oekg.serializers import StudyReportSerializer
 
+# A collection read and a detail read of the same resource would otherwise both
+# be called `..._retrieve`, and the generator would resolve the collision with
+# a numeral -- a name no reader can map back to an endpoint. Named on the
+# subclasses because the handlers themselves are shared: one implementation
+# serves scenarios and study reports both, and only the subclass knows which.
 
+
+@extend_schema_view(
+    get=extend_schema(operation_id="scenario_bundles_study_reports_list"),
+)
 class StudyReportCollectionAPIView(BundlePartCollectionAPIView):
     part = STUDY_REPORT
     serializer_class = StudyReportSerializer
 
 
+@extend_schema_view(
+    get=extend_schema(operation_id="scenario_bundles_study_reports_retrieve"),
+)
 class StudyReportAPIView(BundlePartAPIView):
     part = STUDY_REPORT
     serializer_class = StudyReportSerializer

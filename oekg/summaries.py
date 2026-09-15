@@ -39,6 +39,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 from dataclasses import dataclass
 from typing import Optional
 
+from drf_spectacular.utils import OpenApiParameter
 from rdflib import RDFS, Literal, URIRef
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
@@ -122,6 +123,61 @@ class SummaryFilters:
             published_from=_year(params, "published_from"),
             published_to=_year(params, "published_to"),
         )
+
+
+def _filter(name, description, many=True):
+    return OpenApiParameter(
+        name=name,
+        location=OpenApiParameter.QUERY,
+        required=False,
+        type=str,
+        description=description
+        + (
+            " Repeating this parameter widens it; different parameters narrow "
+            "each other, which is what a faceted interface means by ticking "
+            "two boxes in one facet."
+            if many
+            else ""
+        ),
+    )
+
+
+def _year_filter(name, description):
+    return OpenApiParameter(
+        name=name,
+        location=OpenApiParameter.QUERY,
+        required=False,
+        type=int,
+        description=description + " Either end of the range may be given alone.",
+    )
+
+
+#: Declared beside the parser that reads them, so a filter cannot appear in the
+#: description under a name `from_query` does not answer to. Each takes IRIs
+#: rather than labels wherever the payload does, so a filter can be built out
+#: of a bundle a client just read.
+LISTING_FILTERS = [
+    _filter(
+        "acronym",
+        "Only the bundle carrying exactly this acronym. **The filter the "
+        "contract depends on**: it is how a pipeline holding no state between "
+        "runs finds its own bundle again, and the `_meta` it gets back carries "
+        "the version its next write has to send.",
+        many=False,
+    ),
+    _filter("organisation", "The IRI of an organisation a bundle names."),
+    _filter("funder", "The IRI of a funder a bundle names."),
+    _filter("author", "The IRI of an author of one of a bundle's study reports."),
+    _filter("descriptor", "The IRI of a descriptor a bundle is tagged with."),
+    _year_filter("year_from", "Bundles with a scenario year at or after this."),
+    _year_filter("year_to", "Bundles with a scenario year at or before this."),
+    _year_filter(
+        "published_from", "Bundles with a study report published in this year or later."
+    ),
+    _year_filter(
+        "published_to", "Bundles with a study report published in this year or earlier."
+    ),
+]
 
 
 class BundleSummaries:
