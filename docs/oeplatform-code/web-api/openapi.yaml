@@ -770,6 +770,81 @@ paths:
         `?acronym=` is the filter the contract depends on: it is how a pipeline
         holding no state between runs finds its own bundle again, and the
         `_meta` it gets back carries the version its next write must send.
+
+        **Public.** No authentication is required, and sending credentials changes nothing about the answer. The OEKG SPARQL endpoint already serves the same data, so a token here would protect nothing while making published research records awkward to read. (The reference page draws a **closed** padlock here. It marks a security requirement the reader already meets, not a protected endpoint -- on that page the closed padlock is the public one.)
+      parameters:
+      - in: query
+        name: acronym
+        schema:
+          type: string
+        description: 'Only the bundle carrying exactly this acronym. **The filter
+          the contract depends on**: it is how a pipeline holding no state between
+          runs finds its own bundle again, and the `_meta` it gets back carries the
+          version its next write has to send.'
+      - in: query
+        name: author
+        schema:
+          type: string
+        description: The IRI of an author of one of a bundle's study reports. Repeating
+          this parameter widens it; different parameters narrow each other, which
+          is what a faceted interface means by ticking two boxes in one facet.
+      - in: query
+        name: descriptor
+        schema:
+          type: string
+        description: The IRI of a descriptor a bundle is tagged with. Repeating this
+          parameter widens it; different parameters narrow each other, which is what
+          a faceted interface means by ticking two boxes in one facet.
+      - in: query
+        name: funder
+        schema:
+          type: string
+        description: The IRI of a funder a bundle names. Repeating this parameter
+          widens it; different parameters narrow each other, which is what a faceted
+          interface means by ticking two boxes in one facet.
+      - in: query
+        name: organisation
+        schema:
+          type: string
+        description: The IRI of an organisation a bundle names. Repeating this parameter
+          widens it; different parameters narrow each other, which is what a faceted
+          interface means by ticking two boxes in one facet.
+      - in: query
+        name: page
+        schema:
+          type: integer
+        description: Which page of the result to return. 1-based.
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+        description: 'How many entries a page holds. Defaults to 25 and is capped
+          at 100: this endpoint is public, and no public collection here has an unbounded
+          mode.'
+      - in: query
+        name: published_from
+        schema:
+          type: integer
+        description: Bundles with a study report published in this year or later.
+          Either end of the range may be given alone.
+      - in: query
+        name: published_to
+        schema:
+          type: integer
+        description: Bundles with a study report published in this year or earlier.
+          Either end of the range may be given alone.
+      - in: query
+        name: year_from
+        schema:
+          type: integer
+        description: Bundles with a scenario year at or after this. Either end of
+          the range may be given alone.
+      - in: query
+        name: year_to
+        schema:
+          type: integer
+        description: Bundles with a scenario year at or before this. Either end of
+          the range may be given alone.
       tags:
       - scenario-bundles
       security:
@@ -778,26 +853,191 @@ paths:
       - tokenAuth: []
       - {}
       responses:
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Refused, and **nothing was written**. The payload named a key
+            the closed bundle shape does not have, or a value the shape's own `sh:in`
+            list does not allow, or the change would introduce a violation of the
+            OEKG shape -- `violations` then names them, and `pre_existing_violations`
+            counts the ones this write is not blamed for. A write is judged by what
+            it *introduces*, so a bundle that was already non-conforming can still
+            be repaired through this API.
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Throttled. These endpoints are public to read, so they carry
+            a ceiling for anonymous callers and a separate one per account. `Retry-After`
+            says how long to wait.
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'The OEKG graph store could not be reached, or the shape this
+            API validates against is not installed on this server. Neither is an answer
+            about the bundle: nothing was read and nothing was written.'
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'A page of summaries. Each carries the two fields a human recognises
+            a bundle by at the top level -- `label` and `acronym` -- and everything
+            a client cannot write in `_meta`: the identifier, the version, and the
+            number of scenarios and study reports the bundle holds. The entries are
+            in `results`, wrapped: `count` is how many matched in total, and `next`
+            and `previous` are the neighbouring pages or `null`.'
     post:
       operationId: scenario_bundles_create
-      description: '`GET` lists scenario bundles as summaries. `POST` creates one.'
+      description: |-
+        Create a whole scenario bundle, its scenarios and study reports with it.
+
+        Nothing is written until the payload has been checked for structure,
+        the acronym for uniqueness and the assembled **post-state** against the
+        OEKG shape -- so an invalid payload leaves the graph untouched, not
+        mostly untouched. The write itself is one request, which the store
+        makes one transaction, and the acronym check is bound inside it: two
+        concurrent creates cannot both take an acronym they both found free.
+
+        **The server mints the identifier.** A client sends none anywhere in
+        this API, and `uid` is a rejected key rather than an ignored one. A
+        pipeline that keeps no state re-identifies its bundle afterwards with
+        `GET /api/v0/scenario-bundles/?acronym=...`.
+
+        Nested `scenarios` and `study_reports` are accepted here and **only**
+        here: a `PATCH` refuses them, so no single call can drop a bundle's
+        parts by omitting them. Dataset links are not accepted -- they hang off
+        a scenario and have their own endpoint.
+
+        Unlike every other write, a create is judged strictly: there is no
+        pre-state, so there is nothing it can have inherited and every
+        violation of the shape is its own.
+
+        **Requires authentication.** Any authenticated account may create a scenario bundle, and the account that creates one becomes its owner, which is what lets it write to the bundle afterwards. (The reference page draws an **open** padlock here. It marks a security requirement not yet met -- use *Authorize* -- not an unprotected endpoint.)
       tags:
       - scenario-bundles
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScenarioBundleCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ScenarioBundleCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ScenarioBundleCreate'
+        required: true
       security:
       - basicAuth: []
       - cookieAuth: []
       - tokenAuth: []
       responses:
-        '200':
-          description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Refused, and **nothing was written**. The payload named a key
+            the closed bundle shape does not have, or a value the shape's own `sh:in`
+            list does not allow, or the change would introduce a violation of the
+            OEKG shape -- `violations` then names them, and `pre_existing_violations`
+            counts the ones this write is not blamed for. A write is judged by what
+            it *introduces*, so a bundle that was already non-conforming can still
+            be repaired through this API.
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No credentials, or credentials this platform does not recognise.
+            Reads here need none; writes do.
+        '409':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'Another bundle already has this acronym, so nothing was written.
+            The acronym is how a stateless pipeline finds its own bundle again, so
+            two bundles sharing one is not untidy: it is a pipeline writing into a
+            stranger''s record.'
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Throttled. These endpoints are public to read, so they carry
+            a ceiling for anonymous callers and a separate one per account. `Retry-After`
+            says how long to wait.
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'The OEKG graph store could not be reached, or the shape this
+            API validates against is not installed on this server. Neither is an answer
+            about the bundle: nothing was read and nothing was written.'
+        '201':
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The bundle's current version. Send it back in `If-Match`
+                on the next write. It is returned on **every** response that carries
+                one, writes included, so a pipeline reads once per run and chains
+                its writes; only a lost response forces a re-read. A sub-resource
+                has no version of its own -- the tag here is always the containing
+                bundle's.
+            Location:
+              schema:
+                type: string
+              description: 'Where the created resource can be read. The identifier
+                in it was minted by the server: this API accepts none from a client.'
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Created. The body is the bundle as it now stands -- exactly
+            what a write accepts, plus `_meta`. `Location` names its URL and `ETag`
+            the version the next write has to send back.
   /api/v0/scenario-bundles/{uid}/:
     get:
       operationId: scenario_bundles_retrieve
-      description: '`GET` reads one, publicly. `PATCH` changes a field. `DELETE` removes
-        it.'
+      description: |-
+        Read one bundle, publicly.
+
+        Dataset links are **not** in this body: they hang off a scenario and
+        are read at their own endpoint.
+
+        **Public.** No authentication is required, and sending credentials changes nothing about the answer. The OEKG SPARQL endpoint already serves the same data, so a token here would protect nothing while making published research records awkward to read. (The reference page draws a **closed** padlock here. It marks a security requirement the reader already meets, not a protected endpoint -- on that page the closed padlock is the public one.)
       parameters:
+      - in: query
+        name: expand
+        schema:
+          type: string
+          enum:
+          - labels
+        description: '`labels` resolves the ontology terms this resource picks into
+          `_meta.labels`, from a small label subset rather than the full OEO. A value
+          this endpoint does not offer is refused with `400` rather than ignored,
+          and the refusal happens before anything is written, so nothing was written
+          when one arrives. Values are comma-separated, which matters once an endpoint
+          offers two; none offers two yet, and the enum says which one it offers.'
       - in: query
         name: format
         schema:
@@ -819,13 +1059,124 @@ paths:
       - tokenAuth: []
       - {}
       responses:
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Refused, and **nothing was written**. The payload named a key
+            the closed bundle shape does not have, or a value the shape's own `sh:in`
+            list does not allow, or the change would introduce a violation of the
+            OEKG shape -- `violations` then names them, and `pre_existing_violations`
+            counts the ones this write is not blamed for. A write is judged by what
+            it *introduces*, so a bundle that was already non-conforming can still
+            be repaired through this API.
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No such scenario bundle, or no such resource within it.
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Throttled. These endpoints are public to read, so they carry
+            a ceiling for anonymous callers and a separate one per account. `Retry-After`
+            says how long to wait.
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'The OEKG graph store could not be reached, or the shape this
+            API validates against is not installed on this server. Neither is an answer
+            about the bundle: nothing was read and nothing was written.'
         '200':
-          description: No response body
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The bundle's current version. Send it back in `If-Match`
+                on the next write. It is returned on **every** response that carries
+                one, writes included, so a pipeline reads once per run and chains
+                its writes; only a lost response forces a re-read. A sub-resource
+                has no version of its own -- the tag here is always the containing
+                bundle's.
+          content:
+            application/json:
+              schema: {}
+            text/turtle:
+              schema: {}
+            application/ld+json:
+              schema: {}
+          description: 'The bundle: exactly what a write accepts, plus `_meta`, with
+            its scenarios and study reports nested so that a client can send back
+            what it read without stripping anything. `ETag` carries the version the
+            next write has to send. On `Accept: text/turtle` or `application/ld+json`
+            the same bundle comes back as its stored subgraph instead; `expand` has
+            nothing to do there, because triples are already what they are.'
     patch:
       operationId: scenario_bundles_partial_update
-      description: '`GET` reads one, publicly. `PATCH` changes a field. `DELETE` removes
-        it.'
+      description: |-
+        Change the fields this payload names, and no others.
+
+        A key the payload does not mention is **genuinely untouched** -- not
+        read and written back -- which is also what stops an unrelated patch
+        from re-minting every framework and model in the bundle. An empty list
+        is how a multi-valued key is cleared, which is why omission cannot
+        mean the same thing.
+
+        Sub-resources are not accepted here, though a read nests them: a
+        `PATCH` is partial by nature and nobody sends a whole read to one, so
+        accepting `scenarios` would give a single call the power to drop a
+        bundle's parts by omitting them. They have their own endpoints.
+
+        A rename answers for the acronym's uniqueness the same way a create
+        does, and for the same reason. A shared node -- a contact, an
+        organisation, a funder, a region -- may be referenced by `iri` but
+        never renamed: other bundles cite it, and one payload may not rewrite
+        their labels.
+
+        **This write is judged by what it introduces.** Most bundles in the
+        graph were written by the browser and do not conform to the shape; a
+        violation this payload did not add is not this caller's to answer for,
+        and `pre_existing_violations` reports how many were found. Refusing
+        them would make the missing fields -- which are what a human would add
+        by patching -- unfixable through this API.
+
+        **Requires authentication**, and only an owner of this scenario bundle may write to it -- a bundle with no recorded owner can be changed by an administrator only. Ownership is the bundle's, whatever part of it this operation names. (The reference page draws an **open** padlock here. It marks a security requirement not yet met -- use *Authorize* -- not an unprotected endpoint.)
       parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: string
+        description: 'The entity tag of the bundle state this write applies to, as
+          returned in `ETag` by the read it was built from. **Required, with no opt-out**:
+          without it a client that has never heard of the header would overwrite a
+          change made since it read, and neither party would be told. `*` is refused
+          as an absent header rather than honoured as a wildcard, because it satisfies
+          the letter of the precondition while withholding the one thing the precondition
+          is for. A weak validator (`W/"4"`) and a bare number are both read as the
+          version they plainly name.'
+        required: true
+      - in: query
+        name: expand
+        schema:
+          type: string
+          enum:
+          - labels
+        description: '`labels` resolves the ontology terms this resource picks into
+          `_meta.labels`, from a small label subset rather than the full OEO. A value
+          this endpoint does not offer is refused with `400` rather than ignored,
+          and the refusal happens before anything is written, so nothing was written
+          when one arrives. Values are comma-separated, which matters once an endpoint
+          offers two; none offers two yet, and the enum says which one it offers.'
       - in: path
         name: uid
         schema:
@@ -833,13 +1184,121 @@ paths:
         required: true
       tags:
       - scenario-bundles
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedScenarioBundle'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedScenarioBundle'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedScenarioBundle'
       security:
       - basicAuth: []
       - cookieAuth: []
       - tokenAuth: []
       responses:
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Refused, and **nothing was written**. The payload named a key
+            the closed bundle shape does not have, or a value the shape's own `sh:in`
+            list does not allow, or the change would introduce a violation of the
+            OEKG shape -- `violations` then names them, and `pre_existing_violations`
+            counts the ones this write is not blamed for. A write is judged by what
+            it *introduces*, so a bundle that was already non-conforming can still
+            be repaired through this API.
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No credentials, or credentials this platform does not recognise.
+            Reads here need none; writes do.
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Authenticated, but not an owner of this scenario bundle. A
+            bundle with no recorded owner is administrator-only.
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No such scenario bundle, or no such resource within it.
+        '409':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Either the bundle moved between the read this write was prepared
+            from and the write itself, or -- on a rename -- another bundle took the
+            acronym. The guard carries both conditions, so this refusal names neither;
+            the advice is the same for both. Nothing was written.
+        '412':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: '`If-Match` named a version, and it is not the current one.
+            Nothing was written. The response says which version the bundle is at.'
+        '428':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: '`If-Match` was absent, so this write did not say which version
+            it was editing and nothing was written. The response names the current
+            entity tag to send.'
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Throttled. These endpoints are public to read, so they carry
+            a ceiling for anonymous callers and a separate one per account. `Retry-After`
+            says how long to wait.
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'The OEKG graph store could not be reached, or the shape this
+            API validates against is not installed on this server. Neither is an answer
+            about the bundle: nothing was read and nothing was written.'
         '200':
-          description: No response body
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The bundle's current version. Send it back in `If-Match`
+                on the next write. It is returned on **every** response that carries
+                one, writes included, so a pipeline reads once per run and chains
+                its writes; only a lost response forces a re-read. A sub-resource
+                has no version of its own -- the tag here is always the containing
+                bundle's.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Changed. The body is the bundle as it now stands and `ETag`
+            is its new version -- so a pipeline chains writes without reading again.
     delete:
       operationId: scenario_bundles_destroy
       description: |-
@@ -863,13 +1322,30 @@ paths:
         `200` with a body rather than `204`, as for a part: the typed
         containment walk can decide that a node another bundle still cites is
         unlinked rather than deleted, and no status code can say that.
+
+        **Requires authentication**, and only an owner of this scenario bundle may write to it -- a bundle with no recorded owner can be changed by an administrator only. Ownership is the bundle's, whatever part of it this operation names. (The reference page draws an **open** padlock here. It marks a security requirement not yet met -- use *Authorize* -- not an unprotected endpoint.)
       parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: string
+        description: 'The entity tag of the bundle state this write applies to, as
+          returned in `ETag` by the read it was built from. **Required, with no opt-out**:
+          without it a client that has never heard of the header would overwrite a
+          change made since it read, and neither party would be told. `*` is refused
+          as an absent header rather than honoured as a wildcard, because it satisfies
+          the letter of the precondition while withholding the one thing the precondition
+          is for. A weak validator (`W/"4"`) and a bare number are both read as the
+          version they plainly name.'
+        required: true
       - in: query
         name: confirm
         schema:
           type: string
         description: 'The bundle''s acronym, retyped. It guards the accident the version
-          cannot: right verb, wrong identifier.'
+          cannot: right verb, wrong identifier. Compared **exactly** -- normalising
+          it away would let `api-test` confirm the deletion of `API-TEST`, which is
+          the confusion the check exists to catch.'
         required: true
       - in: path
         name: uid
@@ -883,14 +1359,148 @@ paths:
       - cookieAuth: []
       - tokenAuth: []
       responses:
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'The confirmation was missing, or was not this bundle''s acronym,
+            so nothing was deleted. `400` rather than `412`: nothing here is a precondition
+            on the bundle''s state, and it is exactly as the caller last read it.
+            A bundle with no acronym at all cannot be confirmed and so cannot be deleted
+            through this API -- give it one with a `PATCH` first.'
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No credentials, or credentials this platform does not recognise.
+            Reads here need none; writes do.
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Authenticated, but not an owner of this scenario bundle. A
+            bundle with no recorded owner is administrator-only.
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'No such scenario bundle. A **repeated** delete answers this,
+            and a client may treat it as success. `204` instead would swallow the
+            wrong-identifier delete: a bundle that is gone has no acronym left to
+            check a confirmation against, so a blanket success would confirm anything.'
+        '409':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: The bundle moved between the read this delete was prepared
+            from and the delete itself, or something outside it started citing a node
+            this delete was about to remove. Nothing was deleted. Read it again, check
+            it is still the one you meant, and retry.
+        '412':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: '`If-Match` named a version, and it is not the current one.
+            Nothing was written. The response says which version the bundle is at.'
+        '428':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: '`If-Match` was absent, so this write did not say which version
+            it was editing and nothing was written. The response names the current
+            entity tag to send.'
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Throttled. These endpoints are public to read, so they carry
+            a ceiling for anonymous callers and a separate one per account. `Retry-After`
+            says how long to wait.
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'The OEKG graph store could not be reached, or the shape this
+            API validates against is not installed on this server. Neither is an answer
+            about the bundle: nothing was read and nothing was written.'
         '200':
-          description: Deleted. The body names what was deleted and what was only
-            unlinked, which no status code can say.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'Deleted. The body names what was **deleted** and what was
+            only **unlinked**, which no status code can say: a node another bundle
+            still cites is kept and detached rather than destroyed. No `ETag`, because
+            there is no bundle left to have a version. The bundle''s history survives
+            and stays readable at its own URL -- one line saying who removed it, when,
+            and under which acronym.'
   /api/v0/scenario-bundles/{uid}/history/:
     get:
-      operationId: scenario_bundles_history_retrieve
-      description: '`GET` returns one bundle''s change history.'
+      operationId: scenario_bundles_history_list
+      description: |-
+        Read one bundle's change history.
+
+        **Public, but per bundle and paginated.** What makes a bundle read
+        public does not transfer -- that rests on the SPARQL endpoint already
+        serving the same data, and this is in no graph. What it exposes is not
+        bundle content but who edited what, and when; a per-bundle log is a
+        record about a bundle, while a global one would be a profile of a
+        person's activity across the platform.
+
+        **A deleted bundle's history is still readable**, and is the whole of
+        what a whole-bundle delete leaves: one line saying who removed it, when,
+        and under which acronym. So existence here means *in the graph or in
+        this ledger*, and a bundle nobody ever wrote has neither.
+
+        Two generations of entry share this endpoint. Rows written before this
+        API existed carry `era` saying so, and no field-level summary: nothing
+        recorded which fields they touched.
+
+        **Public.** No authentication is required, and sending credentials changes nothing about the answer. The OEKG SPARQL endpoint already serves the same data, so a token here would protect nothing while making published research records awkward to read. (The reference page draws a **closed** padlock here. It marks a security requirement the reader already meets, not a protected endpoint -- on that page the closed padlock is the public one.)
       parameters:
+      - in: query
+        name: expand
+        schema:
+          type: string
+          enum:
+          - triples
+        description: '`triples` adds the stored payload of each entry, so that a legible
+          summary never becomes the only account. A value this endpoint does not offer
+          is refused with `400` rather than ignored, and the refusal happens before
+          anything is written, so nothing was written when one arrives. Values are
+          comma-separated, which matters once an endpoint offers two; none offers
+          two yet, and the enum says which one it offers.'
+      - in: query
+        name: page
+        schema:
+          type: integer
+        description: Which page of the result to return. 1-based.
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+        description: 'How many entries a page holds. Defaults to 20 and is capped
+          at 100: this endpoint is public, and no public collection here has an unbounded
+          mode.'
       - in: path
         name: uid
         schema:
@@ -904,13 +1514,95 @@ paths:
       - tokenAuth: []
       - {}
       responses:
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Refused, and **nothing was written**. The payload named a key
+            the closed bundle shape does not have, or a value the shape's own `sh:in`
+            list does not allow, or the change would introduce a violation of the
+            OEKG shape -- `violations` then names them, and `pre_existing_violations`
+            counts the ones this write is not blamed for. A write is judged by what
+            it *introduces*, so a bundle that was already non-conforming can still
+            be repaired through this API.
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No such scenario bundle, or no such resource within it.
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Throttled. These endpoints are public to read, so they carry
+            a ceiling for anonymous callers and a separate one per account. `Retry-After`
+            says how long to wait.
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'The OEKG graph store could not be reached, or the shape this
+            API validates against is not installed on this server. Neither is an answer
+            about the bundle: nothing was read and nothing was written.'
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'A page of entries, newest first -- a history is read from
+            the present backwards. Each names the verb, the actor as a username, the
+            resource, the versions either side of the write, and the fields that changed.
+            `changes` is `null` rather than `[]` where there cannot be a summary:
+            an empty list would say that nothing changed, and what is known is that
+            nothing recorded *what* changed. The entries are in `results`, wrapped:
+            `count` is how many matched in total, and `next` and `previous` are the
+            neighbouring pages or `null`.'
   /api/v0/scenario-bundles/{uid}/scenarios/:
     get:
-      operationId: scenario_bundles_scenarios_retrieve
-      description: '`GET` lists a bundle''s parts of one kind. `POST` adds one.'
+      operationId: scenario_bundles_scenarios_list
+      description: |-
+        List this bundle's parts of one kind.
+
+        Paginated, although the collection is bounded by its bundle: this is a
+        public endpoint and no public collection here has an unbounded mode.
+        The nested form inside a bundle read is the exception, and a deliberate
+        one -- that one has to be complete, because a client sends it back.
+
+        **Public.** No authentication is required, and sending credentials changes nothing about the answer. The OEKG SPARQL endpoint already serves the same data, so a token here would protect nothing while making published research records awkward to read. (The reference page draws a **closed** padlock here. It marks a security requirement the reader already meets, not a protected endpoint -- on that page the closed padlock is the public one.)
       parameters:
+      - in: query
+        name: expand
+        schema:
+          type: string
+          enum:
+          - labels
+        description: '`labels` resolves the ontology terms this resource picks into
+          `_meta.labels`, from a small label subset rather than the full OEO. A value
+          this endpoint does not offer is refused with `400` rather than ignored,
+          and the refusal happens before anything is written, so nothing was written
+          when one arrives. Values are comma-separated, which matters once an endpoint
+          offers two; none offers two yet, and the enum says which one it offers.'
+      - in: query
+        name: page
+        schema:
+          type: integer
+        description: Which page of the result to return. 1-based.
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+        description: 'How many entries a page holds. Defaults to 50 and is capped
+          at 200: this endpoint is public, and no public collection here has an unbounded
+          mode.'
       - in: path
         name: uid
         schema:
@@ -924,16 +1616,109 @@ paths:
       - tokenAuth: []
       - {}
       responses:
-        '200':
+        '400':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Scenario'
-          description: ''
+                type: object
+                additionalProperties: {}
+          description: Refused, and **nothing was written**. The payload named a key
+            the closed bundle shape does not have, or a value the shape's own `sh:in`
+            list does not allow, or the change would introduce a violation of the
+            OEKG shape -- `violations` then names them, and `pre_existing_violations`
+            counts the ones this write is not blamed for. A write is judged by what
+            it *introduces*, so a bundle that was already non-conforming can still
+            be repaired through this API.
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No such scenario bundle, or no such resource within it.
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Throttled. These endpoints are public to read, so they carry
+            a ceiling for anonymous callers and a separate one per account. `Retry-After`
+            says how long to wait.
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'The OEKG graph store could not be reached, or the shape this
+            API validates against is not installed on this server. Neither is an answer
+            about the bundle: nothing was read and nothing was written.'
+        '200':
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The bundle's current version. Send it back in `If-Match`
+                on the next write. It is returned on **every** response that carries
+                one, writes included, so a pipeline reads once per run and chains
+                its writes; only a lost response forces a re-read. A sub-resource
+                has no version of its own -- the tag here is always the containing
+                bundle's.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'A page of this bundle''s parts of one kind, each in the form
+            a write accepts it nested. `ETag` carries the **bundle''s** version: a
+            part has none of its own. The entries are in `results`, wrapped: `count`
+            is how many matched in total, and `next` and `previous` are the neighbouring
+            pages or `null`.'
     post:
       operationId: scenario_bundles_scenarios_create
-      description: '`GET` lists a bundle''s parts of one kind. `POST` adds one.'
+      description: |-
+        Add one part to this bundle.
+
+        The identifier is minted by the server, as everywhere in this API, and
+        returned in `Location`. What is validated is the **whole bundle with
+        this part in it**: every constraint in the OEKG shape is bundle-local,
+        so a part on its own is not a unit the shape can judge, and validating
+        one alone would pass vacuously in the places that matter.
+
+        The version guarded, the ownership asked and the entity tag returned
+        are all the bundle's. Two clients editing two different parts of one
+        bundle therefore do conflict -- the price of one version per bundle,
+        and deliberate: conflict granularity follows the aggregate root, and a
+        part is not one.
+
+        **Requires authentication**, and only an owner of this scenario bundle may write to it -- a bundle with no recorded owner can be changed by an administrator only. Ownership is the bundle's, whatever part of it this operation names. (The reference page draws an **open** padlock here. It marks a security requirement not yet met -- use *Authorize* -- not an unprotected endpoint.)
       parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: string
+        description: 'The entity tag of the bundle state this write applies to, as
+          returned in `ETag` by the read it was built from. **Required, with no opt-out**:
+          without it a client that has never heard of the header would overwrite a
+          change made since it read, and neither party would be told. `*` is refused
+          as an absent header rather than honoured as a wildcard, because it satisfies
+          the letter of the precondition while withholding the one thing the precondition
+          is for. A weak validator (`W/"4"`) and a bare number are both read as the
+          version they plainly name.'
+        required: true
+      - in: query
+        name: expand
+        schema:
+          type: string
+          enum:
+          - labels
+        description: '`labels` resolves the ontology terms this resource picks into
+          `_meta.labels`, from a small label subset rather than the full OEO. A value
+          this endpoint does not offer is refused with `400` rather than ignored,
+          and the refusal happens before anything is written, so nothing was written
+          when one arrives. Values are comma-separated, which matters once an endpoint
+          offers two; none offers two yet, and the enum says which one it offers.'
       - in: path
         name: uid
         schema:
@@ -958,18 +1743,129 @@ paths:
       - cookieAuth: []
       - tokenAuth: []
       responses:
-        '200':
+        '400':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Scenario'
-          description: ''
+                type: object
+                additionalProperties: {}
+          description: Refused, and **nothing was written**. The payload named a key
+            the closed bundle shape does not have, or a value the shape's own `sh:in`
+            list does not allow, or the change would introduce a violation of the
+            OEKG shape -- `violations` then names them, and `pre_existing_violations`
+            counts the ones this write is not blamed for. A write is judged by what
+            it *introduces*, so a bundle that was already non-conforming can still
+            be repaired through this API.
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No credentials, or credentials this platform does not recognise.
+            Reads here need none; writes do.
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Authenticated, but not an owner of this scenario bundle. A
+            bundle with no recorded owner is administrator-only.
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No such scenario bundle, or no such resource within it.
+        '409':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: The bundle moved between the read this write was prepared from
+            and the write itself, so **nothing was written**. Read it again, apply
+            the change to what comes back, and retry.
+        '412':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: '`If-Match` named a version, and it is not the current one.
+            Nothing was written. The response says which version the bundle is at.'
+        '428':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: '`If-Match` was absent, so this write did not say which version
+            it was editing and nothing was written. The response names the current
+            entity tag to send.'
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Throttled. These endpoints are public to read, so they carry
+            a ceiling for anonymous callers and a separate one per account. `Retry-After`
+            says how long to wait.
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'The OEKG graph store could not be reached, or the shape this
+            API validates against is not installed on this server. Neither is an answer
+            about the bundle: nothing was read and nothing was written.'
+        '201':
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The bundle's current version. Send it back in `If-Match`
+                on the next write. It is returned on **every** response that carries
+                one, writes included, so a pipeline reads once per run and chains
+                its writes; only a lost response forces a re-read. A sub-resource
+                has no version of its own -- the tag here is always the containing
+                bundle's.
+            Location:
+              schema:
+                type: string
+              description: 'Where the created resource can be read. The identifier
+                in it was minted by the server: this API accepts none from a client.'
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Created. The body is the part as it now stands, `Location`
+            names its URL and `ETag` the **bundle's** new version.
   /api/v0/scenario-bundles/{uid}/scenarios/{pid}/:
     get:
-      operationId: scenario_bundles_scenarios_retrieve_2
-      description: '`GET` reads one. `PATCH` changes the keys it names. `DELETE` removes
-        it.'
+      operationId: scenario_bundles_scenarios_retrieve
+      description: |-
+        Read one part of a bundle, publicly.
+
+        **Public.** No authentication is required, and sending credentials changes nothing about the answer. The OEKG SPARQL endpoint already serves the same data, so a token here would protect nothing while making published research records awkward to read. (The reference page draws a **closed** padlock here. It marks a security requirement the reader already meets, not a protected endpoint -- on that page the closed padlock is the public one.)
       parameters:
+      - in: query
+        name: expand
+        schema:
+          type: string
+          enum:
+          - labels
+        description: '`labels` resolves the ontology terms this resource picks into
+          `_meta.labels`, from a small label subset rather than the full OEO. A value
+          this endpoint does not offer is refused with `400` rather than ignored,
+          and the refusal happens before anything is written, so nothing was written
+          when one arrives. Values are comma-separated, which matters once an endpoint
+          offers two; none offers two yet, and the enum says which one it offers.'
       - in: path
         name: pid
         schema:
@@ -988,17 +1884,104 @@ paths:
       - tokenAuth: []
       - {}
       responses:
-        '200':
+        '400':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Scenario'
-          description: ''
+                type: object
+                additionalProperties: {}
+          description: Refused, and **nothing was written**. The payload named a key
+            the closed bundle shape does not have, or a value the shape's own `sh:in`
+            list does not allow, or the change would introduce a violation of the
+            OEKG shape -- `violations` then names them, and `pre_existing_violations`
+            counts the ones this write is not blamed for. A write is judged by what
+            it *introduces*, so a bundle that was already non-conforming can still
+            be repaired through this API.
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No such scenario bundle, or no such resource within it.
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Throttled. These endpoints are public to read, so they carry
+            a ceiling for anonymous callers and a separate one per account. `Retry-After`
+            says how long to wait.
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'The OEKG graph store could not be reached, or the shape this
+            API validates against is not installed on this server. Neither is an answer
+            about the bundle: nothing was read and nothing was written.'
+        '200':
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The bundle's current version. Send it back in `If-Match`
+                on the next write. It is returned on **every** response that carries
+                one, writes included, so a pipeline reads once per run and chains
+                its writes; only a lost response forces a re-read. A sub-resource
+                has no version of its own -- the tag here is always the containing
+                bundle's.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'The part: what a write accepts, plus `_meta`. `ETag` carries
+            the **bundle''s** version, which is what a write to this part has to send
+            back.'
     patch:
       operationId: scenario_bundles_scenarios_partial_update
-      description: '`GET` reads one. `PATCH` changes the keys it names. `DELETE` removes
-        it.'
+      description: |-
+        Change the fields this payload names, without touching its siblings.
+
+        A key the payload does not mention is genuinely untouched. The part's
+        existence is checked **before** the precondition, so a request for a
+        part that is not there hears that rather than being told its `If-Match`
+        is missing for something that does not exist.
+
+        Like every write here it is judged by what it **introduces**: a
+        violation the bundle already carried is reported in
+        `pre_existing_violations` and does not refuse the write.
+
+        **Requires authentication**, and only an owner of this scenario bundle may write to it -- a bundle with no recorded owner can be changed by an administrator only. Ownership is the bundle's, whatever part of it this operation names. (The reference page draws an **open** padlock here. It marks a security requirement not yet met -- use *Authorize* -- not an unprotected endpoint.)
       parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: string
+        description: 'The entity tag of the bundle state this write applies to, as
+          returned in `ETag` by the read it was built from. **Required, with no opt-out**:
+          without it a client that has never heard of the header would overwrite a
+          change made since it read, and neither party would be told. `*` is refused
+          as an absent header rather than honoured as a wildcard, because it satisfies
+          the letter of the precondition while withholding the one thing the precondition
+          is for. A weak validator (`W/"4"`) and a bare number are both read as the
+          version they plainly name.'
+        required: true
+      - in: query
+        name: expand
+        schema:
+          type: string
+          enum:
+          - labels
+        description: '`labels` resolves the ontology terms this resource picks into
+          `_meta.labels`, from a small label subset rather than the full OEO. A value
+          this endpoint does not offer is refused with `400` rather than ignored,
+          and the refusal happens before anything is written, so nothing was written
+          when one arrives. Values are comma-separated, which matters once an endpoint
+          offers two; none offers two yet, and the enum says which one it offers.'
       - in: path
         name: pid
         schema:
@@ -1027,12 +2010,104 @@ paths:
       - cookieAuth: []
       - tokenAuth: []
       responses:
-        '200':
+        '400':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Scenario'
-          description: ''
+                type: object
+                additionalProperties: {}
+          description: Refused, and **nothing was written**. The payload named a key
+            the closed bundle shape does not have, or a value the shape's own `sh:in`
+            list does not allow, or the change would introduce a violation of the
+            OEKG shape -- `violations` then names them, and `pre_existing_violations`
+            counts the ones this write is not blamed for. A write is judged by what
+            it *introduces*, so a bundle that was already non-conforming can still
+            be repaired through this API.
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No credentials, or credentials this platform does not recognise.
+            Reads here need none; writes do.
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Authenticated, but not an owner of this scenario bundle. A
+            bundle with no recorded owner is administrator-only.
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No such scenario bundle, or no such resource within it.
+        '409':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: The bundle moved between the read this write was prepared from
+            and the write itself, so **nothing was written**. Read it again, apply
+            the change to what comes back, and retry.
+        '412':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: '`If-Match` named a version, and it is not the current one.
+            Nothing was written. The response says which version the bundle is at.'
+        '428':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: '`If-Match` was absent, so this write did not say which version
+            it was editing and nothing was written. The response names the current
+            entity tag to send.'
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Throttled. These endpoints are public to read, so they carry
+            a ceiling for anonymous callers and a separate one per account. `Retry-After`
+            says how long to wait.
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'The OEKG graph store could not be reached, or the shape this
+            API validates against is not installed on this server. Neither is an answer
+            about the bundle: nothing was read and nothing was written.'
+        '200':
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The bundle's current version. Send it back in `If-Match`
+                on the next write. It is returned on **every** response that carries
+                one, writes included, so a pipeline reads once per run and chains
+                its writes; only a lost response forces a re-read. A sub-resource
+                has no version of its own -- the tag here is always the containing
+                bundle's.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Changed. The body is the part as it now stands and `ETag` is
+            the bundle's new version.
     delete:
       operationId: scenario_bundles_scenarios_destroy
       description: |-
@@ -1047,7 +2122,22 @@ paths:
         No retyped confirmation token, unlike the whole-bundle delete. Ceremony
         is proportional to blast radius: this removes one bounded part that can
         be created again, and the history says what it held.
+
+        **Requires authentication**, and only an owner of this scenario bundle may write to it -- a bundle with no recorded owner can be changed by an administrator only. Ownership is the bundle's, whatever part of it this operation names. (The reference page draws an **open** padlock here. It marks a security requirement not yet met -- use *Authorize* -- not an unprotected endpoint.)
       parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: string
+        description: 'The entity tag of the bundle state this write applies to, as
+          returned in `ETag` by the read it was built from. **Required, with no opt-out**:
+          without it a client that has never heard of the header would overwrite a
+          change made since it read, and neither party would be told. `*` is refused
+          as an absent header rather than honoured as a wildcard, because it satisfies
+          the letter of the precondition while withholding the one thing the precondition
+          is for. A weak validator (`W/"4"`) and a bare number are both read as the
+          version they plainly name.'
+        required: true
       - in: path
         name: pid
         schema:
@@ -1065,14 +2155,139 @@ paths:
       - cookieAuth: []
       - tokenAuth: []
       responses:
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Refused, and **nothing was written**. The payload named a key
+            the closed bundle shape does not have, or a value the shape's own `sh:in`
+            list does not allow, or the change would introduce a violation of the
+            OEKG shape -- `violations` then names them, and `pre_existing_violations`
+            counts the ones this write is not blamed for. A write is judged by what
+            it *introduces*, so a bundle that was already non-conforming can still
+            be repaired through this API.
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No credentials, or credentials this platform does not recognise.
+            Reads here need none; writes do.
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Authenticated, but not an owner of this scenario bundle. A
+            bundle with no recorded owner is administrator-only.
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No such scenario bundle, or no such resource within it.
+        '409':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: The bundle moved between the read this write was prepared from
+            and the write itself, so **nothing was written**. Read it again, apply
+            the change to what comes back, and retry.
+        '412':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: '`If-Match` named a version, and it is not the current one.
+            Nothing was written. The response says which version the bundle is at.'
+        '428':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: '`If-Match` was absent, so this write did not say which version
+            it was editing and nothing was written. The response names the current
+            entity tag to send.'
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Throttled. These endpoints are public to read, so they carry
+            a ceiling for anonymous callers and a separate one per account. `Retry-After`
+            says how long to wait.
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'The OEKG graph store could not be reached, or the shape this
+            API validates against is not installed on this server. Neither is an answer
+            about the bundle: nothing was read and nothing was written.'
         '200':
-          description: Removed. The body names what was deleted and what was only
-            unlinked, which no status code can say.
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The bundle's current version. Send it back in `If-Match`
+                on the next write. It is returned on **every** response that carries
+                one, writes included, so a pipeline reads once per run and chains
+                its writes; only a lost response forces a re-read. A sub-resource
+                has no version of its own -- the tag here is always the containing
+                bundle's.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'Removed. The body names what was **deleted** and what was
+            only **unlinked**, which no status code can say: a node another bundle
+            still cites is kept and detached rather than destroyed. Only the downgraded
+            nodes are listed -- the shared regions, authors and ontology terms every
+            delete detaches are the rule, not the news.'
   /api/v0/scenario-bundles/{uid}/scenarios/{sid}/datasets/:
     get:
-      operationId: scenario_bundles_scenarios_datasets_retrieve
-      description: '`GET` lists a scenario''s dataset links. `POST` adds one.'
+      operationId: scenario_bundles_scenarios_datasets_list
+      description: |-
+        List this scenario's links to data on this platform.
+
+        **Public.** No authentication is required, and sending credentials changes nothing about the answer. The OEKG SPARQL endpoint already serves the same data, so a token here would protect nothing while making published research records awkward to read. (The reference page draws a **closed** padlock here. It marks a security requirement the reader already meets, not a protected endpoint -- on that page the closed padlock is the public one.)
       parameters:
+      - in: query
+        name: expand
+        schema:
+          type: string
+          enum:
+          - labels
+        description: '`labels` resolves the ontology terms this resource picks into
+          `_meta.labels`, from a small label subset rather than the full OEO. A value
+          this endpoint does not offer is refused with `400` rather than ignored,
+          and the refusal happens before anything is written, so nothing was written
+          when one arrives. Values are comma-separated, which matters once an endpoint
+          offers two; none offers two yet, and the enum says which one it offers.'
+      - in: query
+        name: page
+        schema:
+          type: integer
+        description: Which page of the result to return. 1-based.
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+        description: 'How many entries a page holds. Defaults to 50 and is capped
+          at 200: this endpoint is public, and no public collection here has an unbounded
+          mode.'
       - in: path
         name: sid
         schema:
@@ -1091,12 +2306,118 @@ paths:
       - tokenAuth: []
       - {}
       responses:
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Refused, and **nothing was written**. The payload named a key
+            the closed bundle shape does not have, or a value the shape's own `sh:in`
+            list does not allow, or the change would introduce a violation of the
+            OEKG shape -- `violations` then names them, and `pre_existing_violations`
+            counts the ones this write is not blamed for. A write is judged by what
+            it *introduces*, so a bundle that was already non-conforming can still
+            be repaired through this API.
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No such scenario bundle, or no such resource within it.
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Throttled. These endpoints are public to read, so they carry
+            a ceiling for anonymous callers and a separate one per account. `Retry-After`
+            says how long to wait.
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'The OEKG graph store could not be reached, or the shape this
+            API validates against is not installed on this server. Neither is an answer
+            about the bundle: nothing was read and nothing was written.'
         '200':
-          description: No response body
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The bundle's current version. Send it back in `If-Match`
+                on the next write. It is returned on **every** response that carries
+                one, writes included, so a pipeline reads once per run and chains
+                its writes; only a lost response forces a re-read. A sub-resource
+                has no version of its own -- the tag here is always the containing
+                bundle's.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'A page of this scenario''s dataset links. Every link reports
+            what it points at **now**: `_meta.resolvable` says whether the named target
+            is still on this platform, and `_meta.tables` names the one table for
+            `ref: table` or the catalogue entry''s current members for `ref: dataset`.
+            That is computed per read and never stored. Both read `null` -- never
+            `false` -- when the stored address is not a page on this platform, because
+            `false` would claim the target had been deleted. **Resolution is not an
+            expansion**: a reader needs it to tell a live citation from a dead one,
+            so it is never opt-in. The entries are in `results`, wrapped: `count`
+            is how many matched in total, and `next` and `previous` are the neighbouring
+            pages or `null`.'
     post:
       operationId: scenario_bundles_scenarios_datasets_create
-      description: '`GET` lists a scenario''s dataset links. `POST` adds one.'
+      description: |-
+        Link this scenario to a table or dataset on this platform.
+
+        Three keys and no more: `type` (`input` or `output`), `ref` (`table`
+        or `dataset`) and the target's `name`. Everything the shape stores
+        follows from them, which is the same fact that gives a link no `PATCH`.
+
+        **The target is not checked.** A link may outlive what it points at --
+        a bundle is a published research record, so *this scenario used table
+        X* stays true after X is gone -- and blocking here would let one user
+        make a stranger's table undeletable. Whether the citation still
+        resolves is reported on every read instead.
+
+        `ref: table` is reproducible and `ref: dataset` is current: a dataset
+        reference resolves to the catalogue entry's members as they are today,
+        not as they were when the link was written. Choosing between them is
+        the client's call.
+
+        **Requires authentication**, and only an owner of this scenario bundle may write to it -- a bundle with no recorded owner can be changed by an administrator only. Ownership is the bundle's, whatever part of it this operation names. (The reference page draws an **open** padlock here. It marks a security requirement not yet met -- use *Authorize* -- not an unprotected endpoint.)
       parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: string
+        description: 'The entity tag of the bundle state this write applies to, as
+          returned in `ETag` by the read it was built from. **Required, with no opt-out**:
+          without it a client that has never heard of the header would overwrite a
+          change made since it read, and neither party would be told. `*` is refused
+          as an absent header rather than honoured as a wildcard, because it satisfies
+          the letter of the precondition while withholding the one thing the precondition
+          is for. A weak validator (`W/"4"`) and a bare number are both read as the
+          version they plainly name.'
+        required: true
+      - in: query
+        name: expand
+        schema:
+          type: string
+          enum:
+          - labels
+        description: '`labels` resolves the ontology terms this resource picks into
+          `_meta.labels`, from a small label subset rather than the full OEO. A value
+          this endpoint does not offer is refused with `400` rather than ignored,
+          and the refusal happens before anything is written, so nothing was written
+          when one arrives. Values are comma-separated, which matters once an endpoint
+          offers two; none offers two yet, and the enum says which one it offers.'
       - in: path
         name: sid
         schema:
@@ -1109,28 +2430,162 @@ paths:
         required: true
       tags:
       - scenario-bundles
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DatasetLink'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DatasetLink'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DatasetLink'
+        required: true
       security:
       - basicAuth: []
       - cookieAuth: []
       - tokenAuth: []
       responses:
-        '200':
-          description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: The payload named a key this link does not have, or a `type`
+            or `ref` outside the two values each allows -- or the target named cannot
+            be addressed on this platform. Nothing was written.
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No credentials, or credentials this platform does not recognise.
+            Reads here need none; writes do.
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Authenticated, but not an owner of this scenario bundle. A
+            bundle with no recorded owner is administrator-only.
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No such scenario bundle, or no such resource within it.
+        '409':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'This scenario already links that target in that direction,
+            or the bundle moved while this write was being prepared. A duplicate is
+            refused rather than silently skipped: two nodes saying one thing would
+            leave a later `DELETE` ambiguous, and a caller unable to tell *added*
+            from *already there*.'
+        '412':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: '`If-Match` named a version, and it is not the current one.
+            Nothing was written. The response says which version the bundle is at.'
+        '428':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: '`If-Match` was absent, so this write did not say which version
+            it was editing and nothing was written. The response names the current
+            entity tag to send.'
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Throttled. These endpoints are public to read, so they carry
+            a ceiling for anonymous callers and a separate one per account. `Retry-After`
+            says how long to wait.
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'The OEKG graph store could not be reached, or the shape this
+            API validates against is not installed on this server. Neither is an answer
+            about the bundle: nothing was read and nothing was written.'
+        '201':
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The bundle's current version. Send it back in `If-Match`
+                on the next write. It is returned on **every** response that carries
+                one, writes included, so a pipeline reads once per run and chains
+                its writes; only a lost response forces a re-read. A sub-resource
+                has no version of its own -- the tag here is always the containing
+                bundle's.
+            Location:
+              schema:
+                type: string
+              description: 'Where the created resource can be read. The identifier
+                in it was minted by the server: this API accepts none from a client.'
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'Created. `Location` names the link''s URL and `ETag` the bundle''s
+            new version. Every link reports what it points at **now**: `_meta.resolvable`
+            says whether the named target is still on this platform, and `_meta.tables`
+            names the one table for `ref: table` or the catalogue entry''s current
+            members for `ref: dataset`. That is computed per read and never stored.
+            Both read `null` -- never `false` -- when the stored address is not a
+            page on this platform, because `false` would claim the target had been
+            deleted. **Resolution is not an expansion**: a reader needs it to tell
+            a live citation from a dead one, so it is never opt-in.'
   /api/v0/scenario-bundles/{uid}/scenarios/{sid}/datasets/{did}/:
     get:
-      operationId: scenario_bundles_scenarios_datasets_retrieve_2
+      operationId: scenario_bundles_scenarios_datasets_retrieve
       description: |-
-        `GET` reads one dataset link, `DELETE` removes it. No `PATCH`.
+        Read one dataset link, publicly.
 
-        Add and remove is the whole contract, so the remove is the other half of
-        the design rather than an extra: with no way to edit a link, a client that
-        got one wrong has nothing else to reach for.
+        `_meta.target_iri` is the address actually stored. It is there because
+        it is the only thing that stays true when `ref` comes back `null`: a
+        link written before this API existed can point at an address this
+        platform has no route for, and the writable payload then genuinely
+        cannot express it.
+
+        **Public.** No authentication is required, and sending credentials changes nothing about the answer. The OEKG SPARQL endpoint already serves the same data, so a token here would protect nothing while making published research records awkward to read. (The reference page draws a **closed** padlock here. It marks a security requirement the reader already meets, not a protected endpoint -- on that page the closed padlock is the public one.)
       parameters:
       - in: path
         name: did
         schema:
           type: string
         required: true
+      - in: query
+        name: expand
+        schema:
+          type: string
+          enum:
+          - labels
+        description: '`labels` resolves the ontology terms this resource picks into
+          `_meta.labels`, from a small label subset rather than the full OEO. A value
+          this endpoint does not offer is refused with `400` rather than ignored,
+          and the refusal happens before anything is written, so nothing was written
+          when one arrives. Values are comma-separated, which matters once an endpoint
+          offers two; none offers two yet, and the enum says which one it offers.'
       - in: path
         name: sid
         schema:
@@ -1149,8 +2604,68 @@ paths:
       - tokenAuth: []
       - {}
       responses:
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Refused, and **nothing was written**. The payload named a key
+            the closed bundle shape does not have, or a value the shape's own `sh:in`
+            list does not allow, or the change would introduce a violation of the
+            OEKG shape -- `violations` then names them, and `pre_existing_violations`
+            counts the ones this write is not blamed for. A write is judged by what
+            it *introduces*, so a bundle that was already non-conforming can still
+            be repaired through this API.
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No such scenario bundle, or no such resource within it.
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Throttled. These endpoints are public to read, so they carry
+            a ceiling for anonymous callers and a separate one per account. `Retry-After`
+            says how long to wait.
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'The OEKG graph store could not be reached, or the shape this
+            API validates against is not installed on this server. Neither is an answer
+            about the bundle: nothing was read and nothing was written.'
         '200':
-          description: No response body
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The bundle's current version. Send it back in `If-Match`
+                on the next write. It is returned on **every** response that carries
+                one, writes included, so a pipeline reads once per run and chains
+                its writes; only a lost response forces a re-read. A sub-resource
+                has no version of its own -- the tag here is always the containing
+                bundle's.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'One dataset link. Every link reports what it points at **now**:
+            `_meta.resolvable` says whether the named target is still on this platform,
+            and `_meta.tables` names the one table for `ref: table` or the catalogue
+            entry''s current members for `ref: dataset`. That is computed per read
+            and never stored. Both read `null` -- never `false` -- when the stored
+            address is not a page on this platform, because `false` would claim the
+            target had been deleted. **Resolution is not an expansion**: a reader
+            needs it to tell a live citation from a dead one, so it is never opt-in.'
     delete:
       operationId: scenario_bundles_scenarios_datasets_destroy
       description: |-
@@ -1162,7 +2677,22 @@ paths:
         still goes through the typed walk, because the guard clause is what
         decides whether *this* node is only claimed by this scenario, and that
         is not a question the class alone answers.
+
+        **Requires authentication**, and only an owner of this scenario bundle may write to it -- a bundle with no recorded owner can be changed by an administrator only. Ownership is the bundle's, whatever part of it this operation names. (The reference page draws an **open** padlock here. It marks a security requirement not yet met -- use *Authorize* -- not an unprotected endpoint.)
       parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: string
+        description: 'The entity tag of the bundle state this write applies to, as
+          returned in `ETag` by the read it was built from. **Required, with no opt-out**:
+          without it a client that has never heard of the header would overwrite a
+          change made since it read, and neither party would be told. `*` is refused
+          as an absent header rather than honoured as a wildcard, because it satisfies
+          the letter of the precondition while withholding the one thing the precondition
+          is for. A weak validator (`W/"4"`) and a bare number are both read as the
+          version they plainly name.'
+        required: true
       - in: path
         name: did
         schema:
@@ -1185,14 +2715,144 @@ paths:
       - cookieAuth: []
       - tokenAuth: []
       responses:
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Refused, and **nothing was written**. The payload named a key
+            the closed bundle shape does not have, or a value the shape's own `sh:in`
+            list does not allow, or the change would introduce a violation of the
+            OEKG shape -- `violations` then names them, and `pre_existing_violations`
+            counts the ones this write is not blamed for. A write is judged by what
+            it *introduces*, so a bundle that was already non-conforming can still
+            be repaired through this API.
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No credentials, or credentials this platform does not recognise.
+            Reads here need none; writes do.
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Authenticated, but not an owner of this scenario bundle. A
+            bundle with no recorded owner is administrator-only.
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No such scenario bundle, or no such resource within it.
+        '409':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: The bundle moved between the read this write was prepared from
+            and the write itself, so **nothing was written**. Read it again, apply
+            the change to what comes back, and retry.
+        '412':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: '`If-Match` named a version, and it is not the current one.
+            Nothing was written. The response says which version the bundle is at.'
+        '428':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: '`If-Match` was absent, so this write did not say which version
+            it was editing and nothing was written. The response names the current
+            entity tag to send.'
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Throttled. These endpoints are public to read, so they carry
+            a ceiling for anonymous callers and a separate one per account. `Retry-After`
+            says how long to wait.
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'The OEKG graph store could not be reached, or the shape this
+            API validates against is not installed on this server. Neither is an answer
+            about the bundle: nothing was read and nothing was written.'
         '200':
-          description: Removed. The body names what was deleted and what was only
-            unlinked, which no status code can say.
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The bundle's current version. Send it back in `If-Match`
+                on the next write. It is returned on **every** response that carries
+                one, writes included, so a pipeline reads once per run and chains
+                its writes; only a lost response forces a re-read. A sub-resource
+                has no version of its own -- the tag here is always the containing
+                bundle's.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'Removed. The body names what was **deleted** and what was
+            only **unlinked**, which no status code can say: a node another bundle
+            still cites is kept and detached rather than destroyed. Only the downgraded
+            nodes are listed -- the shared regions, authors and ontology terms every
+            delete detaches are the rule, not the news.'
   /api/v0/scenario-bundles/{uid}/study-reports/:
     get:
-      operationId: scenario_bundles_study_reports_retrieve
-      description: '`GET` lists a bundle''s parts of one kind. `POST` adds one.'
+      operationId: scenario_bundles_study_reports_list
+      description: |-
+        List this bundle's parts of one kind.
+
+        Paginated, although the collection is bounded by its bundle: this is a
+        public endpoint and no public collection here has an unbounded mode.
+        The nested form inside a bundle read is the exception, and a deliberate
+        one -- that one has to be complete, because a client sends it back.
+
+        **Public.** No authentication is required, and sending credentials changes nothing about the answer. The OEKG SPARQL endpoint already serves the same data, so a token here would protect nothing while making published research records awkward to read. (The reference page draws a **closed** padlock here. It marks a security requirement the reader already meets, not a protected endpoint -- on that page the closed padlock is the public one.)
       parameters:
+      - in: query
+        name: expand
+        schema:
+          type: string
+          enum:
+          - labels
+        description: '`labels` resolves the ontology terms this resource picks into
+          `_meta.labels`, from a small label subset rather than the full OEO. A value
+          this endpoint does not offer is refused with `400` rather than ignored,
+          and the refusal happens before anything is written, so nothing was written
+          when one arrives. Values are comma-separated, which matters once an endpoint
+          offers two; none offers two yet, and the enum says which one it offers.'
+      - in: query
+        name: page
+        schema:
+          type: integer
+        description: Which page of the result to return. 1-based.
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+        description: 'How many entries a page holds. Defaults to 50 and is capped
+          at 200: this endpoint is public, and no public collection here has an unbounded
+          mode.'
       - in: path
         name: uid
         schema:
@@ -1206,16 +2866,109 @@ paths:
       - tokenAuth: []
       - {}
       responses:
-        '200':
+        '400':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StudyReport'
-          description: ''
+                type: object
+                additionalProperties: {}
+          description: Refused, and **nothing was written**. The payload named a key
+            the closed bundle shape does not have, or a value the shape's own `sh:in`
+            list does not allow, or the change would introduce a violation of the
+            OEKG shape -- `violations` then names them, and `pre_existing_violations`
+            counts the ones this write is not blamed for. A write is judged by what
+            it *introduces*, so a bundle that was already non-conforming can still
+            be repaired through this API.
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No such scenario bundle, or no such resource within it.
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Throttled. These endpoints are public to read, so they carry
+            a ceiling for anonymous callers and a separate one per account. `Retry-After`
+            says how long to wait.
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'The OEKG graph store could not be reached, or the shape this
+            API validates against is not installed on this server. Neither is an answer
+            about the bundle: nothing was read and nothing was written.'
+        '200':
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The bundle's current version. Send it back in `If-Match`
+                on the next write. It is returned on **every** response that carries
+                one, writes included, so a pipeline reads once per run and chains
+                its writes; only a lost response forces a re-read. A sub-resource
+                has no version of its own -- the tag here is always the containing
+                bundle's.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'A page of this bundle''s parts of one kind, each in the form
+            a write accepts it nested. `ETag` carries the **bundle''s** version: a
+            part has none of its own. The entries are in `results`, wrapped: `count`
+            is how many matched in total, and `next` and `previous` are the neighbouring
+            pages or `null`.'
     post:
       operationId: scenario_bundles_study_reports_create
-      description: '`GET` lists a bundle''s parts of one kind. `POST` adds one.'
+      description: |-
+        Add one part to this bundle.
+
+        The identifier is minted by the server, as everywhere in this API, and
+        returned in `Location`. What is validated is the **whole bundle with
+        this part in it**: every constraint in the OEKG shape is bundle-local,
+        so a part on its own is not a unit the shape can judge, and validating
+        one alone would pass vacuously in the places that matter.
+
+        The version guarded, the ownership asked and the entity tag returned
+        are all the bundle's. Two clients editing two different parts of one
+        bundle therefore do conflict -- the price of one version per bundle,
+        and deliberate: conflict granularity follows the aggregate root, and a
+        part is not one.
+
+        **Requires authentication**, and only an owner of this scenario bundle may write to it -- a bundle with no recorded owner can be changed by an administrator only. Ownership is the bundle's, whatever part of it this operation names. (The reference page draws an **open** padlock here. It marks a security requirement not yet met -- use *Authorize* -- not an unprotected endpoint.)
       parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: string
+        description: 'The entity tag of the bundle state this write applies to, as
+          returned in `ETag` by the read it was built from. **Required, with no opt-out**:
+          without it a client that has never heard of the header would overwrite a
+          change made since it read, and neither party would be told. `*` is refused
+          as an absent header rather than honoured as a wildcard, because it satisfies
+          the letter of the precondition while withholding the one thing the precondition
+          is for. A weak validator (`W/"4"`) and a bare number are both read as the
+          version they plainly name.'
+        required: true
+      - in: query
+        name: expand
+        schema:
+          type: string
+          enum:
+          - labels
+        description: '`labels` resolves the ontology terms this resource picks into
+          `_meta.labels`, from a small label subset rather than the full OEO. A value
+          this endpoint does not offer is refused with `400` rather than ignored,
+          and the refusal happens before anything is written, so nothing was written
+          when one arrives. Values are comma-separated, which matters once an endpoint
+          offers two; none offers two yet, and the enum says which one it offers.'
       - in: path
         name: uid
         schema:
@@ -1240,18 +2993,129 @@ paths:
       - cookieAuth: []
       - tokenAuth: []
       responses:
-        '200':
+        '400':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StudyReport'
-          description: ''
+                type: object
+                additionalProperties: {}
+          description: Refused, and **nothing was written**. The payload named a key
+            the closed bundle shape does not have, or a value the shape's own `sh:in`
+            list does not allow, or the change would introduce a violation of the
+            OEKG shape -- `violations` then names them, and `pre_existing_violations`
+            counts the ones this write is not blamed for. A write is judged by what
+            it *introduces*, so a bundle that was already non-conforming can still
+            be repaired through this API.
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No credentials, or credentials this platform does not recognise.
+            Reads here need none; writes do.
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Authenticated, but not an owner of this scenario bundle. A
+            bundle with no recorded owner is administrator-only.
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No such scenario bundle, or no such resource within it.
+        '409':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: The bundle moved between the read this write was prepared from
+            and the write itself, so **nothing was written**. Read it again, apply
+            the change to what comes back, and retry.
+        '412':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: '`If-Match` named a version, and it is not the current one.
+            Nothing was written. The response says which version the bundle is at.'
+        '428':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: '`If-Match` was absent, so this write did not say which version
+            it was editing and nothing was written. The response names the current
+            entity tag to send.'
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Throttled. These endpoints are public to read, so they carry
+            a ceiling for anonymous callers and a separate one per account. `Retry-After`
+            says how long to wait.
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'The OEKG graph store could not be reached, or the shape this
+            API validates against is not installed on this server. Neither is an answer
+            about the bundle: nothing was read and nothing was written.'
+        '201':
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The bundle's current version. Send it back in `If-Match`
+                on the next write. It is returned on **every** response that carries
+                one, writes included, so a pipeline reads once per run and chains
+                its writes; only a lost response forces a re-read. A sub-resource
+                has no version of its own -- the tag here is always the containing
+                bundle's.
+            Location:
+              schema:
+                type: string
+              description: 'Where the created resource can be read. The identifier
+                in it was minted by the server: this API accepts none from a client.'
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Created. The body is the part as it now stands, `Location`
+            names its URL and `ETag` the **bundle's** new version.
   /api/v0/scenario-bundles/{uid}/study-reports/{pid}/:
     get:
-      operationId: scenario_bundles_study_reports_retrieve_2
-      description: '`GET` reads one. `PATCH` changes the keys it names. `DELETE` removes
-        it.'
+      operationId: scenario_bundles_study_reports_retrieve
+      description: |-
+        Read one part of a bundle, publicly.
+
+        **Public.** No authentication is required, and sending credentials changes nothing about the answer. The OEKG SPARQL endpoint already serves the same data, so a token here would protect nothing while making published research records awkward to read. (The reference page draws a **closed** padlock here. It marks a security requirement the reader already meets, not a protected endpoint -- on that page the closed padlock is the public one.)
       parameters:
+      - in: query
+        name: expand
+        schema:
+          type: string
+          enum:
+          - labels
+        description: '`labels` resolves the ontology terms this resource picks into
+          `_meta.labels`, from a small label subset rather than the full OEO. A value
+          this endpoint does not offer is refused with `400` rather than ignored,
+          and the refusal happens before anything is written, so nothing was written
+          when one arrives. Values are comma-separated, which matters once an endpoint
+          offers two; none offers two yet, and the enum says which one it offers.'
       - in: path
         name: pid
         schema:
@@ -1270,17 +3134,104 @@ paths:
       - tokenAuth: []
       - {}
       responses:
-        '200':
+        '400':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StudyReport'
-          description: ''
+                type: object
+                additionalProperties: {}
+          description: Refused, and **nothing was written**. The payload named a key
+            the closed bundle shape does not have, or a value the shape's own `sh:in`
+            list does not allow, or the change would introduce a violation of the
+            OEKG shape -- `violations` then names them, and `pre_existing_violations`
+            counts the ones this write is not blamed for. A write is judged by what
+            it *introduces*, so a bundle that was already non-conforming can still
+            be repaired through this API.
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No such scenario bundle, or no such resource within it.
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Throttled. These endpoints are public to read, so they carry
+            a ceiling for anonymous callers and a separate one per account. `Retry-After`
+            says how long to wait.
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'The OEKG graph store could not be reached, or the shape this
+            API validates against is not installed on this server. Neither is an answer
+            about the bundle: nothing was read and nothing was written.'
+        '200':
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The bundle's current version. Send it back in `If-Match`
+                on the next write. It is returned on **every** response that carries
+                one, writes included, so a pipeline reads once per run and chains
+                its writes; only a lost response forces a re-read. A sub-resource
+                has no version of its own -- the tag here is always the containing
+                bundle's.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'The part: what a write accepts, plus `_meta`. `ETag` carries
+            the **bundle''s** version, which is what a write to this part has to send
+            back.'
     patch:
       operationId: scenario_bundles_study_reports_partial_update
-      description: '`GET` reads one. `PATCH` changes the keys it names. `DELETE` removes
-        it.'
+      description: |-
+        Change the fields this payload names, without touching its siblings.
+
+        A key the payload does not mention is genuinely untouched. The part's
+        existence is checked **before** the precondition, so a request for a
+        part that is not there hears that rather than being told its `If-Match`
+        is missing for something that does not exist.
+
+        Like every write here it is judged by what it **introduces**: a
+        violation the bundle already carried is reported in
+        `pre_existing_violations` and does not refuse the write.
+
+        **Requires authentication**, and only an owner of this scenario bundle may write to it -- a bundle with no recorded owner can be changed by an administrator only. Ownership is the bundle's, whatever part of it this operation names. (The reference page draws an **open** padlock here. It marks a security requirement not yet met -- use *Authorize* -- not an unprotected endpoint.)
       parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: string
+        description: 'The entity tag of the bundle state this write applies to, as
+          returned in `ETag` by the read it was built from. **Required, with no opt-out**:
+          without it a client that has never heard of the header would overwrite a
+          change made since it read, and neither party would be told. `*` is refused
+          as an absent header rather than honoured as a wildcard, because it satisfies
+          the letter of the precondition while withholding the one thing the precondition
+          is for. A weak validator (`W/"4"`) and a bare number are both read as the
+          version they plainly name.'
+        required: true
+      - in: query
+        name: expand
+        schema:
+          type: string
+          enum:
+          - labels
+        description: '`labels` resolves the ontology terms this resource picks into
+          `_meta.labels`, from a small label subset rather than the full OEO. A value
+          this endpoint does not offer is refused with `400` rather than ignored,
+          and the refusal happens before anything is written, so nothing was written
+          when one arrives. Values are comma-separated, which matters once an endpoint
+          offers two; none offers two yet, and the enum says which one it offers.'
       - in: path
         name: pid
         schema:
@@ -1309,12 +3260,104 @@ paths:
       - cookieAuth: []
       - tokenAuth: []
       responses:
-        '200':
+        '400':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StudyReport'
-          description: ''
+                type: object
+                additionalProperties: {}
+          description: Refused, and **nothing was written**. The payload named a key
+            the closed bundle shape does not have, or a value the shape's own `sh:in`
+            list does not allow, or the change would introduce a violation of the
+            OEKG shape -- `violations` then names them, and `pre_existing_violations`
+            counts the ones this write is not blamed for. A write is judged by what
+            it *introduces*, so a bundle that was already non-conforming can still
+            be repaired through this API.
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No credentials, or credentials this platform does not recognise.
+            Reads here need none; writes do.
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Authenticated, but not an owner of this scenario bundle. A
+            bundle with no recorded owner is administrator-only.
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No such scenario bundle, or no such resource within it.
+        '409':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: The bundle moved between the read this write was prepared from
+            and the write itself, so **nothing was written**. Read it again, apply
+            the change to what comes back, and retry.
+        '412':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: '`If-Match` named a version, and it is not the current one.
+            Nothing was written. The response says which version the bundle is at.'
+        '428':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: '`If-Match` was absent, so this write did not say which version
+            it was editing and nothing was written. The response names the current
+            entity tag to send.'
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Throttled. These endpoints are public to read, so they carry
+            a ceiling for anonymous callers and a separate one per account. `Retry-After`
+            says how long to wait.
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'The OEKG graph store could not be reached, or the shape this
+            API validates against is not installed on this server. Neither is an answer
+            about the bundle: nothing was read and nothing was written.'
+        '200':
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The bundle's current version. Send it back in `If-Match`
+                on the next write. It is returned on **every** response that carries
+                one, writes included, so a pipeline reads once per run and chains
+                its writes; only a lost response forces a re-read. A sub-resource
+                has no version of its own -- the tag here is always the containing
+                bundle's.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Changed. The body is the part as it now stands and `ETag` is
+            the bundle's new version.
     delete:
       operationId: scenario_bundles_study_reports_destroy
       description: |-
@@ -1329,7 +3372,22 @@ paths:
         No retyped confirmation token, unlike the whole-bundle delete. Ceremony
         is proportional to blast radius: this removes one bounded part that can
         be created again, and the history says what it held.
+
+        **Requires authentication**, and only an owner of this scenario bundle may write to it -- a bundle with no recorded owner can be changed by an administrator only. Ownership is the bundle's, whatever part of it this operation names. (The reference page draws an **open** padlock here. It marks a security requirement not yet met -- use *Authorize* -- not an unprotected endpoint.)
       parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: string
+        description: 'The entity tag of the bundle state this write applies to, as
+          returned in `ETag` by the read it was built from. **Required, with no opt-out**:
+          without it a client that has never heard of the header would overwrite a
+          change made since it read, and neither party would be told. `*` is refused
+          as an absent header rather than honoured as a wildcard, because it satisfies
+          the letter of the precondition while withholding the one thing the precondition
+          is for. A weak validator (`W/"4"`) and a bare number are both read as the
+          version they plainly name.'
+        required: true
       - in: path
         name: pid
         schema:
@@ -1347,9 +3405,107 @@ paths:
       - cookieAuth: []
       - tokenAuth: []
       responses:
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Refused, and **nothing was written**. The payload named a key
+            the closed bundle shape does not have, or a value the shape's own `sh:in`
+            list does not allow, or the change would introduce a violation of the
+            OEKG shape -- `violations` then names them, and `pre_existing_violations`
+            counts the ones this write is not blamed for. A write is judged by what
+            it *introduces*, so a bundle that was already non-conforming can still
+            be repaired through this API.
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No credentials, or credentials this platform does not recognise.
+            Reads here need none; writes do.
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Authenticated, but not an owner of this scenario bundle. A
+            bundle with no recorded owner is administrator-only.
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No such scenario bundle, or no such resource within it.
+        '409':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: The bundle moved between the read this write was prepared from
+            and the write itself, so **nothing was written**. Read it again, apply
+            the change to what comes back, and retry.
+        '412':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: '`If-Match` named a version, and it is not the current one.
+            Nothing was written. The response says which version the bundle is at.'
+        '428':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: '`If-Match` was absent, so this write did not say which version
+            it was editing and nothing was written. The response names the current
+            entity tag to send.'
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Throttled. These endpoints are public to read, so they carry
+            a ceiling for anonymous callers and a separate one per account. `Retry-After`
+            says how long to wait.
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'The OEKG graph store could not be reached, or the shape this
+            API validates against is not installed on this server. Neither is an answer
+            about the bundle: nothing was read and nothing was written.'
         '200':
-          description: Removed. The body names what was deleted and what was only
-            unlinked, which no status code can say.
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The bundle's current version. Send it back in `If-Match`
+                on the next write. It is returned on **every** response that carries
+                one, writes included, so a pipeline reads once per run and chains
+                its writes; only a lost response forces a re-read. A sub-resource
+                has no version of its own -- the tag here is always the containing
+                bundle's.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'Removed. The body names what was **deleted** and what was
+            only **unlinked**, which no status code can say: a node another bundle
+            still cites is kept and detached rather than destroyed. Only the downgraded
+            nodes are listed -- the shared regions, authors and ontology terms every
+            delete detaches are the rule, not the news.'
   /api/v0/schema/:
     get:
       operationId: schema_retrieve
@@ -2470,6 +4626,26 @@ components:
       - description
       - name
       - title
+    DatasetLink:
+      type: object
+      description: |-
+        A scenario's link to data on this platform: three keys, all required.
+
+        Not a field table, because a dataset link has no fields of its own: the
+        label, the URL and the identifier the shape requires are all derived from
+        these three. That is also why there is no partial form of this serializer --
+        a link is added or removed, never edited.
+      properties:
+        type:
+          $ref: '#/components/schemas/TypeEnum'
+        ref:
+          $ref: '#/components/schemas/RefEnum'
+        name:
+          type: string
+      required:
+      - name
+      - ref
+      - type
     DatasetRead:
       type: object
       properties:
@@ -2744,6 +4920,17 @@ components:
           type: string
       required:
       - label
+    Part:
+      type: object
+      description: 'A framework or model factsheet: bundle-local, with a link out.'
+      properties:
+        label:
+          type: string
+        iri:
+          type: string
+          nullable: true
+      required:
+      - label
     PatchedScenario:
       type: object
       description: |-
@@ -2777,6 +4964,57 @@ components:
           type: array
           items:
             type: string
+    PatchedScenarioBundle:
+      type: object
+      description: The closed bundle field set -- these and nothing else.
+      properties:
+        label:
+          type: string
+        acronym:
+          type: string
+        abstract:
+          type: string
+          nullable: true
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeReference'
+        organisations:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeReference'
+        funders:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeReference'
+        frameworks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Part'
+        models:
+          type: array
+          items:
+            $ref: '#/components/schemas/Part'
+        descriptors:
+          type: array
+          items:
+            type: string
+        sector_divisions:
+          type: array
+          items:
+            type: string
+        sectors:
+          type: array
+          items:
+            type: string
+        technologies:
+          type: array
+          items:
+            type: string
+        energy_carriers:
+          type: array
+          items:
+            type: string
     PatchedStudyReport:
       type: object
       description: |-
@@ -2806,6 +5044,14 @@ components:
           type: string
           format: uri
           nullable: true
+    RefEnum:
+      enum:
+      - table
+      - dataset
+      type: string
+      description: |-
+        * `table` - table
+        * `dataset` - dataset
     Scenario:
       type: object
       description: |-
@@ -2836,6 +5082,80 @@ components:
             type: string
             format: date-time
         scenario_types:
+          type: array
+          items:
+            type: string
+      required:
+      - acronym
+      - label
+    ScenarioBundleCreate:
+      type: object
+      description: |-
+        The bundle field set **plus** its nested sub-resources, for `POST` only.
+
+        The asymmetry is the whole point and it is structural rather than a flag: a
+        bundle `POST` builds its scenarios and study reports with it, and a bundle
+        `PATCH` uses the class above, which has no such key and therefore refuses
+        one. That is what lets a pipeline create a whole bundle in one call without
+        giving any call the power to drop its parts by omitting them.
+
+        Dataset links are deliberately **not** here. They hang off a scenario
+        rather than off the bundle, and they are add-and-remove only, so there is
+        no partial update of one to reason about -- nesting them would make a
+        create the one place their fields could be written together.
+      properties:
+        label:
+          type: string
+        acronym:
+          type: string
+        abstract:
+          type: string
+          nullable: true
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeReference'
+        organisations:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeReference'
+        funders:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeReference'
+        frameworks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Part'
+        models:
+          type: array
+          items:
+            $ref: '#/components/schemas/Part'
+        scenarios:
+          type: array
+          items:
+            $ref: '#/components/schemas/Scenario'
+        study_reports:
+          type: array
+          items:
+            $ref: '#/components/schemas/StudyReport'
+        descriptors:
+          type: array
+          items:
+            type: string
+        sector_divisions:
+          type: array
+          items:
+            type: string
+        sectors:
+          type: array
+          items:
+            type: string
+        technologies:
+          type: array
+          items:
+            type: string
+        energy_carriers:
           type: array
           items:
             type: string
@@ -2895,6 +5215,14 @@ components:
       - authors
       - label
       - publication_date
+    TypeEnum:
+      enum:
+      - input
+      - output
+      type: string
+      description: |-
+        * `input` - input
+        * `output` - output
   securitySchemes:
     basicAuth:
       type: http

@@ -31,6 +31,16 @@ from rdflib import Graph
 from rest_framework import status
 from rest_framework.response import Response
 
+from oekg.api_description import (
+    EXPAND_LABELS,
+    CollectionSchema,
+    a_page_of,
+    describes_a_guarded_write,
+    describes_a_public_read,
+    describes_a_removal,
+    json_body,
+    paging,
+)
 from oekg.api_support import (
     OekgAPIView,
     Refused,
@@ -57,7 +67,7 @@ from oekg.labels import labelled
 from oekg.resolution import resolve
 from oekg.serializers import READ_ONLY_CONTAINER, DatasetLinkSerializer
 from oekg.shape import ShapeUnavailable
-from oekg.subresource_views import SubResourceViewMixin, describes_a_removal
+from oekg.subresource_views import SubResourcePagination, SubResourceViewMixin
 from oekg.writes import BundleWrite, open_bundle
 
 # A dataset link has no field table, because it has no fields: everything it
@@ -65,6 +75,18 @@ from oekg.writes import BundleWrite, open_bundle
 # that gives it no `PATCH`, and it is why resolving its picked ontology terms
 # is an empty answer rather than a refusal.
 NO_PICKED_TERMS = ()
+
+# Said once and spent by all three link responses, because all three resolve.
+RESOLUTION = (
+    "Every link reports what it points at **now**: `_meta.resolvable` says "
+    "whether the named target is still on this platform, and `_meta.tables` "
+    "names the one table for `ref: table` or the catalogue entry's current "
+    "members for `ref: dataset`. That is computed per read and never stored. "
+    "Both read `null` -- never `false` -- when the stored address is not a "
+    "page on this platform, because `false` would claim the target had been "
+    "deleted. **Resolution is not an expansion**: a reader needs it to tell a "
+    "live citation from a dead one, so it is never opt-in."
+)
 
 
 class DatasetLinkViewMixin(SubResourceViewMixin):
@@ -105,7 +127,17 @@ class DatasetLinkViewMixin(SubResourceViewMixin):
 class DatasetLinkCollectionAPIView(DatasetLinkViewMixin, OekgAPIView):
     """`GET` lists a scenario's dataset links. `POST` adds one."""
 
+    schema = CollectionSchema()
+
+    @describes_a_public_read(
+        a_page_of("A page of this scenario's dataset links. " + RESOLUTION),
+        parameters=[
+            EXPAND_LABELS,
+            *paging(SubResourcePagination),
+        ],
+    )
     def get(self, request, uid, sid):
+        """List this scenario's links to data on this platform."""
         try:
             write = open_bundle(request, uid)
         except GraphStoreError as error:
@@ -117,7 +149,49 @@ class DatasetLinkCollectionAPIView(DatasetLinkViewMixin, OekgAPIView):
             write,
         )
 
+    @describes_a_guarded_write(
+        {
+            201: json_body(
+                "Created. `Location` names the link's URL and `ETag` the "
+                "bundle's new version. " + RESOLUTION
+            )
+        },
+        request=DatasetLinkSerializer,
+        parameters=[EXPAND_LABELS],
+        responses={
+            400: json_body(
+                "The payload named a key this link does not have, or a `type` "
+                "or `ref` outside the two values each allows -- or the target "
+                "named cannot be addressed on this platform. Nothing was "
+                "written."
+            ),
+            409: json_body(
+                "This scenario already links that target in that direction, "
+                "or the bundle moved while this write was being prepared. A "
+                "duplicate is refused rather than silently skipped: two nodes "
+                "saying one thing would leave a later `DELETE` ambiguous, and "
+                "a caller unable to tell *added* from *already there*."
+            ),
+        },
+    )
     def post(self, request, uid, sid):
+        """Link this scenario to a table or dataset on this platform.
+
+        Three keys and no more: `type` (`input` or `output`), `ref` (`table`
+        or `dataset`) and the target's `name`. Everything the shape stores
+        follows from them, which is the same fact that gives a link no `PATCH`.
+
+        **The target is not checked.** A link may outlive what it points at --
+        a bundle is a published research record, so *this scenario used table
+        X* stays true after X is gone -- and blocking here would let one user
+        make a stranger's table undeletable. Whether the citation still
+        resolves is reported on every read instead.
+
+        `ref: table` is reproducible and `ref: dataset` is current: a dataset
+        reference resolves to the catalogue entry's members as they are today,
+        not as they were when the link was written. Choosing between them is
+        the client's call.
+        """
         serializer = DatasetLinkSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         payload = serializer.validated_data
@@ -165,7 +239,19 @@ class DatasetLinkAPIView(DatasetLinkViewMixin, OekgAPIView):
     got one wrong has nothing else to reach for.
     """
 
+    @describes_a_public_read(
+        json_body("One dataset link. " + RESOLUTION),
+        parameters=[EXPAND_LABELS],
+    )
     def get(self, request, uid, sid, did):
+        """Read one dataset link, publicly.
+
+        `_meta.target_iri` is the address actually stored. It is there because
+        it is the only thing that stays true when `ref` comes back `null`: a
+        link written before this API existed can point at an address this
+        platform has no route for, and the writable payload then genuinely
+        cannot express it.
+        """
         try:
             write = open_bundle(request, uid)
         except GraphStoreError as error:

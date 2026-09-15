@@ -298,6 +298,12 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
+- `PATCH /api/v0/scenario-bundles/<uid>/?expand=labels` now resolves the
+  ontology terms it was asked to. Every other write below a bundle answers with
+  its resolved representation; this one accepted the parameter and then dropped
+  it, so a client got a `200` carrying no labels and nothing saying why
+  [(#2475)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2475)
+
 - Error responses from the scenario-bundle API carried the text `"None"` where
   they should have carried an empty value, and would have turned numbers into
   text. Introduced in the previous release cycle and not shipped
@@ -370,6 +376,20 @@ SPDX-License-Identifier: CC0-1.0
   passthrough rather than the endpoints, and that page keeps its SPARQL example
   and now points at the reference for the rest
   [(#2474)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2474)
+
+- That reference now states the scenario-bundle API's contract rather than
+  listing its addresses. Every one of the twenty operations describes the
+  refusals it can give, the writes declare the `If-Match` header they require
+  and the `ETag` that feeds it, `?expand=` appears where it is offered, the
+  request payloads come from the serializers that validate them, and the bundle
+  read lists the RDF forms it serves. Previously each operation declared `200`
+  and nothing else, so a client written from the document would have handled
+  none of the refusals it actually meets. Every operation also says in words
+  whether it is public or needs a login: the reference page's padlock answers a
+  different question -- it closes when a requirement is already met, so public
+  reads render locked and writes needing a token render unlocked -- and the
+  security declarations behind it are correct and deliberately unchanged
+  [(#2475)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2475)
 
 - The OEKG shape guide undercounted the places this repo fetches the ontology
   from: four, where there are five - `podman/entrypoint.sh` was missed. The
