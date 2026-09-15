@@ -187,7 +187,7 @@ SPDX-License-Identifier: CC0-1.0
   looked up is taken from the link's stored address and never from its label,
   because the older `manage-datasets/` route takes those as two separate values
   and a link can carry a real table's address beside a human-readable title
-  [(#2458)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2458)
+  [(#2469)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2469)
 
 - A scenario factsheet, a study report or a dataset link can now be removed
   through the REST API: `DELETE` on its own URL, carrying the bundle's version
