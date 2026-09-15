@@ -357,6 +357,20 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Documentation updates
 
+- The documentation has an **API Reference** page of its own, listing every
+  endpoint of `api/v0` -- the OEDB table and row endpoints, the dataset
+  endpoints and the OEKG scenario-bundle endpoints -- in one place. The
+  description behind it is generated from the code and committed to the
+  repository, so a pull request shows what the description of the API became,
+  and a test regenerates it and fails when the committed copy has fallen behind,
+  naming the command that brings it back in step. The check validates the
+  description before comparing it: a wrong annotation can otherwise produce a
+  document that is reproducibly wrong and so passes a comparison forever. The
+  OEKG page's own OpenAPI file is retired with it -- it described the SPARQL
+  passthrough rather than the endpoints, and that page keeps its SPARQL example
+  and now points at the reference for the rest
+  [(#2474)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2474)
+
 - The scenario-bundle architecture guide now documents the **second** write
   path. The feature has had two since the REST API landed - the browser's, which
   writes triple by triple, and the API's, which validates the whole bundle

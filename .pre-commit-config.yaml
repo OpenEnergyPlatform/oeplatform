@@ -38,6 +38,11 @@ repos:
     hooks:
       - id: prettier
         files: .*\.(json|md|yaml|yml)$
+        # The OpenAPI description is written by `manage.py spectacular` and is
+        # checked against a fresh generation by the test suite. Reformatting it
+        # here would make the committed copy something the generator never
+        # produces, and the guard would then be red on every branch.
+        exclude: ^docs/oeplatform-code/web-api/openapi\.yaml$
   - repo: https://github.com/djlint/djLint
     # see https://djlint.com/docs/integrations/
     rev: v1.46.1

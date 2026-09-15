@@ -270,11 +270,11 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "docs/oeplatform-code/web-api/oekg-api/oekg.yaml"
+path = "docs/oeplatform-code/web-api/openapi.yaml"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
-  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
