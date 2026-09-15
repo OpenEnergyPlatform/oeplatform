@@ -13,8 +13,10 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 from django.urls import reverse
+from rdflib import RDF, Graph
 
-from oekg.fields import OEO
+from oekg.bundles import BUNDLE_CLASS, SCENARIO, bundle_iri, find_part
+from oekg.fields import DC, OEO
 from oekg.labels import LABELS, picked_terms, term_labels
 from oekg.serializers import READ_ONLY_CONTAINER
 from oekg.tests.bundle_fixtures import VALID_PAYLOAD
@@ -189,3 +191,105 @@ class ReadOnlyContainerTest(ReadSideTestCase):
 
         for url in (self.collection_url, self.links_url(uid, sid)):
             self.assertIn(READ_ONLY_CONTAINER, self.read(url)["results"][0], url)
+
+
+class RdfOnReadsTest(ReadSideTestCase):
+    """Structured data is canonical; RDF is the lossless form, on reads only."""
+
+    def as_rdf(self, uid, media_type):
+        response = self.client.get(self.detail_url(uid), HTTP_ACCEPT=media_type)
+        self.assertEqual(response.status_code, 200, response.content[:400])
+        return response
+
+    def parsed(self, uid, media_type, rdflib_format):
+        graph = Graph()
+        graph.parse(
+            data=self.as_rdf(uid, media_type).content.decode(),
+            format=rdflib_format,
+        )
+        return graph
+
+    def test_a_bundle_is_served_as_turtle(self):
+        uid, _ = self.created()
+
+        graph = self.parsed(uid, "text/turtle", "turtle")
+
+        self.assertIn((bundle_iri(uid), RDF.type, BUNDLE_CLASS), graph)
+
+    def test_a_bundle_is_served_as_json_ld(self):
+        uid, _ = self.created()
+
+        graph = self.parsed(uid, "application/ld+json", "json-ld")
+
+        self.assertIn((bundle_iri(uid), RDF.type, BUNDLE_CLASS), graph)
+
+    def test_the_rdf_form_carries_what_the_structured_one_does(self):
+        uid, sid, _ = self.with_one_scenario()
+
+        graph = self.parsed(uid, "text/turtle", "turtle")
+
+        self.assertEqual(
+            str(graph.value(bundle_iri(uid), DC.acronym)), VALID_PAYLOAD["acronym"]
+        )
+        self.assertIsNotNone(
+            find_part(graph, uid, SCENARIO, sid), "the scenario is in the subgraph"
+        )
+
+    def test_the_rdf_form_is_lossless_where_the_payload_is_not(self):
+        # The bookkeeping the structured read cannot express: a scenario's own
+        # type triple, which no field of the payload carries.
+        uid, sid, _ = self.with_one_scenario()
+
+        graph = self.parsed(uid, "text/turtle", "turtle")
+
+        self.assertIn(
+            (find_part(graph, uid, SCENARIO, sid), RDF.type, SCENARIO.node_class),
+            graph,
+        )
+
+    def test_an_rdf_read_carries_the_entity_tag_a_write_needs(self):
+        uid, etag = self.created()
+
+        self.assertEqual(self.as_rdf(uid, "text/turtle")["ETag"], etag)
+
+    def test_json_is_what_a_client_asking_for_anything_gets(self):
+        uid, _ = self.created()
+
+        response = self.client.get(self.detail_url(uid), HTTP_ACCEPT="*/*")
+
+        self.assertEqual(response["Content-Type"], "application/json")
+
+    def test_a_write_cannot_be_answered_in_rdf(self):
+        # The serializers are the validation layer, so a write is structured
+        # data. A response arriving in a form the request could not have been
+        # sent in would say otherwise.
+        uid, etag = self.created()
+
+        response = self.client.patch(
+            self.detail_url(uid),
+            data={"label": "Changed"},
+            content_type="application/json",
+            HTTP_IF_MATCH=etag,
+            HTTP_ACCEPT="text/turtle",
+        )
+
+        self.assertEqual(response.status_code, 406)
+
+    def test_a_refusal_on_an_rdf_read_is_still_readable(self):
+        # An error body is not a graph. It has to arrive as JSON, and the
+        # response has to say JSON rather than claiming to be turtle.
+        response = self.client.get(
+            self.detail_url("11111111-2222-3333-4444-555555555555"),
+            HTTP_ACCEPT="text/turtle",
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response["Content-Type"], "application/json")
+        self.assertIn("detail", response.json())
+
+    def test_a_form_nobody_serves_is_refused_rather_than_guessed(self):
+        uid, _ = self.created()
+
+        response = self.client.get(self.detail_url(uid), HTTP_ACCEPT="application/xml")
+
+        self.assertEqual(response.status_code, 406)

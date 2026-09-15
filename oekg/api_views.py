@@ -38,7 +38,9 @@ unrelated patch from re-minting every framework and model in the bundle.
 
 Reads need no authentication: the SPARQL endpoint already serves the same data,
 so requiring a token here would protect nothing while making public research
-records awkward to read.
+records awkward to read. A read also serves the bundle's subgraph as RDF on
+`Accept: text/turtle` or `application/ld+json` -- the lossless form, and nearly
+free, because the read has constructed that subgraph anyway.
 
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
@@ -77,6 +79,7 @@ from oekg.history import CREATE, UPDATE, record_write
 from oekg.labels import LABELS, labelled
 from oekg.part_views import part_bodies
 from oekg.reads import labels_of, read_bundle
+from oekg.renderers import RDF_FORMATS, RDF_RENDERERS
 from oekg.serializers import (
     READ_ONLY_CONTAINER,
     ScenarioBundleCreateSerializer,
@@ -249,9 +252,25 @@ class ScenarioBundleAPIView(OekgAPIView):
         # by default instead of public until somebody remembers. The price is
         # that an unsupported verb answers 401 before it can answer 405, which
         # is the cheaper of the two mistakes.
-        if self.request.method in ("GET", "HEAD", "OPTIONS"):
+        if self._is_safe():
             return [AllowAny()]
         return [IsAuthenticated()]
+
+    def get_renderers(self):
+        """RDF is offered on reads only.
+
+        A write is structured data because the serializers are the validation
+        layer, so a `PATCH` asking for turtle gets a `406` -- which is the
+        truthful answer, rather than a write whose response silently arrives in
+        a form its request could not have been sent in.
+        """
+        renderers = super().get_renderers()
+        if self._is_safe():
+            renderers += [renderer() for renderer in RDF_RENDERERS]
+        return renderers
+
+    def _is_safe(self) -> bool:
+        return self.request.method in ("GET", "HEAD", "OPTIONS")
 
     def get(self, request, uid):
         labels = LABELS in expansions(request, (LABELS,))
@@ -270,6 +289,13 @@ class ScenarioBundleAPIView(OekgAPIView):
         except GraphStoreError as error:
             return store_unavailable(error, "read")
 
+        if request.accepted_renderer.format in RDF_FORMATS:
+            # The stored form, served as stored. `expand` has nothing to do
+            # here: resolution is a property of the structured representation,
+            # and the triples a bundle holds are already what they are.
+            response = Response(subgraph)
+            response["ETag"] = version.etag
+            return response
         return _bundle_response(uid, subgraph, version, labels=labels)
 
     def patch(self, request, uid):
