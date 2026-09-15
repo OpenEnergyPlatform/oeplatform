@@ -1,4 +1,4 @@
-"""The OEKG scenario-bundle API: create one, read one, change one field.
+"""The OEKG scenario-bundle API: create one, read one, change it, delete it.
 
 The order of operations in a create is the whole point, so it is worth stating
 plainly:
@@ -31,6 +31,16 @@ A patch touches only the keys it names. A key that is absent is untouched --
 not read and rewritten, genuinely untouched -- which is also what stops an
 unrelated patch from re-minting every framework and model in the bundle.
 
+A delete is deliberately awkward, because it is the one irreversible thing this
+API does. It takes **two steps**: the read a client needs anyway, which returns
+the version and the acronym, and then the delete carrying both. They guard
+different accidents -- the version catches a bundle that moved since it was
+read, the retyped acronym catches the wrong bundle entirely -- and the second
+is the one a version cannot give, because a pipeline looping over identifiers
+holds the correct current version of the wrong bundle. What a delete actually
+removes is bounded by type, in `oekg.removal`, so a bundle's delete can never
+destroy what another bundle shares with it.
+
 Reads need no authentication: the SPARQL endpoint already serves the same data,
 so requiring a token here would protect nothing while making public research
 records awkward to read.
@@ -43,6 +53,7 @@ import logging
 
 from django.db import DatabaseError
 from django.urls import reverse
+from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
 from rdflib import Graph, Literal
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -69,6 +80,7 @@ from oekg.fields import DC, mint_identifier, referenced_node_iris
 from oekg.graph_store import GraphStore, GraphStoreError
 from oekg.history import CREATE, UPDATE, record_write
 from oekg.part_views import part_bodies
+from oekg.preconditions import CONFIRM
 from oekg.reads import labels_of, read_bundle
 from oekg.serializers import (
     READ_ONLY_CONTAINER,
@@ -195,7 +207,7 @@ class ScenarioBundleCollectionAPIView(OekgAPIView):
 
 
 class ScenarioBundleAPIView(OekgAPIView):
-    """`GET` returns one scenario bundle, publicly. `PATCH` changes a field."""
+    """`GET` reads one, publicly. `PATCH` changes a field. `DELETE` removes it."""
 
     def get_permissions(self):
         # The safe methods are named and everything else is closed, rather than
@@ -259,6 +271,71 @@ class ScenarioBundleAPIView(OekgAPIView):
             write.post_state,
             write.version,
             history_recorded=write.history_recorded,
+        )
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name=CONFIRM,
+                required=True,
+                description=(
+                    "The bundle's acronym, retyped. It guards the accident the "
+                    "version cannot: right verb, wrong identifier."
+                ),
+            )
+        ],
+        responses={
+            200: OpenApiResponse(
+                description=(
+                    "Deleted. The body names what was deleted and what was "
+                    "only unlinked, which no status code can say."
+                )
+            )
+        },
+    )
+    def delete(self, request, uid):
+        """Delete this bundle, in the second of two steps.
+
+        The first step is the read a client needs anyway: it returns the
+        version to guard on and the acronym to retype. This step requires both,
+        and they defend different accidents -- the version catches a bundle
+        that changed since it was read, the acronym catches the wrong bundle
+        entirely, which is the realistic failure for a pipeline looping over
+        identifiers and the one a version cannot see.
+
+        **The order of the refusals is the contract**, not an implementation
+        detail: existence, then ownership, then the version, then the
+        confirmation. A repeated delete therefore answers `404`, and a client
+        may treat that as success. Answering `204` to it instead would swallow
+        the wrong-identifier delete -- a bundle that is gone has no acronym
+        left to check a confirmation against, so a blanket success would
+        confirm anything.
+
+        `200` with a body rather than `204`, as for a part: the typed
+        containment walk can decide that a node another bundle still cites is
+        unlinked rather than deleted, and no status code can say that.
+        """
+        try:
+            write = open_bundle(request, uid)
+            write.require_write(request)
+            acronym = write.confirm_deletion(request)
+            version_before = write.version.number
+            removal = write.destroy(acronym)
+        except GraphStoreError as error:
+            return store_unavailable(error, "written to")
+
+        return Response(
+            {
+                "deleted": list(removal.deleted),
+                "unlinked": list(removal.unlinked),
+                READ_ONLY_CONTAINER: {
+                    "uid": uid,
+                    "iri": str(bundle_iri(uid)),
+                    "acronym": acronym,
+                    "version_before": version_before,
+                    **write.gaps,
+                },
+            }
         )
 
 

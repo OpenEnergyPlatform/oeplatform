@@ -20,6 +20,12 @@ They are three calls rather than one so a sub-resource view can check that
 *its* part exists between the first and the second, and keep the same order
 one level down. A view is then only the part that differs: which triples change.
 
+A whole-bundle delete is the one write that does not end in `apply`, because
+there is no bundle left to validate or to version afterwards. It takes the same
+first two steps, adds `confirm_deletion` -- the retyped acronym, which only this
+write asks for -- and ends in `destroy`. Everything it does differently is
+written down there.
+
 **Refusals travel as exceptions.** A helper that returns either a value or a
 refusal makes every call site test which it got, and one forgotten test is a
 refusal silently ignored -- so a refusal is raised and a view catches it in the
@@ -36,20 +42,23 @@ from rdflib import Graph, URIRef
 from rest_framework import status
 from rest_framework.response import Response
 
-from oekg.api_support import Refused, bundle_exists
-from oekg.bundles import BUNDLE_CLASS, bundle_subgraph
-from oekg.fields import NODE
+from oekg.api_support import Refused, bundle_exists, bundle_in
+from oekg.bundles import BUNDLE_CLASS, bundle_iri, bundle_subgraph
+from oekg.fields import DC, NODE
 from oekg.graph_store import GraphStore
-from oekg.history import record_write
-from oekg.permissions import may_write_bundle
-from oekg.preconditions import precondition_refusal
+from oekg.history import record_bundle_deletion, record_write
+from oekg.permissions import forget_ownership, may_write_bundle
+from oekg.preconditions import confirmation_refusal, precondition_refusal
 from oekg.reads import labels_of, read_bundle
+from oekg.removal import Removal, plan_bundle_removal
 from oekg.validation import introduced_violations
 from oekg.versioning import (
     BundleVersion,
     guarded_operation,
     mint_write_token,
     read_version,
+    version_guard,
+    version_node_triples,
     write_applied,
 )
 
@@ -65,6 +74,7 @@ class BundleWrite:
     actor: object = None
     post_state: Optional[Graph] = field(default=None)
     history_recorded: bool = True
+    ownership_forgotten: bool = True
 
     def require_write(self, request) -> None:
         """Refuse unless this caller may write, and said which version.
@@ -87,6 +97,38 @@ class BundleWrite:
         refusal = precondition_refusal(request, self.version)
         if refusal is not None:
             raise Refused(refusal)
+
+    def confirm_deletion(self, request) -> str:
+        """Refuse unless the caller retyped this bundle's acronym. Returns it.
+
+        Beside `require_write` because it is the same kind of thing -- what a
+        request has to carry before it may proceed -- and only a whole-bundle
+        delete asks for it. The acronym is read from the bundle rather than
+        taken from the caller, which is the whole point.
+
+        Raises ``Refused`` with a `400`.
+        """
+        stored = self.pre_state.value(bundle_iri(self.uid), DC.acronym)
+        acronym = None if stored is None else str(stored)
+        refusal = confirmation_refusal(request, acronym)
+        if refusal is not None:
+            raise Refused(refusal)
+        return acronym
+
+    @property
+    def gaps(self) -> dict:
+        """What was lost after the graph committed, if anything was.
+
+        Empty when everything landed, so a client does not have to check
+        something on every response to learn that the ordinary thing happened;
+        these keys are there to name the exception.
+        """
+        lost = {}
+        if not self.history_recorded:
+            lost["history_recorded"] = False
+        if not self.ownership_forgotten:
+            lost["ownership_forgotten"] = False
+        return lost
 
     def labels_of(self, iris: list) -> dict:
         """Labels for referenced nodes, answered from the bundle where possible."""
@@ -192,6 +234,71 @@ class BundleWrite:
             resource_type=resource_type,
             resource_uuid=resource_uuid,
         )
+
+    def destroy(self, acronym: str) -> Removal:
+        """Delete this bundle, its bookkeeping and its records of ownership.
+
+        Not `apply`, and every difference is a consequence of there being no
+        bundle afterwards:
+
+        - **Nothing to validate.** The shape judges a bundle; an absent one is
+          not a worse bundle, it is no bundle.
+        - **No version bump.** The version node goes with the bundle it counts.
+          Leaving it is what the browser's delete does (issue #2440), and it
+          leaves a node asserting that a bundle is at version 4 when there is
+          no bundle -- which the next write would then guard against and match.
+        - **The read-back asks whether the bundle is gone**, not whether a
+          token landed. A delete's own signal is absence, and absence needs no
+          token to be unambiguous: nothing else in this API can make a bundle
+          stop existing, so finding it still there can only mean the guard did
+          not hold.
+        - **What follows the commit is different too.** The ownership rows go,
+          and the history records an event rather than a diff.
+
+        Returns what the delete came to -- which nodes went and which were kept
+        because something outside still cites them. The plan is made here
+        rather than by the caller, so the one place that decides what a delete
+        reaches is the one place that writes it.
+
+        Raises ``Refused`` with a `409` if the guard did not hold -- either the
+        bundle moved since it was read, or something outside it started citing
+        a node this plan was about to delete. The advice is the same for both:
+        read it again and retry.
+        """
+        removal = plan_bundle_removal(self.store, self.pre_state, self.uid)
+        removed = Graph()
+        removed += removal.removed
+        removed += version_node_triples(self.uid, self.version)
+        guard = version_guard(self.uid, self.version)
+        if removal.guard:
+            guard = f"{guard} {removal.guard}"
+
+        self.store.update(self.store.guarded_modification(guard, delete=removed))
+        if bundle_in(self.store, self.uid):
+            raise Refused(
+                Response(
+                    {
+                        "detail": (
+                            "The bundle changed while this request was being "
+                            "prepared, so nothing was deleted. Read it again, "
+                            "check it is still the one you meant, and retry."
+                        )
+                    },
+                    status=status.HTTP_409_CONFLICT,
+                )
+            )
+
+        # The graph has committed. Nothing from here may turn a successful
+        # delete into an error; what is lost is named beside the success it
+        # qualifies, never instead of it.
+        self.ownership_forgotten = forget_ownership(self.uid)
+        self.history_recorded = record_bundle_deletion(
+            bundle_uid=self.uid,
+            acronym=acronym,
+            actor=self.actor,
+            version_before=self.version.number,
+        )
+        return removal
 
 
 def open_bundle(request, uid: str) -> BundleWrite:

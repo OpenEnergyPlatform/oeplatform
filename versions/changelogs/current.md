@@ -184,6 +184,25 @@ SPDX-License-Identifier: CC0-1.0
   is recorded in the bundle's history with the triples it removed
   [(#2456)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2456)
 
+- A whole scenario bundle can now be deleted through the REST API, in two
+  deliberate steps: read it, then `DELETE` its URL carrying both the version as
+  `If-Match` and the bundle's acronym retyped as `?confirm=<acronym>`. The two
+  guard different mistakes - the version catches a bundle somebody changed since
+  you looked, the acronym catches the wrong bundle entirely, which is what a
+  script looping over identifiers actually gets wrong. Deleting a bundle that is
+  already gone answers "not found", which a client may treat as success after a
+  lost response. What goes with it is bounded by type, as for a part: the
+  bundle's own scenarios, study reports and dataset links, while regions,
+  authors, contacts, organisations, funders, cited documents, models, frameworks
+  and every picked ontology term are unlinked and never deleted - and anything
+  another bundle still points at is kept, with the response saying which. The
+  bundle's ownership records go with it, and the version bookkeeping the
+  browser's own delete leaves behind is removed too. In the history the bundle
+  keeps one line saying who deleted it, when, and under which acronym, while the
+  contents of its earlier entries are pruned - so deleting really deletes, and
+  the record that it happened survives
+  [(#2470)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2470)
+
 - Changing a scenario bundle through the REST API is now judged by what the
   change adds, not by whether the whole bundle is perfect. Bundles written
   before the API exists often miss fields the shape requires - a sector, a

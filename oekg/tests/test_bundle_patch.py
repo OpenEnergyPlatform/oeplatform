@@ -22,7 +22,6 @@ from django.test import SimpleTestCase
 from rdflib import RDF, Literal
 
 from factsheet.models import ScenarioBundleAccessControl
-from login.models import myuser
 from oekg.bundles import (
     BUNDLE_CLASS,
     BUNDLE_FIELDS,
@@ -578,14 +577,6 @@ def _guarded_field(store, uid, name, value):
 
 
 class OwnershipTest(BundleApiTestCase):
-    def other_user(self, **kwargs):
-        return myuser.objects.create_user(
-            name=kwargs.pop("name", "someone-else"),
-            email=kwargs.pop("email", "else@example.org"),
-            affiliation="",
-            **kwargs,
-        )
-
     def test_an_unauthenticated_patch_is_refused(self):
         uid, etag = self.created()
         self.client.logout()

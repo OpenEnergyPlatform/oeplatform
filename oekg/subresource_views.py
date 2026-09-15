@@ -81,8 +81,7 @@ class SubResourceViewMixin:
         self, body: dict, write: BundleWrite, code: int = status.HTTP_200_OK
     ) -> Response:
         """One sub-resource, carrying the bundle's entity tag."""
-        if not write.history_recorded:
-            body[READ_ONLY_CONTAINER]["history_recorded"] = False
+        body[READ_ONLY_CONTAINER].update(write.gaps)
         response = Response(body, status=code)
         response["ETag"] = write.version.etag
         return response
