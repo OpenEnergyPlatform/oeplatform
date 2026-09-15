@@ -100,8 +100,15 @@ class BundleWrite:
         verb: str,
         resource_type: URIRef = BUNDLE_CLASS,
         resource_uuid: Optional[str] = None,
+        guard: str = "",
     ) -> None:
         """Validate the post-state, write it under the guard, record it.
+
+        ``guard`` is an extra pattern bound into the write's own ``WHERE``, for
+        a condition the bundle's version cannot express -- a delete uses it to
+        assert that nothing outside the bundle started citing the nodes it is
+        about to remove. It shares the `409`, because the answer to either is
+        the same: read again and retry.
 
         Raises ``Refused`` with a `400` if the shape objects **to something this
         write introduced**, and with a `409` if the guard did not hold. Nothing
@@ -149,6 +156,7 @@ class BundleWrite:
                 token,
                 delete=removed,
                 insert=added,
+                condition=guard,
             )
         )
         if not write_applied(self.store, self.uid, token):

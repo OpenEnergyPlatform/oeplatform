@@ -6,7 +6,9 @@ the shape rather than negotiated per class. What follows from being one is the
 same for both, so it is written once here and configured by a `BundlePart`:
 
 - **It is addressable.** `POST` to the collection adds one, `GET` reads one,
-  `PATCH` changes one without touching its siblings.
+  `PATCH` changes one without touching its siblings, and `DELETE` removes one
+  -- with what it removes bounded by `oekg.removal`, because a part's own
+  children go with it and everything shared with other bundles does not.
 - **It is still part of its bundle for everything else.** The version guarded
   is the bundle's, the ownership asked is the bundle's, the entity tag returned
   is the bundle's, and the post-state validated is the whole bundle with this
@@ -45,7 +47,7 @@ from oekg.graph_store import GraphStoreError
 from oekg.history import CREATE, UPDATE
 from oekg.serializers import READ_ONLY_CONTAINER
 from oekg.shape import ShapeUnavailable
-from oekg.subresource_views import SubResourceViewMixin
+from oekg.subresource_views import SubResourceViewMixin, describes_a_removal
 from oekg.writes import BundleWrite, open_bundle, refuse_renames
 
 
@@ -121,7 +123,7 @@ class BundlePartCollectionAPIView(BundlePartViewMixin, OekgAPIView):
 
 
 class BundlePartAPIView(BundlePartViewMixin, OekgAPIView):
-    """`GET` reads one part. `PATCH` changes the keys it names."""
+    """`GET` reads one. `PATCH` changes the keys it names. `DELETE` removes it."""
 
     def get(self, request, uid, pid):
         try:
@@ -179,6 +181,37 @@ class BundlePartAPIView(BundlePartViewMixin, OekgAPIView):
             return store_unavailable(error, "written to")
 
         return self.part_response(write, pid)
+
+    @describes_a_removal
+    def delete(self, request, uid, pid):
+        """Remove this part, and with it what only it holds.
+
+        The same order as a patch -- bundle, part, caller, precondition -- and
+        the same write path, because a delete is a write like any other: it is
+        validated against the shape, guarded on the bundle's version and
+        recorded in the history. What differs is the arithmetic in front of it,
+        which is `oekg.removal`'s.
+
+        No retyped confirmation token, unlike the whole-bundle delete. Ceremony
+        is proportional to blast radius: this removes one bounded part that can
+        be created again, and the history says what it held.
+        """
+        try:
+            write = open_bundle(request, uid)
+            node = find_part(write.pre_state, uid, self.part, pid)
+            if node is None:
+                return self.not_found(pid)
+            write.require_write(request)
+            return self.removed(
+                write,
+                node,
+                resource_type=self.part.node_class,
+                resource_uuid=pid,
+            )
+        except ShapeUnavailable as error:
+            return shape_unavailable(error)
+        except GraphStoreError as error:
+            return store_unavailable(error, "written to")
 
 
 def part_bodies(graph: Graph, uid: str, part: BundlePart) -> list:
