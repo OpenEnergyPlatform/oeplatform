@@ -9,6 +9,12 @@ of a person's activity across the platform. So this endpoint is scoped to one
 bundle, it is paginated with a ceiling, and the actor is a username rather than
 the internal identifier the existing global dump hands out.
 
+**A deleted bundle's history is still readable.** That is the whole of what a
+whole-bundle delete leaves: one line saying who removed it, when, and under
+which acronym. A trace nobody can read is not much of a trace, so existence
+here means "in the graph **or** in this table" -- and there is no ambiguity to
+resolve, because a bundle nobody ever wrote has neither.
+
 Changes are rendered in **field names, computed here at read time** from the
 stored triples. The triples themselves stay reachable through `?expand=triples`
 so that a legible summary never becomes the only account.
@@ -51,21 +57,23 @@ class ScenarioBundleHistoryAPIView(OekgAPIView):
     offers_expansions = (TRIPLES,)
 
     def get(self, request, uid):
-        # Existence is asked of the graph, not of the history: a bundle with no
-        # entries is a real bundle the user interface wrote, and answering 404
-        # for it would say it does not exist.
+        entries = OEKG_Modifications.objects.filter(bundle_id=uid).select_related(
+            "user"
+        )
+
+        # Existence is asked of the graph first, because a bundle with no
+        # entries is a real bundle the user interface wrote and answering 404
+        # for it would say it does not exist. Then of this table, because a
+        # bundle that has been deleted is gone from the graph and its ledger is
+        # exactly what the delete left behind to be read.
         try:
-            if not bundle_exists(uid):
+            if not bundle_exists(uid) and not entries.exists():
                 return no_such_bundle(uid)
         except GraphStoreError as error:
             # "There is no such bundle" and "I could not find out" are
             # different answers, and only one of them is this endpoint's to
             # give when the graph is unreachable.
             return store_unavailable(error, "read")
-
-        entries = OEKG_Modifications.objects.filter(bundle_id=uid).select_related(
-            "user"
-        )
         # Newest first: a history is read from the present backwards.
         entries = entries.order_by("-timestamp", "-id")
 
@@ -86,6 +94,9 @@ def _represent(entry: OEKG_Modifications, uid: str, with_triples: bool) -> dict:
         "actor": entry.user.name if entry.user else None,
         "timestamp": entry.timestamp,
         "resource": {"type": entry.resource_type, "uid": entry.resource_uuid},
+        # Set on a whole-bundle delete and nowhere else: after that write there
+        # is no bundle left to read an acronym off, so the line carries it.
+        "acronym": entry.acronym,
         "version_before": entry.version_before,
         "version_after": entry.version_after,
         "changes": _changes(entry, uid),
@@ -98,11 +109,19 @@ def _represent(entry: OEKG_Modifications, uid: str, with_triples: bool) -> dict:
 def _changes(entry: OEKG_Modifications, uid: str):
     """The field-level summary, or ``None`` where there cannot be one.
 
-    ``None`` rather than an empty list for a pre-API row: an empty list would
-    say that nothing changed, and what is actually known is that this row was
-    written before anything recorded which fields it touched.
+    ``None`` rather than an empty list, in two cases and for one reason: an
+    empty list would say that nothing changed, and what is actually known is
+    that nothing recorded *what* changed.
+
+    - A **pre-API row** was written before anything recorded which fields it
+      touched.
+    - A row with **no payload** either never had one -- a whole-bundle delete
+      records the event and not the bundle -- or had it pruned by one. The two
+      are not distinguished here, because the answer is the same either way.
     """
     if entry.era != API_ERA:
+        return None
+    if not entry.removed and not entry.added:
         return None
     return changed_fields(
         uid,

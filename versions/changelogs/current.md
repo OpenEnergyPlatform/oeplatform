@@ -223,6 +223,25 @@ SPDX-License-Identifier: CC0-1.0
   is recorded in the bundle's history with the triples it removed
   [(#2456)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2456)
 
+- A whole scenario bundle can now be deleted through the REST API, in two
+  deliberate steps: read it, then `DELETE` its URL carrying both the version as
+  `If-Match` and the bundle's acronym retyped as `?confirm=<acronym>`. The two
+  guard different mistakes - the version catches a bundle somebody changed since
+  you looked, the acronym catches the wrong bundle entirely, which is what a
+  script looping over identifiers actually gets wrong. Deleting a bundle that is
+  already gone answers "not found", which a client may treat as success after a
+  lost response. What goes with it is bounded by type, as for a part: the
+  bundle's own scenarios, study reports and dataset links, while regions,
+  authors, contacts, organisations, funders, cited documents, models, frameworks
+  and every picked ontology term are unlinked and never deleted - and anything
+  another bundle still points at is kept, with the response saying which. The
+  bundle's ownership records go with it, and the version bookkeeping the
+  browser's own delete leaves behind is removed too. In the history the bundle
+  keeps one line saying who deleted it, when, and under which acronym, while the
+  contents of its earlier entries are pruned - so deleting really deletes, and
+  the record that it happened survives
+  [(#2470)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2470)
+
 - Changing a scenario bundle through the REST API is now judged by what the
   change adds, not by whether the whole bundle is perfect. Bundles written
   before the API exists often miss fields the shape requires - a sector, a
@@ -317,6 +336,19 @@ SPDX-License-Identifier: CC0-1.0
   [(#2429)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2429)
 
 ## Documentation updates
+
+- The scenario-bundle architecture guide now documents the **second** write
+  path. The feature has had two since the REST API landed - the browser's, which
+  writes triple by triple, and the API's, which validates the whole bundle
+  against the canonical shape and then writes it in one atomic request - but
+  only the first was described. The new section explains what differs before
+  someone changes it (one request is one transaction, the shape is checked on
+  the result rather than on the change, a write is refused only for problems it
+  adds, and every write is guarded by the bundle's version) and generates the
+  module reference from the source, so it cannot drift. The reference for the
+  browser's views is no longer generated on two pages at once; the feature
+  overview links to the guide that owns it
+  [(#2458)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2458)
 
 - The scenario-bundle developer documentation said the sector-division and
   study-descriptor dropdowns were hardcoded lists. Both have been served from
