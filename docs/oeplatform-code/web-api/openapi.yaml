@@ -893,7 +893,9 @@ paths:
           description: 'A page of summaries. Each carries the two fields a human recognises
             a bundle by at the top level -- `label` and `acronym` -- and everything
             a client cannot write in `_meta`: the identifier, the version, and the
-            number of scenarios and study reports the bundle holds.'
+            number of scenarios and study reports the bundle holds. The entries are
+            in `results`, wrapped: `count` is how many matched in total, and `next`
+            and `previous` are the neighbouring pages or `null`.'
     post:
       operationId: scenario_bundles_create
       description: |-
@@ -1031,10 +1033,11 @@ paths:
           enum:
           - labels
         description: '`labels` resolves the ontology terms this resource picks into
-          `_meta.labels`, from a small label subset rather than the full OEO. Comma-separated,
-          so asking for two is asking once. A value this endpoint does not offer is
-          refused with `400` rather than ignored, and the refusal happens before anything
-          is written.'
+          `_meta.labels`, from a small label subset rather than the full OEO. A value
+          this endpoint does not offer is refused with `400` rather than ignored,
+          and the refusal happens before anything is written, so nothing was written
+          when one arrives. Values are comma-separated, which matters once an endpoint
+          offers two; none offers two yet, and the enum says which one it offers.'
       - in: query
         name: format
         schema:
@@ -1062,14 +1065,6 @@ paths:
               schema:
                 type: object
                 additionalProperties: {}
-            text/turtle:
-              schema:
-                type: object
-                additionalProperties: {}
-            application/ld+json:
-              schema:
-                type: object
-                additionalProperties: {}
           description: Refused, and **nothing was written**. The payload named a key
             the closed bundle shape does not have, or a value the shape's own `sh:in`
             list does not allow, or the change would introduce a violation of the
@@ -1083,26 +1078,10 @@ paths:
               schema:
                 type: object
                 additionalProperties: {}
-            text/turtle:
-              schema:
-                type: object
-                additionalProperties: {}
-            application/ld+json:
-              schema:
-                type: object
-                additionalProperties: {}
           description: No such scenario bundle, or no such resource within it.
         '429':
           content:
             application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-            text/turtle:
-              schema:
-                type: object
-                additionalProperties: {}
-            application/ld+json:
               schema:
                 type: object
                 additionalProperties: {}
@@ -1112,14 +1091,6 @@ paths:
         '503':
           content:
             application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-            text/turtle:
-              schema:
-                type: object
-                additionalProperties: {}
-            application/ld+json:
               schema:
                 type: object
                 additionalProperties: {}
@@ -1201,10 +1172,11 @@ paths:
           enum:
           - labels
         description: '`labels` resolves the ontology terms this resource picks into
-          `_meta.labels`, from a small label subset rather than the full OEO. Comma-separated,
-          so asking for two is asking once. A value this endpoint does not offer is
-          refused with `400` rather than ignored, and the refusal happens before anything
-          is written.'
+          `_meta.labels`, from a small label subset rather than the full OEO. A value
+          this endpoint does not offer is refused with `400` rather than ignored,
+          and the refusal happens before anything is written, so nothing was written
+          when one arrives. Values are comma-separated, which matters once an endpoint
+          offers two; none offers two yet, and the enum says which one it offers.'
       - in: path
         name: uid
         schema:
@@ -1512,9 +1484,11 @@ paths:
           enum:
           - triples
         description: '`triples` adds the stored payload of each entry, so that a legible
-          summary never becomes the only account. Comma-separated, so asking for two
-          is asking once. A value this endpoint does not offer is refused with `400`
-          rather than ignored, and the refusal happens before anything is written.'
+          summary never becomes the only account. A value this endpoint does not offer
+          is refused with `400` rather than ignored, and the refusal happens before
+          anything is written, so nothing was written when one arrives. Values are
+          comma-separated, which matters once an endpoint offers two; none offers
+          two yet, and the enum says which one it offers.'
       - in: query
         name: page
         schema:
@@ -1589,7 +1563,9 @@ paths:
             resource, the versions either side of the write, and the fields that changed.
             `changes` is `null` rather than `[]` where there cannot be a summary:
             an empty list would say that nothing changed, and what is known is that
-            nothing recorded *what* changed.'
+            nothing recorded *what* changed. The entries are in `results`, wrapped:
+            `count` is how many matched in total, and `next` and `previous` are the
+            neighbouring pages or `null`.'
   /api/v0/scenario-bundles/{uid}/scenarios/:
     get:
       operationId: scenario_bundles_scenarios_list
@@ -1610,10 +1586,11 @@ paths:
           enum:
           - labels
         description: '`labels` resolves the ontology terms this resource picks into
-          `_meta.labels`, from a small label subset rather than the full OEO. Comma-separated,
-          so asking for two is asking once. A value this endpoint does not offer is
-          refused with `400` rather than ignored, and the refusal happens before anything
-          is written.'
+          `_meta.labels`, from a small label subset rather than the full OEO. A value
+          this endpoint does not offer is refused with `400` rather than ignored,
+          and the refusal happens before anything is written, so nothing was written
+          when one arrives. Values are comma-separated, which matters once an endpoint
+          offers two; none offers two yet, and the enum says which one it offers.'
       - in: query
         name: page
         schema:
@@ -1695,7 +1672,9 @@ paths:
                 additionalProperties: {}
           description: 'A page of this bundle''s parts of one kind, each in the form
             a write accepts it nested. `ETag` carries the **bundle''s** version: a
-            part has none of its own.'
+            part has none of its own. The entries are in `results`, wrapped: `count`
+            is how many matched in total, and `next` and `previous` are the neighbouring
+            pages or `null`.'
     post:
       operationId: scenario_bundles_scenarios_create
       description: |-
@@ -1735,10 +1714,11 @@ paths:
           enum:
           - labels
         description: '`labels` resolves the ontology terms this resource picks into
-          `_meta.labels`, from a small label subset rather than the full OEO. Comma-separated,
-          so asking for two is asking once. A value this endpoint does not offer is
-          refused with `400` rather than ignored, and the refusal happens before anything
-          is written.'
+          `_meta.labels`, from a small label subset rather than the full OEO. A value
+          this endpoint does not offer is refused with `400` rather than ignored,
+          and the refusal happens before anything is written, so nothing was written
+          when one arrives. Values are comma-separated, which matters once an endpoint
+          offers two; none offers two yet, and the enum says which one it offers.'
       - in: path
         name: uid
         schema:
@@ -1881,10 +1861,11 @@ paths:
           enum:
           - labels
         description: '`labels` resolves the ontology terms this resource picks into
-          `_meta.labels`, from a small label subset rather than the full OEO. Comma-separated,
-          so asking for two is asking once. A value this endpoint does not offer is
-          refused with `400` rather than ignored, and the refusal happens before anything
-          is written.'
+          `_meta.labels`, from a small label subset rather than the full OEO. A value
+          this endpoint does not offer is refused with `400` rather than ignored,
+          and the refusal happens before anything is written, so nothing was written
+          when one arrives. Values are comma-separated, which matters once an endpoint
+          offers two; none offers two yet, and the enum says which one it offers.'
       - in: path
         name: pid
         schema:
@@ -1996,10 +1977,11 @@ paths:
           enum:
           - labels
         description: '`labels` resolves the ontology terms this resource picks into
-          `_meta.labels`, from a small label subset rather than the full OEO. Comma-separated,
-          so asking for two is asking once. A value this endpoint does not offer is
-          refused with `400` rather than ignored, and the refusal happens before anything
-          is written.'
+          `_meta.labels`, from a small label subset rather than the full OEO. A value
+          this endpoint does not offer is refused with `400` rather than ignored,
+          and the refusal happens before anything is written, so nothing was written
+          when one arrives. Values are comma-separated, which matters once an endpoint
+          offers two; none offers two yet, and the enum says which one it offers.'
       - in: path
         name: pid
         schema:
@@ -2289,10 +2271,11 @@ paths:
           enum:
           - labels
         description: '`labels` resolves the ontology terms this resource picks into
-          `_meta.labels`, from a small label subset rather than the full OEO. Comma-separated,
-          so asking for two is asking once. A value this endpoint does not offer is
-          refused with `400` rather than ignored, and the refusal happens before anything
-          is written.'
+          `_meta.labels`, from a small label subset rather than the full OEO. A value
+          this endpoint does not offer is refused with `400` rather than ignored,
+          and the refusal happens before anything is written, so nothing was written
+          when one arrives. Values are comma-separated, which matters once an endpoint
+          offers two; none offers two yet, and the enum says which one it offers.'
       - in: query
         name: page
         schema:
@@ -2385,7 +2368,9 @@ paths:
             `false` -- when the stored address is not a page on this platform, because
             `false` would claim the target had been deleted. **Resolution is not an
             expansion**: a reader needs it to tell a live citation from a dead one,
-            so it is never opt-in.'
+            so it is never opt-in. The entries are in `results`, wrapped: `count`
+            is how many matched in total, and `next` and `previous` are the neighbouring
+            pages or `null`.'
     post:
       operationId: scenario_bundles_scenarios_datasets_create
       description: |-
@@ -2428,10 +2413,11 @@ paths:
           enum:
           - labels
         description: '`labels` resolves the ontology terms this resource picks into
-          `_meta.labels`, from a small label subset rather than the full OEO. Comma-separated,
-          so asking for two is asking once. A value this endpoint does not offer is
-          refused with `400` rather than ignored, and the refusal happens before anything
-          is written.'
+          `_meta.labels`, from a small label subset rather than the full OEO. A value
+          this endpoint does not offer is refused with `400` rather than ignored,
+          and the refusal happens before anything is written, so nothing was written
+          when one arrives. Values are comma-separated, which matters once an endpoint
+          offers two; none offers two yet, and the enum says which one it offers.'
       - in: path
         name: sid
         schema:
@@ -2595,10 +2581,11 @@ paths:
           enum:
           - labels
         description: '`labels` resolves the ontology terms this resource picks into
-          `_meta.labels`, from a small label subset rather than the full OEO. Comma-separated,
-          so asking for two is asking once. A value this endpoint does not offer is
-          refused with `400` rather than ignored, and the refusal happens before anything
-          is written.'
+          `_meta.labels`, from a small label subset rather than the full OEO. A value
+          this endpoint does not offer is refused with `400` rather than ignored,
+          and the refusal happens before anything is written, so nothing was written
+          when one arrives. Values are comma-separated, which matters once an endpoint
+          offers two; none offers two yet, and the enum says which one it offers.'
       - in: path
         name: sid
         schema:
@@ -2849,10 +2836,11 @@ paths:
           enum:
           - labels
         description: '`labels` resolves the ontology terms this resource picks into
-          `_meta.labels`, from a small label subset rather than the full OEO. Comma-separated,
-          so asking for two is asking once. A value this endpoint does not offer is
-          refused with `400` rather than ignored, and the refusal happens before anything
-          is written.'
+          `_meta.labels`, from a small label subset rather than the full OEO. A value
+          this endpoint does not offer is refused with `400` rather than ignored,
+          and the refusal happens before anything is written, so nothing was written
+          when one arrives. Values are comma-separated, which matters once an endpoint
+          offers two; none offers two yet, and the enum says which one it offers.'
       - in: query
         name: page
         schema:
@@ -2934,7 +2922,9 @@ paths:
                 additionalProperties: {}
           description: 'A page of this bundle''s parts of one kind, each in the form
             a write accepts it nested. `ETag` carries the **bundle''s** version: a
-            part has none of its own.'
+            part has none of its own. The entries are in `results`, wrapped: `count`
+            is how many matched in total, and `next` and `previous` are the neighbouring
+            pages or `null`.'
     post:
       operationId: scenario_bundles_study_reports_create
       description: |-
@@ -2974,10 +2964,11 @@ paths:
           enum:
           - labels
         description: '`labels` resolves the ontology terms this resource picks into
-          `_meta.labels`, from a small label subset rather than the full OEO. Comma-separated,
-          so asking for two is asking once. A value this endpoint does not offer is
-          refused with `400` rather than ignored, and the refusal happens before anything
-          is written.'
+          `_meta.labels`, from a small label subset rather than the full OEO. A value
+          this endpoint does not offer is refused with `400` rather than ignored,
+          and the refusal happens before anything is written, so nothing was written
+          when one arrives. Values are comma-separated, which matters once an endpoint
+          offers two; none offers two yet, and the enum says which one it offers.'
       - in: path
         name: uid
         schema:
@@ -3120,10 +3111,11 @@ paths:
           enum:
           - labels
         description: '`labels` resolves the ontology terms this resource picks into
-          `_meta.labels`, from a small label subset rather than the full OEO. Comma-separated,
-          so asking for two is asking once. A value this endpoint does not offer is
-          refused with `400` rather than ignored, and the refusal happens before anything
-          is written.'
+          `_meta.labels`, from a small label subset rather than the full OEO. A value
+          this endpoint does not offer is refused with `400` rather than ignored,
+          and the refusal happens before anything is written, so nothing was written
+          when one arrives. Values are comma-separated, which matters once an endpoint
+          offers two; none offers two yet, and the enum says which one it offers.'
       - in: path
         name: pid
         schema:
@@ -3235,10 +3227,11 @@ paths:
           enum:
           - labels
         description: '`labels` resolves the ontology terms this resource picks into
-          `_meta.labels`, from a small label subset rather than the full OEO. Comma-separated,
-          so asking for two is asking once. A value this endpoint does not offer is
-          refused with `400` rather than ignored, and the refusal happens before anything
-          is written.'
+          `_meta.labels`, from a small label subset rather than the full OEO. A value
+          this endpoint does not offer is refused with `400` rather than ignored,
+          and the refusal happens before anything is written, so nothing was written
+          when one arrives. Values are comma-separated, which matters once an endpoint
+          offers two; none offers two yet, and the enum says which one it offers.'
       - in: path
         name: pid
         schema:

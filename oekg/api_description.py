@@ -1,5 +1,9 @@
 """What the generated description says about these endpoints, written once.
 
+Not to be confused with `oekg/shape.py`, which is the SHACL shape, or with
+`/api/v0/schema/`, which serves the whole document this contributes to. What
+is assembled here is the prose and the signatures of one API's operations.
+
 Every fact a client needs is either in a signature or in prose. The ones that
 *can* be in a signature must be, because only those are covered by the drift
 guard: a parameter, a status code or a response header that stops being true
@@ -47,8 +51,34 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 import inspect
 
+from drf_spectacular.openapi import AutoSchema
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
+
+
+class CollectionSchema(AutoSchema):
+    """Name a collection's `GET` a list, which is what it is.
+
+    The generator already does this for views it can recognise as list views;
+    it cannot recognise these, because they are plain `APIView`s with no
+    serializer or paginator attribute to read. Left alone it calls the
+    collection read and the detail read of one resource `..._retrieve` both,
+    then resolves the collision with a numeral -- a name no reader can map back
+    to an endpoint.
+
+    A rule rather than an id per endpoint, because the handlers are shared: one
+    implementation serves scenarios and study reports, so an id written at the
+    handler would name the wrong resource and an id written per subclass would
+    have to be written again for the next part.
+    """
+
+    def get_operation_id(self):
+        operation_id = super().get_operation_id()
+        if self.method != "GET":
+            return operation_id
+        subject, _, action = operation_id.rpartition("_")
+        return f"{subject}_list" if action == "retrieve" else operation_id
+
 
 # --------------------------------------------------------------------------
 # The auth expectation, in words.
@@ -151,9 +181,11 @@ def expands(*values, description):
         type=str,
         enum=list(values),
         description=(
-            description + " Comma-separated, so asking for two is asking once. "
-            "A value this endpoint does not offer is refused with `400` rather "
-            "than ignored, and the refusal happens before anything is written."
+            description + " A value this endpoint does not offer is refused "
+            "with `400` rather than ignored, and the refusal happens before "
+            "anything is written, so nothing was written when one arrives. "
+            "Values are comma-separated, which matters once an endpoint offers "
+            "two; none offers two yet, and the enum says which one it offers."
         ),
     )
 
@@ -172,21 +204,34 @@ EXPAND_LABELS = expands(
 # --------------------------------------------------------------------------
 
 
-def describes(description):
-    """A response that carries a body. JSON unless the operation says otherwise.
+def json_body(description):
+    """A response carrying a JSON body, described rather than schema'd.
 
-    Named for what it does rather than for what it returns. The obvious name is
-    `body`, and it is taken: half the read paths in this API already call their
-    assembled payload that, so importing it shadows theirs.
+    Every refusal in this API is a JSON object, and so is every success bar
+    one: the bundle read also serves two RDF forms, and says so itself.
     """
     return OpenApiResponse(response=OpenApiTypes.OBJECT, description=description)
+
+
+#: What surrounds the entries of any collection here. Said once because every
+#: one of them is paged by the same class, and said at all because a client
+#: that is told a page size and not the shape of a page has to guess it.
+PAGE_ENVELOPE = (
+    "The entries are in `results`, wrapped: `count` is how many matched in "
+    "total, and `next` and `previous` are the neighbouring pages or `null`."
+)
+
+
+def a_page_of(description):
+    """A collection's success: the entries, and the envelope around them."""
+    return json_body(f"{description} {PAGE_ENVELOPE}")
 
 
 #: The refusals shared across these endpoints, each said once. An endpoint that
 #: can refuse for a reason of its own overrides the entry rather than adding a
 #: second code, so a client never meets one status meaning two things.
 REFUSALS = {
-    400: describes(
+    400: json_body(
         "Refused, and **nothing was written**. The payload named a key the "
         "closed bundle shape does not have, or a value the shape's own `sh:in` "
         "list does not allow, or the change would introduce a violation of the "
@@ -195,35 +240,35 @@ REFUSALS = {
         "for. A write is judged by what it *introduces*, so a bundle that was "
         "already non-conforming can still be repaired through this API."
     ),
-    401: describes(
+    401: json_body(
         "No credentials, or credentials this platform does not recognise. "
         "Reads here need none; writes do."
     ),
-    403: describes(
+    403: json_body(
         "Authenticated, but not an owner of this scenario bundle. A bundle "
         "with no recorded owner is administrator-only."
     ),
-    404: describes("No such scenario bundle, or no such resource within it."),
-    409: describes(
+    404: json_body("No such scenario bundle, or no such resource within it."),
+    409: json_body(
         "The bundle moved between the read this write was prepared from and "
         "the write itself, so **nothing was written**. Read it again, apply "
         "the change to what comes back, and retry."
     ),
-    412: describes(
+    412: json_body(
         "`If-Match` named a version, and it is not the current one. Nothing "
         "was written. The response says which version the bundle is at."
     ),
-    428: describes(
+    428: json_body(
         "`If-Match` was absent, so this write did not say which version it was "
         "editing and nothing was written. The response names the current "
         "entity tag to send."
     ),
-    429: describes(
+    429: json_body(
         "Throttled. These endpoints are public to read, so they carry a "
         "ceiling for anonymous callers and a separate one per account. "
         "`Retry-After` says how long to wait."
     ),
-    503: describes(
+    503: json_body(
         "The OEKG graph store could not be reached, or the shape this API "
         "validates against is not installed on this server. Neither is an "
         "answer about the bundle: nothing was read and nothing was written."
@@ -241,8 +286,12 @@ READ_REFUSALS = (400, 404, *ALWAYS)
 WRITE_REFUSALS = (400, 401, 403, 404, 409, 412, 428, *ALWAYS)
 
 
-def paging(page_size, maximum):
+def paging(paginator):
     """`page` and `page_size`, as every collection in this API spells them.
+
+    Takes the paginator rather than its two numbers: the default and the
+    ceiling are that class's to state, and a call site holding them apart could
+    quote a ceiling from one paginator beside a default from another.
 
     Declared rather than inferred: these are plain views, so nothing else tells
     a reader that a collection is paged at all, let alone where its ceiling is.
@@ -264,18 +313,34 @@ def paging(page_size, maximum):
             required=False,
             type=int,
             description=(
-                f"How many entries a page holds. Defaults to {page_size} and "
-                f"is capped at {maximum}: this endpoint is public, and no "
+                f"How many entries a page holds. Defaults to "
+                f"{paginator.page_size} and is capped at "
+                f"{paginator.max_page_size}: this endpoint is public, and no "
                 "public collection here has an unbounded mode."
             ),
         ),
     ]
 
 
-def _responses(codes, success, extra):
-    described = {code: REFUSALS[code] for code in codes}
+def _responses(codes, success, extra, refusals_in=None):
+    """The refusals this operation can give, plus the success it describes.
+
+    ``refusals_in`` pins the refusals to one media type, for the one operation
+    that serves its success in three. The generator reads an operation's
+    content types off the view's renderers and applies them to every response
+    it declares -- so without this, the bundle read would offer `404` as
+    turtle, which `GraphRenderer` deliberately never does: an error body is a
+    dict, and it is rendered as JSON with the response's own content type
+    corrected to match. Declaring a form nothing can arrive in is the failure
+    this module exists to remove, not one to introduce elsewhere.
+    """
+
+    def key(code):
+        return code if refusals_in is None else (code, refusals_in)
+
+    described = {key(code): REFUSALS[code] for code in codes}
     described.update(success)
-    described.update(extra or {})
+    described.update({key(code): value for code, value in (extra or {}).items()})
     return described
 
 
@@ -301,6 +366,7 @@ def describes_a_public_read(
     parameters=(),
     responses=None,
     refusals=READ_REFUSALS,
+    refusals_in=None,
     entity_tag=True,
     **schema,
 ):
@@ -317,7 +383,7 @@ def describes_a_public_read(
     return _describing(
         PUBLIC,
         parameters=[*([ETAG] if entity_tag else []), *parameters],
-        responses=_responses(refusals, {200: success}, responses),
+        responses=_responses(refusals, {200: success}, responses, refusals_in),
         **schema,
     )
 
@@ -363,7 +429,7 @@ describes_a_removal = describes_a_guarded_write(
     # description a client reads cannot drift from the one `removed` actually
     # implements.
     {
-        200: describes(
+        200: json_body(
             "Removed. The body names what was **deleted** and what was only "
             "**unlinked**, which no status code can say: a node another bundle "
             "still cites is kept and detached rather than destroyed. Only the "
