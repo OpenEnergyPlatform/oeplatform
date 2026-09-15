@@ -252,15 +252,13 @@ class DatasetLinkWriteTest(DatasetLinkTestCase):
         self.assertEqual(response.status_code, 404, response.data)
 
 
-class LinkWrittenElsewhereTest(DatasetLinkTestCase):
-    """A link this API did not write, as the browser and its ancestors wrote it.
+class ExternalLinkMixin:
+    """A link pointing at an address this platform has no route for.
 
-    The writable payload is `{type, ref, name}`, and `ref` is inferred from the
-    URL. A link pointing at an address this platform has no route for therefore
-    cannot be expressed in that payload at all -- so it reads back with `ref`
-    null, and `_meta.target_iri` says where it actually points. Pinned here
-    because it is a property of the payload the resource model fixed, not an
-    accident, and the replace endpoint inherits it.
+    The live graph holds databus URLs, written long before this API. Shared
+    rather than rebuilt in each test module, because what a read says about
+    such a link is asserted from two directions -- the payload it produces and
+    the resolution it refuses to guess at.
     """
 
     EXTERNAL = "https://databus.openenergyplatform.org/koubaa/LLEC_Dataset/WS_23_24"
@@ -279,6 +277,18 @@ class LinkWrittenElsewhereTest(DatasetLinkTestCase):
         triples.add((node, HAS_UUID, Literal("legacy")))
         self.store.insert(triples)
         return uid, sid
+
+
+class LinkWrittenElsewhereTest(ExternalLinkMixin, DatasetLinkTestCase):
+    """A link this API did not write, as the browser and its ancestors wrote it.
+
+    The writable payload is `{type, ref, name}`, and `ref` is inferred from the
+    URL. A link pointing at an address this platform has no route for therefore
+    cannot be expressed in that payload at all -- so it reads back with `ref`
+    null, and `_meta.target_iri` says where it actually points. Pinned here
+    because it is a property of the payload the resource model fixed, not an
+    accident, and the replace endpoint inherits it.
+    """
 
     def test_it_is_listed_rather_than_hidden(self):
         uid, sid = self.with_an_external_link()

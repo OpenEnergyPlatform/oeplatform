@@ -16,6 +16,12 @@ no field to change without changing what the link is. Editing one is adding a
 different one and removing this one, which says plainly what happened -- and
 `DELETE` is what makes that reachable, so the pair is the whole contract.
 
+**Every read resolves.** A link is a citation with nothing enforcing it, so a
+read says what the citation means now: whether the named target is still there
+and, for a catalogue reference, which tables it groups today. That is computed
+per read and never stored -- see `oekg.resolution` for why, and for what the
+nulls mean.
+
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
@@ -46,6 +52,7 @@ from oekg.dataset_links import (
 from oekg.fields import mint_identifier
 from oekg.graph_store import GraphStoreError
 from oekg.history import CREATE
+from oekg.resolution import resolve
 from oekg.serializers import READ_ONLY_CONTAINER, DatasetLinkSerializer
 from oekg.shape import ShapeUnavailable
 from oekg.subresource_views import SubResourceViewMixin, describes_a_removal
@@ -82,9 +89,8 @@ class DatasetLinkViewMixin(SubResourceViewMixin):
         state = self.state_of(write)
         scenario = find_part(state, write.uid, SCENARIO, sid)
         direction, node = find_dataset_link(state, scenario, did)
-        return self.represented(
-            _link_body(state, node, direction, write.uid, sid), write, code
-        )
+        (body,) = _resolved([_link_body(state, node, direction, write.uid, sid)])
+        return self.represented(body, write, code)
 
 
 class DatasetLinkCollectionAPIView(DatasetLinkViewMixin, OekgAPIView):
@@ -203,6 +209,21 @@ def _link_bodies(graph: Graph, scenario, uid: str, sid: str) -> list:
         for direction, node in dataset_link_nodes(graph, scenario)
     ]
     bodies.sort(key=lambda body: (body["type"], body["name"]))
+    return _resolved(bodies)
+
+
+def _resolved(bodies: list) -> list:
+    """Say, for every one of these links, what it points at right now.
+
+    Done to the whole list at once and never to one link at a time: resolution
+    costs a fixed few relational queries for any number of links, and a
+    per-link version of this would put a query per citation on a public
+    endpoint. A single link is simply a list of one.
+    """
+    for body, resolution in zip(
+        bodies, resolve([(body["ref"], body["name"]) for body in bodies])
+    ):
+        body[READ_ONLY_CONTAINER].update(resolution.as_meta())
     return bodies
 
 

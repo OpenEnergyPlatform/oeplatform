@@ -169,6 +169,23 @@ SPDX-License-Identifier: CC0-1.0
   writes relations the canonical shape does not validate and no identifier at
   all [(#2452)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2452)
 
+- A scenario's dataset links now say whether what they cite is still there.
+  Every read of a link reports whether the named OEP table or dataset still
+  exists, which tables the citation resolves to today, and whether each of those
+  has been through Open Peer Review - finished, in progress, or no review at
+  all, told apart rather than collapsed into a boolean, because most of the
+  platform's data predates the review process and "not reviewed" is not "failed
+  review". Nothing is stored: every read works it out afresh, so the answer
+  cannot go stale, and a link starts resolving the moment its target appears
+  without the bundle being touched. A citation of a whole OEP dataset resolves
+  to the tables that dataset groups _now_ - that currency is the point of
+  allowing the coarser citation, and it is why a table citation is the
+  reproducible one. A dead link is never removed and never blocks its target's
+  deletion, so nobody's citation can hold somebody else's data hostage. A link
+  pointing at an address this platform has no route for - the graph holds
+  databus URLs - reports nothing rather than reporting "deleted"
+  [(#2458)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2458)
+
 - A scenario factsheet, a study report or a dataset link can now be removed
   through the REST API: `DELETE` on its own URL, carrying the bundle's version
   as `If-Match` and nothing else - the retyped acronym guards a whole-bundle

@@ -17,7 +17,8 @@ whose meaning anybody would have to reason about.
 **A link is never checked against its target, and never blocked by it.** A
 bundle is a published research record: "this scenario used table X" stays true
 after X is deleted, so the link outlives the thing it cites and a read says
-whether it still resolves. Writing a link therefore touches no table and no
+whether it still resolves -- `oekg.resolution` is where that answer is worked
+out. Writing a link therefore touches no table and no
 catalogue entry, and a table's owner can still delete it while somebody else's
 bundle cites it.
 
