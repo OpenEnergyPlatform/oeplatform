@@ -201,6 +201,7 @@ SPDX-License-Identifier: CC0-1.0
   keeps one line saying who deleted it, when, and under which acronym, while the
   contents of its earlier entries are pruned - so deleting really deletes, and
   the record that it happened survives
+  [(#2470)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2470)
 
 - Changing a scenario bundle through the REST API is now judged by what the
   change adds, not by whether the whole bundle is perfect. Bundles written
