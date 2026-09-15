@@ -177,6 +177,26 @@ def bundle_iri(uid: str) -> URIRef:
     return OEKG[uid]
 
 
+def bundle_uid(iri) -> Optional[str]:
+    """The identifier inside a bundle's IRI -- the inverse of `bundle_iri`.
+
+    ``None`` for an IRI outside the namespace bundles live in, so a listing
+    reports what it found rather than a segment chopped off the end of an
+    address it does not recognise. The IRI itself is reported either way.
+
+    A uid this API did not mint can come back here: the user interface takes
+    one from its client and concatenates it. Such a bundle is listed with the
+    uid it has, and its own URL answers `404` -- which is the read side
+    reporting an identity problem that predates it, not making one.
+    """
+    prefix = str(OEKG)
+    text = str(iri)
+    if not text.startswith(prefix):
+        return None
+    uid = text[len(prefix) :]
+    return uid or None
+
+
 def part_iri(part: BundlePart, pid: str) -> URIRef:
     """The IRI a sub-resource this API minted lives at.
 

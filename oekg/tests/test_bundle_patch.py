@@ -322,16 +322,14 @@ class PatchOneFieldTest(BundleApiTestCase):
 
 
 class PatchAcronymTest(BundleApiTestCase):
-    """What a patch does to an acronym -- including what it does NOT do.
+    """What a patch does to an acronym -- and what it refuses to do.
 
-    Uniqueness is enforced on a create and not thereafter, deliberately: the
+    Uniqueness is enforced on every write that can change an acronym. It was
+    enforced on a create only until the read side landed, deliberately: the
     read side is where the acronym becomes load-bearing, because that is where
     a pipeline looks a bundle up by it, so the check belongs with the endpoint
-    that makes the promise rather than being scattered across every write.
-
-    The gap is pinned down here rather than left to be discovered. When the
-    read side closes it, `test_renaming_onto_a_taken_acronym_is_currently_allowed`
-    is the test that has to be turned around, and it says so.
+    that makes the promise. `test_renaming_onto_a_taken_acronym_is_refused` is
+    the test that was turned around when it did.
     """
 
     def test_an_acronym_can_be_changed(self):
@@ -344,22 +342,56 @@ class PatchAcronymTest(BundleApiTestCase):
             self.client.get(self.detail_url(uid)).data["acronym"], "RENAMED"
         )
 
-    def test_renaming_onto_a_taken_acronym_is_currently_allowed(self):
-        # CHARACTERISATION, not an endorsement: two bundles can end up sharing
-        # an acronym, and a lookup by acronym then has two answers. Deferred to
-        # the read-side slice, which is the one that promises the lookup.
-        # Turning this around is what closing the gap looks like.
+    def test_renaming_onto_a_taken_acronym_is_refused(self):
+        # A lookup by acronym is how a stateless pipeline finds its bundle, so
+        # two bundles sharing one would send somebody's results into a
+        # stranger's record.
         uid, etag = self.created()
         self.create({**VALID_PAYLOAD, "acronym": "TAKEN"})
 
         response = self.patch(uid, {"acronym": "TAKEN"}, if_match=etag)
 
-        self.assertEqual(response.status_code, 200, response.data)
+        self.assertEqual(response.status_code, 409, response.data)
         self.assertEqual(
             len(self.bundles_with_acronym("TAKEN")),
-            2,
-            "the acronym is now ambiguous -- this is the deferred gap",
+            1,
+            "the rename was refused, so the acronym still has one holder",
         )
+
+    def test_a_refused_rename_leaves_the_bundle_as_it_was(self):
+        uid, etag = self.created()
+        self.create({**VALID_PAYLOAD, "acronym": "TAKEN"})
+
+        self.patch(uid, {"acronym": "TAKEN"}, if_match=etag)
+
+        read = self.client.get(self.detail_url(uid))
+        self.assertEqual(read.data["acronym"], VALID_PAYLOAD["acronym"])
+        self.assertEqual(read["ETag"], etag, "nothing was written, so no version bump")
+
+    def test_the_check_is_bound_inside_the_write(self):
+        # The friendly check in front is a separate request, so two renames can
+        # both find an acronym free. With it mocked away -- which is what
+        # losing that race looks like from inside the write -- the guard bound
+        # into the update has to refuse on its own.
+        uid, etag = self.created()
+        self.create({**VALID_PAYLOAD, "acronym": "TAKEN"})
+
+        with patch("oekg.api_views.acronym_taken", return_value=False):
+            response = self.patch(uid, {"acronym": "TAKEN"}, if_match=etag)
+
+        self.assertEqual(response.status_code, 409, response.data)
+        self.assertEqual(len(self.bundles_with_acronym("TAKEN")), 1)
+
+    def test_a_patch_that_does_not_rename_is_unaffected(self):
+        # The guard is added only for a payload naming the acronym: a patch of
+        # another field must not start failing because some other bundle holds
+        # an acronym this one never mentioned.
+        uid, etag = self.created()
+        self.create({**VALID_PAYLOAD, "acronym": "TAKEN"})
+
+        response = self.patch(uid, {"label": "Renamed label"}, if_match=etag)
+
+        self.assertEqual(response.status_code, 200, response.data)
 
     def test_sending_the_acronym_back_unchanged_is_accepted(self):
         # The round trip a client and, later, replace both rely on: a bundle's

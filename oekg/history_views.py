@@ -26,10 +26,8 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 import json
 
 from rdflib import Graph
-from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
 
 from factsheet.models import API_ERA, OEKG_Modifications
 from oekg.api_support import (
@@ -56,20 +54,9 @@ class ScenarioBundleHistoryAPIView(OekgAPIView):
     """`GET` returns one bundle's change history."""
 
     permission_classes = [AllowAny]
+    offers_expansions = (TRIPLES,)
 
     def get(self, request, uid):
-        expand = request.query_params.get("expand")
-        if expand not in (None, "", TRIPLES):
-            return Response(
-                {
-                    "detail": (
-                        f"{expand!r} is not something this endpoint can expand. "
-                        f"The only value is {TRIPLES!r}."
-                    )
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
         entries = OEKG_Modifications.objects.filter(bundle_id=uid).select_related(
             "user"
         )
@@ -93,7 +80,10 @@ class ScenarioBundleHistoryAPIView(OekgAPIView):
         paginator = HistoryPagination()
         page = paginator.paginate_queryset(entries, request, view=self)
         return paginator.get_paginated_response(
-            [_represent(entry, uid, with_triples=expand == TRIPLES) for entry in page]
+            [
+                _represent(entry, uid, with_triples=TRIPLES in self.expand)
+                for entry in page
+            ]
         )
 
 
