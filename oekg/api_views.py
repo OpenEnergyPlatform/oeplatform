@@ -81,6 +81,11 @@ from oekg.serializers import (
     ScenarioBundleSerializer,
 )
 from oekg.shape import ShapeUnavailable
+from oekg.summaries import (
+    BundleSummaries,
+    ScenarioBundlePagination,
+    SummaryFilters,
+)
 from oekg.validation import validate_post_state
 from oekg.versioning import (
     FIRST_VERSION,
@@ -97,9 +102,37 @@ logger = logging.getLogger("oeplatform")
 
 
 class ScenarioBundleCollectionAPIView(OekgAPIView):
-    """`POST` creates a scenario bundle."""
+    """`GET` lists scenario bundles as summaries. `POST` creates one."""
 
-    permission_classes = [IsAuthenticated]
+    def get_permissions(self):
+        # The safe methods are named and everything else is closed, as
+        # everywhere else in this API: a verb a later slice adds is
+        # authenticated by default rather than public until somebody remembers.
+        if self.request.method in ("GET", "HEAD", "OPTIONS"):
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+    def get(self, request):
+        """A page of summaries: identifier, acronym, label, version and counts.
+
+        Not bundles. A listing that returned whole bundles would carry every
+        client the whole corpus, and would drag the relational resolution a
+        dataset link needs across every link of every bundle on a public
+        endpoint -- which is how the two listings next door on this platform
+        became unusable.
+
+        `?acronym=` is the filter the contract depends on: it is how a pipeline
+        holding no state between runs finds its own bundle again, and the
+        `_meta` it gets back carries the version its next write must send.
+        """
+        filters = SummaryFilters.from_query(request.query_params)
+        paginator = ScenarioBundlePagination()
+        try:
+            summaries = BundleSummaries(GraphStore.from_settings(), filters)
+            page = paginator.paginate_queryset(summaries, request, view=self)
+        except GraphStoreError as error:
+            return store_unavailable(error, "read")
+        return paginator.get_paginated_response(page)
 
     def post(self, request):
         serializer = ScenarioBundleCreateSerializer(data=request.data)
