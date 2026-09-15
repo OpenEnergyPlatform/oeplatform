@@ -37,7 +37,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 from dataclasses import dataclass
-from typing import Iterable, Optional, Sequence
+from typing import Optional, Sequence
 
 from dataedit.models import Dataset, PeerReview, Table
 
@@ -57,15 +57,16 @@ class Resolution:
     ``resolvable`` and ``tables`` are both nullable, and the null means the
     same thing in both: *this server cannot say*. That happens for a link
     pointing at an address this platform has no route for -- the live graph
-    holds databus URLs written long before this API -- where `ref` already
-    reads back null. Answering `false` there would claim the target had been
-    deleted, which is a fabrication rather than an answer.
+    holds databus URLs -- where `ref` already reads back null. Answering
+    `false` there would claim the target had been deleted, which is a
+    fabrication rather than an answer.
 
     ``tables`` is the citation's meaning today: the one table for a table
     reference, the catalogue entry's current members for a dataset reference,
     and an empty list when the named target is gone. Each entry carries its own
     review state, because the review process is per table and there is no such
-    thing as a reviewed catalogue entry.
+    thing as a reviewed catalogue entry -- so a table reference carries the
+    indicator there too rather than growing a key of its own.
     """
 
     resolvable: Optional[bool]
@@ -80,62 +81,73 @@ class Resolution:
 UNKNOWABLE = Resolution(resolvable=None, tables=None)
 
 
-def resolve(links: Sequence[tuple]) -> list:
+def resolve(targets: Sequence[tuple]) -> list:
     """Resolve ``(ref, name)`` pairs, in order, in a fixed number of queries.
 
+    Both halves of a pair come from the link's stored **URL** and never from
+    its label -- see `oekg.dataset_links.reference_target` for why that
+    distinction has teeth.
+
     Batched rather than per link, because the alternative is a query per
-    citation on a public endpoint. Three queries at most, whatever the bundle
-    holds: one for the tables named directly, one for the catalogue entries and
-    their members together, and one for the reviews of everything the first two
-    turned up.
+    citation on a public endpoint. Three queries at most, whatever a bundle
+    holds: one per kind of target named, and one for the reviews of every
+    table those turned up.
 
     A name is looked up as it is stored. There is no normalisation and no
-    guessing: a table name that no longer exists is simply not found, which is
+    guessing: a name that no longer exists is simply not found, which is
     exactly what the caller is asking about.
     """
-    named_tables = {name for ref, name in links if ref == "table"}
-    members = _members_by_dataset({name for ref, name in links if ref == "dataset"})
-    existing = _existing_tables(named_tables)
-    reviews = _review_states(existing.union(*members.values()))
-
-    def resolved(ref, name):
-        if ref == "table":
-            return _found(name in existing, [name], reviews)
-        if ref == "dataset":
-            return _found(name in members, sorted(members.get(name, ())), reviews)
-        return UNKNOWABLE
-
-    return [resolved(ref, name) for ref, name in links]
-
-
-def _found(exists: bool, names: Sequence[str], reviews: dict) -> Resolution:
-    """One resolution: whether the named target is there, and what it means.
-
-    The empty list when it is not is deliberate and is not the same as the
-    null `UNKNOWABLE` carries -- here the server looked and the target is gone,
-    there it never had anywhere to look.
-    """
-    return Resolution(
-        resolvable=exists,
-        tables=[_table_entry(name, reviews) for name in names] if exists else [],
+    found = {
+        ref: RESOLVERS[ref]({name for kind, name in targets if kind == ref})
+        for ref in RESOLVERS
+    }
+    reviews = _review_states(
+        {
+            table
+            for kind in found.values()
+            for members in kind.values()
+            for table in members
+        }
     )
 
+    def resolved(ref, name):
+        if ref not in found:
+            return UNKNOWABLE
+        members = found[ref].get(name)
+        if members is None:
+            # Looked for and not there -- which is not the same answer as
+            # UNKNOWABLE's null, where there was nowhere to look.
+            return Resolution(resolvable=False, tables=[])
+        return Resolution(
+            resolvable=True,
+            tables=[_table_entry(member, reviews) for member in sorted(members)],
+        )
 
-def _existing_tables(names: Iterable[str]) -> set:
-    names = set(names)
+    return [resolved(ref, name) for ref, name in targets]
+
+
+def _tables_by_name(names: set) -> dict:
+    """The named tables that exist, each standing for itself.
+
+    A table reference resolves to one table -- the citation *is* the table --
+    which is why this answers in the same shape a catalogue entry does rather
+    than in one of its own.
+    """
     if not names:
-        return set()
-    return set(Table.objects.filter(name__in=names).values_list("name", flat=True))
+        return {}
+    return {
+        name: {name}
+        for name in Table.objects.filter(name__in=names).values_list("name", flat=True)
+    }
 
 
-def _members_by_dataset(names: Iterable[str]) -> dict:
+def _members_by_dataset(names: set) -> dict:
     """Which member tables each named catalogue entry has, as it stands.
 
     Existence and membership in one query: the left join answers both, and a
     catalogue entry with no members comes back as itself with a null member,
     which is how "it exists and is empty" is told apart from "it is gone".
     """
-    names = set(names)
     if not names:
         return {}
     members = {}
@@ -147,7 +159,19 @@ def _members_by_dataset(names: Iterable[str]) -> dict:
     return members
 
 
-def _review_states(names: Iterable[str]) -> dict:
+# How each kind of target is looked up, keyed by the same names the link
+# vocabulary uses. Written as a table rather than as branches inside `resolve`
+# so a third kind of target is an entry here and a route there, and
+# `ResolverCoverageTest` fails until somebody adds it -- which is the point:
+# a new target kind that silently resolved to nothing would look like data
+# that had been deleted.
+RESOLVERS = {
+    "table": _tables_by_name,
+    "dataset": _members_by_dataset,
+}
+
+
+def _review_states(names: set) -> dict:
     """The review state of each of these tables, for the ones that have one.
 
     A table with several reviews counts as reviewed if any of them finished. A
@@ -155,7 +179,6 @@ def _review_states(names: Iterable[str]) -> dict:
     question a reader is asking -- has this data been through review -- is
     answered `finished` from then on.
     """
-    names = set(names)
     if not names:
         return {}
     states = {}

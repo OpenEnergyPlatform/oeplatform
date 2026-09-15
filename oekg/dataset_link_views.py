@@ -46,6 +46,7 @@ from oekg.dataset_links import (
     dataset_link_payload,
     dataset_link_uid,
     find_dataset_link,
+    reference_target,
     stored_iri,
     target_iri,
 )
@@ -89,7 +90,8 @@ class DatasetLinkViewMixin(SubResourceViewMixin):
         state = self.state_of(write)
         scenario = find_part(state, write.uid, SCENARIO, sid)
         direction, node = find_dataset_link(state, scenario, did)
-        (body,) = _resolved([_link_body(state, node, direction, write.uid, sid)])
+        body = _link_body(state, node, direction, write.uid, sid)
+        _resolve_into(state, [(node, body)])
         return self.represented(body, write, code)
 
 
@@ -204,27 +206,35 @@ def _no_such_link(did: str) -> Response:
 
 
 def _link_bodies(graph: Graph, scenario, uid: str, sid: str) -> list:
-    bodies = [
-        _link_body(graph, node, direction, uid, sid)
+    pairs = [
+        (node, _link_body(graph, node, direction, uid, sid))
         for direction, node in dataset_link_nodes(graph, scenario)
     ]
-    bodies.sort(key=lambda body: (body["type"], body["name"]))
-    return _resolved(bodies)
+    pairs.sort(key=lambda pair: (pair[1]["type"], pair[1]["name"]))
+    _resolve_into(graph, pairs)
+    return [body for _, body in pairs]
 
 
-def _resolved(bodies: list) -> list:
+def _resolve_into(graph: Graph, pairs: list) -> None:
     """Say, for every one of these links, what it points at right now.
 
     Done to the whole list at once and never to one link at a time: resolution
     costs a fixed few relational queries for any number of links, and a
     per-link version of this would put a query per citation on a public
     endpoint. A single link is simply a list of one.
+
+    What is looked up comes from each link's stored **URL**, not from the
+    `name` in its body. The two agree for every link this API wrote, because
+    the URL was built from the name -- but the existing route takes them as two
+    separate values from a client, so a legacy link can carry a real table's
+    URL beside a human-readable title. Resolving by that title would report a
+    table that is plainly there as deleted.
     """
-    for body, resolution in zip(
-        bodies, resolve([(body["ref"], body["name"]) for body in bodies])
-    ):
+    resolutions = resolve(
+        [reference_target(stored_iri(graph, node) or "") for node, _ in pairs]
+    )
+    for (_, body), resolution in zip(pairs, resolutions):
         body[READ_ONLY_CONTAINER].update(resolution.as_meta())
-    return bodies
 
 
 def _link_body(graph: Graph, node, direction, uid: str, sid: str) -> dict:

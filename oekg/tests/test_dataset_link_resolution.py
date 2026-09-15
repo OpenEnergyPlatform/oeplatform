@@ -24,11 +24,23 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 from django.db import connection
+from django.test import SimpleTestCase
 from django.test.utils import CaptureQueriesContext
+from rdflib import RDF, RDFS, Graph, Literal, URIRef
 
 from dataedit.models import Dataset, PeerReview, Table
 from login.models import myuser
-from oekg.resolution import REVIEW_FINISHED, REVIEW_IN_PROGRESS
+from oekg.bundles import SCENARIO, find_part
+from oekg.dataset_links import (
+    DIRECTION_BY_NAME,
+    TARGETS,
+    reference_target,
+    target_path,
+)
+from oekg.fields import HAS_IRI, HAS_UUID
+from oekg.graph_store import GraphStore
+from oekg.reads import read_bundle
+from oekg.resolution import RESOLVERS, REVIEW_FINISHED, REVIEW_IN_PROGRESS
 from oekg.serializers import READ_ONLY_CONTAINER
 from oekg.tests.bundle_fixtures import VALID_PAYLOAD
 from oekg.tests.test_dataset_link_api import (
@@ -59,6 +71,13 @@ class ResolutionTestCase(DatasetLinkTestCase):
                 ),
             )
         return self._reviewers
+
+    def a_dataset_with(self, *table_names):
+        """A catalogue entry grouping these tables, each of them new."""
+        dataset = Dataset.objects.create(name="my_dataset")
+        for name in table_names:
+            dataset.tables.add(Table.objects.create(name=name))
+        return dataset
 
 
 class TableReferenceResolutionTest(ResolutionTestCase):
@@ -138,12 +157,6 @@ class TableReferenceResolutionTest(ResolutionTestCase):
 class DatasetReferenceResolutionTest(ResolutionTestCase):
     """`ref: dataset` is the *current* reference, and the read says what it means
     today rather than what it meant when the bundle was written."""
-
-    def a_dataset_with(self, *table_names):
-        dataset = Dataset.objects.create(name="my_dataset")
-        for name in table_names:
-            dataset.tables.add(Table.objects.create(name=name))
-        return dataset
 
     def test_a_link_to_an_existing_catalogue_entry_resolves(self):
         self.a_dataset_with("t_one")
@@ -288,9 +301,7 @@ class PeerReviewIndicatorTest(ResolutionTestCase):
     def test_a_catalogue_entrys_members_carry_their_own_review_state(self):
         # The review process is per table, so there is no such thing as a
         # reviewed catalogue entry -- each member answers for itself.
-        dataset = Dataset.objects.create(name="my_dataset")
-        for name in ("t_one", "t_two"):
-            dataset.tables.add(Table.objects.create(name=name))
+        self.a_dataset_with("t_one", "t_two")
         self.review("t_two", is_finished=True)
 
         uid, sid, did, _ = self.with_one_link(DATASET_LINK)
@@ -373,3 +384,104 @@ class UnroutableLinkResolutionTest(ExternalLinkMixin, ResolutionTestCase):
         read = self.client.get(self.link_url(uid, sid, "legacy")).data
 
         self.assertIsNone(read[READ_ONLY_CONTAINER]["tables"])
+
+
+class ResolvedByUrlNotByLabelTest(ResolutionTestCase):
+    """A legacy link whose label is a title and whose URL is the pointer.
+
+    The existing `manage-datasets/` route takes the label and the URL as two
+    separate client-supplied values (`oekg/sparqlModels.py`), so they need not
+    agree. Resolution therefore reads the name out of the URL: resolving by
+    label would answer `false` for a table that is plainly there, which is the
+    fabrication this feature exists to avoid.
+    """
+
+    def with_a_titled_link(self, table):
+        uid, sid, etag = self.with_one_scenario()
+        scenario = find_part(
+            read_bundle(GraphStore.from_settings(), uid), uid, SCENARIO, sid
+        )
+        node = URIRef("https://openenergyplatform.org/ontology/oekg/dataset/titled")
+        triples = Graph()
+        triples.add((scenario, DIRECTION_BY_NAME["input"].predicate, node))
+        triples.add((node, RDF.type, DIRECTION_BY_NAME["input"].node_class))
+        triples.add((node, RDFS.label, Literal("Emobility, 2020 edition")))
+        triples.add(
+            (
+                node,
+                HAS_IRI,
+                Literal("https://openenergyplatform.org" + target_path("table", table)),
+            )
+        )
+        triples.add((node, HAS_UUID, Literal("titled")))
+        self.store.insert(triples)
+        return uid, sid
+
+    def test_it_resolves_by_the_url_even_though_the_label_differs(self):
+        Table.objects.create(name="abbb_emob")
+
+        uid, sid = self.with_a_titled_link("abbb_emob")
+
+        meta = self.meta_of(uid, sid, "titled")
+        self.assertIs(meta["resolvable"], True)
+        self.assertEqual([row["name"] for row in meta["tables"]], ["abbb_emob"])
+
+    def test_the_payload_still_reports_the_label_it_stores(self):
+        # The label is what a write accepts, so it stays the `name`. What the
+        # citation resolves to is read-only and lives beside it.
+        Table.objects.create(name="abbb_emob")
+
+        uid, sid = self.with_a_titled_link("abbb_emob")
+
+        self.assertEqual(
+            self.client.get(self.link_url(uid, sid, "titled")).data["name"],
+            "Emobility, 2020 edition",
+        )
+
+
+class ResolverCoverageTest(SimpleTestCase):
+    """Every kind of target a link may name has a way to look it up.
+
+    This fails the moment a third kind joins `TARGETS`, which is the point: a
+    kind with no resolver would answer `null` for every link naming it, and
+    "this server cannot say" is reserved for addresses that are not pages on
+    this platform at all.
+    """
+
+    def test_every_target_kind_can_be_resolved(self):
+        self.assertEqual(set(RESOLVERS), {target.name for target in TARGETS})
+
+
+class UnroutableTargetTest(SimpleTestCase):
+    """What counts as naming a target, read off the router rather than typed.
+
+    Built with `target_path`, the same helper the write side uses, so a route
+    change moves the test with the code instead of leaving it asserting an
+    address the platform no longer serves.
+    """
+
+    HOST = "https://openenergyplatform.org"
+
+    def test_a_table_page_names_its_table(self):
+        self.assertEqual(
+            reference_target(self.HOST + target_path("table", "abc")), ("table", "abc")
+        )
+
+    def test_a_dataset_page_names_its_catalogue_entry(self):
+        self.assertEqual(
+            reference_target(self.HOST + target_path("dataset", "abc")),
+            ("dataset", "abc"),
+        )
+
+    def test_a_page_about_a_table_is_not_a_link_to_the_table(self):
+        # Reaching past a target's own page: the permissions page is a page
+        # about a table, not the table, so it names nothing to resolve.
+        self.assertEqual(
+            reference_target(self.HOST + target_path("table", "abc") + "/permissions"),
+            (None, None),
+        )
+
+    def test_an_address_elsewhere_names_nothing(self):
+        self.assertEqual(
+            reference_target("https://databus.example.org/x/y"), (None, None)
+        )

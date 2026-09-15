@@ -183,7 +183,10 @@ SPDX-License-Identifier: CC0-1.0
   reproducible one. A dead link is never removed and never blocks its target's
   deletion, so nobody's citation can hold somebody else's data hostage. A link
   pointing at an address this platform has no route for - the graph holds
-  databus URLs - reports nothing rather than reporting "deleted"
+  databus URLs - reports nothing rather than reporting "deleted". What gets
+  looked up is taken from the link's stored address and never from its label,
+  because the older `manage-datasets/` route takes those as two separate values
+  and a link can carry a real table's address beside a human-readable title
   [(#2458)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2458)
 
 - A scenario factsheet, a study report or a dataset link can now be removed
