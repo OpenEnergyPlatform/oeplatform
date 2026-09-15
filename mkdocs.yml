@@ -111,6 +111,7 @@ nav:
           - oeplatform Modules: oeplatform-code/architecture/modules.md
       - Web-API's:
           - oeplatform-code/web-api/index.md
+          - API Reference: oeplatform-code/web-api/api-reference.md
           - OEDB REST-API:
               - oeplatform-code/web-api/oedb-rest-api/index.md
               - oeplatform-code/web-api/oedb-rest-api/resource-data-size.md
