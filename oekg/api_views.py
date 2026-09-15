@@ -50,6 +50,7 @@ import logging
 
 from django.db import DatabaseError
 from django.urls import reverse
+from drf_spectacular.utils import extend_schema
 from rdflib import Graph
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -117,6 +118,10 @@ class ScenarioBundleCollectionAPIView(OekgAPIView):
             return [AllowAny()]
         return [IsAuthenticated()]
 
+    # Named, because a collection read and a detail read would otherwise both
+    # generate `scenario_bundles_retrieve` and the description would resolve
+    # the collision with a numeral -- a name no reader could map back.
+    @extend_schema(operation_id="scenario_bundles_list")
     def get(self, request):
         """A page of summaries: identifier, acronym, label, version and counts.
 

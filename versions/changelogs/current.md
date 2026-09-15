@@ -112,9 +112,7 @@ SPDX-License-Identifier: CC0-1.0
   version that is no longer current it is refused (`412`), and if the bundle
   moves while the request is being prepared nothing is written and the answer is
   `409`. The version check is part of the write itself, so two clients cannot
-  both succeed against the same version. Note that acronym uniqueness is
-  enforced when a bundle is created but not when one is renamed, so a patch can
-  still give two bundles the same acronym
+  both succeed against the same version
   [(#2438)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2438)
 
 - Creating a bundle now binds the acronym uniqueness check inside the write, so
@@ -168,6 +166,44 @@ SPDX-License-Identifier: CC0-1.0
   same direction. This supersedes the older `manage-datasets/` route, which
   writes relations the canonical shape does not validate and no identifier at
   all [(#2452)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2452)
+
+- Scenario bundles can now be listed and searched through the REST API:
+  `GET /api/v0/scenario-bundles/`. An entry says what it takes to choose a
+  bundle - its acronym, its label, its identifier, its version and how many
+  scenarios and study reports it holds - and not the bundles themselves, so the
+  listing stays the same size as the corpus grows. `?acronym=` finds one bundle
+  by the name it is known under, which is how a script that keeps nothing
+  between runs finds the bundle it wrote last time, and the answer carries the
+  version its next write has to send. The filters the scenario-bundle search
+  offers carry over - organisation, funder, author, study descriptor, scenario
+  year and publication year - named the way the API names those fields
+  elsewhere, and either end of a year range now works on its own. The listing is
+  paginated and there is no way to ask for all of it at once
+
+- A read of a scenario bundle, a scenario, a study report or a dataset link can
+  ask for the ontology terms it picks to be resolved to their names:
+  `?expand=labels`. The names come from the small label subset the platform
+  already keeps beside the shape, never from the full ontology, and they arrive
+  beside the payload rather than in it, so what you read can still be sent
+  straight back. A term with no name in the subset is reported as such rather
+  than left out. An `expand` value no endpoint offers is refused rather than
+  ignored, so a misspelling is not silently answered with an unresolved
+  representation
+
+- A scenario bundle can now be fetched as RDF: `Accept: text/turtle` or
+  `application/ld+json` on its own URL returns the bundle's subgraph as the
+  graph store holds it, carrying the same version tag the JSON read does. Writes
+  stay JSON - that is where the payload is validated - so a write that asks for
+  RDF back is refused rather than answered in a form it could not have been sent
+  in
+
+- Renaming a scenario bundle onto an acronym another bundle already holds is now
+  refused. Uniqueness was enforced when a bundle was created and not afterwards,
+  which left a rename able to make a lookup by acronym ambiguous - and a lookup
+  by acronym is how a pipeline finds its own bundle. The check is part of the
+  write itself, so two simultaneous renames cannot both take the same acronym,
+  and a bundle never counts against itself, so sending back the acronym you just
+  read is not refused by its own value
 
 - A scenario factsheet, a study report or a dataset link can now be removed
   through the REST API: `DELETE` on its own URL, carrying the bundle's version
