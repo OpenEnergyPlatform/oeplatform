@@ -182,6 +182,7 @@ SPDX-License-Identifier: CC0-1.0
   server checks whether something outside this bundle still points at it; if so
   the node is kept and only unlinked, and the response says which. Every delete
   is recorded in the bundle's history with the triples it removed
+  [(#2456)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2456)
 
 - Changing a scenario bundle through the REST API is now judged by what the
   change adds, not by whether the whole bundle is perfect. Bundles written
