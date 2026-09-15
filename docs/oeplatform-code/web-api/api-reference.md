@@ -18,11 +18,15 @@ file has fallen behind, naming the command that brings it back in step.
 !!! Info "Two descriptions of the OEDB endpoints"
 
     The [OEDB REST-API](./oedb-rest-api/index.md) page embeds an older,
-    hand-written description of the table and row endpoints. It is kept for now
-    because it carries prose that the generated document does not: the generated
-    one reports those endpoints from their routes, without request or response
-    bodies, until they are annotated. Where the two disagree about what is
-    routed, this page is the current one.
+    hand-written description of the table and row endpoints, and it is kept for
+    now: the two are complementary rather than one superseding the other. This
+    page is generated, so it is complete about *which* endpoints exist; but the
+    OEDB views are not yet annotated, so it reports them without request or
+    response bodies, and the handful routed by regular expression rather than by
+    path appear here with that expression still in the address. The hand-written
+    page carries the bodies and the readable addresses, and can be out of date
+    about what is routed. Read them together until the OEDB endpoints are
+    annotated.
 
 !!! Info "OEP-API Token"
 

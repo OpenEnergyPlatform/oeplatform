@@ -26,7 +26,7 @@ inside the suite.
 
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
-"""  # noqa: 501
+"""  # noqa: E501
 
 import difflib
 import re
@@ -109,6 +109,21 @@ class OpenAPISchemaTest(SimpleTestCase):
                 return
             cls.generated = fresh.read_text(encoding="utf-8")
 
+    def _require_a_generated_description(self):
+        """Skip a check that has nothing to work with.
+
+        A failed generation is reported once, by the check below whose subject
+        it is. The two that read what it produced skip instead of failing, so
+        one broken annotation reports as one failure rather than three -- and
+        so that neither of them can report a drift or a missing endpoint that
+        was never actually measured.
+        """
+        if self.generation_error is not None:
+            self.skipTest(
+                "the OpenAPI description could not be generated -- see "
+                "test_the_generated_description_is_a_valid_openapi_document"
+            )
+
     def test_the_generated_description_is_a_valid_openapi_document(self):
         if self.generation_error is not None:
             self.fail(
@@ -118,13 +133,7 @@ class OpenAPISchemaTest(SimpleTestCase):
             )
 
     def test_the_committed_artifact_matches_a_fresh_generation(self):
-        if self.generation_error is not None:
-            self.fail(
-                "The OpenAPI description could not be generated, so it could "
-                "not be compared against the committed artifact. Fix that "
-                "first -- see "
-                "test_the_generated_description_is_a_valid_openapi_document."
-            )
+        self._require_a_generated_description()
         self.assertTrue(
             ARTIFACT.exists(),
             f"{ARTIFACT} is missing. Write it with:\n    {REGENERATE}",
@@ -154,8 +163,7 @@ class OpenAPISchemaTest(SimpleTestCase):
         )
 
     def test_every_scenario_bundle_endpoint_reaches_the_document(self):
-        if self.generation_error is not None:
-            self.skipTest("the OpenAPI description could not be generated")
+        self._require_a_generated_description()
         described = set(yaml.safe_load(self.generated)["paths"])
         routed = {
             _openapi_path(route)
