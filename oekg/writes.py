@@ -37,19 +37,22 @@ from rest_framework import status
 from rest_framework.response import Response
 
 from oekg.api_support import Refused, bundle_exists
-from oekg.bundles import BUNDLE_CLASS, bundle_subgraph
+from oekg.bundles import BUNDLE_CLASS, bundle_iri, bundle_subgraph
 from oekg.fields import NODE
 from oekg.graph_store import GraphStore
-from oekg.history import record_write
-from oekg.permissions import may_write_bundle
+from oekg.history import record_bundle_deletion, record_write
+from oekg.permissions import forget_ownership, may_write_bundle
 from oekg.preconditions import precondition_refusal
 from oekg.reads import labels_of, read_bundle
+from oekg.removal import Removal
 from oekg.validation import introduced_violations
 from oekg.versioning import (
     BundleVersion,
     guarded_operation,
     mint_write_token,
     read_version,
+    version_guard,
+    version_node_triples,
     write_applied,
 )
 
@@ -65,6 +68,7 @@ class BundleWrite:
     actor: object = None
     post_state: Optional[Graph] = field(default=None)
     history_recorded: bool = True
+    ownership_forgotten: bool = True
 
     def require_write(self, request) -> None:
         """Refuse unless this caller may write, and said which version.
@@ -191,6 +195,73 @@ class BundleWrite:
             added=added,
             resource_type=resource_type,
             resource_uuid=resource_uuid,
+        )
+
+    def destroy(self, removal: Removal, acronym: str) -> None:
+        """Delete this bundle, its bookkeeping and its records of ownership.
+
+        Not `apply`, and every difference is a consequence of there being no
+        bundle afterwards:
+
+        - **Nothing to validate.** The shape judges a bundle; an absent one is
+          not a worse bundle, it is no bundle.
+        - **No version bump.** The version node goes with the bundle it counts.
+          Leaving it is what the browser's delete does (issue #2440), and it
+          leaves a node asserting that a bundle is at version 4 when there is
+          no bundle -- which the next write would then guard against and match.
+        - **The read-back asks whether the bundle is gone**, not whether a
+          token landed. A delete's own signal is absence, and absence needs no
+          token to be unambiguous: nothing else in this API can make a bundle
+          stop existing, so finding it still there can only mean the guard did
+          not hold.
+        - **What follows the commit is different too.** The ownership rows go,
+          and the history records an event rather than a diff.
+
+        Raises ``Refused`` with a `409` if the guard did not hold -- either the
+        bundle moved since it was read, or something outside it started citing
+        a node this plan was about to delete. The advice is the same for both:
+        read it again and retry.
+        """
+        if self.post_state is not None:
+            raise RuntimeError(
+                "This bundle has already been written. A delete after a write "
+                "would guard on a version that has moved, and would be "
+                "refused for a reason nobody could act on."
+            )
+
+        removed = Graph()
+        removed += removal.removed
+        removed += version_node_triples(self.uid, self.version)
+        guard = version_guard(self.uid, self.version)
+        if removal.guard:
+            guard = f"{guard} {removal.guard}"
+
+        self.store.update(self.store.guarded_modification(guard, delete=removed))
+        if self.store.ask(
+            "ASK { %s a %s }" % (bundle_iri(self.uid).n3(), BUNDLE_CLASS.n3())
+        ):
+            raise Refused(
+                Response(
+                    {
+                        "detail": (
+                            "The bundle changed while this request was being "
+                            "prepared, so nothing was deleted. Read it again, "
+                            "check it is still the one you meant, and retry."
+                        )
+                    },
+                    status=status.HTTP_409_CONFLICT,
+                )
+            )
+
+        # The graph has committed. Nothing from here may turn a successful
+        # delete into an error; what is lost is named beside the success it
+        # qualifies, never instead of it.
+        self.ownership_forgotten = forget_ownership(self.uid)
+        self.history_recorded = record_bundle_deletion(
+            bundle_uid=self.uid,
+            acronym=acronym,
+            actor=self.actor,
+            version_before=self.version.number,
         )
 
 

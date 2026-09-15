@@ -1,4 +1,13 @@
-"""The version a mutating request says it is editing.
+"""What a mutating request has to carry before it is allowed to proceed.
+
+Two guards live here, and they defend different accidents. The version catches
+*somebody changed this since you looked*. The retyped acronym catches *right
+verb, wrong identifier* -- a pipeline looping over a list and reaching the
+wrong entry -- which no version can catch, because the version it names is the
+correct current version of the wrong bundle.
+
+Only the whole-bundle delete asks for the second one. Ceremony is proportional
+to blast radius: everything else in this API can be written again.
 
 `If-Match` is **required** on every mutating call and there is no opt-out. The
 alternative — optional, with same-field writes falling back to last-write-wins
@@ -25,6 +34,8 @@ from rest_framework import status
 from rest_framework.response import Response
 
 from oekg.versioning import BundleVersion
+
+CONFIRM = "confirm"
 
 
 def precondition_refusal(request, version: BundleVersion) -> Optional[Response]:
@@ -78,3 +89,62 @@ def versions_named(request):
             entry = entry[2:].strip()
         named.append(entry.strip('"'))
     return named
+
+
+def confirmation_refusal(request, acronym: str) -> Optional[Response]:
+    """Why this delete may not proceed on its confirmation, if it may not.
+
+    The acronym is retyped as a query parameter and compared **exactly** with
+    the one stored. Exactly, because the whole value of the check is that it
+    cannot be satisfied by a value the caller already had in hand for another
+    bundle -- normalising it away would let `NEMO-2030` confirm a delete of
+    `nemo 2030`, which is the confusion the check exists to catch.
+
+    Both refusals are `400` rather than `412`: nothing here is a precondition
+    on the bundle's state. A missing or wrong token is a badly formed request,
+    and the bundle is exactly as the caller last read it.
+    """
+    if acronym is None:
+        # Not reachable for a bundle this API created -- the shape requires an
+        # acronym -- but the browser wrote most of the bundles in the graph and
+        # the API judges a write by what it introduces, not by what it found.
+        # Refusing here rather than inventing a substitute token keeps the
+        # check meaning what it says; the way out is to give the bundle an
+        # acronym with a `PATCH`, which is allowed precisely because the
+        # missing one is a violation this caller did not introduce.
+        return Response(
+            {
+                "detail": (
+                    "This scenario bundle has no acronym, so there is nothing "
+                    "to confirm a delete with. Give it one with a PATCH first, "
+                    "then delete it."
+                )
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    given = request.query_params.get(CONFIRM)
+    if given is None:
+        return Response(
+            {
+                "detail": (
+                    "Deleting a whole scenario bundle is irreversible, so it "
+                    f"has to be confirmed: repeat the bundle's acronym as "
+                    f"?{CONFIRM}=<acronym>. Read the bundle first -- the "
+                    "acronym is in the response, and so is the version this "
+                    "delete also needs."
+                )
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    if given != acronym:
+        return Response(
+            {
+                "detail": (
+                    f"The confirmation {given!r} is not this bundle's acronym, "
+                    "so nothing was deleted. Check that this is the bundle you "
+                    "meant to delete before retrying."
+                )
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    return None
