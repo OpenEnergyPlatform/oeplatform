@@ -382,16 +382,16 @@ LEGACY_TABLE_PATTERN = "/api/v0/schema/[\\w\\d_]/tables/"
 
 LEGACY_TABLE_PATH = "/api/v0/schema/{schema}/tables/"
 
-#: The same uncaptured group reaches the operation ids, which are generated
+#: The same uncaptured group reaches the front of the operation ids, which are generated
 #: from the path before any hook runs: `schema_[\w\d_]_tables_retrieve`. An
 #: id is what a generated client turns into a method name, so this one is not
 #: cosmetic either.
-LEGACY_OPERATION_ID = "schema_[\\w\\d_]_"
+LEGACY_OPERATION_ID_PREFIX = "schema_[\\w\\d_]_"
 
 #: What it is renamed to. Still distinct from the canonical `tables_*` ids,
 #: because these are a second spelling of the same operations rather than the
 #: same operation described twice.
-CANONICAL_LEGACY_OPERATION_ID = "schema_"
+CANONICAL_OPERATION_ID_PREFIX = "schema_"
 
 LEGACY_SCHEMA_PARAMETER = {
     "in": "path",
@@ -450,9 +450,10 @@ def name_the_legacy_table_routes(result, generator, request, public):
                 continue
             operation["deprecated"] = True
             operation["tags"] = [TABLES_LEGACY]
-            operation["operationId"] = operation.get("operationId", "").replace(
-                LEGACY_OPERATION_ID, CANONICAL_LEGACY_OPERATION_ID, 1
-            )
+            if "operationId" in operation:
+                operation["operationId"] = operation["operationId"].replace(
+                    LEGACY_OPERATION_ID_PREFIX, CANONICAL_OPERATION_ID_PREFIX, 1
+                )
             operation["parameters"] = [
                 LEGACY_SCHEMA_PARAMETER,
                 *operation.get("parameters", []),

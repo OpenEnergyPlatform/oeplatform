@@ -88,6 +88,26 @@ def _routes(patterns, prefix=""):
 LEGACY_TABLE_PATH = "/api/v0/schema/{schema}/tables/"
 
 
+def committed_document():
+    """The artifact, parsed. The three guards that read it share this one."""
+    return yaml.safe_load(ARTIFACT.read_text(encoding="utf-8"))
+
+
+def operations(document, prefix=""):
+    """Every operation in the document, as ``path, method, operation``.
+
+    A path item holds more than operations -- shared ``parameters`` sit beside
+    them -- so an entry is one when it declares the responses every operation
+    has to declare.
+    """
+    for path, methods in document["paths"].items():
+        if not path.startswith(prefix):
+            continue
+        for method, operation in methods.items():
+            if isinstance(operation, dict) and "responses" in operation:
+                yield path, method, operation
+
+
 class OpenAPISchemaTest(SimpleTestCase):
     """The committed description, checked against a fresh generation.
 

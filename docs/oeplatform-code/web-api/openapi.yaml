@@ -9978,9 +9978,11 @@ components:
 tags:
 - name: Tables
   description: 'Create a table, alter its columns and constraints, write and read
-    its rows, publish it to a topic. **Table names are global**: a table is addressed
-    by name alone and no two tables share one, whichever topic they are published
-    under.'
+    its rows, publish it to a topic, and list the tables a topic holds. **Table names
+    are global**: a table is addressed by name alone and no two tables share one,
+    whichever topic they are published under. One listing here is addressed under
+    `datasets/` and belongs to this group rather than to **Datasets**, because what
+    it returns is tables: `datasets/list_all/scenario/`.'
 - name: 'Tables: metadata'
   description: The OEMetadata document a table carries. Writing it never changes a
     row, and a table created without one is given a minimal document generated from
@@ -10015,8 +10017,8 @@ tags:
     Not the OEKG scenario bundles: the two share the word *factsheet* and a URL prefix
     in the web interface, and nothing else.'
 - name: API description
-  description: This document, served by the platform itself. It is what the reference
-    page renders and what a generated client is built from.
+  description: 'The machine-readable description of `api/v0`: one endpoint, and the
+    source this page is rendered from.'
 - name: Scenario Bundles (legacy)
   description: '**Superseded by Scenario Bundles.** One RPC route that attaches datasets
     to a scenario, kept because clients call it. It writes predicates the canonical

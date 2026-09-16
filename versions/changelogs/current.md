@@ -382,10 +382,10 @@ SPDX-License-Identifier: CC0-1.0
   `scenario-bundle/scenario/manage-datasets/` route, and the schema-qualified
   table addresses. Before this the group came from the path, so the single
   legacy route and the whole REST API replacing it rendered as adjacent sections
-  one letter apart with nothing distinguishing them, and the same eighteen table
-  endpoints were split across two sections by which spelling of their address
-  was used. Superseded sections are read last, and the names are stable enough
-  for a documentation page to link into a section and stay linked. Operation
+  one letter apart with nothing distinguishing them, and the table endpoints
+  were split across two sections by which spelling of their address was used.
+  Superseded sections are read last, and the names are stable enough for a
+  documentation page to link into a section and stay linked. Operation
   identifiers no longer carry a fragment of regular expression either -- a
   generated client would have held a method named after a character class
   [(#2459)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2459)

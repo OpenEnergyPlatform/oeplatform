@@ -57,10 +57,13 @@ TAGS = [
     {
         "name": TABLES,
         "description": (
-            "Create a table, alter its columns and constraints, write and read "
-            "its rows, publish it to a topic. **Table names are global**: a "
-            "table is addressed by name alone and no two tables share one, "
-            "whichever topic they are published under."
+            "Create a table, alter its columns and constraints, write and "
+            "read its rows, publish it to a topic, and list the tables a topic "
+            "holds. **Table names are global**: a table is addressed by name "
+            "alone and no two tables share one, whichever topic they are "
+            "published under. One listing here is addressed under `datasets/` "
+            "and belongs to this group rather than to **Datasets**, because "
+            "what it returns is tables: `datasets/list_all/scenario/`."
         ),
     },
     {
@@ -138,8 +141,8 @@ TAGS = [
     {
         "name": API_DESCRIPTION,
         "description": (
-            "This document, served by the platform itself. It is what the "
-            "reference page renders and what a generated client is built from."
+            "The machine-readable description of `api/v0`: one endpoint, and "
+            "the source this page is rendered from."
         ),
     },
     {

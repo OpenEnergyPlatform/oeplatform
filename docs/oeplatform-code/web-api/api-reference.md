@@ -26,8 +26,11 @@ file has fallen behind, naming the command that brings it back in step.
 
     The endpoints are grouped into named sections -- *Tables*, *Datasets*,
     *Scenario Bundles*, the `advanced/` interface, and the superseded surfaces
-    last -- and each section has an address of its own, so a page can point at
-    one and land there: [Scenario Bundles](#/Scenario%20Bundles).
+    last -- and each section has an address of its own, so another page can
+    point at one and open the reference there. The *Scenario Bundles* section
+    is `web-api/api-reference/#/Scenario%20Bundles`; a section whose name
+    carries spaces spells them `%20`, which is the form the page itself writes
+    into the address bar when you open a section.
 
     The names are chosen rather than taken from the addresses, which is what
     makes those links survive a route moving, and what lets a section say that

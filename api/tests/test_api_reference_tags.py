@@ -19,12 +19,13 @@ SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: E501
 
+import ast
 import re
 from pathlib import Path
 
-import yaml
 from django.test import SimpleTestCase
 
+import api.api_tags
 from api.api_tags import (
     SCENARIO_BUNDLES,
     SCENARIO_BUNDLES_LEGACY,
@@ -32,7 +33,13 @@ from api.api_tags import (
     TABLES_LEGACY,
     TAGS,
 )
-from api.tests.test_openapi_schema import ARTIFACT, LEGACY_TABLE_PATH, REGENERATE
+from api.tests.test_openapi_schema import (
+    ARTIFACT,
+    LEGACY_TABLE_PATH,
+    REGENERATE,
+    committed_document,
+    operations,
+)
 
 #: The superseded groups, each with the group that replaced it. A description
 #: here has to say *superseded* and name that replacement, because the document
@@ -52,25 +59,14 @@ STABLE_ANCHOR = re.compile(r"^[A-Za-z0-9 :()\-]+$")
 REFERENCE_PAGE = Path(ARTIFACT.parent, "api-reference.md")
 
 
-def _document():
-    return yaml.safe_load(ARTIFACT.read_text(encoding="utf-8"))
-
-
-def _operations(document):
-    for path, methods in document["paths"].items():
-        for method, operation in methods.items():
-            if isinstance(operation, dict) and "responses" in operation:
-                yield path, method, operation
-
-
 class TagSetTest(SimpleTestCase):
     """The groups a reader navigates by, and the order they are read in."""
 
     def setUp(self):
-        self.document = _document()
+        self.document = committed_document()
         self.declared = self.document.get("tags", [])
         self.names = [tag["name"] for tag in self.declared]
-        self.operations = list(_operations(self.document))
+        self.operations = list(operations(self.document))
         self.assertTrue(self.operations, "no operations described")
 
     def advice(self, complaint):
@@ -160,13 +156,14 @@ class TagSetTest(SimpleTestCase):
     def test_the_reference_page_links_into_a_group_that_exists(self):
         """The page beside the document cites a section by name.
 
-        Swagger builds a section's anchor from its name, so the citation is
-        also the demonstration that one can be linked to. If a group is
-        renamed, this is what notices that the page still points at the old
-        name.
+        In the form another page has to use: the reference is rendered inside
+        a page, so a section is reached by opening that page at the section's
+        address rather than by an anchor of the surrounding document. The
+        citation is both the worked example the client page copies and the
+        thing that notices when a section is renamed under it.
         """
         page = REFERENCE_PAGE.read_text(encoding="utf-8")
-        cited = re.findall(r"\]\(#/([^)]+)\)", page)
+        cited = re.findall(r"#/([A-Za-z0-9()\-]+(?:%20[A-Za-z0-9()\-]+)*)", page)
         self.assertTrue(cited, f"{REFERENCE_PAGE.name} links into no section")
         for anchor in cited:
             self.assertIn(
@@ -186,6 +183,31 @@ class TagSetTest(SimpleTestCase):
             )
 
 
+class TagModuleTest(SimpleTestCase):
+    """The one property of ``api.api_tags`` that something else depends on.
+
+    ``oeplatform.settings`` reads the list from it, which happens before
+    Django's app registry exists. A module that imports nothing survives that;
+    one that imports anything touching Django does not, and the failure is the
+    whole project refusing to start rather than a test going red. The docstring
+    says so, and a docstring is not a mechanism.
+    """
+
+    def test_the_tag_module_imports_nothing(self):
+        source = Path(api.api_tags.__file__).read_text(encoding="utf-8")
+        imports = [
+            node
+            for node in ast.parse(source).body
+            if isinstance(node, (ast.Import, ast.ImportFrom))
+        ]
+        self.assertEqual(
+            imports,
+            [],
+            "api/api_tags.py has grown an import; oeplatform.settings reads it "
+            "before the app registry exists, so it has to stay inert",
+        )
+
+
 class LegacyTableGroupTest(SimpleTestCase):
     """The older table addresses, which no annotation on a view can reach.
 
@@ -195,10 +217,10 @@ class LegacyTableGroupTest(SimpleTestCase):
     """
 
     def setUp(self):
-        self.document = _document()
+        self.document = committed_document()
         self.legacy = [
             (path, method, operation)
-            for path, method, operation in _operations(self.document)
+            for path, method, operation in operations(self.document)
             if path.startswith(LEGACY_TABLE_PATH)
         ]
         self.assertTrue(self.legacy, "no legacy table addresses in the description")
@@ -213,7 +235,7 @@ class LegacyTableGroupTest(SimpleTestCase):
 
     def test_no_canonical_address_is_in_the_legacy_group(self):
         """The group is the older spelling, not the endpoints themselves."""
-        for path, method, operation in _operations(self.document):
+        for path, method, operation in operations(self.document):
             if path.startswith(LEGACY_TABLE_PATH):
                 continue
             self.assertNotIn(
@@ -231,7 +253,7 @@ class LegacyTableGroupTest(SimpleTestCase):
         paths alone, because the cause is a kind of route rather than these
         routes.
         """
-        for path, method, operation in _operations(self.document):
+        for path, method, operation in operations(self.document):
             operation_id = operation.get("operationId", "")
             self.assertRegex(
                 operation_id,

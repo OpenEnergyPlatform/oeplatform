@@ -30,10 +30,9 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 import re
 
-import yaml
 from django.test import SimpleTestCase
 
-from api.tests.test_openapi_schema import ARTIFACT, REGENERATE
+from api.tests.test_openapi_schema import REGENERATE, committed_document, operations
 
 #: Everything below this prefix is this module's subject. The OEDB endpoints
 #: are held to the checks in ``test_openapi_schema``; the stricter rules here
@@ -84,12 +83,7 @@ RDF_MEDIA_TYPES = ("text/turtle", "application/ld+json")
 
 def _operations():
     """Every scenario-bundle operation in the committed description."""
-    document = yaml.safe_load(ARTIFACT.read_text(encoding="utf-8"))
-    for path, methods in document["paths"].items():
-        if not path.startswith(PREFIX):
-            continue
-        for method, operation in methods.items():
-            yield path, method, operation
+    return operations(committed_document(), PREFIX)
 
 
 def _parameter(operation, name, location):
