@@ -24,7 +24,7 @@ the reference rather than repeating it:
 
 - [Working with the OEDB](./oedb-rest-api/index.md) — how a table is addressed,
   creating one, and uploading a lot of rows at once.
-- [How much data fits](./oedb-rest-api/resource-data-size.md) — the size limits
-  and what to do about them.
+- [Database table sizes](./oedb-rest-api/resource-data-size.md) — asking how
+  much storage a table takes.
 - [Querying the OEKG with SPARQL](./oekg-api/index.md) — the read-only graph
   endpoint, and where writing to the graph happens instead.
