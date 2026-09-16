@@ -375,6 +375,21 @@ SPDX-License-Identifier: CC0-1.0
   fragment of regular expression where the address should be, which no client
   could call
 
+- The reference's sections are **named and ordered** rather than derived from
+  the first segment of each address. Every one of the 107 operations now sits in
+  one of thirteen named groups, each carrying a line saying what it holds, and
+  the two superseded surfaces say so and name what replaced them: the singular
+  `scenario-bundle/scenario/manage-datasets/` route, and the schema-qualified
+  table addresses. Before this the group came from the path, so the single
+  legacy route and the whole REST API replacing it rendered as adjacent sections
+  one letter apart with nothing distinguishing them, and the same eighteen table
+  endpoints were split across two sections by which spelling of their address
+  was used. Superseded sections are read last, and the names are stable enough
+  for a documentation page to link into a section and stay linked. Operation
+  identifiers no longer carry a fragment of regular expression either -- a
+  generated client would have held a method named after a character class
+  [(#2459)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2459)
+
 - The OEKG page is named for what it documents — the read-only SPARQL endpoint —
   and says where writing to the graph happens instead. It had been titled "OEKG
   API" while describing one endpoint of it. The scenario-dataset page no longer
