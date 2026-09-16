@@ -298,6 +298,16 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
+- **Security:** queueing a structural change to a table
+  (`POST /api/v0/tables/<name>/`) required no authentication — an anonymous
+  request was accepted — and the values it carried were written into the
+  database by building the SQL statement around them, so a value containing a
+  quote could change the statement rather than be stored by it. The endpoint now
+  requires write permission on the table, like every other write to it, and both
+  queue writers bind their values instead of interpolating them. Changes already
+  queued are unaffected in what they contain
+  [(#2486)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2486)
+
 - Error responses from the scenario-bundle API carried the text `"None"` where
   they should have carried an empty value, and would have turned numbers into
   text. Introduced in the previous release cycle and not shipped
