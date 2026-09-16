@@ -10,6 +10,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 import json
+import logging
 from io import StringIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -107,6 +108,17 @@ class DangerousRepairsAreOptInTest(RepairCommandTestCase):
         self.store.insert(graph)
 
     def with_a_year_only_date(self):
+        # rdflib warns, with a traceback, every time it parses this literal --
+        # and it parses it on every read, so a handful of tests write hundreds
+        # of lines. The warning is correct and is exactly the defect the
+        # `year-dates` repair exists for, so it is quieted here, where the
+        # literal is written on purpose, rather than anywhere that would also
+        # hide one coming from real data.
+        logger = logging.getLogger("rdflib.term")
+        was = logger.level
+        logger.setLevel(logging.ERROR)
+        self.addCleanup(logger.setLevel, was)
+
         graph = Graph()
         graph.add((SCENARIO, HAS_YEAR, Literal("2020", datatype=XSD.dateTime)))
         self.store.insert(graph)

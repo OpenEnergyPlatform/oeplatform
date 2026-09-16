@@ -145,7 +145,15 @@ LOGGING = {
     },
     "root": {
         "handlers": ["console"],
-        "level": "DEBUG",
+        "level": "INFO",
+    },
+    "loggers": {
+        # Pinned rather than left to the root level, so turning the root back
+        # up to DEBUG to trace our own code does not also reinstate this. The
+        # test suite talks to a real Fuseki over HTTP, so at DEBUG urllib3
+        # writes one line per SPARQL query and update -- tens of thousands of
+        # lines per run, in which anything worth reading is lost.
+        "urllib3": {"level": "WARNING"},
     },
 }
 
