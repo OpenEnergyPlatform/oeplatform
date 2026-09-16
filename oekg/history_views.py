@@ -45,6 +45,7 @@ from oekg.api_support import (
 )
 from oekg.graph_store import GraphStoreError
 from oekg.history import changed_fields
+from oekg.read_serializers import BundleHistoryEntrySerializer
 
 TRIPLES = "triples"
 
@@ -66,13 +67,14 @@ class ScenarioBundleHistoryAPIView(OekgAPIView):
 
     @describes_a_public_read(
         a_page_of(
+            BundleHistoryEntrySerializer,
             "A page of entries, newest first -- a history is read from the "
             "present backwards. Each names the verb, the actor as a username, "
             "the resource, the versions either side of the write, and the "
             "fields that changed. `changes` is `null` rather than `[]` where "
             "there cannot be a summary: an empty list would say that nothing "
             "changed, and what is known is that nothing recorded *what* "
-            "changed."
+            "changed.",
         ),
         parameters=[
             expands(

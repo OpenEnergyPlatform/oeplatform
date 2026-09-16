@@ -18,16 +18,32 @@ SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
+from drf_spectacular.utils import extend_schema_view
+
 from oekg.bundles import STUDY_REPORT
-from oekg.part_views import BundlePartAPIView, BundlePartCollectionAPIView
+from oekg.part_views import (
+    BundlePartAPIView,
+    BundlePartCollectionAPIView,
+    part_detail_operations,
+    part_operations,
+)
+from oekg.read_serializers import StudyReportReadSerializer
 from oekg.serializers import StudyReportSerializer
 
+# What the shared handlers cannot say: which serializer their answer has, and
+# what to call the thing. Per subclass because it *is* per subclass -- unlike
+# the operation ids, which are a rule and live in `CollectionSchema`.
 
+
+@extend_schema_view(
+    **part_operations(StudyReportReadSerializer, "study report", "study reports")
+)
 class StudyReportCollectionAPIView(BundlePartCollectionAPIView):
     part = STUDY_REPORT
     serializer_class = StudyReportSerializer
 
 
+@extend_schema_view(**part_detail_operations(StudyReportReadSerializer, "study report"))
 class StudyReportAPIView(BundlePartAPIView):
     part = STUDY_REPORT
     serializer_class = StudyReportSerializer

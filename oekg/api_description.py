@@ -36,14 +36,24 @@ here instead of it. The prose that explains an endpoint belongs next to the
 endpoint, where the next person to change it will be; what this module adds is
 the sentence that is the same at every endpoint of one kind.
 
-**Success responses carry a description, not a serializer.** Every response in
-this API is the writable payload *plus* `_meta`, and `_meta` is not the same
-from one endpoint to the next -- it carries the version, and it grows a key
-when something was lost after the graph committed. A schema claiming the
-response is the request serializer would be wrong in exactly the direction that
-hurts: a client would treat `_meta` as surplus and strip it, and `_meta` is
-where the version its next write has to send lives. Client generation is out of
-scope for this description (WF-13), so the honest description is the useful one.
+**Success responses carry a schema as well as a description, and the schema is
+not the request serializer.** Every response here is the writable payload *plus*
+`_meta`, and `_meta` differs from endpoint to endpoint: it carries the version,
+it gains the resolved labels when they were asked for, and it grows a key when
+something was lost after the graph had already committed. Pointing a response at
+the serializer that validates the write would therefore describe a body nobody
+receives, and would invite a client to treat `_meta` as surplus and strip it --
+and `_meta` is where the version its next write must send lives. So
+`oekg/read_serializers.py` states each read shape as *the write serializer plus
+`_meta`*, by subclassing it, and `oekg/tests/test_response_schema.py` validates
+a real response from every endpoint against the schema that produces. A response
+schema nothing checks is a claim, and the drift guard cannot see it go stale:
+the serializer and the artifact would agree with each other while both drifted
+from what the view actually sends.
+
+**Refusals carry a description and no schema.** A `400` here is either
+`{"detail": ...}` or the framework's field-keyed map of validation errors, and
+a schema for "one or the other" tells a client less than the sentence does.
 
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
@@ -53,7 +63,15 @@ import inspect
 
 from drf_spectacular.openapi import AutoSchema
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
+from drf_spectacular.utils import (
+    OpenApiParameter,
+    OpenApiResponse,
+    extend_schema,
+    inline_serializer,
+)
+from rest_framework import serializers
+
+from oekg.read_serializers import RemovalSerializer
 
 
 class CollectionSchema(AutoSchema):
@@ -168,11 +186,17 @@ LOCATION = OpenApiParameter(
 def expands(*values, description):
     """`?expand=` as this endpoint offers it.
 
-    Declared only where the response actually carries the expansion. The
-    parameter is parsed once per view rather than once per handler, so a delete
-    below a bundle tolerates one too -- but a removal report has nowhere to put
-    resolved labels, and a parameter documented where it does nothing is worse
-    than one left undocumented.
+    Declared only where the response actually carries the expansion, which is
+    narrower than where one is accepted: the parameter is parsed once per view
+    rather than once per handler, so the four deletes below a bundle take one
+    and so does the bundle's own `PATCH`, and none of them acts on it. A
+    removal report has nowhere to put resolved labels; the bundle patch simply
+    does not resolve, unlike the part writes next to it.
+
+    Left undocumented in both cases rather than made to work. Documentation
+    describes what is there -- making an endpoint do something so that a line
+    about it becomes true is a behaviour change wearing a documentation slice's
+    clothes, and this one is not needed by anything.
     """
     return OpenApiParameter(
         name="expand",
@@ -213,18 +237,25 @@ def json_body(description):
     return OpenApiResponse(response=OpenApiTypes.OBJECT, description=description)
 
 
-#: What surrounds the entries of any collection here. Said once because every
-#: one of them is paged by the same class, and said at all because a client
-#: that is told a page size and not the shape of a page has to guess it.
-PAGE_ENVELOPE = (
-    "The entries are in `results`, wrapped: `count` is how many matched in "
-    "total, and `next` and `previous` are the neighbouring pages or `null`."
-)
+def a_page_of(entry, description):
+    """A collection's success: the entries, and the envelope around them.
 
-
-def a_page_of(description):
-    """A collection's success: the entries, and the envelope around them."""
-    return json_body(f"{description} {PAGE_ENVELOPE}")
+    The envelope is built here rather than declared per endpoint because every
+    collection in this API is paged by the same class, and a client told a page
+    size but not the shape of a page has to guess the rest.
+    """
+    return OpenApiResponse(
+        response=inline_serializer(
+            name=f"{entry.__name__.removesuffix('Serializer')}Page",
+            fields={
+                "count": serializers.IntegerField(),
+                "next": serializers.URLField(allow_null=True),
+                "previous": serializers.URLField(allow_null=True),
+                "results": entry(many=True),
+            },
+        ),
+        description=description,
+    )
 
 
 #: The refusals shared across these endpoints, each said once. An endpoint that
@@ -232,7 +263,9 @@ def a_page_of(description):
 #: second code, so a client never meets one status meaning two things.
 REFUSALS = {
     400: json_body(
-        "Refused, and **nothing was written**. The payload named a key the "
+        "Refused, and **nothing was written**. The body is either `detail` "
+        "with one sentence, or -- when the payload failed the serializer -- a "
+        "map from field name to what was wrong with it. The payload named a key the "
         "closed bundle shape does not have, or a value the shape's own `sh:in` "
         "list does not allow, or the change would introduce a violation of the "
         "OEKG shape -- `violations` then names them, and "
@@ -320,6 +353,24 @@ def paging(paginator):
             ),
         ),
     ]
+
+
+def read_responses(success, refusals=READ_REFUSALS, extra=None):
+    """A read's responses, for a caller that cannot use the decorator.
+
+    The two part endpoints are shared by scenarios and study reports, so the
+    handler cannot name the body it answers with -- only the subclass knows
+    which serializer that is. Everything else about those operations stays on
+    the handler; the subclass supplies the body, and needs the refusals back to
+    do it, because `extend_schema` replaces a response map rather than merging
+    into one.
+    """
+    return _responses(refusals, {200: success}, extra)
+
+
+def write_responses(success, extra=None):
+    """A guarded write's responses, for the same reason."""
+    return _responses(WRITE_REFUSALS, success, extra)
 
 
 def _responses(codes, success, extra, refusals_in=None):
@@ -429,12 +480,17 @@ describes_a_removal = describes_a_guarded_write(
     # description a client reads cannot drift from the one `removed` actually
     # implements.
     {
-        200: json_body(
-            "Removed. The body names what was **deleted** and what was only "
-            "**unlinked**, which no status code can say: a node another bundle "
-            "still cites is kept and detached rather than destroyed. Only the "
-            "downgraded nodes are listed -- the shared regions, authors and "
-            "ontology terms every delete detaches are the rule, not the news."
+        200: OpenApiResponse(
+            response=RemovalSerializer,
+            description=(
+                "Removed. The body names what was **deleted** and what was "
+                "only **unlinked**, which no status code can say: a node "
+                "another bundle still cites is kept and detached rather than "
+                "destroyed. Only the downgraded nodes are listed -- the "
+                "shared regions, authors and "
+                "ontology terms every delete detaches are the rule, not the "
+                "news."
+            ),
         )
     },
 )

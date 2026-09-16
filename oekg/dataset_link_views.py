@@ -27,6 +27,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 from django.urls import reverse
+from drf_spectacular.utils import OpenApiResponse
 from rdflib import Graph
 from rest_framework import status
 from rest_framework.response import Response
@@ -64,6 +65,7 @@ from oekg.fields import mint_identifier
 from oekg.graph_store import GraphStoreError
 from oekg.history import CREATE
 from oekg.labels import labelled
+from oekg.read_serializers import DatasetLinkReadSerializer
 from oekg.resolution import resolve
 from oekg.serializers import READ_ONLY_CONTAINER, DatasetLinkSerializer
 from oekg.shape import ShapeUnavailable
@@ -130,7 +132,10 @@ class DatasetLinkCollectionAPIView(DatasetLinkViewMixin, OekgAPIView):
     schema = CollectionSchema()
 
     @describes_a_public_read(
-        a_page_of("A page of this scenario's dataset links. " + RESOLUTION),
+        a_page_of(
+            DatasetLinkReadSerializer,
+            "A page of this scenario's dataset links. " + RESOLUTION,
+        ),
         parameters=[
             EXPAND_LABELS,
             *paging(SubResourcePagination),
@@ -151,9 +156,12 @@ class DatasetLinkCollectionAPIView(DatasetLinkViewMixin, OekgAPIView):
 
     @describes_a_guarded_write(
         {
-            201: json_body(
-                "Created. `Location` names the link's URL and `ETag` the "
-                "bundle's new version. " + RESOLUTION
+            201: OpenApiResponse(
+                response=DatasetLinkReadSerializer,
+                description=(
+                    "Created. `Location` names the link's URL and `ETag` the "
+                    "bundle's new version. " + RESOLUTION
+                ),
             )
         },
         request=DatasetLinkSerializer,
@@ -240,7 +248,10 @@ class DatasetLinkAPIView(DatasetLinkViewMixin, OekgAPIView):
     """
 
     @describes_a_public_read(
-        json_body("One dataset link. " + RESOLUTION),
+        OpenApiResponse(
+            response=DatasetLinkReadSerializer,
+            description="One dataset link. " + RESOLUTION,
+        ),
         parameters=[EXPAND_LABELS],
     )
     def get(self, request, uid, sid, did):

@@ -48,12 +48,11 @@ CREATE = (PREFIX + "/", "post")
 
 #: Where ``?expand=`` is offered. Written out rather than derived, because the
 #: artifact cannot say which operations *act* on it -- and being tolerated is
-#: not being offered. Every endpoint below a bundle parses the parameter for
-#: the whole view, so a delete accepts one too; a removal report has nowhere to
-#: put resolved labels, so it does not claim to.
+#: not being offered. The parameter is parsed per view, so the four deletes
+#: accept one and so does the bundle `PATCH`; none of them resolves anything,
+#: so none of them says it does.
 EXPANDS = {
     (PREFIX + "/{uid}/", "get"),
-    (PREFIX + "/{uid}/", "patch"),
     (PREFIX + "/{uid}/history/", "get"),
     (PREFIX + "/{uid}/scenarios/", "get"),
     (PREFIX + "/{uid}/scenarios/", "post"),
@@ -353,6 +352,33 @@ class ScenarioBundleDescriptionTest(SimpleTestCase):
                     "requestBody",
                     operation,
                     self.advice(path, method, "claims to take a request body."),
+                )
+
+    def test_every_success_declares_the_body_it_returns(self):
+        """A `200` with no schema describes half an answer.
+
+        This is also what catches the one thing the shared part handlers
+        cannot get right by themselves: a scenario factsheet and a study report
+        are served by one implementation, so the body is filled in by the
+        subclass that knows which serializer it is (`part_operations` in
+        `oekg/part_views.py`). A subclass that forgot would ship the handler's
+        own generic description -- true, and with nothing a client can read.
+        """
+        for path, method, operation in self.operations:
+            for code, response in operation.get("responses", {}).items():
+                if not code.startswith("2"):
+                    continue
+                schema = response.get("content", {}).get("application/json", {})
+                self.assertIn(
+                    "$ref",
+                    schema.get("schema", {}),
+                    self.advice(
+                        path,
+                        method,
+                        f"describes its {code} in prose and gives no schema "
+                        "for the body. Every success here is a serializer in "
+                        "oekg/read_serializers.py.",
+                    ),
                 )
 
     def test_no_refusal_is_offered_in_a_form_it_cannot_arrive_in(self):

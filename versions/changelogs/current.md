@@ -382,7 +382,12 @@ SPDX-License-Identifier: CC0-1.0
   whether it is public or needs a login: the reference page's padlock answers a
   different question -- it closes when a requirement is already met, so public
   reads render locked and writes needing a token render unlocked -- and the
-  security declarations behind it are correct and deliberately unchanged
+  security declarations behind it are correct and deliberately unchanged. Each
+  operation also describes the body it answers with -- the writable payload and
+  the read-only `_meta` beside it, the page envelope around a collection, and
+  the two lists a delete reports -- and a test validates a real response from
+  every endpoint against the description, so a body and the document cannot
+  come apart unnoticed
   [(#2475)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2475)
 
 - The OEKG shape guide undercounted the places this repo fetches the ontology

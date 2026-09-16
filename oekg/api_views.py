@@ -60,7 +60,6 @@ import logging
 
 from django.db import DatabaseError
 from django.urls import reverse
-from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse
 from rdflib import Graph
 from rest_framework import status
@@ -102,6 +101,11 @@ from oekg.history import CREATE, UPDATE, record_write
 from oekg.labels import LABELS, labelled
 from oekg.part_views import part_bodies
 from oekg.preconditions import CONFIRM
+from oekg.read_serializers import (
+    BundleRemovalSerializer,
+    ScenarioBundleReadSerializer,
+    ScenarioBundleSummarySerializer,
+)
 from oekg.reads import labels_of, read_bundle
 from oekg.renderers import RDF_FORMATS, RDF_RENDERERS
 from oekg.serializers import (
@@ -150,11 +154,12 @@ class ScenarioBundleCollectionAPIView(OekgAPIView):
 
     @describes_a_public_read(
         a_page_of(
+            ScenarioBundleSummarySerializer,
             "A page of summaries. Each carries the two fields a human "
             "recognises a bundle by at the top level -- `label` and `acronym` "
             "-- and everything a client cannot write in `_meta`: the "
             "identifier, the version, and the number of scenarios and study "
-            "reports the bundle holds."
+            "reports the bundle holds.",
         ),
         parameters=[
             *LISTING_FILTERS,
@@ -190,10 +195,14 @@ class ScenarioBundleCollectionAPIView(OekgAPIView):
 
     @describes_a_creation(
         {
-            201: json_body(
-                "Created. The body is the bundle as it now stands -- exactly "
-                "what a write accepts, plus `_meta`. `Location` names its URL "
-                "and `ETag` the version the next write has to send back."
+            201: OpenApiResponse(
+                response=ScenarioBundleReadSerializer,
+                description=(
+                    "Created. The body is the bundle as it now stands -- "
+                    "exactly what a write accepts, plus `_meta`. `Location` "
+                    "names its URL and `ETag` the version the next write has "
+                    "to send back."
+                ),
             )
         },
         request=ScenarioBundleCreateSerializer,
@@ -352,13 +361,13 @@ class ScenarioBundleAPIView(OekgAPIView):
 
     @describes_a_public_read(
         OpenApiResponse(
-            # Not a JSON schema: this one response is served in three forms,
-            # two of them text. `Accept: text/turtle` or `application/ld+json`
-            # returns the bundle's subgraph as it is stored -- lossless, and
-            # nearly free, because the read has constructed that subgraph
-            # anyway. The structured form is canonical for writes, because the
-            # serializers are this API's validation layer.
-            response=OpenApiTypes.ANY,
+            # The schema describes the JSON form. The same response is also
+            # served as `text/turtle` or `application/ld+json` -- the stored
+            # subgraph, lossless and nearly free because the read has
+            # constructed it anyway -- and those two carry no schema, being
+            # text rather than an object. The structured form is canonical for
+            # writes, because the serializers are this API's validation layer.
+            response=ScenarioBundleReadSerializer,
             description=(
                 "The bundle: exactly what a write accepts, plus `_meta`, with "
                 "its scenarios and study reports nested so that a client can "
@@ -405,14 +414,16 @@ class ScenarioBundleAPIView(OekgAPIView):
 
     @describes_a_guarded_write(
         {
-            200: json_body(
-                "Changed. The body is the bundle as it now stands and `ETag` "
-                "is its new version -- so a pipeline chains writes without "
-                "reading again."
+            200: OpenApiResponse(
+                response=ScenarioBundleReadSerializer,
+                description=(
+                    "Changed. The body is the bundle as it now stands and "
+                    "`ETag` is its new version -- so a pipeline chains writes "
+                    "without reading again."
+                ),
             )
         },
         request=ScenarioBundleSerializer,
-        parameters=[EXPAND_LABELS],
         responses={
             409: json_body(
                 "Either the bundle moved between the read this write was "
@@ -505,14 +516,17 @@ class ScenarioBundleAPIView(OekgAPIView):
 
     @describes_a_guarded_write(
         {
-            200: json_body(
-                "Deleted. The body names what was **deleted** and what was "
-                "only **unlinked**, which no status code can say: a node "
-                "another bundle still cites is kept and detached rather than "
-                "destroyed. No `ETag`, because there is no bundle left to have "
-                "a version. The bundle's history survives and stays readable "
-                "at its own URL -- one line saying who removed it, when, and "
-                "under which acronym."
+            200: OpenApiResponse(
+                response=BundleRemovalSerializer,
+                description=(
+                    "Deleted. The body names what was **deleted** and what was "
+                    "only **unlinked**, which no status code can say: a node "
+                    "another bundle still cites is kept and detached rather than "
+                    "destroyed. No `ETag`, because there is no bundle left to have "
+                    "a version. The bundle's history survives and stays readable "
+                    "at its own URL -- one line saying who removed it, when, and "
+                    "under which acronym."
+                ),
             )
         },
         # No entity tag on the response, for the reason the body gives.

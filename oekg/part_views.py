@@ -28,6 +28,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 from django.urls import reverse
+from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rdflib import Graph
 from rest_framework import status
 from rest_framework.response import Response
@@ -41,6 +42,8 @@ from oekg.api_description import (
     describes_a_removal,
     json_body,
     paging,
+    read_responses,
+    write_responses,
 )
 from oekg.api_support import OekgAPIView, shape_unavailable, store_unavailable
 from oekg.bundles import (
@@ -92,7 +95,7 @@ class BundlePartCollectionAPIView(BundlePartViewMixin, OekgAPIView):
     schema = CollectionSchema()
 
     @describes_a_public_read(
-        a_page_of(
+        json_body(
             "A page of this bundle's parts of one kind, each in the form a "
             "write accepts it nested. `ETag` carries the **bundle's** version: "
             "a part has none of its own."
@@ -299,6 +302,79 @@ class BundlePartAPIView(BundlePartViewMixin, OekgAPIView):
             return shape_unavailable(error)
         except GraphStoreError as error:
             return store_unavailable(error, "written to")
+
+
+def part_operations(read, one, many):
+    """The bodies the shared part handlers cannot name, filled in per part.
+
+    One implementation serves scenario factsheets and study reports both, so a
+    decorator on the handler cannot say which serializer its answer has -- only
+    the subclass knows. Everything else about these operations stays on the
+    handler: the prose, the parameters, the refusals, the entity tag. This
+    supplies the success body, and has to hand the refusals back with it,
+    because `extend_schema` replaces a response map rather than merging into
+    one.
+
+    A subclass that forgot to spend this would ship the handler's own generic
+    description -- true, but with no schema -- which
+    `test_every_success_declares_the_body_it_returns` refuses.
+    """
+    return {
+        "get": extend_schema(
+            responses=read_responses(
+                a_page_of(read, f"A page of this bundle's {many}.")
+            )
+        ),
+        "post": extend_schema(
+            responses=write_responses(
+                {
+                    201: OpenApiResponse(
+                        response=read,
+                        description=(
+                            f"Created. The body is the {one} as it now stands, "
+                            "`Location` names its URL and `ETag` the "
+                            "**bundle's** new version."
+                        ),
+                    )
+                }
+            )
+        ),
+    }
+
+
+def part_detail_operations(read, one):
+    """The same, for the endpoint that addresses one part.
+
+    Separate from `part_operations` because the two endpoints are two classes,
+    and `extend_schema_view` names methods of one class.
+    """
+    return {
+        "get": extend_schema(
+            responses=read_responses(
+                OpenApiResponse(
+                    response=read,
+                    description=(
+                        f"The {one}: what a write accepts, plus `_meta`. `ETag` "
+                        "carries the **bundle's** version, which is what a "
+                        "write to this part has to send back."
+                    ),
+                )
+            )
+        ),
+        "patch": extend_schema(
+            responses=write_responses(
+                {
+                    200: OpenApiResponse(
+                        response=read,
+                        description=(
+                            f"Changed. The body is the {one} as it now stands "
+                            "and `ETag` is the bundle's new version."
+                        ),
+                    )
+                }
+            )
+        ),
+    }
 
 
 def part_bodies(graph: Graph, uid: str, part: BundlePart, labels: bool = False) -> list:

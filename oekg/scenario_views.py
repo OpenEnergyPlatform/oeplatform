@@ -10,16 +10,36 @@ SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
+from drf_spectacular.utils import extend_schema_view
+
 from oekg.bundles import SCENARIO
-from oekg.part_views import BundlePartAPIView, BundlePartCollectionAPIView
+from oekg.part_views import (
+    BundlePartAPIView,
+    BundlePartCollectionAPIView,
+    part_detail_operations,
+    part_operations,
+)
+from oekg.read_serializers import ScenarioReadSerializer
 from oekg.serializers import ScenarioSerializer
 
+# What the shared handlers cannot say: which serializer their answer has, and
+# what to call the thing. Per subclass because it *is* per subclass -- unlike
+# the operation ids, which are a rule and live in `CollectionSchema`.
 
+
+@extend_schema_view(
+    **part_operations(
+        ScenarioReadSerializer, "scenario factsheet", "scenario factsheets"
+    )
+)
 class ScenarioCollectionAPIView(BundlePartCollectionAPIView):
     part = SCENARIO
     serializer_class = ScenarioSerializer
 
 
+@extend_schema_view(
+    **part_detail_operations(ScenarioReadSerializer, "scenario factsheet")
+)
 class ScenarioAPIView(BundlePartAPIView):
     part = SCENARIO
     serializer_class = ScenarioSerializer

@@ -859,8 +859,10 @@ paths:
               schema:
                 type: object
                 additionalProperties: {}
-          description: Refused, and **nothing was written**. The payload named a key
-            the closed bundle shape does not have, or a value the shape's own `sh:in`
+          description: Refused, and **nothing was written**. The body is either `detail`
+            with one sentence, or -- when the payload failed the serializer -- a map
+            from field name to what was wrong with it. The payload named a key the
+            closed bundle shape does not have, or a value the shape's own `sh:in`
             list does not allow, or the change would introduce a violation of the
             OEKG shape -- `violations` then names them, and `pre_existing_violations`
             counts the ones this write is not blamed for. A write is judged by what
@@ -888,14 +890,11 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: {}
+                $ref: '#/components/schemas/ScenarioBundleSummaryPage'
           description: 'A page of summaries. Each carries the two fields a human recognises
             a bundle by at the top level -- `label` and `acronym` -- and everything
             a client cannot write in `_meta`: the identifier, the version, and the
-            number of scenarios and study reports the bundle holds. The entries are
-            in `results`, wrapped: `count` is how many matched in total, and `next`
-            and `previous` are the neighbouring pages or `null`.'
+            number of scenarios and study reports the bundle holds.'
     post:
       operationId: scenario_bundles_create
       description: |-
@@ -948,8 +947,10 @@ paths:
               schema:
                 type: object
                 additionalProperties: {}
-          description: Refused, and **nothing was written**. The payload named a key
-            the closed bundle shape does not have, or a value the shape's own `sh:in`
+          description: Refused, and **nothing was written**. The body is either `detail`
+            with one sentence, or -- when the payload failed the serializer -- a map
+            from field name to what was wrong with it. The payload named a key the
+            closed bundle shape does not have, or a value the shape's own `sh:in`
             list does not allow, or the change would introduce a violation of the
             OEKG shape -- `violations` then names them, and `pre_existing_violations`
             counts the ones this write is not blamed for. A write is judged by what
@@ -1010,8 +1011,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: {}
+                $ref: '#/components/schemas/ScenarioBundleRead'
           description: Created. The body is the bundle as it now stands -- exactly
             what a write accepts, plus `_meta`. `Location` names its URL and `ETag`
             the version the next write has to send back.
@@ -1065,8 +1065,10 @@ paths:
               schema:
                 type: object
                 additionalProperties: {}
-          description: Refused, and **nothing was written**. The payload named a key
-            the closed bundle shape does not have, or a value the shape's own `sh:in`
+          description: Refused, and **nothing was written**. The body is either `detail`
+            with one sentence, or -- when the payload failed the serializer -- a map
+            from field name to what was wrong with it. The payload named a key the
+            closed bundle shape does not have, or a value the shape's own `sh:in`
             list does not allow, or the change would introduce a violation of the
             OEKG shape -- `violations` then names them, and `pre_existing_violations`
             counts the ones this write is not blamed for. A write is judged by what
@@ -1110,11 +1112,14 @@ paths:
                 bundle's.
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: '#/components/schemas/ScenarioBundleRead'
             text/turtle:
-              schema: {}
+              schema:
+                $ref: '#/components/schemas/ScenarioBundleRead'
             application/ld+json:
-              schema: {}
+              schema:
+                $ref: '#/components/schemas/ScenarioBundleRead'
           description: 'The bundle: exactly what a write accepts, plus `_meta`, with
             its scenarios and study reports nested so that a client can send back
             what it read without stripping anything. `ETag` carries the version the
@@ -1165,18 +1170,6 @@ paths:
           is for. A weak validator (`W/"4"`) and a bare number are both read as the
           version they plainly name.'
         required: true
-      - in: query
-        name: expand
-        schema:
-          type: string
-          enum:
-          - labels
-        description: '`labels` resolves the ontology terms this resource picks into
-          `_meta.labels`, from a small label subset rather than the full OEO. A value
-          this endpoint does not offer is refused with `400` rather than ignored,
-          and the refusal happens before anything is written, so nothing was written
-          when one arrives. Values are comma-separated, which matters once an endpoint
-          offers two; none offers two yet, and the enum says which one it offers.'
       - in: path
         name: uid
         schema:
@@ -1206,8 +1199,10 @@ paths:
               schema:
                 type: object
                 additionalProperties: {}
-          description: Refused, and **nothing was written**. The payload named a key
-            the closed bundle shape does not have, or a value the shape's own `sh:in`
+          description: Refused, and **nothing was written**. The body is either `detail`
+            with one sentence, or -- when the payload failed the serializer -- a map
+            from field name to what was wrong with it. The payload named a key the
+            closed bundle shape does not have, or a value the shape's own `sh:in`
             list does not allow, or the change would introduce a violation of the
             OEKG shape -- `violations` then names them, and `pre_existing_violations`
             counts the ones this write is not blamed for. A write is judged by what
@@ -1295,8 +1290,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: {}
+                $ref: '#/components/schemas/ScenarioBundleRead'
           description: Changed. The body is the bundle as it now stands and `ETag`
             is its new version -- so a pipeline chains writes without reading again.
     delete:
@@ -1445,8 +1439,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: {}
+                $ref: '#/components/schemas/BundleRemoval'
           description: 'Deleted. The body names what was **deleted** and what was
             only **unlinked**, which no status code can say: a node another bundle
             still cites is kept and detached rather than destroyed. No `ETag`, because
@@ -1520,8 +1513,10 @@ paths:
               schema:
                 type: object
                 additionalProperties: {}
-          description: Refused, and **nothing was written**. The payload named a key
-            the closed bundle shape does not have, or a value the shape's own `sh:in`
+          description: Refused, and **nothing was written**. The body is either `detail`
+            with one sentence, or -- when the payload failed the serializer -- a map
+            from field name to what was wrong with it. The payload named a key the
+            closed bundle shape does not have, or a value the shape's own `sh:in`
             list does not allow, or the change would introduce a violation of the
             OEKG shape -- `violations` then names them, and `pre_existing_violations`
             counts the ones this write is not blamed for. A write is judged by what
@@ -1556,16 +1551,13 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: {}
+                $ref: '#/components/schemas/BundleHistoryEntryPage'
           description: 'A page of entries, newest first -- a history is read from
             the present backwards. Each names the verb, the actor as a username, the
             resource, the versions either side of the write, and the fields that changed.
             `changes` is `null` rather than `[]` where there cannot be a summary:
             an empty list would say that nothing changed, and what is known is that
-            nothing recorded *what* changed. The entries are in `results`, wrapped:
-            `count` is how many matched in total, and `next` and `previous` are the
-            neighbouring pages or `null`.'
+            nothing recorded *what* changed.'
   /api/v0/scenario-bundles/{uid}/scenarios/:
     get:
       operationId: scenario_bundles_scenarios_list
@@ -1622,8 +1614,10 @@ paths:
               schema:
                 type: object
                 additionalProperties: {}
-          description: Refused, and **nothing was written**. The payload named a key
-            the closed bundle shape does not have, or a value the shape's own `sh:in`
+          description: Refused, and **nothing was written**. The body is either `detail`
+            with one sentence, or -- when the payload failed the serializer -- a map
+            from field name to what was wrong with it. The payload named a key the
+            closed bundle shape does not have, or a value the shape's own `sh:in`
             list does not allow, or the change would introduce a violation of the
             OEKG shape -- `violations` then names them, and `pre_existing_violations`
             counts the ones this write is not blamed for. A write is judged by what
@@ -1668,13 +1662,8 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: {}
-          description: 'A page of this bundle''s parts of one kind, each in the form
-            a write accepts it nested. `ETag` carries the **bundle''s** version: a
-            part has none of its own. The entries are in `results`, wrapped: `count`
-            is how many matched in total, and `next` and `previous` are the neighbouring
-            pages or `null`.'
+                $ref: '#/components/schemas/ScenarioReadPage'
+          description: A page of this bundle's scenario factsheets.
     post:
       operationId: scenario_bundles_scenarios_create
       description: |-
@@ -1749,8 +1738,10 @@ paths:
               schema:
                 type: object
                 additionalProperties: {}
-          description: Refused, and **nothing was written**. The payload named a key
-            the closed bundle shape does not have, or a value the shape's own `sh:in`
+          description: Refused, and **nothing was written**. The body is either `detail`
+            with one sentence, or -- when the payload failed the serializer -- a map
+            from field name to what was wrong with it. The payload named a key the
+            closed bundle shape does not have, or a value the shape's own `sh:in`
             list does not allow, or the change would introduce a violation of the
             OEKG shape -- `violations` then names them, and `pre_existing_violations`
             counts the ones this write is not blamed for. A write is judged by what
@@ -1842,10 +1833,9 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: {}
-          description: Created. The body is the part as it now stands, `Location`
-            names its URL and `ETag` the **bundle's** new version.
+                $ref: '#/components/schemas/ScenarioRead'
+          description: Created. The body is the scenario factsheet as it now stands,
+            `Location` names its URL and `ETag` the **bundle's** new version.
   /api/v0/scenario-bundles/{uid}/scenarios/{pid}/:
     get:
       operationId: scenario_bundles_scenarios_retrieve
@@ -1890,8 +1880,10 @@ paths:
               schema:
                 type: object
                 additionalProperties: {}
-          description: Refused, and **nothing was written**. The payload named a key
-            the closed bundle shape does not have, or a value the shape's own `sh:in`
+          description: Refused, and **nothing was written**. The body is either `detail`
+            with one sentence, or -- when the payload failed the serializer -- a map
+            from field name to what was wrong with it. The payload named a key the
+            closed bundle shape does not have, or a value the shape's own `sh:in`
             list does not allow, or the change would introduce a violation of the
             OEKG shape -- `violations` then names them, and `pre_existing_violations`
             counts the ones this write is not blamed for. A write is judged by what
@@ -1936,11 +1928,10 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: {}
-          description: 'The part: what a write accepts, plus `_meta`. `ETag` carries
-            the **bundle''s** version, which is what a write to this part has to send
-            back.'
+                $ref: '#/components/schemas/ScenarioRead'
+          description: 'The scenario factsheet: what a write accepts, plus `_meta`.
+            `ETag` carries the **bundle''s** version, which is what a write to this
+            part has to send back.'
     patch:
       operationId: scenario_bundles_scenarios_partial_update
       description: |-
@@ -2016,8 +2007,10 @@ paths:
               schema:
                 type: object
                 additionalProperties: {}
-          description: Refused, and **nothing was written**. The payload named a key
-            the closed bundle shape does not have, or a value the shape's own `sh:in`
+          description: Refused, and **nothing was written**. The body is either `detail`
+            with one sentence, or -- when the payload failed the serializer -- a map
+            from field name to what was wrong with it. The payload named a key the
+            closed bundle shape does not have, or a value the shape's own `sh:in`
             list does not allow, or the change would introduce a violation of the
             OEKG shape -- `violations` then names them, and `pre_existing_violations`
             counts the ones this write is not blamed for. A write is judged by what
@@ -2104,10 +2097,9 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: {}
-          description: Changed. The body is the part as it now stands and `ETag` is
-            the bundle's new version.
+                $ref: '#/components/schemas/ScenarioRead'
+          description: Changed. The body is the scenario factsheet as it now stands
+            and `ETag` is the bundle's new version.
     delete:
       operationId: scenario_bundles_scenarios_destroy
       description: |-
@@ -2161,8 +2153,10 @@ paths:
               schema:
                 type: object
                 additionalProperties: {}
-          description: Refused, and **nothing was written**. The payload named a key
-            the closed bundle shape does not have, or a value the shape's own `sh:in`
+          description: Refused, and **nothing was written**. The body is either `detail`
+            with one sentence, or -- when the payload failed the serializer -- a map
+            from field name to what was wrong with it. The payload named a key the
+            closed bundle shape does not have, or a value the shape's own `sh:in`
             list does not allow, or the change would introduce a violation of the
             OEKG shape -- `violations` then names them, and `pre_existing_violations`
             counts the ones this write is not blamed for. A write is judged by what
@@ -2249,8 +2243,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: {}
+                $ref: '#/components/schemas/Removal'
           description: 'Removed. The body names what was **deleted** and what was
             only **unlinked**, which no status code can say: a node another bundle
             still cites is kept and detached rather than destroyed. Only the downgraded
@@ -2312,8 +2305,10 @@ paths:
               schema:
                 type: object
                 additionalProperties: {}
-          description: Refused, and **nothing was written**. The payload named a key
-            the closed bundle shape does not have, or a value the shape's own `sh:in`
+          description: Refused, and **nothing was written**. The body is either `detail`
+            with one sentence, or -- when the payload failed the serializer -- a map
+            from field name to what was wrong with it. The payload named a key the
+            closed bundle shape does not have, or a value the shape's own `sh:in`
             list does not allow, or the change would introduce a violation of the
             OEKG shape -- `violations` then names them, and `pre_existing_violations`
             counts the ones this write is not blamed for. A write is judged by what
@@ -2358,8 +2353,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: {}
+                $ref: '#/components/schemas/DatasetLinkReadPage'
           description: 'A page of this scenario''s dataset links. Every link reports
             what it points at **now**: `_meta.resolvable` says whether the named target
             is still on this platform, and `_meta.tables` names the one table for
@@ -2368,9 +2362,7 @@ paths:
             `false` -- when the stored address is not a page on this platform, because
             `false` would claim the target had been deleted. **Resolution is not an
             expansion**: a reader needs it to tell a live citation from a dead one,
-            so it is never opt-in. The entries are in `results`, wrapped: `count`
-            is how many matched in total, and `next` and `previous` are the neighbouring
-            pages or `null`.'
+            so it is never opt-in.'
     post:
       operationId: scenario_bundles_scenarios_datasets_create
       description: |-
@@ -2544,8 +2536,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: {}
+                $ref: '#/components/schemas/DatasetLinkRead'
           description: 'Created. `Location` names the link''s URL and `ETag` the bundle''s
             new version. Every link reports what it points at **now**: `_meta.resolvable`
             says whether the named target is still on this platform, and `_meta.tables`
@@ -2610,8 +2601,10 @@ paths:
               schema:
                 type: object
                 additionalProperties: {}
-          description: Refused, and **nothing was written**. The payload named a key
-            the closed bundle shape does not have, or a value the shape's own `sh:in`
+          description: Refused, and **nothing was written**. The body is either `detail`
+            with one sentence, or -- when the payload failed the serializer -- a map
+            from field name to what was wrong with it. The payload named a key the
+            closed bundle shape does not have, or a value the shape's own `sh:in`
             list does not allow, or the change would introduce a violation of the
             OEKG shape -- `violations` then names them, and `pre_existing_violations`
             counts the ones this write is not blamed for. A write is judged by what
@@ -2656,8 +2649,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: {}
+                $ref: '#/components/schemas/DatasetLinkRead'
           description: 'One dataset link. Every link reports what it points at **now**:
             `_meta.resolvable` says whether the named target is still on this platform,
             and `_meta.tables` names the one table for `ref: table` or the catalogue
@@ -2721,8 +2713,10 @@ paths:
               schema:
                 type: object
                 additionalProperties: {}
-          description: Refused, and **nothing was written**. The payload named a key
-            the closed bundle shape does not have, or a value the shape's own `sh:in`
+          description: Refused, and **nothing was written**. The body is either `detail`
+            with one sentence, or -- when the payload failed the serializer -- a map
+            from field name to what was wrong with it. The payload named a key the
+            closed bundle shape does not have, or a value the shape's own `sh:in`
             list does not allow, or the change would introduce a violation of the
             OEKG shape -- `violations` then names them, and `pre_existing_violations`
             counts the ones this write is not blamed for. A write is judged by what
@@ -2809,8 +2803,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: {}
+                $ref: '#/components/schemas/Removal'
           description: 'Removed. The body names what was **deleted** and what was
             only **unlinked**, which no status code can say: a node another bundle
             still cites is kept and detached rather than destroyed. Only the downgraded
@@ -2872,8 +2865,10 @@ paths:
               schema:
                 type: object
                 additionalProperties: {}
-          description: Refused, and **nothing was written**. The payload named a key
-            the closed bundle shape does not have, or a value the shape's own `sh:in`
+          description: Refused, and **nothing was written**. The body is either `detail`
+            with one sentence, or -- when the payload failed the serializer -- a map
+            from field name to what was wrong with it. The payload named a key the
+            closed bundle shape does not have, or a value the shape's own `sh:in`
             list does not allow, or the change would introduce a violation of the
             OEKG shape -- `violations` then names them, and `pre_existing_violations`
             counts the ones this write is not blamed for. A write is judged by what
@@ -2918,13 +2913,8 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: {}
-          description: 'A page of this bundle''s parts of one kind, each in the form
-            a write accepts it nested. `ETag` carries the **bundle''s** version: a
-            part has none of its own. The entries are in `results`, wrapped: `count`
-            is how many matched in total, and `next` and `previous` are the neighbouring
-            pages or `null`.'
+                $ref: '#/components/schemas/StudyReportReadPage'
+          description: A page of this bundle's study reports.
     post:
       operationId: scenario_bundles_study_reports_create
       description: |-
@@ -2999,8 +2989,10 @@ paths:
               schema:
                 type: object
                 additionalProperties: {}
-          description: Refused, and **nothing was written**. The payload named a key
-            the closed bundle shape does not have, or a value the shape's own `sh:in`
+          description: Refused, and **nothing was written**. The body is either `detail`
+            with one sentence, or -- when the payload failed the serializer -- a map
+            from field name to what was wrong with it. The payload named a key the
+            closed bundle shape does not have, or a value the shape's own `sh:in`
             list does not allow, or the change would introduce a violation of the
             OEKG shape -- `violations` then names them, and `pre_existing_violations`
             counts the ones this write is not blamed for. A write is judged by what
@@ -3092,9 +3084,8 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: {}
-          description: Created. The body is the part as it now stands, `Location`
+                $ref: '#/components/schemas/StudyReportRead'
+          description: Created. The body is the study report as it now stands, `Location`
             names its URL and `ETag` the **bundle's** new version.
   /api/v0/scenario-bundles/{uid}/study-reports/{pid}/:
     get:
@@ -3140,8 +3131,10 @@ paths:
               schema:
                 type: object
                 additionalProperties: {}
-          description: Refused, and **nothing was written**. The payload named a key
-            the closed bundle shape does not have, or a value the shape's own `sh:in`
+          description: Refused, and **nothing was written**. The body is either `detail`
+            with one sentence, or -- when the payload failed the serializer -- a map
+            from field name to what was wrong with it. The payload named a key the
+            closed bundle shape does not have, or a value the shape's own `sh:in`
             list does not allow, or the change would introduce a violation of the
             OEKG shape -- `violations` then names them, and `pre_existing_violations`
             counts the ones this write is not blamed for. A write is judged by what
@@ -3186,11 +3179,10 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: {}
-          description: 'The part: what a write accepts, plus `_meta`. `ETag` carries
-            the **bundle''s** version, which is what a write to this part has to send
-            back.'
+                $ref: '#/components/schemas/StudyReportRead'
+          description: 'The study report: what a write accepts, plus `_meta`. `ETag`
+            carries the **bundle''s** version, which is what a write to this part
+            has to send back.'
     patch:
       operationId: scenario_bundles_study_reports_partial_update
       description: |-
@@ -3266,8 +3258,10 @@ paths:
               schema:
                 type: object
                 additionalProperties: {}
-          description: Refused, and **nothing was written**. The payload named a key
-            the closed bundle shape does not have, or a value the shape's own `sh:in`
+          description: Refused, and **nothing was written**. The body is either `detail`
+            with one sentence, or -- when the payload failed the serializer -- a map
+            from field name to what was wrong with it. The payload named a key the
+            closed bundle shape does not have, or a value the shape's own `sh:in`
             list does not allow, or the change would introduce a violation of the
             OEKG shape -- `violations` then names them, and `pre_existing_violations`
             counts the ones this write is not blamed for. A write is judged by what
@@ -3354,10 +3348,9 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: {}
-          description: Changed. The body is the part as it now stands and `ETag` is
-            the bundle's new version.
+                $ref: '#/components/schemas/StudyReportRead'
+          description: Changed. The body is the study report as it now stands and
+            `ETag` is the bundle's new version.
     delete:
       operationId: scenario_bundles_study_reports_destroy
       description: |-
@@ -3411,8 +3404,10 @@ paths:
               schema:
                 type: object
                 additionalProperties: {}
-          description: Refused, and **nothing was written**. The payload named a key
-            the closed bundle shape does not have, or a value the shape's own `sh:in`
+          description: Refused, and **nothing was written**. The body is either `detail`
+            with one sentence, or -- when the payload failed the serializer -- a map
+            from field name to what was wrong with it. The payload named a key the
+            closed bundle shape does not have, or a value the shape's own `sh:in`
             list does not allow, or the change would introduce a violation of the
             OEKG shape -- `violations` then names them, and `pre_existing_violations`
             counts the ones this write is not blamed for. A write is judged by what
@@ -3499,8 +3494,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: {}
+                $ref: '#/components/schemas/Removal'
           description: 'Removed. The body names what was **deleted** and what was
             only **unlinked**, which no status code can say: a node another bundle
             still cites is kept and detached rather than destroyed. Only the downgraded
@@ -4593,6 +4587,170 @@ paths:
           description: No response body
 components:
   schemas:
+    BundleHistoryEntry:
+      type: object
+      properties:
+        era:
+          type: string
+          description: Which generation of row this is. Entries written before this
+            API existed record no verb and no field-level summary.
+        verb:
+          type: string
+          nullable: true
+        actor:
+          type: string
+          nullable: true
+          description: A username, not an internal identifier.
+        timestamp:
+          type: string
+          format: date-time
+        resource:
+          allOf:
+          - $ref: '#/components/schemas/Resource'
+          description: The class and identifier the write was about.
+        acronym:
+          type: string
+          nullable: true
+          description: 'Set on a whole-bundle delete and nowhere else: after that
+            write there is no bundle left to read an acronym off, so the line carries
+            it.'
+        version_before:
+          type: integer
+          nullable: true
+        version_after:
+          type: integer
+          nullable: true
+        changes:
+          type: array
+          items:
+            $ref: '#/components/schemas/HistoryChange'
+          nullable: true
+          description: '`null` rather than `[]` where there cannot be a summary --
+            an empty list would say that nothing changed, and what is known is that
+            nothing recorded *what* changed.'
+        triples:
+          type: object
+          additionalProperties: {}
+      required:
+      - acronym
+      - actor
+      - changes
+      - era
+      - resource
+      - timestamp
+      - verb
+      - version_after
+      - version_before
+    BundleHistoryEntryPage:
+      type: object
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+          format: uri
+          nullable: true
+        previous:
+          type: string
+          format: uri
+          nullable: true
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/BundleHistoryEntry'
+      required:
+      - count
+      - next
+      - previous
+      - results
+    BundleMeta:
+      type: object
+      description: |-
+        The two keys that appear only when something was lost after the commit.
+
+        The graph and the relational database cannot share a transaction, and the
+        graph commits first. A history entry or an ownership row that could not be
+        written afterwards is named beside the success it qualifies rather than
+        turned into an error for a write that did happen -- so these are absent on
+        an ordinary response and `false` when they are there. Never `true`: a
+        client should not have to check something on every response to learn that
+        the ordinary thing happened.
+      properties:
+        history_recorded:
+          type: boolean
+        ownership_recorded:
+          type: boolean
+        ownership_forgotten:
+          type: boolean
+        labels:
+          type: object
+          additionalProperties:
+            type: string
+            nullable: true
+        uid:
+          type: string
+        iri:
+          type: string
+          format: uri
+        version:
+          type: integer
+      required:
+      - iri
+      - uid
+      - version
+    BundleRemoval:
+      type: object
+      properties:
+        deleted:
+          type: array
+          items:
+            $ref: '#/components/schemas/RemovedNode'
+        unlinked:
+          type: array
+          items:
+            $ref: '#/components/schemas/RemovedNode'
+        _meta:
+          allOf:
+          - $ref: '#/components/schemas/BundleRemovalMeta'
+          title: ' meta'
+      required:
+      - _meta
+      - deleted
+      - unlinked
+    BundleRemovalMeta:
+      type: object
+      description: |-
+        The two keys that appear only when something was lost after the commit.
+
+        The graph and the relational database cannot share a transaction, and the
+        graph commits first. A history entry or an ownership row that could not be
+        written afterwards is named beside the success it qualifies rather than
+        turned into an error for a write that did happen -- so these are absent on
+        an ordinary response and `false` when they are there. Never `true`: a
+        client should not have to check something on every response to learn that
+        the ordinary thing happened.
+      properties:
+        history_recorded:
+          type: boolean
+        ownership_recorded:
+          type: boolean
+        ownership_forgotten:
+          type: boolean
+        uid:
+          type: string
+        iri:
+          type: string
+          format: uri
+        acronym:
+          type: string
+          nullable: true
+        version_before:
+          type: integer
+      required:
+      - acronym
+      - iri
+      - uid
+      - version_before
     DatasetAssignTables:
       type: object
       properties:
@@ -4646,6 +4804,120 @@ components:
       - name
       - ref
       - type
+    DatasetLinkMeta:
+      type: object
+      description: |-
+        The two keys that appear only when something was lost after the commit.
+
+        The graph and the relational database cannot share a transaction, and the
+        graph commits first. A history entry or an ownership row that could not be
+        written afterwards is named beside the success it qualifies rather than
+        turned into an error for a write that did happen -- so these are absent on
+        an ordinary response and `false` when they are there. Never `true`: a
+        client should not have to check something on every response to learn that
+        the ordinary thing happened.
+      properties:
+        history_recorded:
+          type: boolean
+        ownership_recorded:
+          type: boolean
+        ownership_forgotten:
+          type: boolean
+        labels:
+          type: object
+          additionalProperties:
+            type: string
+            nullable: true
+        uid:
+          type: string
+        iri:
+          type: string
+          format: uri
+        type:
+          type: string
+          format: uri
+          description: The OEO class of this resource.
+        bundle:
+          type: string
+        target_iri:
+          type: string
+          format: uri
+          nullable: true
+          description: The address actually stored. It is the only thing that stays
+            true when `ref` reads `null`, which happens for a link written before
+            this API existed that points somewhere this platform has no route for.
+        scenario:
+          type: string
+        resolvable:
+          type: boolean
+          nullable: true
+          description: Whether the named target is still on this platform. `null`
+            -- never `false` -- when the stored address is not a page here, because
+            `false` would claim the target had been deleted.
+        tables:
+          type: array
+          items:
+            $ref: '#/components/schemas/TableEntry'
+          nullable: true
+          description: 'What the citation means today: the one table for `ref: table`,
+            the catalogue entry''s current members for `ref: dataset`, `[]` when the
+            named target is gone, and `null` when this server cannot say.'
+      required:
+      - bundle
+      - iri
+      - resolvable
+      - scenario
+      - tables
+      - target_iri
+      - type
+      - uid
+    DatasetLinkRead:
+      type: object
+      description: |-
+        A scenario's link to data on this platform: three keys, all required.
+
+        Not a field table, because a dataset link has no fields of its own: the
+        label, the URL and the identifier the shape requires are all derived from
+        these three. That is also why there is no partial form of this serializer --
+        a link is added or removed, never edited.
+      properties:
+        type:
+          $ref: '#/components/schemas/TypeEnum'
+        ref:
+          $ref: '#/components/schemas/RefEnum'
+        name:
+          type: string
+        _meta:
+          allOf:
+          - $ref: '#/components/schemas/DatasetLinkMeta'
+          title: ' meta'
+      required:
+      - _meta
+      - name
+      - ref
+      - type
+    DatasetLinkReadPage:
+      type: object
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+          format: uri
+          nullable: true
+        previous:
+          type: string
+          format: uri
+          nullable: true
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DatasetLinkRead'
+      required:
+      - count
+      - next
+      - previous
+      - results
     DatasetRead:
       type: object
       properties:
@@ -4834,6 +5106,33 @@ components:
       - id
       - model_name
       - url
+    HistoryChange:
+      type: object
+      description: One field's worth of a write, rendered at read time from the triples.
+      properties:
+        field:
+          type: string
+          nullable: true
+          description: '`null` for a triple this cannot attribute to a field -- the
+            type and label a minted contact brings with it, say. Reported rather than
+            dropped, because dropping it would make the summary look complete when
+            it is not.'
+        predicate:
+          type: string
+          format: uri
+        removed:
+          type: array
+          items:
+            type: string
+        added:
+          type: array
+          items:
+            type: string
+      required:
+      - added
+      - field
+      - predicate
+      - removed
     LicenseEnum:
       enum:
       - Academic Free License v3.0
@@ -4920,6 +5219,9 @@ components:
           type: string
       required:
       - label
+    NullEnum:
+      enum:
+      - null
     Part:
       type: object
       description: 'A framework or model factsheet: bundle-local, with a link out.'
@@ -4931,6 +5233,46 @@ components:
           nullable: true
       required:
       - label
+    PartMeta:
+      type: object
+      description: |-
+        The two keys that appear only when something was lost after the commit.
+
+        The graph and the relational database cannot share a transaction, and the
+        graph commits first. A history entry or an ownership row that could not be
+        written afterwards is named beside the success it qualifies rather than
+        turned into an error for a write that did happen -- so these are absent on
+        an ordinary response and `false` when they are there. Never `true`: a
+        client should not have to check something on every response to learn that
+        the ordinary thing happened.
+      properties:
+        history_recorded:
+          type: boolean
+        ownership_recorded:
+          type: boolean
+        ownership_forgotten:
+          type: boolean
+        labels:
+          type: object
+          additionalProperties:
+            type: string
+            nullable: true
+        uid:
+          type: string
+        iri:
+          type: string
+          format: uri
+        type:
+          type: string
+          format: uri
+          description: The OEO class of this resource.
+        bundle:
+          type: string
+      required:
+      - bundle
+      - iri
+      - type
+      - uid
     PatchedScenario:
       type: object
       description: |-
@@ -5044,6 +5386,14 @@ components:
           type: string
           format: uri
           nullable: true
+    PeerReviewEnum:
+      enum:
+      - finished
+      - in_progress
+      type: string
+      description: |-
+        * `finished` - finished
+        * `in_progress` - in_progress
     RefEnum:
       enum:
       - table
@@ -5052,6 +5402,95 @@ components:
       description: |-
         * `table` - table
         * `dataset` - dataset
+    Removal:
+      type: object
+      description: |-
+        What a delete came to: two lists, because one status code cannot say.
+
+        `unlinked` holds only the nodes the typed containment walk **downgraded** --
+        ones something outside this bundle still cites, so they were detached
+        rather than destroyed. The shared regions, authors and ontology terms every
+        delete detaches are the rule that always applies, and listing them would
+        bury the line that is news.
+      properties:
+        deleted:
+          type: array
+          items:
+            $ref: '#/components/schemas/RemovedNode'
+        unlinked:
+          type: array
+          items:
+            $ref: '#/components/schemas/RemovedNode'
+        _meta:
+          allOf:
+          - $ref: '#/components/schemas/RemovalMeta'
+          title: ' meta'
+      required:
+      - _meta
+      - deleted
+      - unlinked
+    RemovalMeta:
+      type: object
+      description: |-
+        The two keys that appear only when something was lost after the commit.
+
+        The graph and the relational database cannot share a transaction, and the
+        graph commits first. A history entry or an ownership row that could not be
+        written afterwards is named beside the success it qualifies rather than
+        turned into an error for a write that did happen -- so these are absent on
+        an ordinary response and `false` when they are there. Never `true`: a
+        client should not have to check something on every response to learn that
+        the ordinary thing happened.
+      properties:
+        history_recorded:
+          type: boolean
+        ownership_recorded:
+          type: boolean
+        ownership_forgotten:
+          type: boolean
+        bundle:
+          type: string
+        resource:
+          $ref: '#/components/schemas/Resource'
+        scenario:
+          type: string
+      required:
+      - bundle
+      - resource
+    RemovedNode:
+      type: object
+      description: 'A node as a delete reports it back: an address and a class.'
+      properties:
+        iri:
+          type: string
+          format: uri
+        type:
+          type: string
+          format: uri
+          nullable: true
+          description: '`null` for a node whose class this API does not recognise,
+            which a response listing a bare address would not have said.'
+      required:
+      - iri
+      - type
+    Resource:
+      type: object
+      description: |-
+        Which resource a line is about: its OEO class and its identifier.
+
+        Both nullable, and for one reason: a row written before sub-resources
+        existed names neither, and is read as a bundle write.
+      properties:
+        type:
+          type: string
+          format: uri
+          nullable: true
+        uid:
+          type: string
+          nullable: true
+      required:
+      - type
+      - uid
     Scenario:
       type: object
       description: |-
@@ -5162,6 +5601,122 @@ components:
       required:
       - acronym
       - label
+    ScenarioBundleRead:
+      type: object
+      description: The bundle, its parts nested, exactly as a `POST` would take it
+        back.
+      properties:
+        label:
+          type: string
+        acronym:
+          type: string
+        abstract:
+          type: string
+          nullable: true
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeReference'
+        organisations:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeReference'
+        funders:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeReference'
+        frameworks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Part'
+        models:
+          type: array
+          items:
+            $ref: '#/components/schemas/Part'
+        scenarios:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScenarioRead'
+        study_reports:
+          type: array
+          items:
+            $ref: '#/components/schemas/StudyReportRead'
+        _meta:
+          allOf:
+          - $ref: '#/components/schemas/BundleMeta'
+          title: ' meta'
+        descriptors:
+          type: array
+          items:
+            type: string
+        sector_divisions:
+          type: array
+          items:
+            type: string
+        sectors:
+          type: array
+          items:
+            type: string
+        technologies:
+          type: array
+          items:
+            type: string
+        energy_carriers:
+          type: array
+          items:
+            type: string
+      required:
+      - _meta
+      - acronym
+      - label
+      - scenarios
+      - study_reports
+    ScenarioBundleSummary:
+      type: object
+      description: |-
+        Enough to find a bundle and decide which one, and nothing else.
+
+        Not a bundle with fields left out: the two a human recognises a bundle by
+        stay at the top level, where a bundle read has them too, and everything a
+        client cannot write is in `_meta`. The version is there because it is what
+        a pipeline's next write must send.
+      properties:
+        label:
+          type: string
+          nullable: true
+        acronym:
+          type: string
+          nullable: true
+        _meta:
+          allOf:
+          - $ref: '#/components/schemas/SummaryMeta'
+          title: ' meta'
+      required:
+      - _meta
+      - acronym
+      - label
+    ScenarioBundleSummaryPage:
+      type: object
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+          format: uri
+          nullable: true
+        previous:
+          type: string
+          format: uri
+          nullable: true
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScenarioBundleSummary'
+      required:
+      - count
+      - next
+      - previous
+      - results
     ScenarioDataTables:
       type: object
       properties:
@@ -5182,6 +5737,69 @@ components:
       - id
       - name
       - url
+    ScenarioRead:
+      type: object
+      description: |-
+        One scenario factsheet -- a sub-resource, not a field of its bundle.
+
+        What makes it one is the shape: it carries its own has-uuid. That uuid is
+        **not** a field here, because the server mints it; a client supplies no
+        identifier anywhere in this API.
+      properties:
+        label:
+          type: string
+        acronym:
+          type: string
+        abstract:
+          type: string
+          nullable: true
+        study_regions:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeReference'
+        interacting_regions:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeReference'
+        years:
+          type: array
+          items:
+            type: string
+            format: date-time
+        _meta:
+          allOf:
+          - $ref: '#/components/schemas/PartMeta'
+          title: ' meta'
+        scenario_types:
+          type: array
+          items:
+            type: string
+      required:
+      - _meta
+      - acronym
+      - label
+    ScenarioReadPage:
+      type: object
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+          format: uri
+          nullable: true
+        previous:
+          type: string
+          format: uri
+          nullable: true
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScenarioRead'
+      required:
+      - count
+      - next
+      - previous
+      - results
     StudyReport:
       type: object
       description: |-
@@ -5215,6 +5833,112 @@ components:
       - authors
       - label
       - publication_date
+    StudyReportRead:
+      type: object
+      description: |-
+        One study report -- the publication a bundle is written up in.
+
+        A sub-resource for the same reason a scenario is: the shape gives it its
+        own has-uuid, which the server mints, so it is not a field here.
+
+        What the shape requires of one, and therefore what is required here: a
+        label, at least one author, and exactly one publication date. The doi and
+        the reference are optional, and the reference is singular because the shape
+        allows at most one.
+      properties:
+        label:
+          type: string
+        doi:
+          type: string
+          nullable: true
+        publication_date:
+          type: string
+          format: date-time
+        authors:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeReference'
+        reference:
+          type: string
+          format: uri
+          nullable: true
+        _meta:
+          allOf:
+          - $ref: '#/components/schemas/PartMeta'
+          title: ' meta'
+      required:
+      - _meta
+      - authors
+      - label
+      - publication_date
+    StudyReportReadPage:
+      type: object
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+          format: uri
+          nullable: true
+        previous:
+          type: string
+          format: uri
+          nullable: true
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/StudyReportRead'
+      required:
+      - count
+      - next
+      - previous
+      - results
+    SummaryCounts:
+      type: object
+      properties:
+        scenarios:
+          type: integer
+        study_reports:
+          type: integer
+      required:
+      - scenarios
+      - study_reports
+    SummaryMeta:
+      type: object
+      properties:
+        uid:
+          type: string
+        iri:
+          type: string
+          format: uri
+        version:
+          type: integer
+        counts:
+          $ref: '#/components/schemas/SummaryCounts'
+      required:
+      - counts
+      - iri
+      - uid
+      - version
+    TableEntry:
+      type: object
+      description: One table a dataset link resolves to, as it stands today.
+      properties:
+        name:
+          type: string
+        peer_review:
+          nullable: true
+          description: |-
+            Three-valued, and `null` rather than `false` where there is no review: the peer review process postdates most of the data on this platform, so a boolean would read as a quality judgement on links that predate it. A table with several reviews reads `finished` if any of them finished.
+
+            * `finished` - finished
+            * `in_progress` - in_progress
+          oneOf:
+          - $ref: '#/components/schemas/PeerReviewEnum'
+          - $ref: '#/components/schemas/NullEnum'
+      required:
+      - name
+      - peer_review
     TypeEnum:
       enum:
       - input
