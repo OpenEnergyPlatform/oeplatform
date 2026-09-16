@@ -40,13 +40,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
@@ -56,13 +49,6 @@ paths:
           description: 'Authenticated, but not permitted: the table belongs to somebody
             else, or is under embargo, or the operation needs a level of permission
             on it that this account does not hold.'
-        '404':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No table of that name on this platform.
         '200':
           content:
             application/json:
@@ -85,13 +71,15 @@ paths:
       - tokenAuth: []
       - {}
       responses:
-        '401':
+        '403':
           content:
             application/json:
               schema:
                 type: object
                 additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
+          description: 'Authenticated, but not permitted: the table belongs to somebody
+            else, or is under embargo, or the operation needs a level of permission
+            on it that this account does not hold.'
         '200':
           content:
             application/json:
@@ -135,13 +123,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
@@ -151,13 +132,6 @@ paths:
           description: 'Authenticated, but not permitted: the table belongs to somebody
             else, or is under embargo, or the operation needs a level of permission
             on it that this account does not hold.'
-        '404':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No table of that name on this platform.
         '200':
           content:
             application/json:
@@ -200,13 +174,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
@@ -216,13 +183,6 @@ paths:
           description: 'Authenticated, but not permitted: the table belongs to somebody
             else, or is under embargo, or the operation needs a level of permission
             on it that this account does not hold.'
-        '404':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No table of that name on this platform.
         '200':
           content:
             application/json:
@@ -265,13 +225,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
@@ -281,13 +234,6 @@ paths:
           description: 'Authenticated, but not permitted: the table belongs to somebody
             else, or is under embargo, or the operation needs a level of permission
             on it that this account does not hold.'
-        '404':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No table of that name on this platform.
         '200':
           content:
             application/json:
@@ -330,13 +276,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
@@ -346,13 +285,6 @@ paths:
           description: 'Authenticated, but not permitted: the table belongs to somebody
             else, or is under embargo, or the operation needs a level of permission
             on it that this account does not hold.'
-        '404':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No table of that name on this platform.
         '200':
           content:
             application/json:
@@ -396,13 +328,15 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
+        '403':
           content:
             application/json:
               schema:
                 type: object
                 additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
+          description: 'Authenticated, but not permitted: the table belongs to somebody
+            else, or is under embargo, or the operation needs a level of permission
+            on it that this account does not hold.'
         '200':
           content:
             application/json:
@@ -448,13 +382,15 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
+        '403':
           content:
             application/json:
               schema:
                 type: object
                 additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
+          description: 'Authenticated, but not permitted: the table belongs to somebody
+            else, or is under embargo, or the operation needs a level of permission
+            on it that this account does not hold.'
         '200':
           content:
             application/json:
@@ -499,13 +435,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
@@ -515,13 +444,6 @@ paths:
           description: 'Authenticated, but not permitted: the table belongs to somebody
             else, or is under embargo, or the operation needs a level of permission
             on it that this account does not hold.'
-        '404':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No table of that name on this platform.
         '200':
           content:
             application/json:
@@ -564,13 +486,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
@@ -580,13 +495,6 @@ paths:
           description: 'Authenticated, but not permitted: the table belongs to somebody
             else, or is under embargo, or the operation needs a level of permission
             on it that this account does not hold.'
-        '404':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No table of that name on this platform.
         '200':
           content:
             application/json:
@@ -629,13 +537,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
@@ -645,13 +546,6 @@ paths:
           description: 'Authenticated, but not permitted: the table belongs to somebody
             else, or is under embargo, or the operation needs a level of permission
             on it that this account does not hold.'
-        '404':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No table of that name on this platform.
         '200':
           content:
             application/json:
@@ -694,13 +588,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
@@ -710,13 +597,6 @@ paths:
           description: 'Authenticated, but not permitted: the table belongs to somebody
             else, or is under embargo, or the operation needs a level of permission
             on it that this account does not hold.'
-        '404':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No table of that name on this platform.
         '200':
           content:
             application/json:
@@ -759,13 +639,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
@@ -775,13 +648,6 @@ paths:
           description: 'Authenticated, but not permitted: the table belongs to somebody
             else, or is under embargo, or the operation needs a level of permission
             on it that this account does not hold.'
-        '404':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No table of that name on this platform.
         '200':
           content:
             application/json:
@@ -824,13 +690,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
@@ -840,13 +699,6 @@ paths:
           description: 'Authenticated, but not permitted: the table belongs to somebody
             else, or is under embargo, or the operation needs a level of permission
             on it that this account does not hold.'
-        '404':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No table of that name on this platform.
         '200':
           content:
             application/json:
@@ -889,13 +741,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
@@ -905,13 +750,6 @@ paths:
           description: 'Authenticated, but not permitted: the table belongs to somebody
             else, or is under embargo, or the operation needs a level of permission
             on it that this account does not hold.'
-        '404':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No table of that name on this platform.
         '200':
           content:
             application/json:
@@ -954,13 +792,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
@@ -970,13 +801,6 @@ paths:
           description: 'Authenticated, but not permitted: the table belongs to somebody
             else, or is under embargo, or the operation needs a level of permission
             on it that this account does not hold.'
-        '404':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No table of that name on this platform.
         '200':
           content:
             application/json:
@@ -1019,13 +843,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
@@ -1035,13 +852,6 @@ paths:
           description: 'Authenticated, but not permitted: the table belongs to somebody
             else, or is under embargo, or the operation needs a level of permission
             on it that this account does not hold.'
-        '404':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No table of that name on this platform.
         '200':
           content:
             application/json:
@@ -1084,13 +894,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
@@ -1100,13 +903,6 @@ paths:
           description: 'Authenticated, but not permitted: the table belongs to somebody
             else, or is under embargo, or the operation needs a level of permission
             on it that this account does not hold.'
-        '404':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No table of that name on this platform.
         '200':
           content:
             application/json:
@@ -1149,13 +945,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
@@ -1165,13 +954,6 @@ paths:
           description: 'Authenticated, but not permitted: the table belongs to somebody
             else, or is under embargo, or the operation needs a level of permission
             on it that this account does not hold.'
-        '404':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No table of that name on this platform.
         '200':
           content:
             application/json:
@@ -1214,13 +996,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
@@ -1230,13 +1005,6 @@ paths:
           description: 'Authenticated, but not permitted: the table belongs to somebody
             else, or is under embargo, or the operation needs a level of permission
             on it that this account does not hold.'
-        '404':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No table of that name on this platform.
         '200':
           content:
             application/json:
@@ -1279,13 +1047,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
@@ -1295,13 +1056,6 @@ paths:
           description: 'Authenticated, but not permitted: the table belongs to somebody
             else, or is under embargo, or the operation needs a level of permission
             on it that this account does not hold.'
-        '404':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No table of that name on this platform.
         '200':
           content:
             application/json:
@@ -1344,13 +1098,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
@@ -1360,13 +1107,6 @@ paths:
           description: 'Authenticated, but not permitted: the table belongs to somebody
             else, or is under embargo, or the operation needs a level of permission
             on it that this account does not hold.'
-        '404':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No table of that name on this platform.
         '200':
           content:
             application/json:
@@ -1409,13 +1149,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
@@ -1425,13 +1158,6 @@ paths:
           description: 'Authenticated, but not permitted: the table belongs to somebody
             else, or is under embargo, or the operation needs a level of permission
             on it that this account does not hold.'
-        '404':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No table of that name on this platform.
         '200':
           content:
             application/json:
@@ -1474,13 +1200,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
@@ -1490,13 +1209,6 @@ paths:
           description: 'Authenticated, but not permitted: the table belongs to somebody
             else, or is under embargo, or the operation needs a level of permission
             on it that this account does not hold.'
-        '404':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No table of that name on this platform.
         '200':
           content:
             application/json:
@@ -1539,13 +1251,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
@@ -1555,13 +1260,6 @@ paths:
           description: 'Authenticated, but not permitted: the table belongs to somebody
             else, or is under embargo, or the operation needs a level of permission
             on it that this account does not hold.'
-        '404':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No table of that name on this platform.
         '200':
           content:
             application/json:
@@ -1604,13 +1302,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
@@ -1620,13 +1311,6 @@ paths:
           description: 'Authenticated, but not permitted: the table belongs to somebody
             else, or is under embargo, or the operation needs a level of permission
             on it that this account does not hold.'
-        '404':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No table of that name on this platform.
         '200':
           content:
             application/json:
@@ -1669,13 +1353,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
@@ -1685,13 +1362,6 @@ paths:
           description: 'Authenticated, but not permitted: the table belongs to somebody
             else, or is under embargo, or the operation needs a level of permission
             on it that this account does not hold.'
-        '404':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No table of that name on this platform.
         '200':
           content:
             application/json:
@@ -1734,13 +1404,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
@@ -1750,13 +1413,6 @@ paths:
           description: 'Authenticated, but not permitted: the table belongs to somebody
             else, or is under embargo, or the operation needs a level of permission
             on it that this account does not hold.'
-        '404':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No table of that name on this platform.
         '200':
           content:
             application/json:
@@ -1799,13 +1455,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
@@ -1815,13 +1464,6 @@ paths:
           description: 'Authenticated, but not permitted: the table belongs to somebody
             else, or is under embargo, or the operation needs a level of permission
             on it that this account does not hold.'
-        '404':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No table of that name on this platform.
         '200':
           content:
             application/json:
@@ -1864,13 +1506,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
@@ -1880,13 +1515,6 @@ paths:
           description: 'Authenticated, but not permitted: the table belongs to somebody
             else, or is under embargo, or the operation needs a level of permission
             on it that this account does not hold.'
-        '404':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No table of that name on this platform.
         '200':
           content:
             application/json:
@@ -1929,13 +1557,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
@@ -1945,13 +1566,6 @@ paths:
           description: 'Authenticated, but not permitted: the table belongs to somebody
             else, or is under embargo, or the operation needs a level of permission
             on it that this account does not hold.'
-        '404':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No table of that name on this platform.
         '200':
           content:
             application/json:
@@ -1994,13 +1608,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
@@ -2010,13 +1617,6 @@ paths:
           description: 'Authenticated, but not permitted: the table belongs to somebody
             else, or is under embargo, or the operation needs a level of permission
             on it that this account does not hold.'
-        '404':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No table of that name on this platform.
         '200':
           content:
             application/json:
@@ -2355,32 +1955,6 @@ paths:
       - tokenAuth: []
       - {}
       responses:
-        '400':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: 'The request could not be carried out as sent: a payload key
-            missing or holding something this endpoint cannot use, a column name that
-            is not a Postgres identifier, or a query the database refused. The body
-            carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
-        '403':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: 'Authenticated, but not permitted: the table belongs to somebody
-            else, or is under embargo, or the operation needs a level of permission
-            on it that this account does not hold.'
         '404':
           content:
             application/json:
@@ -5540,32 +5114,6 @@ paths:
       - tokenAuth: []
       - {}
       responses:
-        '400':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: 'The request could not be carried out as sent: a payload key
-            missing or holding something this endpoint cannot use, a column name that
-            is not a Postgres identifier, or a query the database refused. The body
-            carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
-        '403':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: 'Authenticated, but not permitted: the table belongs to somebody
-            else, or is under embargo, or the operation needs a level of permission
-            on it that this account does not hold.'
         '404':
           content:
             application/json:
@@ -5626,22 +5174,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
-        '403':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: 'Authenticated, but not permitted: the table belongs to somebody
-            else, or is under embargo, or the operation needs a level of permission
-            on it that this account does not hold.'
         '404':
           content:
             application/json:
@@ -5718,22 +5250,6 @@ paths:
                 type: object
                 additionalProperties: {}
           description: No credentials, or credentials this platform does not know.
-        '403':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: 'Authenticated, but not permitted: the table belongs to somebody
-            else, or is under embargo, or the operation needs a level of permission
-            on it that this account does not hold.'
-        '404':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No table of that name on this platform.
         '409':
           content:
             application/json:
@@ -5770,16 +5286,6 @@ paths:
       - tokenAuth: []
       - {}
       responses:
-        '400':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: 'The request could not be carried out as sent: a payload key
-            missing or holding something this endpoint cannot use, a column name that
-            is not a Postgres identifier, or a query the database refused. The body
-            carries `reason` or `error` naming which.'
         '401':
           content:
             application/json:
@@ -5938,22 +5444,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
-        '403':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: 'Authenticated, but not permitted: the table belongs to somebody
-            else, or is under embargo, or the operation needs a level of permission
-            on it that this account does not hold.'
         '404':
           content:
             application/json:
@@ -6155,32 +5645,6 @@ paths:
       - tokenAuth: []
       - {}
       responses:
-        '400':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: 'The request could not be carried out as sent: a payload key
-            missing or holding something this endpoint cannot use, a column name that
-            is not a Postgres identifier, or a query the database refused. The body
-            carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
-        '403':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: 'Authenticated, but not permitted: the table belongs to somebody
-            else, or is under embargo, or the operation needs a level of permission
-            on it that this account does not hold.'
         '404':
           content:
             application/json:
@@ -6434,13 +5898,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
@@ -6826,13 +6283,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
@@ -7168,16 +6618,6 @@ paths:
       - tokenAuth: []
       - {}
       responses:
-        '400':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: 'The request could not be carried out as sent: a payload key
-            missing or holding something this endpoint cannot use, a column name that
-            is not a Postgres identifier, or a query the database refused. The body
-            carries `reason` or `error` naming which.'
         '401':
           content:
             application/json:
@@ -7242,32 +6682,6 @@ paths:
       - tokenAuth: []
       - {}
       responses:
-        '400':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: 'The request could not be carried out as sent: a payload key
-            missing or holding something this endpoint cannot use, a column name that
-            is not a Postgres identifier, or a query the database refused. The body
-            carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
-        '403':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: 'Authenticated, but not permitted: the table belongs to somebody
-            else, or is under embargo, or the operation needs a level of permission
-            on it that this account does not hold.'
         '404':
           content:
             application/json:
@@ -7339,22 +6753,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
-        '403':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: 'Authenticated, but not permitted: the table belongs to somebody
-            else, or is under embargo, or the operation needs a level of permission
-            on it that this account does not hold.'
         '404':
           content:
             application/json:
@@ -7443,22 +6841,6 @@ paths:
                 type: object
                 additionalProperties: {}
           description: No credentials, or credentials this platform does not know.
-        '403':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: 'Authenticated, but not permitted: the table belongs to somebody
-            else, or is under embargo, or the operation needs a level of permission
-            on it that this account does not hold.'
-        '404':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No table of that name on this platform.
         '409':
           content:
             application/json:
@@ -7507,16 +6889,6 @@ paths:
       - tokenAuth: []
       - {}
       responses:
-        '400':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: 'The request could not be carried out as sent: a payload key
-            missing or holding something this endpoint cannot use, a column name that
-            is not a Postgres identifier, or a query the database refused. The body
-            carries `reason` or `error` naming which.'
         '401':
           content:
             application/json:
@@ -7699,22 +7071,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
-        '403':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: 'Authenticated, but not permitted: the table belongs to somebody
-            else, or is under embargo, or the operation needs a level of permission
-            on it that this account does not hold.'
         '404':
           content:
             application/json:
@@ -7952,32 +7308,6 @@ paths:
       - tokenAuth: []
       - {}
       responses:
-        '400':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: 'The request could not be carried out as sent: a payload key
-            missing or holding something this endpoint cannot use, a column name that
-            is not a Postgres identifier, or a query the database refused. The body
-            carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
-        '403':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: 'Authenticated, but not permitted: the table belongs to somebody
-            else, or is under embargo, or the operation needs a level of permission
-            on it that this account does not hold.'
         '404':
           content:
             application/json:
@@ -8260,13 +7590,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
@@ -8699,13 +8022,6 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
-        '401':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
@@ -9088,16 +8404,6 @@ paths:
       - tokenAuth: []
       - {}
       responses:
-        '400':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: 'The request could not be carried out as sent: a payload key
-            missing or holding something this endpoint cannot use, a column name that
-            is not a Postgres identifier, or a query the database refused. The body
-            carries `reason` or `error` naming which.'
         '401':
           content:
             application/json:
@@ -10066,9 +9372,15 @@ components:
       description: |-
         One row, or the values to set on the rows a filter selects.
 
-        Column names are the keys. On a `PUT` an `id` in the payload must match
-        the one in the path if it is sent at all: an id never changes.
+        Column names are the keys of `query`. On a `PUT` an `id` in the payload
+        must match the one in the path if it is sent at all: an id never changes.
       properties:
+        connection_id:
+          type: string
+          description: From `advanced/connection/open`.
+        cursor_id:
+          type: string
+          description: From `advanced/cursor/open`.
         query: {}
       required:
       - query

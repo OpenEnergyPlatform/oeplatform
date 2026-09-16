@@ -328,7 +328,9 @@ def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
                             f"The result of `{func.__name__}`, under `content`."
                         ),
                     )
-                }
+                },
+                400,
+                403,
             ),
             description=(
                 f"Runs `{func.__name__}` against the OEDB.\n\n" + ADVANCED_SESSION_NOTE

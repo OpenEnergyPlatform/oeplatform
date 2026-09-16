@@ -136,11 +136,16 @@ from api.api_description import (
     ALWAYS,
     DELIMITER,
     IS_SANDBOX,
+    OWNED_READ,
+    OWNED_WRITE,
+    PUBLIC_READ,
+    PUBLIC_READ_WITH_FILTERS,
     QUERY_WRAPPER,
     ROW_FILTERS,
     TABLE,
     AdvancedRequestSerializer,
     QueryWrappedSerializer,
+    RowDeleteSerializer,
     RowSerializer,
     SparqlSerializer,
     TableAlterSerializer,
@@ -255,7 +260,7 @@ class TableMetadataAPIView(APIView):
             "`resources[0]`."
         ),
         parameters=[TABLE],
-        responses=responses({200: describes("The OEMetadata document.")}),
+        responses=responses({200: describes("The OEMetadata document.")}, *PUBLIC_READ),
     )
     @api_exception
     @method_decorator(never_cache)
@@ -674,7 +679,8 @@ class TableAPIView(APIView):
                     "`name`, `columns`, `indexed` and `constraints`, each "
                     "keyed by name."
                 )
-            }
+            },
+            *PUBLIC_READ,
         ),
     )
     @api_exception
@@ -714,7 +720,10 @@ class TableAPIView(APIView):
         ),
         parameters=[TABLE],
         request=TableAlterSerializer,
-        responses=responses({200: describes("What the queued change came to.")}),
+        responses=responses(
+            {200: describes("What the queued change came to.")},
+            *PUBLIC_READ_WITH_FILTERS,
+        ),
     )
     @api_exception
     def post(self, request: Request, table: str) -> JsonLikeResponse:
@@ -772,7 +781,8 @@ class TableAPIView(APIView):
         request=TableCreateSerializer,
         responses=responses(
             {201: describes("Created. The body is empty; the table is at this URL.")},
-            *ALWAYS,
+            400,
+            401,
             409,
         ),
     )
@@ -894,7 +904,9 @@ class TableAPIView(APIView):
             "the rows with it."
         ),
         parameters=[TABLE],
-        responses=responses({200: describes("Deleted. The body is empty.")}),
+        responses=responses(
+            {200: describes("Deleted. The body is empty.")}, 401, 403, 404
+        ),
     )
     @api_exception
     @require_delete_permission
@@ -921,7 +933,10 @@ class TableColumnAPIView(APIView):
                 description="The column's name. Omit it for every column.",
             ),
         ],
-        responses=responses({200: describes("The column definitions, keyed by name.")}),
+        responses=responses(
+            {200: describes("The column definitions, keyed by name.")},
+            *PUBLIC_READ_WITH_FILTERS,
+        ),
     )
     @api_exception
     @method_decorator(never_cache)
@@ -1036,7 +1051,9 @@ class TableUnpublishAPIView(APIView):
         ),
         parameters=[TABLE],
         request=None,
-        responses=responses({200: describes("Unpublished. The body is empty.")}),
+        responses=responses(
+            {200: describes("Unpublished. The body is empty.")}, 401, 403, 404
+        ),
     )
     @api_exception
     @require_admin_permission
@@ -1072,7 +1089,8 @@ class TableRowsAPIView(APIView):
             *ROW_FILTERS,
         ],
         responses=responses(
-            {200: describes("The rows, as a list of objects keyed by column name.")}
+            {200: describes("The rows, as a list of objects keyed by column name.")},
+            *OWNED_READ,
         ),
     )
     @api_exception
@@ -1388,8 +1406,8 @@ class TableRowsAPIView(APIView):
             ),
             *ROW_FILTERS,
         ],
-        request=None,
-        responses=responses({200: describes("What was deleted.")}),
+        request=RowDeleteSerializer,
+        responses=responses({200: describes("What was deleted.")}, *OWNED_WRITE),
     )
     @api_exception
     @require_delete_permission
@@ -2090,7 +2108,7 @@ class AllTableSizesAPIView(APIView):
                 description="One table's name. Omit it for the whole list.",
             )
         ],
-        responses=responses({200: describes("The sizes.")}),
+        responses=responses({200: describes("The sizes.")}, *PUBLIC_READ),
     )
     @api_exception
     @method_decorator(never_cache)
@@ -2127,7 +2145,7 @@ class AllTableSizesAPIView(APIView):
                 )
             },
             400,
-            401,
+            403,
         ),
     )
 )
@@ -2173,7 +2191,7 @@ class AdvancedFetchAPIView(APIView):
             "out of a session left open by a client that stopped without "
             "closing it.\n\n" + ADVANCED_SESSION_NOTE
         ),
-        responses=responses({200: describes("Closed.")}, 401),
+        responses=responses({200: describes("Closed.")}, 403),
     )
 )
 class AdvancedCloseAllAPIView(LoginRequiredMixin, APIView):

@@ -65,8 +65,18 @@ REFUSALS = {
     409: describes("A table of that name already exists. Table names are global."),
 }
 
-#: What every OEDB endpoint can answer, whatever it was asked to do.
-ALWAYS = (400, 401, 403, 404)
+#: The refusal sets these endpoints actually give, read off their permission
+#: decorators rather than assumed. They differ more than they look: several
+#: reads here are public, so declaring `401` on one would describe a refusal it
+#: cannot give -- the same untruth in the other direction as leaving one out.
+PUBLIC_READ = (404,)
+PUBLIC_READ_WITH_FILTERS = (400, 404)
+OWNED_READ = (400, 403, 404)
+OWNED_WRITE = (400, 401, 403, 404)
+
+#: Kept as a name because several call sites read better for it, but it is the
+#: write set rather than a universal one.
+ALWAYS = OWNED_WRITE
 
 
 def responses(success, *codes, also=None):
@@ -301,11 +311,36 @@ class QueryWrappedSerializer(serializers.Serializer):
     query = serializers.JSONField()
 
 
-class RowSerializer(QueryWrappedSerializer):
+class SessionMixin(serializers.Serializer):
+    """The two identifiers that put a call inside an existing transaction.
+
+    Optional everywhere they are accepted: without them the endpoint opens a
+    connection and a cursor of its own, does the work and commits. With them it
+    joins the session `advanced/connection/open` and `advanced/cursor/open`
+    handed out, which is how several changes are committed or rolled back
+    together.
+    """
+
+    connection_id = serializers.CharField(
+        required=False, help_text="From `advanced/connection/open`."
+    )
+    cursor_id = serializers.CharField(
+        required=False, help_text="From `advanced/cursor/open`."
+    )
+
+
+class RowSerializer(SessionMixin, QueryWrappedSerializer):
     """One row, or the values to set on the rows a filter selects.
 
-    Column names are the keys. On a `PUT` an `id` in the payload must match
-    the one in the path if it is sent at all: an id never changes.
+    Column names are the keys of `query`. On a `PUT` an `id` in the payload
+    must match the one in the path if it is sent at all: an id never changes.
+    """
+
+
+class RowDeleteSerializer(SessionMixin):
+    """A delete takes no payload of its own -- only, optionally, a session.
+
+    What it deletes comes from the address and the `where` parameters.
     """
 
 
