@@ -16,7 +16,6 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 from django.urls import include, path, re_path
 from drf_spectacular.views import (
-    SpectacularAPIView,
     SpectacularSwaggerView,
 )
 
@@ -61,6 +60,7 @@ from api.views import (
     EnergymodelFactsheetListAPIView,
     ManageOekgScenarioDatasetsAPIView,
     OekgSparqlAPIView,
+    OpenAPIDescriptionAPIView,
     ScenarioDataTablesListAPIView,
     TableAPIView,
     TableBulkUploadAPIView,
@@ -280,7 +280,7 @@ urlpatterns_v0 = [
     # OpenAPI Schema (JSON)
     path(
         "schema/",
-        SpectacularAPIView.as_view(),
+        OpenAPIDescriptionAPIView.as_view(),
         name="openapi-schema",
     ),
     # Swagger UI

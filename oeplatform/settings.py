@@ -39,6 +39,10 @@ import sys
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 from pathlib import Path
 
+# Data only, and imported here for that reason: the reference's tag list has to
+# be in the settings the generator reads, and nothing that touches Django can
+# be imported at this point.
+from api.api_tags import TAGS as API_REFERENCE_TAGS
 from oeplatform.securitysettings import (
     ALLOWED_HOSTS,
     ANON_CONNECTION_LIMIT,
@@ -433,6 +437,10 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "Open Energy Platform API",
     "DESCRIPTION": "OpenAPI schema for the Open Energy Platform REST API.",
     "VERSION": "v0",
+    # The reference's groups, named and ordered rather than derived from the
+    # first path segment. `api.api_tags` imports nothing, which is what makes
+    # it safe to read here: this runs before the app registry exists.
+    "TAGS": API_REFERENCE_TAGS,
     "POSTPROCESSING_HOOKS": [
         "drf_spectacular.hooks.postprocess_schema_enums",
         # The legacy schema-qualified table addresses cannot be repaired at
