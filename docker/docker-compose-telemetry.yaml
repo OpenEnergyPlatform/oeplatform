@@ -1,0 +1,186 @@
+volumes:
+  pgdata:
+  fuseki_databases:
+  vite_node_modules:
+  vite_cache:
+  vite_temp:
+  prometheus_data:
+  grafana_data:
+
+services:
+  postgres:
+    image: ghcr.io/openenergyplatform/oeplatform-postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "${OEP_DEV_PORT_POSTGRES:-5432}:5432"
+
+  fuseki:
+    image: stain/jena-fuseki:5.1.0
+    container_name: fuseki
+    environment:
+      ADMIN_PASSWORD: "admin"
+      FUSEKI_DATASET_1: "ds"
+    volumes:
+      - fuseki_databases:/home/fuseki/databases
+      # - ./fuseki/config:/home/fuseki/configuration
+    restart: unless-stopped
+    ports:
+      - "${OEP_DEV_PORT_FUSEKI:-3030}:3030"
+
+  web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+      args:
+        USER_ID: ${USER_ID}
+        GROUP_ID: ${GROUP_ID}
+    user: "${USER_ID}:${GROUP_ID}"
+    image: oeplatform-dev
+    container_name: oeplatform-web-dev
+    working_dir: /home/appuser/app
+    volumes:
+      - type: bind
+        source: ..
+        target: /home/appuser/app
+    ports:
+      - "${OEP_DEV_PORT_WEB:-8000}:8000"
+      - "${OEP_DEV_PORT_DEBUGPY:-5678}:5678"
+    command:
+      - opentelemetry-instrument
+      - python
+      - -m
+      - debugpy
+      - --listen
+      - "0.0.0.0:5678"
+      - manage.py
+      - runserver
+      - "0.0.0.0:8000"
+    environment:
+      DJANGO_SETTINGS_MODULE: "oeplatform.settings"
+      CHOKIDAR_USEPOLLING: "false"
+      DEBUG: True
+      OEP_DJANGO_USER: postgres
+      OEP_DB_PW: postgres
+      OEP_DJANGO_HOST: postgres
+      OEP_DJANGO_NAME: oep_django
+      LOCAL_DB_USER: postgres
+      LOCAL_DB_PASSWORD: postgres
+      LOCAL_DB_NAME: oedb
+      LOCAL_DB_HOST: postgres
+      VITE_DEV_MODE: "True"
+      VITE_DEV_SERVER_URL: "http://vite:5173"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4317"
+      OTEL_EXPORTER_OTLP_INSECURE: "true"
+      OTEL_SERVICE_NAME: "oeplatform-web"
+    depends_on:
+      - postgres
+
+  vite:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.vite
+      args:
+        USER_ID: ${USER_ID}
+        GROUP_ID: ${GROUP_ID}
+    image: oeplatform-vite-dev
+    container_name: vite-js-dev
+    working_dir: /home/appuser/app
+    ports:
+      - "${OEP_DEV_PORT_VITE:-5173}:5173"
+    volumes:
+      - type: volume
+        source: vite_node_modules
+        target: /home/appuser/app/node_modules
+      - type: volume
+        source: vite_cache
+        target: /home/appuser/app/.vite_cache
+      - type: bind
+        source: ..
+        target: /home/appuser/app
+    environment:
+      CHOKIDAR_USEPOLLING: "false"
+      HOST: "0.0.0.0"
+    depends_on:
+      - web
+
+  ontop:
+    build:
+      context: .
+      dockerfile: Dockerfile.ontop
+    container_name: ontop
+    ports:
+      - "8080:8080"
+    environment:
+      ONTOP_MAPPING_FILE: "/opt/ontop-config/mapping.obda"
+      ONTOP_OWL_FILE: "/opt/ontop-config/ontology.owl"
+      ONTOP_PROPERTIES_FILE: "/opt/ontop-config/ontop.properties"
+    volumes:
+      - ./serviceConfigs/ontop:/opt/ontop-config
+    depends_on:
+      - postgres
+
+  lookup:
+    restart: unless-stopped
+    image: dbpedia/lookup:dev
+    container_name: loep_lookup_dev
+    ports:
+      - "3004:8082"
+    volumes:
+      - ./data/index/:/index
+      - ./serviceConfigs/lookup/config.yaml:/resources/config.yml
+  otel-collector:
+    image: otel/opentelemetry-collector:latest
+    container_name: otel-collector
+    command: ["--config=/etc/otel-config.yaml"]
+    volumes:
+      - ./otel-config.yaml:/etc/otel-config.yaml:Z
+    ports:
+      - "4317:4317" # OTLP gRPC receiver
+      - "4318:4318" # OTLP HTTP receiver
+      - "8889:8889" # Prometheus metrics scrape endpoint
+    networks:
+      - default
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "16686:16686" # Jaeger Web UI
+      - "4317"        # Internal OTLP gRPC port
+    networks:
+      - default
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:Z
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+    ports:
+      - "9090:9090" # Prometheus Web UI
+    networks:
+      - default
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3000:3000" # Grafana Web UI
+    depends_on:
+      - prometheus
+      - jaeger
+    networks:
+      - default
