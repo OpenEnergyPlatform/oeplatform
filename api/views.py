@@ -713,19 +713,21 @@ class TableAPIView(APIView):
     @extend_schema(
         summary="Change a table's columns or constraints",
         description=(
-            "Alters an existing table. **The payload is at the top level "
-            "here**, unlike the `PUT` on this same address, which reads it "
-            "out of `query`. `type` decides which kind of change is meant; "
-            "anything else is refused."
+            "Queues a change to an existing table's structure. It is not "
+            "applied on the spot: it lands in the change-request queue for "
+            "review.\n\n"
+            "**The payload is at the top level here**, unlike the `PUT` on "
+            "this same address, which reads it out of `query`. `type` decides "
+            "which kind of change is meant; anything else is refused."
         ),
         parameters=[TABLE],
         request=TableAlterSerializer,
         responses=responses(
-            {200: describes("What the queued change came to.")},
-            *PUBLIC_READ_WITH_FILTERS,
+            {200: describes("What the queued change came to.")}, *OWNED_WRITE
         ),
     )
     @api_exception
+    @require_write_permission
     def post(self, request: Request, table: str) -> JsonLikeResponse:
         """
         Changes properties of tables and table columns
