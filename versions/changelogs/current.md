@@ -357,6 +357,30 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Documentation updates
 
+- The API documentation described its OEDB half **twice** — once on the
+  generated API Reference and once on the OEDB page, which embedded a separate
+  hand-written file. The hand-written one is gone, and everything it described
+  is now in the reference, generated from the code: every one of the 107
+  operations of `api/v0` says what it does, 66 of them describe the payload they
+  take, and none is left to be inferred. The OEDB and OEKG pages are guides now
+  — what the endpoints are for and which one to reach for — and link into the
+  one reference instead of repeating it
+  [(#2454)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2454)
+
+- The eight schema-qualified table addresses
+  (`/api/v0/schema/<schema>/tables/…`) are documented as what they are: the
+  older spelling of `/api/v0/tables/…`, marked deprecated, with the `<schema>`
+  segment described as ignored — it is not read by anything, so any value
+  reaches the same table. They had been appearing in the reference with a
+  fragment of regular expression where the address should be, which no client
+  could call
+
+- The OEKG page is named for what it documents — the read-only SPARQL endpoint —
+  and says where writing to the graph happens instead. It had been titled "OEKG
+  API" while describing one endpoint of it. The scenario-dataset page no longer
+  escapes that section and appear beside "Architecture" in the top-level
+  navigation
+
 - The documentation has an **API Reference** page of its own, listing every
   endpoint of `api/v0` -- the OEDB table and row endpoints, the dataset
   endpoints and the OEKG scenario-bundle endpoints -- in one place. The

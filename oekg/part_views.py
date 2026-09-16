@@ -34,7 +34,9 @@ from rest_framework import status
 from rest_framework.response import Response
 
 from oekg.api_description import (
+    BUNDLE_UID,
     EXPAND_LABELS,
+    PART_PID,
     CollectionSchema,
     a_page_of,
     describes_a_guarded_write,
@@ -101,6 +103,7 @@ class BundlePartCollectionAPIView(BundlePartViewMixin, OekgAPIView):
             "a part has none of its own."
         ),
         parameters=[
+            BUNDLE_UID,
             EXPAND_LABELS,
             *paging(SubResourcePagination),
         ],
@@ -130,7 +133,7 @@ class BundlePartCollectionAPIView(BundlePartViewMixin, OekgAPIView):
                 "names its URL and `ETag` the **bundle's** new version."
             )
         },
-        parameters=[EXPAND_LABELS],
+        parameters=[BUNDLE_UID, EXPAND_LABELS],
     )
     def post(self, request, uid):
         """Add one part to this bundle.
@@ -192,7 +195,7 @@ class BundlePartAPIView(BundlePartViewMixin, OekgAPIView):
             "**bundle's** version, which is what a write to this part has to "
             "send back."
         ),
-        parameters=[EXPAND_LABELS],
+        parameters=[BUNDLE_UID, PART_PID, EXPAND_LABELS],
     )
     def get(self, request, uid, pid):
         """Read one part of a bundle, publicly."""
@@ -211,7 +214,7 @@ class BundlePartAPIView(BundlePartViewMixin, OekgAPIView):
                 "the bundle's new version."
             )
         },
-        parameters=[EXPAND_LABELS],
+        parameters=[BUNDLE_UID, PART_PID, EXPAND_LABELS],
     )
     def patch(self, request, uid, pid):
         """Change the fields this payload names, without touching its siblings.
@@ -272,7 +275,7 @@ class BundlePartAPIView(BundlePartViewMixin, OekgAPIView):
 
         return self.part_response(write, pid)
 
-    @describes_a_removal
+    @describes_a_removal(BUNDLE_UID, PART_PID)
     def delete(self, request, uid, pid):
         """Remove this part, and with it what only it holds.
 

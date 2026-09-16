@@ -183,6 +183,47 @@ LOCATION = OpenApiParameter(
 )
 
 
+def addresses(name, description):
+    """A path parameter, typed and explained.
+
+    Declared because the generator cannot derive one here: these are plain
+    `APIView`s with no queryset for it to read a field off, so an undeclared
+    path parameter arrives in the description untyped and unexplained. Every
+    identifier in this API is a server-minted uuid, which is worth saying once
+    per parameter rather than leaving a client to infer it from an example.
+    """
+    return OpenApiParameter(
+        name=name,
+        location=OpenApiParameter.PATH,
+        required=True,
+        type=str,
+        description=description,
+    )
+
+
+#: The identifiers this API's addresses are built from. All server-minted: a
+#: client supplies none of them anywhere.
+BUNDLE_UID = addresses(
+    "uid",
+    "The scenario bundle's identifier, as minted by the server on create and "
+    "returned in `_meta.uid`. A pipeline holding no state finds it again with "
+    "`GET /api/v0/scenario-bundles/?acronym=...`.",
+)
+
+PART_PID = addresses(
+    "pid",
+    "The identifier of the part this address names -- a scenario factsheet or "
+    "a study report, depending on the route.",
+)
+
+SCENARIO_SID = addresses(
+    "sid",
+    "The identifier of the scenario factsheet these dataset links hang off.",
+)
+
+LINK_DID = addresses("did", "The dataset link's identifier.")
+
+
 def expands(*values, description):
     """`?expand=` as this endpoint offers it.
 
@@ -475,22 +516,27 @@ def describes_a_guarded_write(
     )
 
 
-describes_a_removal = describes_a_guarded_write(
-    # Written once and applied to every delete below a bundle, so the
-    # description a client reads cannot drift from the one `removed` actually
-    # implements.
-    {
-        200: OpenApiResponse(
-            response=RemovalSerializer,
-            description=(
-                "Removed. The body names what was **deleted** and what was "
-                "only **unlinked**, which no status code can say: a node "
-                "another bundle still cites is kept and detached rather than "
-                "destroyed. Only the downgraded nodes are listed -- the "
-                "shared regions, authors and "
-                "ontology terms every delete detaches are the rule, not the "
-                "news."
-            ),
-        )
-    },
-)
+def describes_a_removal(*parameters):
+    """A delete below a bundle. Takes the parameters of the route it is on.
+
+    Written once and applied to every delete below a bundle, so the description
+    a client reads cannot drift from the one `removed` actually implements.
+    The parameters are the one thing it cannot know for itself: a scenario's
+    delete is addressed by two identifiers and a dataset link's by three.
+    """
+    return describes_a_guarded_write(
+        {
+            200: OpenApiResponse(
+                response=RemovalSerializer,
+                description=(
+                    "Removed. The body names what was **deleted** and what "
+                    "was only **unlinked**, which no status code can say: a "
+                    "node another bundle still cites is kept and detached "
+                    "rather than destroyed. Only the downgraded nodes are "
+                    "listed -- the shared regions, authors and ontology terms "
+                    "every delete detaches are the rule, not the news."
+                ),
+            )
+        },
+        parameters=list(parameters),
+    )

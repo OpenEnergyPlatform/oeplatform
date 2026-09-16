@@ -15,18 +15,12 @@ produced by `python manage.py spectacular` and committed to the repository as
 of the API became. A test in the suite regenerates it and fails if the committed
 file has fallen behind, naming the command that brings it back in step.
 
-!!! Info "Two descriptions of the OEDB endpoints"
+!!! Info "This is the only description of `api/v0`"
 
-    The [OEDB REST-API](./oedb-rest-api/index.md) page embeds an older,
-    hand-written description of the table and row endpoints, and it is kept for
-    now: the two are complementary rather than one superseding the other. This
-    page is generated, so it is complete about *which* endpoints exist; but the
-    OEDB views are not yet annotated, so it reports them without request or
-    response bodies, and the handful routed by regular expression rather than by
-    path appear here with that expression still in the address. The hand-written
-    page carries the bodies and the readable addresses, and can be out of date
-    about what is routed. Read them together until the OEDB endpoints are
-    annotated.
+    It used to share the job with a hand-written file behind the OEDB page.
+    That file is gone: every endpoint it described is here, described from the
+    code rather than by hand. The guides next to this page explain what the
+    endpoints are *for* and link here for what they take.
 
 !!! Info "OEP-API Token"
 

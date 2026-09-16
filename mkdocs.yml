@@ -112,13 +112,11 @@ nav:
       - Web-API's:
           - oeplatform-code/web-api/index.md
           - API Reference: oeplatform-code/web-api/api-reference.md
-          - OEDB REST-API:
-              - oeplatform-code/web-api/oedb-rest-api/index.md
-              - oeplatform-code/web-api/oedb-rest-api/resource-data-size.md
-            # - Draft open-API schema: oeplatform-code/web-api/oedb-rest-api/swagger-ui.html
-          - OEKG API:
-              - oeplatform-code/web-api/oekg-api/index.md
-      - Edit scenario datasets: oeplatform-code/web-api/oekg-api/scenario-dataset.md
+          - Guides:
+              - Working with the OEDB: oeplatform-code/web-api/oedb-rest-api/index.md
+              - Database table sizes: oeplatform-code/web-api/oedb-rest-api/resource-data-size.md
+              - Querying the OEKG with SPARQL: oeplatform-code/web-api/oekg-api/index.md
+              - Edit scenario datasets: oeplatform-code/web-api/oekg-api/scenario-dataset.md
       - Django Apps:
           - oeplatform-code/apps/index.md
           - oeplatform-code/apps/login.md

@@ -54,6 +54,7 @@ from django.http import Http404, HttpRequest, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
+from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (
     OpenApiExample,
     OpenApiParameter,
@@ -129,6 +130,28 @@ from api.actions import (
     try_convert_metadata_to_v2,
     try_parse_metadata,
     try_validate_metadata,
+)
+from api.api_description import (
+    ADVANCED_SESSION_NOTE,
+    ALWAYS,
+    DELIMITER,
+    IS_SANDBOX,
+    OWNED_READ,
+    OWNED_WRITE,
+    PUBLIC_READ,
+    PUBLIC_READ_WITH_FILTERS,
+    QUERY_WRAPPER,
+    ROW_FILTERS,
+    TABLE,
+    AdvancedRequestSerializer,
+    QueryWrappedSerializer,
+    RowDeleteSerializer,
+    RowSerializer,
+    SparqlSerializer,
+    TableAlterSerializer,
+    TableCreateSerializer,
+    describes,
+    responses,
 )
 from api.encode import Echo
 from api.error import APIError
@@ -229,6 +252,16 @@ class TableMetadataAPIView(APIView):
     Datasets are handled in the model.Datasets & api views.
     """
 
+    @extend_schema(
+        summary="Read a table's metadata",
+        description=(
+            "The table's OEMetadata document, as stored. A table carries one "
+            "resource, so a reader wanting the table's own fields wants "
+            "`resources[0]`."
+        ),
+        parameters=[TABLE],
+        responses=responses({200: describes("The OEMetadata document.")}, *PUBLIC_READ),
+    )
     @api_exception
     @method_decorator(never_cache)
     def get(self, request: Request, table: str) -> JsonLikeResponse:
@@ -236,6 +269,21 @@ class TableMetadataAPIView(APIView):
         metadata = table_obj.get_metadata()
         return JsonResponse(metadata)
 
+    @extend_schema(
+        summary="Set a table's metadata",
+        description=(
+            "Replaces the stored OEMetadata document. The payload is the "
+            "document itself, at the top level -- not wrapped in `query`. An "
+            "older version is converted to the current one, the column list is "
+            "synchronised with the table's actual columns, and the result is "
+            "validated before anything is stored; a document that fails "
+            "validation is refused and nothing changes. The table's keywords "
+            "become its tags on this platform."
+        ),
+        parameters=[TABLE],
+        request=OpenApiTypes.OBJECT,
+        responses=responses({200: describes("The metadata as it was stored.")}),
+    )
     @api_exception
     @require_write_permission
     @load_cursor()
@@ -335,6 +383,24 @@ def load_owned_dataset_from_request(request, dataset_name: str):
             )
         ],
     )
+)
+@extend_schema_view(
+    get=extend_schema(
+        summary="List datasets",
+        description=(
+            "Every dataset on the platform, each with its metadata. The "
+            "`resources` of a dataset are assembled from its member tables at "
+            "read time rather than stored, so this never reports a resource "
+            "the dataset no longer holds. Public."
+        ),
+    ),
+    post=extend_schema(
+        summary="Create a dataset",
+        description=(
+            "Creates a catalogue entry that tables can then be assigned to. "
+            "The name must be free; a taken one is refused naming the field."
+        ),
+    ),
 )
 class DatasetsListCreate(generics.ListCreateAPIView):
     queryset = Dataset.objects.prefetch_related("tables")
@@ -535,8 +601,38 @@ class AssignDatasetTables(APIView):
 
 
 class UnassignDatasetTables(APIView):
+    """Detach tables from a dataset. The tables themselves are untouched."""
+
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        summary="Unassign tables from a dataset",
+        description=(
+            "Removes the named tables from the dataset. The tables are not "
+            "deleted -- a dataset is a catalogue entry, and leaving it is not "
+            "leaving the platform. A name the dataset does not hold is "
+            "reported in `missing` rather than refused, so a repeated call is "
+            "safe."
+        ),
+        parameters=[
+            OpenApiParameter(
+                name="dataset_name",
+                location=OpenApiParameter.PATH,
+                required=True,
+                type=str,
+                description="The dataset's name.",
+            )
+        ],
+        request=DatasetAssignTablesSerializer,
+        responses=responses(
+            {
+                200: describes(
+                    "`removed` names what was detached and `missing` what the "
+                    "dataset did not hold."
+                )
+            }
+        ),
+    )
     def post(self, request, dataset_name):
         dataset, table_refs = load_owned_dataset_from_request(request, dataset_name)
         if table_refs is None:
@@ -570,6 +666,23 @@ class TableAPIView(APIView):
 
     objects = None
 
+    @extend_schema(
+        summary="Describe a table",
+        description=(
+            "The table's structure: its columns, its indexes and its "
+            "constraints. Not its rows -- those are at `rows/`."
+        ),
+        parameters=[TABLE],
+        responses=responses(
+            {
+                200: describes(
+                    "`name`, `columns`, `indexed` and `constraints`, each "
+                    "keyed by name."
+                )
+            },
+            *PUBLIC_READ,
+        ),
+    )
     @api_exception
     @method_decorator(never_cache)
     def get(self, request: Request, table: str) -> JsonLikeResponse:
@@ -597,6 +710,21 @@ class TableAPIView(APIView):
             }
         )
 
+    @extend_schema(
+        summary="Change a table's columns or constraints",
+        description=(
+            "Alters an existing table. **The payload is at the top level "
+            "here**, unlike the `PUT` on this same address, which reads it "
+            "out of `query`. `type` decides which kind of change is meant; "
+            "anything else is refused."
+        ),
+        parameters=[TABLE],
+        request=TableAlterSerializer,
+        responses=responses(
+            {200: describes("What the queued change came to.")},
+            *PUBLIC_READ_WITH_FILTERS,
+        ),
+    )
     @api_exception
     def post(self, request: Request, table: str) -> JsonLikeResponse:
         """
@@ -639,6 +767,25 @@ class TableAPIView(APIView):
         else:
             return ModJsonResponse(get_response_dict(False, 400, "type not recognised"))
 
+    @extend_schema(
+        summary="Create a table",
+        description=(
+            "Creates the table and its metadata row. **Two things about this "
+            "endpoint catch people out.** The target schema comes from the "
+            "`is_sandbox` query parameter, not from the payload. And table "
+            "names are global -- a name already taken anywhere on the "
+            "platform is a `409`, whichever schema or topic holds it.\n\n"
+            + QUERY_WRAPPER
+        ),
+        parameters=[TABLE, IS_SANDBOX],
+        request=TableCreateSerializer,
+        responses=responses(
+            {201: describes("Created. The body is empty; the table is at this URL.")},
+            400,
+            401,
+            409,
+        ),
+    )
     @api_exception
     def put(self, request: Request, table: str) -> JsonLikeResponse:
         """
@@ -750,6 +897,17 @@ class TableAPIView(APIView):
 
         return JsonResponse({}, status=status.HTTP_201_CREATED)
 
+    @extend_schema(
+        summary="Delete a table",
+        description=(
+            "Removes the table and its metadata. Irreversible, and it takes "
+            "the rows with it."
+        ),
+        parameters=[TABLE],
+        responses=responses(
+            {200: describes("Deleted. The body is empty.")}, 401, 403, 404
+        ),
+    )
     @api_exception
     @require_delete_permission
     def delete(self, request: Request, table: str) -> JsonLikeResponse:
@@ -759,6 +917,27 @@ class TableAPIView(APIView):
 
 
 class TableColumnAPIView(APIView):
+    @extend_schema(
+        summary="Describe a column, or every column",
+        description=(
+            "One column's definition, or the whole set when the address ends "
+            "at `columns/`."
+        ),
+        parameters=[
+            TABLE,
+            OpenApiParameter(
+                name="column",
+                location=OpenApiParameter.PATH,
+                required=False,
+                type=str,
+                description="The column's name. Omit it for every column.",
+            ),
+        ],
+        responses=responses(
+            {200: describes("The column definitions, keyed by name.")},
+            *PUBLIC_READ_WITH_FILTERS,
+        ),
+    )
     @api_exception
     @method_decorator(never_cache)
     def get(
@@ -774,6 +953,22 @@ class TableColumnAPIView(APIView):
                 raise APIError("The column specified is not part of this table.")
         return JsonResponse(response)
 
+    @extend_schema(
+        summary="Alter a column",
+        description="Changes an existing column's definition.\n\n" + QUERY_WRAPPER,
+        parameters=[
+            TABLE,
+            OpenApiParameter(
+                name="column",
+                location=OpenApiParameter.PATH,
+                required=True,
+                type=str,
+                description="The column's name.",
+            ),
+        ],
+        request=QueryWrappedSerializer,
+        responses=responses({200: describes("What the change came to.")}),
+    )
     @api_exception
     @require_write_permission
     def post(self, request: Request, table: str, column: str) -> JsonLikeResponse:
@@ -783,6 +978,22 @@ class TableColumnAPIView(APIView):
         response = column_alter(request_data_dict["query"], table_obj, column)
         return JsonResponse(response)
 
+    @extend_schema(
+        summary="Add a column",
+        description="Adds a column to an existing table.\n\n" + QUERY_WRAPPER,
+        parameters=[
+            TABLE,
+            OpenApiParameter(
+                name="column",
+                location=OpenApiParameter.PATH,
+                required=True,
+                type=str,
+                description="The column's name.",
+            ),
+        ],
+        request=QueryWrappedSerializer,
+        responses=responses({201: describes("Added. The body is empty.")}),
+    )
     @api_exception
     @require_write_permission
     def put(self, request: Request, table: str, column: str) -> JsonLikeResponse:
@@ -793,6 +1004,27 @@ class TableColumnAPIView(APIView):
 
 
 class TableMovePublishAPIView(APIView):
+    @extend_schema(
+        summary="Publish a table under a topic",
+        description=(
+            "Moves the table into a topic and marks it published. Needs "
+            "administrator permission on the table. An embargo may be given "
+            "either at the top level or inside `query` -- this endpoint reads "
+            "both, which is worth knowing because its neighbours do not."
+        ),
+        parameters=[
+            TABLE,
+            OpenApiParameter(
+                name="topic",
+                location=OpenApiParameter.PATH,
+                required=True,
+                type=str,
+                description="The topic to publish under.",
+            ),
+        ],
+        request=OpenApiTypes.OBJECT,
+        responses=responses({200: describes("Published. The body is empty.")}),
+    )
     @api_exception
     @require_admin_permission
     def post(self, request: Request, table: str, topic: str) -> JsonLikeResponse:
@@ -810,6 +1042,19 @@ class TableMovePublishAPIView(APIView):
 
 
 class TableUnpublishAPIView(APIView):
+    @extend_schema(
+        summary="Unpublish a table",
+        description=(
+            "Marks the table not published. It keeps its topic and its rows; "
+            "what changes is whether it is listed. Needs administrator "
+            "permission on the table."
+        ),
+        parameters=[TABLE],
+        request=None,
+        responses=responses(
+            {200: describes("Unpublished. The body is empty.")}, 401, 403, 404
+        ),
+    )
     @api_exception
     @require_admin_permission
     def post(self, request: HttpRequest, table: str) -> JsonLikeResponse:
@@ -821,6 +1066,33 @@ class TableUnpublishAPIView(APIView):
 
 
 class TableRowsAPIView(APIView):
+    @extend_schema(
+        summary="Read rows",
+        description=(
+            "One row by id, or the rows a filter selects. The filter "
+            "parameters and a row id are mutually exclusive: an id already "
+            "names one row, so sending both is refused rather than silently "
+            "resolved one way."
+        ),
+        parameters=[
+            TABLE,
+            OpenApiParameter(
+                name="row_id",
+                location=OpenApiParameter.PATH,
+                required=False,
+                type=int,
+                description=(
+                    "One row's id. Omit it to address the whole table; the "
+                    "filter parameters are then what select rows."
+                ),
+            ),
+            *ROW_FILTERS,
+        ],
+        responses=responses(
+            {200: describes("The rows, as a list of objects keyed by column name.")},
+            *OWNED_READ,
+        ),
+    )
     @api_exception
     @method_decorator(never_cache)
     def get(
@@ -977,6 +1249,34 @@ class TableRowsAPIView(APIView):
                 (dict(zip(cols, row)) for row in return_obj["data"]), session=session
             )
 
+    @extend_schema(
+        summary="Insert or update rows",
+        description=(
+            "At `rows/new` this inserts and answers `201`. At `rows/<id>` it "
+            "updates that row, and at `rows/` it updates the rows a filter "
+            "selects.\n\n" + QUERY_WRAPPER
+        ),
+        parameters=[
+            TABLE,
+            OpenApiParameter(
+                name="row_id",
+                location=OpenApiParameter.PATH,
+                required=False,
+                type=int,
+                description=(
+                    "One row's id. Omit it to address the whole table; the "
+                    "filter parameters are then what select rows."
+                ),
+            ),
+        ],
+        request=RowSerializer,
+        responses=responses(
+            {
+                200: describes("The rows as they now stand."),
+                201: describes("Inserted."),
+            }
+        ),
+    )
     @api_exception
     @require_write_permission
     def post(
@@ -1008,6 +1308,34 @@ class TableRowsAPIView(APIView):
         apply_changes(table_obj)
         return stream(response, status_code=status_code)
 
+    @extend_schema(
+        summary="Put one row at an id",
+        description=(
+            "Updates the row at this id, or inserts it there if it is not yet "
+            "taken. **An id never changes**: an `id` in the payload that "
+            "disagrees with the one in the address is a `409` rather than a "
+            "move. Requires an id -- `rows/new` is a `POST`.\n\n" + QUERY_WRAPPER
+        ),
+        parameters=[
+            TABLE,
+            OpenApiParameter(
+                name="row_id",
+                location=OpenApiParameter.PATH,
+                required=True,
+                type=int,
+                description="The row's id.",
+            ),
+        ],
+        request=RowSerializer,
+        responses=responses(
+            {
+                200: describes("Updated."),
+                201: describes("Inserted at that id."),
+            },
+            *ALWAYS,
+            409,
+        ),
+    )
     @api_exception
     @require_write_permission
     def put(
@@ -1058,6 +1386,29 @@ class TableRowsAPIView(APIView):
             apply_changes(table_obj)
             return JsonResponse(result, status=status.HTTP_201_CREATED)
 
+    @extend_schema(
+        summary="Delete rows",
+        description=(
+            "One row by id, or the rows a `where` filter selects. Deleting "
+            "with neither deletes every row in the table."
+        ),
+        parameters=[
+            TABLE,
+            OpenApiParameter(
+                name="row_id",
+                location=OpenApiParameter.PATH,
+                required=False,
+                type=int,
+                description=(
+                    "One row's id. Omit it to address the whole table; the "
+                    "filter parameters are then what select rows."
+                ),
+            ),
+            *ROW_FILTERS,
+        ],
+        request=RowDeleteSerializer,
+        responses=responses({200: describes("What was deleted.")}, *OWNED_WRITE),
+    )
     @api_exception
     @require_delete_permission
     def delete(
@@ -1330,6 +1681,41 @@ class TableBulkUploadAPIView(APIView):
     _log_bulk_upload_attempt for the format).
     """
 
+    @extend_schema(
+        summary="Append a CSV to a table",
+        description=(
+            "**The request body is the CSV itself**, not JSON wrapping one. "
+            "Rows are appended in one transaction: either the whole upload "
+            "lands or none of it does. It bypasses the edit journal, so there "
+            "is no per-row history for what it writes -- the `BulkLoadEvent` "
+            "it leaves is the upload's provenance.\n\n"
+            "Send it gzipped (`Content-Encoding: gzip`) unless the file is "
+            "small: the platform is not the bottleneck on a large upload, the "
+            "client's uplink is, and CSV compresses well enough to change what "
+            "is reachable.\n\n"
+            "At most one upload per account runs at a time; a second answers "
+            "`429` with `Retry-After` and writes nothing."
+        ),
+        parameters=[TABLE, DELIMITER],
+        request={"text/csv": OpenApiTypes.STR},
+        responses=responses(
+            {
+                201: describes(
+                    "Appended. `rows` is how many, `id_range` the first and "
+                    "last id written, and `event_id` names the BulkLoadEvent "
+                    "this upload left."
+                )
+            },
+            *ALWAYS,
+            also={
+                429: describes(
+                    "Another upload of yours is already running, or the "
+                    "platform is at its limit. Nothing was written and no "
+                    "event recorded. `Retry-After` says how long to wait."
+                )
+            },
+        ),
+    )
     @api_exception
     @require_write_permission
     def post(self, request: Request, table: str) -> JsonLikeResponse:
@@ -1577,9 +1963,29 @@ def oevkg_query_api_view(request: Request) -> JsonLikeResponse:
 
 
 class OekgSparqlAPIView(APIView):
+    """A read-only SPARQL endpoint over the OEKG."""
+
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        summary="Query the OEKG with SPARQL",
+        description=(
+            "Hands a query to the graph store and returns what comes back. "
+            "**Reads only**: a query that would update or delete is refused "
+            "whatever the caller's permissions, so this is not a way to write "
+            "to the graph. The scenario-bundle endpoints are, and they "
+            "validate what they write against the OEKG shape.\n\n"
+            "Authenticated by token. A `format` other than `json` is returned "
+            "with the store's own content type rather than parsed."
+        ),
+        request=SparqlSerializer,
+        responses=responses(
+            {200: describes("The store's answer, in the format asked for.")},
+            400,
+            401,
+        ),
+    )
     @api_exception
     def post(self, request: Request) -> JsonLikeResponse:
         request_data_dict = get_request_data_dict(request)
@@ -1637,8 +2043,28 @@ class ScenarioDataTablesListAPIView(generics.ListAPIView):
 
 
 class ManageOekgScenarioDatasetsAPIView(APIView):
+    """The user interface's route for attaching datasets to a scenario."""
+
     permission_classes = [IsAuthenticated]  # Require authentication
 
+    @extend_schema(
+        summary="Attach datasets to a scenario (superseded)",
+        description=(
+            "**Superseded** by the scenario-bundle dataset-link endpoints "
+            "under `/api/v0/scenario-bundles/<uid>/scenarios/<sid>/datasets/`, "
+            "which validate what they write against the OEKG shape and say on "
+            "every read whether a citation still resolves. This route writes "
+            "predicates the canonical shape does not validate; it is kept "
+            "because the user interface calls it."
+        ),
+        request=ScenarioBundleScenarioDatasetSerializer,
+        responses=responses(
+            {200: describes("What was attached.")},
+            400,
+            401,
+            403,
+        ),
+    )
     @api_exception
     @post_only_if_user_is_owner_of_scenario_bundle
     def post(self, request: Request) -> JsonLikeResponse:
@@ -1667,6 +2093,23 @@ class AllTableSizesAPIView(APIView):
     - none  -> all tables
     """
 
+    @extend_schema(
+        summary="Table sizes",
+        description=(
+            "How much space tables take in the database. Without `table` this "
+            "lists every table; with one it describes that table in detail."
+        ),
+        parameters=[
+            OpenApiParameter(
+                name="table",
+                location=OpenApiParameter.QUERY,
+                required=False,
+                type=str,
+                description="One table's name. Omit it for the whole list.",
+            )
+        ],
+        responses=responses({200: describes("The sizes.")}, *PUBLIC_READ),
+    )
     @api_exception
     @method_decorator(never_cache)
     def get(self, request: Request) -> JsonLikeResponse:
@@ -1684,7 +2127,28 @@ class AllTableSizesAPIView(APIView):
         return Response(data, status=status.HTTP_200_OK)
 
 
-@extend_schema_view(post=extend_schema(tags=["Advanced: Cursor"]))
+@extend_schema_view(
+    post=extend_schema(
+        tags=["Advanced: Cursor"],
+        summary="Fetch rows from an open cursor",
+        description=(
+            "Streams rows from a cursor opened by `advanced/cursor/open`, one "
+            "JSON array per line rather than one document -- so a large result "
+            "can be read without holding it whole.\n\n" + ADVANCED_SESSION_NOTE
+        ),
+        request=AdvancedRequestSerializer,
+        responses=responses(
+            {
+                200: describes(
+                    "One row per line, each a JSON array of cell values in "
+                    "column order."
+                )
+            },
+            400,
+            403,
+        ),
+    )
+)
 class AdvancedFetchAPIView(APIView):
     @api_exception
     def post(self, request: Request, fetchtype) -> JsonLikeResponse:
@@ -1718,7 +2182,18 @@ class AdvancedFetchAPIView(APIView):
         )
 
 
-@extend_schema_view(get=extend_schema(tags=["Advanced: Connection"]))
+@extend_schema_view(
+    get=extend_schema(
+        tags=["Advanced: Connection"],
+        summary="Close every connection this account holds",
+        description=(
+            "Closes all of this account's open database connections. The way "
+            "out of a session left open by a client that stopped without "
+            "closing it.\n\n" + ADVANCED_SESSION_NOTE
+        ),
+        responses=responses({200: describes("Closed.")}, 403),
+    )
+)
 class AdvancedCloseAllAPIView(LoginRequiredMixin, APIView):
     @api_exception
     def get(self, request: Request) -> JsonLikeResponse:
