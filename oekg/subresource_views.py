@@ -29,7 +29,6 @@ SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
-from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rdflib import Graph, URIRef
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
@@ -42,19 +41,6 @@ from oekg.labels import LABELS
 from oekg.removal import plan_removal
 from oekg.serializers import READ_ONLY_CONTAINER
 from oekg.writes import BundleWrite
-
-# Written once and applied to every delete, so the description a client reads
-# cannot drift from the one `removed` actually implements.
-describes_a_removal = extend_schema(
-    responses={
-        200: OpenApiResponse(
-            description=(
-                "Removed. The body names what was deleted and what was only "
-                "unlinked, which no status code can say."
-            )
-        )
-    }
-)
 
 
 class SubResourcePagination(PageNumberPagination):

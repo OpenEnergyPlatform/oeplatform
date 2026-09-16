@@ -30,6 +30,13 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
 
 from factsheet.models import API_ERA, OEKG_Modifications
+from oekg.api_description import (
+    CollectionSchema,
+    a_page_of,
+    describes_a_public_read,
+    expands,
+    paging,
+)
 from oekg.api_support import (
     OekgAPIView,
     bundle_exists,
@@ -38,6 +45,7 @@ from oekg.api_support import (
 )
 from oekg.graph_store import GraphStoreError
 from oekg.history import changed_fields
+from oekg.read_serializers import BundleHistoryEntrySerializer
 
 TRIPLES = "triples"
 
@@ -55,8 +63,52 @@ class ScenarioBundleHistoryAPIView(OekgAPIView):
 
     permission_classes = [AllowAny]
     offers_expansions = (TRIPLES,)
+    schema = CollectionSchema()
 
+    @describes_a_public_read(
+        a_page_of(
+            BundleHistoryEntrySerializer,
+            "A page of entries, newest first -- a history is read from the "
+            "present backwards. Each names the verb, the actor as a username, "
+            "the resource, the versions either side of the write, and the "
+            "fields that changed. `changes` is `null` rather than `[]` where "
+            "there cannot be a summary: an empty list would say that nothing "
+            "changed, and what is known is that nothing recorded *what* "
+            "changed.",
+        ),
+        parameters=[
+            expands(
+                TRIPLES,
+                description=(
+                    "`triples` adds the stored payload of each entry, so that "
+                    "a legible summary never becomes the only account."
+                ),
+            ),
+            *paging(HistoryPagination),
+        ],
+        # A history carries no entity tag: it is a ledger of events, not a
+        # state a write could be guarded against.
+        entity_tag=False,
+    )
     def get(self, request, uid):
+        """Read one bundle's change history.
+
+        **Public, but per bundle and paginated.** What makes a bundle read
+        public does not transfer -- that rests on the SPARQL endpoint already
+        serving the same data, and this is in no graph. What it exposes is not
+        bundle content but who edited what, and when; a per-bundle log is a
+        record about a bundle, while a global one would be a profile of a
+        person's activity across the platform.
+
+        **A deleted bundle's history is still readable**, and is the whole of
+        what a whole-bundle delete leaves: one line saying who removed it, when,
+        and under which acronym. So existence here means *in the graph or in
+        this ledger*, and a bundle nobody ever wrote has neither.
+
+        Two generations of entry share this endpoint. Rows written before this
+        API existed carry `era` saying so, and no field-level summary: nothing
+        recorded which fields they touched.
+        """
         entries = OEKG_Modifications.objects.filter(bundle_id=uid).select_related(
             "user"
         )
