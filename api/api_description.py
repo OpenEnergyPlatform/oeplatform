@@ -38,6 +38,8 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse
 from rest_framework import serializers
 
+from api.api_tags import TABLES_LEGACY
+
 
 def describes(description):
     """A JSON response that carries a body, described rather than schema'd."""
@@ -380,6 +382,17 @@ LEGACY_TABLE_PATTERN = "/api/v0/schema/[\\w\\d_]/tables/"
 
 LEGACY_TABLE_PATH = "/api/v0/schema/{schema}/tables/"
 
+#: The same uncaptured group reaches the operation ids, which are generated
+#: from the path before any hook runs: `schema_[\w\d_]_tables_retrieve`. An
+#: id is what a generated client turns into a method name, so this one is not
+#: cosmetic either.
+LEGACY_OPERATION_ID = "schema_[\\w\\d_]_"
+
+#: What it is renamed to. Still distinct from the canonical `tables_*` ids,
+#: because these are a second spelling of the same operations rather than the
+#: same operation described twice.
+CANONICAL_LEGACY_OPERATION_ID = "schema_"
+
 LEGACY_SCHEMA_PARAMETER = {
     "in": "path",
     "name": "schema",
@@ -403,8 +416,8 @@ LEGACY_TABLE_NOTE = (
 def name_the_legacy_table_routes(result, generator, request, public):
     """Make the legacy table addresses callable, and say they are superseded.
 
-    A drf-spectacular postprocessing hook. Three things are wrong with those
-    paths as generated, and all three are consequences of one cause -- the
+    A drf-spectacular postprocessing hook. Four things are wrong with those
+    paths as generated, and all four are consequences of one cause -- the
     route's schema segment is an uncaptured group:
 
     - **The address cannot be called.** It arrives as
@@ -417,9 +430,15 @@ def name_the_legacy_table_routes(result, generator, request, public):
       expensive of the two mistakes.
     - **Nothing said it was the older spelling.** Marked deprecated, with the
       canonical address named.
+    - **The operation id carried the pattern too**, so a generated client would
+      have held a method named after a character class. Renamed to the same
+      address's canonical id with `schema_` in front of it.
 
-    Done here rather than at the route because one view serves both spellings:
-    an annotation on the view would deprecate the canonical address too.
+    It also puts these operations in their own group, named for what they are
+    rather than for their first path segment. That is the fourth consequence
+    of the same cause and the reason all of it is done here rather than at the
+    route: **one view serves both spellings**, so an annotation on the view
+    would deprecate the canonical address too, and tag it as legacy with it.
     """
     paths = result.get("paths", {})
     for path in [p for p in paths if p.startswith(LEGACY_TABLE_PATTERN)]:
@@ -430,6 +449,10 @@ def name_the_legacy_table_routes(result, generator, request, public):
             if not isinstance(operation, dict):
                 continue
             operation["deprecated"] = True
+            operation["tags"] = [TABLES_LEGACY]
+            operation["operationId"] = operation.get("operationId", "").replace(
+                LEGACY_OPERATION_ID, CANONICAL_LEGACY_OPERATION_ID, 1
+            )
             operation["parameters"] = [
                 LEGACY_SCHEMA_PARAMETER,
                 *operation.get("parameters", []),
