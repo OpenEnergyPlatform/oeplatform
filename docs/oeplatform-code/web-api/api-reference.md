@@ -22,6 +22,17 @@ file has fallen behind, naming the command that brings it back in step.
     code rather than by hand. The guides next to this page explain what the
     endpoints are *for* and link here for what they take.
 
+!!! Info "Linking to a section"
+
+    The endpoints are grouped into named sections -- *Tables*, *Datasets*,
+    *Scenario Bundles*, the `advanced/` interface, and the superseded surfaces
+    last -- and each section has an address of its own, so a page can point at
+    one and land there: [Scenario Bundles](#/Scenario%20Bundles).
+
+    The names are chosen rather than taken from the addresses, which is what
+    makes those links survive a route moving, and what lets a section say that
+    it is superseded and name what replaced it.
+
 !!! Info "OEP-API Token"
 
     Most write endpoints need authentication. Register at
