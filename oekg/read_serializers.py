@@ -74,7 +74,7 @@ class LabelsMixin(serializers.Serializer):
     )
 
 
-class ResourceSerializer(serializers.Serializer):
+class ResourceReferenceSerializer(serializers.Serializer):
     """Which resource a line is about: its OEO class and its identifier.
 
     Both nullable, and for one reason: a row written before sub-resources
@@ -91,7 +91,7 @@ class BundleMetaSerializer(GapsMixin, LabelsMixin):
     version = serializers.IntegerField()
 
 
-class PartMetaSerializer(GapsMixin, LabelsMixin):
+class SubResourceMetaSerializer(GapsMixin, LabelsMixin):
     uid = serializers.CharField()
     iri = serializers.URLField()
     type = serializers.URLField(help_text="The OEO class of this resource.")
@@ -115,7 +115,7 @@ class TableEntrySerializer(serializers.Serializer):
     )
 
 
-class DatasetLinkMetaSerializer(PartMetaSerializer):
+class DatasetLinkMetaSerializer(SubResourceMetaSerializer):
     target_iri = serializers.URLField(
         allow_null=True,
         help_text=(
@@ -147,11 +147,11 @@ class DatasetLinkMetaSerializer(PartMetaSerializer):
 
 
 class ScenarioReadSerializer(ScenarioSerializer):
-    _meta = PartMetaSerializer()
+    _meta = SubResourceMetaSerializer()
 
 
 class StudyReportReadSerializer(StudyReportSerializer):
-    _meta = PartMetaSerializer()
+    _meta = SubResourceMetaSerializer()
 
 
 class DatasetLinkReadSerializer(DatasetLinkSerializer):
@@ -221,7 +221,7 @@ class BundleHistoryEntrySerializer(serializers.Serializer):
         allow_null=True, help_text="A username, not an internal identifier."
     )
     timestamp = serializers.DateTimeField()
-    resource = ResourceSerializer(
+    resource = ResourceReferenceSerializer(
         help_text="The class and identifier the write was about."
     )
     acronym = serializers.CharField(
@@ -261,7 +261,7 @@ class RemovedNodeSerializer(serializers.Serializer):
 
 class RemovalMetaSerializer(GapsMixin):
     bundle = serializers.CharField()
-    resource = ResourceSerializer()
+    resource = ResourceReferenceSerializer()
     # Only a dataset link is addressed below a scenario, so only its removal
     # names one.
     scenario = serializers.CharField(required=False)

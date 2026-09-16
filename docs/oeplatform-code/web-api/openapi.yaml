@@ -4606,7 +4606,7 @@ components:
           format: date-time
         resource:
           allOf:
-          - $ref: '#/components/schemas/Resource'
+          - $ref: '#/components/schemas/ResourceReference'
           description: The class and identifier the write was about.
         acronym:
           type: string
@@ -5233,46 +5233,6 @@ components:
           nullable: true
       required:
       - label
-    PartMeta:
-      type: object
-      description: |-
-        The two keys that appear only when something was lost after the commit.
-
-        The graph and the relational database cannot share a transaction, and the
-        graph commits first. A history entry or an ownership row that could not be
-        written afterwards is named beside the success it qualifies rather than
-        turned into an error for a write that did happen -- so these are absent on
-        an ordinary response and `false` when they are there. Never `true`: a
-        client should not have to check something on every response to learn that
-        the ordinary thing happened.
-      properties:
-        history_recorded:
-          type: boolean
-        ownership_recorded:
-          type: boolean
-        ownership_forgotten:
-          type: boolean
-        labels:
-          type: object
-          additionalProperties:
-            type: string
-            nullable: true
-        uid:
-          type: string
-        iri:
-          type: string
-          format: uri
-        type:
-          type: string
-          format: uri
-          description: The OEO class of this resource.
-        bundle:
-          type: string
-      required:
-      - bundle
-      - iri
-      - type
-      - uid
     PatchedScenario:
       type: object
       description: |-
@@ -5451,7 +5411,7 @@ components:
         bundle:
           type: string
         resource:
-          $ref: '#/components/schemas/Resource'
+          $ref: '#/components/schemas/ResourceReference'
         scenario:
           type: string
       required:
@@ -5473,7 +5433,7 @@ components:
       required:
       - iri
       - type
-    Resource:
+    ResourceReference:
       type: object
       description: |-
         Which resource a line is about: its OEO class and its identifier.
@@ -5768,7 +5728,7 @@ components:
             format: date-time
         _meta:
           allOf:
-          - $ref: '#/components/schemas/PartMeta'
+          - $ref: '#/components/schemas/SubResourceMeta'
           title: ' meta'
         scenario_types:
           type: array
@@ -5864,7 +5824,7 @@ components:
           nullable: true
         _meta:
           allOf:
-          - $ref: '#/components/schemas/PartMeta'
+          - $ref: '#/components/schemas/SubResourceMeta'
           title: ' meta'
       required:
       - _meta
@@ -5893,6 +5853,46 @@ components:
       - next
       - previous
       - results
+    SubResourceMeta:
+      type: object
+      description: |-
+        The two keys that appear only when something was lost after the commit.
+
+        The graph and the relational database cannot share a transaction, and the
+        graph commits first. A history entry or an ownership row that could not be
+        written afterwards is named beside the success it qualifies rather than
+        turned into an error for a write that did happen -- so these are absent on
+        an ordinary response and `false` when they are there. Never `true`: a
+        client should not have to check something on every response to learn that
+        the ordinary thing happened.
+      properties:
+        history_recorded:
+          type: boolean
+        ownership_recorded:
+          type: boolean
+        ownership_forgotten:
+          type: boolean
+        labels:
+          type: object
+          additionalProperties:
+            type: string
+            nullable: true
+        uid:
+          type: string
+        iri:
+          type: string
+          format: uri
+        type:
+          type: string
+          format: uri
+          description: The OEO class of this resource.
+        bundle:
+          type: string
+      required:
+      - bundle
+      - iri
+      - type
+      - uid
     SummaryCounts:
       type: object
       properties:
