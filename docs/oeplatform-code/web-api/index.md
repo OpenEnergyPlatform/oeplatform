@@ -6,12 +6,25 @@ SPDX-License-Identifier: CC0-1.0
 
 # Web API´s
 
-This section describes the web APIs provided by the oeplatform. In the context
-of the oeplatform, the web APIs include http request interfaces that require an
-expected request body with a JSON data structure to formulate the specific
-request. As a result, a JSON response is sent back.
+This section describes the web APIs provided by the oeplatform: HTTP interfaces
+that take a JSON request body and answer with a JSON one.
 
-Currently, a REST API is used that provides basic data management functions for
-interacting with the OEDB, with a focus on interacting with the data uploaded by
-users. The other WEB API provides functions for interacting with the scenario
-bundles. With this API, users can perform complex semantic queries.
+There is **one API**, `api/v0`, and it covers two kinds of thing: the OEDB — the
+data tables users upload and the datasets that group them — and the OEKG, the
+knowledge graph of scenario bundles.
+
+**One page describes every endpoint of it.** The
+[API Reference](./api-reference.md) is generated from the code and checked
+against it by the test suite, so it is the page to trust about what exists, what
+a call takes and what it can answer.
+
+The guides beside it do the other job — what the endpoints are _for_, which one
+to reach for, and the handful of things that catch people out. They link into
+the reference rather than repeating it:
+
+- [Working with the OEDB](./oedb-rest-api/index.md) — how a table is addressed,
+  creating one, and uploading a lot of rows at once.
+- [How much data fits](./oedb-rest-api/resource-data-size.md) — the size limits
+  and what to do about them.
+- [Querying the OEKG with SPARQL](./oekg-api/index.md) — the read-only graph
+  endpoint, and where writing to the graph happens instead.

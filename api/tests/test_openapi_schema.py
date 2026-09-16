@@ -83,6 +83,11 @@ def _routes(patterns, prefix=""):
             yield route
 
 
+#: The legacy schema-qualified table addresses, after the postprocessing hook
+#: has made them callable. Their canonical form is `/api/v0/tables/...`.
+LEGACY_TABLE_PATH = "/api/v0/schema/{schema}/tables/"
+
+
 class OpenAPISchemaTest(SimpleTestCase):
     """The committed description, checked against a fresh generation.
 
@@ -92,6 +97,7 @@ class OpenAPISchemaTest(SimpleTestCase):
 
     generated = None
     generation_error = None
+    generation_output = ""
 
     @classmethod
     def setUpClass(cls):
@@ -107,6 +113,7 @@ class OpenAPISchemaTest(SimpleTestCase):
             if result.returncode != 0:
                 cls.generation_error = result.stderr
                 return
+            cls.generation_output = result.stderr
             cls.generated = fresh.read_text(encoding="utf-8")
 
     def _require_a_generated_description(self):
@@ -160,6 +167,91 @@ class OpenAPISchemaTest(SimpleTestCase):
             "The committed OpenAPI description no longer matches the API it "
             "describes. Regenerate it and commit the result:\n"
             f"    {REGENERATE}\n\n" + "\n".join(shown)
+        )
+
+    def test_the_description_is_generated_without_complaint(self):
+        """No view left unannotated, anywhere in `api/v0`.
+
+        The generator reports a view whose request or response it cannot
+        resolve, and then **drops it** -- so an unannotated view is not a
+        cosmetic complaint, it is an endpoint missing from the description. For
+        most of this project's life there were hundreds of those, and the
+        noise made the few that mattered unfindable.
+
+        Asserted here rather than by passing `--fail-on-warn` to the command.
+        The distinction is the one #2457 drew: the flag makes the artifact
+        *unregenerable* while a complaint stands, which is a bad place to be
+        mid-change. A failing test says the same thing without taking the
+        command away.
+        """
+        self._require_a_generated_description()
+        summary = [
+            line
+            for line in (self.generation_output or "").splitlines()
+            if line.startswith(("Error", "Warning"))
+        ]
+        self.assertEqual(
+            [],
+            summary,
+            "The generator is complaining about views it cannot describe. Each "
+            "line names one; a view it cannot resolve is dropped from the "
+            "description entirely. Annotate it -- `api/api_description.py` and "
+            "`oekg/api_description.py` hold the vocabulary -- and regenerate:\n"
+            f"    {REGENERATE}",
+        )
+
+    def test_the_legacy_table_addresses_are_callable_and_marked(self):
+        """The schema-qualified spelling, as a client has to read it.
+
+        Its schema segment is not captured by the route, so the generator
+        renders the address with the raw character class in it -- something no
+        client can call. `api.api_description.name_the_legacy_table_routes`
+        repairs it, and this is what says the repair still runs: without the
+        hook these paths come back as `/api/v0/schema/[\\w\\d_]/tables/...`
+        and nothing else in the suite would notice.
+        """
+        self._require_a_generated_description()
+        document = yaml.safe_load(self.generated)
+        legacy = [p for p in document["paths"] if p.startswith(LEGACY_TABLE_PATH)]
+        self.assertTrue(legacy, "no legacy schema-qualified table paths found")
+        for path in document["paths"]:
+            self.assertNotRegex(
+                path,
+                r"[\[\]\\^$*+]",
+                f"{path} carries a regular expression where an address should "
+                "be. A route whose parameter is not a named group renders this "
+                "way; see name_the_legacy_table_routes.",
+            )
+        for path in legacy:
+            for method, operation in document["paths"][path].items():
+                self.assertTrue(
+                    operation.get("deprecated"),
+                    f"{method.upper()} {path} is the older spelling of an "
+                    "endpoint and does not say so.",
+                )
+                self.assertIn(
+                    "schema",
+                    [p["name"] for p in operation.get("parameters", [])],
+                    f"{method.upper()} {path} has a schema segment in its "
+                    "address and does not describe it.",
+                )
+
+    def test_every_operation_says_what_it_does(self):
+        """A route in the document with nothing written about it is half a fact."""
+        self._require_a_generated_description()
+        document = yaml.safe_load(self.generated)
+        silent = [
+            f"{method.upper()} {path}"
+            for path, methods in document["paths"].items()
+            for method, operation in methods.items()
+            if isinstance(operation, dict) and not operation.get("description")
+        ]
+        self.assertEqual(
+            [],
+            silent,
+            "These operations are described by their address alone. Give each "
+            "an `extend_schema(description=...)` or a docstring, and "
+            f"regenerate:\n    {REGENERATE}",
         )
 
     def test_every_scenario_bundle_endpoint_reaches_the_document(self):

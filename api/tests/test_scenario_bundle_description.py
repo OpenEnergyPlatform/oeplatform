@@ -35,9 +35,10 @@ from django.test import SimpleTestCase
 
 from api.tests.test_openapi_schema import ARTIFACT, REGENERATE
 
-#: Everything below this prefix is this slice's subject. The OEDB table, row
-#: and ``advanced/`` endpoints are described by the hand-written
-#: ``schema.json`` and are explicitly out of scope (#2454).
+#: Everything below this prefix is this module's subject. The OEDB endpoints
+#: are held to the checks in ``test_openapi_schema``; the stricter rules here
+#: -- `If-Match`, the precondition refusals, the entity tag -- are the
+#: scenario-bundle contract and describe nothing the OEDB API does.
 PREFIX = "/api/v0/scenario-bundles"
 
 WRITE_METHODS = ("post", "patch", "delete")

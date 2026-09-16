@@ -33,7 +33,10 @@ from rest_framework import status
 from rest_framework.response import Response
 
 from oekg.api_description import (
+    BUNDLE_UID,
     EXPAND_LABELS,
+    LINK_DID,
+    SCENARIO_SID,
     CollectionSchema,
     a_page_of,
     describes_a_guarded_write,
@@ -137,6 +140,8 @@ class DatasetLinkCollectionAPIView(DatasetLinkViewMixin, OekgAPIView):
             "A page of this scenario's dataset links. " + RESOLUTION,
         ),
         parameters=[
+            BUNDLE_UID,
+            SCENARIO_SID,
             EXPAND_LABELS,
             *paging(SubResourcePagination),
         ],
@@ -165,7 +170,7 @@ class DatasetLinkCollectionAPIView(DatasetLinkViewMixin, OekgAPIView):
             )
         },
         request=DatasetLinkSerializer,
-        parameters=[EXPAND_LABELS],
+        parameters=[BUNDLE_UID, SCENARIO_SID, EXPAND_LABELS],
         responses={
             400: json_body(
                 "The payload named a key this link does not have, or a `type` "
@@ -252,7 +257,7 @@ class DatasetLinkAPIView(DatasetLinkViewMixin, OekgAPIView):
             response=DatasetLinkReadSerializer,
             description="One dataset link. " + RESOLUTION,
         ),
-        parameters=[EXPAND_LABELS],
+        parameters=[BUNDLE_UID, SCENARIO_SID, LINK_DID, EXPAND_LABELS],
     )
     def get(self, request, uid, sid, did):
         """Read one dataset link, publicly.
@@ -273,7 +278,7 @@ class DatasetLinkAPIView(DatasetLinkViewMixin, OekgAPIView):
             return _no_such_link(did)
         return self.link_response(write, sid, did)
 
-    @describes_a_removal
+    @describes_a_removal(BUNDLE_UID, SCENARIO_SID, LINK_DID)
     def delete(self, request, uid, sid, did):
         """Remove one link. Its target is not touched and never was.
 

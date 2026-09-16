@@ -17,7 +17,7 @@ from oeplatform.settings import URL
 class EnergyframeworkSerializer(serializers.ModelSerializer):
     url = serializers.SerializerMethodField()
 
-    def get_url(self, obj):
+    def get_url(self, obj) -> str:
         kwargs = {"sheettype": "framework", "pk": obj.id}
         detail_url = reverse(
             "modelview:show-factsheet",
@@ -33,7 +33,7 @@ class EnergyframeworkSerializer(serializers.ModelSerializer):
 class EnergymodelSerializer(serializers.ModelSerializer):
     url = serializers.SerializerMethodField()
 
-    def get_url(self, obj):
+    def get_url(self, obj) -> str:
         kwargs = {"sheettype": "model", "pk": obj.id}
         detail_url = reverse(
             "modelview:show-factsheet",
@@ -49,7 +49,7 @@ class EnergymodelSerializer(serializers.ModelSerializer):
 class ScenarioDataTablesSerializer(serializers.ModelSerializer):
     url = serializers.SerializerMethodField()
 
-    def get_url(self, obj):
+    def get_url(self, obj) -> str:
         kwargs = {"table": obj.name}
         detail_url = reverse(
             "dataedit:view",
@@ -173,7 +173,7 @@ class DatasetReadSerializer(serializers.ModelSerializer):
         model = Dataset
         fields = ["uuid", "name", "metadata", "created_at"]
 
-    def get_metadata(self, obj):
+    def get_metadata(self, obj) -> dict:
         # resources are never stored on the dataset: assemble them live
         # from the member tables so reads can not go stale
         metadata = dict(obj.metadata)

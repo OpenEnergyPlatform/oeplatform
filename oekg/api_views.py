@@ -70,6 +70,7 @@ from factsheet.models import ScenarioBundleAccessControl
 from oekg.acronyms import acronym_conflict, acronym_is_free, acronym_taken
 from oekg.api_description import (
     ALWAYS,
+    BUNDLE_UID,
     EXPAND_LABELS,
     CollectionSchema,
     a_page_of,
@@ -378,7 +379,7 @@ class ScenarioBundleAPIView(OekgAPIView):
                 "do there, because triples are already what they are."
             ),
         ),
-        parameters=[EXPAND_LABELS],
+        parameters=[BUNDLE_UID, EXPAND_LABELS],
         # The success is served in three forms; a refusal never is.
         refusals_in="application/json",
     )
@@ -424,6 +425,7 @@ class ScenarioBundleAPIView(OekgAPIView):
             )
         },
         request=ScenarioBundleSerializer,
+        parameters=[BUNDLE_UID],
         responses={
             409: json_body(
                 "Either the bundle moved between the read this write was "
@@ -532,6 +534,7 @@ class ScenarioBundleAPIView(OekgAPIView):
         # No entity tag on the response, for the reason the body gives.
         entity_tag=False,
         parameters=[
+            BUNDLE_UID,
             OpenApiParameter(
                 name=CONFIRM,
                 required=True,
@@ -542,7 +545,7 @@ class ScenarioBundleAPIView(OekgAPIView):
                     "confirm the deletion of `API-TEST`, which is the "
                     "confusion the check exists to catch."
                 ),
-            )
+            ),
         ],
         responses={
             400: json_body(

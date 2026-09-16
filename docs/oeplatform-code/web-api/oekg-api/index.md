@@ -5,12 +5,20 @@ SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: CC0-1.0
 -->
 
-## OEKG web based access
+# The OEKG SPARQL endpoint
 
-In this document we describe how you can access the contents of the OEKG via Web
-based Requests using HTTP
+The Open Energy Knowledge Graph is reachable over HTTP in two ways, and this
+page is about the first of them:
 
-### The SPARQL endpoint for OEKG
+- **SPARQL**, below: one endpoint, read-only, for asking the graph questions.
+- **The scenario-bundle endpoints**, for creating and changing bundles, their
+  scenarios, study reports and dataset links. Those are described in the
+  [API Reference](../api-reference.md) with the rest of `api/v0`, and they are
+  the only way to _write_ to the graph through this API — the SPARQL endpoint
+  refuses an update whatever the caller's permissions, because a write has to be
+  validated against the OEKG shape and a passthrough cannot do that.
+
+## The SPARQL endpoint
 
 `https://openenergyplatform.org/api/v0/oekg/sparql/`
 
@@ -42,10 +50,11 @@ r = requests.post(url=sparql_endpoint, json=payload, headers=HEADER)
 print(r.json())
 ```
 
-## The rest of the API
+## Writing to the graph
 
-The SPARQL endpoint above is a passthrough: it hands a query to the graph store
-and returns what comes back. The OEKG's own CRUD endpoints -- creating and
-reading scenario bundles, their scenarios, study reports and dataset links --
-are described together with the rest of `api/v0` in the
-[API Reference](../api-reference.md).
+Not here. The endpoint above is a passthrough: it hands a query to the graph
+store and returns what comes back, and an update or delete is refused. Creating
+and changing scenario bundles is done through the scenario-bundle endpoints in
+the [API Reference](../api-reference.md), which validate every write against the
+OEKG shape, guard it with an `If-Match` version, and record it in the bundle's
+history.

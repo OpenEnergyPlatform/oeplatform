@@ -31,6 +31,7 @@ from rest_framework.permissions import AllowAny
 
 from factsheet.models import API_ERA, OEKG_Modifications
 from oekg.api_description import (
+    BUNDLE_UID,
     CollectionSchema,
     a_page_of,
     describes_a_public_read,
@@ -77,6 +78,7 @@ class ScenarioBundleHistoryAPIView(OekgAPIView):
             "changed.",
         ),
         parameters=[
+            BUNDLE_UID,
             expands(
                 TRIPLES,
                 description=(

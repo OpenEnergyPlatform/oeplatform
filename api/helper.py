@@ -33,6 +33,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpRequest, JsonResponse, StreamingHttpResponse
 from django.http.response import Http404
 from django.utils import timezone
+from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -51,6 +52,12 @@ from api.actions import (
     open_cursor,
     open_raw_connection,
     translate_fetched_cell,
+)
+from api.api_description import (
+    ADVANCED_SESSION_NOTE,
+    AdvancedRequestSerializer,
+    AdvancedResponseSerializer,
+    responses,
 )
 from api.encode import GeneratorJSONEncoder
 from api.error import APIError
@@ -300,11 +307,33 @@ def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
     """
 
     class AJAX_View(APIView):
+        @extend_schema(exclude=True)
         @cors(allow_cors)
         @api_exception
         def options(self, request: HttpRequest, *args, **kwargs) -> JsonLikeResponse:
             return JsonResponse({})
 
+        # Annotated here rather than at each of the thirty-odd routes this
+        # factory serves: the envelope is the factory's, and writing it per
+        # endpoint would be writing it thirty times. What differs per endpoint
+        # is the shape of `query`, which only the action knows -- so the
+        # description names the action and the rest is shared.
+        @extend_schema(
+            request=AdvancedRequestSerializer,
+            responses=responses(
+                {
+                    200: OpenApiResponse(
+                        response=AdvancedResponseSerializer,
+                        description=(
+                            f"The result of `{func.__name__}`, under `content`."
+                        ),
+                    )
+                }
+            ),
+            description=(
+                f"Runs `{func.__name__}` against the OEDB.\n\n" + ADVANCED_SESSION_NOTE
+            ),
+        )
         @cors(allow_cors)
         @api_exception
         def post(self, request: HttpRequest) -> JsonLikeResponse:

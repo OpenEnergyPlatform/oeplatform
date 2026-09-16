@@ -433,6 +433,12 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "Open Energy Platform API",
     "DESCRIPTION": "OpenAPI schema for the Open Energy Platform REST API.",
     "VERSION": "v0",
+    "POSTPROCESSING_HOOKS": [
+        "drf_spectacular.hooks.postprocess_schema_enums",
+        # The legacy schema-qualified table addresses cannot be repaired at
+        # the route, because one view serves both spellings. See the hook.
+        "api.api_description.name_the_legacy_table_routes",
+    ],
 }
 
 AUTHENTICATION_BACKENDS = [
