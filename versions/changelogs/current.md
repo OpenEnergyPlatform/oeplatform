@@ -386,8 +386,8 @@ SPDX-License-Identifier: CC0-1.0
   operation also describes the body it answers with -- the writable payload and
   the read-only `_meta` beside it, the page envelope around a collection, and
   the two lists a delete reports -- and a test validates a real response from
-  every endpoint against the description, so a body and the document cannot
-  come apart unnoticed
+  every endpoint against the description, so a body and the document cannot come
+  apart unnoticed
   [(#2475)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2475)
 
 - The OEKG shape guide undercounted the places this repo fetches the ontology
