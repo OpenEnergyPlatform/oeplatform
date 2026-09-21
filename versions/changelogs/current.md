@@ -85,6 +85,15 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Features
 
+- Scenario bundle addresses now open something. Every bundle is named by an IRI
+  under `https://openenergyplatform.org/ontology/oekg/`, and those addresses are
+  in published citations and in the graph's own triples -- but following one
+  used to land on an ontology term page for a term that does not exist. A bundle
+  address, and a scenario address, now redirect to the bundle's page in the
+  browser, or to its representation in the REST API for a client asking for RDF.
+  The addresses themselves are unchanged
+  [(#2501)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2501)
+
 - The REST API now describes itself. `GET /api/v0/schema/` returns an OpenAPI
   description generated from the code itself, and `/api/v0/open-api/` renders it
   as a browsable Swagger page you can read the endpoints from. Because it is
@@ -333,6 +342,14 @@ SPDX-License-Identifier: CC0-1.0
   [(#2452)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2452)
 
 ## Bugs
+
+- An address under `/ontology/` for something the platform does not serve now
+  answers "not found". Depending on which address was used, an unknown name
+  previously rendered an ontology page for nothing, a search page for nothing,
+  or an internal server error. The platform now keeps a list of what it serves
+  there, so all three answer the same way -- including when the name is known
+  but its files are missing from a deployment, which was the error
+  [(#2501)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2501)
 
 - The container stack's Apache configuration is now in the repository. It was
   excluded by an ignore rule meant for a directory of the same name, so the file
