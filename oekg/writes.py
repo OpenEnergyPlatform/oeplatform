@@ -43,7 +43,13 @@ from rest_framework import status
 from rest_framework.response import Response
 
 from oekg.api_support import Refused, bundle_exists, bundle_in
-from oekg.bundles import BUNDLE_CLASS, bundle_iri, bundle_subgraph
+from oekg.bundles import (
+    BUNDLE_CLASS,
+    BUNDLE_FIELDS,
+    BUNDLE_PARTS,
+    bundle_iri,
+    bundle_subgraph,
+)
 from oekg.fields import DC, NODE
 from oekg.graph_store import GraphStore
 from oekg.history import record_bundle_deletion, record_write
@@ -338,6 +344,21 @@ def open_bundle(request, uid: str) -> BundleWrite:
         version=read_version(store, uid),
         actor=getattr(request, "user", None),
     )
+
+
+def refuse_bundle_renames(payload: dict, known_labels: dict) -> None:
+    """`refuse_renames` for a whole-bundle payload, nested parts included.
+
+    The pair of `bundles.bundle_referenced_iris`: that one finds the IRIs a
+    whole payload points at, this one refuses the ones it would rename. Two
+    endpoints take a whole bundle -- the create and the replace -- and a loop
+    written twice is a loop that will cover the parts in one of them and not in
+    the other the next time a part is added.
+    """
+    refuse_renames(payload, known_labels, BUNDLE_FIELDS)
+    for part in BUNDLE_PARTS:
+        for nested in payload.get(part.payload_key) or []:
+            refuse_renames(nested, known_labels, part.fields)
 
 
 def refuse_renames(payload: dict, known_labels: dict, fields: tuple) -> None:

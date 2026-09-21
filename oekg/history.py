@@ -50,7 +50,15 @@ UPDATE = "PATCH"
 # records none -- see `record_bundle_deletion`. Both are this verb: what differs
 # is what the row holds, not what happened.
 DELETE = "DELETE"
-VERBS = (CREATE, UPDATE, DELETE)
+# The one entry that is not an HTTP method, because the operation it records is
+# not one of them. The replace endpoint is addressed with `POST`, and `POST`
+# already means *created* in this column -- so a replace recorded as one would
+# read as a bundle coming into existence, while recording it as `PATCH` would
+# hide the fact that the write was a declaration of the whole bundle and could
+# therefore have removed things by saying nothing about them. That is exactly
+# what a reader auditing a pipeline is looking for.
+REPLACE = "REPLACE"
+VERBS = (CREATE, UPDATE, DELETE, REPLACE)
 
 
 def record_write(

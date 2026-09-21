@@ -23,10 +23,17 @@ SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
+from urllib.parse import urlsplit
+
 from rest_framework import serializers
 
 from oekg.bundles import BUNDLE_FIELDS, SCENARIO_FIELDS, STUDY_REPORT_FIELDS
-from oekg.dataset_links import DIRECTIONS, TARGETS
+from oekg.dataset_links import (
+    DIRECTIONS,
+    EXTERNAL,
+    REFERENCE_KINDS,
+    reference_kind,
+)
 from oekg.fields import ENUM
 from oekg.shape import constraint_message, enumeration
 
@@ -34,6 +41,16 @@ from oekg.shape import constraint_message, enumeration
 # lets a client send back what it read without stripping anything -- and it
 # keeps the closed check structural instead of an exception list that grows.
 READ_ONLY_CONTAINER = "_meta"
+
+
+def _is_address(value: str) -> bool:
+    """Whether this is a URL at all -- a scheme and a host, and nothing more.
+
+    Deliberately weaker than Django's URL validator, which is the point: see
+    the note on `DatasetLinkSerializer.url`.
+    """
+    parts = urlsplit(value)
+    return bool(parts.scheme and parts.netloc)
 
 
 class ClosedSerializer(serializers.Serializer):
@@ -187,6 +204,117 @@ class StudyReportSerializer(EnumeratedFieldsMixin, ClosedSerializer):
     reference = serializers.URLField(required=False, allow_blank=True, allow_null=True)
 
 
+class DatasetLinkSerializer(ClosedSerializer):
+    """A scenario's link to data: what it is, what it points at, and where.
+
+    Not a field table, because a dataset link has no fields of its own: the
+    label, the address and the identifier the shape requires all follow from
+    these keys. That is also why there is no partial form of this serializer --
+    a link is added or removed, never edited.
+
+    **`ref` has to be what a read of this link will report.** A client naming a
+    platform target sends `ref` and `name` and lets the router derive the
+    address; a client sending back a link it read sends the address it read,
+    and then `ref` has to be the kind that address actually is. `ref` is never
+    stored -- it is derived from the address on every read -- so a payload
+    whose `ref` disagreed with its `url` would be making a claim that vanished
+    on the way in and came back different.
+
+    **`name` is the label, and it is deliberately NOT checked against the
+    address.** They are one value for a link this API derives -- the address is
+    built from the name -- and two independent values for a link written
+    through the existing `manage-datasets/` route, which takes a
+    human-readable title and a URL separately. Requiring them to agree would
+    refuse exactly those links on the way back, which is the round trip issue
+    #2473 exists to protect; so a citation may be labelled one thing and point
+    at another, and everything that has to know where it points reads the
+    address (`oekg.resolution`, via `reference_target`) rather than the label.
+    That is #2469's rule, applied to a value a client can now send.
+    """
+
+    # "input" or "output": which way the data flowed.
+    type = serializers.ChoiceField(choices=[d.name for d in DIRECTIONS])
+    # "table", "dataset" or "external". The first two are not equivalent -- a
+    # table reference is reproducible, a dataset reference stays current as its
+    # membership changes -- and choosing between them is the client's call.
+    # "external" is an address this platform has no route for, which exists so
+    # that a bundle holding one can be sent back whole. Null is a link that
+    # stores no address at all, which the shape permits.
+    ref = serializers.ChoiceField(choices=list(REFERENCE_KINDS), allow_null=True)
+    # The name of that table or dataset on this platform, or -- for an external
+    # link -- whatever the citation is called. Stored as the label the shape
+    # requires. Not checked against the platform: a link may outlive what it
+    # points at, and a read says whether it still resolves.
+    name = serializers.CharField()
+    # Where it points, as stored. Optional on a write that names a platform
+    # target, because the router derives it; required for an external link,
+    # which has nothing else to go on.
+    #
+    # A CharField and not a URLField, checked below instead: the addresses this
+    # API mints are absolute and built from the host the request arrived on,
+    # and Django's URL validator refuses an authority with no dot in it -- a
+    # deployment's internal name, `testserver` in this suite. A read has to be
+    # sendable back, so the field accepts what a read emits and asks only for
+    # what an address actually needs.
+    url = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+
+    def validate(self, attrs):
+        ref, url = attrs.get("ref"), attrs.get("url") or None
+        attrs["url"] = url
+        if url is not None and not _is_address(url):
+            raise serializers.ValidationError(
+                {
+                    "url": (
+                        f"{url!r} is not an address: a dataset link stores "
+                        "where it points, so this needs a scheme and a host."
+                    )
+                }
+            )
+        if url is None:
+            if ref == EXTERNAL:
+                raise serializers.ValidationError(
+                    {
+                        "url": (
+                            "An external link is its address: there is nothing "
+                            "else to point at. Send the url, or name a target "
+                            "on this platform with ref 'table' or 'dataset'."
+                        )
+                    }
+                )
+            return attrs
+        actual = reference_kind(url) or EXTERNAL
+        if ref != actual:
+            raise serializers.ValidationError(
+                {
+                    "ref": (
+                        f"{url!r} is {'an' if actual == EXTERNAL else 'a'} "
+                        f"{actual} address, and this payload calls it "
+                        f"{ref!r}. The address is what gets stored, so a "
+                        "disagreement here would be a claim that vanished."
+                    )
+                }
+            )
+        return attrs
+
+
+class NestedScenarioSerializer(ScenarioSerializer):
+    """A scenario as it appears *inside* a bundle payload, links and all.
+
+    The links nest here and not on the bundle because that is where the shape
+    hangs them, and they nest at all because of what `replace` does: anything
+    in the graph and absent from its payload is removed, so a link a payload
+    has no way to mention is a link a re-import destroys. A bundle read nests
+    them for the same reason from the other side -- a client sends back what it
+    read, without stripping and without losing its citations.
+
+    A scenario's **own** endpoints use the plain serializer above and refuse
+    this key: a link has its own URL there, and add-and-remove is its whole
+    contract.
+    """
+
+    datasets = DatasetLinkSerializer(many=True, required=False)
+
+
 class ScenarioBundleCreateSerializer(ScenarioBundleSerializer):
     """The bundle field set **plus** its nested sub-resources, for `POST` only.
 
@@ -196,33 +324,69 @@ class ScenarioBundleCreateSerializer(ScenarioBundleSerializer):
     one. That is what lets a pipeline create a whole bundle in one call without
     giving any call the power to drop its parts by omitting them.
 
-    Dataset links are deliberately **not** here. They hang off a scenario
-    rather than off the bundle, and they are add-and-remove only, so there is
-    no partial update of one to reason about -- nesting them would make a
-    create the one place their fields could be written together.
+    Dataset links nest one level deeper, inside each scenario, because that is
+    where the shape hangs them -- see `NestedScenarioSerializer`.
     """
 
-    scenarios = ScenarioSerializer(many=True, required=False)
+    scenarios = NestedScenarioSerializer(many=True, required=False)
     study_reports = StudyReportSerializer(many=True, required=False)
 
 
-class DatasetLinkSerializer(ClosedSerializer):
-    """A scenario's link to data on this platform: three keys, all required.
+#: Where a matched sub-resource's identifier lands in validated data. Not a
+#: field name -- no field starts with an underscore -- so it cannot collide
+#: with the closed field set it travels beside.
+IDENTIFIED_BY = "_uid"
 
-    Not a field table, because a dataset link has no fields of its own: the
-    label, the URL and the identifier the shape requires are all derived from
-    these three. That is also why there is no partial form of this serializer --
-    a link is added or removed, never edited.
+
+class IdentifiedMixin:
+    """Reads the identifier out of `_meta`, for the one write that needs it.
+
+    **This is the single place in the API where a client's own `_meta` is not
+    ignored, and it is not an inconsistency -- it is what the container was
+    built for.** A read puts everything a client cannot write under `_meta` so
+    that a client can send back what it read without stripping anything; the
+    replace endpoint is the endpoint that exists to be sent a whole read back.
+    Its payload declares the bundle's parts, and a part it does not recognise
+    is a part it creates, so a read that lost its identifiers would delete and
+    recreate every scenario on every run -- churning identifiers and filling
+    the history with deletions nobody asked for.
+
+    Only `uid` is read, and only on a sub-resource. The bundle's identity is
+    the URL, and everything else in `_meta` is derived from the graph.
     """
 
-    # "input" or "output": which way the data flowed.
-    type = serializers.ChoiceField(choices=[d.name for d in DIRECTIONS])
-    # "table" or "dataset": whether this points at one OEP Table or at an OEP
-    # Dataset catalogue entry. The two are not equivalent -- a table reference
-    # is reproducible, a dataset reference stays current as its membership
-    # changes -- and choosing between them is the client's call.
-    ref = serializers.ChoiceField(choices=[t.name for t in TARGETS])
-    # The name of that table or dataset on this platform. Not checked against
-    # the platform: a link may outlive what it points at, and a read says
-    # whether it still resolves.
-    name = serializers.CharField()
+    def to_internal_value(self, data):
+        value = super().to_internal_value(data)
+        if isinstance(data, dict):
+            meta = data.get(READ_ONLY_CONTAINER)
+            uid = meta.get("uid") if isinstance(meta, dict) else None
+            if uid is not None:
+                value[IDENTIFIED_BY] = str(uid)
+        return value
+
+
+class IdentifiedDatasetLinkSerializer(IdentifiedMixin, DatasetLinkSerializer):
+    """A dataset link that may name the one it already is."""
+
+
+class IdentifiedScenarioSerializer(IdentifiedMixin, NestedScenarioSerializer):
+    """A scenario that may name the one it already is, links and all."""
+
+    datasets = IdentifiedDatasetLinkSerializer(many=True, required=False)
+
+
+class IdentifiedStudyReportSerializer(IdentifiedMixin, StudyReportSerializer):
+    """A study report that may name the one it already is."""
+
+
+class ScenarioBundleReplaceSerializer(ScenarioBundleCreateSerializer):
+    """The whole desired bundle: the create's payload, with identities kept.
+
+    Same shape as a create -- deliberately, because the point of the endpoint
+    is that a pipeline declares one bundle and the server makes it so, whether
+    or not the bundle is there yet. What it adds is that every nested part may
+    say which existing part it is, in the `_meta.uid` a read gave it.
+    """
+
+    scenarios = IdentifiedScenarioSerializer(many=True, required=False)
+    study_reports = IdentifiedStudyReportSerializer(many=True, required=False)

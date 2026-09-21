@@ -57,11 +57,11 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 import logging
+from functools import partial
 
 from django.db import DatabaseError
 from django.urls import reverse
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse
-from rdflib import Graph
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -88,19 +88,19 @@ from oekg.api_support import (
     shape_unavailable,
     store_unavailable,
 )
+from oekg.bundle_bodies import bundle_response, note_history_gap, represent_bundle
 from oekg.bundles import (
     BUNDLE_FIELDS,
-    BUNDLE_PARTS,
     build_bundle_graph,
     bundle_delta,
     bundle_iri,
-    bundle_payload,
+    bundle_referenced_iris,
 )
+from oekg.dataset_links import UnaddressableTarget, link_address
 from oekg.fields import mint_identifier, referenced_node_iris
 from oekg.graph_store import GraphStore, GraphStoreError
 from oekg.history import CREATE, UPDATE, record_write
-from oekg.labels import LABELS, labelled
-from oekg.part_views import part_bodies
+from oekg.labels import LABELS
 from oekg.preconditions import CONFIRM
 from oekg.read_serializers import (
     BundleRemovalSerializer,
@@ -131,7 +131,7 @@ from oekg.versioning import (
     version_triples,
     write_applied,
 )
-from oekg.writes import open_bundle, refuse_renames
+from oekg.writes import open_bundle, refuse_bundle_renames, refuse_renames
 
 logger = logging.getLogger("oeplatform")
 
@@ -231,10 +231,12 @@ class ScenarioBundleCollectionAPIView(OekgAPIView):
         pipeline that keeps no state re-identifies its bundle afterwards with
         `GET /api/v0/scenario-bundles/?acronym=...`.
 
-        Nested `scenarios` and `study_reports` are accepted here and **only**
-        here: a `PATCH` refuses them, so no single call can drop a bundle's
-        parts by omitting them. Dataset links are not accepted -- they hang off
-        a scenario and have their own endpoint.
+        Nested `scenarios` and `study_reports` are accepted here and on the
+        replace endpoint, and nowhere else: a `PATCH` refuses them, so no
+        single call can drop a bundle's parts by omitting them. A scenario's
+        `datasets` nest one level deeper, inside it, which is where the shape
+        hangs them -- so one call creates a bundle, its scenarios and the data
+        each of them cites.
 
         Unlike every other write, a create is judged strictly: there is no
         pre-state, so there is nothing it can have inherited and every
@@ -253,14 +255,13 @@ class ScenarioBundleCollectionAPIView(OekgAPIView):
             if acronym_taken(store, acronym):
                 return acronym_conflict(acronym)
 
-            known_labels = labels_of(store, _all_referenced_iris(payload))
-            refuse_renames(payload, known_labels, BUNDLE_FIELDS)
-            for part in BUNDLE_PARTS:
-                for nested in payload.get(part.payload_key) or []:
-                    refuse_renames(nested, known_labels, part.fields)
+            known_labels = labels_of(store, bundle_referenced_iris(payload))
+            refuse_bundle_renames(payload, known_labels)
 
             uid = mint_identifier()
-            post_state = build_bundle_graph(uid, payload, known_labels)
+            post_state = build_bundle_graph(
+                uid, payload, known_labels, address=partial(link_address, request)
+            )
 
             violations = validate_post_state(post_state)
             if violations:
@@ -288,6 +289,8 @@ class ScenarioBundleCollectionAPIView(OekgAPIView):
                 # cannot answer this precisely, because its guard carries the
                 # version too -- see there.
                 return acronym_conflict(acronym)
+        except UnaddressableTarget as error:
+            return Response({"detail": str(error)}, status=status.HTTP_400_BAD_REQUEST)
         except ShapeUnavailable as error:
             return shape_unavailable(error)
         except GraphStoreError as error:
@@ -327,10 +330,10 @@ class ScenarioBundleCollectionAPIView(OekgAPIView):
         )
 
         version = BundleVersion(FIRST_VERSION, token)
-        body = _represent(uid, post_state, version)
+        body = represent_bundle(uid, post_state, version)
         if not owned:
             body[READ_ONLY_CONTAINER]["ownership_recorded"] = False
-        _note_history_gap(body, recorded)
+        note_history_gap(body, recorded)
         response = Response(body, status=status.HTTP_201_CREATED)
         response["Location"] = reverse("api:scenario-bundle", kwargs={"uid": uid})
         response["ETag"] = version.etag
@@ -386,8 +389,12 @@ class ScenarioBundleAPIView(OekgAPIView):
     def get(self, request, uid):
         """Read one bundle, publicly.
 
-        Dataset links are **not** in this body: they hang off a scenario and
-        are read at their own endpoint.
+        Everything the bundle holds is in this body -- its scenarios, their
+        study reports, and the dataset links each scenario cites -- so a client
+        can send it straight back to `POST` or to `replace/` without stripping
+        anything. Links carry their own URL as well; nesting them here is what
+        makes a read round-trippable, and `replace` is the endpoint that turns
+        that into a requirement.
         """
         # Identifiers are minted here, so anything that is not one cannot name a
         # bundle. Checked before it reaches a query, where an IRI-unsafe
@@ -411,7 +418,7 @@ class ScenarioBundleAPIView(OekgAPIView):
             response = Response(subgraph)
             response["ETag"] = version.etag
             return response
-        return _bundle_response(uid, subgraph, version, expand=self.expand)
+        return bundle_response(uid, subgraph, version, expand=self.expand)
 
     @describes_a_guarded_write(
         {
@@ -509,7 +516,7 @@ class ScenarioBundleAPIView(OekgAPIView):
         except GraphStoreError as error:
             return store_unavailable(error, "written to")
 
-        return _bundle_response(
+        return bundle_response(
             uid,
             write.post_state,
             write.version,
@@ -616,70 +623,3 @@ class ScenarioBundleAPIView(OekgAPIView):
                 },
             }
         )
-
-
-def _all_referenced_iris(payload: dict) -> list:
-    """Existing node IRIs a create points at, its nested parts included."""
-    iris = referenced_node_iris(payload, BUNDLE_FIELDS)
-    for part in BUNDLE_PARTS:
-        for nested in payload.get(part.payload_key) or []:
-            iris += referenced_node_iris(nested, part.fields)
-    return iris
-
-
-def _represent(
-    uid: str,
-    graph: Graph,
-    version: BundleVersion,
-    expand: frozenset = frozenset(),
-) -> dict:
-    """A read returns exactly what a write accepts, plus read-only data.
-
-    **Sub-resources are nested here and rejected on `PATCH`.** That looks
-    inconsistent until you notice which write each is for: a read sent back to
-    `POST` copies the whole bundle, scenarios and study reports included, and
-    later the replace endpoint takes exactly this shape -- while a `PATCH` is
-    partial by nature and nobody sends a whole read to one. Nesting on read is
-    what lets a client send back what it read without stripping anything.
-    """
-    body = labelled(
-        {
-            **bundle_payload(graph, uid),
-            READ_ONLY_CONTAINER: {
-                "uid": uid,
-                "iri": str(bundle_iri(uid)),
-                "version": version.number,
-            },
-        },
-        BUNDLE_FIELDS,
-        expand,
-    )
-    for part in BUNDLE_PARTS:
-        body[part.payload_key] = part_bodies(graph, uid, part, expand)
-    return body
-
-
-def _note_history_gap(body: dict, recorded: bool) -> dict:
-    """Say so when the history was lost, and say nothing when it was not.
-
-    The key appears only when it is ``False``. A client should not have to
-    check something on every response to learn that the ordinary thing
-    happened; it is there to name the exception.
-    """
-    if not recorded:
-        body[READ_ONLY_CONTAINER]["history_recorded"] = False
-    return body
-
-
-def _bundle_response(
-    uid: str,
-    graph: Graph,
-    version: BundleVersion,
-    history_recorded: bool = True,
-    expand: frozenset = frozenset(),
-) -> Response:
-    """The body, plus the entity tag every read has to carry."""
-    body = _note_history_gap(_represent(uid, graph, version, expand), history_recorded)
-    response = Response(body)
-    response["ETag"] = version.etag
-    return response

@@ -48,19 +48,11 @@ from oekg.api_description import (
     write_responses,
 )
 from oekg.api_support import OekgAPIView, shape_unavailable, store_unavailable
-from oekg.bundles import (
-    BundlePart,
-    build_part_graph,
-    bundle_iri,
-    find_part,
-    part_nodes,
-    part_payload,
-    part_uid,
-)
+from oekg.bundle_bodies import part_bodies, part_body
+from oekg.bundles import BundlePart, build_part_graph, bundle_iri, find_part
 from oekg.fields import mint_identifier, referenced_node_iris, resource_delta
 from oekg.graph_store import GraphStoreError
 from oekg.history import CREATE, UPDATE
-from oekg.labels import labelled
 from oekg.serializers import READ_ONLY_CONTAINER
 from oekg.shape import ShapeUnavailable
 from oekg.subresource_views import SubResourcePagination, SubResourceViewMixin
@@ -378,31 +370,3 @@ def part_detail_operations(read, one):
             )
         ),
     }
-
-
-def part_bodies(graph: Graph, uid: str, part: BundlePart, labels: bool = False) -> list:
-    """Every part of this kind, in the form a write accepts them nested."""
-    bodies = [
-        part_body(graph, node, uid, part, labels)
-        for node in part_nodes(graph, uid, part)
-    ]
-    bodies.sort(key=lambda body: body[part.sort_field] or "")
-    return bodies
-
-
-def part_body(
-    graph: Graph, node, uid: str, part: BundlePart, expand: frozenset = frozenset()
-) -> dict:
-    return labelled(
-        {
-            **part_payload(graph, node, part),
-            READ_ONLY_CONTAINER: {
-                "uid": part_uid(graph, node),
-                "iri": str(node),
-                "type": str(part.node_class),
-                "bundle": uid,
-            },
-        },
-        part.fields,
-        expand,
-    )

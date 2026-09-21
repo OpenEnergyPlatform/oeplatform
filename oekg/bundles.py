@@ -30,6 +30,7 @@ from typing import Optional
 
 from rdflib import RDF, RDFS, Graph, Literal, URIRef
 
+from oekg.dataset_links import build_dataset_link_graph
 from oekg.fields import (
     DATE,
     DATES,
@@ -45,6 +46,7 @@ from oekg.fields import (
     PART,
     ResourceField,
     mint_identifier,
+    referenced_node_iris,
     resource_delta,
     resource_payload,
     resource_triples,
@@ -131,6 +133,9 @@ class BundlePart:
     payload_key: str  # the key it nests under on a bundle create
     detail_route: str  # the named URL of one of them
     sort_field: str  # the field a listing is ordered by
+    # The key its payload nests dataset links under, or "" for a part that
+    # carries none. A study report cites a publication, not data.
+    nested_links: str = ""
 
 
 SCENARIO = BundlePart(
@@ -141,6 +146,7 @@ SCENARIO = BundlePart(
     payload_key="scenarios",
     detail_route="api:scenario-bundle-scenario",
     sort_field="acronym",
+    nested_links="datasets",
 )
 
 STUDY_REPORT = BundlePart(
@@ -240,6 +246,7 @@ def build_part_graph(
     pid: str,
     payload: dict,
     known_labels: dict = None,
+    node: Optional[URIRef] = None,
 ) -> Graph:
     """One sub-resource, linked to its bundle and carrying its identity.
 
@@ -247,32 +254,75 @@ def build_part_graph(
     and the URL names, and once inside the minted IRI. The literal is the
     identity -- a part the user interface wrote has an IRI this API did not
     choose, and a lookup by literal finds it anyway.
+
+    ``node`` names an existing part this is rewriting, for the one caller that
+    has one: a replace matches a part by the identifier its `_meta` carries,
+    and that part may well live at an IRI this API did not mint.
     """
-    node = part_iri(part, pid)
+    node = part_iri(part, pid) if node is None else node
     graph = resource_triples(node, part.node_class, part.fields, payload, known_labels)
     graph.add((bundle, HAS_PART, node))
     graph.add((node, HAS_UUID, Literal(pid)))
     return graph
 
 
-def build_bundle_graph(uid: str, payload: dict, known_labels: dict = None) -> Graph:
-    """A whole bundle, including any parts nested in the payload.
+def build_bundle_graph(
+    uid: str, payload: dict, known_labels: dict = None, address=None
+) -> Graph:
+    """A whole bundle: its fields, its parts, and its scenarios' dataset links.
 
-    Nesting is accepted here and nowhere else on the write path: a bundle
-    `POST` builds its scenarios and study reports with it, while a bundle
-    `PATCH` cannot reach one. That asymmetry is what lets a pipeline create a
-    whole bundle in one call without giving any call the power to drop its
-    parts by omission.
+    Nesting is accepted here and on the replace endpoint, and nowhere else on
+    the write path: a bundle `POST` builds its scenarios and study reports with
+    it, while a bundle `PATCH` cannot reach one. That asymmetry is what lets a
+    pipeline create a whole bundle in one call without giving any call the
+    power to drop its parts by omission.
+
+    ``address`` says where one nested dataset link points, given its payload.
+    It is a callable rather than a URL because half of the answer comes from
+    the router and the other half from the request the link arrived on -- and
+    neither belongs in a module about triples.
     """
     graph = resource_triples(
         bundle_iri(uid), BUNDLE_CLASS, BUNDLE_FIELDS, payload, known_labels
     )
     for part in BUNDLE_PARTS:
         for nested in payload.get(part.payload_key) or []:
-            graph += build_part_graph(
-                part, bundle_iri(uid), mint_identifier(), nested, known_labels
+            pid = mint_identifier()
+            graph += build_part_graph(part, bundle_iri(uid), pid, nested, known_labels)
+            graph += build_nested_link_graphs(
+                part, part_iri(part, pid), nested, address
             )
     return graph
+
+
+def build_nested_link_graphs(
+    part: BundlePart, node: URIRef, payload: dict, address=None
+) -> Graph:
+    """The dataset links nested inside one part's payload, if it takes any.
+
+    Only a scenario does. Asked of the part rather than of the key, so a part
+    that never carries links needs no branch here and a payload that names them
+    on a study report is refused by that serializer rather than ignored here.
+    """
+    graph = Graph()
+    for link in payload.get(part.nested_links) or []:
+        graph += build_dataset_link_graph(
+            node, mint_identifier(), link, address(link) if address else None
+        )
+    return graph
+
+
+def bundle_referenced_iris(payload: dict) -> list:
+    """Existing node IRIs a whole-bundle payload points at, nesting included.
+
+    One field table knows one level, because only the caller knows which key
+    holds what -- so the walk over the parts is here, where the parts are.
+    """
+    iris = referenced_node_iris(payload, BUNDLE_FIELDS)
+    for part in BUNDLE_PARTS:
+        for nested in payload.get(part.payload_key) or []:
+            iris += referenced_node_iris(nested, part.fields)
+    return iris
 
 
 def bundle_delta(

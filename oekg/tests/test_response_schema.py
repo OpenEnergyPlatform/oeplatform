@@ -37,6 +37,8 @@ from jsonschema import Draft202012Validator
 from jsonschema.exceptions import best_match
 
 from api.tests.test_openapi_schema import ARTIFACT, REGENERATE
+from oekg.serializers import READ_ONLY_CONTAINER
+from oekg.tests.test_bundle_replace import ReplaceTestCase
 from oekg.tests.test_dataset_link_api import DatasetLinkTestCase
 from oekg.tests.test_study_report_api import VALID_REPORT, StudyReportTestCase
 
@@ -197,6 +199,31 @@ class BundleResponseSchemaTest(ResponseSchemaTestCase):
         self.assertMatchesSchema(
             response, "/api/v0/scenario-bundles/{uid}/history/", "get", 200
         )
+
+
+class ReplaceResponseSchemaTest(ResponseSchemaTestCase, ReplaceTestCase):
+    """The one body that is a bundle *and* a removal report."""
+
+    REPLACE = "/api/v0/scenario-bundles/{uid}/replace/"
+
+    def test_a_replace_sends_the_bundle_and_the_report_it_describes(self):
+        uid, sid, _did, _etag = self.with_one_link()
+        body, etag = self.read_body(uid)
+
+        response = self.replace(uid, self.declared(body, label="Declared"), etag)
+
+        self.assertMatchesSchema(response, self.REPLACE, "post", 200)
+
+    def test_a_replace_that_removed_something_still_matches(self):
+        # `_meta.deleted` and `_meta.unlinked` are empty on the happy path, so
+        # a schema that got their entries wrong would only fail here.
+        uid, sid, _did, _etag = self.with_one_link()
+        body, etag = self.read_body(uid)
+
+        response = self.replace(uid, self.declared(body, scenarios=[]), etag)
+
+        self.assertTrue(response.data[READ_ONLY_CONTAINER]["deleted"])
+        self.assertMatchesSchema(response, self.REPLACE, "post", 200)
 
 
 class PartResponseSchemaTest(ResponseSchemaTestCase):
