@@ -221,6 +221,21 @@ def cors(allow):
     return doublewrapper
 
 
+def _request_path(args) -> str:
+    """The path of whichever argument is the request, for the log line.
+
+    The decorator sits on bound view methods and on plain functions, and
+    `create_ajax_handler` calls one of them as `(request, request)`, so the
+    request is not reliably at a fixed position. Never raises: this runs while
+    something has already gone wrong.
+    """
+    for arg in args:
+        path = getattr(arg, "path", None)
+        if isinstance(path, str):
+            return path
+    return "<unknown path>"
+
+
 def api_exception(
     f: Callable[..., JsonLikeResponse],
 ) -> Callable[..., JsonLikeResponse]:
@@ -241,7 +256,12 @@ def api_exception(
         except Exception as exc:
             # All other Errors: dont accidently return sensitive data from error
             # but return generic error message
-            logger.error(str(exc))
+            logger.exception(
+                "unhandled %s on %s: %s",
+                type(exc).__name__,
+                _request_path(args),
+                exc,
+            )
             return JsonResponse({"reason": "Invalid request"}, status=400)
 
     return wrapper

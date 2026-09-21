@@ -31,8 +31,16 @@ def __get_connection_string():
     )
 
 
+# pool_pre_ping: the pool discards a connection for being old, never for
+# being dead, so without this a connection Postgres or the network has already
+# closed is handed to the next request, which fails with a generic 400 while
+# the retry succeeds -- issue #2488. The cost is one round trip per checkout.
 __ENGINE = create_engine(
-    __get_connection_string(), pool_size=0, pool_recycle=600, max_overflow=200
+    __get_connection_string(),
+    pool_size=0,
+    pool_recycle=600,
+    max_overflow=200,
+    pool_pre_ping=True,
 )
 
 _SA_METADATA = MetaData(bind=__ENGINE)
