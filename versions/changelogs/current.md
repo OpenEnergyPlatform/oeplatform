@@ -262,6 +262,42 @@ SPDX-License-Identifier: CC0-1.0
   the record that it happened survives
   [(#2470)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2470)
 
+- A whole scenario bundle can now be declared in one call:
+  `POST /api/v0/scenario-bundles/<uid>/replace/` takes the complete bundle -
+  fields, scenarios, study reports and the dataset links each scenario cites -
+  and makes the bundle be exactly that. **This is the only place in the API
+  where leaving something out removes it**, which is why it has an address of
+  its own rather than being a verb on the bundle's URL, and why it requires the
+  version as `If-Match`. What is removed is bounded by type exactly as a
+  `DELETE` is: a scenario or a link the payload does not mention goes, while
+  regions, contacts, organisations, funders, authors, models, frameworks and
+  every picked ontology term are unlinked and never deleted - and anything
+  another bundle still points at is kept, with the answer saying which was
+  which. Sending back what you read is free: a nested resource that carries the
+  `_meta.uid` it was read with keeps its identity, so a re-import updates its
+  scenarios instead of recreating them, and a run that declares what is already
+  there writes nothing at all - no version bump and no history line. Together
+  with `GET /api/v0/scenario-bundles/?acronym=...` this is the whole of an
+  idempotent re-import: look it up, create it if it is not there, otherwise
+  declare it - a pipeline keeps no state between runs
+  [(#2477)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2477)
+
+- A read of a scenario bundle now includes the dataset links of each of its
+  scenarios, so what you read is what a write accepts - links were the one part
+  of a bundle that a read did not mention, and the new declare-the-whole-bundle
+  endpoint would have removed them for that reason alone. A bundle can be
+  created with them nested in the same call
+  [(#2473)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2473)
+
+- A dataset link can now point somewhere that is not a page on this platform.
+  The live knowledge graph holds such links - databus addresses written long
+  before this API - and they could be read but not written, so a bundle holding
+  one could not be sent back. They now read and write as `ref: "external"` with
+  the address in `url`, and every link reports the address it actually stores,
+  so a link whose stored address and human-readable title disagree - which the
+  older route allowed - survives a round trip pointing where it always did
+  [(#2473)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2473)
+
 - Changing a scenario bundle through the REST API is now judged by what the
   change adds, not by whether the whole bundle is perfect. Bundles written
   before the API exists often miss fields the shape requires - a sector, a
