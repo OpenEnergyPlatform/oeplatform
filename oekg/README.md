@@ -148,10 +148,11 @@ touches.
 A genuinely in-memory dataset (`POST /$/datasets?dbName=ds&dbType=mem`) does
 that same write in ~21 ms, but **the suite does not pass against one** — bundle
 creates fail — so it is not a shortcut you can take today. Note also that
-`FUSEKI_MEM_1=true`, which the continuous integration service sets, is **not a
-variable `stain/jena-fuseki` reads**: the config it generates is
+`FUSEKI_MEM_1=true`, which the continuous integration service used to set, is
+**not a variable `stain/jena-fuseki` reads**: the config it generates is
 `tdb2:DatasetTDB2` at `/fuseki/databases/ds`, and the data survives a container
-restart. CI runs TDB2 on disk like everyone else.
+restart. CI has always run TDB2 on disk like everyone else, and no longer claims
+otherwise.
 
 ## Two things are called `oekg`
 

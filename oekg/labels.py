@@ -23,11 +23,11 @@ SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
-from rdflib import RDFS, URIRef
+from rdflib import URIRef
 
 from oekg.fields import ENUM
 from oekg.serializers import READ_ONLY_CONTAINER
-from oekg.shape import label_graph
+from oekg.shape import labels_by_term
 
 # The one expansion a resource read offers.
 LABELS = "labels"
@@ -68,9 +68,10 @@ def term_labels(iris: list) -> dict:
     """The label the subset holds for each of these terms, ``None`` if none."""
     if not iris:
         return {}
-    subset = label_graph()
-    return {iri: _label(subset.value(URIRef(iri), RDFS.label)) for iri in iris}
+    subset = labels_by_term()
+    return {iri: _label(subset.get(URIRef(iri))) for iri in iris}
 
 
-def _label(value):
-    return None if value is None else str(value)
+def _label(labels):
+    """The one label a term has. The artifact holds exactly one per term."""
+    return str(labels[0]) if labels else None

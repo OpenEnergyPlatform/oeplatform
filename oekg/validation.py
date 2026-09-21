@@ -113,6 +113,12 @@ def _with_the_labels_it_names(post_state: Graph) -> Graph:
     the wider rule needs no argument about which nodes a shape can reach, so
     it cannot be invalidated by a shape that grows a new target.
 
+    The argument does rest on one fact about the shape as it stands, and
+    ``ShapeTargetsTest`` fails if it stops holding: every target in it is
+    ``sh:targetClass`` or ``sh:targetObjectsOf``, and it carries no
+    ``sh:targetNode``, ``sh:sparql`` or ``sh:rule`` -- each of which could
+    select or read a node the post-state never mentions.
+
     The filter has to be the referenced IRIs exactly, because ``ex:CommonShape``
     checks the datatype **and the cardinality** of ``rdfs:label`` on every term
     a bundle picks. Dropping one label turns a conforming bundle into a

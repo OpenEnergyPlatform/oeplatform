@@ -116,6 +116,11 @@ def _parsed(fingerprint: tuple) -> Graph:
 
 @lru_cache(maxsize=2)
 def _labels_index(fingerprint: tuple) -> Mapping:
+    """Every term in the label subset, with the labels it carries.
+
+    One entry per subject, so a caller asks by term rather than searching a
+    graph for it.
+    """
     index = {}
     for term, label in _parsed(fingerprint).subject_objects(RDFS.label):
         index.setdefault(term, []).append(label)

@@ -13,7 +13,9 @@ answer, because the property is *equivalence*, not a particular verdict.
 
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
-"""  # noqa: 501
+"""  # noqa: E501
+
+from collections import Counter
 
 from django.test import SimpleTestCase
 from pyshacl import validate as pyshacl_validate
@@ -33,12 +35,51 @@ from oekg.validation import (
 
 UID = "11111111-2222-3333-4444-555555555555"
 
-# The four picks of VALID_PAYLOAD, minus one at a time: each of these is a real
-# bundle shape, and between them they exercise a conforming post-state and
-# several that violate different rules.
-WITHOUT_TECHNOLOGIES = {k: v for k, v in VALID_PAYLOAD.items() if k != "technologies"}
-WITHOUT_SECTORS = {k: v for k, v in VALID_PAYLOAD.items() if k != "sectors"}
-WITHOUT_ACRONYM = {k: v for k, v in VALID_PAYLOAD.items() if k != "acronym"}
+
+def without(*keys) -> dict:
+    """``VALID_PAYLOAD`` minus some fields: a bundle violating known rules."""
+    return {k: v for k, v in VALID_PAYLOAD.items() if k not in keys}
+
+
+# A bundle carrying one of everything that puts a node two or three hops out:
+# a scenario with both kinds of region, a study report with an author and a
+# reference. Those are where sh:targetObjectsOf reaches furthest, so a flat
+# bundle alone would not exercise the filter where it matters most.
+NESTED_PAYLOAD = {
+    **VALID_PAYLOAD,
+    "contacts": [{"label": "Grace Hopper"}],
+    "organisations": [{"label": "Reiner Lemoine Institut"}],
+    "funders": [{"label": "BMWK"}],
+    "frameworks": [{"label": "PyPSA"}],
+    "scenarios": [
+        {
+            "label": "A high renewables scenario",
+            "acronym": "HIGH-RE",
+            "scenario_types": [str(OEO.OEO_00000364)],
+            "years": ["2030-01-01T00:00:00+00:00"],
+            "study_regions": [
+                {
+                    "iri": "https://openenergyplatform.org/oekg/regions/berlin",
+                    "label": "Berlin",
+                }
+            ],
+            "interacting_regions": [
+                {
+                    "iri": "https://openenergyplatform.org/oekg/regions/brandenburg",
+                    "label": "Brandenburg",
+                }
+            ],
+        }
+    ],
+    "study_reports": [
+        {
+            "label": "Energy scenarios for 2045",
+            "authors": [{"label": "Ada Lovelace"}],
+            "publication_date": "2024-03-01T00:00:00+00:00",
+            "reference": "https://doi.org/10.5281/zenodo.1234567",
+        }
+    ],
+}
 
 
 def violations_of(graph: Graph):
@@ -47,6 +88,12 @@ def violations_of(graph: Graph):
     The reference the narrowed merge is measured against. Hand it
     ``post_state + label_graph()`` for what ``validate_post_state`` used to
     do, or the bare post-state for what it would report with no labels at all.
+
+    It repeats ``validate_post_state``'s body on purpose: a reference that
+    called the function under test could not measure it. The one thing it
+    must keep sharing is ``_violation``, because the comparison is between
+    violations and not between report graphs -- hence the private import,
+    which is the only one in this package's tests.
     """
     conforms, report, _ = pyshacl_validate(
         graph, shacl_graph=shape_graph(), advanced=True, inference="none"
@@ -78,16 +125,23 @@ class NarrowedMergeTest(ValidationTestCase):
     def test_it_reports_exactly_what_the_whole_subset_reported(self):
         for name, payload in [
             ("valid", VALID_PAYLOAD),
-            ("no technologies", WITHOUT_TECHNOLOGIES),
-            ("no sectors", WITHOUT_SECTORS),
-            ("no acronym", WITHOUT_ACRONYM),
+            ("nested", NESTED_PAYLOAD),
+            ("nested, no technologies", {**NESTED_PAYLOAD, "technologies": []}),
+            ("no technologies", without("technologies")),
+            ("no sectors", without("sectors")),
+            ("no acronym", without("acronym")),
+            ("no label or abstract", without("label", "abstract")),
             ("empty", {}),
         ]:
             with self.subTest(payload=name):
                 post_state = build_bundle_graph(UID, payload)
+                # As a multiset, the way `introduced_violations` compares
+                # them: two violations sharing a sort key keep rdflib's own
+                # iteration order, which two validations need not agree on,
+                # and an ordering difference is not a difference in verdict.
                 self.assertEqual(
-                    validate_post_state(post_state),
-                    violations_of(post_state + label_graph()),
+                    Counter(validate_post_state(post_state)),
+                    Counter(violations_of(post_state + label_graph())),
                 )
 
     def test_the_labels_are_load_bearing_and_not_merely_unused(self):
@@ -136,6 +190,38 @@ class NarrowedMergeTest(ValidationTestCase):
             (str(unknown), str(RDFS.label)),
             [(v.focus_node, v.path) for v in validate_post_state(post_state)],
         )
+
+
+class ShapeTargetsTest(ValidationTestCase):
+    """The one fact about the shape that the narrow merge argues from.
+
+    Leaving a term's label out is safe because nothing in the shape can
+    select or read a node the post-state never mentions. That is true of the
+    shape as it stands, not of SHACL in general -- so this fails rather than
+    the equivalence quietly weakening if the shape grows a target or a
+    constraint that reaches further. The answer is not necessarily to revert;
+    it is to re-check `_with_the_labels_it_names` against the new construct.
+    """
+
+    def test_every_target_is_a_class_or_the_objects_of_a_predicate(self):
+        # sh:targetClass needs an rdf:type the label subset does not carry;
+        # the objects of a predicate come only from the post-state. Either
+        # way a term the post-state never names cannot be a focus node.
+        targets = {
+            str(predicate)
+            for _, predicate, _ in shape_graph()
+            if str(predicate).startswith(str(SH)) and "target" in str(predicate)
+        }
+
+        self.assertEqual(targets, {str(SH.targetClass), str(SH.targetObjectsOf)})
+
+    def test_the_shape_reads_nothing_by_query_or_rule(self):
+        # sh:targetNode names a node outright; sh:sparql and sh:rule can read
+        # or write anywhere in the data graph. Any of the three would make
+        # "only what the post-state names" the wrong set.
+        for construct in (SH.targetNode, SH.sparql, SH.rule, SH.select):
+            with self.subTest(construct=str(construct)):
+                self.assertEqual([], list(shape_graph().subject_objects(construct)))
 
 
 class NothingLeaksTest(ValidationTestCase):
