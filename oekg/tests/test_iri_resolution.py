@@ -36,8 +36,7 @@ from urllib.parse import urlparse
 from django.test import SimpleTestCase
 from django.urls import reverse
 
-from oekg.bundles import SCENARIO, bundle_iri
-from oekg.fields import OEKG
+from oekg.bundles import SCENARIO, bundle_iri, part_iri
 from oekg.graph_store import GraphStoreUnavailable
 from oekg.serializers import READ_ONLY_CONTAINER
 from oekg.tests.bundle_fixtures import VALID_PAYLOAD
@@ -75,7 +74,7 @@ class IriTestCase(ScenarioTestCase):
         return urlparse(str(bundle_iri(uid))).path + "/"
 
     def scenario_address(self, sid):
-        return urlparse(str(OEKG[f"{SCENARIO.mint_segment}/{sid}"])).path + "/"
+        return urlparse(str(part_iri(SCENARIO, sid))).path + "/"
 
     def page_of(self, uid):
         return reverse("factsheet:bundle-id-page", args=[uid])

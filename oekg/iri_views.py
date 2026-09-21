@@ -63,9 +63,9 @@ import logging
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.urls import re_path, reverse
 
-from oekg.api_support import is_minted_identifier
-from oekg.bundles import BUNDLE_CLASS, SCENARIO, bundle_iri, bundle_uid
-from oekg.fields import HAS_PART, OEKG
+from oekg.api_support import bundle_exists, is_minted_identifier
+from oekg.bundles import BUNDLE_CLASS, SCENARIO, bundle_uid, part_iri
+from oekg.fields import HAS_PART
 from oekg.graph_store import GraphStore, GraphStoreError
 
 logger = logging.getLogger("oeplatform")
@@ -98,6 +98,15 @@ def _bundle_of_scenario(store: GraphStore, scenario) -> str:
     Both types are asserted, not just the has-part edge: an edge alone would
     resolve any node some bundle happens to point at, and this address promises
     a scenario.
+
+    ``LIMIT 1`` because a scenario factsheet belongs to one bundle. The graph
+    does not enforce that, so the limit states the assumption instead of
+    letting an unexpected second row decide the answer by ordering.
+
+    ``None`` also when the bundle found lives at an IRI outside the namespace
+    -- the user interface concatenates a uid of its client's choosing. Such a
+    bundle has no URL of its own either, so there is nowhere to send anyone and
+    a 404 reports an identity problem that predates this module.
     """
     query = """
         SELECT ?bundle WHERE {
@@ -148,13 +157,14 @@ def _unavailable(error: Exception) -> HttpResponse:
 
 
 def bundle_address(request, uid: str) -> HttpResponse:
-    """Dereference a bundle's own IRI."""
-    if not is_minted_identifier(uid):
-        raise Http404(f"{uid!r} is not an identifier this platform mints.")
+    """Dereference a bundle's own IRI.
 
-    store = GraphStore.from_settings()
+    Asked through `bundle_exists` rather than with an ASK of its own, because
+    that is where the one spelling of this question lives and two spellings of
+    it would be free to drift.
+    """
     try:
-        found = store.ask("ASK { %s a %s }" % (bundle_iri(uid).n3(), BUNDLE_CLASS.n3()))
+        found = bundle_exists(uid)
     except GraphStoreError as error:
         return _unavailable(error)
 
@@ -169,12 +179,17 @@ def scenario_address(request, pid: str) -> HttpResponse:
     There is no scenario page to send anyone to, so both representations are
     the bundle's. That is not a shortcut: a scenario factsheet is read as part
     of its bundle everywhere else in this API too.
+
+    The identifier is checked here rather than inside a shared helper the way
+    the bundle's is, because there is no `scenario_exists`: this is the only
+    place that asks. An IRI-unsafe value makes rdflib refuse to build the IRI,
+    which would surface as a 500 rather than the 404 it is.
     """
     if not is_minted_identifier(pid):
         raise Http404(f"{pid!r} is not an identifier this platform mints.")
 
     store = GraphStore.from_settings()
-    scenario = OEKG[f"{SCENARIO.mint_segment}/{pid}"]
+    scenario = part_iri(SCENARIO, pid)
     try:
         uid = _bundle_of_scenario(store, scenario)
     except GraphStoreError as error:

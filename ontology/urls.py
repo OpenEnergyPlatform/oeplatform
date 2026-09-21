@@ -34,7 +34,7 @@ urlpatterns = [
     # The knowledge graphs come FIRST, and the ordering is load-bearing. The
     # last route below is a catch-all that matches `<name>/<term>/` perfectly
     # well, so whichever is reached first wins -- which is how a scenario
-    # bundle came to render as an ontology term. `OntologyNamespaceTest` pins
+    # bundle came to render as an ontology term. `KnowledgeGraphRoutingTest` pins
     # this order, because a route added at the top of the list is exactly what
     # would undo it without anything failing.
     *(pattern for patterns in KNOWLEDGE_GRAPH_ROUTES.values() for pattern in patterns),
