@@ -5131,9 +5131,10 @@ paths:
             by name.'
     post:
       operationId: tables_create
-      description: Alters an existing table. **The payload is at the top level here**,
-        unlike the `PUT` on this same address, which reads it out of `query`. `type`
-        decides which kind of change is meant; anything else is refused.
+      description: |-
+        Queues a change to an existing table's structure. It is not applied on the spot: it lands in the change-request queue for review.
+
+        **The payload is at the top level here**, unlike the `PUT` on this same address, which reads it out of `query`. `type` decides which kind of change is meant; anything else is refused.
       summary: Change a table's columns or constraints
       parameters:
       - in: path
@@ -5174,6 +5175,22 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No credentials, or credentials this platform does not know.
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'Authenticated, but not permitted: the table belongs to somebody
+            else, or is under embargo, or the operation needs a level of permission
+            on it that this account does not hold.'
         '404':
           content:
             application/json:
@@ -6701,7 +6718,9 @@ paths:
     post:
       operationId: schema_tables_create
       description: |-
-        Alters an existing table. **The payload is at the top level here**, unlike the `PUT` on this same address, which reads it out of `query`. `type` decides which kind of change is meant; anything else is refused.
+        Queues a change to an existing table's structure. It is not applied on the spot: it lands in the change-request queue for review.
+
+        **The payload is at the top level here**, unlike the `PUT` on this same address, which reads it out of `query`. `type` decides which kind of change is meant; anything else is refused.
 
         **Deprecated.** This is the older, schema-qualified spelling of the same endpoint. Use `/api/v0/tables/{table}/` instead: it reaches the same view, and the `{schema}` segment here selects nothing.
       summary: Change a table's columns or constraints
@@ -6753,6 +6772,22 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No credentials, or credentials this platform does not know.
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'Authenticated, but not permitted: the table belongs to somebody
+            else, or is under embargo, or the operation needs a level of permission
+            on it that this account does not hold.'
         '404':
           content:
             application/json:
