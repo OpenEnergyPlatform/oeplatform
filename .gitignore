@@ -87,7 +87,10 @@ venv*/
 !.env.example
 !**/oep.env.example
 /fuseki
-apache*
+# Anchored: unanchored `apache*` matched podman/apache2.conf at any depth,
+# so the production image's Apache config was never committed while the
+# Dockerfile went on COPYing it.
+/apache*
 /oep-django-5
 
 .DS_Store
