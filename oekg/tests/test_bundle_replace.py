@@ -18,6 +18,11 @@ implementation gets wrong:
   the bundle. `ReplaceKeepsDatasetLinksTest` is the test that would not have
   been written by accident; issue #2473 is where the hazard was found.
 
+Rule 3 of the client page rests on these tests: delete-by-omission lives
+at this one address and nowhere else.
+
+Documents: docs/oeplatform-code/web-api/oekg-api/scenario-bundles.md
+
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501

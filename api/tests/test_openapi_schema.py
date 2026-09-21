@@ -309,7 +309,7 @@ POINTER = re.compile(r"^\s*Documents:\s*(\S+\.md)\s*$", re.MULTILINE)
 TEST_FILE = "test*.py"
 
 #: The directory a checkout's dependencies land in, wherever it is put.
-INSTALLED = "site-packages"
+SITE_PACKAGES = "site-packages"
 
 
 def project_packages():
@@ -329,7 +329,7 @@ def project_packages():
     """
     for config in apps.get_app_configs():
         path = Path(config.path)
-        if path.is_relative_to(BASE_DIR) and INSTALLED not in path.parts:
+        if path.is_relative_to(BASE_DIR) and SITE_PACKAGES not in path.parts:
             yield path
 
 
@@ -351,10 +351,7 @@ def declared_pointers():
         path for package in project_packages() for path in package.rglob(TEST_FILE)
     }
     for path in sorted(found):
-        try:
-            tree = ast.parse(path.read_text(encoding="utf-8"))
-        except (SyntaxError, UnicodeDecodeError):  # pragma: no cover
-            continue
+        tree = ast.parse(path.read_text(encoding="utf-8"))
         for node in ast.walk(tree):
             if not isinstance(
                 node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
