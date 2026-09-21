@@ -177,9 +177,12 @@ def plan_replacement(
                 kept.add(node)
                 scope += _own_triples(pre_state, node)
                 scope.add((bundle, HAS_PART, node))
-            kept |= _declare_links(
-                pre_state, part, node, pid, nested, desired, scope, address
+            links, linked, held = _declare_links(
+                pre_state, part, node, pid, nested, address
             )
+            desired += links
+            scope += linked
+            kept |= held
 
     discarded = tuple(
         node for node in bundle_local_nodes(pre_state, uid) if node not in kept
@@ -274,14 +277,14 @@ def _declare_links(
     node: Optional[URIRef],
     pid: str,
     nested: dict,
-    desired: Graph,
-    scope: Graph,
     address,
-) -> set:
-    """The dataset links declared inside one part, added to ``desired``.
+) -> tuple:
+    """The dataset links declared inside one part.
 
-    Returns the existing link nodes this declaration keeps, so the walk that
-    decides what goes can leave them alone.
+    Three answers, returned rather than written into graphs the caller passed
+    in: the triples these links mean, the triples of theirs this write may
+    therefore remove, and the existing link nodes the declaration keeps -- so
+    the walk that decides what goes can leave those alone.
 
     A link is matched by the identifier a read gave it, exactly as a part is.
     It is also checked for being declared twice, and that check compares what
@@ -289,8 +292,9 @@ def _declare_links(
     link is its address, so two databus citations sharing a title are two
     citations.
     """
+    desired, scope = Graph(), Graph()
     if not part.nested_links:
-        return set()
+        return desired, scope, set()
     parent = node if node is not None else part_iri(part, pid)
     kept, declared = set(), set()
     for link in nested.get(part.nested_links) or []:
@@ -298,7 +302,7 @@ def _declare_links(
         if identity in declared:
             raise _link_declared_twice(link)
         declared.add(identity)
-        did, link_node = _matched_link(pre_state, parent, link)
+        link_node, did = _matched_link(pre_state, parent, link)
         if link_node is not None and link_node in kept:
             # Two entries naming one link and saying different things about it.
             # Caught here rather than left to the shape, which would refuse it
@@ -311,18 +315,23 @@ def _declare_links(
         if link_node is not None:
             kept.add(link_node)
             scope += _own_triples(pre_state, link_node)
-    return kept
+    return desired, scope, kept
 
 
 def _matched_link(pre_state: Graph, scenario: URIRef, link: dict) -> tuple:
-    """The existing link this declaration names, or ``None`` and a fresh id."""
+    """The existing link this declaration names, or ``None`` and a fresh id.
+
+    ``(node, identifier)``, the same way round as `_matched_part`: they answer
+    the same question one level apart, and two orders for one answer is the
+    kind of thing that reads fine and is wrong at the call site.
+    """
     did = link.get(IDENTIFIED_BY)
     if did is None:
-        return mint_identifier(), None
+        return None, mint_identifier()
     _, node = find_dataset_link(pre_state, scenario, did)
     if node is None:
         raise _unknown("dataset link", did)
-    return did, node
+    return node, did
 
 
 def _own_triples(graph: Graph, node: URIRef) -> Graph:

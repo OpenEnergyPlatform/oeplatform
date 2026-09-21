@@ -53,7 +53,7 @@ from oekg.api_description import (
 )
 from oekg.api_support import OekgAPIView, shape_unavailable, store_unavailable
 from oekg.bundle_bodies import bundle_response
-from oekg.bundles import BUNDLE_FIELDS, BUNDLE_PARTS, bundle_referenced_iris
+from oekg.bundles import bundle_referenced_iris
 from oekg.dataset_links import UnaddressableTarget, link_address
 from oekg.graph_store import GraphStoreError
 from oekg.history import REPLACE
@@ -62,7 +62,7 @@ from oekg.read_serializers import ScenarioBundleReplaceReadSerializer
 from oekg.replacement import plan_replacement
 from oekg.serializers import ScenarioBundleReplaceSerializer
 from oekg.shape import ShapeUnavailable
-from oekg.writes import open_bundle, refuse_renames
+from oekg.writes import open_bundle, refuse_bundle_renames
 
 
 class ScenarioBundleReplaceAPIView(OekgAPIView):
@@ -161,10 +161,7 @@ class ScenarioBundleReplaceAPIView(OekgAPIView):
                 return acronym_conflict(acronym)
 
             known_labels = write.labels_of(bundle_referenced_iris(payload))
-            refuse_renames(payload, known_labels, BUNDLE_FIELDS)
-            for part in BUNDLE_PARTS:
-                for nested in payload.get(part.payload_key) or []:
-                    refuse_renames(nested, known_labels, part.fields)
+            refuse_bundle_renames(payload, known_labels)
 
             replacement = plan_replacement(
                 write.store,

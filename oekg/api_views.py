@@ -91,7 +91,6 @@ from oekg.api_support import (
 from oekg.bundle_bodies import bundle_response, note_history_gap, represent_bundle
 from oekg.bundles import (
     BUNDLE_FIELDS,
-    BUNDLE_PARTS,
     build_bundle_graph,
     bundle_delta,
     bundle_iri,
@@ -132,7 +131,7 @@ from oekg.versioning import (
     version_triples,
     write_applied,
 )
-from oekg.writes import open_bundle, refuse_renames
+from oekg.writes import open_bundle, refuse_bundle_renames, refuse_renames
 
 logger = logging.getLogger("oeplatform")
 
@@ -257,10 +256,7 @@ class ScenarioBundleCollectionAPIView(OekgAPIView):
                 return acronym_conflict(acronym)
 
             known_labels = labels_of(store, bundle_referenced_iris(payload))
-            refuse_renames(payload, known_labels, BUNDLE_FIELDS)
-            for part in BUNDLE_PARTS:
-                for nested in payload.get(part.payload_key) or []:
-                    refuse_renames(nested, known_labels, part.fields)
+            refuse_bundle_renames(payload, known_labels)
 
             uid = mint_identifier()
             post_state = build_bundle_graph(

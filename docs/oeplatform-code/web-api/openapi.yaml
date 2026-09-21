@@ -8990,13 +8990,24 @@ components:
         these keys. That is also why there is no partial form of this serializer --
         a link is added or removed, never edited.
 
-        **`ref` and `url` are two ways of saying the same thing, and they are
-        checked against each other.** A client naming a platform target sends
-        `ref` and `name` and lets the router derive the address; a client sending
-        back a link it read sends the address it read, and then `ref` has to be the
-        kind that address actually is. Anything else would let a payload claim one
-        target and cite another -- and since `ref` is not stored, the claim would
-        be the half that vanished.
+        **`ref` has to be what a read of this link will report.** A client naming a
+        platform target sends `ref` and `name` and lets the router derive the
+        address; a client sending back a link it read sends the address it read,
+        and then `ref` has to be the kind that address actually is. `ref` is never
+        stored -- it is derived from the address on every read -- so a payload
+        whose `ref` disagreed with its `url` would be making a claim that vanished
+        on the way in and came back different.
+
+        **`name` is the label, and it is deliberately NOT checked against the
+        address.** They are one value for a link this API derives -- the address is
+        built from the name -- and two independent values for a link written
+        through the existing `manage-datasets/` route, which takes a
+        human-readable title and a URL separately. Requiring them to agree would
+        refuse exactly those links on the way back, which is the round trip issue
+        #2473 exists to protect; so a citation may be labelled one thing and point
+        at another, and everything that has to know where it points reads the
+        address (`oekg.resolution`, via `reference_target`) rather than the label.
+        That is #2469's rule, applied to a value a client can now send.
       properties:
         type:
           $ref: '#/components/schemas/TypeEnum'
@@ -9091,13 +9102,24 @@ components:
         these keys. That is also why there is no partial form of this serializer --
         a link is added or removed, never edited.
 
-        **`ref` and `url` are two ways of saying the same thing, and they are
-        checked against each other.** A client naming a platform target sends
-        `ref` and `name` and lets the router derive the address; a client sending
-        back a link it read sends the address it read, and then `ref` has to be the
-        kind that address actually is. Anything else would let a payload claim one
-        target and cite another -- and since `ref` is not stored, the claim would
-        be the half that vanished.
+        **`ref` has to be what a read of this link will report.** A client naming a
+        platform target sends `ref` and `name` and lets the router derive the
+        address; a client sending back a link it read sends the address it read,
+        and then `ref` has to be the kind that address actually is. `ref` is never
+        stored -- it is derived from the address on every read -- so a payload
+        whose `ref` disagreed with its `url` would be making a claim that vanished
+        on the way in and came back different.
+
+        **`name` is the label, and it is deliberately NOT checked against the
+        address.** They are one value for a link this API derives -- the address is
+        built from the name -- and two independent values for a link written
+        through the existing `manage-datasets/` route, which takes a
+        human-readable title and a URL separately. Requiring them to agree would
+        refuse exactly those links on the way back, which is the round trip issue
+        #2473 exists to protect; so a citation may be labelled one thing and point
+        at another, and everything that has to know where it points reads the
+        address (`oekg.resolution`, via `reference_target`) rather than the label.
+        That is #2469's rule, applied to a value a client can now send.
       properties:
         type:
           $ref: '#/components/schemas/TypeEnum'

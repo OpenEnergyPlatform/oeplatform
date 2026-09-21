@@ -23,16 +23,27 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 import json
+from unittest.mock import patch
 
+from django.test import SimpleTestCase
 from django.urls import reverse
 from rdflib import RDF, RDFS, Graph, URIRef
 
 from factsheet.models import OEKG_Modifications
-from oekg.bundles import SCENARIO, SCENARIO_CLASS, bundle_iri, find_part
+from oekg.bundles import (
+    BUNDLE_FIELDS,
+    SCENARIO,
+    SCENARIO_CLASS,
+    SCENARIO_FIELDS,
+    STUDY_REPORT_FIELDS,
+    bundle_iri,
+    find_part,
+)
 from oekg.fields import OEO
 from oekg.graph_store import GraphStore
 from oekg.history import REPLACE
 from oekg.reads import read_bundle
+from oekg.replacement import EMPTY_VALUE
 from oekg.serializers import READ_ONLY_CONTAINER
 from oekg.tests.bundle_fixtures import VALID_PAYLOAD
 from oekg.tests.test_dataset_link_api import (
@@ -48,6 +59,32 @@ OTHER_SCENARIO = {
     "acronym": "LOW-RE",
     "scenario_types": [str(OEO.OEO_00000364)],
 }
+
+
+class EmptyValueCoverageTest(SimpleTestCase):
+    """Every field kind says what omitting it means, or omission is undefined.
+
+    The same shape as `AllowlistTest` and `ResolverCoverageTest`: a table this
+    API reads at runtime, checked by a test that fails when somebody adds to
+    the thing it has to keep up with. Without it the first declaration to omit
+    a field of a new kind is the one that finds out -- and this is the endpoint
+    where omission means deletion, so "finding out" is the expensive kind.
+    """
+
+    def test_every_field_kind_in_use_says_what_omitting_it_means(self):
+        kinds = {
+            field.kind
+            for table in (BUNDLE_FIELDS, SCENARIO_FIELDS, STUDY_REPORT_FIELDS)
+            for field in table
+        }
+
+        self.assertEqual(
+            kinds - set(EMPTY_VALUE),
+            set(),
+            "A field table uses a kind `EMPTY_VALUE` has no entry for, so a "
+            "replace that omits such a field has no defined meaning. Decide "
+            "what an absent one declares and add it to the table.",
+        )
 
 
 class ReplaceTestCase(DatasetLinkTestCase):
@@ -591,6 +628,22 @@ class ReplaceAnswersForTheAcronymTest(ReplaceTestCase):
 
         self.assertEqual(response.status_code, 409, response.data)
 
+    def test_the_bound_guard_refuses_on_its_own(self):
+        # The friendly check in front is a separate request, so two writes can
+        # both pass it. Mocking it away is what losing that race looks like
+        # from inside the write -- and the guard bound into the update has to
+        # refuse without it.
+        uid, etag = self.created()
+        self.created({**VALID_PAYLOAD, "acronym": "TAKEN"})
+        body, etag = self.read_body(uid)
+
+        with patch("oekg.replace_views.acronym_taken", return_value=False):
+            response = self.replace(uid, self.declared(body, acronym="TAKEN"), etag)
+
+        self.assertEqual(response.status_code, 409, response.data)
+        # And nothing was written: the bundle still answers to its own acronym.
+        self.assertEqual(self.read_body(uid)[0]["acronym"], "API-TEST")
+
     def test_declaring_the_acronym_it_already_has_is_not_a_conflict(self):
         # A bundle never counts against itself, or sending back what was read
         # would be refused by its own value.
@@ -646,6 +699,49 @@ class BundleReadNestsDatasetLinksTest(ReplaceTestCase):
 
         (link,) = body["scenarios"][0]["datasets"]
         self.assertEqual(link["name"], TABLE_LINK["name"])
+
+
+class TheWholePipelineStoryTest(ReplaceTestCase):
+    """The loop the endpoint exists for, walked once end to end.
+
+    A modelling pipeline keeps no state between runs: it looks its bundle up by
+    acronym, creates it if there is none, and otherwise declares it. Each half
+    is tested elsewhere; nothing pinned that they join up, and the join is the
+    whole claim.
+    """
+
+    def by_acronym(self, acronym):
+        return self.client.get(f"{self.collection_url}?acronym={acronym}").data
+
+    def test_a_pipeline_holding_no_state_creates_then_declares(self):
+        # Run one: nothing is there, so the pipeline creates.
+        self.assertEqual(self.by_acronym("API-TEST")["count"], 0)
+        self.created({**VALID_PAYLOAD, "scenarios": [VALID_SCENARIO]})
+
+        # Run two: it finds the bundle again by acronym alone, and what it
+        # finds carries the identifier and the version its next write needs.
+        found = self.by_acronym("API-TEST")
+        self.assertEqual(found["count"], 1)
+        meta = found["results"][0][READ_ONLY_CONTAINER]
+        uid, version = meta["uid"], meta["version"]
+
+        body, _ = self.read_body(uid)
+        response = self.replace(
+            uid,
+            self.declared(body, label="Declared by the pipeline"),
+            f'"{version}"',
+        )
+
+        self.assertEqual(response.status_code, 200, response.data)
+        self.assertEqual(response.data["label"], "Declared by the pipeline")
+        # Run three declares the same thing and writes nothing at all.
+        again = self.replace(
+            uid,
+            self.declared(body, label="Declared by the pipeline"),
+            response["ETag"],
+        )
+        self.assertEqual(again.status_code, 200, again.data)
+        self.assertEqual(again["ETag"], response["ETag"])
 
 
 class ReplaceKeepsDatasetLinksTest(ReplaceTestCase):

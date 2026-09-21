@@ -377,6 +377,36 @@ class LinkWrittenElsewhereTest(ExternalLinkMixin, DatasetLinkTestCase):
         self.assertEqual(response.status_code, 400, response.data)
         self.assertIn("ref", response.data)
 
+    def test_a_label_that_disagrees_with_the_address_is_allowed(self):
+        # The pair that is NOT checked, and the reason it cannot be. The
+        # existing manage-datasets route takes the title and the address as
+        # separate values from a client, so a link in the live graph can carry
+        # a real table's address beside an unrelated title. Refusing that pair
+        # here would refuse exactly those links on the way back, which is the
+        # round trip issue #2473 exists to protect. What decides where the
+        # citation points is the address, everywhere -- see #2469.
+        uid, sid, etag = self.with_one_scenario()
+
+        response = self.add_link(
+            uid,
+            sid,
+            etag,
+            {
+                "type": "input",
+                "ref": "table",
+                "name": "A friendly title",
+                # The path from the router and the host the test client uses,
+                # which is what the API itself would have built.
+                "url": "http://testserver"
+                + reverse("dataedit:view", kwargs={"table": "abbb_emob"}),
+            },
+        )
+
+        self.assertEqual(response.status_code, 201, response.data)
+        self.assertEqual(response.data["name"], "A friendly title")
+        # Resolution follows the address, not the label.
+        self.assertEqual(response.data[READ_ONLY_CONTAINER]["resolvable"], False)
+
     def test_an_external_link_without_an_address_is_refused(self):
         uid, sid, etag = self.with_one_scenario()
 
