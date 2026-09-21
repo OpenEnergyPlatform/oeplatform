@@ -137,6 +137,23 @@ Three things about it are deliberate:
 - **The tests refuse a store they cannot recognise as local.** They write, and
   `RDF_DATABASE_HOST` is a local file's setting that could point anywhere.
 
+**What the wait actually is.** A local run spends most of its time waiting for
+the store, and none of that is this app's code. Measured against Fuseki 5.1.0 on
+TDB2, 2026-09-21: a `SELECT` costs ~6 ms, an `INSERT DATA` ~310 ms — and the
+same ~310 ms whether it carries one triple or a thousand, so the price is the
+durable commit, not the body or the round trip. A fresh TCP connection costs
+nothing. Before optimising anything here, check which of the two a change
+touches.
+
+A genuinely in-memory dataset (`POST /$/datasets?dbName=ds&dbType=mem`) does
+that same write in ~21 ms, but **the suite does not pass against one** — bundle
+creates fail — so it is not a shortcut you can take today. Note also that
+`FUSEKI_MEM_1=true`, which the continuous integration service used to set, is
+**not a variable `stain/jena-fuseki` reads**: the config it generates is
+`tdb2:DatasetTDB2` at `/fuseki/databases/ds`, and the data survives a container
+restart. CI has always run TDB2 on disk like everyone else, and no longer claims
+otherwise.
+
 ## Two things are called `oekg`
 
 - **This app** (`oekg/`, repo root) — reusable OEKG query functionality. Extend

@@ -634,6 +634,16 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Code Quality
 
+- The OEKG shape validator merges in only the ontology labels a bundle actually
+  names, instead of all 2,054 of them. The label subset is there because the
+  shape requires exactly one label on every ontology term a bundle picks, and a
+  bundle picks a handful; the rest was copied into every validation and then
+  copied again by the validator itself. Same verdicts, and the `oekg` test suite
+  -- 45% of the whole run -- does a third of the processor work it used to (184
+  s down to 64 s). What is left of a local run is the graph store's own write
+  cost, which no change here can reach
+  [(#2479)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2479)
+
 - The test run no longer buries itself in debug logging. The shipped
   `securitysettings.py.default` set the root logger to `DEBUG`, which was
   harmless until the OEKG tests began talking to a real graph store over HTTP --

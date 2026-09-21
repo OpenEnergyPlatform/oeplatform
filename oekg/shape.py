@@ -25,12 +25,13 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 from functools import lru_cache
 from pathlib import Path
-from typing import Optional
+from types import MappingProxyType
+from typing import Mapping, Optional
 
 from django.conf import settings
 from rdflib import Graph, URIRef
 from rdflib.collection import Collection
-from rdflib.namespace import SH
+from rdflib.namespace import RDFS, SH
 
 
 class ShapeUnavailable(Exception):
@@ -45,6 +46,22 @@ def shape_graph() -> Graph:
 def label_graph() -> Graph:
     """The rdfs:label subset the shape's targets need to satisfy it."""
     return _parsed(_fingerprint(Path(settings.OEKG_SHAPE_LABELS_PATH)))
+
+
+def labels_by_term() -> Mapping:
+    """The same subset as a lookup table: term IRI to its label literals.
+
+    The subset is flat -- one predicate, ``rdfs:label``, on IRI subjects -- so
+    a caller needing the labels of a handful of terms can ask for exactly
+    those instead of merging all 2,054 triples to reach twenty. Read-only,
+    because it is the cached artifact and not a copy of it.
+
+    The literals are a tuple rather than a single value on purpose: the
+    artifact holds one label per term today, and a validator asking "how many
+    labels does this term have" must see what is there rather than what the
+    extraction promised.
+    """
+    return _labels_index(_fingerprint(Path(settings.OEKG_SHAPE_LABELS_PATH)))
 
 
 def enumeration(property_iri: str) -> frozenset:
@@ -95,6 +112,19 @@ def _parsed(fingerprint: tuple) -> Graph:
     graph = Graph()
     graph.parse(fingerprint[0], format="turtle")
     return graph
+
+
+@lru_cache(maxsize=2)
+def _labels_index(fingerprint: tuple) -> Mapping:
+    """Every term in the label subset, with the labels it carries.
+
+    One entry per subject, so a caller asks by term rather than searching a
+    graph for it.
+    """
+    index = {}
+    for term, label in _parsed(fingerprint).subject_objects(RDFS.label):
+        index.setdefault(term, []).append(label)
+    return MappingProxyType({term: tuple(labels) for term, labels in index.items()})
 
 
 @lru_cache(maxsize=2)
