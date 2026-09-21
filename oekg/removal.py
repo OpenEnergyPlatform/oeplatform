@@ -31,11 +31,12 @@ The guard also settles the descent: a node that is kept is still reachable, so
 its children are still reachable, and they are kept with it -- which falls out
 of the fixpoint below rather than needing a rule of its own.
 
-**One walk serves both deletes.** A part's delete starts at the part; a whole
-bundle's starts at the bundle's children and takes the bundle itself with
-them. Written as one fixpoint with two entry points rather than as two walks,
-because the dangerous half is what the walk reaches -- and two spellings of
-that would eventually reach different things.
+**One walk serves every removal.** A part's delete starts at the part; a whole
+bundle's starts at the bundle's children and takes the bundle itself with them;
+a replace starts at whatever its payload no longer mentions. Written as one
+fixpoint with three entry points rather than as three walks, because the
+dangerous half is what the walk reaches -- and three spellings of that would
+eventually reach different things.
 
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
@@ -90,6 +91,23 @@ class Removal:
     guard: str
 
 
+def bundle_local_nodes(subgraph: Graph, uid: str) -> tuple:
+    """Every bundle-local node this bundle currently holds.
+
+    The set a whole-bundle delete removes and the set a replace decides about,
+    asked in one place so the two cannot come to disagree about what a bundle
+    is made of. Derived from `BUNDLE_LOCAL_CLASSES` by walking, never from a
+    list of the resources this API happens to address: being addressable and
+    being bundle-local are different questions, and the allowlist is the one
+    that answers this one.
+    """
+    bundle = bundle_iri(uid)
+    return _candidates(
+        subgraph,
+        *(node for node in subgraph.objects(bundle, None) if isinstance(node, URIRef)),
+    )
+
+
 def plan_removal(store: GraphStore, subgraph: Graph, target: URIRef) -> Removal:
     """Work out what deleting ``target`` removes from ``subgraph``.
 
@@ -117,7 +135,7 @@ def plan_removal(store: GraphStore, subgraph: Graph, target: URIRef) -> Removal:
     in the write's own ``WHERE``, atomic -- and the report costs one additional
     `SELECT`, next to the subgraph read every write on this path already makes.
     """
-    return _plan(store, subgraph, target, _candidates(subgraph, target))
+    return _plan(store, subgraph, (target,), _candidates(subgraph, target))
 
 
 def plan_bundle_removal(store: GraphStore, subgraph: Graph, uid: str) -> Removal:
@@ -142,17 +160,38 @@ def plan_bundle_removal(store: GraphStore, subgraph: Graph, uid: str) -> Removal
       a node saying a bundle is at version 4 when there is no bundle.
     """
     bundle = bundle_iri(uid)
-    children = _candidates(
+    children = bundle_local_nodes(subgraph, uid)
+    return _plan(store, subgraph, (bundle,), children, pinned=(bundle,))
+
+
+def plan_discarded_removal(
+    store: GraphStore, subgraph: Graph, discarded: tuple, spared: tuple = ()
+) -> Removal:
+    """Work out what removing everything in ``discarded`` comes to.
+
+    The replace endpoint's entry point: the nodes a declared bundle no longer
+    mentions. The same walk again -- so omission removes exactly what a
+    `DELETE` on each of those resources would have removed, and a node another
+    bundle cites is unlinked here too. Delete-by-omission is a different way of
+    *saying* which nodes go, not a different rule about what going means.
+
+    ``spared`` are the nodes the payload kept. The descent stops at them, which
+    matters only in a graph where one link node hangs off two scenarios -- but
+    a walk that could reach a node this write is busy rewriting is the kind of
+    thing to rule out rather than argue about.
+    """
+    return _plan(
+        store,
         subgraph,
-        *(node for node in subgraph.objects(bundle, None) if isinstance(node, URIRef)),
+        tuple(discarded),
+        _candidates(subgraph, *discarded, spared=spared),
     )
-    return _plan(store, subgraph, bundle, children, pinned=(bundle,))
 
 
 def _plan(
     store: GraphStore,
     subgraph: Graph,
-    target: URIRef,
+    targets: Tuple[URIRef, ...],
     candidates: Tuple[URIRef, ...],
     pinned: Tuple[URIRef, ...] = (),
 ) -> Removal:
@@ -163,7 +202,7 @@ def _plan(
     `plan_bundle_removal` for why the bundle is not a node the guard may save.
     """
     incoming = _incoming_references(store, candidates)
-    unlink = _links_into(subgraph, target)
+    unlink = _links_into(subgraph, targets)
 
     doomed = set(candidates) | set(pinned)
     while True:
@@ -188,7 +227,7 @@ def _plan(
     )
 
 
-def _candidates(subgraph: Graph, *start: URIRef) -> tuple:
+def _candidates(subgraph: Graph, *start: URIRef, spared: tuple = ()) -> tuple:
     """Every bundle-local node reachable from ``start``, ``start`` included.
 
     Optimistic: this is what *could* be deleted if nothing else cited it. The
@@ -200,7 +239,7 @@ def _candidates(subgraph: Graph, *start: URIRef) -> tuple:
     question of the wrong list.
     """
     found, frontier = [], list(start)
-    seen = set()
+    seen = set(spared)
     while frontier:
         node = frontier.pop()
         if node in seen:
@@ -270,15 +309,19 @@ def _still_unreferenced(doomed: set, removed: Graph) -> str:
     return " ".join(clauses)
 
 
-def _links_into(subgraph: Graph, target: URIRef) -> Graph:
-    """The edges that attach ``target`` to the bundle. Always removed.
+def _links_into(subgraph: Graph, targets: Tuple[URIRef, ...]) -> Graph:
+    """The edges that attach ``targets`` to the bundle. Always removed.
 
-    Even when the node itself is kept: the request was to remove this part from
+    Even when a node itself is kept: the request was to remove this part from
     this bundle, and that much is always honoured.
+
+    Several targets rather than one, because a replace discards whatever its
+    payload stopped mentioning and that is a set, not a node.
     """
     links = Graph()
-    for subject, predicate in subgraph.subject_predicates(target):
-        links.add((subject, predicate, target))
+    for target in targets:
+        for subject, predicate in subgraph.subject_predicates(target):
+            links.add((subject, predicate, target))
     return links
 
 

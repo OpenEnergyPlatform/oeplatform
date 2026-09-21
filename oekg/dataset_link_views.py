@@ -2,8 +2,9 @@
 
 **Which "dataset" this is:** the OEKG input/output dataset -- a node on a
 scenario factsheet recording that the scenario consumed or produced data. What
-it points at is an OEP Table or an OEP Dataset. See `oekg.dataset_links` for the
-full vocabulary note; the nested URL is what keeps the three apart in practice.
+it points at is an OEP Table, an OEP Dataset, or an address somewhere else
+entirely. See `oekg.dataset_links` for the full vocabulary note; the nested URL
+is what keeps the three senses of the word apart in practice.
 
 The endpoints sit one level deeper than the other sub-resources, under the
 scenario they belong to, because that is where the shape hangs them. Everything
@@ -11,8 +12,8 @@ else is the bundle's: the version guarded, the ownership asked, the entity tag
 returned, and the post-state validated.
 
 **No `PATCH`, and that is the design rather than an omission.** Every triple a
-link holds is derived from its type, its target kind and its name, so there is
-no field to change without changing what the link is. Editing one is adding a
+link holds follows from its type, its target kind, its name and where it
+points, so there is no field to change without changing what the link is. Editing one is adding a
 different one and removing this one, which says plainly what happened -- and
 `DELETE` is what makes that reachable, so the pair is the whole contract.
 
@@ -51,35 +52,27 @@ from oekg.api_support import (
     shape_unavailable,
     store_unavailable,
 )
+from oekg.bundle_bodies import link_bodies, link_body, resolve_into
 from oekg.bundles import SCENARIO, find_part
 from oekg.dataset_links import (
     DIRECTION_BY_NAME,
+    EXTERNAL,
     UnaddressableTarget,
     build_dataset_link_graph,
     dataset_link_nodes,
     dataset_link_payload,
-    dataset_link_uid,
     find_dataset_link,
-    reference_target,
-    stored_iri,
-    target_iri,
+    link_address,
+    link_identity,
 )
 from oekg.fields import mint_identifier
 from oekg.graph_store import GraphStoreError
 from oekg.history import CREATE
-from oekg.labels import labelled
 from oekg.read_serializers import DatasetLinkReadSerializer
-from oekg.resolution import resolve
-from oekg.serializers import READ_ONLY_CONTAINER, DatasetLinkSerializer
+from oekg.serializers import DatasetLinkSerializer
 from oekg.shape import ShapeUnavailable
 from oekg.subresource_views import SubResourcePagination, SubResourceViewMixin
 from oekg.writes import BundleWrite, open_bundle
-
-# A dataset link has no field table, because it has no fields: everything it
-# holds follows from its type, its target and its name. That is the same fact
-# that gives it no `PATCH`, and it is why resolving its picked ontology terms
-# is an empty answer rather than a refusal.
-NO_PICKED_TERMS = ()
 
 # Said once and spent by all three link responses, because all three resolve.
 RESOLUTION = (
@@ -124,8 +117,8 @@ class DatasetLinkViewMixin(SubResourceViewMixin):
         state = self.state_of(write)
         scenario = find_part(state, write.uid, SCENARIO, sid)
         direction, node = find_dataset_link(state, scenario, did)
-        body = _link_body(state, node, direction, write.uid, sid, self.resolving())
-        _resolve_into(state, [(node, body)])
+        body = link_body(state, node, direction, write.uid, sid, self.resolving())
+        resolve_into(state, [(node, body)])
         return self.represented(body, write, code)
 
 
@@ -155,7 +148,7 @@ class DatasetLinkCollectionAPIView(DatasetLinkViewMixin, OekgAPIView):
         scenario = self.scenario_of(write, sid)
         return self.paginated(
             request,
-            _link_bodies(write.pre_state, scenario, write.uid, sid, self.resolving()),
+            link_bodies(write.pre_state, scenario, write.uid, sid, self.resolving()),
             write,
         )
 
@@ -188,11 +181,20 @@ class DatasetLinkCollectionAPIView(DatasetLinkViewMixin, OekgAPIView):
         },
     )
     def post(self, request, uid, sid):
-        """Link this scenario to a table or dataset on this platform.
+        """Record that this scenario consumed or produced some data.
 
-        Three keys and no more: `type` (`input` or `output`), `ref` (`table`
-        or `dataset`) and the target's `name`. Everything the shape stores
-        follows from them, which is the same fact that gives a link no `PATCH`.
+        Four keys and no more: `type` (`input` or `output`), `ref` (`table`,
+        `dataset` or `external`), the target's `name`, and `url` where the
+        client says where it points rather than letting the router derive it.
+        Everything the shape stores follows from them, which is the same fact
+        that gives a link no `PATCH`.
+
+        **`ref: external` is an address this platform has no route for** -- a
+        databus entry, say. It is not a lesser citation: the address is stored
+        exactly as sent, and a read reports that this server cannot say whether
+        it still resolves rather than claiming it was deleted. A link naming a
+        platform target may send its `url` too, and then `ref` has to be the
+        kind that address actually is.
 
         **The target is not checked.** A link may outlive what it points at --
         a bundle is a published research record, so *this scenario used table
@@ -204,6 +206,12 @@ class DatasetLinkCollectionAPIView(DatasetLinkViewMixin, OekgAPIView):
         reference resolves to the catalogue entry's members as they are today,
         not as they were when the link was written. Choosing between them is
         the client's call.
+
+        A duplicate is refused rather than skipped, and what counts as a
+        duplicate is not the same question for every kind: a platform target
+        compares by what the client said, because the stored URL carries
+        whichever host name the request arrived on, while an external link
+        compares by its address, which is the only thing identifying it.
         """
         serializer = DatasetLinkSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -223,7 +231,7 @@ class DatasetLinkCollectionAPIView(DatasetLinkViewMixin, OekgAPIView):
             write.apply(
                 removed=Graph(),
                 added=build_dataset_link_graph(
-                    scenario, did, payload, target_iri(request, payload)
+                    scenario, did, payload, link_address(request, payload)
                 ),
                 verb=CREATE,
                 resource_type=_direction_of(payload).node_class,
@@ -316,69 +324,6 @@ def _no_such_link(did: str) -> Response:
     )
 
 
-def _link_bodies(
-    graph: Graph, scenario, uid: str, sid: str, expand: frozenset = frozenset()
-) -> list:
-    pairs = [
-        (node, _link_body(graph, node, direction, uid, sid, expand))
-        for direction, node in dataset_link_nodes(graph, scenario)
-    ]
-    pairs.sort(key=lambda pair: (pair[1]["type"], pair[1]["name"]))
-    _resolve_into(graph, pairs)
-    return [body for _, body in pairs]
-
-
-def _resolve_into(graph: Graph, pairs: list) -> None:
-    """Say, for every one of these links, what it points at right now.
-
-    Done to the whole list at once and never to one link at a time: resolution
-    costs a fixed few relational queries for any number of links, and a
-    per-link version of this would put a query per citation on a public
-    endpoint. A single link is simply a list of one.
-
-    What is looked up comes from each link's stored **URL**, not from the
-    `name` in its body. The two agree for every link this API wrote, because
-    the URL was built from the name -- but the existing route takes them as two
-    separate values from a client, so a legacy link can carry a real table's
-    URL beside a human-readable title. Resolving by that title would report a
-    table that is plainly there as deleted.
-    """
-    resolutions = resolve(
-        [reference_target(stored_iri(graph, node) or "") for node, _ in pairs]
-    )
-    for (_, body), resolution in zip(pairs, resolutions):
-        body[READ_ONLY_CONTAINER].update(resolution.as_meta())
-
-
-def _link_body(
-    graph: Graph, node, direction, uid: str, sid: str, expand: frozenset = frozenset()
-) -> dict:
-    """One link: the three keys a write accepts, and the rest read-only.
-
-    ``target_iri`` is in `_meta` rather than in the payload because a client
-    does not send it -- it is derived. It is there because it is the only thing
-    that stays true when `ref` comes back null: a link written before this API
-    existed can point at an address this platform has no route for, and then
-    the writable payload genuinely cannot express it. Saying where it points is
-    better than leaving a reader with a name and no target.
-    """
-    return labelled(
-        {
-            **dataset_link_payload(graph, node, direction),
-            READ_ONLY_CONTAINER: {
-                "uid": dataset_link_uid(graph, node),
-                "iri": str(node),
-                "type": str(direction.node_class),
-                "target_iri": stored_iri(graph, node),
-                "bundle": uid,
-                "scenario": sid,
-            },
-        },
-        NO_PICKED_TERMS,
-        expand,
-    )
-
-
 def _direction_of(payload: dict):
     return DIRECTION_BY_NAME[payload["type"]]
 
@@ -392,24 +337,31 @@ def _already_linked(graph: Graph, scenario, payload: dict) -> bool:
     happened -- the existing route's answer of `200` with a "skipped" list
     leaves a pipeline unable to distinguish "added" from "already there".
 
-    Compared on the three answers a link *is*, not on the URL they produce: the
-    stored URL carries the host the request arrived on, so two links written
-    through different names for this platform would otherwise both be kept.
+    What counts as the same link is `link_identity`, and it is not the same
+    question for every kind: a platform target compares by what the client
+    said, because the URL it produces carries whichever host name the request
+    arrived on, while an external link compares by its address, because that
+    address *is* the target and nothing else identifies it.
     """
-    wanted = {key: payload[key] for key in ("type", "ref", "name")}
+    wanted = link_identity(payload)
     return any(
-        dataset_link_payload(graph, node, direction) == wanted
+        link_identity(dataset_link_payload(graph, node, direction)) == wanted
         for direction, node in dataset_link_nodes(graph, scenario)
     )
 
 
 def _duplicate(payload: dict) -> Response:
+    # Named by what identifies it, which is the same thing the duplicate check
+    # compared: a client told that its external link duplicates a *name* would
+    # go looking for the wrong collision.
+    cited = payload["url"] if payload["ref"] == EXTERNAL else payload["name"]
+    kind = payload["ref"] or "unaddressed"
     return Response(
         {
             "detail": (
-                f"This scenario already links the {payload['ref']} "
-                f"{payload['name']!r} as {payload['type']}. A dataset link is "
-                "added or removed, never duplicated."
+                f"This scenario already links the {kind} {cited!r} as "
+                f"{payload['type']}. A dataset link is added or removed, "
+                "never duplicated."
             )
         },
         status=status.HTTP_409_CONFLICT,

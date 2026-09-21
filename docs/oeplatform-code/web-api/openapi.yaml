@@ -2280,10 +2280,12 @@ paths:
         pipeline that keeps no state re-identifies its bundle afterwards with
         `GET /api/v0/scenario-bundles/?acronym=...`.
 
-        Nested `scenarios` and `study_reports` are accepted here and **only**
-        here: a `PATCH` refuses them, so no single call can drop a bundle's
-        parts by omitting them. Dataset links are not accepted -- they hang off
-        a scenario and have their own endpoint.
+        Nested `scenarios` and `study_reports` are accepted here and on the
+        replace endpoint, and nowhere else: a `PATCH` refuses them, so no
+        single call can drop a bundle's parts by omitting them. A scenario's
+        `datasets` nest one level deeper, inside it, which is where the shape
+        hangs them -- so one call creates a bundle, its scenarios and the data
+        each of them cites.
 
         Unlike every other write, a create is judged strictly: there is no
         pre-state, so there is nothing it can have inherited and every
@@ -2389,8 +2391,12 @@ paths:
       description: |-
         Read one bundle, publicly.
 
-        Dataset links are **not** in this body: they hang off a scenario and
-        are read at their own endpoint.
+        Everything the bundle holds is in this body -- its scenarios, their
+        study reports, and the dataset links each scenario cites -- so a client
+        can send it straight back to `POST` or to `replace/` without stripping
+        anything. Links carry their own URL as well; nesting them here is what
+        makes a read round-trippable, and `replace` is the endpoint that turns
+        that into a requirement.
 
         **Public.** No authentication is required, and sending credentials changes nothing about the answer. The OEKG SPARQL endpoint already serves the same data, so a token here would protect nothing while making published research records awkward to read. (The reference page draws a **closed** padlock here. It marks a security requirement the reader already meets, not a protected endpoint -- on that page the closed padlock is the public one.)
       parameters:
@@ -2938,6 +2944,197 @@ paths:
             `changes` is `null` rather than `[]` where there cannot be a summary:
             an empty list would say that nothing changed, and what is known is that
             nothing recorded *what* changed.'
+  /api/v0/scenario-bundles/{uid}/replace/:
+    post:
+      operationId: scenario_bundles_replace_create
+      description: |-
+        Make this bundle be exactly what the payload declares.
+
+        **This is the only endpoint in the API where leaving something out
+        removes it.** Everywhere else a key a payload does not name is
+        genuinely untouched; here the payload is the whole bundle, so a field
+        it omits is emptied and a scenario, study report or dataset link it
+        does not list is removed. What "removed" means is the same typed
+        containment walk a `DELETE` uses: a node another bundle still cites is
+        unlinked instead, and the answer names both sets.
+
+        **A nested resource keeps its identity when it names one.** Send back
+        the `_meta.uid` a read gave it and the existing scenario, report or
+        link is updated in place; send none and a new one is created. This is
+        the single place a client's `_meta` is read rather than ignored, and it
+        is what the container was built for -- without it a re-import would
+        delete and recreate every part of the bundle on every run, churning
+        identifiers and filling the history with deletions nobody asked for.
+
+        **Running it twice is free.** The second call finds nothing to change,
+        writes nothing, leaves the version where it is and records no history
+        entry -- so a pipeline that runs nightly does not accumulate a ledger
+        of changes it never made.
+
+        Anything in the bundle this API has no vocabulary for -- a predicate no
+        field table names, a shared contact's own triples -- is left alone. A
+        declaration in this API's vocabulary is a declaration about this API's
+        vocabulary, and silence about something a client cannot send is not
+        permission to delete it.
+
+        **Requires authentication**, and only an owner of this scenario bundle may write to it -- a bundle with no recorded owner can be changed by an administrator only. Ownership is the bundle's, whatever part of it this operation names. (The reference page draws an **open** padlock here. It marks a security requirement not yet met -- use *Authorize* -- not an unprotected endpoint.)
+      parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: string
+        description: 'The entity tag of the bundle state this write applies to, as
+          returned in `ETag` by the read it was built from. **Required, with no opt-out**:
+          without it a client that has never heard of the header would overwrite a
+          change made since it read, and neither party would be told. `*` is refused
+          as an absent header rather than honoured as a wildcard, because it satisfies
+          the letter of the precondition while withholding the one thing the precondition
+          is for. A weak validator (`W/"4"`) and a bare number are both read as the
+          version they plainly name.'
+        required: true
+      - in: query
+        name: expand
+        schema:
+          type: string
+          enum:
+          - labels
+        description: '`labels` resolves the ontology terms this resource picks into
+          `_meta.labels`, from a small label subset rather than the full OEO. A value
+          this endpoint does not offer is refused with `400` rather than ignored,
+          and the refusal happens before anything is written, so nothing was written
+          when one arrives. Values are comma-separated, which matters once an endpoint
+          offers two; none offers two yet, and the enum says which one it offers.'
+      - in: path
+        name: uid
+        schema:
+          type: string
+        description: The scenario bundle's identifier, as minted by the server on
+          create and returned in `_meta.uid`. A pipeline holding no state finds it
+          again with `GET /api/v0/scenario-bundles/?acronym=...`.
+        required: true
+      tags:
+      - Scenario Bundles
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScenarioBundleReplace'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ScenarioBundleReplace'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ScenarioBundleReplace'
+        required: true
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'Refused, and **nothing was written**. Besides the usual payload
+            problems: the declaration named a nested scenario, study report or dataset
+            link that is not in this bundle -- identifiers are matched, never created
+            from -- or declared the same one twice. A replace is also judged by what
+            it *introduces*, so dropping a field the bundle needed is refused while
+            a violation it already carried is not blamed on this caller.'
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No credentials, or credentials this platform does not recognise.
+            Reads here need none; writes do.
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Authenticated, but not an owner of this scenario bundle. A
+            bundle with no recorded owner is administrator-only.
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No such scenario bundle, or no such resource within it.
+        '409':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Either the bundle moved between the read this replace was prepared
+            from and the write itself, another bundle holds the acronym declared,
+            or something outside this bundle started citing a node the replace was
+            about to remove. Nothing was written. Read it again, apply the declaration
+            to what comes back, and retry.
+        '412':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: '`If-Match` named a version, and it is not the current one.
+            Nothing was written. The response says which version the bundle is at.'
+        '428':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: '`If-Match` was absent, so this write did not say which version
+            it was editing and nothing was written. The response names the current
+            entity tag to send.'
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Throttled. These endpoints are public to read, so they carry
+            a ceiling for anonymous callers and a separate one per account. `Retry-After`
+            says how long to wait.
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'The OEKG graph store could not be reached, or the shape this
+            API validates against is not installed on this server. Neither is an answer
+            about the bundle: nothing was read and nothing was written.'
+        '200':
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: The bundle's current version. Send it back in `If-Match`
+                on the next write. It is returned on **every** response that carries
+                one, writes included, so a pipeline reads once per run and chains
+                its writes; only a lost response forces a re-read. A sub-resource
+                has no version of its own -- the tag here is always the containing
+                bundle's.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScenarioBundleReplaceRead'
+          description: 'The bundle is now what the payload declared. The body is that
+            bundle, in the form a write accepts it back, and `_meta.deleted` and `_meta.unlinked`
+            say what the declaration removed -- a node another bundle still cites
+            is detached rather than destroyed, which no status code can say. `ETag`
+            is the new version, so a pipeline chains its next write without reading
+            again. A replace that declared what was already there writes nothing:
+            the version is unchanged, both lists are empty, and the history records
+            nothing.'
   /api/v0/scenario-bundles/{uid}/scenarios/:
     get:
       operationId: scenario_bundles_scenarios_list
@@ -3772,11 +3969,20 @@ paths:
     post:
       operationId: scenario_bundles_scenarios_datasets_create
       description: |-
-        Link this scenario to a table or dataset on this platform.
+        Record that this scenario consumed or produced some data.
 
-        Three keys and no more: `type` (`input` or `output`), `ref` (`table`
-        or `dataset`) and the target's `name`. Everything the shape stores
-        follows from them, which is the same fact that gives a link no `PATCH`.
+        Four keys and no more: `type` (`input` or `output`), `ref` (`table`,
+        `dataset` or `external`), the target's `name`, and `url` where the
+        client says where it points rather than letting the router derive it.
+        Everything the shape stores follows from them, which is the same fact
+        that gives a link no `PATCH`.
+
+        **`ref: external` is an address this platform has no route for** -- a
+        databus entry, say. It is not a lesser citation: the address is stored
+        exactly as sent, and a read reports that this server cannot say whether
+        it still resolves rather than claiming it was deleted. A link naming a
+        platform target may send its `url` too, and then `ref` has to be the
+        kind that address actually is.
 
         **The target is not checked.** A link may outlive what it points at --
         a bundle is a published research record, so *this scenario used table
@@ -3788,6 +3994,12 @@ paths:
         reference resolves to the catalogue entry's members as they are today,
         not as they were when the link was written. Choosing between them is
         the client's call.
+
+        A duplicate is refused rather than skipped, and what counts as a
+        duplicate is not the same question for every kind: a platform target
+        compares by what the client said, because the stored URL carries
+        whichever host name the request arrived on, while an external link
+        compares by its address, which is the only thing identifying it.
 
         **Requires authentication**, and only an owner of this scenario bundle may write to it -- a bundle with no recorded owner can be changed by an administrator only. Ownership is the bundle's, whatever part of it this operation names. (The reference page draws an **open** padlock here. It marks a security requirement not yet met -- use *Authorize* -- not an unprotected endpoint.)
       parameters:
@@ -8678,6 +8890,47 @@ components:
       - iri
       - uid
       - version_before
+    BundleReplaceMeta:
+      type: object
+      description: |-
+        The bundle's own `_meta`, plus the account of what the replace removed.
+
+        In `_meta` and not beside the fields, for the reason every read-only value
+        here is: the top level of a bundle body is exactly what a write accepts, and
+        a client that read a replace's answer can send it straight back.
+      properties:
+        history_recorded:
+          type: boolean
+        ownership_recorded:
+          type: boolean
+        ownership_forgotten:
+          type: boolean
+        labels:
+          type: object
+          additionalProperties:
+            type: string
+            nullable: true
+        uid:
+          type: string
+        iri:
+          type: string
+          format: uri
+        version:
+          type: integer
+        deleted:
+          type: array
+          items:
+            $ref: '#/components/schemas/RemovedNode'
+        unlinked:
+          type: array
+          items:
+            $ref: '#/components/schemas/RemovedNode'
+      required:
+      - deleted
+      - iri
+      - uid
+      - unlinked
+      - version
     Dataset:
       type: object
       properties:
@@ -8730,19 +8983,33 @@ components:
     DatasetLink:
       type: object
       description: |-
-        A scenario's link to data on this platform: three keys, all required.
+        A scenario's link to data: what it is, what it points at, and where.
 
         Not a field table, because a dataset link has no fields of its own: the
-        label, the URL and the identifier the shape requires are all derived from
-        these three. That is also why there is no partial form of this serializer --
+        label, the address and the identifier the shape requires all follow from
+        these keys. That is also why there is no partial form of this serializer --
         a link is added or removed, never edited.
+
+        **`ref` and `url` are two ways of saying the same thing, and they are
+        checked against each other.** A client naming a platform target sends
+        `ref` and `name` and lets the router derive the address; a client sending
+        back a link it read sends the address it read, and then `ref` has to be the
+        kind that address actually is. Anything else would let a payload claim one
+        target and cite another -- and since `ref` is not stored, the claim would
+        be the half that vanished.
       properties:
         type:
           $ref: '#/components/schemas/TypeEnum'
         ref:
-          $ref: '#/components/schemas/RefEnum'
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/RefEnum'
+          - $ref: '#/components/schemas/NullEnum'
         name:
           type: string
+        url:
+          type: string
+          nullable: true
       required:
       - name
       - ref
@@ -8817,19 +9084,33 @@ components:
     DatasetLinkRead:
       type: object
       description: |-
-        A scenario's link to data on this platform: three keys, all required.
+        A scenario's link to data: what it is, what it points at, and where.
 
         Not a field table, because a dataset link has no fields of its own: the
-        label, the URL and the identifier the shape requires are all derived from
-        these three. That is also why there is no partial form of this serializer --
+        label, the address and the identifier the shape requires all follow from
+        these keys. That is also why there is no partial form of this serializer --
         a link is added or removed, never edited.
+
+        **`ref` and `url` are two ways of saying the same thing, and they are
+        checked against each other.** A client naming a platform target sends
+        `ref` and `name` and lets the router derive the address; a client sending
+        back a link it read sends the address it read, and then `ref` has to be the
+        kind that address actually is. Anything else would let a payload claim one
+        target and cite another -- and since `ref` is not stored, the claim would
+        be the half that vanished.
       properties:
         type:
           $ref: '#/components/schemas/TypeEnum'
         ref:
-          $ref: '#/components/schemas/RefEnum'
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/RefEnum'
+          - $ref: '#/components/schemas/NullEnum'
         name:
           type: string
+        url:
+          type: string
+          nullable: true
         _meta:
           allOf:
           - $ref: '#/components/schemas/DatasetLinkMeta'
@@ -9077,6 +9358,85 @@ components:
       - field
       - predicate
       - removed
+    IdentifiedDatasetLink:
+      type: object
+      description: A dataset link that may name the one it already is.
+      properties:
+        type:
+          $ref: '#/components/schemas/TypeEnum'
+        ref:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/RefEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        name:
+          type: string
+        url:
+          type: string
+          nullable: true
+      required:
+      - name
+      - ref
+      - type
+    IdentifiedScenario:
+      type: object
+      description: A scenario that may name the one it already is, links and all.
+      properties:
+        label:
+          type: string
+        acronym:
+          type: string
+        abstract:
+          type: string
+          nullable: true
+        study_regions:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeReference'
+        interacting_regions:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeReference'
+        years:
+          type: array
+          items:
+            type: string
+            format: date-time
+        datasets:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentifiedDatasetLink'
+        scenario_types:
+          type: array
+          items:
+            type: string
+      required:
+      - acronym
+      - label
+    IdentifiedStudyReport:
+      type: object
+      description: A study report that may name the one it already is.
+      properties:
+        label:
+          type: string
+        doi:
+          type: string
+          nullable: true
+        publication_date:
+          type: string
+          format: date-time
+        authors:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeReference'
+        reference:
+          type: string
+          format: uri
+          nullable: true
+      required:
+      - authors
+      - label
+      - publication_date
     LicenseEnum:
       enum:
       - Academic Free License v3.0
@@ -9151,6 +9511,101 @@ components:
         * `BSD 3-clause 'New' or 'Revised' license` - BSD 3-clause 'New' or 'Revised' license
         * `Other` - Other
         * `Unknown` - Unknown
+    NestedScenario:
+      type: object
+      description: |-
+        A scenario as it appears *inside* a bundle payload, links and all.
+
+        The links nest here and not on the bundle because that is where the shape
+        hangs them, and they nest at all because of what `replace` does: anything
+        in the graph and absent from its payload is removed, so a link a payload
+        has no way to mention is a link a re-import destroys. A bundle read nests
+        them for the same reason from the other side -- a client sends back what it
+        read, without stripping and without losing its citations.
+
+        A scenario's **own** endpoints use the plain serializer above and refuse
+        this key: a link has its own URL there, and add-and-remove is its whole
+        contract.
+      properties:
+        label:
+          type: string
+        acronym:
+          type: string
+        abstract:
+          type: string
+          nullable: true
+        study_regions:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeReference'
+        interacting_regions:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeReference'
+        years:
+          type: array
+          items:
+            type: string
+            format: date-time
+        datasets:
+          type: array
+          items:
+            $ref: '#/components/schemas/DatasetLink'
+        scenario_types:
+          type: array
+          items:
+            type: string
+      required:
+      - acronym
+      - label
+    NestedScenarioRead:
+      type: object
+      description: |-
+        A scenario *inside* a bundle body: the same, plus what it cites.
+
+        Two read shapes for one resource, because there are two write shapes: a
+        scenario's own endpoints take no dataset links, and a bundle payload takes
+        them nested. The read that a client sends back to `replace` has to be the
+        second one, or the citations it does not mention are the citations it
+        loses.
+      properties:
+        label:
+          type: string
+        acronym:
+          type: string
+        abstract:
+          type: string
+          nullable: true
+        study_regions:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeReference'
+        interacting_regions:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeReference'
+        years:
+          type: array
+          items:
+            type: string
+            format: date-time
+        datasets:
+          type: array
+          items:
+            $ref: '#/components/schemas/DatasetLinkRead'
+        _meta:
+          allOf:
+          - $ref: '#/components/schemas/SubResourceMeta'
+          title: ' meta'
+        scenario_types:
+          type: array
+          items:
+            type: string
+      required:
+      - _meta
+      - acronym
+      - datasets
+      - label
     NodeReference:
       type: object
       description: 'A contact, organisation or funder: referenced by IRI, or minted
@@ -9309,10 +9764,12 @@ components:
       enum:
       - table
       - dataset
+      - external
       type: string
       description: |-
         * `table` - table
         * `dataset` - dataset
+        * `external` - external
     Removal:
       type: object
       description: |-
@@ -9466,10 +9923,8 @@ components:
         one. That is what lets a pipeline create a whole bundle in one call without
         giving any call the power to drop its parts by omitting them.
 
-        Dataset links are deliberately **not** here. They hang off a scenario
-        rather than off the bundle, and they are add-and-remove only, so there is
-        no partial update of one to reason about -- nesting them would make a
-        create the one place their fields could be written together.
+        Dataset links nest one level deeper, inside each scenario, because that is
+        where the shape hangs them -- see `NestedScenarioSerializer`.
       properties:
         label:
           type: string
@@ -9501,7 +9956,7 @@ components:
         scenarios:
           type: array
           items:
-            $ref: '#/components/schemas/Scenario'
+            $ref: '#/components/schemas/NestedScenario'
         study_reports:
           type: array
           items:
@@ -9564,7 +10019,7 @@ components:
         scenarios:
           type: array
           items:
-            $ref: '#/components/schemas/ScenarioRead'
+            $ref: '#/components/schemas/NestedScenarioRead'
         study_reports:
           type: array
           items:
@@ -9572,6 +10027,144 @@ components:
         _meta:
           allOf:
           - $ref: '#/components/schemas/BundleMeta'
+          title: ' meta'
+        descriptors:
+          type: array
+          items:
+            type: string
+        sector_divisions:
+          type: array
+          items:
+            type: string
+        sectors:
+          type: array
+          items:
+            type: string
+        technologies:
+          type: array
+          items:
+            type: string
+        energy_carriers:
+          type: array
+          items:
+            type: string
+      required:
+      - _meta
+      - acronym
+      - label
+      - scenarios
+      - study_reports
+    ScenarioBundleReplace:
+      type: object
+      description: |-
+        The whole desired bundle: the create's payload, with identities kept.
+
+        Same shape as a create -- deliberately, because the point of the endpoint
+        is that a pipeline declares one bundle and the server makes it so, whether
+        or not the bundle is there yet. What it adds is that every nested part may
+        say which existing part it is, in the `_meta.uid` a read gave it.
+      properties:
+        label:
+          type: string
+        acronym:
+          type: string
+        abstract:
+          type: string
+          nullable: true
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeReference'
+        organisations:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeReference'
+        funders:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeReference'
+        frameworks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Part'
+        models:
+          type: array
+          items:
+            $ref: '#/components/schemas/Part'
+        scenarios:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentifiedScenario'
+        study_reports:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentifiedStudyReport'
+        descriptors:
+          type: array
+          items:
+            type: string
+        sector_divisions:
+          type: array
+          items:
+            type: string
+        sectors:
+          type: array
+          items:
+            type: string
+        technologies:
+          type: array
+          items:
+            type: string
+        energy_carriers:
+          type: array
+          items:
+            type: string
+      required:
+      - acronym
+      - label
+    ScenarioBundleReplaceRead:
+      type: object
+      description: 'What a replace answers with: the bundle it made, and what it took
+        out.'
+      properties:
+        label:
+          type: string
+        acronym:
+          type: string
+        abstract:
+          type: string
+          nullable: true
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeReference'
+        organisations:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeReference'
+        funders:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeReference'
+        frameworks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Part'
+        models:
+          type: array
+          items:
+            $ref: '#/components/schemas/Part'
+        scenarios:
+          type: array
+          items:
+            $ref: '#/components/schemas/NestedScenarioRead'
+        study_reports:
+          type: array
+          items:
+            $ref: '#/components/schemas/StudyReportRead'
+        _meta:
+          allOf:
+          - $ref: '#/components/schemas/BundleReplaceMeta'
           title: ' meta'
         descriptors:
           type: array
@@ -9684,12 +10277,8 @@ components:
       - url
     ScenarioRead:
       type: object
-      description: |-
-        One scenario factsheet -- a sub-resource, not a field of its bundle.
-
-        What makes it one is the shape: it carries its own has-uuid. That uuid is
-        **not** a field here, because the server mints it; a client supplies no
-        identifier anywhere in this API.
+      description: A scenario at its own endpoints, where a dataset link has its own
+        URL.
       properties:
         label:
           type: string

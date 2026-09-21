@@ -8,9 +8,10 @@ platform's database) or an **OEP Dataset** (the catalogue entity that groups
 several of them). The nested URL disambiguates the endpoint; this docstring
 disambiguates the code.
 
-A dataset link has no fields of its own to edit. Everything it holds is derived
-from three things a client sends -- which direction it is (`type`), what kind of
-thing it points at (`ref`), and which one (`name`) -- so it is only ever added
+A dataset link has no fields of its own to edit. Everything it holds follows
+from what a client says it is -- which direction it is (`type`), what kind of
+thing it points at (`ref`), which one (`name`) and, where the client says so
+rather than letting it be derived, where (`url`) -- so it is only ever added
 or removed. That is why there is no `PATCH`: there is no partial update of one
 whose meaning anybody would have to reason about.
 
@@ -22,10 +23,30 @@ out. Writing a link therefore touches no table and no
 catalogue entry, and a table's owner can still delete it while somebody else's
 bundle cites it.
 
-The two reference kinds are not equivalent, and the difference is the client's
-to choose knowingly: **`ref: table` is the reproducible reference, `ref: dataset`
-the current one** -- a catalogue entry's members can change after a bundle cites
-it, and that currency is the point of allowing the coarser reference at all.
+The two platform reference kinds are not equivalent, and the difference is the
+client's to choose knowingly: **`ref: table` is the reproducible reference,
+`ref: dataset` the current one** -- a catalogue entry's members can change after
+a bundle cites it, and that currency is the point of allowing the coarser
+reference at all.
+
+**A third kind, `ref: external`, points somewhere this platform has no route
+for** -- the live graph holds databus URLs written long before this API. It is
+not a shape change: `ref` is never stored, only the address is, in
+`oeo:has_iri` as a string, so an external link writes exactly the triples
+`ex:DatasetShape` already allows. It exists because a link that cannot be
+*expressed* cannot be sent back, and the replace endpoint deletes what a
+payload does not mention -- so a kind missing from the payload is a kind
+`replace` destroys.
+
+**The address is a payload key of its own (`url`), for every kind.** A link
+this API wrote derives it from the name, so a client sending `type`, `ref` and
+`name` need not know it; but the existing route takes the label and the address
+as two independent values from a client, so a legacy link can carry a real
+table's address beside a human-readable title. Reporting only the label would
+make such a link round-trip into a *different* link -- one pointing wherever
+the title happens to spell -- which is the same silent loss `ref: external`
+exists to prevent. So a read always says where a link points, and a write that
+says it is believed, checked against the kind it claims.
 
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
@@ -78,6 +99,17 @@ TARGETS = (
 )
 TARGET_BY_NAME = {target.name: target for target in TARGETS}
 
+# The kind for an address this platform has no route for. Deliberately NOT a
+# `LinkTarget`: a target is something `oekg.resolution` can look up, and this
+# one is by definition not on this platform. Keeping it out of `TARGETS` is
+# what leaves `RESOLVERS` complete -- an external link resolves to "this server
+# cannot say", which is the honest answer and the one `Resolution.UNKNOWABLE`
+# already gives.
+EXTERNAL = "external"
+
+#: What a client may write in `ref`, in the order a reader should meet them.
+REFERENCE_KINDS = tuple(target.name for target in TARGETS) + (EXTERNAL,)
+
 
 class UnaddressableTarget(Exception):
     """The name given cannot be part of a URL for this kind of target."""
@@ -94,18 +126,50 @@ def dataset_link_iri(did: str) -> URIRef:
     return OEKG[f"dataset/{did}"]
 
 
-def target_iri(request, payload: dict) -> str:
+def link_address(request, payload: dict) -> Optional[str]:
     """The address this link points at, as it will be stored.
 
-    Absolute, because the graph is read by things that are not this server --
-    and built from the request, as the platform already does for a table's own
-    identifier, so a deployment under another name says its own name. The
-    consequence is that the stored URL is not the link's identity: two links to
-    the same table written through two host names differ as strings. Identity
-    is the three answers a client gives, and everything that compares links
-    compares those.
+    Three cases, and the payload decides which:
+
+    - **The payload says where it points** (`url`). Stored verbatim. That is
+      the only way an external address can be written at all, and it is also
+      what makes a read of *any* link round-trippable: a link the existing
+      route wrote can carry a real table's address beside an unrelated title,
+      and deriving the address from that title would move the citation.
+    - **It names a platform target** (`ref` plus `name`). Derived from the
+      router, absolute because the graph is read by things that are not this
+      server -- as the platform already does for a table's own identifier, so a
+      deployment under another name says its own name.
+    - **It names no target at all** (`ref: null`). The shape allows a link with
+      no address, so this API can express one; nothing is stored.
+
+    The consequence of building from the request is that the stored URL is not
+    the link's identity: two links to the same table written through two host
+    names differ as strings. Identity is `link_identity`, which is why it
+    compares the answers a client gave and not the string they produced.
     """
+    if payload.get("url"):
+        return payload["url"]
+    if payload["ref"] is None or payload["ref"] == EXTERNAL:
+        return None
     return request.build_absolute_uri(target_path(payload["ref"], payload["name"]))
+
+
+def link_identity(payload: dict) -> tuple:
+    """What makes two dataset links the same link.
+
+    **Not the stored URL, except for an external link, where it is the only
+    thing.** For a platform target the URL carries whichever host name the
+    request arrived on, so comparing it would keep two links written through
+    two names for this platform. An external address is not derived from the
+    name and no host is being normalised away: it *is* the target, so two
+    databus links sharing a human-readable label are two different links, and
+    comparing them by that label would refuse the second as a duplicate of the
+    first.
+    """
+    if payload["ref"] == EXTERNAL:
+        return (payload["type"], EXTERNAL, payload.get("url"))
+    return (payload["type"], payload["ref"], payload["name"])
 
 
 def target_path(ref: str, name: str) -> str:
@@ -167,7 +231,11 @@ def reference_target(iri: str) -> tuple:
 
 
 def build_dataset_link_graph(
-    scenario: URIRef, did: str, payload: dict, iri: str
+    scenario: URIRef,
+    did: str,
+    payload: dict,
+    iri: Optional[str],
+    node: Optional[URIRef] = None,
 ) -> Graph:
     """The triples one dataset link means.
 
@@ -176,16 +244,24 @@ def build_dataset_link_graph(
     own URL carries. ``oekg:has_id`` is allowed too and deliberately not
     written -- it would be a copy of a database key that nothing keeps in step,
     and a link is resolved by name on read instead.
+
+    ``node`` names an existing link this is rewriting, for the one caller that
+    has one: a replace matches a link by the identifier its `_meta` carries,
+    and a link the browser wrote lives at an IRI this API did not choose. The
+    identity is the uuid either way, which is why the address can differ from
+    the one this function would have derived.
     """
     direction = DIRECTION_BY_NAME[payload["type"]]
-    node = dataset_link_iri(did)
+    node = dataset_link_iri(did) if node is None else node
     graph = Graph()
     graph.add((scenario, direction.predicate, node))
     graph.add((node, RDF.type, direction.node_class))
     graph.add((node, RDFS.label, Literal(payload["name"])))
-    # has-iri is a STRING here, per the shape -- it points at a page on the
-    # platform and is not the node's identity.
-    graph.add((node, HAS_IRI, Literal(iri)))
+    # has-iri is a STRING here, per the shape -- it is where the link points
+    # and is not the node's identity. Absent for a link that names no target:
+    # the shape allows at most one, not at least one.
+    if iri is not None:
+        graph.add((node, HAS_IRI, Literal(iri)))
     graph.add((node, HAS_UUID, Literal(did)))
     return graph
 
@@ -220,16 +296,25 @@ def find_dataset_link(graph: Graph, scenario: URIRef, did: str):
 
 
 def dataset_link_payload(graph: Graph, node: URIRef, direction: LinkDirection) -> dict:
-    """One link, in exactly the three keys a write accepts.
+    """One link, in exactly the keys a write accepts.
 
-    ``ref`` can come back ``None`` for a link this API did not write; that is
-    honest rather than a guess, and the name and direction are still true.
+    ``ref`` is read out of the stored address rather than stored beside it: the
+    shape's DatasetShape is closed and has no field for it. An address this
+    platform has no route for reads back ``external`` -- honest, and expressible
+    on a write, which is what lets a bundle holding one be sent back whole.
+    ``ref`` is ``None`` only for a link that stores no address at all, which the
+    shape permits and this API can therefore express too.
+
+    ``url`` is the address exactly as stored, on every kind. A client that just
+    names a platform target may leave it out and let the router derive it; a
+    client sending back what it read keeps the citation exactly where it was.
     """
     iri = stored_iri(graph, node)
     return {
         "type": direction.name,
-        "ref": None if iri is None else reference_kind(iri),
+        "ref": None if iri is None else (reference_kind(iri) or EXTERNAL),
         "name": str(graph.value(node, RDFS.label) or ""),
+        "url": iri,
     }
 
 

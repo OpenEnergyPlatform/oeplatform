@@ -79,6 +79,7 @@ from api.views import (
 from oekg.api_views import ScenarioBundleAPIView, ScenarioBundleCollectionAPIView
 from oekg.dataset_link_views import DatasetLinkAPIView, DatasetLinkCollectionAPIView
 from oekg.history_views import ScenarioBundleHistoryAPIView
+from oekg.replace_views import ScenarioBundleReplaceAPIView
 from oekg.scenario_views import ScenarioAPIView, ScenarioCollectionAPIView
 from oekg.study_report_views import (
     StudyReportAPIView,
@@ -334,6 +335,15 @@ urlpatterns_v0 = [
         "scenario-bundles/<uid>/",
         ScenarioBundleAPIView.as_view(),
         name="scenario-bundle",
+    ),
+    # The one endpoint where leaving something out removes it. Named rather
+    # than a verb on the bundle's own URL: full replacement was rejected for
+    # being reachable by accident, not for its semantics, and an address a
+    # client has to spell out is not hit by habit.
+    path(
+        "scenario-bundles/<uid>/replace/",
+        ScenarioBundleReplaceAPIView.as_view(),
+        name="scenario-bundle-replace",
     ),
     path(
         "scenario-bundles/<uid>/history/",

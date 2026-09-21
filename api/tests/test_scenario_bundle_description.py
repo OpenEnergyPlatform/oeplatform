@@ -53,6 +53,7 @@ CREATE = (PREFIX + "/", "post")
 #: so none of them says it does.
 EXPANDS = {
     (PREFIX + "/{uid}/", "get"),
+    (PREFIX + "/{uid}/replace/", "post"),
     (PREFIX + "/{uid}/history/", "get"),
     (PREFIX + "/{uid}/scenarios/", "get"),
     (PREFIX + "/{uid}/scenarios/", "post"),
@@ -314,10 +315,19 @@ class ScenarioBundleDescriptionTest(SimpleTestCase):
             )
 
     def test_a_create_says_where_it_put_the_resource(self):
+        """And a `POST` that creates nothing is not held to it.
+
+        Not every `POST` here is a create: `.../replace/` declares a bundle
+        that already exists and answers `200`, so there is no new address to
+        name. What this pins is that an operation which *does* answer `201`
+        says where it put the thing.
+        """
         for path, method, operation in self.operations:
             if method != "post":
                 continue
-            created = operation.get("responses", {}).get("201", {})
+            created = operation.get("responses", {}).get("201")
+            if created is None:
+                continue
             self.assertIn(
                 "Location",
                 set(created.get("headers", {})),

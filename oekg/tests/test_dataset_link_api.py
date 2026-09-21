@@ -282,12 +282,13 @@ class ExternalLinkMixin:
 class LinkWrittenElsewhereTest(ExternalLinkMixin, DatasetLinkTestCase):
     """A link this API did not write, as the browser and its ancestors wrote it.
 
-    The writable payload is `{type, ref, name}`, and `ref` is inferred from the
-    URL. A link pointing at an address this platform has no route for therefore
-    cannot be expressed in that payload at all -- so it reads back with `ref`
-    null, and `_meta.target_iri` says where it actually points. Pinned here
-    because it is a property of the payload the resource model fixed, not an
-    accident, and the replace endpoint inherits it.
+    Such a link used to be readable and **not** writable: `ref` was inferred
+    from the URL, an address this platform has no route for was neither of the
+    two kinds, so the payload could not say what the link was and the body came
+    back refused. That was pinned here as a known limit -- until `replace`
+    turned it into data loss, because a pipeline that cannot send a link back
+    omits it, and a declaration that omits a link removes it. `ref: external`
+    is the answer (issue #2473), and these tests are the round trip it bought.
     """
 
     def test_it_is_listed_rather_than_hidden(self):
@@ -298,14 +299,16 @@ class LinkWrittenElsewhereTest(ExternalLinkMixin, DatasetLinkTestCase):
         self.assertEqual(listed["count"], 1)
         self.assertEqual(listed["results"][0]["name"], "WS_23_24")
 
-    def test_its_reference_kind_reads_back_as_null(self):
+    def test_its_reference_kind_reads_back_as_external(self):
         # Honest rather than guessed: it is neither an OEP table nor an OEP
-        # dataset, and saying "table" would be a fabrication.
+        # dataset, and saying "table" would be a fabrication. Saying nothing at
+        # all was the earlier answer, and it left the link inexpressible.
         uid, sid = self.with_an_external_link()
 
         read = self.client.get(self.link_url(uid, sid, "legacy")).data
 
-        self.assertIsNone(read["ref"])
+        self.assertEqual(read["ref"], "external")
+        self.assertEqual(read["url"], self.EXTERNAL)
 
     def test_where_it_points_is_still_reported(self):
         uid, sid = self.with_an_external_link()
@@ -314,19 +317,75 @@ class LinkWrittenElsewhereTest(ExternalLinkMixin, DatasetLinkTestCase):
 
         self.assertEqual(read[READ_ONLY_CONTAINER]["target_iri"], self.EXTERNAL)
 
-    def test_such_a_body_is_not_accepted_back(self):
-        # The consequence, stated: a read of this link is not round-trippable,
-        # because the payload has no way to say "an address of its own".
+    def test_such_a_body_is_accepted_back(self):
+        # Turned around from the characterisation it used to be. The address is
+        # in the payload now, so a client can send back what it read -- and a
+        # replace that is sent a whole bundle keeps the citations in it.
         uid, sid = self.with_an_external_link()
-        read = self.client.get(self.link_url(uid, sid, "legacy")).data
+        response = self.client.get(self.link_url(uid, sid, "legacy"))
+        read, etag = response.data, response["ETag"]
+
+        written = self.add_link(
+            uid,
+            sid,
+            etag,
+            {key: read[key] for key in ("type", "ref", "name", "url")},
+        )
+
+        # Refused as a duplicate of itself, which is the point: an external
+        # link compares by its address, so this body identifies the very link
+        # it was read from.
+        self.assertEqual(written.status_code, 409, written.data)
+
+    def test_the_same_address_under_another_name_is_a_different_link(self):
+        # Where the duplicate rule inverts. A platform target compares by what
+        # the client said, because the stored URL carries whichever host the
+        # request arrived on; an external address is not derived from the name,
+        # so two databus citations sharing a title are two citations.
+        uid, sid = self.with_an_external_link()
         etag = self.client.get(self.link_url(uid, sid, "legacy"))["ETag"]
 
         response = self.add_link(
-            uid, sid, etag, {key: read[key] for key in ("type", "ref", "name")}
+            uid,
+            sid,
+            etag,
+            {
+                "type": "input",
+                "ref": "external",
+                "name": "WS_23_24",
+                "url": self.EXTERNAL + "/other",
+            },
+        )
+
+        self.assertEqual(response.status_code, 201, response.data)
+
+    def test_an_address_that_calls_itself_the_wrong_kind_is_refused(self):
+        uid, sid, etag = self.with_one_scenario()
+
+        response = self.add_link(
+            uid,
+            sid,
+            etag,
+            {
+                "type": "input",
+                "ref": "table",
+                "name": "abbb_emob",
+                "url": "https://databus.example.org/x/y",
+            },
         )
 
         self.assertEqual(response.status_code, 400, response.data)
         self.assertIn("ref", response.data)
+
+    def test_an_external_link_without_an_address_is_refused(self):
+        uid, sid, etag = self.with_one_scenario()
+
+        response = self.add_link(
+            uid, sid, etag, {"type": "input", "ref": "external", "name": "Somewhere"}
+        )
+
+        self.assertEqual(response.status_code, 400, response.data)
+        self.assertIn("url", response.data)
 
 
 class DatasetLinkReadTest(DatasetLinkTestCase):
@@ -493,8 +552,12 @@ class DatasetLinkShapeConformanceTest(RequiresShapeArtifactsMixin, SimpleTestCas
         self.assertEqual(paths - written - self.NOT_WRITTEN, set())
         self.assertEqual(written - paths, set())
 
-    def test_the_serializer_offers_only_the_three_derived_keys(self):
-        self.assertEqual(set(DatasetLinkSerializer().fields), {"type", "ref", "name"})
+    def test_the_serializer_offers_only_the_keys_a_link_follows_from(self):
+        # `url` joined them when an off-platform address had to become
+        # expressible; everything the shape stores still follows from these.
+        self.assertEqual(
+            set(DatasetLinkSerializer().fields), {"type", "ref", "name", "url"}
+        )
 
     def test_a_client_cannot_supply_the_identifier(self):
         self.assertNotIn("uid", DatasetLinkSerializer().fields)
