@@ -444,6 +444,16 @@ SPDX-License-Identifier: CC0-1.0
   in the reference, which has been there since `replace/` landed
   [(#2500)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2500)
 
+- Rule 2 of the same page said without qualification that `_meta` is read-only
+  and dropped before validation. That stopped being true when `replace/` landed,
+  which reads `_meta.uid` on a nested sub-resource to tell which one a
+  declaration means. The exception is now named where the rule is stated, with
+  the two rules pointing at each other, and it is spelled out that naming is not
+  assigning: the identifier is still the server's, a sub-resource naming none is
+  created with a fresh one, and one naming an identifier the bundle does not
+  hold is refused with nothing written
+  [(#2500)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2500)
+
 - A test that pins behaviour a documentation page describes now names that page,
   in its docstring, and a check in the suite fails when a named page is not in
   the tree. The pointer runs from the code to the page rather than the other way
@@ -454,8 +464,8 @@ SPDX-License-Identifier: CC0-1.0
   private vault, which nobody outside the project can open, and it was written
   by the very change that left a table in the architecture guide wrong about two
   fields until a reader noticed. The check asserts only that the pages named do
-  exist; it does not require a pointer, so a rule whose endpoint is still being
-  built does not turn the suite red
+  exist; it does not require a pointer, so a page may describe something no test
+  pins yet without turning the suite red
   [(#2462)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2462)
 
 - The reference's sections are checked for dead links on **every** documentation
@@ -488,9 +498,10 @@ SPDX-License-Identifier: CC0-1.0
   whole, and that a successful write can report that its own history entry was
   lost. Each rule carries a real request and response and links the reference at
   the operation it describes. One rule, delete-by-omission on the replace
-  endpoint, describes an endpoint that does not exist yet and is marked as
-  pending rather than left out, since a reader who saw the other eight would
-  conclude that leaving a key out is always safe
+  endpoint, was written before that endpoint existed and marked as pending
+  rather than left out, since a reader who saw the other eight would conclude
+  that leaving a key out is always safe; it describes the shipped endpoint as of
+  #2500, below
   [(#2460)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2460)
 
 - The API documentation described its OEDB half **twice** — once on the

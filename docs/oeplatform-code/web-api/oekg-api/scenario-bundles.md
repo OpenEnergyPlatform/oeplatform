@@ -157,9 +157,13 @@ resolved. A write that sends `_meta` back is not refused — the key is dropped
 before validation. That is what lets a client send back what it read without
 stripping anything first.
 
-There is exactly one exception, and it exists because of that round trip:
-`replace/` reads `_meta.uid` on a nested sub-resource to tell which one you
-mean. Nowhere else, and nothing else inside `_meta`, ever reaches a write — see
+There is exactly one exception, and it is narrower than it sounds: `replace/`
+reads `_meta.uid` on a nested sub-resource to tell **which** one you mean. That
+is a name, not an assignment. The identifier is still the server's — a
+sub-resource that names none is created with a freshly minted one, and one
+naming a `uid` this bundle does not hold is refused. The bundle's own identity
+is the URL, never the body, and everything else under `_meta` is dropped there
+as it is everywhere else. See
 [rule 3](#rule-3-delete-by-omission-lives-on-replace-and-nowhere-else).
 
 The container is not a hole in the closed shape, it is what keeps the shape
@@ -233,6 +237,33 @@ carrying the identifier it was read with is updated in place, one carrying none
 is created, and one that is not there at all is removed. A client that strips
 `_meta` before sending is therefore not sending the same bundle back; it is
 deleting every sub-resource in it and minting replacements.
+
+**It names, it does not assign.** The identifier is still the server's, as
+[rule 8](#rule-8-the-server-mints-the-identifier) says, and this endpoint is no
+way round that: a `uid` this bundle does not hold is a payload assembled from
+some other bundle, and it is refused rather than created.
+
+**Request** — this bundle's own read, sent back with one scenario's `_meta.uid`
+swapped for an identifier it does not hold. The body is otherwise a complete,
+valid declaration; only that one value differs.
+
+```http
+POST /api/v0/scenario-bundles/c7f37ddf-ec55-44bb-81a3-f738b6a5ff83/replace/ HTTP/1.1
+If-Match: "1"
+Content-Type: application/json
+Authorization: Token <token>
+```
+
+**Response** — `400 Bad Request`
+
+```json
+{
+  "detail": "This bundle has no scenario 00000000-0000-4000-8000-000000000000. A replace matches a nested resource by the identifier in its `_meta.uid`, and creates one that names none -- so an identifier that is not here is a payload built from a different bundle, not a request to create something. Nothing was written."
+}
+```
+
+Nothing was written, so a pipeline that has built its payload from the wrong
+bundle finds out at the refusal rather than at the next read.
 
 `NEMO-2035` below is at version 2: one scenario, `HIGH-RE`, carrying two
 citations, and one study report. The declaration changes the abstract, adds a
