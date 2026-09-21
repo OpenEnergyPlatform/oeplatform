@@ -334,6 +334,14 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
+- The container stack's Apache configuration is now in the repository. It was
+  excluded by an ignore rule meant for a directory of the same name, so the file
+  the production image build copies had never been committed -- a build from a
+  clean checkout could not have worked. The configuration also gains the
+  separate single-process group that the stateful part of the API requires, and
+  the request timeouts production runs with
+  [(#2495)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2495)
+
 - The platform no longer runs out of database connections. A query that failed
   part-way left its connection checked out for the life of the server process,
   with its transaction still open, so the pool grew by roughly seventeen
