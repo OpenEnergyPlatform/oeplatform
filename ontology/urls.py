@@ -10,6 +10,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 from django.urls import path, re_path
 from django.views.generic import TemplateView
 
+from oekg.iri_views import urlpatterns as oekg_iri_urlpatterns
 from ontology.views import (
     OeoExtendedFileServeView,
     OntologyAboutView,
@@ -20,7 +21,23 @@ from ontology.views import (
 )
 
 app_name = "ontology"
+
+# The store-backed vocabularies, each with the routes that resolve its
+# addresses. Keyed by name so `KnowledgeGraphRoutingTest` can hold it against
+# the registry: a knowledge graph registered with no routes here would fall
+# through to the ontology views and answer as though its contents were gone.
+KNOWLEDGE_GRAPH_ROUTES = {
+    "oekg": oekg_iri_urlpatterns,
+}
+
 urlpatterns = [
+    # The knowledge graphs come FIRST, and the ordering is load-bearing. The
+    # last route below is a catch-all that matches `<name>/<term>/` perfectly
+    # well, so whichever is reached first wins -- which is how a scenario
+    # bundle came to render as an ontology term. `OntologyNamespaceTest` pins
+    # this order, because a route added at the top of the list is exactly what
+    # would undo it without anything failing.
+    *(pattern for patterns in KNOWLEDGE_GRAPH_ROUTES.values() for pattern in patterns),
     # oeo-extended
     re_path(r"^$", OntologyAboutView.as_view(), name="index"),
     path("oeox/", OeoExtendedFileServeView.as_view(), name="oeox"),
