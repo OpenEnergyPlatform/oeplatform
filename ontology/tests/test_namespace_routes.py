@@ -27,7 +27,7 @@ from django.urls import resolve
 
 from ontology import urls as ontology_urls
 from ontology.views import get_OEO_MODULES_MAIN
-from ontology.vocabularies import KNOWLEDGE_GRAPH, names_of_kind
+from ontology.vocabularies import KNOWLEDGE_GRAPH, ONTOLOGY, names_of_kind
 
 # A name of every shape a vocabulary name can be given, so an unknown one is
 # asked the same question at each. The statics view answers four of these and
@@ -69,6 +69,18 @@ class RealOntologiesStillResolveTest(TestCase):
         response = self.client.get("/ontology/oeo_ext/entities/")
 
         self.assertEqual(response.status_code, 200)
+
+    def test_every_registered_ontology_is_actually_served(self):
+        # The other half of the coverage rule, and the half a
+        # KNOWLEDGE_GRAPH-only check leaves open: a name registered as an
+        # ONTOLOGY that no file-backed route can serve would answer 404 at
+        # every address while the registry said we offer it -- indistinguishable
+        # from a vocabulary that had been withdrawn.
+        for name in names_of_kind(ONTOLOGY):
+            with self.subTest(name=name):
+                response = self.client.get(f"/ontology/{name}/entities/")
+
+                self.assertEqual(response.status_code, 200)
 
     def test_the_file_backed_releases_are_still_served(self):
         if "oeo" not in get_OEO_MODULES_MAIN():

@@ -58,44 +58,28 @@ KINDS = frozenset({ONTOLOGY, KNOWLEDGE_GRAPH})
 
 @dataclass(frozen=True)
 class Vocabulary:
-    """One name under `/ontology/`, and what the platform does with it."""
+    """One name under `/ontology/`, and what the platform does with it.
+
+    A name and a kind, and nothing else. A title and a blurb were written here
+    first and taken out again: no code read them, so they were prose kept where
+    prose cannot be checked. What each name is stays a comment beside it, and
+    the routes are the description that has to be true.
+    """
 
     name: str
     kind: str
-    title: str
-    description: str
 
 
 VOCABULARIES = (
-    Vocabulary(
-        name="oeo",
-        kind=ONTOLOGY,
-        title="Open Energy Ontology",
-        description=(
-            "The platform's domain ontology. Its terms are the picks every "
-            "scenario bundle and every table's metadata select from."
-        ),
-    ),
-    Vocabulary(
-        name="oeo_ext",
-        kind=ONTOLOGY,
-        title="Open Energy Ontology, extended",
-        description=(
-            "Terms held beside the ontology proper, served from the same "
-            "release layout."
-        ),
-    ),
-    Vocabulary(
-        name="oekg",
-        kind=KNOWLEDGE_GRAPH,
-        title="Open Energy Knowledge Graph",
-        description=(
-            "The scenario bundles, in Fuseki rather than on disk. An address "
-            "here names a bundle or one of its scenarios and dereferences to "
-            "the page or the API representation of it; see oekg/iri_views.py "
-            "for what resolves and what deliberately does not."
-        ),
-    ),
+    # The domain ontology. Its terms are the picks every scenario bundle and
+    # every table's metadata select from.
+    Vocabulary(name="oeo", kind=ONTOLOGY),
+    # Terms held beside the ontology proper, in the same release layout.
+    Vocabulary(name="oeo_ext", kind=ONTOLOGY),
+    # The scenario bundles, in Fuseki rather than on disk. An address here
+    # names a bundle or one of its scenarios; `oekg/iri_views.py` says what
+    # resolves and what deliberately does not.
+    Vocabulary(name="oekg", kind=KNOWLEDGE_GRAPH),
 )
 
 _BY_NAME = {vocabulary.name: vocabulary for vocabulary in VOCABULARIES}

@@ -45,10 +45,13 @@ resolving one is a query: which bundle has this scenario as a part. The IRI is
 matched exactly rather than looked up by has-uuid, so the answer is about the
 address given and not about something that happens to share an identifier.
 
-**Only IRIs this API minted resolve.** A scenario written through the browser
-lives at an address this API did not mint and under a different shape, so
-``.../oekg/scenario/<pid>`` names API-minted scenarios alone. That is a 404
-reporting an identity problem that predates this module, not a bug in it.
+**Who wrote the node does not decide whether it resolves -- its types do.**
+Resolution asks the graph, so anything carrying the right `rdf:type` triples
+answers whether this API or the user interface wrote it, and the browser mints
+uuids of the same shape (`react-uuid`). What does not resolve is an identifier
+that is not a uuid, refused before it reaches a query, and a node the browser
+wrote without typing it -- the live graph has such nodes, and that 404 reports
+an identity problem which predates this module rather than a bug in it.
 
 **This module stays light on purpose.** It must not reach
 `factsheet/oekg/connection.py`, which parses the full ontology at import --
@@ -67,12 +70,17 @@ from oekg.api_support import bundle_exists, is_minted_identifier
 from oekg.bundles import BUNDLE_CLASS, SCENARIO, bundle_uid, part_iri
 from oekg.fields import HAS_PART
 from oekg.graph_store import GraphStore, GraphStoreError
+from oekg.renderers import RDF_RENDERERS
 
 logger = logging.getLogger("oeplatform")
 
-#: The representations that mean "send me the graph, not the page". Both are
-#: served by `ScenarioBundleAPIView`, which slice 10 taught to render RDF.
-RDF_MEDIA_TYPES = ("text/turtle", "application/ld+json")
+#: The representations that mean "send me the graph, not the page" -- read off
+#: the renderers `ScenarioBundleAPIView` actually has, so this cannot come to
+#: promise a form the destination would answer `406` for.
+RDF_MEDIA_TYPES = tuple(renderer.media_type for renderer in RDF_RENDERERS)
+
+#: Text this platform serves for a reader.
+HTML = "text/html"
 
 #: What a minted identifier looks like in a URL. Narrow enough that nothing
 #: reaches a query which could not have been minted; the value is checked
@@ -125,15 +133,57 @@ def _bundle_of_scenario(store: GraphStore, scenario) -> str:
     return bundle_uid(rows[0]["bundle"]) if rows else None
 
 
+def _quality(request, media_type: str) -> float:
+    """What this request's `Accept` header is worth for ``media_type``.
+
+    Quality values have to be read, not just membership: **every RDF client
+    that matters sends a wildcard too.** `rdflib` asks for
+    ``text/turtle, application/x-turtle, */*;q=0.1``, so "does this client
+    accept HTML" is true of it -- and answering on membership alone sent every
+    such client to the page instead of the graph.
+
+    The most specific matching range wins, per RFC 9110: an exact type beats
+    ``type/*`` beats ``*/*``. Among ranges of equal specificity the best
+    quality wins, since nothing orders them.
+    """
+    main, _, sub = media_type.partition("/")
+    specificity, quality = -1, 0.0
+    for accepted in request.accepted_types:
+        if accepted.main_type == main and accepted.sub_type == sub:
+            matched = 2
+        elif accepted.main_type == main and accepted.sub_type == "*":
+            matched = 1
+        elif accepted.main_type == "*":
+            matched = 0
+        else:
+            continue
+        try:
+            offered = float(accepted.params.get("q", 1))
+        except ValueError:
+            offered = 0.0
+        if matched > specificity:
+            specificity, quality = matched, offered
+        elif matched == specificity:
+            quality = max(quality, offered)
+    return quality
+
+
 def _destination(request, uid: str) -> str:
     """Where a reader asking like this should be sent for bundle ``uid``.
 
-    HTML is the default rather than one branch of three: a client that asks for
-    nothing in particular is a person following a link.
+    **HTML wins a tie**, so a client that asks for nothing in particular -- or
+    for both equally, as a browser does -- is treated as a person following a
+    link. RDF has to be asked for more specifically than the page, which is
+    exactly what an RDF client does and what a browser does not.
+
+    A form this platform does not serve, such as ``application/rdf+xml``, ties
+    with HTML at the wildcard and so gets the page. That is the better of the
+    two answers available: the alternative is redirecting a client to an
+    endpoint that will refuse it.
     """
-    if not request.accepts("text/html") and any(
-        request.accepts(media_type) for media_type in RDF_MEDIA_TYPES
-    ):
+    for_html = _quality(request, HTML)
+    for_rdf = max(_quality(request, media_type) for media_type in RDF_MEDIA_TYPES)
+    if for_rdf > for_html:
         return reverse("api:scenario-bundle", kwargs={"uid": uid})
     return reverse("factsheet:bundle-id-page", args=[uid])
 
@@ -149,11 +199,7 @@ def _unavailable(error: Exception) -> HttpResponse:
     that believes that stops asking.
     """
     logger.error("An OEKG address could not be resolved: %s", error)
-    return HttpResponse(
-        "The OEKG graph store could not be reached.",
-        content_type="text/plain; charset=utf-8",
-        status=503,
-    )
+    return HttpResponse("The OEKG graph store could not be reached.", status=503)
 
 
 def bundle_address(request, uid: str) -> HttpResponse:
@@ -200,7 +246,7 @@ def scenario_address(request, pid: str) -> HttpResponse:
     return _see_other(request, uid)
 
 
-def unresolvable_address(request, *args, **kwargs) -> HttpResponse:
+def unresolvable_address(request) -> HttpResponse:
     """Everything else in the OEKG namespace.
 
     A route rather than a fall-through, so the answer is this module's and

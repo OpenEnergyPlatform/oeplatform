@@ -75,14 +75,6 @@ class RegistryTest(SimpleTestCase):
             sorted(vocabulary.name for vocabulary in VOCABULARIES),
         )
 
-    def test_every_vocabulary_says_what_it_is(self):
-        # The registry is also the answer to "what does this platform serve
-        # here", which is a question the routes could never answer.
-        for vocabulary in VOCABULARIES:
-            with self.subTest(vocabulary=vocabulary.name):
-                self.assertTrue(vocabulary.title.strip())
-                self.assertTrue(vocabulary.description.strip())
-
 
 class DataOnlyTest(SimpleTestCase):
     """The registry imports nothing, the way `api/api_tags.py` imports nothing.

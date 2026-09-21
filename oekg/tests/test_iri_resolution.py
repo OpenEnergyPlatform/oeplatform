@@ -38,6 +38,8 @@ from django.urls import reverse
 
 from oekg.bundles import SCENARIO, bundle_iri, part_iri
 from oekg.graph_store import GraphStoreUnavailable
+from oekg.iri_views import RDF_MEDIA_TYPES
+from oekg.renderers import RDF_RENDERERS
 from oekg.serializers import READ_ONLY_CONTAINER
 from oekg.tests.bundle_fixtures import VALID_PAYLOAD
 from oekg.tests.test_scenario_api import VALID_SCENARIO, ScenarioTestCase
@@ -45,6 +47,20 @@ from oekg.tests.test_study_report_api import VALID_REPORT
 from oekg.versioning import version_iri
 
 BROWSER_ACCEPT = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+
+# What `rdflib.Graph().parse(url, format=...)` actually sends, copied from
+# `rdflib.parser.URLInputSource`. Every one of them carries `*/*;q=0.1`, which
+# is the whole reason this endpoint has to read quality values rather than ask
+# whether a client "accepts" a type: on membership alone all three of these
+# accept HTML, and every RDF client went to the page.
+RDFLIB_ACCEPT = {
+    "turtle": "text/turtle, application/x-turtle, */*;q=0.1",
+    "json-ld": "application/ld+json, application/json;q=0.9, */*;q=0.1",
+}
+
+# rdflib's XML request. This platform serves no rdf+xml, so it ties with HTML
+# at the wildcard and gets the page -- better than a redirect to a 406.
+RDFLIB_XML_ACCEPT = "application/rdf+xml, */*;q=0.1"
 
 # Every segment this API mints a node under that is NOT addressable. Each is a
 # real kind of node in the live graph; none of them has a page or an RDF
@@ -109,6 +125,39 @@ class BundleAddressTest(IriTestCase):
 
         self.assertEqual(response.status_code, 303)
         self.assertEqual(response["Location"], self.api_of(uid))
+
+    def test_a_real_rdf_client_reaches_the_graph(self):
+        # The case that was broken while every hand-written Accept header
+        # passed: `rdflib` sends a wildcard beside the type it wants, so a
+        # membership test says it accepts HTML and it never saw the graph.
+        uid, _ = self.created()
+
+        for form, accept in RDFLIB_ACCEPT.items():
+            with self.subTest(form=form):
+                response = self.client.get(self.bundle_address(uid), HTTP_ACCEPT=accept)
+
+                self.assertEqual(response.status_code, 303)
+                self.assertEqual(response["Location"], self.api_of(uid))
+
+    def test_a_form_this_platform_does_not_serve_gets_the_page(self):
+        # Redirecting to an endpoint that would answer 406 is worse than
+        # answering with the page a person can read.
+        uid, _ = self.created()
+
+        response = self.client.get(
+            self.bundle_address(uid), HTTP_ACCEPT=RDFLIB_XML_ACCEPT
+        )
+
+        self.assertEqual(response["Location"], self.page_of(uid))
+
+    def test_the_forms_offered_are_the_ones_the_destination_serves(self):
+        # A media type promised here and not rendered there would send a client
+        # to a refusal; one rendered there and not promised here would leave a
+        # client on the page. Read off the renderers so neither can drift.
+        self.assertEqual(
+            sorted(RDF_MEDIA_TYPES),
+            sorted(renderer.media_type for renderer in RDF_RENDERERS),
+        )
 
     def test_a_browser_gets_the_page_although_it_accepts_anything(self):
         # A browser's Accept ends in `*/*;q=0.8`, so "does it accept turtle" is
@@ -215,6 +264,25 @@ class ScenarioAddressTest(IriTestCase):
         )
 
         self.assertEqual(response.status_code, 303)
+        self.assertEqual(response["Location"], self.api_of(uid))
+
+    def test_a_scenario_asked_for_as_json_ld_goes_to_the_bundle_api(self):
+        uid, sid, _ = self.with_one_scenario()
+
+        response = self.client.get(
+            self.scenario_address(sid), HTTP_ACCEPT="application/ld+json"
+        )
+
+        self.assertEqual(response.status_code, 303)
+        self.assertEqual(response["Location"], self.api_of(uid))
+
+    def test_a_scenario_reached_by_a_real_rdf_client_goes_to_the_api(self):
+        uid, sid, _ = self.with_one_scenario()
+
+        response = self.client.get(
+            self.scenario_address(sid), HTTP_ACCEPT=RDFLIB_ACCEPT["turtle"]
+        )
+
         self.assertEqual(response["Location"], self.api_of(uid))
 
     def test_the_right_bundle_is_found_when_there_are_several(self):
