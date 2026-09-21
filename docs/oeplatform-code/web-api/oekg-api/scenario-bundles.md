@@ -18,9 +18,9 @@ otherwise learn from a `400` — or, worse, never learn, because the request
 succeeded and did something other than what was meant.
 
 There are nine, and every one of them describes the API as it is today. **Rule
-3** is the one to read first if you are automating anything: it is the only rule
-here about destroying data, and it names the single address at which leaving
-something out removes it.
+3** is the one to read first if you are automating anything: it names the single
+address at which leaving something out removes it, which is the one way this API
+can destroy data you never asked it to touch.
 
 !!! Info "What is not on this page"
 
@@ -157,6 +157,11 @@ resolved. A write that sends `_meta` back is not refused — the key is dropped
 before validation. That is what lets a client send back what it read without
 stripping anything first.
 
+There is exactly one exception, and it exists because of that round trip:
+`replace/` reads `_meta.uid` on a nested sub-resource to tell which one you
+mean. Nowhere else, and nothing else inside `_meta`, ever reaches a write — see
+[rule 3](#rule-3-delete-by-omission-lives-on-replace-and-nowhere-else).
+
 The container is not a hole in the closed shape, it is what keeps the shape
 closed: the **top** level of a payload is exactly the fields of the resource, so
 an unknown key there is a `400` (see
@@ -221,22 +226,23 @@ data should be the one you ask for by name.
 **What you send is a bundle read, sent back.** A `GET` on the bundle returns
 exactly what this endpoint accepts, so a pipeline reads, edits and declares
 without assembling anything. That round trip is why `_meta.uid` is the one piece
-of `_meta` a write does read — and only here. It says _this is the same
-resource_: a nested scenario, study report or dataset link that carries the
-identifier it was read with is updated in place, one that carries none is
-created, and one that is not there at all is removed. A client that strips
+of `_meta` a write reads — and it reads it only here, which is the single
+exception to [rule 2](#rule-2-_meta-is-read-only-and-ignored-on-write). It says
+_this is the same resource_: a nested scenario, study report or dataset link
+carrying the identifier it was read with is updated in place, one carrying none
+is created, and one that is not there at all is removed. A client that strips
 `_meta` before sending is therefore not sending the same bundle back; it is
 deleting every sub-resource in it and minting replacements.
 
 `NEMO-2035` below is at version 2: one scenario, `HIGH-RE`, carrying two
 citations, and one study report. The declaration changes the abstract, adds a
-second scenario, and does not mention the study report.
+second scenario, and has no `study_reports` key at all.
 
-**Request** — the bundle as `GET` returned it, with those three changes
-(excerpt; every field not shown was sent back exactly as it was read)
+**Request** — the bundle as `GET` returned it, with those changes (excerpt;
+every field not shown was sent back exactly as it was read)
 
 ```http
-POST /api/v0/scenario-bundles/f861aa99-9f9a-4d63-adfa-7305e25fa6b7/replace/ HTTP/1.1
+POST /api/v0/scenario-bundles/e5d4e5ac-d39f-4089-b4bb-0d73f723731b/replace/ HTTP/1.1
 If-Match: "2"
 Content-Type: application/json
 Authorization: Token <token>
@@ -252,21 +258,21 @@ Authorization: Token <token>
       "scenario_types": [
         "https://openenergyplatform.org/ontology/oeo/OEO_00000364"
       ],
-      "_meta": { "uid": "b02fe11c-ed3a-42d7-99be-501fcf31a4ac" },
+      "_meta": { "uid": "67889811-fd77-4ee0-94ca-3be9386d4f5e" },
       "datasets": [
         {
           "type": "input",
           "ref": "table",
           "name": "nemo_2035_capacities",
           "url": "https://openenergyplatform.org/database/tables/nemo_2035_capacities",
-          "_meta": { "uid": "4f9f6dbd-4557-4206-ac16-13d9682d681c" }
+          "_meta": { "uid": "2a5d7fc4-99d2-4710-9d26-7cd881dfe4e1" }
         },
         {
           "type": "output",
           "ref": "external",
           "name": "NEMO-2035 results on the databus",
           "url": "https://databus.openenergyplatform.org/nemo/results/2035",
-          "_meta": { "uid": "33baa83c-11cd-4f08-bb52-8f8865e7ddbd" }
+          "_meta": { "uid": "2b8ee5db-c169-463d-bfcc-07f17510930c" }
         }
       ]
     },
@@ -277,8 +283,7 @@ Authorization: Token <token>
         "https://openenergyplatform.org/ontology/oeo/OEO_00000364"
       ]
     }
-  ],
-  "study_reports": []
+  ]
 }
 ```
 
@@ -289,11 +294,12 @@ Authorization: Token <token>
   "acronym": "NEMO-2035",
   "abstract": "Three pathways to 2035, and a low-renewables variant.",
   "_meta": {
-    "uid": "f861aa99-9f9a-4d63-adfa-7305e25fa6b7",
+    "uid": "e5d4e5ac-d39f-4089-b4bb-0d73f723731b",
+    "iri": "https://openenergyplatform.org/ontology/oekg/e5d4e5ac-d39f-4089-b4bb-0d73f723731b",
     "version": 3,
     "deleted": [
       {
-        "iri": "https://openenergyplatform.org/ontology/oekg/study-report/c35d355f-66b3-4c9a-8ace-91fc265ee3da",
+        "iri": "https://openenergyplatform.org/ontology/oekg/study-report/8618e7c6-4b09-4e71-8c0a-a0beea0c9545",
         "type": "https://openenergyplatform.org/ontology/oeo/OEO_00020012"
       }
     ],
@@ -302,23 +308,23 @@ Authorization: Token <token>
   "scenarios": [
     {
       "acronym": "HIGH-RE",
-      "_meta": { "uid": "b02fe11c-ed3a-42d7-99be-501fcf31a4ac" },
+      "_meta": { "uid": "67889811-fd77-4ee0-94ca-3be9386d4f5e" },
       "datasets": [
         {
           "ref": "table",
           "name": "nemo_2035_capacities",
-          "_meta": { "uid": "4f9f6dbd-4557-4206-ac16-13d9682d681c" }
+          "_meta": { "uid": "2a5d7fc4-99d2-4710-9d26-7cd881dfe4e1" }
         },
         {
           "ref": "external",
           "name": "NEMO-2035 results on the databus",
-          "_meta": { "uid": "33baa83c-11cd-4f08-bb52-8f8865e7ddbd" }
+          "_meta": { "uid": "2b8ee5db-c169-463d-bfcc-07f17510930c" }
         }
       ]
     },
     {
       "acronym": "LOW-RE",
-      "_meta": { "uid": "66f131e6-fe08-4791-9727-86d41d9ac12e" }
+      "_meta": { "uid": "d6c4f48e-a12e-4309-9d2b-c5b0be1d645c" }
     }
   ],
   "study_reports": []
@@ -327,14 +333,15 @@ Authorization: Token <token>
 
 Three things in that answer are worth reading closely.
 
-**`deleted` names the study report, and nothing named it.** Leaving it out did.
-That is the whole rule, and it is the only place in the API where it is true.
+**`deleted` names the study report, and nothing named it.** The request has no
+`study_reports` key; leaving it out is what removed the report. Sending
+`"study_reports": []` would have done the same thing — an omitted list and an
+empty one mean the same here, which is exactly what makes omission dangerous.
 
 **`unlinked` is empty here, and will not always be.** Omission removes by the
-same typed containment walk a `DELETE` uses, so it inherits the same guard: a
-scenario, study report or dataset link that another bundle also cites is
-detached from this bundle rather than destroyed, and lands in this list instead.
-The two lists mean exactly what they mean for a delete —
+same typed containment walk a `DELETE` uses, so the two lists mean precisely
+what they mean for a delete, including the guard that moves a node from one list
+to the other:
 [rule 5](#rule-5-the-deletes-two-guards-catch-two-different-accidents) describes
 them.
 
@@ -352,8 +359,8 @@ scenario — does not notice.
     Send back what you read. If your client builds the payload itself rather
     than editing a `GET`, it has to carry every scenario's `datasets` list, and
     every link's `_meta.uid`, or the citations in that scenario are deleted.
-    The same holds for `scenarios` and `study_reports` on the bundle: an
-    omitted list is an empty one, and an empty one removes what is there.
+    The same holds for `scenarios` and `study_reports` on the bundle: a list
+    you leave out is a list you emptied, and emptying it removes what is there.
 
 Declaring a bundle exactly as it already is writes nothing at all — no triples,
 no version bump, no history entry — so a pipeline that runs nightly does not
