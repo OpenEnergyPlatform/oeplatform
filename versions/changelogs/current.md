@@ -367,6 +367,18 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Documentation updates
 
+- The legacy **Edit scenario datasets** page is gone. It documented the singular
+  `scenario-bundle/scenario/manage-datasets/` route, which the scenario-bundle
+  REST API replaces, and it promised group-based shared editing of a bundle,
+  which was ruled out of scope and does not exist. The route itself still works
+  and is still described -- in the API Reference, under _Scenario Bundles
+  (legacy)_, which names the endpoint that replaces it. Its account of databus
+  registration, the only one the documentation carries, moves into **Writing
+  scenario bundles** beside the rule about what a dataset link may cite, and now
+  says which route can still accept such an address: the superseded one, not the
+  new API
+  [(#2461)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2461)
+
 - A guide for clients of the scenario-bundle API: **Writing scenario bundles**,
   under Web-API's → Guides. The generated API Reference says what each endpoint
   takes; this page carries the nine rules that decide what a request does and

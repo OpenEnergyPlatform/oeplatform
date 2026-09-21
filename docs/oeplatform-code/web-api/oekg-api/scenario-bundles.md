@@ -739,6 +739,23 @@ review it was never submitted to.
     }
     ```
 
+**Data that is not on this platform.** Both kinds of `ref` name something on
+this platform, so a dataset held elsewhere has no form in this payload. What
+gives such data a citable, persistent identifier is registering it on the OEP
+databus: publish it through the
+[publish wizard](https://databus.openenergyplatform.org/app/publish-wizard), or
+register many at once through the databus' own API, and then copy the file or
+version URL the databus issues.
+
+The one route that currently accepts such a URL is the superseded
+`scenario-bundle/scenario/manage-datasets/` endpoint, which takes an optional
+`external_url` beside each dataset's name and type. It does not merely recommend
+the databus: an address hosted anywhere else is refused, and the dataset's name
+comes back marked `(external dataset)`. It is described in the reference under
+[Scenario Bundles (legacy)](<../api-reference.md#/Scenario%20Bundles%20(legacy)>).
+A link written that way is exactly the one the warning above reads back: this
+API will tell you where it points, and will not accept it back.
+
 In the reference:
 [`POST /scenario-bundles/{uid}/scenarios/{sid}/datasets/`](../api-reference.md#/Scenario%20Bundles/scenario_bundles_scenarios_datasets_create).
 

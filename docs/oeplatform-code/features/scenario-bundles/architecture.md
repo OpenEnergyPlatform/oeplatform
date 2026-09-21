@@ -203,8 +203,13 @@ passes it down to the filter dialog, which resolves the labels itself.
 - **OEKG chat** — an external chatbot for asking questions about the OEKG,
   `https://oekg-chat.openenergyplatform.org/`. (Being linked from the Scenario
   Bundles nav and the overview page — see the wayfinder map.)
-- **OEKG Web-API** — see [OEKG API](../../web-api/oekg-api/index.md) and
-  [Edit scenario datasets](../../web-api/oekg-api/scenario-dataset.md).
+- **OEKG Web-API** — see [OEKG API](../../web-api/oekg-api/index.md) for the
+  read-only SPARQL endpoint and
+  [Writing scenario bundles](../../web-api/oekg-api/scenario-bundles.md) for the
+  REST API that writes them. The singular
+  `scenario-bundle/scenario/manage-datasets/` route is superseded by that API
+  and still served; it is described in the reference under
+  [Scenario Bundles (legacy)](<../../web-api/api-reference.md#/Scenario%20Bundles%20(legacy)>).
 
 ## How to extend this feature
 
