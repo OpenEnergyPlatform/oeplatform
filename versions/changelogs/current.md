@@ -298,6 +298,16 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
+- **Security:** queueing a structural change to a table
+  (`POST /api/v0/tables/<name>/`) required no authentication — an anonymous
+  request was accepted — and the values it carried were written into the
+  database by building the SQL statement around them, so a value containing a
+  quote could change the statement rather than be stored by it. The endpoint now
+  requires write permission on the table, like every other write to it, and both
+  queue writers bind their values instead of interpolating them. Changes already
+  queued are unaffected in what they contain
+  [(#2486)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2486)
+
 - Viewing a table's data no longer fails intermittently with
   `{"reason": "Invalid request"}`. The connection pool to the data database
   discarded a connection for being old but not for being dead, so a connection
@@ -382,6 +392,21 @@ SPDX-License-Identifier: CC0-1.0
   reaches the same table. They had been appearing in the reference with a
   fragment of regular expression where the address should be, which no client
   could call
+
+- The reference's sections are **named and ordered** rather than derived from
+  the first segment of each address. Every one of the 107 operations now sits in
+  one of thirteen named groups, each carrying a line saying what it holds, and
+  the two superseded surfaces say so and name what replaced them: the singular
+  `scenario-bundle/scenario/manage-datasets/` route, and the schema-qualified
+  table addresses. Before this the group came from the path, so the single
+  legacy route and the whole REST API replacing it rendered as adjacent sections
+  one letter apart with nothing distinguishing them, and the table endpoints
+  were split across two sections by which spelling of their address was used.
+  Superseded sections are read last, and the names are stable enough for a
+  documentation page to link into a section and stay linked. Operation
+  identifiers no longer carry a fragment of regular expression either -- a
+  generated client would have held a method named after a character class
+  [(#2459)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2459)
 
 - The OEKG page is named for what it documents — the read-only SPARQL endpoint —
   and says where writing to the graph happens instead. It had been titled "OEKG

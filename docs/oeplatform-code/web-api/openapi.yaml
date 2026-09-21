@@ -1631,7 +1631,7 @@ paths:
         stored, so this never reports a resource the dataset no longer holds. Public.
       summary: List datasets
       tags:
-      - datasets
+      - Datasets
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -1651,7 +1651,7 @@ paths:
       description: Creates a new dataset.
       summary: Create dataset
       tags:
-      - datasets
+      - Datasets
       requestBody:
         content:
           application/json:
@@ -1695,7 +1695,7 @@ paths:
           type: string
         required: true
       tags:
-      - datasets
+      - Datasets
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -1719,7 +1719,7 @@ paths:
           type: string
         required: true
       tags:
-      - datasets
+      - Datasets
       requestBody:
         content:
           application/json:
@@ -1758,7 +1758,7 @@ paths:
           type: string
         required: true
       tags:
-      - datasets
+      - Datasets
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -1782,7 +1782,7 @@ paths:
           Example: `test_dataset`.'
         required: true
       tags:
-      - datasets
+      - Datasets
       requestBody:
         content:
           application/json:
@@ -1823,7 +1823,7 @@ paths:
           type: string
         required: true
       tags:
-      - datasets
+      - Datasets
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -1854,7 +1854,7 @@ paths:
         description: The dataset's name.
         required: true
       tags:
-      - datasets
+      - Datasets
       requestBody:
         content:
           application/json:
@@ -1920,7 +1920,7 @@ paths:
         Used for the scenario bundles react app to be able to populate
         form select options with existing datasets from scenario topic.
       tags:
-      - datasets
+      - Tables
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -1948,7 +1948,7 @@ paths:
           type: string
         description: One table's name. Omit it for the whole list.
       tags:
-      - db
+      - Tables
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -1976,7 +1976,7 @@ paths:
         Used for the scenario bundles react app to be able to select a existing
         framework or model factsheet.
       tags:
-      - factsheet
+      - Factsheets
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -1998,7 +1998,7 @@ paths:
         Used for the scenario bundles react app to be able to select a existing
         framework or model factsheet.
       tags:
-      - factsheet
+      - Factsheets
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -2022,7 +2022,7 @@ paths:
         Authenticated by token. A `format` other than `json` is returned with the store's own content type rather than parsed.
       summary: Query the OEKG with SPARQL
       tags:
-      - oekg
+      - OEKG SPARQL
       requestBody:
         content:
           application/json:
@@ -2072,7 +2072,7 @@ paths:
         validate; it is kept because the user interface calls it.'
       summary: Attach datasets to a scenario (superseded)
       tags:
-      - scenario-bundle
+      - Scenario Bundles (legacy)
       requestBody:
         content:
           application/json:
@@ -2214,7 +2214,7 @@ paths:
         description: Bundles with a scenario year at or before this. Either end of
           the range may be given alone.
       tags:
-      - scenario-bundles
+      - Scenario Bundles
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -2291,7 +2291,7 @@ paths:
 
         **Requires authentication.** Any authenticated account may create a scenario bundle, and the account that creates one becomes its owner, which is what lets it write to the bundle afterwards. (The reference page draws an **open** padlock here. It marks a security requirement not yet met -- use *Authorize* -- not an unprotected endpoint.)
       tags:
-      - scenario-bundles
+      - Scenario Bundles
       requestBody:
         content:
           application/json:
@@ -2423,7 +2423,7 @@ paths:
           again with `GET /api/v0/scenario-bundles/?acronym=...`.
         required: true
       tags:
-      - scenario-bundles
+      - Scenario Bundles
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -2550,7 +2550,7 @@ paths:
           again with `GET /api/v0/scenario-bundles/?acronym=...`.
         required: true
       tags:
-      - scenario-bundles
+      - Scenario Bundles
       requestBody:
         content:
           application/json:
@@ -2724,7 +2724,7 @@ paths:
           again with `GET /api/v0/scenario-bundles/?acronym=...`.
         required: true
       tags:
-      - scenario-bundles
+      - Scenario Bundles
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -2880,7 +2880,7 @@ paths:
           again with `GET /api/v0/scenario-bundles/?acronym=...`.
         required: true
       tags:
-      - scenario-bundles
+      - Scenario Bundles
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -2984,7 +2984,7 @@ paths:
           again with `GET /api/v0/scenario-bundles/?acronym=...`.
         required: true
       tags:
-      - scenario-bundles
+      - Scenario Bundles
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -3100,7 +3100,7 @@ paths:
           again with `GET /api/v0/scenario-bundles/?acronym=...`.
         required: true
       tags:
-      - scenario-bundles
+      - Scenario Bundles
       requestBody:
         content:
           application/json:
@@ -3258,7 +3258,7 @@ paths:
           again with `GET /api/v0/scenario-bundles/?acronym=...`.
         required: true
       tags:
-      - scenario-bundles
+      - Scenario Bundles
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -3380,7 +3380,7 @@ paths:
           again with `GET /api/v0/scenario-bundles/?acronym=...`.
         required: true
       tags:
-      - scenario-bundles
+      - Scenario Bundles
       requestBody:
         content:
           application/json:
@@ -3542,7 +3542,7 @@ paths:
           again with `GET /api/v0/scenario-bundles/?acronym=...`.
         required: true
       tags:
-      - scenario-bundles
+      - Scenario Bundles
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -3698,7 +3698,7 @@ paths:
           again with `GET /api/v0/scenario-bundles/?acronym=...`.
         required: true
       tags:
-      - scenario-bundles
+      - Scenario Bundles
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -3832,7 +3832,7 @@ paths:
           again with `GET /api/v0/scenario-bundles/?acronym=...`.
         required: true
       tags:
-      - scenario-bundles
+      - Scenario Bundles
       requestBody:
         content:
           application/json:
@@ -4005,7 +4005,7 @@ paths:
           again with `GET /api/v0/scenario-bundles/?acronym=...`.
         required: true
       tags:
-      - scenario-bundles
+      - Scenario Bundles
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -4124,7 +4124,7 @@ paths:
           again with `GET /api/v0/scenario-bundles/?acronym=...`.
         required: true
       tags:
-      - scenario-bundles
+      - Scenario Bundles
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -4278,7 +4278,7 @@ paths:
           again with `GET /api/v0/scenario-bundles/?acronym=...`.
         required: true
       tags:
-      - scenario-bundles
+      - Scenario Bundles
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -4394,7 +4394,7 @@ paths:
           again with `GET /api/v0/scenario-bundles/?acronym=...`.
         required: true
       tags:
-      - scenario-bundles
+      - Scenario Bundles
       requestBody:
         content:
           application/json:
@@ -4552,7 +4552,7 @@ paths:
           again with `GET /api/v0/scenario-bundles/?acronym=...`.
         required: true
       tags:
-      - scenario-bundles
+      - Scenario Bundles
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -4674,7 +4674,7 @@ paths:
           again with `GET /api/v0/scenario-bundles/?acronym=...`.
         required: true
       tags:
-      - scenario-bundles
+      - Scenario Bundles
       requestBody:
         content:
           application/json:
@@ -4836,7 +4836,7 @@ paths:
           again with `GET /api/v0/scenario-bundles/?acronym=...`.
         required: true
       tags:
-      - scenario-bundles
+      - Scenario Bundles
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -4948,10 +4948,10 @@ paths:
     get:
       operationId: schema_retrieve
       description: |-
-        OpenApi3 schema for this API. Format can be selected via content negotiation.
+        The OpenAPI description of `api/v0`, generated from the code. It is what the reference page renders and what a generated client is built from.
 
-        - YAML: application/vnd.oai.openapi
-        - JSON: application/vnd.oai.openapi+json
+        A copy is committed to the repository and a check keeps the two equal, so this endpoint and the published reference describe the same API.
+      summary: This description, as a document
       parameters:
       - in: query
         name: format
@@ -5065,7 +5065,7 @@ paths:
           - zh-hans
           - zh-hant
       tags:
-      - schema
+      - API description
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -5107,7 +5107,7 @@ paths:
           topic they are published under.'
         required: true
       tags:
-      - tables
+      - Tables
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -5131,9 +5131,10 @@ paths:
             by name.'
     post:
       operationId: tables_create
-      description: Alters an existing table. **The payload is at the top level here**,
-        unlike the `PUT` on this same address, which reads it out of `query`. `type`
-        decides which kind of change is meant; anything else is refused.
+      description: |-
+        Queues a change to an existing table's structure. It is not applied on the spot: it lands in the change-request queue for review.
+
+        **The payload is at the top level here**, unlike the `PUT` on this same address, which reads it out of `query`. `type` decides which kind of change is meant; anything else is refused.
       summary: Change a table's columns or constraints
       parameters:
       - in: path
@@ -5145,7 +5146,7 @@ paths:
           topic they are published under.'
         required: true
       tags:
-      - tables
+      - Tables
       requestBody:
         content:
           application/json:
@@ -5174,6 +5175,22 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No credentials, or credentials this platform does not know.
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'Authenticated, but not permitted: the table belongs to somebody
+            else, or is under embargo, or the operation needs a level of permission
+            on it that this account does not hold.'
         '404':
           content:
             application/json:
@@ -5214,7 +5231,7 @@ paths:
           topic they are published under.'
         required: true
       tags:
-      - tables
+      - Tables
       requestBody:
         content:
           application/json:
@@ -5279,7 +5296,7 @@ paths:
           topic they are published under.'
         required: true
       tags:
-      - tables
+      - Tables
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -5343,7 +5360,7 @@ paths:
           topic they are published under.'
         required: true
       tags:
-      - tables
+      - Tables
       requestBody:
         content:
           text/csv:
@@ -5427,7 +5444,7 @@ paths:
           topic they are published under.'
         required: true
       tags:
-      - tables
+      - Tables
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -5481,7 +5498,7 @@ paths:
           topic they are published under.'
         required: true
       tags:
-      - tables
+      - Tables
       requestBody:
         content:
           application/json:
@@ -5563,7 +5580,7 @@ paths:
           topic they are published under.'
         required: true
       tags:
-      - tables
+      - Tables
       requestBody:
         content:
           application/json:
@@ -5638,7 +5655,7 @@ paths:
           topic they are published under.'
         required: true
       tags:
-      - 'Schema: Meta'
+      - 'Tables: metadata'
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -5678,7 +5695,7 @@ paths:
           topic they are published under.'
         required: true
       tags:
-      - 'Schema: Meta'
+      - 'Tables: metadata'
       requestBody:
         content:
           application/json:
@@ -5763,7 +5780,7 @@ paths:
         description: The topic to publish under.
         required: true
       tags:
-      - tables
+      - Tables
       requestBody:
         content:
           application/json:
@@ -5881,7 +5898,7 @@ paths:
           the negated forms. Repeat the parameter to apply several. Not accepted together
           with a row id in the path -- the id already names the row.
       tags:
-      - tables
+      - Tables
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -5945,7 +5962,7 @@ paths:
           topic they are published under.'
         required: true
       tags:
-      - tables
+      - Tables
       requestBody:
         content:
           application/json:
@@ -6034,7 +6051,7 @@ paths:
           topic they are published under.'
         required: true
       tags:
-      - tables
+      - Tables
       requestBody:
         content:
           application/json:
@@ -6162,7 +6179,7 @@ paths:
           the negated forms. Repeat the parameter to apply several. Not accepted together
           with a row id in the path -- the id already names the row.
       tags:
-      - tables
+      - Tables
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -6266,7 +6283,7 @@ paths:
           the negated forms. Repeat the parameter to apply several. Not accepted together
           with a row id in the path -- the id already names the row.
       tags:
-      - tables
+      - Tables
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -6330,7 +6347,7 @@ paths:
           topic they are published under.'
         required: true
       tags:
-      - tables
+      - Tables
       requestBody:
         content:
           application/json:
@@ -6419,7 +6436,7 @@ paths:
           topic they are published under.'
         required: true
       tags:
-      - tables
+      - Tables
       requestBody:
         content:
           application/json:
@@ -6547,7 +6564,7 @@ paths:
           the negated forms. Repeat the parameter to apply several. Not accepted together
           with a row id in the path -- the id already names the row.
       tags:
-      - tables
+      - Tables
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -6611,7 +6628,7 @@ paths:
           topic they are published under.'
         required: true
       tags:
-      - tables
+      - Tables
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -6650,7 +6667,7 @@ paths:
           description: Unpublished. The body is empty.
   /api/v0/schema/{schema}/tables/{table}/:
     get:
-      operationId: schema_[\w\d_]_tables_retrieve
+      operationId: schema_tables_retrieve
       description: |-
         The table's structure: its columns, its indexes and its constraints. Not its rows -- those are at `rows/`.
 
@@ -6675,7 +6692,7 @@ paths:
           topic they are published under.'
         required: true
       tags:
-      - schema
+      - Tables (legacy addresses)
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -6699,9 +6716,11 @@ paths:
             by name.'
       deprecated: true
     post:
-      operationId: schema_[\w\d_]_tables_create
+      operationId: schema_tables_create
       description: |-
-        Alters an existing table. **The payload is at the top level here**, unlike the `PUT` on this same address, which reads it out of `query`. `type` decides which kind of change is meant; anything else is refused.
+        Queues a change to an existing table's structure. It is not applied on the spot: it lands in the change-request queue for review.
+
+        **The payload is at the top level here**, unlike the `PUT` on this same address, which reads it out of `query`. `type` decides which kind of change is meant; anything else is refused.
 
         **Deprecated.** This is the older, schema-qualified spelling of the same endpoint. Use `/api/v0/tables/{table}/` instead: it reaches the same view, and the `{schema}` segment here selects nothing.
       summary: Change a table's columns or constraints
@@ -6724,7 +6743,7 @@ paths:
           topic they are published under.'
         required: true
       tags:
-      - schema
+      - Tables (legacy addresses)
       requestBody:
         content:
           application/json:
@@ -6753,6 +6772,22 @@ paths:
             missing or holding something this endpoint cannot use, a column name that
             is not a Postgres identifier, or a query the database refused. The body
             carries `reason` or `error` naming which.'
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No credentials, or credentials this platform does not know.
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'Authenticated, but not permitted: the table belongs to somebody
+            else, or is under embargo, or the operation needs a level of permission
+            on it that this account does not hold.'
         '404':
           content:
             application/json:
@@ -6769,7 +6804,7 @@ paths:
           description: What the queued change came to.
       deprecated: true
     put:
-      operationId: schema_[\w\d_]_tables_update
+      operationId: schema_tables_update
       description: |-
         Creates the table and its metadata row. **Two things about this endpoint catch people out.** The target schema comes from the `is_sandbox` query parameter, not from the payload. And table names are global -- a name already taken anywhere on the platform is a `409`, whichever schema or topic holds it.
 
@@ -6805,7 +6840,7 @@ paths:
           topic they are published under.'
         required: true
       tags:
-      - schema
+      - Tables (legacy addresses)
       requestBody:
         content:
           application/json:
@@ -6857,7 +6892,7 @@ paths:
           description: Created. The body is empty; the table is at this URL.
       deprecated: true
     delete:
-      operationId: schema_[\w\d_]_tables_destroy
+      operationId: schema_tables_destroy
       description: |-
         Removes the table and its metadata. Irreversible, and it takes the rows with it.
 
@@ -6882,7 +6917,7 @@ paths:
           topic they are published under.'
         required: true
       tags:
-      - schema
+      - Tables (legacy addresses)
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -6922,7 +6957,7 @@ paths:
       deprecated: true
   /api/v0/schema/{schema}/tables/{table}/bulk-upload/:
     post:
-      operationId: schema_[\w\d_]_tables_bulk_upload_create
+      operationId: schema_tables_bulk_upload_create
       description: |-
         **The request body is the CSV itself**, not JSON wrapping one. Rows are appended in one transaction: either the whole upload lands or none of it does. It bypasses the edit journal, so there is no per-row history for what it writes -- the `BulkLoadEvent` it leaves is the upload's provenance.
 
@@ -6958,7 +6993,7 @@ paths:
           topic they are published under.'
         required: true
       tags:
-      - schema
+      - Tables (legacy addresses)
       requestBody:
         content:
           text/csv:
@@ -7023,7 +7058,7 @@ paths:
       deprecated: true
   /api/v0/schema/{schema}/tables/{table}/columns/{column}:
     get:
-      operationId: schema_[\w\d_]_tables_columns_retrieve
+      operationId: schema_tables_columns_retrieve
       description: |-
         One column's definition, or the whole set when the address ends at `columns/`.
 
@@ -7054,7 +7089,7 @@ paths:
           topic they are published under.'
         required: true
       tags:
-      - schema
+      - Tables (legacy addresses)
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -7087,7 +7122,7 @@ paths:
           description: The column definitions, keyed by name.
       deprecated: true
     post:
-      operationId: schema_[\w\d_]_tables_columns_create
+      operationId: schema_tables_columns_create
       description: |-
         Changes an existing column's definition.
 
@@ -7120,7 +7155,7 @@ paths:
           topic they are published under.'
         required: true
       tags:
-      - schema
+      - Tables (legacy addresses)
       requestBody:
         content:
           application/json:
@@ -7181,7 +7216,7 @@ paths:
           description: What the change came to.
       deprecated: true
     put:
-      operationId: schema_[\w\d_]_tables_columns_update
+      operationId: schema_tables_columns_update
       description: |-
         Adds a column to an existing table.
 
@@ -7214,7 +7249,7 @@ paths:
           topic they are published under.'
         required: true
       tags:
-      - schema
+      - Tables (legacy addresses)
       requestBody:
         content:
           application/json:
@@ -7276,7 +7311,7 @@ paths:
       deprecated: true
   /api/v0/schema/{schema}/tables/{table}/meta/:
     get:
-      operationId: schema_[\w\d_]_tables_meta_retrieve
+      operationId: schema_tables_meta_retrieve
       description: |-
         The table's OEMetadata document, as stored. A table carries one resource, so a reader wanting the table's own fields wants `resources[0]`.
 
@@ -7301,7 +7336,7 @@ paths:
           topic they are published under.'
         required: true
       tags:
-      - 'Schema: Meta'
+      - Tables (legacy addresses)
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -7324,7 +7359,7 @@ paths:
           description: The OEMetadata document.
       deprecated: true
     post:
-      operationId: schema_[\w\d_]_tables_meta_create
+      operationId: schema_tables_meta_create
       description: |-
         Replaces the stored OEMetadata document. The payload is the document itself, at the top level -- not wrapped in `query`. An older version is converted to the current one, the column list is synchronised with the table's actual columns, and the result is validated before anything is stored; a document that fails validation is refused and nothing changes. The table's keywords become its tags on this platform.
 
@@ -7349,7 +7384,7 @@ paths:
           topic they are published under.'
         required: true
       tags:
-      - 'Schema: Meta'
+      - Tables (legacy addresses)
       requestBody:
         content:
           application/json:
@@ -7413,7 +7448,7 @@ paths:
       deprecated: true
   /api/v0/schema/{schema}/tables/{table}/move_publish/{topic}/:
     post:
-      operationId: schema_[\w\d_]_tables_move_publish_create
+      operationId: schema_tables_move_publish_create
       description: |-
         Moves the table into a topic and marks it published. Needs administrator permission on the table. An embargo may be given either at the top level or inside `query` -- this endpoint reads both, which is worth knowing because its neighbours do not.
 
@@ -7444,7 +7479,7 @@ paths:
         description: The topic to publish under.
         required: true
       tags:
-      - schema
+      - Tables (legacy addresses)
       requestBody:
         content:
           application/json:
@@ -7508,7 +7543,7 @@ paths:
       deprecated: true
   /api/v0/schema/{schema}/tables/{table}/rows/{row_id}:
     get:
-      operationId: schema_[\w\d_]_tables_rows_retrieve
+      operationId: schema_tables_rows_retrieve
       description: |-
         One row by id, or the rows a filter selects. The filter parameters and a row id are mutually exclusive: an id already names one row, so sending both is refused rather than silently resolved one way.
 
@@ -7573,7 +7608,7 @@ paths:
           the negated forms. Repeat the parameter to apply several. Not accepted together
           with a row id in the path -- the id already names the row.
       tags:
-      - schema
+      - Tables (legacy addresses)
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -7615,7 +7650,7 @@ paths:
           description: The rows, as a list of objects keyed by column name.
       deprecated: true
     post:
-      operationId: schema_[\w\d_]_tables_rows_create
+      operationId: schema_tables_rows_create
       description: |-
         At `rows/new` this inserts and answers `201`. At `rows/<id>` it updates that row, and at `rows/` it updates the rows a filter selects.
 
@@ -7649,7 +7684,7 @@ paths:
           topic they are published under.'
         required: true
       tags:
-      - schema
+      - Tables (legacy addresses)
       requestBody:
         content:
           application/json:
@@ -7717,7 +7752,7 @@ paths:
           description: Inserted.
       deprecated: true
     put:
-      operationId: schema_[\w\d_]_tables_rows_update
+      operationId: schema_tables_rows_update
       description: |-
         Updates the row at this id, or inserts it there if it is not yet taken. **An id never changes**: an `id` in the payload that disagrees with the one in the address is a `409` rather than a move. Requires an id -- `rows/new` is a `POST`.
 
@@ -7750,7 +7785,7 @@ paths:
           topic they are published under.'
         required: true
       tags:
-      - schema
+      - Tables (legacy addresses)
       requestBody:
         content:
           application/json:
@@ -7825,7 +7860,7 @@ paths:
           description: Inserted at that id.
       deprecated: true
     delete:
-      operationId: schema_[\w\d_]_tables_rows_destroy
+      operationId: schema_tables_rows_destroy
       description: |-
         One row by id, or the rows a `where` filter selects. Deleting with neither deletes every row in the table.
 
@@ -7890,7 +7925,7 @@ paths:
           the negated forms. Repeat the parameter to apply several. Not accepted together
           with a row id in the path -- the id already names the row.
       tags:
-      - schema
+      - Tables (legacy addresses)
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -7940,7 +7975,7 @@ paths:
       deprecated: true
   /api/v0/schema/{schema}/tables/{table}/rows/new:
     get:
-      operationId: schema_[\w\d_]_tables_rows_new_retrieve
+      operationId: schema_tables_rows_new_retrieve
       description: |-
         One row by id, or the rows a filter selects. The filter parameters and a row id are mutually exclusive: an id already names one row, so sending both is refused rather than silently resolved one way.
 
@@ -8005,7 +8040,7 @@ paths:
           the negated forms. Repeat the parameter to apply several. Not accepted together
           with a row id in the path -- the id already names the row.
       tags:
-      - schema
+      - Tables (legacy addresses)
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -8047,7 +8082,7 @@ paths:
           description: The rows, as a list of objects keyed by column name.
       deprecated: true
     post:
-      operationId: schema_[\w\d_]_tables_rows_new_create
+      operationId: schema_tables_rows_new_create
       description: |-
         At `rows/new` this inserts and answers `201`. At `rows/<id>` it updates that row, and at `rows/` it updates the rows a filter selects.
 
@@ -8081,7 +8116,7 @@ paths:
           topic they are published under.'
         required: true
       tags:
-      - schema
+      - Tables (legacy addresses)
       requestBody:
         content:
           application/json:
@@ -8149,7 +8184,7 @@ paths:
           description: Inserted.
       deprecated: true
     put:
-      operationId: schema_[\w\d_]_tables_rows_new_update
+      operationId: schema_tables_rows_new_update
       description: |-
         Updates the row at this id, or inserts it there if it is not yet taken. **An id never changes**: an `id` in the payload that disagrees with the one in the address is a `409` rather than a move. Requires an id -- `rows/new` is a `POST`.
 
@@ -8182,7 +8217,7 @@ paths:
           topic they are published under.'
         required: true
       tags:
-      - schema
+      - Tables (legacy addresses)
       requestBody:
         content:
           application/json:
@@ -8257,7 +8292,7 @@ paths:
           description: Inserted at that id.
       deprecated: true
     delete:
-      operationId: schema_[\w\d_]_tables_rows_new_destroy
+      operationId: schema_tables_rows_new_destroy
       description: |-
         One row by id, or the rows a `where` filter selects. Deleting with neither deletes every row in the table.
 
@@ -8322,7 +8357,7 @@ paths:
           the negated forms. Repeat the parameter to apply several. Not accepted together
           with a row id in the path -- the id already names the row.
       tags:
-      - schema
+      - Tables (legacy addresses)
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -8372,7 +8407,7 @@ paths:
       deprecated: true
   /api/v0/schema/{schema}/tables/{table}/unpublish:
     post:
-      operationId: schema_[\w\d_]_tables_unpublish_create
+      operationId: schema_tables_unpublish_create
       description: |-
         Marks the table not published. It keeps its topic and its rows; what changes is whether it is listed. Needs administrator permission on the table.
 
@@ -8397,7 +8432,7 @@ paths:
           topic they are published under.'
         required: true
       tags:
-      - schema
+      - Tables (legacy addresses)
       security:
       - basicAuth: []
       - cookieAuth: []
@@ -9975,3 +10010,57 @@ components:
       in: header
       name: Authorization
       description: Token-based authentication with required prefix "Token"
+tags:
+- name: Tables
+  description: 'Create a table, alter its columns and constraints, write and read
+    its rows, publish it to a topic, and list the tables a topic holds. **Table names
+    are global**: a table is addressed by name alone and no two tables share one,
+    whichever topic they are published under. One listing here is addressed under
+    `datasets/` and belongs to this group rather than to **Datasets**, because what
+    it returns is tables: `datasets/list_all/scenario/`.'
+- name: 'Tables: metadata'
+  description: The OEMetadata document a table carries. Writing it never changes a
+    row, and a table created without one is given a minimal document generated from
+    its columns.
+- name: Datasets
+  description: The catalogue entries that group tables. A dataset's `resources` are
+    assembled from its member tables when it is read rather than stored, so a dataset
+    never reports a resource it no longer holds.
+- name: Scenario Bundles
+  description: 'The OEKG scenario bundles as a REST API: a bundle, the scenarios and
+    study reports below it, the datasets a scenario cites, and the record of every
+    change. Reads are public; a write needs a token, and every write to a bundle that
+    already exists carries `If-Match` -- there is no opt-out.'
+- name: Advanced
+  description: A thin authenticated passthrough to the database, meant to be driven
+    by a client library rather than by hand. A call carrying no session identifiers
+    runs and commits on its own.
+- name: 'Advanced: Connection'
+  description: Opening, committing, rolling back and closing the database session
+    that the other `advanced/` calls are threaded onto.
+- name: 'Advanced: Cursor'
+  description: Cursors inside such a session, and fetching rows from them one at a
+    time or all at once.
+- name: 'Advanced: Two phase'
+  description: 'Two-phase commit across a session: begin, prepare, commit, roll back,
+    and recover the transactions left prepared.'
+- name: OEKG SPARQL
+  description: One read-only SPARQL endpoint against the Open Energy Knowledge Graph.
+    Anything that would update or delete is refused, whatever the caller's permissions.
+- name: Factsheets
+  description: 'The model and framework factsheets held in this platform''s own database.
+    Not the OEKG scenario bundles: the two share the word *factsheet* and a URL prefix
+    in the web interface, and nothing else.'
+- name: API description
+  description: 'The machine-readable description of `api/v0`: one endpoint, and the
+    source this page is rendered from.'
+- name: Scenario Bundles (legacy)
+  description: '**Superseded by Scenario Bundles.** One RPC route that attaches datasets
+    to a scenario, kept because clients call it. It writes predicates the canonical
+    shape does not validate, and it is the singular `scenario-bundle/` address --
+    one letter from the plural that replaces it. New clients want `POST /api/v0/scenario-bundles/{uid}/scenarios/{sid}/datasets/`.'
+- name: Tables (legacy addresses)
+  description: '**Superseded by Tables.** The older schema-qualified spelling of every
+    endpoint under **Tables**, reaching the same views. The `{schema}` segment is
+    not captured by the route and therefore selects nothing: table names are global,
+    so the table is found by name alone whatever is sent here.'

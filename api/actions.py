@@ -69,7 +69,6 @@ from api.parser import (
     read_bool,
     read_pgid,
     read_pgvalue,
-    replace_None_with_NULL,
     set_meta_info,
 )
 from api.sessions import (
@@ -562,25 +561,22 @@ def queue_constraint_change(table_obj: Table, constraint_def: dict):
     :return: Result of database command
     """
 
-    cd = replace_None_with_NULL(constraint_def)
-
-    sql_string = (
+    return perform_sql(
         "INSERT INTO public.api_constraints (action, constraint_type"
         ", constraint_name, constraint_parameter, reference_table, reference_column, c_schema, c_table) "  # noqa
-        "VALUES ('{action}', '{c_type}', '{c_name}', '{c_parameter}', '{r_table}', '{r_column}' , '{c_schema}' "  # noqa
-        ", '{c_table}');".format(
-            action=get_or_403(cd, "action"),
-            c_type=get_or_403(cd, "constraint_type"),
-            c_name=get_or_403(cd, "constraint_name"),
-            c_parameter=get_or_403(cd, "constraint_parameter"),
-            r_table=get_or_403(cd, "reference_table"),
-            r_column=get_or_403(cd, "reference_column"),
-            c_schema=table_obj.oedb_schema,
-            c_table=table_obj.name,
-        ).replace("'NULL'", "NULL")
+        "VALUES (:action, :constraint_type, :constraint_name, :constraint_parameter"
+        ", :reference_table, :reference_column, :c_schema, :c_table);",
+        {
+            "action": get_or_403(constraint_def, "action"),
+            "constraint_type": get_or_403(constraint_def, "constraint_type"),
+            "constraint_name": get_or_403(constraint_def, "constraint_name"),
+            "constraint_parameter": get_or_403(constraint_def, "constraint_parameter"),
+            "reference_table": get_or_403(constraint_def, "reference_table"),
+            "reference_column": get_or_403(constraint_def, "reference_column"),
+            "c_schema": table_obj.oedb_schema,
+            "c_table": table_obj.name,
+        },
     )
-
-    return perform_sql(sql_string)
 
 
 def queue_column_change(table_obj: Table, column_definition: dict) -> dict:
@@ -591,20 +587,19 @@ def queue_column_change(table_obj: Table, column_definition: dict) -> dict:
     :return: Result of database command
     """
 
-    column_definition = replace_None_with_NULL(column_definition)
-
-    sql_string = "INSERT INTO public.api_columns (column_name, not_null, data_type, new_name, c_schema, c_table) " "VALUES ('{name}','{not_null}','{data_type}','{new_name}','{c_schema}','{c_table}');".format(  # noqa
-        name=get_or_403(column_definition, "column_name"),
-        not_null=get_or_403(column_definition, "not_null"),
-        data_type=get_or_403(column_definition, "data_type"),
-        new_name=get_or_403(column_definition, "new_name"),
-        c_schema=table_obj.oedb_schema,
-        c_table=table_obj.name,
-    ).replace(
-        "'NULL'", "NULL"
+    return perform_sql(
+        "INSERT INTO public.api_columns "
+        "(column_name, not_null, data_type, new_name, c_schema, c_table) "
+        "VALUES (:column_name, :not_null, :data_type, :new_name, :c_schema, :c_table);",
+        {
+            "column_name": get_or_403(column_definition, "column_name"),
+            "not_null": get_or_403(column_definition, "not_null"),
+            "data_type": get_or_403(column_definition, "data_type"),
+            "new_name": get_or_403(column_definition, "new_name"),
+            "c_schema": table_obj.oedb_schema,
+            "c_table": table_obj.name,
+        },
     )
-
-    return perform_sql(sql_string)
 
 
 def get_column_change(i_id):
