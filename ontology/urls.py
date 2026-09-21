@@ -10,7 +10,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 from django.urls import path, re_path
 from django.views.generic import TemplateView
 
-from oekg.iri_views import urlpatterns as oekg_iri_urlpatterns
+from oekg.iri_views import IRI_ROUTES as OEKG_IRI_ROUTES
 from ontology.views import (
     OeoExtendedFileServeView,
     OntologyAboutView,
@@ -27,7 +27,7 @@ app_name = "ontology"
 # the registry: a knowledge graph registered with no routes here would fall
 # through to the ontology views and answer as though its contents were gone.
 KNOWLEDGE_GRAPH_ROUTES = {
-    "oekg": oekg_iri_urlpatterns,
+    "oekg": OEKG_IRI_ROUTES,
 }
 
 urlpatterns = [

@@ -259,9 +259,18 @@ def unresolvable_address(request) -> HttpResponse:
     )
 
 
-#: Registered ahead of the ontology routes, so the whole `oekg/` namespace is
-#: answered here and no part of it can fall into a view that lists a directory.
-urlpatterns = [
+#: The routes for the addresses above, mounted by `ontology/urls.py` ahead of
+#: the ontology routes, so the whole `oekg/` namespace is answered here and no
+#: part of it can fall into a view that lists a directory.
+#:
+#: Deliberately NOT named `urlpatterns`, and deliberately not in `oekg/urls.py`.
+#: `urlpatterns` is Django's name for an includable URLConf, and this module is
+#: not one -- these addresses live under another app's prefix, so the list is
+#: handed over rather than mounted here. And `oekg/urls.py` is mounted at
+#: `/oekg/`, which is not where any of these addresses are; putting them there
+#: would claim a prefix they do not have. They belong beside the three views
+#: that answer them.
+IRI_ROUTES = [
     re_path(
         r"^oekg/%s/(?P<pid>%s)/?$" % (SCENARIO.mint_segment, IDENTIFIER),
         scenario_address,
