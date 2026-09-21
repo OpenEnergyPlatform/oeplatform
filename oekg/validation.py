@@ -11,7 +11,8 @@ one bundle's post-state is a complete unit.
 
 The label subset is merged in for the same reason it exists: ``ex:CommonShape``
 requires exactly one ``rdfs:label`` on every OEO term a bundle picks, and the
-payload carries labels only for the nodes it mints.
+payload carries labels only for the nodes it mints. Only the labels of terms
+the post-state actually names are merged -- see ``_with_the_labels_it_names``.
 
 One seam, one function: post-state graph in, violations out. The engine behind
 it is then swappable -- the fallback if the library ever stalls is Jena's own
@@ -27,9 +28,9 @@ from typing import List, Optional, Tuple
 
 from pyshacl import validate as pyshacl_validate
 from rdflib import RDF, Graph
-from rdflib.namespace import SH
+from rdflib.namespace import RDFS, SH
 
-from oekg.shape import label_graph, message_for, shape_graph
+from oekg.shape import labels_by_term, message_for, shape_graph
 
 
 @dataclass(frozen=True)
@@ -54,7 +55,7 @@ def validate_post_state(post_state: Graph) -> List[ShapeViolation]:
     """Validate a bundle subgraph. An empty list means it conforms."""
     shape = shape_graph()
     conforms, report, _ = pyshacl_validate(
-        post_state + label_graph(),
+        _with_the_labels_it_names(post_state),
         shacl_graph=shape,
         advanced=True,
         inference="none",
@@ -93,6 +94,44 @@ def introduced_violations(before: Graph, after: Graph) -> Tuple[List, int]:
     inherited = Counter(validate_post_state(before))
     arrived = Counter(validate_post_state(after))
     return list((arrived - inherited).elements()), sum(inherited.values())
+
+
+def _with_the_labels_it_names(post_state: Graph) -> Graph:
+    """A fresh graph: the post-state, plus the labels of the terms it names.
+
+    The whole 2,054-triple subset used to be merged into every validation. A
+    bundle picks a handful of terms out of it, and the rest is inert: the
+    subset holds nothing but ``rdfs:label`` on IRI subjects, so a term the
+    post-state never names -- in **any** position -- can be neither a target
+    nor a value. Every shape here targets a class, which needs an ``rdf:type``
+    the subset does not carry, or the objects of a predicate, which only the
+    post-state supplies; and no constraint in it counts or scans across the
+    graph. Merging the whole subset was the second largest cost in this app's
+    test suite, and leaving out what it never names changes no verdict.
+
+    "Any position" rather than "the objects a shape could target" on purpose:
+    the wider rule needs no argument about which nodes a shape can reach, so
+    it cannot be invalidated by a shape that grows a new target.
+
+    The filter has to be the referenced IRIs exactly, because ``ex:CommonShape``
+    checks the datatype **and the cardinality** of ``rdfs:label`` on every term
+    a bundle picks. Dropping one label turns a conforming bundle into a
+    violation of a rule nobody broke.
+
+    Freshly built, and the caller's graph is never written to: the merged
+    result is handed to the validator and then dropped, so nothing one
+    validation adds can reach the next one or the cached artifact.
+    """
+    graph = Graph()
+    labels = labels_by_term()
+    named = set()
+    for triple in post_state:
+        graph.add(triple)
+        named.update(node for node in triple if node in labels)
+    for term in named:
+        for label in labels[term]:
+            graph.add((term, RDFS.label, label))
+    return graph
 
 
 def _violation(report: Graph, result) -> ShapeViolation:
