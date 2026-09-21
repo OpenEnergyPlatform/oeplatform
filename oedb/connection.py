@@ -32,15 +32,39 @@ def __get_connection_string():
     )
 
 
+# The pool is bounded PER PROCESS while the database ceiling is per cluster,
+# and nothing in this process can see how many processes there are. Production
+# runs 13 mod_wsgi daemon processes (12 in the main group, 1 for
+# /api/v0/advanced) against `max_connections = 255` with 8 reserved, so the
+# budget is 247 and the arithmetic is:
+#
+#     13 processes x (pool_size + max_overflow) = 13 x 17 = 221  <  247
+#
+# The old values were pool_size=0 (unbounded retention) and max_overflow=200,
+# i.e. 2,600 against 255 -- ten times the database. That ceiling was reached in
+# production on 2026-09-10 and the platform refused connections for twelve days
+# (issue #2495).
+#
+# A healthy platform uses about 12 connections across all 13 processes, so
+# these numbers are a safety net rather than an allocation. max_overflow=15
+# still exceeds `threads=15`, so request-scoped work never queues on the pool.
+#
+# IF THE PROCESS COUNT CHANGES, THIS ARITHMETIC CHANGES. That count lives in
+# `/data/httpd/conf/oep.conf` on the production host, which is in no repository
+# and has already been changed twice in 2026 (1 -> 4 -> 12).
+#
 # pool_pre_ping: the pool discards a connection for being old, never for
 # being dead, so without this a connection Postgres or the network has already
 # closed is handed to the next request, which fails with a generic 400 while
 # the retry succeeds -- issue #2488. The cost is one round trip per checkout.
+OEDB_POOL_SIZE = 2
+OEDB_MAX_OVERFLOW = 15
+
 __ENGINE = create_engine(
     __get_connection_string(),
-    pool_size=0,
+    pool_size=OEDB_POOL_SIZE,
     pool_recycle=600,
-    max_overflow=200,
+    max_overflow=OEDB_MAX_OVERFLOW,
     pool_pre_ping=True,
 )
 
