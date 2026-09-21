@@ -18,6 +18,7 @@ SPDX-License-Identifier: CC0-1.0
   reachable only by noticing a link in that guide's second paragraph. The link's
   setting is also no longer called `readthedocs`; that documentation was retired
   and redirected here some time ago
+  [(#2507)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2507)
 
 - The scenario-bundle changelog page under Factsheets now also lists changes
   made through the REST API. Those rows show who changed what and when, but no
@@ -647,6 +648,7 @@ SPDX-License-Identifier: CC0-1.0
   edited one of the two copies, at which point which one wins is decided by
   position in the file. The values were identical, so removing the second block
   leaves every link exactly as it was
+  [(#2507)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2507)
 
 - The OEKG shape validator merges in only the ontology labels a bundle actually
   names, instead of all 2,054 of them. The label subset is there because the
