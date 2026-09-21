@@ -231,7 +231,7 @@ EXTERNAL_URLS = {
     "tutorials_create_database_conform_data": "https://openenergyplatform.github.io/academy/tutorials/99_other/database_data/",  # noqa E501
     "tutorials_oemetadata": "https://openenergyplatform.github.io/academy/tutorials/99_other/getting_started_with_OEMetadata/",  # noqa E501
     "tutorials_oemetabuilder": "https://openenergyplatform.github.io/academy/tutorials/99_other/oemetadata/",  # noqa E501
-    "readthedocs": "https://openenergyplatform.github.io/oeplatform/oeplatform-code/web-api/oedb-rest-api/",  # noqa E501
+    "rest_api_docs": "https://openenergyplatform.github.io/oeplatform/oeplatform-code/web-api/",  # noqa E501
     "mkdocs": "https://openenergyplatform.github.io/oeplatform/",
     "compendium": "https://openenergyplatform.github.io/organisation/",
     "tib_terminology_service": "https://terminology.tib.eu/ts/collections",
@@ -244,27 +244,6 @@ EXTERNAL_URLS = {
     "ORKG": "https://academy.orkg.org/orkg-academy/main/index.html",
     "open_plan": "https://open-plan-tool.org/",
     "open_egon": "https://rego-n.org/",
-    "open_mastr": "https://open-mastr.readthedocs.io/en/latest/",
-    "tutorials_index": "https://openenergyplatform.github.io/academy/",
-    "tutorials_faq": "https://openenergyplatform.github.io/academy/questions/",
-    "tutorials_api1": "https://openenergyplatform.github.io/academy/tutorials/01_api/01_api_download/",  # noqa E501
-    "tutorials_api_upload": "https://openenergyplatform.github.io/academy/tutorials/01_api/02_api_upload/",  # noqa E501
-    "tutorials_licenses": "https://openenergyplatform.github.io/academy/tutorials/metadata/tutorial_open-data-licenses/",  # noqa E501
-    "tutorials_wizard": "https://openenergyplatform.github.io/academy/tutorials/99_other/wizard/",  # noqa E501
-    "tutorials_create_database_conform_data": "https://openenergyplatform.github.io/academy/tutorials/99_other/database_data/",  # noqa E501
-    "tutorials_oemetadata": "https://openenergyplatform.github.io/academy/tutorials/99_other/getting_started_with_OEMetadata/",  # noqa E501
-    "tutorials_oemetabuilder": "https://openenergyplatform.github.io/academy/tutorials/99_other/oemetadata/",  # noqa E501
-    "readthedocs": "https://openenergyplatform.github.io/oeplatform/oeplatform-code/web-api/oedb-rest-api/",  # noqa E501
-    "mkdocs": "https://openenergyplatform.github.io/oeplatform/",
-    "compendium": "https://openenergyplatform.github.io/organisation/",
-    "tib_terminology_service": "https://terminology.tib.eu/ts/collections",
-    "tib_ts_oeo": "https://terminology.tib.eu/ts/ontologies/oeo",
-    "spdx_licenses": "https://spdx.github.io/license-list-data/",
-    "oemetadata_key_description": "https://github.com/OpenEnergyPlatform/oemetadata/blob/develop/oemetadata/latest/metadata_key_description.md",  # noqa E501
-    "oeo_extended_github": "https://github.com/OpenEnergyPlatform/oeo-extended",  # noqa E501
-    "oedatamodel": "https://github.com/OpenEnergyPlatform/oedatamodel",
-    "ORKG": "https://academy.orkg.org/orkg-academy/main/index.html",
-    "open_plan": "https://open-plan-tool.org/",
     "open_mastr": "https://open-mastr.readthedocs.io/en/latest/",
     "creativecommons_licenses_by_3_0_de": "http://creativecommons.org/licenses/by/3.0/de/",  # noqa:E501
     "iks_cs_ovgu_iks": "http://iks.cs.ovgu.de/IKS.html",
