@@ -17,11 +17,10 @@ which no endpoint signature can state. They are the ones a client author would
 otherwise learn from a `400` — or, worse, never learn, because the request
 succeeded and did something other than what was meant.
 
-There are nine. Eight describe the API as it is today; **rule 3** waits on an
-endpoint that is still being built, and is named here rather than left out. A
-reader who meets eight rules about what a write does, and no rule saying where
-omission starts deleting things, has been misled by the silence rather than
-served by it.
+There are nine, and every one of them describes the API as it is today. **Rule
+3** is the one to read first if you are automating anything: it is the only rule
+here about destroying data, and it names the single address at which leaving
+something out removes it.
 
 !!! Info "What is not on this page"
 
@@ -205,44 +204,163 @@ In the reference:
 
 ---
 
-## Rule 3 — delete-by-omission will exist on `replace/`, and nowhere else
+## Rule 3 — delete-by-omission lives on `replace/`, and nowhere else
 
-!!! Warning "This endpoint is not built yet"
+`POST /api/v0/scenario-bundles/{uid}/replace/` is the declarative endpoint a
+pipeline wants: it takes the complete bundle you mean to see, sub-resources
+included, and makes the graph match it in one atomic write. It is the one
+address in this API where **a sub-resource you do not send is a sub-resource you
+have deleted**. Everywhere else, under every verb,
+[rule 1](#rule-1-a-key-you-do-not-send-is-a-key-you-do-not-change) holds
+instead.
 
-    `POST /api/v0/scenario-bundles/{uid}/replace/` does not exist on the
-    platform today. The rule is stated here because the rest of this page tells
-    you that leaving a key out is safe, and that will stop being true at exactly
-    one address. Until it lands, **nothing in this API deletes anything because
-    a key was left out**: the only way to remove something is to name it — send
-    a shorter list, or call `DELETE` on the sub-resource's own URL.
+That is why it is an address of its own rather than a `PUT` on the bundle. Two
+behaviours that different should not share one URL, and the one that can destroy
+data should be the one you ask for by name.
+
+**What you send is a bundle read, sent back.** A `GET` on the bundle returns
+exactly what this endpoint accepts, so a pipeline reads, edits and declares
+without assembling anything. That round trip is why `_meta.uid` is the one piece
+of `_meta` a write does read — and only here. It says _this is the same
+resource_: a nested scenario, study report or dataset link that carries the
+identifier it was read with is updated in place, one that carries none is
+created, and one that is not there at all is removed. A client that strips
+`_meta` before sending is therefore not sending the same bundle back; it is
+deleting every sub-resource in it and minting replacements.
+
+`NEMO-2035` below is at version 2: one scenario, `HIGH-RE`, carrying two
+citations, and one study report. The declaration changes the abstract, adds a
+second scenario, and does not mention the study report.
+
+**Request** — the bundle as `GET` returned it, with those three changes
+(excerpt; every field not shown was sent back exactly as it was read)
 
 ```http
-POST /api/v0/scenario-bundles/a195633f-3cf3-474e-8647-3f27c76d7cfa/replace/ HTTP/1.1
+POST /api/v0/scenario-bundles/f861aa99-9f9a-4d63-adfa-7305e25fa6b7/replace/ HTTP/1.1
+If-Match: "2"
 Content-Type: application/json
 Authorization: Token <token>
 
-{}
+{
+  "label": "Nationaler Energiemonitor 2035",
+  "acronym": "NEMO-2035",
+  "abstract": "Three pathways to 2035, and a low-renewables variant.",
+  "scenarios": [
+    {
+      "label": "A high renewables scenario",
+      "acronym": "HIGH-RE",
+      "scenario_types": [
+        "https://openenergyplatform.org/ontology/oeo/OEO_00000364"
+      ],
+      "_meta": { "uid": "b02fe11c-ed3a-42d7-99be-501fcf31a4ac" },
+      "datasets": [
+        {
+          "type": "input",
+          "ref": "table",
+          "name": "nemo_2035_capacities",
+          "url": "https://openenergyplatform.org/database/tables/nemo_2035_capacities",
+          "_meta": { "uid": "4f9f6dbd-4557-4206-ac16-13d9682d681c" }
+        },
+        {
+          "type": "output",
+          "ref": "external",
+          "name": "NEMO-2035 results on the databus",
+          "url": "https://databus.openenergyplatform.org/nemo/results/2035",
+          "_meta": { "uid": "33baa83c-11cd-4f08-bb52-8f8865e7ddbd" }
+        }
+      ]
+    },
+    {
+      "label": "A low renewables scenario",
+      "acronym": "LOW-RE",
+      "scenario_types": [
+        "https://openenergyplatform.org/ontology/oeo/OEO_00000364"
+      ]
+    }
+  ],
+  "study_reports": []
+}
 ```
 
+**Response** — `200 OK`, `ETag: "3"` (excerpt)
+
+```json
+{
+  "acronym": "NEMO-2035",
+  "abstract": "Three pathways to 2035, and a low-renewables variant.",
+  "_meta": {
+    "uid": "f861aa99-9f9a-4d63-adfa-7305e25fa6b7",
+    "version": 3,
+    "deleted": [
+      {
+        "iri": "https://openenergyplatform.org/ontology/oekg/study-report/c35d355f-66b3-4c9a-8ace-91fc265ee3da",
+        "type": "https://openenergyplatform.org/ontology/oeo/OEO_00020012"
+      }
+    ],
+    "unlinked": []
+  },
+  "scenarios": [
+    {
+      "acronym": "HIGH-RE",
+      "_meta": { "uid": "b02fe11c-ed3a-42d7-99be-501fcf31a4ac" },
+      "datasets": [
+        {
+          "ref": "table",
+          "name": "nemo_2035_capacities",
+          "_meta": { "uid": "4f9f6dbd-4557-4206-ac16-13d9682d681c" }
+        },
+        {
+          "ref": "external",
+          "name": "NEMO-2035 results on the databus",
+          "_meta": { "uid": "33baa83c-11cd-4f08-bb52-8f8865e7ddbd" }
+        }
+      ]
+    },
+    {
+      "acronym": "LOW-RE",
+      "_meta": { "uid": "66f131e6-fe08-4791-9727-86d41d9ac12e" }
+    }
+  ],
+  "study_reports": []
+}
 ```
-404 Not Found
-```
 
-`replace/` is the declarative endpoint a pipeline wants: it will take the
-complete bundle you mean to see, sub-resources included, and make the graph
-match it in one atomic write. That is why it is an address of its own rather
-than a `PUT` on the bundle. Everywhere else, a key you do not send is a key you
-do not change; there, a sub-resource you do not send is a sub-resource you have
-deleted. Two behaviours that different should not share one URL, and the one
-that can destroy data should be the one you ask for by name.
+Three things in that answer are worth reading closely.
 
-The endpoint is tracked as
-[issue #2477](https://github.com/OpenEnergyPlatform/oeplatform/issues/2477).
-This page gains the worked example when it lands.
+**`deleted` names the study report, and nothing named it.** Leaving it out did.
+That is the whole rule, and it is the only place in the API where it is true.
 
-In the reference: nothing yet. When `replace/` ships it joins the
-[Scenario Bundles](../api-reference.md#/Scenario%20Bundles) section with
-everything else.
+**`unlinked` is empty here, and will not always be.** Omission removes by the
+same typed containment walk a `DELETE` uses, so it inherits the same guard: a
+scenario, study report or dataset link that another bundle also cites is
+detached from this bundle rather than destroyed, and lands in this list instead.
+The two lists mean exactly what they mean for a delete —
+[rule 5](#rule-5-the-deletes-two-guards-catch-two-different-accidents) describes
+them.
+
+**Both citations survived, with the identifiers they were read with.** This is
+the property to test your own client against, because the mistake it guards
+against passes every obvious test. Dataset links are nested under their scenario
+in the bundle payload, and they are bundle-local for the purposes of deletion —
+so a declaration that carries a scenario but not its `datasets` is a declaration
+that the scenario has no citations, and the replace makes that true. The happy
+path anybody would write by hand — add a scenario, change a field, remove a
+scenario — does not notice.
+
+!!! Warning "A scenario sent without its `datasets` loses its citations"
+
+    Send back what you read. If your client builds the payload itself rather
+    than editing a `GET`, it has to carry every scenario's `datasets` list, and
+    every link's `_meta.uid`, or the citations in that scenario are deleted.
+    The same holds for `scenarios` and `study_reports` on the bundle: an
+    omitted list is an empty one, and an empty one removes what is there.
+
+Declaring a bundle exactly as it already is writes nothing at all — no triples,
+no version bump, no history entry — so a pipeline that runs nightly does not
+accumulate a ledger of changes it never made.
+
+In the reference:
+[`POST /scenario-bundles/{uid}/replace/`](../api-reference.md#/Scenario%20Bundles/scenario_bundles_replace_create).
 
 ---
 

@@ -430,6 +430,20 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Documentation updates
 
+- Rule 3 of the client guide for scenario bundles described `replace/` as an
+  endpoint still being built, with a worked exchange answering `404`. It
+  shipped, and it is the one rule on that page about destroying data, so the
+  page was telling automation authors that the address where omission deletes
+  things cannot be reached yet. The rule is now written in the present tense
+  around a real recorded exchange: a declaration that changes a field, adds a
+  scenario and leaves the study report out, answered with `_meta.deleted` naming
+  the report. It also states the property the replace slice's most important
+  test exists for -- a bundle's dataset links are nested under their scenario
+  and survive a replace that sends them back, and are deleted by one that does
+  not -- and the stale pointer to the closed issue is replaced by the operation
+  in the reference, which has been there since `replace/` landed
+  [(#2500)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2500)
+
 - A test that pins behaviour a documentation page describes now names that page,
   in its docstring, and a check in the suite fails when a named page is not in
   the tree. The pointer runs from the code to the page rather than the other way
