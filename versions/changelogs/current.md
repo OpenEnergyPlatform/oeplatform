@@ -375,6 +375,27 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Documentation updates
 
+- A test that pins behaviour a documentation page describes now names that page,
+  in its docstring, and a check in the suite fails when a named page is not in
+  the tree. The pointer runs from the code to the page rather than the other way
+  about: a citation written in prose rots silently on a rename, while a pointer
+  in a test is read at the moment somebody changes the behaviour -- the only
+  moment the page is wrong. Nine tests carry one. The one that existed before
+  named a research note in a private vault, which nobody outside the project can
+  open, and it was written by the very change that left a table in the
+  architecture guide wrong about two fields until a reader noticed. The check
+  asserts only that the pages named do exist; it does not require a pointer,
+  because a rule whose endpoint is still being built has no test to carry one
+  [(#2462)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2462)
+
+- The reference's sections are checked for dead links on **every** documentation
+  page, not only on the reference itself. Two pages had come to cite the
+  superseded _Scenario Bundles (legacy)_ section from elsewhere, so renaming it
+  would have gone red in one place and quietly dead in two. Doing this found
+  that the check also mis-read a citation ending a Markdown link, taking the
+  link's own closing bracket for part of the section's name
+  [(#2462)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2462)
+
 - The legacy **Edit scenario datasets** page is gone. It documented the singular
   `scenario-bundle/scenario/manage-datasets/` route, which the scenario-bundle
   REST API replaces, and it promised group-based shared editing of a bundle,

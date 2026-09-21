@@ -12,6 +12,12 @@ The 409 window cannot be opened from a test client alone, so the tests that
 exercise it interleave a competing write inside the transport itself. That is
 the only way to reach the race the guard exists for.
 
+Rules 1 and 4 of the client page rest on these tests: a key the payload
+does not name is genuinely untouched, and a patch does not reach into a
+sub-resource.
+
+Documents: docs/oeplatform-code/web-api/oekg-api/scenario-bundles.md
+
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501

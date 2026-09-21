@@ -1,4 +1,13 @@
-"""
+"""Creating a scenario bundle, and reading one back.
+
+Rules 2 and 8 of the client page rest on these tests. The server mints the
+identifier -- there is no key to supply one through, and a payload that tries
+is refused rather than quietly overridden -- and a read can be sent back to a
+write unchanged, read-only container and all, which is the property the
+replace endpoint depends on.
+
+Documents: docs/oeplatform-code/web-api/oekg-api/scenario-bundles.md
+
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501

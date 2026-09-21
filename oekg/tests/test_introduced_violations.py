@@ -15,6 +15,11 @@ A create is the deliberate exception and is tested here too -- it has no
 pre-state, so everything it produces is new, and a bundle cannot be *created*
 broken.
 
+Rule 6 of the client page rests on these tests: a write is judged by the
+violations it introduces.
+
+Documents: docs/oeplatform-code/web-api/oekg-api/scenario-bundles.md
+
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501

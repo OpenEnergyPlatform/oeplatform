@@ -28,6 +28,7 @@ SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: E501
 
+import ast
 import difflib
 import re
 import subprocess
@@ -36,6 +37,7 @@ import tempfile
 from pathlib import Path
 
 import yaml
+from django.apps import apps
 from django.test import SimpleTestCase
 from django.urls import URLPattern, URLResolver, get_resolver
 
@@ -290,4 +292,125 @@ class OpenAPISchemaTest(SimpleTestCase):
             "generated description. drf-spectacular drops a view whose request "
             "or response it cannot resolve; running the command below reports "
             f"which and why:\n    {REGENERATE}",
+        )
+
+
+#: How a test says which documentation page it pins. One line, in any docstring
+#: of a test module, naming the page from the repository root::
+#:
+#:     Documents: docs/oeplatform-code/web-api/oekg-api/scenario-bundles.md
+#:
+#: The prose around it is for the reader; this line is the part a machine reads,
+#: so the sentence a developer sees and the fact the check collects are one
+#: thing rather than two that can drift apart.
+POINTER = re.compile(r"^\s*Documents:\s*(\S+\.md)\s*$", re.MULTILINE)
+
+#: What a test module is called, the way Django's own discovery spells it.
+TEST_FILE = "test*.py"
+
+#: The directory a checkout's dependencies land in, wherever it is put.
+INSTALLED = "site-packages"
+
+
+def project_packages():
+    """The directories of this project's own apps.
+
+    Deliberately not a walk of the whole tree from ``BASE_DIR``. A checkout
+    routinely holds a virtual environment and a ``node_modules`` beneath it --
+    this one carries 1,922 files matching ``test*.py`` inside ``.venv`` alone --
+    so a plain walk would read thousands of third-party modules, and a
+    ``Documents:`` line in any of their docstrings would be reported as this
+    project's broken pointer. Asking the app registry also means a new app is
+    covered the day it is added.
+
+    Being under ``BASE_DIR`` is not enough on its own: a virtual environment
+    inside the checkout puts the 27 installed apps under it too, so where a
+    package sits is what separates this project's from everyone else's.
+    """
+    for config in apps.get_app_configs():
+        path = Path(config.path)
+        if path.is_relative_to(BASE_DIR) and INSTALLED not in path.parts:
+            yield path
+
+
+def declared_pointers():
+    """Every code->doc pointer in the suite, as (file, named page) pairs.
+
+    Read **statically**. Importing the modules instead would be much worse than
+    slow: ``factsheet/tests/test_sector_dropdowns.py`` imports
+    ``factsheet.oekg.connection``, which parses the whole OEO at module scope
+    (``factsheet/oekg/connection.py:40``), so a collector that imported its way
+    through the suite would pull a 1.3 GB ontology into memory to read a
+    docstring.
+
+    Every docstring is searched, not only the module's. The one pointer that
+    predates this convention sits on a class, which is the natural place when a
+    file pins more than one page.
+    """
+    found = {
+        path for package in project_packages() for path in package.rglob(TEST_FILE)
+    }
+    for path in sorted(found):
+        try:
+            tree = ast.parse(path.read_text(encoding="utf-8"))
+        except (SyntaxError, UnicodeDecodeError):  # pragma: no cover
+            continue
+        for node in ast.walk(tree):
+            if not isinstance(
+                node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
+            ):
+                continue
+            for named in POINTER.findall(ast.get_docstring(node) or ""):
+                yield path, named
+
+
+class DocumentationPointerTest(SimpleTestCase):
+    """The pointers that run from a test to the page it keeps true.
+
+    A documentation page describing behaviour goes stale silently: nothing
+    fails at the moment the behaviour changes, which is the only moment the
+    page is wrong. A citation in the prose does not help, because it rots on a
+    rename with nobody watching. So the pointer runs the other way -- the test
+    names the page -- and this is the check that the name still resolves.
+
+    What it deliberately does **not** do is demand a pointer. A rule whose
+    endpoint nobody has built yet has no test to carry one, and a check that
+    insisted would be red until that work landed, which would teach the suite's
+    readers to ignore it.
+
+    This class carries no pointer of its own. It pins no documented behaviour,
+    and a marker here would satisfy the emptiness check below out of its own
+    docstring -- the check would then pass on a suite in which every real
+    pointer had been deleted.
+    """
+
+    def setUp(self):
+        self.pointers = list(declared_pointers())
+
+    def test_the_suite_declares_at_least_one_pointer(self):
+        """Without this the check below passes by finding nothing.
+
+        The convention lives in docstrings, so a typo in the marker, a change
+        of quoting style or a move of the test tree all end the same way: zero
+        pointers collected, every assertion about them vacuously true.
+        """
+        self.assertTrue(
+            self.pointers,
+            "no test in the suite names a documentation page. Add a line "
+            "'Documents: <path>' to the docstring of a test that pins what a "
+            "page describes",
+        )
+
+    def test_every_named_page_exists(self):
+        missing = sorted(
+            f"{path.relative_to(BASE_DIR)} -> {named}"
+            for path, named in self.pointers
+            if not Path(BASE_DIR, named).is_file()
+        )
+        self.assertEqual(
+            [],
+            missing,
+            "These tests name a documentation page that is not in the tree. "
+            "The page was renamed, moved or deleted; point the test at where "
+            "it went:\n    " + "\n    ".join(missing),
         )

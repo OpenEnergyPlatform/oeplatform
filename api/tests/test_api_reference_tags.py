@@ -40,6 +40,7 @@ from api.tests.test_openapi_schema import (
     committed_document,
     operations,
 )
+from oeplatform.settings import BASE_DIR
 
 #: The superseded groups, each with the group that replaced it. A description
 #: here has to say *superseded* and name that replacement, because the document
@@ -54,9 +55,20 @@ STABLE_ANCHOR = re.compile(r"^[A-Za-z0-9 :()\-]+$")
 
 
 #: The page that renders the document. It cites a group by name to show that a
-#: section can be linked to, and a name it cites has to be one that exists --
-#: the failure a prose citation has is that it rots quietly.
+#: section can be linked to, and carries the worked example other pages copy.
 REFERENCE_PAGE = Path(ARTIFACT.parent, "api-reference.md")
+
+#: Every page of the documentation, because a citation rots quietly wherever it
+#: was written. Checking only the reference left the copies unwatched: the two
+#: pages that cite the superseded group both cite it from somewhere else, so
+#: renaming that group went red in one place and silently dead in two.
+DOCUMENTATION = Path(BASE_DIR, "docs")
+
+#: A citation of a section, as a page writes one. Parentheses are part of a
+#: group's name, so they are matched only in balanced pairs -- a name followed
+#: by the closing bracket of the Markdown link it sits in would otherwise be
+#: read as ending in one, and no declared group ends in ")".
+CITATION = re.compile(r"#/((?:[A-Za-z0-9\-]|%20|\((?:[A-Za-z0-9\-]|%20)*\))+)")
 
 
 class TagSetTest(SimpleTestCase):
@@ -153,25 +165,50 @@ class TagSetTest(SimpleTestCase):
             "the superseded groups are not the last entries in the tag list",
         )
 
-    def test_the_reference_page_links_into_a_group_that_exists(self):
+    def citations(self):
+        """Every (page, section) a documentation page links to."""
+        return [
+            (page, anchor.replace("%20", " "))
+            for page in sorted(DOCUMENTATION.rglob("*.md"))
+            for anchor in CITATION.findall(page.read_text(encoding="utf-8"))
+        ]
+
+    def test_the_reference_page_shows_how_to_link_into_a_group(self):
         """The page beside the document cites a section by name.
 
         In the form another page has to use: the reference is rendered inside
         a page, so a section is reached by opening that page at the section's
-        address rather than by an anchor of the surrounding document. The
-        citation is both the worked example the client page copies and the
-        thing that notices when a section is renamed under it.
+        address rather than by an anchor of the surrounding document. This is
+        the worked example the other pages copy, so it has to stay on the page
+        that explains the form.
         """
         page = REFERENCE_PAGE.read_text(encoding="utf-8")
-        cited = re.findall(r"#/([A-Za-z0-9()\-]+(?:%20[A-Za-z0-9()\-]+)*)", page)
-        self.assertTrue(cited, f"{REFERENCE_PAGE.name} links into no section")
-        for anchor in cited:
-            self.assertIn(
-                anchor.replace("%20", " "),
-                self.names,
-                f"{REFERENCE_PAGE.name} links to the section {anchor!r}, which "
-                "the description does not declare",
-            )
+        self.assertTrue(
+            CITATION.findall(page),
+            f"{REFERENCE_PAGE.name} links into no section, so the form it "
+            "documents has no example on it",
+        )
+
+    def test_every_page_links_into_a_group_that_exists(self):
+        """A citation names a group the description declares -- from any page.
+
+        Documents: docs/oeplatform-code/web-api/api-reference.md
+        """
+        cited = self.citations()
+        self.assertTrue(cited, "no page of the documentation links into a section")
+        dead = sorted(
+            f"{page.relative_to(DOCUMENTATION)} -> {anchor}"
+            for page, anchor in cited
+            if anchor not in self.names
+        )
+        self.assertEqual(
+            [],
+            dead,
+            "These pages link to a section the description does not declare. "
+            "A renamed group leaves the link pointing at nothing, and the page "
+            "opens at the top with no sign anything is wrong:\n    "
+            + "\n    ".join(dead),
+        )
 
     def test_every_group_name_makes_a_stable_anchor(self):
         for name in self.names:

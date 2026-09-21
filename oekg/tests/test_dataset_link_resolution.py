@@ -19,6 +19,11 @@ What that buys, and what each of these tests is really pinning:
 - **The cost is bounded by target kinds, not by citations.** A scenario with
   ten links costs a read exactly what a scenario with two costs it.
 
+Rule 7 of the client page rests on these tests: what a citation means now,
+and why a dead one stays.
+
+Documents: docs/oeplatform-code/web-api/oekg-api/scenario-bundles.md
+
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
