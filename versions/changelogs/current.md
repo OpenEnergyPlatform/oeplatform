@@ -11,6 +11,14 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- The _About -> REST-API Documentation_ link in the page header now opens the
+  Web-API section of the developer documentation, which leads with the generated
+  API Reference and lists the guides beside it. It pointed at one guide -
+  "Working with the OEDB" - so the page describing every endpoint of the API was
+  reachable only by noticing a link in that guide's second paragraph. The link's
+  setting is also no longer called `readthedocs`; that documentation was retired
+  and redirected here some time ago
+
 - The scenario-bundle changelog page under Factsheets now also lists changes
   made through the REST API. Those rows show who changed what and when, but no
   side-by-side diff: the API records what changed in a newer form that this page
@@ -633,6 +641,12 @@ SPDX-License-Identifier: CC0-1.0
   page is built, the release order for the tag repair, and the test seams.
 
 ## Code Quality
+
+- `EXTERNAL_URLS` in the settings listed the same 21 entries twice. Python keeps
+  the last of a repeated key, so the duplicates changed nothing - until someone
+  edited one of the two copies, at which point which one wins is decided by
+  position in the file. The values were identical, so removing the second block
+  leaves every link exactly as it was
 
 - The OEKG shape validator merges in only the ontology labels a bundle actually
   names, instead of all 2,054 of them. The label subset is there because the
