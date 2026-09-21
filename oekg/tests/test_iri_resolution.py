@@ -34,7 +34,7 @@ from unittest import mock
 from urllib.parse import urlparse
 
 from django.test import SimpleTestCase
-from django.urls import reverse
+from django.urls import resolve, reverse
 
 from oekg.bundles import SCENARIO, bundle_iri, part_iri
 from oekg.graph_store import GraphStoreUnavailable
@@ -191,14 +191,26 @@ class BundleAddressTest(IriTestCase):
 
         self.assertEqual(response.redirect_chain, [(self.page_of(uid), 303)])
 
-    def test_the_destination_of_a_reader_is_a_page_that_exists(self):
-        # The redirect is only worth anything if what it names answers. Taken
-        # from the router in the view for the same reason.
+    def test_a_reader_is_sent_to_the_scenario_bundle_application(self):
+        # NOT a status code. The destination renders a React shell and never
+        # looks at the uid, so it answers 200 for any path segment at all --
+        # the same worthless signal this slice exists to remove from
+        # `/ontology/`, and one that would have passed against a destination
+        # showing nothing. What is checkable on this side of the wire is WHICH
+        # view the redirect names, and it is named by comparison with that
+        # application's own front door rather than by importing it: the module
+        # serving both parses the whole OEO at import, which no test in this
+        # app may pay for.
+        #
+        # The shell fetches the bundle itself, which is why the 303 fires only
+        # once the graph has confirmed the bundle is there -- the existence
+        # check upstream is what makes this destination sound.
         uid, _ = self.created()
 
-        response = self.client.get(self.page_of(uid))
-
-        self.assertEqual(response.status_code, 200)
+        self.assertIs(
+            resolve(self.page_of(uid)).func,
+            resolve(reverse("factsheet:factsheets_index")).func,
+        )
 
     def test_the_destination_of_a_client_serves_the_graph(self):
         uid, _ = self.created()
