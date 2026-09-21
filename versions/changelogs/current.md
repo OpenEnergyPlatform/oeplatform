@@ -334,6 +334,17 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
+- The platform no longer runs out of database connections. A query that failed
+  part-way left its connection checked out for the life of the server process,
+  with its transaction still open, so the pool grew by roughly seventeen
+  connections a day until the database refused new ones -- at which point
+  viewing a table's data, and anything else needing the database, answered
+  `{"reason": "Invalid request"}`. Connections are now returned however a query
+  ends, and the pool is bounded so it cannot exhaust the database even if
+  something else leaks. The limit on simultaneous connections for anonymous API
+  clients drops from 40 to 15 to stay inside that bound
+  [(#2495)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2495)
+
 - **Security:** queueing a structural change to a table
   (`POST /api/v0/tables/<name>/`) required no authentication — an anonymous
   request was accepted — and the values it carried were written into the
