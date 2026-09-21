@@ -38,6 +38,7 @@ from rest_framework import serializers
 
 from oekg.serializers import (
     DatasetLinkSerializer,
+    NestedScenarioSerializer,
     ScenarioBundleCreateSerializer,
     ScenarioSerializer,
     StudyReportSerializer,
@@ -147,6 +148,8 @@ class DatasetLinkMetaSerializer(SubResourceMetaSerializer):
 
 
 class ScenarioReadSerializer(ScenarioSerializer):
+    """A scenario at its own endpoints, where a dataset link has its own URL."""
+
     _meta = SubResourceMetaSerializer()
 
 
@@ -158,12 +161,57 @@ class DatasetLinkReadSerializer(DatasetLinkSerializer):
     _meta = DatasetLinkMetaSerializer()
 
 
+class NestedScenarioReadSerializer(NestedScenarioSerializer):
+    """A scenario *inside* a bundle body: the same, plus what it cites.
+
+    Two read shapes for one resource, because there are two write shapes: a
+    scenario's own endpoints take no dataset links, and a bundle payload takes
+    them nested. The read that a client sends back to `replace` has to be the
+    second one, or the citations it does not mention are the citations it
+    loses.
+    """
+
+    _meta = SubResourceMetaSerializer()
+    datasets = DatasetLinkReadSerializer(many=True)
+
+
 class ScenarioBundleReadSerializer(ScenarioBundleCreateSerializer):
     """The bundle, its parts nested, exactly as a `POST` would take it back."""
 
     _meta = BundleMetaSerializer()
-    scenarios = ScenarioReadSerializer(many=True)
+    scenarios = NestedScenarioReadSerializer(many=True)
     study_reports = StudyReportReadSerializer(many=True)
+
+
+class RemovedNodeSerializer(serializers.Serializer):
+    """A node as a delete reports it back: an address and a class."""
+
+    iri = serializers.URLField()
+    type = serializers.URLField(
+        allow_null=True,
+        help_text=(
+            "`null` for a node whose class this API does not recognise, which "
+            "a response listing a bare address would not have said."
+        ),
+    )
+
+
+class BundleReplaceMetaSerializer(BundleMetaSerializer):
+    """The bundle's own `_meta`, plus the account of what the replace removed.
+
+    In `_meta` and not beside the fields, for the reason every read-only value
+    here is: the top level of a bundle body is exactly what a write accepts, and
+    a client that read a replace's answer can send it straight back.
+    """
+
+    deleted = RemovedNodeSerializer(many=True)
+    unlinked = RemovedNodeSerializer(many=True)
+
+
+class ScenarioBundleReplaceReadSerializer(ScenarioBundleReadSerializer):
+    """What a replace answers with: the bundle it made, and what it took out."""
+
+    _meta = BundleReplaceMetaSerializer()
 
 
 class SummaryCountsSerializer(serializers.Serializer):
@@ -244,19 +292,6 @@ class BundleHistoryEntrySerializer(serializers.Serializer):
         ),
     )
     triples = serializers.DictField(required=False)
-
-
-class RemovedNodeSerializer(serializers.Serializer):
-    """A node as a delete reports it back: an address and a class."""
-
-    iri = serializers.URLField()
-    type = serializers.URLField(
-        allow_null=True,
-        help_text=(
-            "`null` for a node whose class this API does not recognise, which "
-            "a response listing a bare address would not have said."
-        ),
-    )
 
 
 class RemovalMetaSerializer(GapsMixin):
