@@ -8,7 +8,8 @@ SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
-from typing import Any, Iterable, List, Optional, Protocol
+from contextlib import contextmanager
+from typing import Any, Iterable, Iterator, List, Optional, Protocol
 
 from sqlalchemy import MetaData, create_engine, inspect
 from sqlalchemy.engine import ResultProxy
@@ -58,8 +59,29 @@ def _create_oedb_session() -> Session:
     """Return a sqlalchemy session to the oedb
 
     Should only be created once per user request.
+
+    Prefer `oedb_session()`: a session closed only on the success path leaks
+    its connection, with its transaction still open, whenever anything raises.
     """
     return sessionmaker(bind=_get_engine())()
+
+
+@contextmanager
+def oedb_session() -> Iterator[Session]:
+    """A session that is returned to the pool however the block ends.
+
+    This is the leak fix for issue #2495. Callers used to close on the success
+    path only, so any exception between opening and closing left the
+    connection checked out for the life of the process -- and `idle in
+    transaction`, which also holds back autovacuum across the whole database.
+    Measured at roughly 17 leaked connections a day, which exhausted a
+    255-connection cluster in about a fortnight.
+    """
+    session = _create_oedb_session()
+    try:
+        yield session
+    finally:
+        session.close()
 
 
 class AbstractColumn(Protocol):

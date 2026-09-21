@@ -29,9 +29,10 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 from uuid import uuid4
 
-from api.actions import _create_oedb_session, _execute
+from api.actions import _execute
 from api.tests import APITestCaseWithTable
 from dataedit.models import Table
+from oedb.connection import _create_oedb_session
 
 COLUMN_CHANGE = {
     "type": "column",
