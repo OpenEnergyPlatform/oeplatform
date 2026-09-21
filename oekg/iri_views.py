@@ -34,6 +34,12 @@ Anything else -- `*/*` from curl, a browser's long Accept list, a client asking
 for something nobody serves -- gets the HTML page, because a person following a
 link is the case that has to work without being spelled.
 
+**Both forms of the address answer.** The minted IRI has no trailing slash and
+that is the form people paste; the routes accept it directly rather than
+leaving it to `APPEND_SLASH`, which would 301 it first. Every citation in the
+wild would otherwise cost two requests, with two chances for a client to drop
+the `Accept` header that decides where it lands.
+
 **A scenario's IRI carries only its own identifier**, not its bundle's, so
 resolving one is a query: which bundle has this scenario as a part. The IRI is
 matched exactly rather than looked up by has-uuid, so the answer is about the
