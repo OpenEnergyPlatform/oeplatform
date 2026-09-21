@@ -62,6 +62,7 @@ from drf_spectacular.utils import (
     extend_schema,
     extend_schema_view,
 )
+from drf_spectacular.views import SpectacularAPIView
 from oemetadata.latest.example import OEMETADATA_LATEST_EXAMPLE
 from oemetadata.latest.template import OEMETADATA_LATEST_TEMPLATE
 from rest_framework import generics, status
@@ -153,6 +154,19 @@ from api.api_description import (
     describes,
     responses,
 )
+from api.api_tags import (
+    ADVANCED,
+    ADVANCED_CONNECTION,
+    ADVANCED_CURSOR,
+    ADVANCED_TWO_PHASE,
+    API_DESCRIPTION,
+    DATASETS,
+    FACTSHEETS,
+    OEKG_SPARQL,
+    SCENARIO_BUNDLES_LEGACY,
+    TABLE_METADATA,
+    TABLES,
+)
 from api.encode import Echo
 from api.error import APIError
 from api.helper import (
@@ -239,10 +253,27 @@ DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL_WO_QUERY = strip_query(
 logger = logging.getLogger("oeplatform")
 
 
-@extend_schema_view(
-    get=extend_schema(tags=["Schema: Meta"]),
-    post=extend_schema(tags=["Schema: Meta"]),
+@extend_schema(
+    tags=[API_DESCRIPTION],
+    summary="This description, as a document",
+    description=(
+        "The OpenAPI description of `api/v0`, generated from the code. It is "
+        "what the reference page renders and what a generated client is built "
+        "from.\n\nA copy is committed to the repository and a check keeps the "
+        "two equal, so this endpoint and the published reference describe the "
+        "same API."
+    ),
 )
+class OpenAPIDescriptionAPIView(SpectacularAPIView):
+    """The generated description, served by the platform.
+
+    A subclass for one reason: the view is a third-party one and the group it
+    belongs in is a decision of this project's. Annotating the imported class
+    in place would set that on every project that imports it in this process.
+    """
+
+
+@extend_schema(tags=[TABLE_METADATA])
 class TableMetadataAPIView(APIView):
     """
     Important note:
@@ -353,6 +384,7 @@ def load_owned_dataset_from_request(request, dataset_name: str):
     return dataset, serializer.validated_data["tables"]
 
 
+@extend_schema(tags=[DATASETS])
 @extend_schema_view(
     post=extend_schema(
         summary="Create dataset",
@@ -429,6 +461,7 @@ class DatasetsListCreate(generics.ListCreateAPIView):
         )
 
 
+@extend_schema(tags=[DATASETS])
 @extend_schema_view(
     get=extend_schema(
         summary="List dataset resources",
@@ -445,6 +478,7 @@ class DatasetsListResources(generics.ListAPIView):
         return dataset.tables.all()
 
 
+@extend_schema(tags=[DATASETS])
 @extend_schema_view(
     get=extend_schema(
         summary="Get dataset",
@@ -514,6 +548,7 @@ class DatasetManager(APIView):
         )
 
 
+@extend_schema(tags=[DATASETS])
 class AssignDatasetTables(APIView):
     """
     Assign existing OEP tables to an existing dataset.
@@ -600,6 +635,7 @@ class AssignDatasetTables(APIView):
         )
 
 
+@extend_schema(tags=[DATASETS])
 class UnassignDatasetTables(APIView):
     """Detach tables from a dataset. The tables themselves are untouched."""
 
@@ -659,6 +695,7 @@ class UnassignDatasetTables(APIView):
         )
 
 
+@extend_schema(tags=[TABLES])
 class TableAPIView(APIView):
     """
     Handles the creation of tables and serves information on existing tables
@@ -916,6 +953,7 @@ class TableAPIView(APIView):
         return JsonResponse({}, status=status.HTTP_200_OK)
 
 
+@extend_schema(tags=[TABLES])
 class TableColumnAPIView(APIView):
     @extend_schema(
         summary="Describe a column, or every column",
@@ -1003,6 +1041,7 @@ class TableColumnAPIView(APIView):
         return JsonResponse({}, status=201)
 
 
+@extend_schema(tags=[TABLES])
 class TableMovePublishAPIView(APIView):
     @extend_schema(
         summary="Publish a table under a topic",
@@ -1041,6 +1080,7 @@ class TableMovePublishAPIView(APIView):
         return JsonResponse({}, status=status.HTTP_200_OK)
 
 
+@extend_schema(tags=[TABLES])
 class TableUnpublishAPIView(APIView):
     @extend_schema(
         summary="Unpublish a table",
@@ -1065,6 +1105,7 @@ class TableUnpublishAPIView(APIView):
         return JsonResponse({}, status=status.HTTP_200_OK)
 
 
+@extend_schema(tags=[TABLES])
 class TableRowsAPIView(APIView):
     @extend_schema(
         summary="Read rows",
@@ -1666,6 +1707,7 @@ def _log_bulk_upload_attempt(
     )
 
 
+@extend_schema(tags=[TABLES])
 class TableBulkUploadAPIView(APIView):
     """Bulk Upload (issue #2362): the request body IS the CSV.
 
@@ -1962,6 +2004,7 @@ def oevkg_query_api_view(request: Request) -> JsonLikeResponse:
     return JsonResponse(res, safe=False)
 
 
+@extend_schema(tags=[OEKG_SPARQL])
 class OekgSparqlAPIView(APIView):
     """A read-only SPARQL endpoint over the OEKG."""
 
@@ -2009,6 +2052,7 @@ class OekgSparqlAPIView(APIView):
 
 
 # Energyframework, Energymodel
+@extend_schema(tags=[FACTSHEETS])
 @method_decorator(never_cache, name="dispatch")
 class EnergyframeworkFactsheetListAPIView(generics.ListAPIView):
     """
@@ -2020,6 +2064,7 @@ class EnergyframeworkFactsheetListAPIView(generics.ListAPIView):
     serializer_class = EnergyframeworkSerializer
 
 
+@extend_schema(tags=[FACTSHEETS])
 @method_decorator(never_cache, name="dispatch")
 class EnergymodelFactsheetListAPIView(generics.ListAPIView):
     """
@@ -2031,6 +2076,7 @@ class EnergymodelFactsheetListAPIView(generics.ListAPIView):
     serializer_class = EnergymodelSerializer
 
 
+@extend_schema(tags=[TABLES])
 @method_decorator(never_cache, name="dispatch")
 class ScenarioDataTablesListAPIView(generics.ListAPIView):
     """
@@ -2042,6 +2088,7 @@ class ScenarioDataTablesListAPIView(generics.ListAPIView):
     serializer_class = ScenarioDataTablesSerializer
 
 
+@extend_schema(tags=[SCENARIO_BUNDLES_LEGACY])
 class ManageOekgScenarioDatasetsAPIView(APIView):
     """The user interface's route for attaching datasets to a scenario."""
 
@@ -2086,6 +2133,7 @@ class ManageOekgScenarioDatasetsAPIView(APIView):
         return Response(response_data, status=status.HTTP_200_OK)
 
 
+@extend_schema(tags=[TABLES])
 class AllTableSizesAPIView(APIView):
     """
     GET /api/v0/db/table-sizes/?stopic=<stopic>&table=<table>
@@ -2129,7 +2177,7 @@ class AllTableSizesAPIView(APIView):
 
 @extend_schema_view(
     post=extend_schema(
-        tags=["Advanced: Cursor"],
+        tags=[ADVANCED_CURSOR],
         summary="Fetch rows from an open cursor",
         description=(
             "Streams rows from a cursor opened by `advanced/cursor/open`, one "
@@ -2184,7 +2232,7 @@ class AdvancedFetchAPIView(APIView):
 
 @extend_schema_view(
     get=extend_schema(
-        tags=["Advanced: Connection"],
+        tags=[ADVANCED_CONNECTION],
         summary="Close every connection this account holds",
         description=(
             "Closes all of this account's open database connections. The way "
@@ -2201,95 +2249,95 @@ class AdvancedCloseAllAPIView(LoginRequiredMixin, APIView):
         return JsonResponse({"message": "All connections closed"})
 
 
-AdvancedSearchAPIView = extend_schema_view(post=extend_schema(tags=["Advanced"]))(
+AdvancedSearchAPIView = extend_schema_view(post=extend_schema(tags=[ADVANCED]))(
     create_ajax_handler(data_search, allow_cors=True, requires_cursor=True)
 )
-AdvancedInsertAPIView = extend_schema_view(post=extend_schema(tags=["Advanced"]))(
+AdvancedInsertAPIView = extend_schema_view(post=extend_schema(tags=[ADVANCED]))(
     create_ajax_handler(data_insert, requires_cursor=True)
 )
-AdvancedDeleteAPIView = extend_schema_view(post=extend_schema(tags=["Advanced"]))(
+AdvancedDeleteAPIView = extend_schema_view(post=extend_schema(tags=[ADVANCED]))(
     create_ajax_handler(data_delete, requires_cursor=True)
 )
-AdvancedUpdateAPIView = extend_schema_view(post=extend_schema(tags=["Advanced"]))(
+AdvancedUpdateAPIView = extend_schema_view(post=extend_schema(tags=[ADVANCED]))(
     create_ajax_handler(data_update, requires_cursor=True)
 )
 
 
-AdvancedHasSchemaAPIView = extend_schema_view(post=extend_schema(tags=["Advanced"]))(
+AdvancedHasSchemaAPIView = extend_schema_view(post=extend_schema(tags=[ADVANCED]))(
     create_ajax_handler(has_schema)
 )
-AdvancedHasTableAPIView = extend_schema_view(post=extend_schema(tags=["Advanced"]))(
+AdvancedHasTableAPIView = extend_schema_view(post=extend_schema(tags=[ADVANCED]))(
     create_ajax_handler(has_table)
 )
-AdvancedGetSchemaNamesAPIView = extend_schema_view(
-    post=extend_schema(tags=["Advanced"])
-)(create_ajax_handler(get_schema_names))
-AdvancedGetTableNamesAPIView = extend_schema_view(
-    post=extend_schema(tags=["Advanced"])
-)(create_ajax_handler(get_table_names))
-AdvancedGetViewNamesAPIView = extend_schema_view(post=extend_schema(tags=["Advanced"]))(
+AdvancedGetSchemaNamesAPIView = extend_schema_view(post=extend_schema(tags=[ADVANCED]))(
+    create_ajax_handler(get_schema_names)
+)
+AdvancedGetTableNamesAPIView = extend_schema_view(post=extend_schema(tags=[ADVANCED]))(
+    create_ajax_handler(get_table_names)
+)
+AdvancedGetViewNamesAPIView = extend_schema_view(post=extend_schema(tags=[ADVANCED]))(
     create_ajax_handler(get_view_names)
 )
 AdvancedGetViewDefinitionAPIView = extend_schema_view(
-    post=extend_schema(tags=["Advanced"])
+    post=extend_schema(tags=[ADVANCED])
 )(create_ajax_handler(get_view_definition))
-AdvancedGetColumnsAPIView = extend_schema_view(post=extend_schema(tags=["Advanced"]))(
+AdvancedGetColumnsAPIView = extend_schema_view(post=extend_schema(tags=[ADVANCED]))(
     create_ajax_handler(get_columns)
 )
 AdvancedGetPkConstraintAPIView = extend_schema_view(
-    post=extend_schema(tags=["Advanced"])
+    post=extend_schema(tags=[ADVANCED])
 )(create_ajax_handler(get_pk_constraint))
-AdvancedGetForeignKeysAPIView = extend_schema_view(
-    post=extend_schema(tags=["Advanced"])
-)(create_ajax_handler(get_foreign_keys))
-AdvancedGetIndexesAPIView = extend_schema_view(post=extend_schema(tags=["Advanced"]))(
+AdvancedGetForeignKeysAPIView = extend_schema_view(post=extend_schema(tags=[ADVANCED]))(
+    create_ajax_handler(get_foreign_keys)
+)
+AdvancedGetIndexesAPIView = extend_schema_view(post=extend_schema(tags=[ADVANCED]))(
     create_ajax_handler(get_indexes)
 )
 AdvancedGetUniqueConstraintsAPIView = extend_schema_view(
-    post=extend_schema(tags=["Advanced"])
+    post=extend_schema(tags=[ADVANCED])
 )(create_ajax_handler(get_unique_constraints))
 
 AdvancedConnectionOpenAPIView = extend_schema_view(
-    post=extend_schema(tags=["Advanced: Connection"])
+    post=extend_schema(tags=[ADVANCED_CONNECTION])
 )(create_ajax_handler(open_raw_connection))
 AdvancedConnectionCloseAPIView = extend_schema_view(
-    post=extend_schema(tags=["Advanced: Connection"])
+    post=extend_schema(tags=[ADVANCED_CONNECTION])
 )(create_ajax_handler(close_raw_connection))
 AdvancedConnectionCommitAPIView = extend_schema_view(
-    post=extend_schema(tags=["Advanced: Connection"])
+    post=extend_schema(tags=[ADVANCED_CONNECTION])
 )(create_ajax_handler(commit_raw_connection))
 AdvancedConnectionRollbackAPIView = extend_schema_view(
-    post=extend_schema(tags=["Advanced: Connection"])
+    post=extend_schema(tags=[ADVANCED_CONNECTION])
 )(create_ajax_handler(rollback_raw_connection))
 
 AdvancedCursorOpenAPIView = extend_schema_view(
-    post=extend_schema(tags=["Advanced: Cursor"])
+    post=extend_schema(tags=[ADVANCED_CURSOR])
 )(create_ajax_handler(open_cursor))
 AdvancedCursorCloseAPIView = extend_schema_view(
-    post=extend_schema(tags=["Advanced: Cursor"])
+    post=extend_schema(tags=[ADVANCED_CURSOR])
 )(create_ajax_handler(close_cursor))
 AdvancedCursorFetchOneAPIView = extend_schema_view(
-    post=extend_schema(tags=["Advanced: Cursor"])
+    post=extend_schema(tags=[ADVANCED_CURSOR])
 )(create_ajax_handler(fetchone))
 
 AdvancedSetIsolationLevelAPIView = extend_schema_view(
-    post=extend_schema(tags=["Advanced"])
+    post=extend_schema(tags=[ADVANCED])
 )(create_ajax_handler(set_isolation_level))
 AdvancedGetIsolationLevelAPIView = extend_schema_view(
-    post=extend_schema(tags=["Advanced"])
+    post=extend_schema(tags=[ADVANCED])
 )(create_ajax_handler(get_isolation_level))
 AdvancedDoBeginTwophaseAPIView = extend_schema_view(
-    post=extend_schema(tags=["Advanced: Two phase"])
+    post=extend_schema(tags=[ADVANCED_TWO_PHASE])
 )(create_ajax_handler(do_begin_twophase))
 AdvancedDoPrepareTwophaseAPIView = extend_schema_view(
-    post=extend_schema(tags=["Advanced: Two phase"])
+    post=extend_schema(tags=[ADVANCED_TWO_PHASE])
 )(create_ajax_handler(do_prepare_twophase))
 AdvancedDoRollbackTwophaseAPIView = extend_schema_view(
-    post=extend_schema(tags=["Advanced: Two phase"])
+    post=extend_schema(tags=[ADVANCED_TWO_PHASE])
 )(create_ajax_handler(do_rollback_twophase))
 AdvancedDoCommitTwophaseAPIView = extend_schema_view(
-    post=extend_schema(tags=["Advanced: Two phase"])
+    post=extend_schema(tags=[ADVANCED_TWO_PHASE])
 )(create_ajax_handler(do_commit_twophase))
 AdvancedDoRecoverTwophaseAPIView = extend_schema_view(
-    post=extend_schema(tags=["Advanced: Two phase"])
+    post=extend_schema(tags=[ADVANCED_TWO_PHASE])
 )(create_ajax_handler(do_recover_twophase))

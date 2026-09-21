@@ -71,6 +71,7 @@ from drf_spectacular.utils import (
 )
 from rest_framework import serializers
 
+from api.api_tags import SCENARIO_BUNDLES
 from oekg.read_serializers import RemovalSerializer
 
 
@@ -442,11 +443,17 @@ def _describing(note, **schema):
     The docstring stays the source of the prose -- it is what the next person
     to change the endpoint reads -- and this adds the one sentence that is the
     same at every endpoint of its kind.
+
+    It also carries the group. Every operation of this API belongs in the one
+    accordion, and every one of them is decorated through here, so the tag is
+    set once rather than per endpoint -- which is also what stops the next
+    resource arriving under a tag derived from its path.
     """
 
     def decorate(handler):
         described = inspect.cleandoc(handler.__doc__ or "")
         description = f"{described}\n\n{note}" if described else note
+        schema.setdefault("tags", [SCENARIO_BUNDLES])
         return extend_schema(description=description, **schema)(handler)
 
     return decorate
