@@ -17,6 +17,8 @@ page is about the first of them:
   the only way to _write_ to the graph through this API — the SPARQL endpoint
   refuses an update whatever the caller's permissions, because a write has to be
   validated against the OEKG shape and a passthrough cannot do that.
+  [Writing scenario bundles](scenario-bundles.md) explains the behaviour those
+  endpoint descriptions cannot state.
 
 ## The SPARQL endpoint
 
@@ -57,4 +59,5 @@ store and returns what comes back, and an update or delete is refused. Creating
 and changing scenario bundles is done through the scenario-bundle endpoints in
 the [API Reference](../api-reference.md), which validate every write against the
 OEKG shape, guard it with an `If-Match` version, and record it in the bundle's
-history.
+history. The rules a client author needs beyond those signatures are on
+[Writing scenario bundles](scenario-bundles.md).
