@@ -19,6 +19,11 @@ feature under test:
   and the payloads of that bundle's earlier entries do not -- otherwise a
   deleted bundle would be reconstructable from the record of its own deletion.
 
+Rule 5 of the client page rests on these tests: the two guards catch two
+different accidents.
+
+Documents: docs/oeplatform-code/web-api/oekg-api/scenario-bundles.md
+
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501

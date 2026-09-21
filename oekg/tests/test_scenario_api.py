@@ -14,6 +14,11 @@ Two asymmetries carry this slice and both are easy to lose:
   has no independent existence to guard, and every constraint in the shape is
   bundle-local, so a scenario alone is not a unit the shape could judge.
 
+Rule 4 of the client page rests on these tests: a bundle create accepts
+nested sub-resources, which is the half a patch refuses.
+
+Documents: docs/oeplatform-code/web-api/oekg-api/scenario-bundles.md
+
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501

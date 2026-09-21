@@ -18,6 +18,11 @@ Three properties carry this slice:
   record, so a link may outlive the table it cites, and a table's owner is
   never blocked by somebody else's citation.
 
+Rule 7 of the client page rests on these tests, including the one link it
+cannot express: an address written elsewhere.
+
+Documents: docs/oeplatform-code/web-api/oekg-api/scenario-bundles.md
+
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501

@@ -14,6 +14,11 @@ Two properties carry this slice, and both are easy to lose:
 The stored diff is lossless and untranslated; field names are computed at read
 time, so a later shape change never re-interprets an old row.
 
+Rule 9 of the client page rests on these tests: an audit gap reported
+inside a successful write.
+
+Documents: docs/oeplatform-code/web-api/oekg-api/scenario-bundles.md
+
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
