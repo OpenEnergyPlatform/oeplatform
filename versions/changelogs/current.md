@@ -298,6 +298,14 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
+- Viewing a table's data no longer fails intermittently with
+  `{"reason": "Invalid request"}`. The connection pool to the data database
+  discarded a connection for being old but not for being dead, so a connection
+  the server had already closed was handed to the next request; the retry worked
+  because the pool replaced it by then, which is why reloading appeared to help.
+  Connections are now checked before use
+  [(#2488)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2488)
+
 - Error responses from the scenario-bundle API carried the text `"None"` where
   they should have carried an empty value, and would have turned numbers into
   text. Introduced in the previous release cycle and not shipped
