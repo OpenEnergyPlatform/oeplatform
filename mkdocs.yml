@@ -116,6 +116,7 @@ nav:
               - Working with the OEDB: oeplatform-code/web-api/oedb-rest-api/index.md
               - Database table sizes: oeplatform-code/web-api/oedb-rest-api/resource-data-size.md
               - Querying the OEKG with SPARQL: oeplatform-code/web-api/oekg-api/index.md
+              - Writing scenario bundles: oeplatform-code/web-api/oekg-api/scenario-bundles.md
               - Edit scenario datasets: oeplatform-code/web-api/oekg-api/scenario-dataset.md
       - Django Apps:
           - oeplatform-code/apps/index.md

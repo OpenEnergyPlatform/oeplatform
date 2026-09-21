@@ -367,6 +367,21 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Documentation updates
 
+- A guide for clients of the scenario-bundle API: **Writing scenario bundles**,
+  under Web-API's → Guides. The generated API Reference says what each endpoint
+  takes; this page carries the nine rules that decide what a request does and
+  that no signature can state — among them that a key left out is left
+  untouched, that `_meta` comes back unstripped so a read can be sent back, that
+  a create takes nested scenarios where a patch refuses them, that a change is
+  refused only for the shape violations it introduces while a create is judged
+  whole, and that a successful write can report that its own history entry was
+  lost. Each rule carries a real request and response and links the reference at
+  the operation it describes. One rule, delete-by-omission on the replace
+  endpoint, describes an endpoint that does not exist yet and is marked as
+  pending rather than left out, since a reader who saw the other eight would
+  conclude that leaving a key out is always safe
+  [(#2460)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2460)
+
 - The API documentation described its OEDB half **twice** — once on the
   generated API Reference and once on the OEDB page, which embedded a separate
   hand-written file. The hand-written one is gone, and everything it described
