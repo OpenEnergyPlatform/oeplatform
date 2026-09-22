@@ -45,10 +45,10 @@ from api.actions import (
     assert_permission,
     close_cursor,
     close_raw_connection,
+    commit_raw_connection,
     describe_columns,
     describe_constraints,
     load_cursor_from_context,
-    load_session_from_context,
     open_cursor,
     open_raw_connection,
     translate_fetched_cell,
@@ -136,8 +136,6 @@ def load_cursor(named=False):
                 result = f(*args, **kwargs)
                 if fetch_all:
                     cursor = load_cursor_from_context(context)
-                    session = load_session_from_context(context)
-                    connection = session.connection
 
                     if not result:
                         result = {}
@@ -150,12 +148,36 @@ def load_cursor(named=False):
 
                     # Set of triggers after all the data was fetched.
                     # The cursor must not be closed earlier!
+                    #
+                    # Two properties of this list are load-bearing, and issue
+                    # #2491 was what happened when neither held:
+                    #
+                    # 1. The commit runs BEFORE the connection goes back to the
+                    #    pool. Once it is back, another request may already hold
+                    #    it, and the commit then lands on that request's
+                    #    transaction -- committing its writes and silently
+                    #    undoing its rollback.
+                    # 2. Every trigger resolves the connection through `context`
+                    #    at the moment it fires, never here. The session's
+                    #    connection is a SQLAlchemy `_ConnectionFairy` with no
+                    #    `commit` of its own, so `connection.commit` used to
+                    #    capture a bound method of the RAW psycopg2 connection.
+                    #    That method stays callable after the fairy has given
+                    #    the connection back, which is why the stray commit
+                    #    went through quietly rather than raising, and so never
+                    #    appeared in a log.
+                    #
+                    # A bound method that outlives the checkout is a loaded gun
+                    # whatever the order, so 2 is the correctness condition and 1
+                    # is a preference resting on it: with the lookup deferred, a
+                    # commit moved back after the close can no longer reach the
+                    # connection this request gave back.
                     triggers = [
                         close_cursor,
+                        commit_raw_connection,
                         close_raw_connection,
-                        connection.commit,
                     ]
-                    trigger_args = [({}, context), ({}, context), tuple()]
+                    trigger_args = [({}, context), ({}, context), ({}, context)]
                     first = None
                     if not named or cursor.statusmessage:
                         try:
@@ -192,7 +214,10 @@ def load_cursor(named=False):
                             result["rowcount"] = cursor.rowcount
                             triggered_close = True
                     if not triggered_close and artificial_connection:
-                        connection.commit()
+                        # Same rule off the streaming path: resolve the
+                        # connection through the context, never hold a
+                        # reference to it across the close below.
+                        commit_raw_connection({}, context)
             finally:
                 if not triggered_close:
                     if fetch_all and not artificial_connection:

@@ -352,6 +352,17 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
+- A query on the advanced API no longer commits a database connection after it
+  has handed that connection back. Connections return to a shared pool as soon
+  as a response has been streamed, and a commit issued afterwards landed on
+  whichever request held the connection next -- committing that request's
+  unfinished work, so its own rollback silently did nothing and a write that
+  failed part-way could be kept. It could also break the response it belonged
+  to, if the pool had meanwhile discarded the connection. The commit now happens
+  while the connection is still held, and every step that runs after a response
+  looks the connection up at that moment instead of holding on to one
+  [(#2491)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2491)
+
 - An address under `/ontology/` for something the platform does not serve now
   answers "not found". Depending on which address was used, an unknown name
   previously rendered an ontology page for nothing, a search page for nothing,
