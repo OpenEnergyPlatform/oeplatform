@@ -11,6 +11,15 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- The dev compose stack's vite container now reinstalls its dependencies when
+  the lockfile moves. The marker recording which lockfile was installed sat at
+  the repository root, which is a bind mount, while `node_modules` is a named
+  volume -- so the marker could describe a dependency tree it had never seen,
+  and the check stayed silent while the container ran a vite the lockfile no
+  longer pins. A rebuild did not help either, because docker only seeds a named
+  volume while it is empty. The marker now lives inside `node_modules`, and a
+  reinstall drops the prebundled dependencies belonging to the old tree
+
 - The _About -> REST-API Documentation_ link in the page header now opens the
   Web-API section of the developer documentation, which leads with the generated
   API Reference and lists the guides beside it. It pointed at one guide -
