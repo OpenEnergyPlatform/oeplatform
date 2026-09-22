@@ -21,6 +21,13 @@ _SESSION_CONTEXTS = {}
 
 
 class SessionContext:
+    # A half-built session must still answer for an owner. The constructor
+    # assigns this before the object is published (see below), but the
+    # ordering is the kind of thing a later refactor reorders, and every
+    # reader of `_SESSION_CONTEXTS` catches `KeyError` only -- a missing
+    # attribute would reach the caller as a 500.
+    owner: AbstractUser | None = None
+
     def __init__(self, connection_id=None, owner: AbstractUser | None = None):
         user_connections = 0
         current_time = time.time()
@@ -55,12 +62,12 @@ class SessionContext:
 
         engine = _get_engine()
         self.connection: DBAPIConnection = engine.connect().connection  # type: ignore
+
         if connection_id is None:
-            connection_id = _add_entry(self, _SESSION_CONTEXTS)
-        elif connection_id not in _SESSION_CONTEXTS:
-            _SESSION_CONTEXTS[connection_id] = self
-        else:
+            connection_id = _get_new_key(_SESSION_CONTEXTS)
+        elif connection_id in _SESSION_CONTEXTS:
             raise Exception("Tried to open existing")
+
         self.owner = owner
 
         # FIXME: is this a good idea, to add a custom attribute?
@@ -68,6 +75,11 @@ class SessionContext:
 
         self.session_context = self
         self.cursors = {}
+
+        # Registering is deliberately the last statement of __init__: from
+        # this line on the session is reachable from every other thread, and
+        # the readers of `_SESSION_CONTEXTS` expect a finished object.
+        _add_entry(self, _SESSION_CONTEXTS, connection_id)
 
     def get_cursor(self, cursor_id) -> AbstractCursor:
         try:
