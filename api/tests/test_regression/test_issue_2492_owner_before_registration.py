@@ -85,12 +85,10 @@ class SessionContextTestCase(SimpleTestCase):
         inserted = threading.Event()
         release = threading.Event()
         real_add_entry = sessions._add_entry
-        paused_one = threading.Event()
 
         def add_entry_then_wait(value, dictionary, key=None):
             key = real_add_entry(value, dictionary, key)
-            if not paused_one.is_set():
-                paused_one.set()
+            if not inserted.is_set():  # only the first session is held
                 inserted.set()
                 release.wait(self.TIMEOUT)
             return key
@@ -163,9 +161,9 @@ class ConcurrentConstructionTest(SessionContextTestCase):
 class HalfBuiltSessionIsReadableTest(SessionContextTestCase):
     """The class default, which is the belt to the ordering's braces.
 
-    The ordering is the kind of thing a later refactor reorders, so no reader
-    may raise `AttributeError` even when it does meet an object whose `owner`
-    has not been assigned.
+    No reader may raise `AttributeError` even when it does meet an object whose
+    `owner` has not been assigned. The reasoning is beside the attribute in
+    `api/sessions.py`.
     """
 
     def half_built_session(self):
@@ -186,7 +184,7 @@ class HalfBuiltSessionIsReadableTest(SessionContextTestCase):
 
         close_all_for_user(self.owner)
 
-    def test_load_session_from_context_does_not_raise(self):
+    def test_load_session_from_context_reaches_its_permission_check(self):
         session = self.half_built_session()
         connection_id = session.connection._id
 
