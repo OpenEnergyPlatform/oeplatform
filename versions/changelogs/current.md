@@ -693,7 +693,7 @@ SPDX-License-Identifier: CC0-1.0
   noticing. Two of the addresses it asks for have in fact never existed; they
   are recorded as such rather than quietly fixed, because whether to serve them
   or drop them from the client is a decision for both projects
-  [(#2516)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2516)
+  [(#2518)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2518)
 
 - `EXTERNAL_URLS` in the settings listed the same 21 entries twice. Python keeps
   the last of a repeated key, so the duplicates changed nothing - until someone
