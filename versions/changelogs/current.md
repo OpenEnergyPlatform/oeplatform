@@ -361,6 +361,14 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
+- The tag administration page under Database no longer fails with a server error
+  when a tag has an empty identifier. Such tags cannot be created today, but
+  older data copied over from the database can contain one, and the page tried
+  to link every tag to its editor -- one tag without an address took the whole
+  list down for everyone. It is now listed, marked as not editable here, and
+  every other tag stays editable. Found on the staging server before release
+  [(#2521)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2521)
+
 - Viewing a table in the browser can no longer be refused by the limit on
   database connections. The limit on `/api/v0/advanced` counted every
   connection, including the ones the server opens for a single request and
