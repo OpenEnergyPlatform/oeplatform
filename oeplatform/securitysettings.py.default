@@ -37,6 +37,10 @@ else:
     ALLOWED_HOSTS = [] if DEBUG else ['localhost']
 
 TIME_OUT = 30
+# Both connection limits are counted per server process (see _LOCK in
+# api/sessions.py), so one account's real ceiling is processes x the limit.
+# They are a real ceiling while the daemon group serving /api/v0/advanced runs
+# one process, which that group's Apache configuration sets -- issue #2492.
 USER_CONNECTION_LIMIT = 4
 # Kept at or below the pool's per-process ceiling (OEDB_POOL_SIZE +
 # OEDB_MAX_OVERFLOW in oedb/connection.py, currently 17). Above it the pool
