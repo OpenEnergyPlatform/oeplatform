@@ -361,7 +361,7 @@ SPDX-License-Identifier: CC0-1.0
   to, if the pool had meanwhile discarded the connection. The commit now happens
   while the connection is still held, and every step that runs after a response
   looks the connection up at that moment instead of holding on to one
-  [(#2491)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2491)
+  [(#2516)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2516)
 
 - An address under `/ontology/` for something the platform does not serve now
   answers "not found". Depending on which address was used, an unknown name
