@@ -79,14 +79,15 @@ class SessionContextTestCase(SimpleTestCase):
         for: forty attempts at racing two real constructions never hit it.
         `_add_entry` is the one place a session is published into the module
         dict, so pausing there parks a session in whatever state the
-        constructor has published it in, and a second thread then walks the
-        dict and finds it.
+        constructor has published it in. The pause is inside the registry
+        lock, so the session is visible to a bare read of the dict but not to
+        anything that takes the lock.
         """
         inserted = threading.Event()
         release = threading.Event()
         real_add_entry = sessions._add_entry
 
-        def add_entry_then_wait(value, dictionary, key=None):
+        def add_entry_then_wait(value, dictionary, key):
             key = real_add_entry(value, dictionary, key)
             if not inserted.is_set():  # only the first session is held
                 inserted.set()
@@ -113,10 +114,40 @@ class SessionContextTestCase(SimpleTestCase):
         return thread
 
 
+class ContendedLock:
+    """A lock that says when a second thread has had to wait for it."""
+
+    def __init__(self):
+        self._lock = threading.Lock()
+        self.contended = threading.Event()
+
+    def __enter__(self):
+        if not self._lock.acquire(blocking=False):
+            self.contended.set()
+            self._lock.acquire()
+        return self
+
+    def __exit__(self, *exc_info):
+        self._lock.release()
+
+
 class ConcurrentConstructionTest(SessionContextTestCase):
     def test_a_session_registered_but_not_yet_finished_does_not_break_the_next_one(
         self,
     ):
+        """A second construction cannot reach a publication still in progress.
+
+        When this was first written the second construction ran inside the
+        window and had to cope with what it found there. Since publishing takes
+        the registry lock (#2492, the exact connection count), it cannot enter
+        the window at all: it waits on the lock until the first session is
+        finished, and then both succeed.
+        """
+        lock = ContendedLock()
+        patch = mock.patch.object(sessions, "_LOCK", lock)
+        patch.start()
+        self.addCleanup(patch.stop)
+
         results = {}
         with self.first_registration_paused() as (inserted, release):
             first = self.construct_in_a_thread(results, "first")
@@ -124,31 +155,32 @@ class ConcurrentConstructionTest(SessionContextTestCase):
                 inserted.wait(self.TIMEOUT), "the first session never registered"
             )
 
-            # the window is open here, and this is what it proves: the paused
-            # session is reachable from this thread
-            observed = list(_SESSION_CONTEXTS.values())
+            second = self.construct_in_a_thread(results, "second")
+            self.assertTrue(
+                lock.contended.wait(self.TIMEOUT),
+                "the second construction never met the paused publication, "
+                "so this test proved nothing",
+            )
+            self.assertNotIn("second", results)
 
-            second = SessionContext(owner=self.owner)
             release.set()
             first.join(self.TIMEOUT)
+            second.join(self.TIMEOUT)
 
-        self.assertEqual(
-            1,
-            len(observed),
-            "the pause did not overlap the second construction, so this test "
-            "proved nothing",
-        )
         self.assertIsInstance(
             results.get("first"), SessionContext, "the first construction failed"
         )
-        self.assertIsInstance(second, SessionContext)
+        self.assertIsInstance(
+            results.get("second"), SessionContext, "the second construction failed"
+        )
+        self.assertEqual(2, len(_SESSION_CONTEXTS))
 
     def test_the_registered_session_already_carries_its_owner(self):
         """`owner` is assigned before the object is published, not after."""
         seen = []
         real_add_entry = sessions._add_entry
 
-        def record(value, dictionary, key=None):
+        def record(value, dictionary, key):
             seen.append(getattr(value, "owner", MISSING))
             return real_add_entry(value, dictionary, key)
 

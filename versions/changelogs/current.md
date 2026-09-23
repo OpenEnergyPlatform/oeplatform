@@ -361,6 +361,19 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
+- The limit on how many connections one account may hold open on
+  `/api/v0/advanced` now means the number it states. Each request counted the
+  account's open connections before registering its own, and nothing kept two
+  requests from counting at the same moment -- so requests arriving together
+  could each see room and all be let through, and how many were refused depended
+  on timing. Counting and taking a place are now one step, and a place is given
+  back if the connection then fails to open. The same step stops two requests
+  for one connection id from both opening it, where the second used to replace
+  the first. This is the second half of the problem the entry below describes.
+  The count is kept per server process, so the limit is a true ceiling while
+  that part of the API runs in one process
+  [(#2492)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2492)
+
 - Two requests arriving at `/api/v0/advanced` at the same moment could answer
   with an internal server error. A connection was entered into the server's list
   of open connections a fraction before it recorded whose it was, and every
