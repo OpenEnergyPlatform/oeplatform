@@ -361,6 +361,16 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
+- Two requests arriving at `/api/v0/advanced` at the same moment could answer
+  with an internal server error. A connection was entered into the server's list
+  of open connections a fraction before it recorded whose it was, and every
+  request that reads that list compares owners -- so a connection caught in
+  between had no owner to compare against, and the reading request failed
+  outright instead of counting it. A connection is now listed only once it is
+  complete. This is the first half of the problem: the list is still read
+  without a lock, so the count of a user's open connections remains inexact
+  [(#2492)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2492)
+
 - An address under `/ontology/` for something the platform does not serve now
   answers "not found". Depending on which address was used, an unknown name
   previously rendered an ontology page for nothing, a search page for nothing,
