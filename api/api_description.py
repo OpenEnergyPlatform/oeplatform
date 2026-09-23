@@ -154,24 +154,31 @@ class AdvancedResponseSerializer(serializers.Serializer):
     cursor_id = serializers.CharField(required=False)
 
 
-#: Declared for the whole block because the factory annotates it once. `429`
-#: is reachable only from a call that opens or rebuilds an explicit session --
-#: `connection/open`, or any call naming a `connection_id` this server no longer
-#: holds -- so a pure catalogue read such as `has_table` declares one it does
-#: not give. The alternative was a flag on each of thirty-odd routes.
-ADVANCED_BUSY_REFUSALS = {
+_POOL_TIMEOUT = describes(
+    "No database connection became free in time. Nothing is wrong with the "
+    "request; retry after the `Retry-After` seconds."
+)
+
+#: For an action that takes a database connection from the pool but never a
+#: session: the catalogue reads that reflect on the engine directly.
+USES_POOL = {503: _POOL_TIMEOUT}
+
+#: For an action that can open or rebuild an explicit session --
+#: `connection/open`, and every action that resolves a `connection_id`, because
+#: an id this server no longer holds is rebuilt as a new session, and that
+#: counts. An action that touches neither the pool nor a session (a constant,
+#: or a Django-side lookup such as `has_table`) declares neither, so the
+#: document does not promise refusals the endpoint cannot give.
+OPENS_SESSION = {
     429: describes(
         "This account (or, without a login, all anonymous clients together) "
         "already holds its limit of explicit sessions, the ones opened with "
         "`connection/open`. Only those count: a call carrying no "
-        "`connection_id` never meets this. `reason` names the limit and how to "
-        "close sessions. No `Retry-After`: waiting helps only once a session "
-        "is closed."
+        "`connection_id` does not take a place. `reason` names the limit and "
+        "how to close sessions. No `Retry-After`: waiting helps only once a "
+        "session is closed."
     ),
-    503: describes(
-        "No database connection became free in time. Nothing is wrong with "
-        "the request; retry after the `Retry-After` seconds."
-    ),
+    503: _POOL_TIMEOUT,
 }
 
 ADVANCED_SESSION_NOTE = (

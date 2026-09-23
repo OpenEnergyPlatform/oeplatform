@@ -55,7 +55,6 @@ from api.actions import (
     translate_fetched_cell,
 )
 from api.api_description import (
-    ADVANCED_BUSY_REFUSALS,
     ADVANCED_SESSION_NOTE,
     AdvancedRequestSerializer,
     AdvancedResponseSerializer,
@@ -290,7 +289,7 @@ def api_exception(
             # The pool had no connection to give within its timeout. That says
             # nothing about the request, which a retry may well serve -- so it
             # is not the generic 400 below, which tells a client not to retry
-            # (issue #2492, slice 4).
+            # (issue #2492).
             logger.warning(
                 "pool timeout on %s: no database connection became free",
                 _request_path(args),
@@ -368,11 +367,14 @@ def date_handler(obj):
         return str(obj)
 
 
-def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
+def create_ajax_handler(func, allow_cors=False, requires_cursor=False, refusals=None):
     """
     Implements a mapper from api pages to the corresponding functions in
     api/actions.py
     :param func: The name of the callable function
+    :param refusals: The refusals beyond 400/403 this action can give, for the
+      description -- `USES_POOL` or `OPENS_SESSION` from `api.api_description`,
+      or none for an action that touches neither the pool nor a session
     :return: A JSON-Response that contains a dictionary with
       the corresponding response stored in *content*
     """
@@ -402,7 +404,7 @@ def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
                 },
                 400,
                 403,
-                also=ADVANCED_BUSY_REFUSALS,
+                also=refusals,
             ),
             description=(
                 f"Runs `{func.__name__}` against the OEDB.\n\n" + ADVANCED_SESSION_NOTE

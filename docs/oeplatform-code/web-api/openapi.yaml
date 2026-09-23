@@ -63,7 +63,7 @@ paths:
                 additionalProperties: {}
           description: 'This account (or, without a login, all anonymous clients together)
             already holds its limit of explicit sessions, the ones opened with `connection/open`.
-            Only those count: a call carrying no `connection_id` never meets this.
+            Only those count: a call carrying no `connection_id` does not take a place.
             `reason` names the limit and how to close sessions. No `Retry-After`:
             waiting helps only once a session is closed.'
         '503':
@@ -165,7 +165,7 @@ paths:
                 additionalProperties: {}
           description: 'This account (or, without a login, all anonymous clients together)
             already holds its limit of explicit sessions, the ones opened with `connection/open`.
-            Only those count: a call carrying no `connection_id` never meets this.
+            Only those count: a call carrying no `connection_id` does not take a place.
             `reason` names the limit and how to close sessions. No `Retry-After`:
             waiting helps only once a session is closed.'
         '503':
@@ -235,7 +235,7 @@ paths:
                 additionalProperties: {}
           description: 'This account (or, without a login, all anonymous clients together)
             already holds its limit of explicit sessions, the ones opened with `connection/open`.
-            Only those count: a call carrying no `connection_id` never meets this.
+            Only those count: a call carrying no `connection_id` does not take a place.
             `reason` names the limit and how to close sessions. No `Retry-After`:
             waiting helps only once a session is closed.'
         '503':
@@ -305,7 +305,7 @@ paths:
                 additionalProperties: {}
           description: 'This account (or, without a login, all anonymous clients together)
             already holds its limit of explicit sessions, the ones opened with `connection/open`.
-            Only those count: a call carrying no `connection_id` never meets this.
+            Only those count: a call carrying no `connection_id` does not take a place.
             `reason` names the limit and how to close sessions. No `Retry-After`:
             waiting helps only once a session is closed.'
         '503':
@@ -375,7 +375,7 @@ paths:
                 additionalProperties: {}
           description: 'This account (or, without a login, all anonymous clients together)
             already holds its limit of explicit sessions, the ones opened with `connection/open`.
-            Only those count: a call carrying no `connection_id` never meets this.
+            Only those count: a call carrying no `connection_id` does not take a place.
             `reason` names the limit and how to close sessions. No `Retry-After`:
             waiting helps only once a session is closed.'
         '503':
@@ -553,7 +553,7 @@ paths:
                 additionalProperties: {}
           description: 'This account (or, without a login, all anonymous clients together)
             already holds its limit of explicit sessions, the ones opened with `connection/open`.
-            Only those count: a call carrying no `connection_id` never meets this.
+            Only those count: a call carrying no `connection_id` does not take a place.
             `reason` names the limit and how to close sessions. No `Retry-After`:
             waiting helps only once a session is closed.'
         '503':
@@ -623,7 +623,7 @@ paths:
                 additionalProperties: {}
           description: 'This account (or, without a login, all anonymous clients together)
             already holds its limit of explicit sessions, the ones opened with `connection/open`.
-            Only those count: a call carrying no `connection_id` never meets this.
+            Only those count: a call carrying no `connection_id` does not take a place.
             `reason` names the limit and how to close sessions. No `Retry-After`:
             waiting helps only once a session is closed.'
         '503':
@@ -693,7 +693,7 @@ paths:
                 additionalProperties: {}
           description: 'This account (or, without a login, all anonymous clients together)
             already holds its limit of explicit sessions, the ones opened with `connection/open`.
-            Only those count: a call carrying no `connection_id` never meets this.
+            Only those count: a call carrying no `connection_id` does not take a place.
             `reason` names the limit and how to close sessions. No `Retry-After`:
             waiting helps only once a session is closed.'
         '503':
@@ -763,7 +763,7 @@ paths:
                 additionalProperties: {}
           description: 'This account (or, without a login, all anonymous clients together)
             already holds its limit of explicit sessions, the ones opened with `connection/open`.
-            Only those count: a call carrying no `connection_id` never meets this.
+            Only those count: a call carrying no `connection_id` does not take a place.
             `reason` names the limit and how to close sessions. No `Retry-After`:
             waiting helps only once a session is closed.'
         '503':
@@ -833,7 +833,7 @@ paths:
                 additionalProperties: {}
           description: 'This account (or, without a login, all anonymous clients together)
             already holds its limit of explicit sessions, the ones opened with `connection/open`.
-            Only those count: a call carrying no `connection_id` never meets this.
+            Only those count: a call carrying no `connection_id` does not take a place.
             `reason` names the limit and how to close sessions. No `Retry-After`:
             waiting helps only once a session is closed.'
         '503':
@@ -903,7 +903,7 @@ paths:
                 additionalProperties: {}
           description: 'This account (or, without a login, all anonymous clients together)
             already holds its limit of explicit sessions, the ones opened with `connection/open`.
-            Only those count: a call carrying no `connection_id` never meets this.
+            Only those count: a call carrying no `connection_id` does not take a place.
             `reason` names the limit and how to close sessions. No `Retry-After`:
             waiting helps only once a session is closed.'
         '503':
@@ -973,7 +973,7 @@ paths:
                 additionalProperties: {}
           description: 'This account (or, without a login, all anonymous clients together)
             already holds its limit of explicit sessions, the ones opened with `connection/open`.
-            Only those count: a call carrying no `connection_id` never meets this.
+            Only those count: a call carrying no `connection_id` does not take a place.
             `reason` names the limit and how to close sessions. No `Retry-After`:
             waiting helps only once a session is closed.'
         '503':
@@ -1043,7 +1043,7 @@ paths:
                 additionalProperties: {}
           description: 'This account (or, without a login, all anonymous clients together)
             already holds its limit of explicit sessions, the ones opened with `connection/open`.
-            Only those count: a call carrying no `connection_id` never meets this.
+            Only those count: a call carrying no `connection_id` does not take a place.
             `reason` names the limit and how to close sessions. No `Retry-After`:
             waiting helps only once a session is closed.'
         '503':
@@ -1105,17 +1105,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdvancedResponse'
           description: The result of `get_columns`, under `content`.
-        '429':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: 'This account (or, without a login, all anonymous clients together)
-            already holds its limit of explicit sessions, the ones opened with `connection/open`.
-            Only those count: a call carrying no `connection_id` never meets this.
-            `reason` names the limit and how to close sessions. No `Retry-After`:
-            waiting helps only once a session is closed.'
         '503':
           content:
             application/json:
@@ -1175,17 +1164,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdvancedResponse'
           description: The result of `get_foreign_keys`, under `content`.
-        '429':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: 'This account (or, without a login, all anonymous clients together)
-            already holds its limit of explicit sessions, the ones opened with `connection/open`.
-            Only those count: a call carrying no `connection_id` never meets this.
-            `reason` names the limit and how to close sessions. No `Retry-After`:
-            waiting helps only once a session is closed.'
         '503':
           content:
             application/json:
@@ -1245,17 +1223,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdvancedResponse'
           description: The result of `get_indexes`, under `content`.
-        '429':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: 'This account (or, without a login, all anonymous clients together)
-            already holds its limit of explicit sessions, the ones opened with `connection/open`.
-            Only those count: a call carrying no `connection_id` never meets this.
-            `reason` names the limit and how to close sessions. No `Retry-After`:
-            waiting helps only once a session is closed.'
         '503':
           content:
             application/json:
@@ -1323,7 +1290,7 @@ paths:
                 additionalProperties: {}
           description: 'This account (or, without a login, all anonymous clients together)
             already holds its limit of explicit sessions, the ones opened with `connection/open`.
-            Only those count: a call carrying no `connection_id` never meets this.
+            Only those count: a call carrying no `connection_id` does not take a place.
             `reason` names the limit and how to close sessions. No `Retry-After`:
             waiting helps only once a session is closed.'
         '503':
@@ -1385,17 +1352,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdvancedResponse'
           description: The result of `get_pk_constraint`, under `content`.
-        '429':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: 'This account (or, without a login, all anonymous clients together)
-            already holds its limit of explicit sessions, the ones opened with `connection/open`.
-            Only those count: a call carrying no `connection_id` never meets this.
-            `reason` names the limit and how to close sessions. No `Retry-After`:
-            waiting helps only once a session is closed.'
         '503':
           content:
             application/json:
@@ -1455,25 +1411,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdvancedResponse'
           description: The result of `get_schema_names`, under `content`.
-        '429':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: 'This account (or, without a login, all anonymous clients together)
-            already holds its limit of explicit sessions, the ones opened with `connection/open`.
-            Only those count: a call carrying no `connection_id` never meets this.
-            `reason` names the limit and how to close sessions. No `Retry-After`:
-            waiting helps only once a session is closed.'
-        '503':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No database connection became free in time. Nothing is wrong
-            with the request; retry after the `Retry-After` seconds.
   /api/v0/advanced/get_table_names:
     post:
       operationId: advanced_get_table_names_create
@@ -1525,25 +1462,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdvancedResponse'
           description: The result of `get_table_names`, under `content`.
-        '429':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: 'This account (or, without a login, all anonymous clients together)
-            already holds its limit of explicit sessions, the ones opened with `connection/open`.
-            Only those count: a call carrying no `connection_id` never meets this.
-            `reason` names the limit and how to close sessions. No `Retry-After`:
-            waiting helps only once a session is closed.'
-        '503':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No database connection became free in time. Nothing is wrong
-            with the request; retry after the `Retry-After` seconds.
   /api/v0/advanced/get_unique_constraints:
     post:
       operationId: advanced_get_unique_constraints_create
@@ -1595,17 +1513,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdvancedResponse'
           description: The result of `get_unique_constraints`, under `content`.
-        '429':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: 'This account (or, without a login, all anonymous clients together)
-            already holds its limit of explicit sessions, the ones opened with `connection/open`.
-            Only those count: a call carrying no `connection_id` never meets this.
-            `reason` names the limit and how to close sessions. No `Retry-After`:
-            waiting helps only once a session is closed.'
         '503':
           content:
             application/json:
@@ -1665,25 +1572,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdvancedResponse'
           description: The result of `get_view_definition`, under `content`.
-        '429':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: 'This account (or, without a login, all anonymous clients together)
-            already holds its limit of explicit sessions, the ones opened with `connection/open`.
-            Only those count: a call carrying no `connection_id` never meets this.
-            `reason` names the limit and how to close sessions. No `Retry-After`:
-            waiting helps only once a session is closed.'
-        '503':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No database connection became free in time. Nothing is wrong
-            with the request; retry after the `Retry-After` seconds.
   /api/v0/advanced/get_view_names:
     post:
       operationId: advanced_get_view_names_create
@@ -1735,25 +1623,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdvancedResponse'
           description: The result of `get_view_names`, under `content`.
-        '429':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: 'This account (or, without a login, all anonymous clients together)
-            already holds its limit of explicit sessions, the ones opened with `connection/open`.
-            Only those count: a call carrying no `connection_id` never meets this.
-            `reason` names the limit and how to close sessions. No `Retry-After`:
-            waiting helps only once a session is closed.'
-        '503':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No database connection became free in time. Nothing is wrong
-            with the request; retry after the `Retry-After` seconds.
   /api/v0/advanced/has_schema:
     post:
       operationId: advanced_has_schema_create
@@ -1805,25 +1674,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdvancedResponse'
           description: The result of `has_schema`, under `content`.
-        '429':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: 'This account (or, without a login, all anonymous clients together)
-            already holds its limit of explicit sessions, the ones opened with `connection/open`.
-            Only those count: a call carrying no `connection_id` never meets this.
-            `reason` names the limit and how to close sessions. No `Retry-After`:
-            waiting helps only once a session is closed.'
-        '503':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No database connection became free in time. Nothing is wrong
-            with the request; retry after the `Retry-After` seconds.
   /api/v0/advanced/has_table:
     post:
       operationId: advanced_has_table_create
@@ -1875,25 +1725,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdvancedResponse'
           description: The result of `has_table`, under `content`.
-        '429':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: 'This account (or, without a login, all anonymous clients together)
-            already holds its limit of explicit sessions, the ones opened with `connection/open`.
-            Only those count: a call carrying no `connection_id` never meets this.
-            `reason` names the limit and how to close sessions. No `Retry-After`:
-            waiting helps only once a session is closed.'
-        '503':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: No database connection became free in time. Nothing is wrong
-            with the request; retry after the `Retry-After` seconds.
   /api/v0/advanced/insert:
     post:
       operationId: advanced_insert_create
@@ -1953,7 +1784,7 @@ paths:
                 additionalProperties: {}
           description: 'This account (or, without a login, all anonymous clients together)
             already holds its limit of explicit sessions, the ones opened with `connection/open`.
-            Only those count: a call carrying no `connection_id` never meets this.
+            Only those count: a call carrying no `connection_id` does not take a place.
             `reason` names the limit and how to close sessions. No `Retry-After`:
             waiting helps only once a session is closed.'
         '503':
@@ -2023,7 +1854,7 @@ paths:
                 additionalProperties: {}
           description: 'This account (or, without a login, all anonymous clients together)
             already holds its limit of explicit sessions, the ones opened with `connection/open`.
-            Only those count: a call carrying no `connection_id` never meets this.
+            Only those count: a call carrying no `connection_id` does not take a place.
             `reason` names the limit and how to close sessions. No `Retry-After`:
             waiting helps only once a session is closed.'
         '503':
@@ -2093,7 +1924,7 @@ paths:
                 additionalProperties: {}
           description: 'This account (or, without a login, all anonymous clients together)
             already holds its limit of explicit sessions, the ones opened with `connection/open`.
-            Only those count: a call carrying no `connection_id` never meets this.
+            Only those count: a call carrying no `connection_id` does not take a place.
             `reason` names the limit and how to close sessions. No `Retry-After`:
             waiting helps only once a session is closed.'
         '503':
@@ -2163,7 +1994,7 @@ paths:
                 additionalProperties: {}
           description: 'This account (or, without a login, all anonymous clients together)
             already holds its limit of explicit sessions, the ones opened with `connection/open`.
-            Only those count: a call carrying no `connection_id` never meets this.
+            Only those count: a call carrying no `connection_id` does not take a place.
             `reason` names the limit and how to close sessions. No `Retry-After`:
             waiting helps only once a session is closed.'
         '503':

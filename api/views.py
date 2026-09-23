@@ -137,6 +137,7 @@ from api.api_description import (
     ALWAYS,
     DELIMITER,
     IS_SANDBOX,
+    OPENS_SESSION,
     OWNED_READ,
     OWNED_WRITE,
     PUBLIC_READ,
@@ -144,6 +145,7 @@ from api.api_description import (
     QUERY_WRAPPER,
     ROW_FILTERS,
     TABLE,
+    USES_POOL,
     AdvancedRequestSerializer,
     QueryWrappedSerializer,
     RowDeleteSerializer,
@@ -2252,16 +2254,18 @@ class AdvancedCloseAllAPIView(LoginRequiredMixin, APIView):
 
 
 AdvancedSearchAPIView = extend_schema_view(post=extend_schema(tags=[ADVANCED]))(
-    create_ajax_handler(data_search, allow_cors=True, requires_cursor=True)
+    create_ajax_handler(
+        data_search, allow_cors=True, requires_cursor=True, refusals=OPENS_SESSION
+    )
 )
 AdvancedInsertAPIView = extend_schema_view(post=extend_schema(tags=[ADVANCED]))(
-    create_ajax_handler(data_insert, requires_cursor=True)
+    create_ajax_handler(data_insert, requires_cursor=True, refusals=OPENS_SESSION)
 )
 AdvancedDeleteAPIView = extend_schema_view(post=extend_schema(tags=[ADVANCED]))(
-    create_ajax_handler(data_delete, requires_cursor=True)
+    create_ajax_handler(data_delete, requires_cursor=True, refusals=OPENS_SESSION)
 )
 AdvancedUpdateAPIView = extend_schema_view(post=extend_schema(tags=[ADVANCED]))(
-    create_ajax_handler(data_update, requires_cursor=True)
+    create_ajax_handler(data_update, requires_cursor=True, refusals=OPENS_SESSION)
 )
 
 
@@ -2284,62 +2288,62 @@ AdvancedGetViewDefinitionAPIView = extend_schema_view(
     post=extend_schema(tags=[ADVANCED])
 )(create_ajax_handler(get_view_definition))
 AdvancedGetColumnsAPIView = extend_schema_view(post=extend_schema(tags=[ADVANCED]))(
-    create_ajax_handler(get_columns)
+    create_ajax_handler(get_columns, refusals=USES_POOL)
 )
 AdvancedGetPkConstraintAPIView = extend_schema_view(
     post=extend_schema(tags=[ADVANCED])
-)(create_ajax_handler(get_pk_constraint))
+)(create_ajax_handler(get_pk_constraint, refusals=USES_POOL))
 AdvancedGetForeignKeysAPIView = extend_schema_view(post=extend_schema(tags=[ADVANCED]))(
-    create_ajax_handler(get_foreign_keys)
+    create_ajax_handler(get_foreign_keys, refusals=USES_POOL)
 )
 AdvancedGetIndexesAPIView = extend_schema_view(post=extend_schema(tags=[ADVANCED]))(
-    create_ajax_handler(get_indexes)
+    create_ajax_handler(get_indexes, refusals=USES_POOL)
 )
 AdvancedGetUniqueConstraintsAPIView = extend_schema_view(
     post=extend_schema(tags=[ADVANCED])
-)(create_ajax_handler(get_unique_constraints))
+)(create_ajax_handler(get_unique_constraints, refusals=USES_POOL))
 
 AdvancedConnectionOpenAPIView = extend_schema_view(
     post=extend_schema(tags=[ADVANCED_CONNECTION])
-)(create_ajax_handler(open_raw_connection))
+)(create_ajax_handler(open_raw_connection, refusals=OPENS_SESSION))
 AdvancedConnectionCloseAPIView = extend_schema_view(
     post=extend_schema(tags=[ADVANCED_CONNECTION])
-)(create_ajax_handler(close_raw_connection))
+)(create_ajax_handler(close_raw_connection, refusals=OPENS_SESSION))
 AdvancedConnectionCommitAPIView = extend_schema_view(
     post=extend_schema(tags=[ADVANCED_CONNECTION])
-)(create_ajax_handler(commit_raw_connection))
+)(create_ajax_handler(commit_raw_connection, refusals=OPENS_SESSION))
 AdvancedConnectionRollbackAPIView = extend_schema_view(
     post=extend_schema(tags=[ADVANCED_CONNECTION])
-)(create_ajax_handler(rollback_raw_connection))
+)(create_ajax_handler(rollback_raw_connection, refusals=OPENS_SESSION))
 
 AdvancedCursorOpenAPIView = extend_schema_view(
     post=extend_schema(tags=[ADVANCED_CURSOR])
-)(create_ajax_handler(open_cursor))
+)(create_ajax_handler(open_cursor, refusals=OPENS_SESSION))
 AdvancedCursorCloseAPIView = extend_schema_view(
     post=extend_schema(tags=[ADVANCED_CURSOR])
-)(create_ajax_handler(close_cursor))
+)(create_ajax_handler(close_cursor, refusals=OPENS_SESSION))
 AdvancedCursorFetchOneAPIView = extend_schema_view(
     post=extend_schema(tags=[ADVANCED_CURSOR])
-)(create_ajax_handler(fetchone))
+)(create_ajax_handler(fetchone, refusals=OPENS_SESSION))
 
 AdvancedSetIsolationLevelAPIView = extend_schema_view(
     post=extend_schema(tags=[ADVANCED])
-)(create_ajax_handler(set_isolation_level))
+)(create_ajax_handler(set_isolation_level, refusals=OPENS_SESSION))
 AdvancedGetIsolationLevelAPIView = extend_schema_view(
     post=extend_schema(tags=[ADVANCED])
-)(create_ajax_handler(get_isolation_level))
+)(create_ajax_handler(get_isolation_level, refusals=OPENS_SESSION))
 AdvancedDoBeginTwophaseAPIView = extend_schema_view(
     post=extend_schema(tags=[ADVANCED_TWO_PHASE])
-)(create_ajax_handler(do_begin_twophase))
+)(create_ajax_handler(do_begin_twophase, refusals=OPENS_SESSION))
 AdvancedDoPrepareTwophaseAPIView = extend_schema_view(
     post=extend_schema(tags=[ADVANCED_TWO_PHASE])
-)(create_ajax_handler(do_prepare_twophase))
+)(create_ajax_handler(do_prepare_twophase, refusals=OPENS_SESSION))
 AdvancedDoRollbackTwophaseAPIView = extend_schema_view(
     post=extend_schema(tags=[ADVANCED_TWO_PHASE])
-)(create_ajax_handler(do_rollback_twophase))
+)(create_ajax_handler(do_rollback_twophase, refusals=OPENS_SESSION))
 AdvancedDoCommitTwophaseAPIView = extend_schema_view(
     post=extend_schema(tags=[ADVANCED_TWO_PHASE])
-)(create_ajax_handler(do_commit_twophase))
+)(create_ajax_handler(do_commit_twophase, refusals=OPENS_SESSION))
 AdvancedDoRecoverTwophaseAPIView = extend_schema_view(
     post=extend_schema(tags=[ADVANCED_TWO_PHASE])
-)(create_ajax_handler(do_recover_twophase))
+)(create_ajax_handler(do_recover_twophase, refusals=OPENS_SESSION))

@@ -6,10 +6,12 @@ SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
+import itertools
 import sys
 import threading
 import time
 from random import randrange
+from typing import NamedTuple
 
 from django.contrib.auth.models import AbstractUser
 from django.urls import reverse
@@ -23,10 +25,22 @@ from oeplatform.settings import ANON_CONNECTION_LIMIT, TIME_OUT, USER_CONNECTION
 _SESSION_CONTEXTS = {}
 
 # Sessions that have been given an id but are still opening their connection,
-# as connection id -> (owner, counted). They hold their id, a counted one holds
+# as connection id -> _Pending. They hold their id, a counted one holds
 # its place in the count, and both stay out of `_SESSION_CONTEXTS` until they
 # are finished.
 _PENDING = {}
+
+
+class _Pending(NamedTuple):
+    """A reservation: whose it is, and whether it holds a place in the count.
+
+    The same two attributes a `SessionContext` carries, so one predicate counts
+    both kinds of holder.
+    """
+
+    owner: AbstractUser | None
+    counted: bool
+
 
 # Guards both dicts: every read that decides something and every mutation of
 # either takes it, so counting and reserving are one operation and the limits
@@ -43,7 +57,7 @@ _PENDING = {}
 # connection, opened by `api.helper.load_cursor` for one request that brought
 # no `connection_id`, cannot outlive it: it is bounded by the worker threads,
 # and counting it made a browser paging through a table refuse itself
-# (issue #2492, decided in its slice 4).
+# (issue #2492).
 #
 # The count is per interpreter, because these dicts are. One account's real
 # ceiling is therefore `processes x USER_CONNECTION_LIMIT` (or
@@ -146,8 +160,13 @@ class SessionContext:
 def close_all_for_user(owner: AbstractUser) -> None:
     if owner.is_anonymous:
         raise PermissionError
+    # An artificial connection is left alone: it belongs to a request still
+    # running, which closes it itself, and closing it underneath that request
+    # would break the request rather than free anything the client holds.
     with _LOCK:
-        owned = [s for s in _SESSION_CONTEXTS.values() if s.owner == owner]
+        owned = [
+            s for s in _SESSION_CONTEXTS.values() if s.counted and s.owner == owner
+        ]
         for sess in owned:
             del _SESSION_CONTEXTS[sess.connection._id]
     _close_sessions(owned, with_cursors=True)
@@ -173,12 +192,20 @@ def load_session_from_context(context: dict) -> SessionContext:
 
 
 def _take_expired(now: float) -> list[SessionContext]:
-    """Unregister the idle sessions, for the caller to close outside the lock."""
+    """Unregister the idle sessions, for the caller to close outside the lock.
+
+    Only explicit sessions expire. An artificial connection keeps the
+    `last_activity` of its creation while its request streams, so one serving a
+    long download would look idle the moment its cursor closed -- and its
+    request's next step would then find the id gone and rebuild it, through the
+    fallback in `load_session_from_context`, as a counted session. Its request
+    closes it in any case.
+    """
     with _LOCK:
         expired = [
             sess
             for sess in _SESSION_CONTEXTS.values()
-            if now - sess.last_activity > TIME_OUT and not sess.cursors
+            if sess.counted and now - sess.last_activity > TIME_OUT and not sess.cursors
         ]
         for sess in expired:
             del _SESSION_CONTEXTS[sess.connection._id]
@@ -195,35 +222,29 @@ def _reserve(connection_id, owner: AbstractUser | None, counted: bool):
     anonymous = not owner or owner.is_anonymous
     limit = ANON_CONNECTION_LIMIT if anonymous else USER_CONNECTION_LIMIT
     with _LOCK:
-        if counted:
-            held = sum(
-                1
-                for sess in _SESSION_CONTEXTS.values()
-                if sess.counted and sess.owner == owner
-            ) + sum(
-                1
-                for pending_owner, pending_counted in _PENDING.values()
-                if pending_counted and pending_owner == owner
-            )
-            at_limit = held >= limit
-        else:
-            at_limit = False
-
+        held = _counted_sessions(owner) if counted else 0
+        at_limit = counted and held >= limit
         if not at_limit:
             taken = _SESSION_CONTEXTS.keys() | _PENDING.keys()
             if connection_id is None:
                 connection_id = _get_new_key(taken)
             elif connection_id in taken:
                 raise Exception("Tried to open existing")
-            _PENDING[connection_id] = (owner, counted)
+            _PENDING[connection_id] = _Pending(owner, counted)
 
     if at_limit:
         # Built outside the lock: `reverse` may load the URLconf on first use.
-        raise APIError(_limit_refusal(anonymous, limit), status=429)
+        raise APIError(_limit_refusal(anonymous, held, limit), status=429)
     return connection_id
 
 
-def _limit_refusal(anonymous: bool, limit: int) -> str:
+def _counted_sessions(owner: AbstractUser | None) -> int:
+    """How many places `owner` holds in the count. The caller holds `_LOCK`."""
+    holders = itertools.chain(_SESSION_CONTEXTS.values(), _PENDING.values())
+    return sum(1 for h in holders if h.counted and h.owner == owner)
+
+
+def _limit_refusal(anonymous: bool, held: int, limit: int) -> str:
     """What a caller at the limit is told.
 
     Only explicit sessions reach this, so it may talk about connections the
@@ -234,12 +255,12 @@ def _limit_refusal(anonymous: bool, limit: int) -> str:
     if anonymous:
         return (
             f"Anonymous clients share a limit of {limit} open connections on the "
-            "advanced API, and it is reached. Log in to get a limit of your own, "
-            "or try again once other connections have closed."
+            f"advanced API, and {held} are open. Log in to get a limit of your "
+            "own, or try again once other connections have closed."
         )
     return (
-        f"This account already has {limit} open connections on the advanced API, "
-        "which is its limit. Close one it no longer needs "
+        f"This account has {held} open connections on the advanced API, and its "
+        f"limit is {limit}. Close one it no longer needs "
         f"({reverse('api:advanced-connection-close')}), or close all of them at "
         f"{reverse('api:advanced-connection-close-all')}."
     )
