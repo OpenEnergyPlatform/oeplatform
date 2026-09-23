@@ -78,10 +78,15 @@ class SessionContext:
 
         # Registering is deliberately the last statement of __init__: from
         # this line on the session is reachable from every other thread, and
-        # the readers of `_SESSION_CONTEXTS` expect a finished object. The
-        # collision check above and this insert remain two operations over an
-        # unguarded dict, as they were before; making the check and the act one
-        # is the exact-count half of #2492 and needs the lock this does not add.
+        # the readers of `_SESSION_CONTEXTS` expect a finished object.
+        #
+        # Still open, and deliberately not closed here: the collision check
+        # above and this insert are two operations over an unguarded dict, so
+        # two constructors can both pass the check for one id and the second
+        # overwrite the first. The connection count above is inexact for the
+        # same reason: it too is taken before the session it belongs to is
+        # registered. Closing either means counting or checking and then
+        # registering as one operation under a module-level lock -- see #2492.
         _add_entry(self, _SESSION_CONTEXTS, connection_id)
 
     def get_cursor(self, cursor_id) -> AbstractCursor:
