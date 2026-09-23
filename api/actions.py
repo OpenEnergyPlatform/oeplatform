@@ -954,7 +954,10 @@ ACTIONS FROM OLD API
 
 def __internal_select(query, context):
     context2 = dict(user=context.get("user"))
-    context2.update(open_raw_connection({}, context2))
+    # Opened and closed within this call, so it is not counted -- which also
+    # matters because it runs beside the request's own connection, and a row
+    # update would otherwise take two places in the limit for one request.
+    context2.update(open_request_connection(context2))
     try:
         context2.update(open_cursor({}, context2))
         try:
@@ -2488,6 +2491,17 @@ def do_recover_twophase(request: dict, context: dict) -> dict:
 
 def open_raw_connection(request: dict, context: dict) -> dict:
     session_context = SessionContext(owner=context.get("user"))
+    return {"connection_id": session_context.connection._id}
+
+
+def open_request_connection(context: dict) -> dict:
+    """Open a connection for one request that brought none of its own.
+
+    Unlike `open_raw_connection`, which serves `advanced/connection/open`, this
+    one is closed when the request ends, so it does not count against the
+    connection limits -- see `api/sessions.py` and issue #2492.
+    """
+    session_context = SessionContext(owner=context.get("user"), counted=False)
     return {"connection_id": session_context.connection._id}
 
 

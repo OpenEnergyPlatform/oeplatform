@@ -38,6 +38,7 @@ from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from sqlalchemy.exc import TimeoutError as PoolTimeout
 
 import login.permissions
 from api import parser, sessions
@@ -50,10 +51,11 @@ from api.actions import (
     describe_constraints,
     load_cursor_from_context,
     open_cursor,
-    open_raw_connection,
+    open_request_connection,
     translate_fetched_cell,
 )
 from api.api_description import (
+    ADVANCED_BUSY_REFUSALS,
     ADVANCED_SESSION_NOTE,
     AdvancedRequestSerializer,
     AdvancedResponseSerializer,
@@ -125,7 +127,7 @@ def load_cursor(named=False):
                 if not artificial_connection:
                     context["connection_id"] = args[1].data["connection_id"]
                 else:
-                    context.update(open_raw_connection({}, context))
+                    context.update(open_request_connection(context))
                     args[1].data["connection_id"] = context["connection_id"]
                 if "cursor_id" in args[1].data:
                     context["cursor_id"] = args[1].data["cursor_id"]
@@ -261,6 +263,12 @@ def _request_path(args) -> str:
     return "<unknown path>"
 
 
+#: Seconds a client is asked to wait after a pool timeout. An estimate, not a
+#: promise: the pool frees a connection whenever any request ends, so a short
+#: wait is usually enough and the client's own retry policy decides the rest.
+POOL_TIMEOUT_RETRY_AFTER = 5
+
+
 def api_exception(
     f: Callable[..., JsonLikeResponse],
 ) -> Callable[..., JsonLikeResponse]:
@@ -278,6 +286,24 @@ def api_exception(
             return JsonResponse({"reason": e.message}, status=e.status)
         except (Table.DoesNotExist, Http404):
             return JsonResponse({"reason": "table does not exist"}, status=404)
+        except PoolTimeout:
+            # The pool had no connection to give within its timeout. That says
+            # nothing about the request, which a retry may well serve -- so it
+            # is not the generic 400 below, which tells a client not to retry
+            # (issue #2492, slice 4).
+            logger.warning(
+                "pool timeout on %s: no database connection became free",
+                _request_path(args),
+            )
+            response = JsonResponse(
+                {
+                    "reason": "The server is busy: no database connection became "
+                    "free in time. Please try again shortly."
+                },
+                status=503,
+            )
+            response["Retry-After"] = str(POOL_TIMEOUT_RETRY_AFTER)
+            return response
         except Exception as exc:
             # All other Errors: dont accidently return sensitive data from error
             # but return generic error message
@@ -376,6 +402,7 @@ def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
                 },
                 400,
                 403,
+                also=ADVANCED_BUSY_REFUSALS,
             ),
             description=(
                 f"Runs `{func.__name__}` against the OEDB.\n\n" + ADVANCED_SESSION_NOTE

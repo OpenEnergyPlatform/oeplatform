@@ -42,11 +42,13 @@ TIME_OUT = 30
 # They are a real ceiling while the daemon group serving /api/v0/advanced runs
 # one process, which that group's Apache configuration sets -- issue #2492.
 USER_CONNECTION_LIMIT = 4
-# Kept at or below the pool's per-process ceiling (OEDB_POOL_SIZE +
-# OEDB_MAX_OVERFLOW in oedb/connection.py, currently 17). Above it the pool
-# refuses first, with an opaque error, instead of api/sessions.py refusing
-# with the message that explains what to do -- issue #2495.
-ANON_CONNECTION_LIMIT = 15
+# Shared by ALL anonymous clients together, not per visitor, and it counts only
+# explicit sessions (advanced/connection/open): each one holds a pooled
+# connection across requests. Kept well below the pool's per-process ceiling
+# (OEDB_POOL_SIZE + OEDB_MAX_OVERFLOW in oedb/connection.py, currently 17) so
+# that anonymous sessions cannot crowd out the one-request connections the
+# table view and the REST API need -- issues #2495 and #2492.
+ANON_CONNECTION_LIMIT = 4
 
 # This database connection is used for the actual data interfaces (App: dataedit)
 # This should not be linked with a potential user account of the OpenEnergyDatabase !!!

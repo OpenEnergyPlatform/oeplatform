@@ -154,6 +154,26 @@ class AdvancedResponseSerializer(serializers.Serializer):
     cursor_id = serializers.CharField(required=False)
 
 
+#: Declared for the whole block because the factory annotates it once. `429`
+#: is reachable only from a call that opens or rebuilds an explicit session --
+#: `connection/open`, or any call naming a `connection_id` this server no longer
+#: holds -- so a pure catalogue read such as `has_table` declares one it does
+#: not give. The alternative was a flag on each of thirty-odd routes.
+ADVANCED_BUSY_REFUSALS = {
+    429: describes(
+        "This account (or, without a login, all anonymous clients together) "
+        "already holds its limit of explicit sessions, the ones opened with "
+        "`connection/open`. Only those count: a call carrying no "
+        "`connection_id` never meets this. `reason` names the limit and how to "
+        "close sessions. No `Retry-After`: waiting helps only once a session "
+        "is closed."
+    ),
+    503: describes(
+        "No database connection became free in time. Nothing is wrong with "
+        "the request; retry after the `Retry-After` seconds."
+    ),
+}
+
 ADVANCED_SESSION_NOTE = (
     "Part of the **advanced** interface: a thin, authenticated passthrough to "
     "the database that exists to be driven by a client library rather than by "

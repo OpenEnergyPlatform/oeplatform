@@ -12,6 +12,7 @@ import time
 from random import randrange
 
 from django.contrib.auth.models import AbstractUser
+from django.urls import reverse
 
 from api.error import APIError
 from api.utils import get_or_403
@@ -21,9 +22,10 @@ from oeplatform.settings import ANON_CONNECTION_LIMIT, TIME_OUT, USER_CONNECTION
 # Finished sessions, by connection id. Every reader expects a finished object.
 _SESSION_CONTEXTS = {}
 
-# Sessions that have been counted and given an id but are still opening their
-# connection, as connection id -> owner. They count against the limit and hold
-# their id, but stay out of `_SESSION_CONTEXTS` until they are finished.
+# Sessions that have been given an id but are still opening their connection,
+# as connection id -> (owner, counted). They hold their id, a counted one holds
+# its place in the count, and both stay out of `_SESSION_CONTEXTS` until they
+# are finished.
 _PENDING = {}
 
 # Guards both dicts: every read that decides something and every mutation of
@@ -33,6 +35,15 @@ _PENDING = {}
 # It is never held while a connection is opened or closed. `engine.connect()`
 # can block on the pool, and a module lock across it would queue every request
 # in the process behind the slowest one.
+#
+# Only explicit sessions count -- the ones a client opens and keeps across
+# requests (`advanced/connection/open`, and the fallback in
+# `load_session_from_context` that rebuilds one under the client's id). The
+# limits exist to stop a connection that outlives its request. An artificial
+# connection, opened by `api.helper.load_cursor` for one request that brought
+# no `connection_id`, cannot outlive it: it is bounded by the worker threads,
+# and counting it made a browser paging through a table refuse itself
+# (issue #2492, decided in its slice 4).
 #
 # The count is per interpreter, because these dicts are. One account's real
 # ceiling is therefore `processes x USER_CONNECTION_LIMIT` (or
@@ -52,10 +63,24 @@ class SessionContext:
     # reader of `_SESSION_CONTEXTS` catches `KeyError` only -- a missing
     # attribute would reach the caller as a 500.
     owner: AbstractUser | None = None
+    counted: bool = True
 
-    def __init__(self, connection_id=None, owner: AbstractUser | None = None):
+    def __init__(
+        self,
+        connection_id=None,
+        owner: AbstractUser | None = None,
+        counted: bool = True,
+    ):
+        """Open a session for `owner`.
+
+        `counted=False` is for an artificial connection: one opened on behalf
+        of a single request and closed when it ends. It is registered like any
+        other, so the request can find it by id and `close_all_for_user` still
+        reaches it, but it takes no place in the connection limits.
+        """
         self.last_activity = time.time()
         self.owner = owner
+        self.counted = counted
         self.session_context = self
         self.cursors = {}
 
@@ -64,7 +89,7 @@ class SessionContext:
         # Counting and reserving happen under the lock; opening the connection
         # does not. A reservation holds its place in the count and its id, so
         # it is given back whatever stops the connection from opening.
-        connection_id = _reserve(connection_id, owner)
+        connection_id = _reserve(connection_id, owner, counted)
         try:
             engine = _get_engine()
             connection = engine.connect()
@@ -160,41 +185,64 @@ def _take_expired(now: float) -> list[SessionContext]:
     return expired
 
 
-def _reserve(connection_id, owner: AbstractUser | None):
-    """Count the owner's sessions and, if there is room, reserve one more.
+def _reserve(connection_id, owner: AbstractUser | None, counted: bool):
+    """Reserve an id and, for a counted session, a place in the owner's count.
 
-    Returns the reserved connection id. Refuses with `APIError` when the owner
-    is at the limit, and raises when the requested id is already taken.
+    Returns the reserved connection id. Refuses with a `429` when a counted
+    session would take the owner over its limit, and raises when the requested
+    id is already taken.
     """
+    anonymous = not owner or owner.is_anonymous
+    limit = ANON_CONNECTION_LIMIT if anonymous else USER_CONNECTION_LIMIT
     with _LOCK:
-        user_connections = sum(
-            1 for sess in _SESSION_CONTEXTS.values() if sess.owner == owner
-        ) + sum(1 for pending in _PENDING.values() if pending == owner)
-
-        if not owner or owner.is_anonymous:
-            if user_connections >= ANON_CONNECTION_LIMIT:
-                raise APIError(
-                    "Connection limit for anonymous users is exceeded"
-                    ". Please login to get your own connection pool."
-                )
+        if counted:
+            held = sum(
+                1
+                for sess in _SESSION_CONTEXTS.values()
+                if sess.counted and sess.owner == owner
+            ) + sum(
+                1
+                for pending_owner, pending_counted in _PENDING.values()
+                if pending_counted and pending_owner == owner
+            )
+            at_limit = held >= limit
         else:
-            if user_connections >= USER_CONNECTION_LIMIT:
-                raise APIError(
-                    "This user exceeded the connection limit."
-                    "If you are using the oedialect, this may be "
-                    "caused by a known bug that has been fixed in"
-                    "v0.0.5.dev0. You can close al your connections"
-                    "manually at https://openenergy-platform.org/api/v0/advanced/connection/close_all"  # noqa
-                )
+            at_limit = False
 
-        taken = _SESSION_CONTEXTS.keys() | _PENDING.keys()
-        if connection_id is None:
-            connection_id = _get_new_key(taken)
-        elif connection_id in taken:
-            raise Exception("Tried to open existing")
+        if not at_limit:
+            taken = _SESSION_CONTEXTS.keys() | _PENDING.keys()
+            if connection_id is None:
+                connection_id = _get_new_key(taken)
+            elif connection_id in taken:
+                raise Exception("Tried to open existing")
+            _PENDING[connection_id] = (owner, counted)
 
-        _PENDING[connection_id] = owner
+    if at_limit:
+        # Built outside the lock: `reverse` may load the URLconf on first use.
+        raise APIError(_limit_refusal(anonymous, limit), status=429)
     return connection_id
+
+
+def _limit_refusal(anonymous: bool, limit: int) -> str:
+    """What a caller at the limit is told.
+
+    Only explicit sessions reach this, so it may talk about connections the
+    caller opened. `close_all` needs a login, so an anonymous caller is pointed
+    at logging in instead -- and told the limit is shared, because every
+    anonymous caller is counted as one owner.
+    """
+    if anonymous:
+        return (
+            f"Anonymous clients share a limit of {limit} open connections on the "
+            "advanced API, and it is reached. Log in to get a limit of your own, "
+            "or try again once other connections have closed."
+        )
+    return (
+        f"This account already has {limit} open connections on the advanced API, "
+        "which is its limit. Close one it no longer needs "
+        f"({reverse('api:advanced-connection-close')}), or close all of them at "
+        f"{reverse('api:advanced-connection-close-all')}."
+    )
 
 
 def _close_sessions(sessions: list[SessionContext], with_cursors=False) -> None:
