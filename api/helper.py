@@ -45,10 +45,10 @@ from api.actions import (
     assert_permission,
     close_cursor,
     close_raw_connection,
+    commit_raw_connection,
     describe_columns,
     describe_constraints,
     load_cursor_from_context,
-    load_session_from_context,
     open_cursor,
     open_raw_connection,
     translate_fetched_cell,
@@ -136,8 +136,6 @@ def load_cursor(named=False):
                 result = f(*args, **kwargs)
                 if fetch_all:
                     cursor = load_cursor_from_context(context)
-                    session = load_session_from_context(context)
-                    connection = session.connection
 
                     if not result:
                         result = {}
@@ -150,12 +148,36 @@ def load_cursor(named=False):
 
                     # Set of triggers after all the data was fetched.
                     # The cursor must not be closed earlier!
+                    #
+                    # Two properties of this list are load-bearing, and issue
+                    # #2491 is what happened when neither held:
+                    #
+                    # 1. The commit runs BEFORE the connection goes back to the
+                    #    pool, because afterwards another request may hold it.
+                    # 2. Every trigger resolves the connection through `context`
+                    #    at the moment it fires, never here. A reference taken
+                    #    here outlives the checkout: the session's connection is
+                    #    a SQLAlchemy `_ConnectionFairy` with no `commit` of its
+                    #    own, so `connection.commit` used to capture a bound
+                    #    method of the raw psycopg2 connection, which stays
+                    #    callable after the fairy has given it back.
+                    #
+                    # 2 is the correctness condition and 1 rests on it, so do
+                    # not trade one for the other.
+                    #
+                    # The commit is kept rather than dropped, which was the
+                    # other candidate fix: the pool rolls a returned connection
+                    # back anyway and a `SELECT` has nothing to commit -- but
+                    # this decorator also serves a caller-supplied connection
+                    # (how `oedialect` works), and there it is what commits the
+                    # client's open transaction. All of it is measured in
+                    # api/tests/test_regression/test_issue_2491_commit_after_release.py
                     triggers = [
                         close_cursor,
+                        commit_raw_connection,
                         close_raw_connection,
-                        connection.commit,
                     ]
-                    trigger_args = [({}, context), ({}, context), tuple()]
+                    trigger_args = [({}, context), ({}, context), ({}, context)]
                     first = None
                     if not named or cursor.statusmessage:
                         try:
@@ -192,7 +214,10 @@ def load_cursor(named=False):
                             result["rowcount"] = cursor.rowcount
                             triggered_close = True
                     if not triggered_close and artificial_connection:
-                        connection.commit()
+                        # Same rule off the streaming path: resolve the
+                        # connection through the context, never hold a
+                        # reference to it across the close below.
+                        commit_raw_connection({}, context)
             finally:
                 if not triggered_close:
                     if fetch_all and not artificial_connection:
