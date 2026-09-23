@@ -455,8 +455,7 @@ def remove_queued_column(id):
     :return: Nothing
     """
 
-    sql = "UPDATE api_columns SET reviewed=True WHERE id='{id}'".format(id=id)
-    perform_sql(sql)
+    perform_sql("UPDATE api_columns SET reviewed=True WHERE id=:id", {"id": id})
 
 
 def apply_queued_column(id):
@@ -469,19 +468,15 @@ def apply_queued_column(id):
     column_description = get_column_change(id)
     res = table_change_column(column_description)
 
+    # The id is bound, never interpolated (#2490). The failure branch used to
+    # write `exception=<text>` unquoted into a column the table does not have,
+    # so it could never succeed; it now records only what the table can hold.
     if res.get("success") is True:
-        sql = (
-            "UPDATE api_columns SET reviewed=True, changed=True WHERE id='{id}'".format(
-                id=id
-            )
-        )
+        sql = "UPDATE api_columns SET reviewed=True, changed=True WHERE id=:id"
     else:
-        ex_str = str(res.get("exception"))
-        sql = "UPDATE api_columns SET reviewed=False, changed=False, exception={ex_str} WHERE id='{id}'".format(  # noqa
-            id=id, ex_str=ex_str
-        )
+        sql = "UPDATE api_columns SET reviewed=False, changed=False WHERE id=:id"
 
-    perform_sql(sql)
+    perform_sql(sql, {"id": id})
     return res
 
 
@@ -495,16 +490,13 @@ def apply_queued_constraint(id):
     constraint_description = get_constraint_change(id)
     res = table_change_constraint(constraint_description)
 
+    # Bound, and without the nonexistent `exception` column; see
+    # apply_queued_column.
     if res.get("success") is True:
-        sql = "UPDATE api_constraints SET reviewed=True, changed=True WHERE id='{id}'".format(  # noqa
-            id=id
-        )
+        sql = "UPDATE api_constraints SET reviewed=True, changed=True WHERE id=:id"
     else:
-        ex_str = str(res.get("exception"))
-        sql = "UPDATE api_constraints SET reviewed=False, changed=False, exception={ex_str} WHERE id='{id}'".format(  # noqa
-            id=id, ex_str=ex_str
-        )
-    perform_sql(sql)
+        sql = "UPDATE api_constraints SET reviewed=False, changed=False WHERE id=:id"
+    perform_sql(sql, {"id": id})
     return res
 
 
@@ -515,8 +507,7 @@ def remove_queued_constraint(id):
     :return:
     """
 
-    sql = "UPDATE api_constraints SET reviewed=True WHERE id='{id}'".format(id=id)
-    perform_sql(sql)
+    perform_sql("UPDATE api_constraints SET reviewed=True WHERE id=:id", {"id": id})
 
 
 def get_response_dict(

@@ -29,9 +29,12 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 from uuid import uuid4
 
+from django.urls import reverse
+
 from api.actions import _execute
 from api.tests import APITestCaseWithTable
 from dataedit.models import Table
+from login.models import myuser
 from oedb.connection import _create_oedb_session
 
 COLUMN_CHANGE = {
@@ -184,3 +187,101 @@ class QueuedValueTest(ChangeQueueTestCase):
         self.api_req("post", data=self.column_change(), exp_code=200)
 
         self.assertIsNone(self.queued_columns()[0]["reviewed"])
+
+
+class ReviewQueueAccessTest(ChangeQueueTestCase):
+    """Applying or denying a queued change is an admin's, and the id is data.
+
+    `admin_column_view` and `admin_constraints_view` carried `@require_POST`
+    and nothing else, and handed the posted `id` to statements that
+    interpolated it (#2490). CSRF does not help: an anonymous visitor gets a
+    token from any page. Admin-only is the interim rule while the issue
+    decides whether the queue is deleted or repaired; the table owner is
+    refused too, on purpose, until that decision says otherwise.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.admin_user, _ = myuser.objects.get_or_create(
+            name="MrAdminTest", email="mradmintest@test.com", did_agree=True
+        )
+        cls.admin_user.is_admin = True
+        cls.admin_user.save()
+
+    def queued_column_id(self):
+        self.api_req("post", data=self.column_change(), exp_code=200)
+        [row] = self.rows(
+            "SELECT id FROM public.api_columns "
+            "WHERE c_table = :table AND new_name = :marker"
+        )
+        return row["id"]
+
+    def reviewed(self):
+        [row] = self.queued_columns()
+        return row["reviewed"]
+
+    def deny(self, change_id, url="dataedit:admin-columns"):
+        return self.client.post(
+            reverse(url),
+            {"action": "deny", "id": change_id, "table": self.test_table},
+        )
+
+    def tearDown(self):
+        self.client.logout()
+        super().tearDown()
+
+    def test_an_anonymous_request_cannot_deny_a_change(self):
+        change_id = self.queued_column_id()
+
+        response = self.deny(change_id)
+
+        self.assertIn(response.status_code, (302, 403))
+        self.assertIsNone(self.reviewed())
+
+    def test_an_anonymous_request_cannot_touch_the_constraint_queue(self):
+        response = self.deny(1, url="dataedit:admin-contraints")
+
+        self.assertIn(response.status_code, (302, 403))
+
+    def test_a_logged_in_account_that_is_not_an_admin_is_refused(self):
+        change_id = self.queued_column_id()
+        self.client.force_login(self.other_user)
+
+        self.assertEqual(403, self.deny(change_id).status_code)
+        self.assertIsNone(self.reviewed())
+
+    def test_the_table_owner_is_refused_too_for_now(self):
+        change_id = self.queued_column_id()
+        self.client.force_login(self.user)
+
+        self.assertEqual(403, self.deny(change_id).status_code)
+        self.assertIsNone(self.reviewed())
+
+    def test_an_admin_can_deny_a_change(self):
+        change_id = self.queued_column_id()
+        self.client.force_login(self.admin_user)
+
+        self.assertEqual(302, self.deny(change_id).status_code)
+        self.assertIs(True, self.reviewed())
+
+    def test_an_id_that_is_not_a_number_is_refused_before_any_statement(self):
+        # The shape the injection took: the id closed the quote and went on.
+        # It is refused as a bad request, and the row it aimed at is untouched.
+        change_id = self.queued_column_id()
+        self.client.force_login(self.admin_user)
+
+        response = self.deny(f"{change_id}' OR '1'='1")
+
+        self.assertEqual(400, response.status_code)
+        self.assertIsNone(self.reviewed())
+
+    def test_an_unknown_action_is_a_bad_request_not_a_server_error(self):
+        self.client.force_login(self.admin_user)
+
+        response = self.client.post(
+            reverse("dataedit:admin-columns"),
+            {"action": "drop", "id": 1, "table": self.test_table},
+        )
+
+        self.assertEqual(400, response.status_code)
