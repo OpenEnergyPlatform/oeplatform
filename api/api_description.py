@@ -154,6 +154,33 @@ class AdvancedResponseSerializer(serializers.Serializer):
     cursor_id = serializers.CharField(required=False)
 
 
+_POOL_TIMEOUT = describes(
+    "No database connection became free in time. Nothing is wrong with the "
+    "request; retry after the `Retry-After` seconds."
+)
+
+#: For an action that takes a database connection from the pool but never a
+#: session: the catalogue reads that reflect on the engine directly.
+USES_POOL = {503: _POOL_TIMEOUT}
+
+#: For an action that can open or rebuild an explicit session --
+#: `connection/open`, and every action that resolves a `connection_id`, because
+#: an id this server no longer holds is rebuilt as a new session, and that
+#: counts. An action that touches neither the pool nor a session (a constant,
+#: or a Django-side lookup such as `has_table`) declares neither, so the
+#: document does not promise refusals the endpoint cannot give.
+OPENS_SESSION = {
+    429: describes(
+        "This account (or, without a login, all anonymous clients together) "
+        "already holds its limit of explicit sessions, the ones opened with "
+        "`connection/open`. Only those count: a call carrying no "
+        "`connection_id` does not take a place. `reason` names the limit and "
+        "how to close sessions. No `Retry-After`: waiting helps only once a "
+        "session is closed."
+    ),
+    503: _POOL_TIMEOUT,
+}
+
 ADVANCED_SESSION_NOTE = (
     "Part of the **advanced** interface: a thin, authenticated passthrough to "
     "the database that exists to be driven by a client library rather than by "

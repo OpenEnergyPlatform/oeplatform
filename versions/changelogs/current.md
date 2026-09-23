@@ -361,6 +361,23 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
+- Viewing a table in the browser can no longer be refused by the limit on
+  database connections. The limit on `/api/v0/advanced` counted every
+  connection, including the ones the server opens for a single request and
+  closes again when it ends -- which is every search the table view sends, two
+  per redraw, and every call to the table REST API. An account paging through a
+  couple of tabs was refused, and told about a bug in a library it had never
+  used. Now only connections a client opens and keeps across requests
+  (`advanced/connection/open`) count. Reaching the limit answers `429` with the
+  number of connections and how to close them, and an anonymous caller is told
+  that the limit is shared and that logging in gives one of its own. A request
+  that waits too long for a free database connection now answers `503` with
+  `Retry-After` instead of `400 "Invalid request"`, because a retry may well
+  succeed. The limit for anonymous clients, which all of them share, drops from
+  15 to 4 in `securitysettings.py.default`. An existing `securitysettings.py` is
+  not updated by a deploy and has to be changed by hand
+  [(#2492)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2492)
+
 - The limit on how many connections one account may hold open on
   `/api/v0/advanced` now means the number it states. Each request counted the
   account's open connections before registering its own, and nothing kept two

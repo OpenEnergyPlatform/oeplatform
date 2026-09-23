@@ -95,7 +95,7 @@ class SessionRegistryTestCase(SimpleTestCase):
         patch.start()
         self.addCleanup(patch.stop)
 
-    def construct_concurrently(self, n, owner, connection_id=None):
+    def construct_concurrently(self, n, owner, connection_id=None, **session_kwargs):
         """Release *n* constructions from one barrier and collect what each got."""
         engine = RendezvousEngine(n)
         self.use_engine(engine)
@@ -105,7 +105,9 @@ class SessionRegistryTestCase(SimpleTestCase):
         def build(i):
             barrier.wait(TIMEOUT)
             try:
-                results[i] = SessionContext(connection_id=connection_id, owner=owner)
+                results[i] = SessionContext(
+                    connection_id=connection_id, owner=owner, **session_kwargs
+                )
             except BaseException as error:  # noqa: B036 - the refusal is the result
                 results[i] = error
                 engine.settle()

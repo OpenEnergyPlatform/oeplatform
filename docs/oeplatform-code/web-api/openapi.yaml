@@ -55,6 +55,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdvancedResponse'
           description: The result of `close_raw_connection`, under `content`.
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'This account (or, without a login, all anonymous clients together)
+            already holds its limit of explicit sessions, the ones opened with `connection/open`.
+            Only those count: a call carrying no `connection_id` does not take a place.
+            `reason` names the limit and how to close sessions. No `Retry-After`:
+            waiting helps only once a session is closed.'
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No database connection became free in time. Nothing is wrong
+            with the request; retry after the `Retry-After` seconds.
   /api/v0/advanced/connection/close_all:
     get:
       operationId: advanced_connection_close_all_retrieve
@@ -138,6 +157,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdvancedResponse'
           description: The result of `commit_raw_connection`, under `content`.
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'This account (or, without a login, all anonymous clients together)
+            already holds its limit of explicit sessions, the ones opened with `connection/open`.
+            Only those count: a call carrying no `connection_id` does not take a place.
+            `reason` names the limit and how to close sessions. No `Retry-After`:
+            waiting helps only once a session is closed.'
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No database connection became free in time. Nothing is wrong
+            with the request; retry after the `Retry-After` seconds.
   /api/v0/advanced/connection/open:
     post:
       operationId: advanced_connection_open_create
@@ -189,6 +227,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdvancedResponse'
           description: The result of `open_raw_connection`, under `content`.
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'This account (or, without a login, all anonymous clients together)
+            already holds its limit of explicit sessions, the ones opened with `connection/open`.
+            Only those count: a call carrying no `connection_id` does not take a place.
+            `reason` names the limit and how to close sessions. No `Retry-After`:
+            waiting helps only once a session is closed.'
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No database connection became free in time. Nothing is wrong
+            with the request; retry after the `Retry-After` seconds.
   /api/v0/advanced/connection/rollback:
     post:
       operationId: advanced_connection_rollback_create
@@ -240,6 +297,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdvancedResponse'
           description: The result of `rollback_raw_connection`, under `content`.
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'This account (or, without a login, all anonymous clients together)
+            already holds its limit of explicit sessions, the ones opened with `connection/open`.
+            Only those count: a call carrying no `connection_id` does not take a place.
+            `reason` names the limit and how to close sessions. No `Retry-After`:
+            waiting helps only once a session is closed.'
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No database connection became free in time. Nothing is wrong
+            with the request; retry after the `Retry-After` seconds.
   /api/v0/advanced/cursor/close:
     post:
       operationId: advanced_cursor_close_create
@@ -291,6 +367,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdvancedResponse'
           description: The result of `close_cursor`, under `content`.
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'This account (or, without a login, all anonymous clients together)
+            already holds its limit of explicit sessions, the ones opened with `connection/open`.
+            Only those count: a call carrying no `connection_id` does not take a place.
+            `reason` names the limit and how to close sessions. No `Retry-After`:
+            waiting helps only once a session is closed.'
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No database connection became free in time. Nothing is wrong
+            with the request; retry after the `Retry-After` seconds.
   /api/v0/advanced/cursor/fetch_all:
     post:
       operationId: advanced_cursor_fetch_all_create
@@ -450,6 +545,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdvancedResponse'
           description: The result of `fetchone`, under `content`.
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'This account (or, without a login, all anonymous clients together)
+            already holds its limit of explicit sessions, the ones opened with `connection/open`.
+            Only those count: a call carrying no `connection_id` does not take a place.
+            `reason` names the limit and how to close sessions. No `Retry-After`:
+            waiting helps only once a session is closed.'
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No database connection became free in time. Nothing is wrong
+            with the request; retry after the `Retry-After` seconds.
   /api/v0/advanced/cursor/open:
     post:
       operationId: advanced_cursor_open_create
@@ -501,6 +615,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdvancedResponse'
           description: The result of `open_cursor`, under `content`.
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'This account (or, without a login, all anonymous clients together)
+            already holds its limit of explicit sessions, the ones opened with `connection/open`.
+            Only those count: a call carrying no `connection_id` does not take a place.
+            `reason` names the limit and how to close sessions. No `Retry-After`:
+            waiting helps only once a session is closed.'
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No database connection became free in time. Nothing is wrong
+            with the request; retry after the `Retry-After` seconds.
   /api/v0/advanced/delete:
     post:
       operationId: advanced_delete_create
@@ -552,6 +685,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdvancedResponse'
           description: The result of `data_delete`, under `content`.
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'This account (or, without a login, all anonymous clients together)
+            already holds its limit of explicit sessions, the ones opened with `connection/open`.
+            Only those count: a call carrying no `connection_id` does not take a place.
+            `reason` names the limit and how to close sessions. No `Retry-After`:
+            waiting helps only once a session is closed.'
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No database connection became free in time. Nothing is wrong
+            with the request; retry after the `Retry-After` seconds.
   /api/v0/advanced/do_begin_twophase:
     post:
       operationId: advanced_do_begin_twophase_create
@@ -603,6 +755,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdvancedResponse'
           description: The result of `do_begin_twophase`, under `content`.
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'This account (or, without a login, all anonymous clients together)
+            already holds its limit of explicit sessions, the ones opened with `connection/open`.
+            Only those count: a call carrying no `connection_id` does not take a place.
+            `reason` names the limit and how to close sessions. No `Retry-After`:
+            waiting helps only once a session is closed.'
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No database connection became free in time. Nothing is wrong
+            with the request; retry after the `Retry-After` seconds.
   /api/v0/advanced/do_commit_twophase:
     post:
       operationId: advanced_do_commit_twophase_create
@@ -654,6 +825,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdvancedResponse'
           description: The result of `do_commit_twophase`, under `content`.
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'This account (or, without a login, all anonymous clients together)
+            already holds its limit of explicit sessions, the ones opened with `connection/open`.
+            Only those count: a call carrying no `connection_id` does not take a place.
+            `reason` names the limit and how to close sessions. No `Retry-After`:
+            waiting helps only once a session is closed.'
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No database connection became free in time. Nothing is wrong
+            with the request; retry after the `Retry-After` seconds.
   /api/v0/advanced/do_prepare_twophase:
     post:
       operationId: advanced_do_prepare_twophase_create
@@ -705,6 +895,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdvancedResponse'
           description: The result of `do_prepare_twophase`, under `content`.
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'This account (or, without a login, all anonymous clients together)
+            already holds its limit of explicit sessions, the ones opened with `connection/open`.
+            Only those count: a call carrying no `connection_id` does not take a place.
+            `reason` names the limit and how to close sessions. No `Retry-After`:
+            waiting helps only once a session is closed.'
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No database connection became free in time. Nothing is wrong
+            with the request; retry after the `Retry-After` seconds.
   /api/v0/advanced/do_recover_twophase:
     post:
       operationId: advanced_do_recover_twophase_create
@@ -756,6 +965,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdvancedResponse'
           description: The result of `do_recover_twophase`, under `content`.
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'This account (or, without a login, all anonymous clients together)
+            already holds its limit of explicit sessions, the ones opened with `connection/open`.
+            Only those count: a call carrying no `connection_id` does not take a place.
+            `reason` names the limit and how to close sessions. No `Retry-After`:
+            waiting helps only once a session is closed.'
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No database connection became free in time. Nothing is wrong
+            with the request; retry after the `Retry-After` seconds.
   /api/v0/advanced/do_rollback_twophase:
     post:
       operationId: advanced_do_rollback_twophase_create
@@ -807,6 +1035,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdvancedResponse'
           description: The result of `do_rollback_twophase`, under `content`.
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'This account (or, without a login, all anonymous clients together)
+            already holds its limit of explicit sessions, the ones opened with `connection/open`.
+            Only those count: a call carrying no `connection_id` does not take a place.
+            `reason` names the limit and how to close sessions. No `Retry-After`:
+            waiting helps only once a session is closed.'
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No database connection became free in time. Nothing is wrong
+            with the request; retry after the `Retry-After` seconds.
   /api/v0/advanced/get_columns:
     post:
       operationId: advanced_get_columns_create
@@ -858,6 +1105,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdvancedResponse'
           description: The result of `get_columns`, under `content`.
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No database connection became free in time. Nothing is wrong
+            with the request; retry after the `Retry-After` seconds.
   /api/v0/advanced/get_foreign_keys:
     post:
       operationId: advanced_get_foreign_keys_create
@@ -909,6 +1164,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdvancedResponse'
           description: The result of `get_foreign_keys`, under `content`.
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No database connection became free in time. Nothing is wrong
+            with the request; retry after the `Retry-After` seconds.
   /api/v0/advanced/get_indexes:
     post:
       operationId: advanced_get_indexes_create
@@ -960,6 +1223,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdvancedResponse'
           description: The result of `get_indexes`, under `content`.
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No database connection became free in time. Nothing is wrong
+            with the request; retry after the `Retry-After` seconds.
   /api/v0/advanced/get_isolation_level:
     post:
       operationId: advanced_get_isolation_level_create
@@ -1011,6 +1282,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdvancedResponse'
           description: The result of `get_isolation_level`, under `content`.
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'This account (or, without a login, all anonymous clients together)
+            already holds its limit of explicit sessions, the ones opened with `connection/open`.
+            Only those count: a call carrying no `connection_id` does not take a place.
+            `reason` names the limit and how to close sessions. No `Retry-After`:
+            waiting helps only once a session is closed.'
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No database connection became free in time. Nothing is wrong
+            with the request; retry after the `Retry-After` seconds.
   /api/v0/advanced/get_pk_constraint:
     post:
       operationId: advanced_get_pk_constraint_create
@@ -1062,6 +1352,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdvancedResponse'
           description: The result of `get_pk_constraint`, under `content`.
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No database connection became free in time. Nothing is wrong
+            with the request; retry after the `Retry-After` seconds.
   /api/v0/advanced/get_schema_names:
     post:
       operationId: advanced_get_schema_names_create
@@ -1215,6 +1513,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdvancedResponse'
           description: The result of `get_unique_constraints`, under `content`.
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No database connection became free in time. Nothing is wrong
+            with the request; retry after the `Retry-After` seconds.
   /api/v0/advanced/get_view_definition:
     post:
       operationId: advanced_get_view_definition_create
@@ -1470,6 +1776,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdvancedResponse'
           description: The result of `data_insert`, under `content`.
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'This account (or, without a login, all anonymous clients together)
+            already holds its limit of explicit sessions, the ones opened with `connection/open`.
+            Only those count: a call carrying no `connection_id` does not take a place.
+            `reason` names the limit and how to close sessions. No `Retry-After`:
+            waiting helps only once a session is closed.'
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No database connection became free in time. Nothing is wrong
+            with the request; retry after the `Retry-After` seconds.
   /api/v0/advanced/search:
     post:
       operationId: advanced_search_create
@@ -1521,6 +1846,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdvancedResponse'
           description: The result of `data_search`, under `content`.
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'This account (or, without a login, all anonymous clients together)
+            already holds its limit of explicit sessions, the ones opened with `connection/open`.
+            Only those count: a call carrying no `connection_id` does not take a place.
+            `reason` names the limit and how to close sessions. No `Retry-After`:
+            waiting helps only once a session is closed.'
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No database connection became free in time. Nothing is wrong
+            with the request; retry after the `Retry-After` seconds.
   /api/v0/advanced/set_isolation_level:
     post:
       operationId: advanced_set_isolation_level_create
@@ -1572,6 +1916,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdvancedResponse'
           description: The result of `set_isolation_level`, under `content`.
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'This account (or, without a login, all anonymous clients together)
+            already holds its limit of explicit sessions, the ones opened with `connection/open`.
+            Only those count: a call carrying no `connection_id` does not take a place.
+            `reason` names the limit and how to close sessions. No `Retry-After`:
+            waiting helps only once a session is closed.'
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No database connection became free in time. Nothing is wrong
+            with the request; retry after the `Retry-After` seconds.
   /api/v0/advanced/update:
     post:
       operationId: advanced_update_create
@@ -1623,6 +1986,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdvancedResponse'
           description: The result of `data_update`, under `content`.
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'This account (or, without a login, all anonymous clients together)
+            already holds its limit of explicit sessions, the ones opened with `connection/open`.
+            Only those count: a call carrying no `connection_id` does not take a place.
+            `reason` names the limit and how to close sessions. No `Retry-After`:
+            waiting helps only once a session is closed.'
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No database connection became free in time. Nothing is wrong
+            with the request; retry after the `Retry-After` seconds.
   /api/v0/datasets/:
     get:
       operationId: datasets_list
