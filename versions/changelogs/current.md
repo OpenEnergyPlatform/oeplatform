@@ -11,6 +11,11 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- The link to the tag manager on the Database pages is now a _Manage Tags_
+  button in the Database introduction, beside Contribute Data, API Access and
+  OEMetaBuilder. It was a sentence below the last topic card, far from the tag
+  search it belongs with, and it appeared on the topic overview only
+
 - The dev compose stack's vite container now reinstalls its dependencies when
   the lockfile moves. The marker recording which lockfile was installed sat at
   the repository root, which is a bind mount, while `node_modules` is a named

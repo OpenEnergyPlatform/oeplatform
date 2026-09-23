@@ -528,3 +528,27 @@ class TestTheOverviewList(TagPageTestCase):
 
         self.assertIn("<li", html)
         self.assertNotIn("float: left", html)
+
+
+class TestTheDatabasePagesLinkToTheTagManager(TagPageTestCase):
+    """The way in sits with the Database's other tools, not below the topics.
+
+    It was a sentence under the last topic card, far from the tag search it
+    belongs to. It is now a button in the info section's row of actions,
+    which every Database page shares through `filter.html`.
+    """
+
+    def actions(self):
+        page = self.get("dataedit:topic-list").content.decode("utf-8")
+        start = page.index('class="info-section__actions')
+        return page, page[start : page.index("</div>", start)]
+
+    def test_the_info_section_actions_link_to_the_tag_manager(self):
+        _, actions = self.actions()
+
+        self.assertIn(reverse("dataedit:tags"), actions)
+
+    def test_the_topic_list_links_to_it_once(self):
+        page, _ = self.actions()
+
+        self.assertEqual(1, page.count(f'href="{reverse("dataedit:tags")}"'))
