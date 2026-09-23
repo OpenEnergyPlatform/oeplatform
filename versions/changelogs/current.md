@@ -11,6 +11,15 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- The dev compose stack's vite container now reinstalls its dependencies when
+  the lockfile moves. The marker recording which lockfile was installed sat at
+  the repository root, which is a bind mount, while `node_modules` is a named
+  volume -- so the marker could describe a dependency tree it had never seen,
+  and the check stayed silent while the container ran a vite the lockfile no
+  longer pins. A rebuild did not help either, because docker only seeds a named
+  volume while it is empty. The marker now lives inside `node_modules`, and a
+  reinstall drops the prebundled dependencies belonging to the old tree
+
 - The _About -> REST-API Documentation_ link in the page header now opens the
   Web-API section of the developer documentation, which leads with the generated
   API Reference and lists the guides beside it. It pointed at one guide -
@@ -351,6 +360,16 @@ SPDX-License-Identifier: CC0-1.0
   [(#2452)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2452)
 
 ## Bugs
+
+- Two requests arriving at `/api/v0/advanced` at the same moment could answer
+  with an internal server error. A connection was entered into the server's list
+  of open connections a fraction before it recorded whose it was, and every
+  request that reads that list compares owners -- so a connection caught in
+  between had no owner to compare against, and the reading request failed
+  outright instead of counting it. A connection is now listed only once it is
+  complete. This is the first half of the problem: the list is still read
+  without a lock, so the count of a user's open connections remains inexact
+  [(#2492)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2492)
 
 - A query on the advanced API no longer commits a database connection after it
   has handed that connection back. Connections return to a shared pool as soon
