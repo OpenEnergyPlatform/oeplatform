@@ -686,6 +686,15 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Code Quality
 
+- The addresses the `oedialect` client depends on are now written down and
+  checked. It reaches the platform only through `/api/v0/advanced/`, and until
+  now nothing recorded which of those addresses it needs, so renaming or
+  removing one would have broken every user of that client without a test
+  noticing. Two of the addresses it asks for have in fact never existed; they
+  are recorded as such rather than quietly fixed, because whether to serve them
+  or drop them from the client is a decision for both projects
+  [(#2518)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2518)
+
 - `EXTERNAL_URLS` in the settings listed the same 21 entries twice. Python keeps
   the last of a repeated key, so the duplicates changed nothing - until someone
   edited one of the two copies, at which point which one wins is decided by
