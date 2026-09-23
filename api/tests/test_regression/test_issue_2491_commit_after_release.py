@@ -10,9 +10,14 @@ callable across the checkout, which is why the stray commit succeeded quietly
 instead of raising.
 
 So a request that had already answered could commit an unrelated request's
-in-flight transaction, and that request's own rollback then did nothing. The
-decorator is shared by `/api/v0/advanced/search`, `/insert`, `/delete` and
-`/update` (issue #2491).
+in-flight transaction, and that request's own rollback then did nothing.
+
+Measured while fixing it: of the four endpoints sharing this decorator, only
+`/api/v0/advanced/search` reaches the trigger list. `/insert`, `/delete` and
+`/update` return no rows, so they take the non-streaming branch, where the
+commit already ran before the close. The stray commit is fired by a read; its
+victim is whichever request holds the connection next, and that can be any of
+the four (issue #2491).
 
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
@@ -38,16 +43,13 @@ from oeplatform.settings import (
 MARKER = "issue-2491"
 
 
-class AdvancedSearchConnectionTest(APITestCaseWithTable):
-    """Everything here runs against the real engine and the real pool.
+class AdvancedAPICase(APITestCaseWithTable):
+    """Everything below runs against the real engine and the real pool.
 
     A mock hands back the connection it was given and so cannot show the pool
     handing the *same* raw connection to somebody else, which is the whole of
     this defect.
     """
-
-    test_table = "issue_2491"
-    test_data = [{"name": "Hans"}, {"name": "Petra"}]
 
     def setUp(self):
         super().setUp()
@@ -58,17 +60,14 @@ class AdvancedSearchConnectionTest(APITestCaseWithTable):
         # same object rather than a coincidence.
         self.engine.dispose()
 
-    def search(self, connection_id=None):
-        """POST the search the table page sends, and drain the streamed body.
+    def post(self, path, payload):
+        """POST to `/api/v0/advanced/<path>` and drain the streamed body.
 
         The triggers fire when the generator is exhausted, so nothing under
         test has happened until the body has been read.
         """
-        payload = {"query": {"from": {"type": "table", "table": self.test_table}}}
-        if connection_id is not None:
-            payload["connection_id"] = connection_id
         response = self.client.post(
-            "/api/v0/advanced/search",
+            "/api/v0/advanced/%s" % path,
             data=json.dumps(payload),
             content_type="application/json",
             HTTP_AUTHORIZATION="Token %s" % self.token,
@@ -98,6 +97,18 @@ class AdvancedSearchConnectionTest(APITestCaseWithTable):
             return cursor.fetchone()[0]
         finally:
             connection.close()
+
+
+class AdvancedSearchConnectionTest(AdvancedAPICase):
+    """A read that opens its own connection and gives it back."""
+
+    test_table = "issue_2491"
+    test_data = [{"name": "Hans"}, {"name": "Petra"}]
+
+    def search(self):
+        return self.post(
+            "search", {"query": {"from": {"type": "table", "table": self.test_table}}}
+        )
 
     def on_connection_returned(self, act):
         """Run `act(raw_connection)` the instant request A gives its connection back.
@@ -202,18 +213,30 @@ class AdvancedSearchConnectionTest(APITestCaseWithTable):
             )
 
     def test_a_streamed_read_still_returns_its_rows(self):
-        """The ordering the comment protects: the cursor still closes first.
-
-        `/advanced/search` runs on `load_cursor(named=True)`, a server-side
-        named cursor, and committing before the cursor is closed destroys it.
-        """
+        """The decorator's own constraint: the cursor still closes first."""
         status_code, body = self.search()
         self.assertEqual(200, status_code, body)
         self.assertIn("Hans", body)
         self.assertIn("Petra", body)
 
+    def test_the_named_cursor_path_still_returns_its_rows(self):
+        """`GET /api/v0/tables/<table>/rows/` is the reason for the ordering.
 
-class CallerSuppliedConnectionTest(APITestCaseWithTable):
+        It is the one caller of `load_cursor(named=True)`, so it is the one
+        holding a server-side named cursor -- which committing before the
+        cursor is closed would destroy. `/advanced/search` runs unnamed, so
+        the test above cannot speak for this path.
+        """
+        rows = self.api_req("get", path="rows/", exp_code=200)
+
+        self.assertEqual(
+            ["Hans", "Petra"],
+            [row["name"] for row in rows],
+            "the named cursor no longer yields its rows",
+        )
+
+
+class CallerSuppliedConnectionTest(AdvancedAPICase):
     """The same triggers fire for a client that brought its own connection.
 
     `oedialect` opens a connection, works across several requests and commits
@@ -223,39 +246,6 @@ class CallerSuppliedConnectionTest(APITestCaseWithTable):
 
     test_table = "issue_2491_session"
     test_data = [{"name": "Hans"}]
-
-    def setUp(self):
-        super().setUp()
-        self.engine = _get_engine()
-        self.engine.dispose()
-
-    def post(self, path, payload):
-        response = self.client.post(
-            "/api/v0/advanced/%s" % path,
-            data=json.dumps(payload),
-            content_type="application/json",
-            HTTP_AUTHORIZATION="Token %s" % self.token,
-        )
-        if hasattr(response, "streaming_content"):
-            body = b"".join(response.streaming_content).decode()
-        else:
-            body = response.content.decode()
-        return response.status_code, body
-
-    def rows_named(self, name):
-        connection = psycopg2.connect(
-            dbname=dbname, user=dbuser, password=dbpasswd, host=dbhost, port=dbport
-        )
-        try:
-            cursor = connection.cursor()
-            cursor.execute(
-                'select count(*) from "%s"."%s" where name = %%s'
-                % (SCHEMA_DEFAULT_TEST_SANDBOX, self.test_table),
-                (name,),
-            )
-            return cursor.fetchone()[0]
-        finally:
-            connection.close()
 
     def open_connection_and_insert(self):
         status_code, body = self.post("connection/open", {"query": {}})

@@ -150,28 +150,28 @@ def load_cursor(named=False):
                     # The cursor must not be closed earlier!
                     #
                     # Two properties of this list are load-bearing, and issue
-                    # #2491 was what happened when neither held:
+                    # #2491 is what happened when neither held:
                     #
                     # 1. The commit runs BEFORE the connection goes back to the
-                    #    pool. Once it is back, another request may already hold
-                    #    it, and the commit then lands on that request's
-                    #    transaction -- committing its writes and silently
-                    #    undoing its rollback.
+                    #    pool, because afterwards another request may hold it.
                     # 2. Every trigger resolves the connection through `context`
-                    #    at the moment it fires, never here. The session's
-                    #    connection is a SQLAlchemy `_ConnectionFairy` with no
-                    #    `commit` of its own, so `connection.commit` used to
-                    #    capture a bound method of the RAW psycopg2 connection.
-                    #    That method stays callable after the fairy has given
-                    #    the connection back, which is why the stray commit
-                    #    went through quietly rather than raising, and so never
-                    #    appeared in a log.
+                    #    at the moment it fires, never here. A reference taken
+                    #    here outlives the checkout: the session's connection is
+                    #    a SQLAlchemy `_ConnectionFairy` with no `commit` of its
+                    #    own, so `connection.commit` used to capture a bound
+                    #    method of the raw psycopg2 connection, which stays
+                    #    callable after the fairy has given it back.
                     #
-                    # A bound method that outlives the checkout is a loaded gun
-                    # whatever the order, so 2 is the correctness condition and 1
-                    # is a preference resting on it: with the lookup deferred, a
-                    # commit moved back after the close can no longer reach the
-                    # connection this request gave back.
+                    # 2 is the correctness condition and 1 rests on it, so do
+                    # not trade one for the other.
+                    #
+                    # The commit is kept rather than dropped, which was the
+                    # other candidate fix: the pool rolls a returned connection
+                    # back anyway and a `SELECT` has nothing to commit -- but
+                    # this decorator also serves a caller-supplied connection
+                    # (how `oedialect` works), and there it is what commits the
+                    # client's open transaction. All of it is measured in
+                    # api/tests/test_regression/test_issue_2491_commit_after_release.py
                     triggers = [
                         close_cursor,
                         commit_raw_connection,
