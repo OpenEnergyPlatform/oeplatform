@@ -11,7 +11,7 @@ from typing import Union
 from uuid import UUID
 
 import requests
-from rdflib import URIRef
+from rdflib import Literal, URIRef
 from SPARQLWrapper import JSON, POST
 
 from factsheet.oekg.connection import sparql, sparql_wrapper_update, update_endpoint
@@ -79,22 +79,31 @@ def scenario_in_bundle(bundle_uuid: UUID, scenario_uuid: UUID) -> bool:
     )  # Returns True if scenario is part of the bundle
 
 
-def dataset_exists(scenario_uuid: UUID, dataset_url: str) -> bool:
-    """
-    Check if a dataset with the same label already exists.
+def dataset_exists_query(scenario_uuid: UUID, dataset_url: str) -> str:
+    """The ASK behind `dataset_exists`.
+
+    The address is written as an escaped literal (`Literal.n3()`), never
+    interpolated between quotes: it is client-supplied (#2509).
     """
 
-    sparql_query = f"""
+    return f"""
     PREFIX oeo: <https://openenergyplatform.org/ontology/oeo/>
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
     ASK {{
         <https://openenergyplatform.org/ontology/oekg/scenario/{scenario_uuid}> ?p ?dataset .
-        ?dataset oeo:has_iri "{dataset_url}" .
+        ?dataset oeo:has_iri {Literal(dataset_url).n3()} .
     }}
 
     """  # noqa
 
+
+def dataset_exists(scenario_uuid: UUID, dataset_url: str) -> bool:
+    """
+    Check if a dataset with the same label already exists.
+    """
+
+    sparql_query = dataset_exists_query(scenario_uuid, dataset_url)
     sparql.setQuery(sparql_query)
     sparql.setMethod(POST)
     sparql.setReturnFormat(JSON)
@@ -103,6 +112,36 @@ def dataset_exists(scenario_uuid: UUID, dataset_url: str) -> bool:
     )  # type: ignore (if json, convert() -> dict)
 
     return response.get("boolean", False)  # Returns True if dataset exists
+
+
+def insert_dataset_query(
+    oekgDatasetConfig: DatasetConfig, rel_property: str, type_entity: str
+) -> str:
+    """The INSERT DATA behind `add_datasets_to_scenario`.
+
+    The label (a table's title, edited by its owner) and the address (an
+    external link's, checked only for its prefix) are client-supplied, so
+    both are written as escaped literals rather than interpolated between
+    quotes -- a quote in either used to close the literal and turn the rest of
+    the value into triples (#2509). The identifiers are uuids this server
+    minted, and the two OEO terms are constants.
+    """
+    # oeo:has_id "{oekgDatasetConfig.dataset_id}" ;
+    # The above seems to be deprecated in the OEKG
+    return f"""
+    PREFIX oeo: <https://openenergyplatform.org/ontology/oeo/>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+    INSERT DATA {{
+        <https://openenergyplatform.org/ontology/oekg/input_datasets/{oekgDatasetConfig.dataset_id}> a oeo:{type_entity} ;
+            rdfs:label {Literal(oekgDatasetConfig.dataset_label).n3()} ;
+            oeo:has_iri {Literal(oekgDatasetConfig.dataset_url).n3()} ;
+            oeo:has_key "{oekgDatasetConfig.dataset_id}" .
+
+        <https://openenergyplatform.org/ontology/oekg/scenario/{oekgDatasetConfig.scenario_uuid}> oeo:{rel_property}
+            <https://openenergyplatform.org/ontology/oekg/input_datasets/{oekgDatasetConfig.dataset_id}> .
+    }}
+    """  # noqa
 
 
 def add_datasets_to_scenario(oekgDatasetConfig: DatasetConfig) -> bool:
@@ -123,22 +162,7 @@ def add_datasets_to_scenario(oekgDatasetConfig: DatasetConfig) -> bool:
         rel_property = "RO_0002234"
         type_entity = "OEO_00030030"
 
-    # oeo:has_id "{oekgDatasetConfig.dataset_id}" ;
-    # The above seems to be deprecated in the OEKG
-    sparql_query = f"""
-    PREFIX oeo: <https://openenergyplatform.org/ontology/oeo/>
-    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-
-    INSERT DATA {{
-        <https://openenergyplatform.org/ontology/oekg/input_datasets/{oekgDatasetConfig.dataset_id}> a oeo:{type_entity} ;
-            rdfs:label "{oekgDatasetConfig.dataset_label}" ;
-            oeo:has_iri "{oekgDatasetConfig.dataset_url}" ;
-            oeo:has_key "{oekgDatasetConfig.dataset_id}" .
-
-        <https://openenergyplatform.org/ontology/oekg/scenario/{oekgDatasetConfig.scenario_uuid}> oeo:{rel_property}
-            <https://openenergyplatform.org/ontology/oekg/input_datasets/{oekgDatasetConfig.dataset_id}> .
-    }}
-    """  # noqa
+    sparql_query = insert_dataset_query(oekgDatasetConfig, rel_property, type_entity)
 
     sparql_wrapper_update.setQuery(sparql_query)
     sparql_wrapper_update.setMethod(POST)

@@ -387,6 +387,21 @@ SPDX-License-Identifier: CC0-1.0
   while the issue decides whether the change queue is removed or repaired
   [(#2490)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2490)
 
+- The legacy route that attaches datasets to a scenario
+  (`/api/v0/scenario-bundle/scenario/manage-datasets/`) now refuses an empty
+  dataset list and duplicate names, as it always meant to: the check was named
+  `validate_dataset` while the field is `datasets`, so it never ran
+  [(#2508)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2508)
+
+- The same route no longer builds its SPARQL update by pasting the dataset's
+  label and address between quotes. The label is a table's title, which the
+  table's owner edits, and the address of an external link is checked only for
+  its prefix, so a quote in either could add arbitrary triples to the knowledge
+  graph. Both are now written as escaped literals. What the route writes is
+  otherwise unchanged; its predicates are still the ones the shape does not
+  validate
+  [(#2509)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2509)
+
 - The tag administration page under Database no longer fails with a server error
   when a tag has an empty identifier. Such tags cannot be created today, but
   older data copied over from the database can contain one, and the page tried
