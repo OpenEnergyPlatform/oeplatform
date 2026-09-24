@@ -1,0 +1,3872 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="The Open Energy Platform is the Frontend of the Open Energy Family and specifically provides a Webapplication which is documented using mkdocs.">
+      
+      
+      
+      
+        <link rel="prev" href="../">
+      
+      
+        <link rel="next" href="../../../apps/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Writing scenario bundles - Open Energy Platform Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../../../css/extra.css">
+    
+    <script>__md_scope=new URL("../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#writing-scenario-bundles" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../.." title="Open Energy Platform Documentation" class="md-header__button md-logo" aria-label="Open Energy Platform Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Open Energy Platform Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Writing scenario bundles
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/OpenEnergyPlatform/oeplatform" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    OpenEnergyFamily/oeplatform
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../installation/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../../dev/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Development
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../../" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Documentation
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../.." title="Open Energy Platform Documentation" class="md-nav__button md-logo" aria-label="Open Energy Platform Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Open Energy Platform Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/OpenEnergyPlatform/oeplatform" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    OpenEnergyFamily/oeplatform
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../../installation/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../installation/guides/installation-docker-dev/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../installation/guides/development-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../installation/guides/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manual Installation Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_5" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../../installation/production-podman/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Production deployment (Podman)
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Production deployment (Podman)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../installation/production-podman/install/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../installation/production-podman/ontop/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ontop
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../installation/production-podman/update/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Update
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../installation/production-podman/maintenance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Maintenance & troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../../dev/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Best Practices
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Best Practices
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2_1" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../../dev/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software development process
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Software development process
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2_2" id="__nav_3_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend and UI
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Frontend and UI
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../dev/frontend/workflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../dev/frontend/design-system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design System
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../dev/frontend/accessibility/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Accessibility
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Context
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Context
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../dev/context/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Context
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Documentation
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Documentation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../architecture/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4_2" id="__nav_4_2_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/infrastructure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/project-structure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software Project
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/modules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    oeplatform Modules
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Web-API's
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4_3" id="__nav_4_3_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Web-API's
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3_3" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../oedb-rest-api/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4_3_3" id="__nav_4_3_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_3_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../oedb-rest-api/resource-data-size/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Database table sizes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Querying the OEKG with SPARQL
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Writing scenario bundles
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Writing scenario bundles
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#reading-the-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reading the examples
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rule-1-a-key-you-do-not-send-is-a-key-you-do-not-change" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule 1 — a key you do not send is a key you do not change
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rule-2-_meta-is-read-only-and-ignored-on-write" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule 2 — _meta is read-only, and ignored on write
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rule-3-delete-by-omission-lives-on-replace-and-nowhere-else" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule 3 — delete-by-omission lives on replace/, and nowhere else
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rule-4-a-bundle-post-accepts-nested-sub-resources-a-patch-does-not" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule 4 — a bundle POST accepts nested sub-resources; a PATCH does not
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rule-5-the-deletes-two-guards-catch-two-different-accidents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule 5 — the delete's two guards catch two different accidents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rule-6-a-write-is-judged-by-the-violations-it-introduces" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule 6 — a write is judged by the violations it introduces
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rule-7-ref-table-is-reproducible-ref-dataset-is-current-and-a-dead-link-stays" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule 7 — ref: table is reproducible, ref: dataset is current, and a dead link stays
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rule-8-the-server-mints-the-identifier" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule 8 — the server mints the identifier
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rule-9-_metahistory_recorded-false-inside-a-200-is-an-audit-gap-not-a-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule 9 — _meta.history_recorded: false inside a 200 is an audit gap, not a status
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_4" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../apps/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Django Apps
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4_4" id="__nav_4_4_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Django Apps
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../apps/login/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Login
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../features/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Features
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4_5" id="__nav_4_5_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Features
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_5_2" id="__nav_4_5_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🚧 OEP-Datasets
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_5_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_5_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🚧 OEP-Datasets
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../features/oep-datasets/datasets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Datasets
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../features/oep-datasets/tech-stack/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tech stack
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_5_3" id="__nav_4_5_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🚧🔄 Upload-Wizard
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_5_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_5_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🚧🔄 Upload-Wizard
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../features/upload-wizard/tabular-data-upload/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tabular data upload
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5_4" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../features/metaBuilder/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    metaBuilder (Metadata creation)
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_5_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_5_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    metaBuilder (Metadata creation)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5_5" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../features/open-peer-review-process/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    🚧 Open Peer Review
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4_5_5" id="__nav_4_5_5_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_5_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_5_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    🚧 Open Peer Review
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../features/open-peer-review-process/technical-docs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technical docs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5_6" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../features/scenario-bundles/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scenario Bundles
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4_5_6" id="__nav_4_5_6_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_5_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_5_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Scenario Bundles
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../features/scenario-bundles/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture & developer guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5_7" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../features/factsheets/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Model & Framework Factsheets
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4_5_7" id="__nav_4_5_7_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_5_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_5_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Model & Framework Factsheets
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../features/factsheets/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture & developer guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#reading-the-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reading the examples
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rule-1-a-key-you-do-not-send-is-a-key-you-do-not-change" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule 1 — a key you do not send is a key you do not change
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rule-2-_meta-is-read-only-and-ignored-on-write" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule 2 — _meta is read-only, and ignored on write
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rule-3-delete-by-omission-lives-on-replace-and-nowhere-else" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule 3 — delete-by-omission lives on replace/, and nowhere else
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rule-4-a-bundle-post-accepts-nested-sub-resources-a-patch-does-not" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule 4 — a bundle POST accepts nested sub-resources; a PATCH does not
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rule-5-the-deletes-two-guards-catch-two-different-accidents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule 5 — the delete's two guards catch two different accidents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rule-6-a-write-is-judged-by-the-violations-it-introduces" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule 6 — a write is judged by the violations it introduces
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rule-7-ref-table-is-reproducible-ref-dataset-is-current-and-a-dead-link-stays" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule 7 — ref: table is reproducible, ref: dataset is current, and a dead link stays
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rule-8-the-server-mints-the-identifier" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule 8 — the server mints the identifier
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rule-9-_metahistory_recorded-false-inside-a-200-is-an-audit-gap-not-a-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rule 9 — _meta.history_recorded: false inside a 200 is an audit gap, not a status
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href="../../../.." class="md-path__link">
+        
+  <span class="md-ellipsis">
+    Home
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../../../" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Documentation
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../../" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Web-API's
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../../oedb-rest-api/" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Guides
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<!--
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: CC0-1.0
+-->
+
+<h1 id="writing-scenario-bundles">Writing scenario bundles<a class="headerlink" href="#writing-scenario-bundles" title="Permanent link">#</a></h1>
+<p>A scenario bundle is the OEKG's record of a study: its scenarios, the study
+reports it was published in, and the data those scenarios consumed and produced.
+The <a href="../../api-reference/#/Scenario%20Bundles">API Reference</a> lists every
+endpoint that reads and writes one. It is generated from the code, so it is the
+place to look up an address, a header or a status code.</p>
+<p>This page is the other half: the rules that decide what a request <strong>does</strong>,
+which no endpoint signature can state. They are the ones a client author would
+otherwise learn from a <code>400</code> — or, worse, never learn, because the request
+succeeded and did something other than what was meant.</p>
+<p>There are nine, and every one of them describes the API as it is today. <strong>Rule
+3</strong> is the one to read first if you are automating anything: it names the single
+address at which leaving something out removes it, which is the one way this API
+can destroy data you never asked it to touch.</p>
+<div class="admonition info">
+<p class="admonition-title">What is not on this page</p>
+<p><code>If-Match</code>, <code>ETag</code>, <code>?confirm=</code>, <code>?expand=</code>, the <code>428</code>/<code>412</code>/<code>409</code> refusals
+and the RDF forms a read can serve are described operation by operation in
+the <a href="../../api-reference/#/Scenario%20Bundles">reference</a>. They are
+mechanical, that description is generated from the code, and a test in the
+suite fails when the two come apart — so this page links there instead of
+keeping a second copy that could quietly go stale.</p>
+</div>
+<h2 id="reading-the-examples">Reading the examples<a class="headerlink" href="#reading-the-examples" title="Permanent link">#</a></h2>
+<p>Every exchange below is a real one, recorded from the API running against a real
+graph store, and the responses are reproduced as they came back. Where a body is
+long it is shown as a marked excerpt, with nothing inside it edited. Host names
+are written as they appear on <code>openenergyplatform.org</code>, and <code>&lt;token&gt;</code> stands for
+your own API token — you will find it on your profile page under <em>Settings</em>.
+Reads need no token.</p>
+<p>Most of the page follows one bundle, <code>NEMO-2030</code>, from its creation to its
+deletion.</p>
+<hr />
+<h2 id="rule-1-a-key-you-do-not-send-is-a-key-you-do-not-change">Rule 1 — a key you do not send is a key you do not change<a class="headerlink" href="#rule-1-a-key-you-do-not-send-is-a-key-you-do-not-change" title="Permanent link">#</a></h2>
+<p>Under every verb. A <code>PATCH</code> that names <code>label</code> changes the label and nothing
+else: the abstract, the sectors and the technologies are not reset, not
+re-minted, not touched.</p>
+<p>This is worth stating because the opposite convention is common enough that
+clients are written defensively — read the whole object, change one field, send
+it all back. Here that is unnecessary, and against a bundle it does not even
+work: a read carries the bundle's scenarios and study reports, and a <code>PATCH</code>
+refuses them, as
+<a href="#rule-4-a-bundle-post-accepts-nested-sub-resources-a-patch-does-not">rule 4</a>
+explains.</p>
+<p>The other half of the same rule: a key you <strong>do</strong> send replaces what is there.
+For a list-valued field, the list you send becomes the list the bundle has — so
+sending <code>[]</code> is how a value is removed.</p>
+<p><strong>Request</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nf">PATCH</span> <span class="nn">/api/v0/scenario-bundles/a195633f-3cf3-474e-8647-3f27c76d7cfa/</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">If-Match</span><span class="o">:</span> <span class="l">"1"</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Token &lt;token&gt;</span>
+
+<span class="p">{</span><span class="w"> </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"The NEMO 2030 scenario study, second edition"</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p><strong>Response</strong> — <code>200 OK</code>, <code>ETag: "2"</code></p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"The NEMO 2030 scenario study, second edition"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"acronym"</span><span class="p">:</span><span class="w"> </span><span class="s2">"NEMO-2030"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"abstract"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Three pathways for the German power sector to 2030."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"descriptors"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"https://openenergyplatform.org/ontology/oeo/OEO_00000143"</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"sector_divisions"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">"https://openenergyplatform.org/ontology/oeo/OEO_00000368"</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"sectors"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"https://openenergyplatform.org/ontology/oeo/OEO_00000367"</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"technologies"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"https://openenergyplatform.org/ontology/oeo/OEO_00000407"</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"energy_carriers"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">  </span><span class="nt">"contacts"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">  </span><span class="nt">"organisations"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">  </span><span class="nt">"funders"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">  </span><span class="nt">"frameworks"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">  </span><span class="nt">"models"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">  </span><span class="nt">"_meta"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"uid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"a195633f-3cf3-474e-8647-3f27c76d7cfa"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"iri"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://openenergyplatform.org/ontology/oekg/a195633f-3cf3-474e-8647-3f27c76d7cfa"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">"scenarios"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">  </span><span class="nt">"study_reports"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Everything the request did not mention came back as it was. The same holds one
+level down, on a scenario or a study report of its own — here on a scenario that
+carries an abstract and two years:</p>
+<p><strong>Request</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nf">PATCH</span> <span class="nn">/api/v0/scenario-bundles/a195633f-.../scenarios/c0f1a112-.../</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">If-Match</span><span class="o">:</span> <span class="l">"5"</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Token &lt;token&gt;</span>
+
+<span class="p">{</span><span class="w"> </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"A very high renewables scenario"</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p><strong>Response</strong> — <code>200 OK</code>, <code>ETag: "6"</code></p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"A very high renewables scenario"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"acronym"</span><span class="p">:</span><span class="w"> </span><span class="s2">"HIGH-RE"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"abstract"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Renewables reach 80% of generation by 2030."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"scenario_types"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">"https://openenergyplatform.org/ontology/oeo/OEO_00000364"</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"study_regions"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">  </span><span class="nt">"interacting_regions"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">  </span><span class="nt">"years"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"2025-01-01T01:00:00+01:00"</span><span class="p">,</span><span class="w"> </span><span class="s2">"2030-01-01T01:00:00+01:00"</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"_meta"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"uid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"c0f1a112-431a-4c65-999a-c98fff76b5b2"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"iri"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://openenergyplatform.org/ontology/oekg/scenario/c0f1a112-431a-4c65-999a-c98fff76b5b2"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://openenergyplatform.org/ontology/oeo/OEO_00000365"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"bundle"</span><span class="p">:</span><span class="w"> </span><span class="s2">"a195633f-3cf3-474e-8647-3f27c76d7cfa"</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The <code>ETag</code> is the <strong>bundle's</strong> version, not the scenario's: a scenario has no
+independent existence to guard, so every write below a bundle moves the one
+version and the next request carries that.</p>
+<p>In the reference:
+<a href="../../api-reference/#/Scenario%20Bundles/scenario_bundles_partial_update"><code>PATCH /scenario-bundles/{uid}/</code></a>.</p>
+<hr />
+<h2 id="rule-2-_meta-is-read-only-and-ignored-on-write">Rule 2 — <code>_meta</code> is read-only, and ignored on write<a class="headerlink" href="#rule-2-_meta-is-read-only-and-ignored-on-write" title="Permanent link">#</a></h2>
+<p>Everything a client cannot set lives under one key: the identifier, the IRI, the
+version, the counts, the resolution of a dataset link, the labels an expansion
+resolved. A write that sends <code>_meta</code> back is not refused — the key is dropped
+before validation. That is what lets a client send back what it read without
+stripping anything first.</p>
+<p>There is exactly one exception, and it is narrower than it sounds: <code>replace/</code>
+reads <code>_meta.uid</code> on a nested sub-resource to tell <strong>which</strong> one you mean. That
+is a name, not an assignment. The identifier is still the server's — a
+sub-resource that names none is created with a freshly minted one, and one
+naming a <code>uid</code> this bundle does not hold is refused. The bundle's own identity
+is the URL, never the body, and everything else under <code>_meta</code> is dropped there
+as it is everywhere else. See
+<a href="#rule-3-delete-by-omission-lives-on-replace-and-nowhere-else">rule 3</a>.</p>
+<p>The container is not a hole in the closed shape, it is what keeps the shape
+closed: the <strong>top</strong> level of a payload is exactly the fields of the resource, so
+an unknown key there is a <code>400</code> (see
+<a href="#rule-8-the-server-mints-the-identifier">rule 8</a>), and everything read-only
+sits one level down where that check does not have to make exceptions.</p>
+<p><strong>Request</strong> — the <code>_meta</code> values here are nonsense on purpose</p>
+<div class="highlight"><pre><span></span><code><span class="nf">PATCH</span> <span class="nn">/api/v0/scenario-bundles/a195633f-3cf3-474e-8647-3f27c76d7cfa/</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">If-Match</span><span class="o">:</span> <span class="l">"2"</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Token &lt;token&gt;</span>
+
+<span class="p">{</span>
+<span class="w">  </span><span class="nt">"abstract"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Three pathways, now including a demand-side variant."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"_meta"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"uid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"not-this"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="mi">99</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"iri"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://example.org/x"</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Response</strong> — <code>200 OK</code>, <code>ETag: "3"</code> (excerpt)</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"The NEMO 2030 scenario study, second edition"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"abstract"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Three pathways, now including a demand-side variant."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"_meta"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"uid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"a195633f-3cf3-474e-8647-3f27c76d7cfa"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"iri"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://openenergyplatform.org/ontology/oekg/a195633f-3cf3-474e-8647-3f27c76d7cfa"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The abstract changed. The identifier is still the server's, the version is 3 and
+not 99, and the version this write was guarded against came from the <code>If-Match</code>
+header — never from the body.</p>
+<p>In the reference:
+<a href="../../api-reference/#/Scenario%20Bundles/scenario_bundles_retrieve"><code>GET /scenario-bundles/{uid}/</code></a>.</p>
+<hr />
+<h2 id="rule-3-delete-by-omission-lives-on-replace-and-nowhere-else">Rule 3 — delete-by-omission lives on <code>replace/</code>, and nowhere else<a class="headerlink" href="#rule-3-delete-by-omission-lives-on-replace-and-nowhere-else" title="Permanent link">#</a></h2>
+<p><code>POST /api/v0/scenario-bundles/{uid}/replace/</code> is the declarative endpoint a
+pipeline wants: it takes the complete bundle you mean to see, sub-resources
+included, and makes the graph match it in one atomic write. It is the one
+address in this API where <strong>a sub-resource you do not send is a sub-resource you
+have deleted</strong>. Everywhere else, under every verb,
+<a href="#rule-1-a-key-you-do-not-send-is-a-key-you-do-not-change">rule 1</a> holds
+instead.</p>
+<p>That is why it is an address of its own rather than a <code>PUT</code> on the bundle. Two
+behaviours that different should not share one URL, and the one that can destroy
+data should be the one you ask for by name.</p>
+<p><strong>What you send is a bundle read, sent back.</strong> A <code>GET</code> on the bundle returns
+exactly what this endpoint accepts, so a pipeline reads, edits and declares
+without assembling anything. That round trip is why <code>_meta.uid</code> is the one piece
+of <code>_meta</code> a write reads — and it reads it only here, which is the single
+exception to <a href="#rule-2-_meta-is-read-only-and-ignored-on-write">rule 2</a>. It says
+<em>this is the same resource</em>: a nested scenario, study report or dataset link
+carrying the identifier it was read with is updated in place, one carrying none
+is created, and one that is not there at all is removed. A client that strips
+<code>_meta</code> before sending is therefore not sending the same bundle back; it is
+deleting every sub-resource in it and minting replacements.</p>
+<p><strong>It names, it does not assign.</strong> The identifier is still the server's, as
+<a href="#rule-8-the-server-mints-the-identifier">rule 8</a> says, and this endpoint is no
+way round that: a <code>uid</code> this bundle does not hold is a payload assembled from
+some other bundle, and it is refused rather than created.</p>
+<p><strong>Request</strong> — this bundle's own read, sent back with one scenario's <code>_meta.uid</code>
+swapped for an identifier it does not hold. The body is otherwise a complete,
+valid declaration; only that one value differs.</p>
+<div class="highlight"><pre><span></span><code><span class="nf">POST</span> <span class="nn">/api/v0/scenario-bundles/c7f37ddf-ec55-44bb-81a3-f738b6a5ff83/replace/</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">If-Match</span><span class="o">:</span> <span class="l">"1"</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Token &lt;token&gt;</span>
+</code></pre></div>
+<p><strong>Response</strong> — <code>400 Bad Request</code></p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"This bundle has no scenario 00000000-0000-4000-8000-000000000000. A replace matches a nested resource by the identifier in its `_meta.uid`, and creates one that names none -- so an identifier that is not here is a payload built from a different bundle, not a request to create something. Nothing was written."</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Nothing was written, so a pipeline that has built its payload from the wrong
+bundle finds out at the refusal rather than at the next read.</p>
+<p><code>NEMO-2035</code> below is at version 2: one scenario, <code>HIGH-RE</code>, carrying two
+citations, and one study report. The declaration changes the abstract, adds a
+second scenario, and has no <code>study_reports</code> key at all.</p>
+<p><strong>Request</strong> — the bundle as <code>GET</code> returned it, with those changes (excerpt;
+every field not shown was sent back exactly as it was read)</p>
+<div class="highlight"><pre><span></span><code><span class="nf">POST</span> <span class="nn">/api/v0/scenario-bundles/e5d4e5ac-d39f-4089-b4bb-0d73f723731b/replace/</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">If-Match</span><span class="o">:</span> <span class="l">"2"</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Token &lt;token&gt;</span>
+
+<span class="p">{</span>
+<span class="w">  </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Nationaler Energiemonitor 2035"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"acronym"</span><span class="p">:</span><span class="w"> </span><span class="s2">"NEMO-2035"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"abstract"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Three pathways to 2035, and a low-renewables variant."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"scenarios"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"A high renewables scenario"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"acronym"</span><span class="p">:</span><span class="w"> </span><span class="s2">"HIGH-RE"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"scenario_types"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">"https://openenergyplatform.org/ontology/oeo/OEO_00000364"</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">"_meta"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"uid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"67889811-fd77-4ee0-94ca-3be9386d4f5e"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">"datasets"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"input"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"ref"</span><span class="p">:</span><span class="w"> </span><span class="s2">"table"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"nemo_2035_capacities"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://openenergyplatform.org/database/tables/nemo_2035_capacities"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"_meta"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"uid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2a5d7fc4-99d2-4710-9d26-7cd881dfe4e1"</span><span class="w"> </span><span class="p">}</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"output"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"ref"</span><span class="p">:</span><span class="w"> </span><span class="s2">"external"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"NEMO-2035 results on the databus"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://databus.openenergyplatform.org/nemo/results/2035"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"_meta"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"uid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2b8ee5db-c169-463d-bfcc-07f17510930c"</span><span class="w"> </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">]</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"A low renewables scenario"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"acronym"</span><span class="p">:</span><span class="w"> </span><span class="s2">"LOW-RE"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"scenario_types"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">"https://openenergyplatform.org/ontology/oeo/OEO_00000364"</span>
+<span class="w">      </span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Response</strong> — <code>200 OK</code>, <code>ETag: "3"</code> (excerpt)</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"acronym"</span><span class="p">:</span><span class="w"> </span><span class="s2">"NEMO-2035"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"abstract"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Three pathways to 2035, and a low-renewables variant."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"_meta"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"uid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"e5d4e5ac-d39f-4089-b4bb-0d73f723731b"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"iri"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://openenergyplatform.org/ontology/oekg/e5d4e5ac-d39f-4089-b4bb-0d73f723731b"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"deleted"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"iri"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://openenergyplatform.org/ontology/oekg/study-report/8618e7c6-4b09-4e71-8c0a-a0beea0c9545"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://openenergyplatform.org/ontology/oeo/OEO_00020012"</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">"unlinked"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">"scenarios"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"acronym"</span><span class="p">:</span><span class="w"> </span><span class="s2">"HIGH-RE"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"_meta"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"uid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"67889811-fd77-4ee0-94ca-3be9386d4f5e"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">"datasets"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">"ref"</span><span class="p">:</span><span class="w"> </span><span class="s2">"table"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"nemo_2035_capacities"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"_meta"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"uid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2a5d7fc4-99d2-4710-9d26-7cd881dfe4e1"</span><span class="w"> </span><span class="p">}</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">"ref"</span><span class="p">:</span><span class="w"> </span><span class="s2">"external"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"NEMO-2035 results on the databus"</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">"_meta"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"uid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2b8ee5db-c169-463d-bfcc-07f17510930c"</span><span class="w"> </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">]</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"acronym"</span><span class="p">:</span><span class="w"> </span><span class="s2">"LOW-RE"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"_meta"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"uid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"d6c4f48e-a12e-4309-9d2b-c5b0be1d645c"</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"study_reports"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Three things in that answer are worth reading closely.</p>
+<p><strong><code>deleted</code> names the study report, and nothing named it.</strong> The request has no
+<code>study_reports</code> key; leaving it out is what removed the report. Sending
+<code>"study_reports": []</code> would have done the same thing — an omitted list and an
+empty one mean the same here, which is exactly what makes omission dangerous.</p>
+<p><strong><code>unlinked</code> is empty here, and will not always be.</strong> Omission removes by the
+same typed containment walk a <code>DELETE</code> uses, so the two lists mean precisely
+what they mean for a delete, including the guard that moves a node from one list
+to the other:
+<a href="#rule-5-the-deletes-two-guards-catch-two-different-accidents">rule 5</a> describes
+them.</p>
+<p><strong>Both citations survived, with the identifiers they were read with.</strong> This is
+the property to test your own client against, because the mistake it guards
+against passes every obvious test. Dataset links are nested under their scenario
+in the bundle payload, and they are bundle-local for the purposes of deletion —
+so a declaration that carries a scenario but not its <code>datasets</code> is a declaration
+that the scenario has no citations, and the replace makes that true. The happy
+path anybody would write by hand — add a scenario, change a field, remove a
+scenario — does not notice.</p>
+<div class="admonition warning">
+<p class="admonition-title">A scenario sent without its <code>datasets</code> loses its citations</p>
+<p>Send back what you read. If your client builds the payload itself rather
+than editing a <code>GET</code>, it has to carry every scenario's <code>datasets</code> list, and
+every link's <code>_meta.uid</code>, or the citations in that scenario are deleted.
+The same holds for <code>scenarios</code> and <code>study_reports</code> on the bundle: a list
+you leave out is a list you emptied, and emptying it removes what is there.</p>
+</div>
+<p>Declaring a bundle exactly as it already is writes nothing at all — no triples,
+no version bump, no history entry — so a pipeline that runs nightly does not
+accumulate a ledger of changes it never made.</p>
+<p>In the reference:
+<a href="../../api-reference/#/Scenario%20Bundles/scenario_bundles_replace_create"><code>POST /scenario-bundles/{uid}/replace/</code></a>.</p>
+<hr />
+<h2 id="rule-4-a-bundle-post-accepts-nested-sub-resources-a-patch-does-not">Rule 4 — a bundle <code>POST</code> accepts nested sub-resources; a <code>PATCH</code> does not<a class="headerlink" href="#rule-4-a-bundle-post-accepts-nested-sub-resources-a-patch-does-not" title="Permanent link">#</a></h2>
+<p>A create may carry its scenarios and study reports with it, so a pipeline can
+publish a whole bundle in one request — and, because one request is one
+transaction, either all of it lands or none of it does. A <code>PATCH</code> on the bundle
+cannot reach them at all: <code>scenarios</code> is not a field of the bundle payload, so
+sending one is an unknown key.</p>
+<p>The asymmetry looks like an oversight and is the opposite. If a bundle <code>PATCH</code>
+took a <code>scenarios</code> list, every <code>PATCH</code> would have to decide what an omitted list
+means — and the answer that keeps a one-field edit safe (leave them alone) is
+the answer that makes the list useless for removing anything. Sub-resources get
+their own URLs instead, and
+<a href="#rule-1-a-key-you-do-not-send-is-a-key-you-do-not-change">rule 1</a> holds without
+exception.</p>
+<p><strong>Request</strong> — a bundle and its scenario in one call</p>
+<div class="highlight"><pre><span></span><code><span class="nf">POST</span> <span class="nn">/api/v0/scenario-bundles/</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Token &lt;token&gt;</span>
+
+<span class="p">{</span>
+<span class="w">  </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"The ALTERNATIVE 2040 study"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"acronym"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ALT-2040"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"abstract"</span><span class="p">:</span><span class="w"> </span><span class="s2">"A slower-transition counterfactual."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"descriptors"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"https://openenergyplatform.org/ontology/oeo/OEO_00000143"</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"sector_divisions"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">"https://openenergyplatform.org/ontology/oeo/OEO_00000368"</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"sectors"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"https://openenergyplatform.org/ontology/oeo/OEO_00000367"</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"technologies"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"https://openenergyplatform.org/ontology/oeo/OEO_00000407"</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"scenarios"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"A high renewables scenario"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"acronym"</span><span class="p">:</span><span class="w"> </span><span class="s2">"HIGH-RE"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"scenario_types"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">"https://openenergyplatform.org/ontology/oeo/OEO_00000364"</span>
+<span class="w">      </span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Response</strong> — <code>201 Created</code>,
+<code>Location: /api/v0/scenario-bundles/5913a078-1bd2-4a81-91df-c83b56fd3681/</code>,
+<code>ETag: "1"</code> (excerpt)</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"The ALTERNATIVE 2040 study"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"acronym"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ALT-2040"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"_meta"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"uid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5913a078-1bd2-4a81-91df-c83b56fd3681"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"iri"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://openenergyplatform.org/ontology/oekg/5913a078-1bd2-4a81-91df-c83b56fd3681"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">"scenarios"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"A high renewables scenario"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"acronym"</span><span class="p">:</span><span class="w"> </span><span class="s2">"HIGH-RE"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"abstract"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"scenario_types"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">"https://openenergyplatform.org/ontology/oeo/OEO_00000364"</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">"study_regions"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">      </span><span class="nt">"interacting_regions"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">      </span><span class="nt">"years"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">      </span><span class="nt">"_meta"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"uid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2db5def3-13dd-4abf-be7f-3bf30cb48ca8"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"iri"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://openenergyplatform.org/ontology/oekg/scenario/2db5def3-13dd-4abf-be7f-3bf30cb48ca8"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://openenergyplatform.org/ontology/oeo/OEO_00000365"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"bundle"</span><span class="p">:</span><span class="w"> </span><span class="s2">"5913a078-1bd2-4a81-91df-c83b56fd3681"</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"study_reports"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The nested scenario has an identifier of its own, and from here it is edited at
+its own URL. Sending another one through the bundle is refused:</p>
+<p><strong>Request</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nf">PATCH</span> <span class="nn">/api/v0/scenario-bundles/5913a078-1bd2-4a81-91df-c83b56fd3681/</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">If-Match</span><span class="o">:</span> <span class="l">"1"</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Token &lt;token&gt;</span>
+
+<span class="p">{</span>
+<span class="w">  </span><span class="nt">"scenarios"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"A low renewables scenario"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"acronym"</span><span class="p">:</span><span class="w"> </span><span class="s2">"LOW-RE"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"scenario_types"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">"https://openenergyplatform.org/ontology/oeo/OEO_00000364"</span>
+<span class="w">      </span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Response</strong> — <code>400 Bad Request</code></p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"> </span><span class="nt">"scenarios"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Unknown field. The bundle shape is closed."</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p>In the reference:
+<a href="../../api-reference/#/Scenario%20Bundles/scenario_bundles_create"><code>POST /scenario-bundles/</code></a>
+and
+<a href="../../api-reference/#/Scenario%20Bundles/scenario_bundles_scenarios_create"><code>POST /scenario-bundles/{uid}/scenarios/</code></a>.</p>
+<hr />
+<h2 id="rule-5-the-deletes-two-guards-catch-two-different-accidents">Rule 5 — the delete's two guards catch two different accidents<a class="headerlink" href="#rule-5-the-deletes-two-guards-catch-two-different-accidents" title="Permanent link">#</a></h2>
+<p>Deleting a whole bundle needs both an <code>If-Match</code> version and a
+<code>?confirm=&lt;acronym&gt;</code>. That reads like ceremony until you notice that each
+catches a mistake the other cannot see.</p>
+<ul>
+<li><code>If-Match</code> catches <strong>stale state</strong>: you are deleting the bundle you meant, but
+  it has changed since you read it, so what you would destroy is not what you
+  looked at.</li>
+<li><code>?confirm=</code> catches the <strong>wrong bundle</strong>: your state is perfectly fresh and
+  the identifier in the URL is somebody else's. This is the accident a looping
+  pipeline actually commits, and no version check can notice it, because the
+  version it is handed is that bundle's own current version.</li>
+</ul>
+<p>The acronym is compared exactly. Normalising it would let <code>nemo-2030</code> confirm
+the deletion of <code>NEMO-2030</code>, which is the class of mistake the check exists for.</p>
+<p>The four exchanges below are the same bundle, <code>NEMO-2030</code>, at version 6.</p>
+<p><strong>Missing confirmation</strong> — the version was right</p>
+<div class="highlight"><pre><span></span><code><span class="nf">DELETE</span> <span class="nn">/api/v0/scenario-bundles/a195633f-3cf3-474e-8647-3f27c76d7cfa/</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">If-Match</span><span class="o">:</span> <span class="l">"6"</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Token &lt;token&gt;</span>
+</code></pre></div>
+<p><code>400 Bad Request</code></p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Deleting a whole scenario bundle is irreversible, so it has to be confirmed: repeat the bundle's acronym as ?confirm=&lt;acronym&gt;. Read the bundle first -- the acronym is in the response, and so is the version this delete also needs."</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Wrong confirmation</strong> — the version was still right</p>
+<div class="highlight"><pre><span></span><code><span class="nf">DELETE</span> <span class="nn">/api/v0/scenario-bundles/a195633f-.../?confirm=NEMO-2031</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">If-Match</span><span class="o">:</span> <span class="l">"6"</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Token &lt;token&gt;</span>
+</code></pre></div>
+<p><code>400 Bad Request</code></p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"The confirmation 'NEMO-2031' is not this bundle's acronym, so nothing was deleted. Check that this is the bundle you meant to delete before retrying."</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Stale version</strong> — the confirmation was right</p>
+<div class="highlight"><pre><span></span><code><span class="nf">DELETE</span> <span class="nn">/api/v0/scenario-bundles/a195633f-.../?confirm=NEMO-2030</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">If-Match</span><span class="o">:</span> <span class="l">"1"</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Token &lt;token&gt;</span>
+</code></pre></div>
+<p><code>412 Precondition Failed</code></p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"The bundle is not at the version this request expects, so nothing was written. It is at \"6\". Read it again and apply the change to what you get back."</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Both right</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nf">DELETE</span> <span class="nn">/api/v0/scenario-bundles/a195633f-.../?confirm=NEMO-2030</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">If-Match</span><span class="o">:</span> <span class="l">"6"</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Token &lt;token&gt;</span>
+</code></pre></div>
+<p><code>200 OK</code>. The bundle had one scenario.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"deleted"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"iri"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://openenergyplatform.org/ontology/oekg/a195633f-3cf3-474e-8647-3f27c76d7cfa"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://openenergyplatform.org/ontology/oeo/OEO_00020227"</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"iri"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://openenergyplatform.org/ontology/oekg/scenario/c0f1a112-431a-4c65-999a-c98fff76b5b2"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://openenergyplatform.org/ontology/oeo/OEO_00000365"</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"unlinked"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">  </span><span class="nt">"_meta"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"uid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"a195633f-3cf3-474e-8647-3f27c76d7cfa"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"iri"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://openenergyplatform.org/ontology/oekg/a195633f-3cf3-474e-8647-3f27c76d7cfa"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"acronym"</span><span class="p">:</span><span class="w"> </span><span class="s2">"NEMO-2030"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"version_before"</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>A delete answers with a body rather than an empty <code>204</code>, and the body carries
+two lists because a delete has two outcomes. <strong><code>deleted</code></strong> is what is gone.
+<strong><code>unlinked</code></strong> is what survived: a scenario, a study report or a dataset link
+that another bundle also cites is detached from this bundle rather than
+destroyed, because deleting your own study must not damage somebody else's
+record. Nodes that are shared by design — organisations, funders, contact
+persons, study regions — are never deleted by this API at all; the bundle simply
+stops referring to them, and they appear in neither list.</p>
+<p>Repeating the delete answers <code>404</code>, and a client may treat that as success. The
+bundle's history outlives it: <code>GET .../history/</code> still answers, with one line
+recording the deletion and the payloads of the earlier entries pruned.</p>
+<p>In the reference:
+<a href="../../api-reference/#/Scenario%20Bundles/scenario_bundles_destroy"><code>DELETE /scenario-bundles/{uid}/</code></a>.</p>
+<hr />
+<h2 id="rule-6-a-write-is-judged-by-the-violations-it-introduces">Rule 6 — a write is judged by the violations it introduces<a class="headerlink" href="#rule-6-a-write-is-judged-by-the-violations-it-introduces" title="Permanent link">#</a></h2>
+<p>Every bundle is validated against the canonical OEKG shape before it is written.
+For a change to a bundle that already exists, the <strong>pre-state is validated
+too</strong>, and the write is refused only for violations it adds. A defect that was
+already there is left alone: not repaired, and not standing between you and a
+change to an unrelated field.</p>
+<p>Without this the API could not write to most of the graph. Bundles written
+through the browser over the years are missing content the shape requires —
+which sector a study covers, who wrote a publication — and that missing content
+is exactly what a person would supply <em>by patching</em>. A rule of "the result must
+conform" would make the defect unfixable through the API: you would need a patch
+to add the missing sector, and the patch would be refused because the sector is
+missing.</p>
+<p>A <strong>create has no pre-state</strong>, so it is strict: everything a create produces is
+new, and nothing excuses it. A <code>400</code> on a create where the same field was
+accepted by a <code>PATCH</code> is this asymmetry, not a bug.</p>
+<p>How the comparison is made, and why the two states have to be assembled the same
+way for it to mean anything, is on the
+<a href="../../../features/scenario-bundles/architecture/#the-api-write-path">architecture guide</a>,
+which is the page for somebody changing this rather than calling it.</p>
+<p><strong>A patch of a bundle that already violates the shape.</strong> <code>NEMO-2020</code> was written
+in the browser and names no technology, which the shape requires.</p>
+<div class="highlight"><pre><span></span><code><span class="nf">PATCH</span> <span class="nn">/api/v0/scenario-bundles/3f2b91c4-7d8e-4a15-9c63-0e5a77b21d48/</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">If-Match</span><span class="o">:</span> <span class="l">"0"</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Token &lt;token&gt;</span>
+
+<span class="p">{</span><span class="w"> </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"The NEMO 2020 study, corrected"</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p><strong>Response</strong> — <code>200 OK</code>, <code>ETag: "1"</code> (excerpt). It still names no technology
+afterwards: the API does not repair what it did not break.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"The NEMO 2020 study, corrected"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"acronym"</span><span class="p">:</span><span class="w"> </span><span class="s2">"NEMO-2020"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"technologies"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">  </span><span class="nt">"_meta"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"uid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"3f2b91c4-7d8e-4a15-9c63-0e5a77b21d48"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>A patch of the same bundle that would remove its sectors</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nf">PATCH</span> <span class="nn">/api/v0/scenario-bundles/3f2b91c4-7d8e-4a15-9c63-0e5a77b21d48/</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">If-Match</span><span class="o">:</span> <span class="l">"1"</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Token &lt;token&gt;</span>
+
+<span class="p">{</span><span class="w"> </span><span class="nt">"sectors"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p><strong>Response</strong> — <code>400 Bad Request</code></p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"This change would add violations of the OEKG shape."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"violations"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Study target: This should cover at least one sector."</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"focus_node"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://openenergyplatform.org/ontology/oekg/3f2b91c4-7d8e-4a15-9c63-0e5a77b21d48"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"path"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://openenergyplatform.org/ontology/oeo/OEO_00020439"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"value"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"pre_existing_violations"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>violations</code> lists only what this request would add — the missing technology is
+not in it, or you could not tell which of them is your own doing.
+<code>pre_existing_violations</code> counts the rest, so the bundle's condition is stated
+rather than hidden.</p>
+<p><strong>The same omission on a create</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nf">POST</span> <span class="nn">/api/v0/scenario-bundles/</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Token &lt;token&gt;</span>
+
+<span class="p">{</span>
+<span class="w">  </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"The NEMO 2045 study"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"acronym"</span><span class="p">:</span><span class="w"> </span><span class="s2">"NEMO-2045"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"abstract"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Three pathways for the German power sector to 2030."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"descriptors"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"https://openenergyplatform.org/ontology/oeo/OEO_00000143"</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"sector_divisions"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">"https://openenergyplatform.org/ontology/oeo/OEO_00000368"</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"sectors"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"https://openenergyplatform.org/ontology/oeo/OEO_00000367"</span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Response</strong> — <code>400 Bad Request</code>. Note the wording: not <em>would add</em>, but <em>does
+not conform</em>. There is no <code>pre_existing_violations</code>, because there is no
+pre-state.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"The bundle does not conform to the OEKG shape."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"violations"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Study target: This should cover at least one technology."</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"focus_node"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://openenergyplatform.org/ontology/oekg/c4bb832d-39e4-4642-954b-e223d9ce8df7"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"path"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://openenergyplatform.org/ontology/oeo/OEO_00020438"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"value"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>In the reference:
+<a href="../../api-reference/#/Scenario%20Bundles/scenario_bundles_create"><code>POST /scenario-bundles/</code></a>.</p>
+<hr />
+<h2 id="rule-7-ref-table-is-reproducible-ref-dataset-is-current-and-a-dead-link-stays">Rule 7 — <code>ref: table</code> is reproducible, <code>ref: dataset</code> is current, and a dead link stays<a class="headerlink" href="#rule-7-ref-table-is-reproducible-ref-dataset-is-current-and-a-dead-link-stays" title="Permanent link">#</a></h2>
+<p>A dataset link records that a scenario consumed or produced data on this
+platform. It has three fields, and <code>ref</code> decides which kind of thing is cited:</p>
+<ul>
+<li><strong><code>ref: "table"</code></strong> names one OEP table. It is the <strong>reproducible</strong> citation:
+  the table it names is the table it will always name.</li>
+<li><strong><code>ref: "dataset"</code></strong> names a catalogue entry that groups tables. It is the
+  <strong>current</strong> citation: it resolves to whatever that entry holds today, which is
+  the reason to cite the entry rather than its members.</li>
+</ul>
+<p>Neither is checked when it is written, and a citation never keeps its target
+alive. A bundle is a published research record, so "this scenario used table X"
+stays true after X is deleted — and letting a stranger's citation block your own
+table's deletion would invert the permission model. Instead, every read resolves
+the link and says in <code>_meta</code> what it means <strong>now</strong>. Nothing is stored, so
+nothing can go stale.</p>
+<p><strong>A table that is there.</strong> Every link below is added to one scenario of one
+bundle, each write carrying the version the one before it returned.</p>
+<div class="highlight"><pre><span></span><code><span class="nf">POST</span> <span class="nn">/api/v0/scenario-bundles/bbb19b1c-.../scenarios/a93baabe-.../datasets/</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">If-Match</span><span class="o">:</span> <span class="l">"2"</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Token &lt;token&gt;</span>
+
+<span class="p">{</span><span class="w"> </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"input"</span><span class="p">,</span><span class="w"> </span><span class="nt">"ref"</span><span class="p">:</span><span class="w"> </span><span class="s2">"table"</span><span class="p">,</span><span class="w"> </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"nemo_2030_capacities"</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p><code>201 Created</code>, <code>ETag: "3"</code> (excerpt)</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"input"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"ref"</span><span class="p">:</span><span class="w"> </span><span class="s2">"table"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"nemo_2030_capacities"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"_meta"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"target_iri"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://openenergyplatform.org/database/tables/nemo_2030_capacities"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"resolvable"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"tables"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"nemo_2030_capacities"</span><span class="p">,</span><span class="w"> </span><span class="nt">"peer_review"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="p">}]</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>A catalogue entry</strong>, resolved to the two tables it holds today</p>
+<div class="highlight"><pre><span></span><code><span class="nf">POST</span> <span class="nn">/api/v0/scenario-bundles/bbb19b1c-.../scenarios/a93baabe-.../datasets/</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">If-Match</span><span class="o">:</span> <span class="l">"3"</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Token &lt;token&gt;</span>
+
+<span class="p">{</span><span class="w"> </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"output"</span><span class="p">,</span><span class="w"> </span><span class="nt">"ref"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dataset"</span><span class="p">,</span><span class="w"> </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"nemo_2030_results"</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p><code>201 Created</code>, <code>ETag: "4"</code> (excerpt)</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"output"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"ref"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dataset"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"nemo_2030_results"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"_meta"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"target_iri"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://openenergyplatform.org/database/datasets/nemo_2030_results"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"resolvable"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"tables"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"nemo_2030_emissions"</span><span class="p">,</span><span class="w"> </span><span class="nt">"peer_review"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"nemo_2030_generation"</span><span class="p">,</span><span class="w"> </span><span class="nt">"peer_review"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>A table that has since been deleted.</strong> The write is not refused: a link is
+never checked against its target.</p>
+<div class="highlight"><pre><span></span><code><span class="nf">POST</span> <span class="nn">/api/v0/scenario-bundles/bbb19b1c-.../scenarios/a93baabe-.../datasets/</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">If-Match</span><span class="o">:</span> <span class="l">"4"</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Token &lt;token&gt;</span>
+
+<span class="p">{</span><span class="w"> </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"input"</span><span class="p">,</span><span class="w"> </span><span class="nt">"ref"</span><span class="p">:</span><span class="w"> </span><span class="s2">"table"</span><span class="p">,</span><span class="w"> </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"nemo_2020_capacities"</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p><code>201 Created</code>, <code>ETag: "5"</code> (excerpt). <code>resolvable: false</code> is the correct answer
+about a citation, not a broken link in your bundle — and the same link reads
+<code>true</code> again if a table of that name reappears.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"input"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"ref"</span><span class="p">:</span><span class="w"> </span><span class="s2">"table"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"nemo_2020_capacities"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"_meta"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"target_iri"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://openenergyplatform.org/database/tables/nemo_2020_capacities"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"resolvable"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"tables"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>peer_review</code> on a table is three-valued — <code>"finished"</code>, <code>"in_progress"</code> or
+<code>null</code>. It is not a boolean because most of the platform's data predates the
+Open Peer Review process, and <code>false</code> would present all of it as having failed a
+review it was never submitted to.</p>
+<div class="admonition warning">
+<p class="admonition-title">A link written before this API cannot be sent back</p>
+<p><code>ref</code> is derived from the stored address, and the payload has no way to say
+"an address somewhere else". A link written by the older route to an
+off-platform address therefore reads back with <code>ref: null</code>, and <code>resolvable</code>
+and <code>tables</code> read <code>null</code> rather than <code>false</code> — nothing was deleted, there is
+simply nothing here to resolve. Such a body is not accepted back by a write.
+<code>_meta.target_iri</code> says where it actually points. Read back from
+<code>GET …/datasets/</code> (excerpt):</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"input"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"ref"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"WS_23_24"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"_meta"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"target_iri"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://databus.openenergyplatform.org/koubaa/LLEC_Dataset/WS_23_24"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"resolvable"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"tables"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+<p><strong>Data that is not on this platform.</strong> Both kinds of <code>ref</code> name something on
+this platform, so a dataset held elsewhere has no form in this payload. What
+gives such data a citable, persistent identifier is registering it on the OEP
+databus: publish it through the
+<a href="https://databus.openenergyplatform.org/app/publish-wizard">publish wizard</a>, or
+register many at once through the databus' own API, and then copy the file or
+version URL the databus issues.</p>
+<p>The one route that currently accepts such a URL is the superseded
+<code>scenario-bundle/scenario/manage-datasets/</code> endpoint, which takes an optional
+<code>external_url</code> beside each dataset's name and type. It does not merely recommend
+the databus: an address hosted anywhere else is refused, and the dataset's name
+comes back marked <code>(external dataset)</code>. It is described in the reference under
+<a href="../../api-reference/#/Scenario%20Bundles%20(legacy)">Scenario Bundles (legacy)</a>.
+A link written that way is exactly the one the warning above reads back: this
+API will tell you where it points, and will not accept it back.</p>
+<p>In the reference:
+<a href="../../api-reference/#/Scenario%20Bundles/scenario_bundles_scenarios_datasets_create"><code>POST /scenario-bundles/{uid}/scenarios/{sid}/datasets/</code></a>.</p>
+<hr />
+<h2 id="rule-8-the-server-mints-the-identifier">Rule 8 — the server mints the identifier<a class="headerlink" href="#rule-8-the-server-mints-the-identifier" title="Permanent link">#</a></h2>
+<p>There is no key to supply one through. <code>uid</code> at the top level of a payload is
+not ignored, it is refused, so a client that tries to choose its own identifier
+is told rather than quietly overridden.</p>
+<div class="highlight"><pre><span></span><code><span class="nf">POST</span> <span class="nn">/api/v0/scenario-bundles/</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Token &lt;token&gt;</span>
+
+<span class="p">{</span>
+<span class="w">  </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"The NEMO 2030 scenario study"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"acronym"</span><span class="p">:</span><span class="w"> </span><span class="s2">"NEMO-2030-B"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"uid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"my-own-id"</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Response</strong> — <code>400 Bad Request</code></p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"> </span><span class="nt">"uid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Unknown field. The bundle shape is closed."</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p>A successful create says where the bundle now lives, in the <code>Location</code> header
+and in <code>_meta.uid</code>:</p>
+<div class="highlight"><pre><span></span><code>201 Created
+Location: /api/v0/scenario-bundles/a195633f-3cf3-474e-8647-3f27c76d7cfa/
+ETag: "1"
+</code></pre></div>
+<p>Which leaves the question a stateless pipeline actually has: it ran last month,
+it kept no file, and it needs the bundle it wrote. <strong>Re-identify it by
+acronym.</strong> That is why acronyms are unique, and why creating or renaming onto a
+taken one is refused.</p>
+<p><strong>Request</strong> — no token needed; reads are public</p>
+<div class="highlight"><pre><span></span><code><span class="nf">GET</span> <span class="nn">/api/v0/scenario-bundles/?acronym=NEMO-2030</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+</code></pre></div>
+<p><strong>Response</strong> — <code>200 OK</code></p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"next"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"previous"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"results"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"The NEMO 2030 scenario study"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"acronym"</span><span class="p">:</span><span class="w"> </span><span class="s2">"NEMO-2030"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"_meta"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">"uid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"a195633f-3cf3-474e-8647-3f27c76d7cfa"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"iri"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://openenergyplatform.org/ontology/oekg/a195633f-3cf3-474e-8647-3f27c76d7cfa"</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">"counts"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"scenarios"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nt">"study_reports"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>One request returns both things the next write needs: the identifier for the
+URL, and the version for the precondition. The header form of the version is the
+number in double quotes, so the run continues with <code>If-Match: "1"</code> without ever
+reading the bundle itself.</p>
+<p>In the reference:
+<a href="../../api-reference/#/Scenario%20Bundles/scenario_bundles_list"><code>GET /scenario-bundles/</code></a>.</p>
+<hr />
+<h2 id="rule-9-_metahistory_recorded-false-inside-a-200-is-an-audit-gap-not-a-status">Rule 9 — <code>_meta.history_recorded: false</code> inside a <code>200</code> is an audit gap, not a status<a class="headerlink" href="#rule-9-_metahistory_recorded-false-inside-a-200-is-an-audit-gap-not-a-status" title="Permanent link">#</a></h2>
+<p>Every write is recorded in the bundle's history. The graph store and this
+platform's database cannot share a transaction, and the graph commits first — so
+there is a narrow window in which the write has landed and the record of it has
+not.</p>
+<p>When that happens the response says so and stays a success. Answering with an
+error would be worse, because the write did happen; writing a history entry the
+graph does not support would be worse still, because it looks like truth. The
+key appears <strong>only when something was lost</strong>, so on an ordinary write there is
+nothing to check for.</p>
+<p><strong>Request</strong> — an ordinary patch, with nothing about it to say that anything will
+go wrong</p>
+<div class="highlight"><pre><span></span><code><span class="nf">PATCH</span> <span class="nn">/api/v0/scenario-bundles/a195633f-3cf3-474e-8647-3f27c76d7cfa/</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">If-Match</span><span class="o">:</span> <span class="l">"3"</span>
+<span class="na">Content-Type</span><span class="o">:</span> <span class="l">application/json</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Token &lt;token&gt;</span>
+
+<span class="p">{</span><span class="w"> </span><span class="nt">"abstract"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Three pathways for the German power sector to 2030."</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p><strong>Response</strong> — <code>200 OK</code>, <code>ETag: "4"</code> (excerpt). The abstract was changed; the
+history row was not written, and the bundle's history has no entry for
+version 4.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"The NEMO 2030 scenario study, second edition"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"abstract"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Three pathways for the German power sector to 2030."</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"_meta"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"uid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"a195633f-3cf3-474e-8647-3f27c76d7cfa"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"history_recorded"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Two siblings behave the same way, for the same reason:</p>
+<table>
+<thead>
+<tr>
+<th>key</th>
+<th>appears on</th>
+<th>means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>history_recorded: false</code></td>
+<td>any write</td>
+<td>the change is in the graph; the history has no entry for it</td>
+</tr>
+<tr>
+<td><code>ownership_recorded: false</code></td>
+<td>a create</td>
+<td>the bundle exists but no owner was recorded, so it is administrator-only until repaired</td>
+</tr>
+<tr>
+<td><code>ownership_forgotten: false</code></td>
+<td>a delete</td>
+<td>the bundle is gone; the row naming you its owner is not</td>
+</tr>
+</tbody>
+</table>
+<p>A client that sees one of these has a successful write and something for a
+maintainer to repair. <code>GET .../history/</code> is where to check what the ledger does
+hold.</p>
+<p>In the reference:
+<a href="../../api-reference/#/Scenario%20Bundles/scenario_bundles_partial_update"><code>PATCH /scenario-bundles/{uid}/</code></a>
+and
+<a href="../../api-reference/#/Scenario%20Bundles/scenario_bundles_history_list"><code>GET /scenario-bundles/{uid}/history/</code></a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.indexes", "navigation.path", "navigation.tracking", "navigation.top", "toc.follow", "search.suggest", "search.share", "content.tabs.link"], "search": "../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="../../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
