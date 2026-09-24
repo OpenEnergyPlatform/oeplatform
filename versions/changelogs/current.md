@@ -378,6 +378,15 @@ SPDX-License-Identifier: CC0-1.0
   one node
   [(#2522)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2522)
 
+- Applying or denying a queued table change (`dataedit/admin/columns/`,
+  `dataedit/admin/constraints/`) now requires an admin. Both routes carried no
+  check beyond `POST`, so an anonymous request could mark a change reviewed or
+  run the statement that alters a table, and the posted id was written into the
+  SQL as text. The id is now a number, bound as a parameter, and an unknown
+  action is a `400` instead of a server error. Admin-only is the interim rule
+  while the issue decides whether the change queue is removed or repaired
+  [(#2490)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2490)
+
 - The tag administration page under Database no longer fails with a server error
   when a tag has an empty identifier. Such tags cannot be created today, but
   older data copied over from the database can contain one, and the page tried
