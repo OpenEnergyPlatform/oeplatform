@@ -129,48 +129,54 @@ class StandaloneMetaEditView(View):
         )
 
 
+def _review_queued_change(request: HttpRequest, deny, apply) -> HttpResponse:
+    """Apply or deny one change from the table change queue.
+
+    Admin-only, and the id must be a number (#2490). These views carried
+    nothing but `@require_POST`, so an anonymous POST reached the statements
+    that alter a table and mark a change reviewed, and the posted `id` was
+    interpolated into them. CSRF does not stop a scripted request: any page
+    hands an anonymous visitor a token. Admin-only is the interim rule while
+    #2490 decides whether the queue is deleted or repaired; the table owner,
+    whose review the queue was meant to be, is refused too until then.
+    """
+    if not getattr(request.user, "is_admin", False):
+        return HttpResponseForbidden("Only admins may review queued changes.")
+
+    action = request.POST.get("action")
+    try:
+        change_id = int(request.POST.get("id", ""))
+    except ValueError:
+        return HttpResponseBadRequest("The change id must be a number.")
+
+    table_obj = table_or_404_from_dict(request.POST)
+
+    if action == "deny":
+        deny(change_id)
+    elif action == "apply":
+        apply(change_id)
+    else:
+        return HttpResponseBadRequest("The action must be 'apply' or 'deny'.")
+
+    return redirect("dataedit:view", table=table_obj.name)
+
+
 @require_POST
+@login_required
 def admin_constraints_view(request: HttpRequest) -> HttpResponse:
-    """
-    Way to apply changes
-    :param request:
-    :return:
-    """
-    action = request.POST.get("action")
-    id = request.POST.get("id")
-
-    table_obj = table_or_404_from_dict(request.POST)
-
-    if action == "deny":
-        remove_queued_constraint(id)
-    elif action == "apply":
-        apply_queued_constraint(id)
-    else:
-        raise NotImplementedError(action)
-
-    return redirect("dataedit:view", table=table_obj.name)
+    """Apply or deny a queued constraint change."""
+    return _review_queued_change(
+        request, deny=remove_queued_constraint, apply=apply_queued_constraint
+    )
 
 
 @require_POST
+@login_required
 def admin_column_view(request: HttpRequest) -> HttpResponse:
-    """
-    Way to apply changes
-    :param request:
-    :return:
-    """
-
-    action = request.POST.get("action")
-    id = request.POST.get("id")
-    table_obj = table_or_404_from_dict(request.POST)
-
-    if action == "deny":
-        remove_queued_column(id)
-    elif action == "apply":
-        apply_queued_column(id)
-    else:
-        raise NotImplementedError(action)
-
-    return redirect("dataedit:view", table=table_obj.name)
+    """Apply or deny a queued column change."""
+    return _review_queued_change(
+        request, deny=remove_queued_column, apply=apply_queued_column
+    )
 
 
 @never_cache
