@@ -11,6 +11,11 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- The link to the tag manager on the Database pages is now a _Manage Tags_
+  button in the Database introduction, beside Contribute Data, API Access and
+  OEMetaBuilder. It was a sentence below the last topic card, far from the tag
+  search it belongs with, and it appeared on the topic overview only
+
 - The dev compose stack's vite container now reinstalls its dependencies when
   the lockfile moves. The marker recording which lockfile was installed sat at
   the repository root, which is a bind mount, while `node_modules` is a named
@@ -360,6 +365,18 @@ SPDX-License-Identifier: CC0-1.0
   [(#2452)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2452)
 
 ## Bugs
+
+- Editing a scenario's input or output datasets in the scenario bundle form no
+  longer deletes the links the field cannot show. The field offers only the
+  tables of the scenario topic, and changing the selection rebuilt the
+  scenario's links from what was visible -- so on save, an external link (for
+  example a databus address), a link to a table that had left the topic, or one
+  whose label differed from the table's display name was removed from the graph
+  without a word. Those links are now kept and listed under the field. A kept
+  link also keeps its address, and a newly picked table gets a fresh one instead
+  of `dataset_<table id>`, which had made every bundle citing that table share
+  one node
+  [(#2522)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2522)
 
 - Applying or denying a queued table change (`dataedit/admin/columns/`,
   `dataedit/admin/constraints/`) now requires an admin. Both routes carried no
