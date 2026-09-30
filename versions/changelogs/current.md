@@ -366,6 +366,15 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
+- Creating a table with a foreign key through `oedialect` works again. The
+  dialect sends each key twice -- on the column and as a table constraint -- and
+  since v1.9.0 the table constraint was refused with a 400, so every
+  `create_all` with a foreign key failed. Its message pointed at the table
+  change queue, which has never applied a change. The create path now builds a
+  table-level FOREIGN KEY, skips one that only repeats a column's, and refuses
+  by name what it cannot build: a key without a target, or `ON DELETE` /
+  `ON UPDATE` options
+
 - Editing a scenario's input or output datasets in the scenario bundle form no
   longer deletes the links the field cannot show. The field offers only the
   tables of the scenario topic, and changing the selection rebuilt the
