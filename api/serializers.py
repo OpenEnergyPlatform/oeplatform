@@ -153,8 +153,10 @@ class ScenarioBundleScenarioDatasetSerializer(serializers.Serializer):
 
         return value
 
-    # Custom validation for the entire dataset list
-    def validate_dataset(self, value):
+    # Custom validation for the entire dataset list. DRF calls
+    # `validate_<field name>`, so this must be `validate_datasets`; it was
+    # `validate_dataset` and never ran (#2508).
+    def validate_datasets(self, value):
         if not value:
             raise serializers.ValidationError("The dataset list cannot be empty.")
 

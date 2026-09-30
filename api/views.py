@@ -2094,7 +2094,12 @@ class ScenarioDataTablesListAPIView(generics.ListAPIView):
 
 @extend_schema(tags=[SCENARIO_BUNDLES_LEGACY])
 class ManageOekgScenarioDatasetsAPIView(APIView):
-    """The user interface's route for attaching datasets to a scenario."""
+    """The token-authenticated HTTP route for attaching datasets to a scenario.
+
+    Built for scripts (#1890), not for the user interface, which has never
+    called it: the scenario-bundle editor writes through
+    `scenario-bundles/update/`.
+    """
 
     permission_classes = [IsAuthenticated]  # Require authentication
 
@@ -2106,7 +2111,7 @@ class ManageOekgScenarioDatasetsAPIView(APIView):
             "which validate what they write against the OEKG shape and say on "
             "every read whether a citation still resolves. This route writes "
             "predicates the canonical shape does not validate; it is kept "
-            "because the user interface calls it."
+            "for scripts written against it before that API existed."
         ),
         request=ScenarioBundleScenarioDatasetSerializer,
         responses=responses(
