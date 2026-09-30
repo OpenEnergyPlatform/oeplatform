@@ -14,7 +14,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 import re
 
 from django.contrib.postgres.search import SearchQuery
-from django.db.models import Q, QuerySet
+from django.db.models import Count, F, Q, QuerySet
 from django.http import HttpRequest, JsonResponse
 
 import api.parser
@@ -303,6 +303,26 @@ def get_all_tags(table_name: str | None = None) -> QuerySet[Tag]:
     return tags
 
 
+def get_all_tags_with_usage() -> QuerySet[Tag]:
+    """Every tag, annotated with what actually points at it.
+
+    `tag_usage` counts both consumers -- database tables and factsheets --
+    because the vocabulary is shared and every list of it governs both.
+
+    Deliberately NOT `Tag.usage_count`: that field is incremented only by
+    table search in this app and never by factsheets, so ordering a tag list
+    by it looks apt and ranks an unrelated quantity.
+    """
+    return (
+        Tag.objects.annotate(
+            tag_tables=Count("tables", distinct=True),
+            tag_factsheets=Count("factsheets", distinct=True),
+        )
+        .annotate(tag_usage=F("tag_tables") + F("tag_factsheets"))
+        .order_by("name")
+    )
+
+
 def sort_tags_by_popularity(tags: QuerySet[Tag]) -> QuerySet[Tag]:
     return tags.order_by("-usage_count")
 
@@ -491,8 +511,20 @@ def add_tag(name: str, color: str) -> None:
     Args:
         name(str): max 40 character tag text
         color(str): hexadecimal color code, eg #aaf0f0
+
+    Raises:
+        IntegrityError: if a tag with that normalised name already exists.
+
+    `force_insert` is load-bearing, not decoration. A tag's primary key is its
+    normalised name, and a `save()` on a model whose pk is already set and has
+    no default makes Django try an UPDATE first -- so creating "Wind Onshore"
+    where `wind_onshore` existed silently OVERWROTE that tag's display name and
+    colour, platform-wide, on every table and factsheet carrying it, and the
+    caller's duplicate-name guard never fired because nothing raised. Forcing
+    the INSERT lets the database's own unique constraint answer, which is also
+    the only answer that is safe against a concurrent create.
     """
-    Tag(name=name, color=Tag.color_from_hex(color)).save()
+    Tag(name=name, color=Tag.color_from_hex(color)).save(force_insert=True)
 
 
 def update_keywords_from_tags(table: Table) -> None:

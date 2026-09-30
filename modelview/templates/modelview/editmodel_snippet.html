@@ -1,15 +1,15 @@
 {% load modelview_extras %}
 {% load django_bootstrap5 %}
 {% if field|fieldtype == "CheckboxInput" and add %}
-  {% include 'modelview/editmodel_snippet_depend.html' with field=field.name add=add.name %}
+  {% include "modelview/editmodel_snippet_depend.html" with field=field.name add=add.name %}
 {% elif field|fieldtype == "Select" and add %}
-  {% include 'modelview/editmodel_snippet_depend.html' with field=field.name add=add.name condition='value != "Other"' %}
+  {% include "modelview/editmodel_snippet_depend.html" with field=field.name add=add.name condition='value != "Other"' %}
 {% endif %}
 <tr {% if class %}class="{{ class }}"{% endif %}
     {% if visible %}style="display:{{ visible }}"{% endif %}>
   <th class="formlabel">
     {% bootstrap_label field.label %}
-    {% if field.field.required and field|fieldtype != 'CheckboxInput' %}
+    {% if field.field.required and field|fieldtype != "CheckboxInput" %}
       *
     {% endif %}
     {% if field.help_text and field.help_text != "" %}
@@ -20,9 +20,9 @@
   </th>
   <td>
     {% if field|isArray %}
-      {% include 'modelview/array_snippet.html' with form=form %}
+      {% include "modelview/array_snippet.html" with form=form %}
     {% else %}
-      {% if not field|fieldtype == 'CheckboxInput' and not field|fieldtype == 'Select' or not add %}
+      {% if not field|fieldtype == "CheckboxInput" and not field|fieldtype == "Select" or not add %}
         {% if event %}
           {% bootstrap_field field|addEvent:event show_label=False show_help=False set_required=False %}
         {% else %}

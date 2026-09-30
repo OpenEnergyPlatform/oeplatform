@@ -76,6 +76,42 @@ podman-compose --env-file podman/.env -f podman/podman-compose.yaml up -d
 
 The postgres container recreates all tables on a fresh volume automatically.
 
+## Process count and database connections
+
+`podman/apache2.conf` runs two mod_wsgi daemon groups, and both numbers in it
+are coupled to something outside the file.
+
+**Every process carries its own connection pool.** The pool's ceiling is per
+process (`OEDB_POOL_SIZE + OEDB_MAX_OVERFLOW` in `oedb/connection.py`); the
+database's is per cluster. So this has to hold:
+
+```
+total processes x (OEDB_POOL_SIZE + OEDB_MAX_OVERFLOW)  <  usable slots
+```
+
+where _usable slots_ is `max_connections` minus `superuser_reserved_connections`
+on the OEDB. As shipped: `(4 + 1) x (2 + 15) = 85` against 247 measured on the
+production database.
+
+`api/tests/test_podman_apache_config.py` asserts it, so **raising a process
+count fails the test suite until the pool is re-sized with it**. That is the
+point. In September 2026 production raised a process count 4 -> 12 in an Apache
+config no repository contained, nothing recomputed the pool, and the database
+ran out of connection slots for twelve days ([#2495]).
+
+**`/api/v0/advanced` runs on its own single-process group and must keep doing
+so.** `api/sessions.py` keeps live database connections in a module-global dict
+keyed by a `connection_id` handed back to the client, and mod_wsgi has no
+session affinity. With more than one process a client that opens a connection
+and then uses it lands on a different interpreter, misses the dict, and silently
+gets a new connection -- or `Cursor not found`. The test checks this too.
+
+**Choosing the process count.** The shipped 4 is not a measurement; production
+runs 12, on a host with 32 cores whose thirteen daemons hold ~34 GiB resident.
+Size it against the host this stack runs on, then re-run the test.
+
+[#2495]: https://github.com/OpenEnergyPlatform/oeplatform/issues/2495
+
 ## Deploy a new release
 
 For the production Quadlets path, follow the guide's

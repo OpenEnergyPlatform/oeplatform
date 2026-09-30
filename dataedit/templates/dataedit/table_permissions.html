@@ -39,7 +39,7 @@
 {% block data_content %}
   {% load dataedit.taghandler %}
   <h3>Manage permissions on {{ table }}</h3>
-  <div class="card ">
+  <div class="card">
     <div class="card-header">
       {% if is_admin %}
         <div style="position:relative;">
@@ -50,7 +50,10 @@
                 method="post">
             {% csrf_token %}
             <input type="hidden" name="mode" value="add_group" />
-            <input name="name" type="text" placeholder="Add a group" id="group_field" />
+            <input name="name"
+                   type="text"
+                   placeholder="Add a group"
+                   id="group_field" />
             <input type="submit" value="Add" />
           </form>
         </div>
@@ -64,14 +67,17 @@
       <div class="card-body">
         <div>
           {% if is_admin %}
-            <label class="form-label" for="group_level">{{ perm.holder.name }}</label>
+            <label class="form-label"
+                   for="group_level">{{ perm.holder.name }}</label>
             <form class="form-inline"
                   action="{% url 'dataedit:table-permission' table=table %}"
                   method="post"
                   style="display:inline-block">
               {% csrf_token %}
               <input type="hidden" name="mode" value="alter_group" />
-              <input type="hidden" name="group_id" value="{{ perm.holder.id }}" />
+              <input type="hidden"
+                     name="group_id"
+                     value="{{ perm.holder.id }}" />
               <select class="form-control"
                       id="group_level"
                       name="level"
@@ -91,8 +97,12 @@
                   onsubmit="return confirm('Are you sure you want to remove {{ perm.holder.name }} from {{ table }} and retract all permissions?')">
               {% csrf_token %}
               <input type="hidden" name="mode" value="remove_group" />
-              <input type="hidden" name="group_id" value="{{ perm.holder.id }}" />
-              <input type="submit" class="btn btn-danger" value="Remove group" />
+              <input type="hidden"
+                     name="group_id"
+                     value="{{ perm.holder.id }}" />
+              <input type="submit"
+                     class="btn btn-danger"
+                     value="Remove group" />
             </form>
           {% else %}
             {{ perm.holder.name }}:
@@ -105,7 +115,7 @@
     {% endfor %}
   </div>
   <br />
-  <div class="card ">
+  <div class="card">
     <div class="card-header">
       {% if is_admin %}
         <div style="position:relative;">
@@ -116,7 +126,10 @@
                 method="post">
             {% csrf_token %}
             <input type="hidden" name="mode" value="add_user" />
-            <input name="name" type="text" placeholder="Add an user" id="user_field" />
+            <input name="name"
+                   type="text"
+                   placeholder="Add an user"
+                   id="user_field" />
             <input type="submit" value="Add" />
           </form>
         </div>
@@ -137,7 +150,9 @@
                   style="display:inline-block">
               {% csrf_token %}
               <input type="hidden" name="mode" value="alter_user" />
-              <input type="hidden" name="user_id" value="{{ perm.holder.id }}" />
+              <input type="hidden"
+                     name="user_id"
+                     value="{{ perm.holder.id }}" />
               <select class="form-control"
                       id="level"
                       name="level"
@@ -159,7 +174,9 @@
                   onsubmit="return confirm('Are you sure you want to remove {{ perm.holder.name }} from {{ table }} and retract all permissions?')">
               {% csrf_token %}
               <input type="hidden" name="mode" value="remove_user" />
-              <input type="hidden" name="user_id" value="{{ perm.holder.id }}" />
+              <input type="hidden"
+                     name="user_id"
+                     value="{{ perm.holder.id }}" />
               <input type="submit" class="btn btn-danger" value="Remove user" />
             </form>
           {% else %}

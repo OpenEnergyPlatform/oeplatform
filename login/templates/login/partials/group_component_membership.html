@@ -18,7 +18,9 @@
                   hx-target="#alter-user-result"
                   data-error-display="alter-user-result">
               <input type="hidden" name="mode" value="alter_user" />
-              <input type="hidden" name="user_id" value="{{ membership.user.id }}" />
+              <input type="hidden"
+                     name="user_id"
+                     value="{{ membership.user.id }}" />
               <select aria-label="Group member's status" name="selected_value">
                 {% for value, choice in choices %}
                   <option value="{{ value }}"
@@ -47,12 +49,14 @@
               hx-swap="outerHTML"
               data-error-display="alter-user-result">
           <input type="hidden" name="mode" value="remove_user" />
-          <input type="hidden" name="user_id" value="{{ membership.user.id }}" />
+          <input type="hidden"
+                 name="user_id"
+                 value="{{ membership.user.id }}" />
           <input type="submit" class="btn btn-danger" value="Remove user" />
         </form>
       {% endif %}
     {% endfor %}
-    {% include 'login/partials/group_component_invite_user.html' %}
+    {% include "login/partials/group_component_invite_user.html" %}
   </div>
 </section>
 <script>

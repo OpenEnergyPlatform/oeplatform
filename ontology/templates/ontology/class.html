@@ -30,7 +30,9 @@
                href="#super_classes_accordion{{ forloop.counter }}">
               {{ super_class.name }}
             </a>
-            <div class="btn-group float-end" role="group" aria-label="Basic example">
+            <div class="btn-group float-end"
+                 role="group"
+                 aria-label="Basic example">
               <a class="btn btn-primary"
                  href="{% url 'ontology:oeo-class-detail' ontology=ontology module_or_id=super_class.ID %}">
                 view
@@ -41,7 +43,7 @@
                class="collapse"
                data-bs-parent="#super_classes_accordion">
             <div class="card-body">
-              {% if super_class.definitions != '' %}
+              {% if super_class.definitions != "" %}
                 {% for definition in super_class.definitions %}
                   <h6>Definition:</h6>
                   {{ definition }}
@@ -49,7 +51,7 @@
                   <br />
                 {% endfor %}
               {% endif %}
-              {% if super_class.notes != '' %}
+              {% if super_class.notes != "" %}
                 {% for note in super_class.notes %}
                   <h6>Editor note:</h6>
                   {{ note }}
@@ -57,7 +59,7 @@
                   <br />
                 {% endfor %}
               {% endif %}
-              {% if super_class.definitions == '' and super_class.notes == '' %}
+              {% if super_class.definitions == "" and super_class.notes == "" %}
                 No description found.
               {% endif %}
             </div>
@@ -71,7 +73,7 @@
 {% block main-content-body %}
   <h5>Label: {{ class_name }}</h5>
   <hr />
-  {% if class_definitions != '' %}
+  {% if class_definitions != "" %}
     {% for class_definition in class_definitions %}
       <h6>Definition:</h6>
       {{ class_definition }}
@@ -84,7 +86,7 @@
       No description found.
     {% endcomment %}
   {% endif %}
-  {% if class_notes != '' %}
+  {% if class_notes != "" %}
     {% for class_note in class_notes %}
       <div class="alert alert-primary" role="alert">
         <h6>Editor note:</h6>
@@ -106,7 +108,9 @@
             <a class="card-link"
                data-bs-toggle="collapse"
                href="#collapse{{ forloop.counter }}">{{ sub_class.name }}</a>
-            <div class="btn-group float-end" role="group" aria-label="Basic example">
+            <div class="btn-group float-end"
+                 role="group"
+                 aria-label="Basic example">
               <a class="btn btn-primary"
                  href="{% url 'ontology:oeo-class-detail' ontology=ontology module_or_id=sub_class.ID %}">
                 view
@@ -117,7 +121,7 @@
                class="collapse"
                data-bs-parent="#sub_classes_accordion">
             <div class="card-body">
-              {% if sub_class.definitions != '' %}
+              {% if sub_class.definitions != "" %}
                 {% for definition in sub_class.definitions %}
                   <h6>Definition:</h6>
                   {{ definition }}
@@ -125,7 +129,7 @@
                   <br />
                 {% endfor %}
               {% endif %}
-              {% if sub_class.notes != '' %}
+              {% if sub_class.notes != "" %}
                 {% for note in sub_class.notes %}
                   <div class="alert alert-primary" role="alert">
                     <h6>Editor note:</h6>
@@ -134,7 +138,7 @@
                   <br />
                 {% endfor %}
               {% endif %}
-              {% if sub_class.definitions == '' and sub_class.notes == '' %}
+              {% if sub_class.definitions == "" and sub_class.notes == "" %}
                 No description found.
               {% endif %}
             </div>

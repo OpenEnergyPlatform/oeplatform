@@ -27,7 +27,8 @@
                id="toggleDatasets"
                autocomplete="off"
                checked />
-        <label class="btn btn-outline-primary" for="toggleDatasets">Datasets</label>
+        <label class="btn btn-outline-primary"
+               for="toggleDatasets">Datasets</label>
       </div>
       <div class="d-flex align-items-center flex-wrap gap-3">
         {% if datasets_paginated.paginator.count > 0 %}
@@ -40,7 +41,7 @@
                 {% if datasets_paginated.has_previous %}
                   <li class="page-item">
                     <a class="page-link shadow-sm"
-                       href="?{{ params_wo_page }}&amp;page={{ datasets_paginated.previous_page_number }}">&laquo;</a>
+                       href="?{{ params_wo_page }}&amp;page={{ datasets_paginated.previous_page_number }}">«</a>
                   </li>
                 {% endif %}
                 <li class="page-item">
@@ -49,7 +50,7 @@
                 {% if datasets_paginated.has_next %}
                   <li class="page-item">
                     <a class="page-link shadow-sm"
-                       href="?{{ params_wo_page }}&amp;page={{ datasets_paginated.next_page_number }}">&raquo;</a>
+                       href="?{{ params_wo_page }}&amp;page={{ datasets_paginated.next_page_number }}">»</a>
                   </li>
                 {% endif %}
               </ul>
@@ -83,8 +84,8 @@
                 {% endif %}
                 <p class="card-text text-muted small mb-0">
                   {{ dataset.tables.count }} resource{{ dataset.tables.count|pluralize }}
-                  &middot; Total size: {{ dataset.total_size_bytes|filesizeformat }}
-                  &middot; created {{ dataset.created_at|date:"d/m/Y" }}
+                  · Total size: {{ dataset.total_size_bytes|filesizeformat }}
+                  · created {{ dataset.created_at|date:"d/m/Y" }}
                 </p>
               </div>
             </div>

@@ -1886,7 +1886,7 @@ const renderScenariosOverview = () => (
                   <Typography color="inherit" variant="subtitle1">
                     {'This can be used to copy the universal identifier for the scenario object below. You need the scenario UID if you want to edit the scenario using Web-API functionality.'}
                     <br />
-                    <a href="https://openenergyplatform.github.io/oeplatform/oeplatform-code/web-api/oekg-api/scenario-dataset/">How to use the Web-API</a>
+                    <a href="https://openenergyplatform.github.io/oeplatform/oeplatform-code/web-api/oekg-api/scenario-bundles/">How to use the Web-API</a>
                   </Typography>
                 </React.Fragment>
               }

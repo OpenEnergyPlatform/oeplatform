@@ -13,6 +13,7 @@ from modelview.views import (
     FSAddView,
     edit_model_view,
     fs_delete_view,
+    list_payload_view,
     list_sheets_view,
     model_to_csv_view,
     show_view,
@@ -34,6 +35,7 @@ urlpatterns = [
         name="delete-factsheet",
     ),
     path("<str:sheettype>s/download/", model_to_csv_view, name="download"),
+    path("<str:sheettype>s/payload/", list_payload_view, name="list-payload"),
     path("<str:sheettype>s/<int:pk>/", show_view, name="show-factsheet"),
     path("<str:sheettype>s/<int:pk>/edit/", edit_model_view, name="edit"),
     path(

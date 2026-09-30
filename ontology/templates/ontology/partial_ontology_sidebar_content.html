@@ -35,7 +35,7 @@
     <h3 class="ontology-side__title">Get the latest OEO release</h3>
     <p>
       Get the
-      <a class=" "
+      <a class=""
          href="{% url 'ontology:oeo-latest-glossary' ontology='oeo' %}">Glossary</a>
       to get an overview of the OEO contents.
     </p>
@@ -75,7 +75,8 @@
         <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="oeoFullInfoModalLabel">Full OEO Information</h5>
+              <h5 class="modal-title"
+                  id="oeoFullInfoModalLabel">Full OEO Information</h5>
               <button type="button"
                       class="btn-close"
                       data-bs-dismiss="modal"
@@ -89,7 +90,8 @@
               <p>You can download the full ontology using the following URLs:</p>
               <ul>
                 <li>
-                  <a href="{% url 'ontology:oeo-initializer' 'oeo' %}" target="_blank">{% url 'ontology:oeo-initializer' 'oeo' %}</a>
+                  <a href="{% url 'ontology:oeo-initializer' 'oeo' %}"
+                     target="_blank">{% url 'ontology:oeo-initializer' 'oeo' %}</a>
                 </li>
                 <li>
                   <a href="{% url 'ontology:oeo-static' 'oeo' 'oeo-full.owl' %}"
@@ -98,9 +100,9 @@
               </ul>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                Close
-              </button>
+              <button type="button"
+                      class="btn btn-secondary"
+                      data-bs-dismiss="modal">Close</button>
             </div>
           </div>
         </div>
@@ -137,7 +139,8 @@
         <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="closureInfoModalLabel">Closure OEO Information</h5>
+              <h5 class="modal-title"
+                  id="closureInfoModalLabel">Closure OEO Information</h5>
               <button type="button"
                       class="btn-close"
                       data-bs-dismiss="modal"
@@ -155,9 +158,9 @@
               </ul>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                Close
-              </button>
+              <button type="button"
+                      class="btn btn-secondary"
+                      data-bs-dismiss="modal">Close</button>
             </div>
           </div>
         </div>

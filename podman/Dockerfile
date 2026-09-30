@@ -60,9 +60,13 @@ RUN mkdir -p /app/ontologies /app/media/oeo_ext \
 
 # Build-time static asset collection (no DB needed)
 # Compress is also run at build time since it only reads templates and static files
+# fetch_oekg_shapes bakes the OEKG SHACL shape and the OEO label subset into the
+# image; see oekg/README.md. It must run after the OEO release is unpacked above,
+# because the label subset is generated from it.
 RUN cp /app/oeplatform/securitysettings.py.default /app/oeplatform/securitysettings.py \
     && python manage.py collectstatic --noinput \
     && python manage.py compress --force \
+    && python manage.py fetch_oekg_shapes \
     && rm /app/oeplatform/securitysettings.py
 
 

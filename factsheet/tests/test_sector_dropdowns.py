@@ -23,8 +23,15 @@ NACE_DIVISION = str(OEO.OEO_00000291)  # no members in the OEO
 class TestSectorDropdowns(unittest.TestCase):
     """The dynamic sector-division payload served by the populate endpoint.
 
-    Counts come from the OEKG scenario-bundles wayfinder research (WF-01 and its
-    NC/BR addendum) against the OEO shipped in this repo.
+    Counts are measured against the OEO shipped in this repository.
+
+    The architecture guide's table of where each controlled vocabulary comes
+    from describes this behaviour, and stood wrong about two of these lists
+    after they were made dynamic -- read by a person rather than caught by a
+    check. That is the drift this pointer exists for. It named a research note
+    in a private vault until now, which an external contributor cannot open.
+
+    Documents: docs/oeplatform-code/features/scenario-bundles/architecture.md
     """
 
     @classmethod

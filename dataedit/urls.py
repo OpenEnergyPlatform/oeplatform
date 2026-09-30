@@ -116,7 +116,13 @@ urlpatterns_view_schema = [
 urlpatterns_tag = [
     re_path(r"^$", tag_overview_view, name="tags"),
     re_path(r"^new/?$", tag_editor_view, name="tags-new"),
-    re_path(r"^edit/(?P<tag_pk>[a-z0-9_]+)/?$", tag_editor_view, name="tags-edit"),
+    # `[^/]+`, not `[a-z0-9_]+`: a tag's primary key is a CharField(40) and
+    # nothing renormalises it on the way in -- `migrate_tags2` copies
+    # `name_normalized` verbatim out of the OEDB. A single legacy pk carrying
+    # anything else took the whole overview down with a NoReverseMatch, because
+    # that page reverses this route once per tag. `edit/` keeps it clear of the
+    # sibling routes.
+    re_path(r"^edit/(?P<tag_pk>[^/]+?)/?$", tag_editor_view, name="tags-edit"),
     re_path(r"^add/?$", tag_table_add_view, name="tags-add"),
     re_path(r"^set/?$", tag_update_view, name="tags-set"),
 ]

@@ -6,8 +6,8 @@
       <div class="card-body">
         <p class="card-text text-muted">
           Bundle your tables into a citable dataset. Style the title as you
-          like &mdash; the permanent web address name is derived from it
-          automatically (e.g. &ldquo;Wind Power 2024&rdquo; &rarr;
+          like — the permanent web address name is derived from it
+          automatically (e.g. “Wind Power 2024” →
           <code>wind_power_2024</code>); title and description stay editable.
         </p>
         <form hx-post="{% url 'login:datasets' user_id=profile_user.id %}"
@@ -28,7 +28,8 @@
               {% endif %}
             </div>
             <div class="col-12">
-              <label class="form-label" for="dataset-description">Description</label>
+              <label class="form-label"
+                     for="dataset-description">Description</label>
               <textarea id="dataset-description"
                         name="description"
                         class="form-control {% if form_errors.description %}is-invalid{% endif %}"
@@ -39,7 +40,8 @@
               {% endif %}
             </div>
           </div>
-          <button type="submit" class="btn btn-primary mt-3">Create dataset</button>
+          <button type="submit"
+                  class="btn btn-primary mt-3">Create dataset</button>
         </form>
       </div>
     </div>
@@ -91,7 +93,7 @@
           </nav>
         {% endif %}
       {% elif search_query %}
-        <p>No datasets match &ldquo;{{ search_query }}&rdquo;.</p>
+        <p>No datasets match “{{ search_query }}”.</p>
       {% else %}
         <p>You have no datasets yet. Create one above to bundle your tables.</p>
       {% endif %}
