@@ -13,16 +13,12 @@ foreign key through the dialect answered 400 and there was no route left that
 would add one.
 
 The create path now builds a table FOREIGN KEY, and skips one that only repeats
-a column's. The first test compiles its body with the installed dialect, so it
-fails if the dialect's wire format and this parser drift apart again.
+a column's. The first test sends the body `oedialect` 0.1.1 sends, recorded
+rather than compiled, because this repository does not depend on the dialect.
 
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: E501
-
-import sqlalchemy as sa
-from oedialect.dialect import OEDialect
-from sqlalchemy.schema import CreateTable
 
 from api.actions import has_table
 from api.tests import APITestCase
@@ -31,21 +27,47 @@ PARENT = "fk_create_parent"
 
 
 def dialect_body(child, parent=PARENT, schema=None):
-    """The `columns` and `constraints` `oedialect` sends to create `child`."""
-    md = sa.MetaData()
-    sa.Table(
-        parent, md, sa.Column("id", sa.BigInteger, primary_key=True), schema=schema
-    )
-    target = f"{schema}.{parent}.id" if schema else f"{parent}.id"
-    table = sa.Table(
-        child,
-        md,
-        sa.Column("id", sa.BigInteger, primary_key=True),
-        sa.Column("parent_id", sa.BigInteger, sa.ForeignKey(target)),
-        schema=schema,
-    )
-    body = CreateTable(table).compile(dialect=OEDialect()).string
-    return {"columns": body["columns"], "constraints": body["constraints"]}
+    """The `columns` and `constraints` `oedialect` sends to create `child`.
+
+    Recorded from `oedialect` 0.1.1 (`CreateTable(...).compile(
+    dialect=OEDialect())` on a table with `sa.ForeignKey(f"{parent}.id")`)
+    rather than compiled here: this repository does not depend on the dialect,
+    so CI does not install it. Re-record it when the dialect's compiler
+    changes; catching that drift is the dialect's own contract test's job.
+    """
+    target = f"{schema}.{parent}" if schema else parent
+    return {
+        "constraints": [
+            {"constraint_type": "primary_key", "columns": ["id"]},
+            {
+                "constraint_type": "foreign_key",
+                "columns": ["parent_id"],
+                "target_table": target,
+                "target_columns": ["id"],
+                "match": "",
+                "cascades": "",
+                "deferrable": "",
+            },
+        ],
+        "columns": [
+            {
+                "name": "id",
+                "is_nullable": False,
+                "data_type": "BIGINT",
+                "primary_key": True,
+                "autoincrement": "auto",
+                "foreign_key": [],
+            },
+            {
+                "name": "parent_id",
+                "is_nullable": True,
+                "data_type": "BIGINT",
+                "primary_key": False,
+                "autoincrement": "auto",
+                "foreign_key": [{"schema": schema, "table": parent, "column": "id"}],
+            },
+        ],
+    }
 
 
 def child_structure(constraints):
