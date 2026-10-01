@@ -24,8 +24,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import F, Q
 from django.http import (
+    Http404,
     HttpResponse,
     HttpResponseForbidden,
     HttpResponseNotAllowed,
@@ -39,7 +41,6 @@ from django.views.generic import RedirectView, TemplateView, View
 from django.views.generic.edit import DeleteView
 from rest_framework.authtoken.models import Token
 
-import login.permissions
 from api.serializers import DatasetCreateSerializer, DatasetUpdateSerializer
 from api.services.dataset_creation import (
     DatasetNameTaken,
@@ -53,8 +54,14 @@ from api.services.dataset_creation import (
 )
 from dataedit.helper import delete_peer_review
 from dataedit.models import Dataset, PeerReviewManager, Table, Topic
+from login.access import (
+    ProfileOwnerRequiredMixin,
+    is_htmx,
+    membership_or_404,
+    profile_owner_required,
+)
 from login.forms import EditUserForm, OrganizationForm
-from login.models import Membership, Organization
+from login.models import Membership
 from login.models import myuser as OepUser
 from login.permissions import ADMIN_PERM, DELETE_PERM, WRITE_PERM
 from login.utils import get_tables_for_organization
@@ -71,7 +78,7 @@ ITEMS_PER_PAGE = 8
 ###########################################################################
 
 
-class TablesView(View):
+class TablesView(ProfileOwnerRequiredMixin, View):
 
     def _get_filtered_tables(self, user, search_query=""):
         """Return filtered querysets for draft and published tables."""
@@ -96,7 +103,7 @@ class TablesView(View):
 
     @method_decorator(never_cache)
     def get(self, request, user_id):
-        user = get_object_or_404(OepUser, pk=user_id)
+        user = self.profile_user
         search_query = request.GET.get("search", "").strip()
         has_search_param = "search" in request.GET
 
@@ -122,7 +129,7 @@ class TablesView(View):
             "search_query": search_query,
         }
 
-        if "HX-Request" in request.headers and not has_search_param:
+        if is_htmx(request) and not has_search_param:
             return render(
                 request,
                 "login/partials/tables_sections.html",
@@ -179,41 +186,39 @@ def _serializer_errors(serializer):
 
 
 def dataset_creator_required(view_func):
-    """Resolve profile user and dataset for the dataset partial views and
-    enforce that only the dataset's creator may act (403 otherwise)."""
+    """Resolve the dataset for the dataset partial views and enforce that
+    only the dataset's creator may act (403 otherwise).
+
+    Stacks under ``profile_owner_required``, which has already settled that
+    ``profile_user`` is the caller."""
 
     @wraps(view_func)
-    def wrapper(request, user_id, dataset_name, *args, **kwargs):
+    def wrapper(request, profile_user, dataset_name, *args, **kwargs):
         dataset = get_object_or_404(Dataset, name=dataset_name)
         if dataset.creator is None or dataset.creator != request.user:
             return HttpResponseForbidden(
                 "Only the dataset creator may manage this dataset."
             )
-        profile_user = get_object_or_404(OepUser, pk=user_id)
         return view_func(request, profile_user, dataset, *args, **kwargs)
 
     return wrapper
 
 
-class DatasetsView(LoginRequiredMixin, View):
+class DatasetsView(ProfileOwnerRequiredMixin, View):
     """Dataset-first dashboard view: list the user's datasets and create
     new ones via HTMX without page reloads. The name is immutable after
     creation; title and description stay editable."""
 
     @method_decorator(never_cache)
     def get(self, request, user_id):
-        user = get_object_or_404(OepUser, pk=user_id)
+        user = self.profile_user
         context = _datasets_context(request, user)
-        if "HX-Request" in request.headers:
+        if is_htmx(request):
             return render(request, "login/partials/datasets_sections.html", context)
         return render(request, "login/user_datasets.html", context)
 
     def post(self, request, user_id):
-        user = get_object_or_404(OepUser, pk=user_id)
-        if user != request.user:
-            return HttpResponseForbidden(
-                "Datasets can only be created on your own dashboard."
-            )
+        user = self.profile_user
 
         # the permanent URL name is derived from the title, so users can
         # style the title freely without thinking in slugs
@@ -245,7 +250,7 @@ class DatasetsView(LoginRequiredMixin, View):
         return render(request, "login/partials/datasets_sections.html", context)
 
 
-@login_required
+@profile_owner_required
 @dataset_creator_required
 def dataset_edit_view(request, profile_user, dataset):
     """Inline edit of a dataset card: title, description and topics; the
@@ -288,7 +293,7 @@ def dataset_edit_view(request, profile_user, dataset):
     )
 
 
-@login_required
+@profile_owner_required
 @dataset_creator_required
 def dataset_card_view(request, profile_user, dataset):
     """A single dataset card, used to close an open edit or manage panel
@@ -301,7 +306,7 @@ def dataset_card_view(request, profile_user, dataset):
     )
 
 
-@login_required
+@profile_owner_required
 @require_POST
 @dataset_creator_required
 def dataset_delete_view(request, profile_user, dataset):
@@ -338,7 +343,7 @@ def _render_dataset_manage(request, profile_user, dataset, search=""):
     return render(request, "login/partials/dataset_manage.html", context)
 
 
-@login_required
+@profile_owner_required
 @dataset_creator_required
 def dataset_manage_view(request, profile_user, dataset):
     """Manage panel for a dataset's resources: current tables with draft
@@ -346,7 +351,7 @@ def dataset_manage_view(request, profile_user, dataset):
     return _render_dataset_manage(request, profile_user, dataset)
 
 
-@login_required
+@profile_owner_required
 @dataset_creator_required
 def dataset_table_search_view(request, profile_user, dataset):
     """Picker search: only tables the user may assign under the curation
@@ -360,7 +365,7 @@ def dataset_table_search_view(request, profile_user, dataset):
     return render(request, "login/partials/dataset_table_search_results.html", context)
 
 
-@login_required
+@profile_owner_required
 @require_POST
 @dataset_creator_required
 def dataset_assign_view(request, profile_user, dataset):
@@ -373,7 +378,7 @@ def dataset_assign_view(request, profile_user, dataset):
     return _render_dataset_manage(request, profile_user, dataset)
 
 
-@login_required
+@profile_owner_required
 @require_POST
 @dataset_creator_required
 def dataset_unassign_view(request, profile_user, dataset):
@@ -388,7 +393,7 @@ def dataset_unassign_view(request, profile_user, dataset):
 ##############################################################################
 
 
-class ReviewsView(View):
+class ReviewsView(ProfileOwnerRequiredMixin, View):
     @method_decorator(never_cache)
     def get(self, request, user_id):
         """
@@ -398,7 +403,7 @@ class ReviewsView(View):
         :param user_id: An user id
         :return: Profile renderer
         """
-        user = get_object_or_404(OepUser, pk=user_id)
+        user = self.profile_user
 
         ##################################################################
         # get reviewer pov reviews
@@ -581,7 +586,7 @@ def delete_peer_review_simple_view(request):
     return delete_peer_review(review_id, request.user)
 
 
-class SettingsView(View):
+class SettingsView(ProfileOwnerRequiredMixin, View):
     @method_decorator(never_cache)
     def get(self, request, user_id):
         """
@@ -592,16 +597,11 @@ class SettingsView(View):
         :return: Profile renderer
         """
 
-        from rest_framework.authtoken.models import Token
-
         for user in OepUser.objects.all():
             Token.objects.get_or_create(user=user)
-        user = get_object_or_404(OepUser, pk=user_id)
-        token = None
-        user_organizations = None
-        if request.user.is_authenticated:
-            token = Token.objects.get(user=request.user)
-            user_organizations = request.user.memberships
+        user = self.profile_user
+        token = Token.objects.get(user=request.user)
+        user_organizations = request.user.memberships
         return render(
             request,
             "login/user_settings.html",
@@ -614,7 +614,7 @@ class SettingsView(View):
 ###########################################################################
 
 
-class OrganizationsView(View):
+class OrganizationsView(ProfileOwnerRequiredMixin, View):
     @method_decorator(never_cache)
     def get(self, request, user_id: int):
         """
@@ -628,7 +628,7 @@ class OrganizationsView(View):
         :return: Profile renderer
         """
 
-        user = get_object_or_404(OepUser, pk=user_id)
+        user = self.profile_user
 
         return render(
             request,
@@ -643,8 +643,7 @@ def organization_leave_view(request, organization_id: int):
     """ """
     user: OepUser = request.user
     user_id: int = request.user.id
-    organization = get_object_or_404(Organization, id=organization_id)
-    membership = get_object_or_404(Membership, group=organization, user=request.user)
+    organization, membership = membership_or_404(request.user, organization_id)
 
     members = (
         Membership.objects.filter(group=organization).exclude(user=user.pk).count()
@@ -665,17 +664,18 @@ def organization_leave_view(request, organization_id: int):
 
     membership.delete()
     response = HttpResponse()
-    response["HX-Redirect"] = f"/user/profile/{user_id}/organizations"
+    response["HX-Redirect"] = reverse(
+        "login:organizations", kwargs={"user_id": user_id}
+    )
     return response
 
 
 @login_required
 def organization_delete_view(request, organization_id: int):
     """View to delete an organization."""
-    organization = get_object_or_404(Organization, id=organization_id)
-    membership = get_object_or_404(Membership, group=organization, user=request.user)
-    if membership.level < login.permissions.ADMIN_PERM:
-        raise PermissionDenied
+    organization, _ = membership_or_404(
+        request.user, organization_id, min_level=ADMIN_PERM
+    )
     organization.delete()
     messages.add_message(
         request,
@@ -684,11 +684,13 @@ def organization_delete_view(request, organization_id: int):
         extra_tags="primary",
     )
     response = HttpResponse()
-    response["HX-Redirect"] = f"/user/profile/{request.user.id}/organizations"
+    response["HX-Redirect"] = reverse(
+        "login:organizations", kwargs={"user_id": request.user.id}
+    )
     return response
 
 
-class OrganizationListView(View):
+class OrganizationListView(ProfileOwnerRequiredMixin, View):
     @method_decorator(never_cache)
     def get(self, request, user_id: int):
         """
@@ -697,7 +699,7 @@ class OrganizationListView(View):
         :param user_id: An user id
         :return: Profile renderer
         """
-        user = get_object_or_404(OepUser, pk=user_id)
+        user = self.profile_user
 
         return render(
             request,
@@ -706,8 +708,11 @@ class OrganizationListView(View):
         )
 
 
-class OrganizationManagementView(View, LoginRequiredMixin):
-    form_is_valid = False
+class OrganizationManagementView(LoginRequiredMixin, View):
+    """Create an organization, or edit one the caller administers.
+
+    The login mixin comes first in the bases, see ProfileOwnerRequiredMixin.
+    """
 
     @method_decorator(never_cache)
     def get(self, request, organization_id=None):
@@ -723,10 +728,7 @@ class OrganizationManagementView(View, LoginRequiredMixin):
         can_edit = False
         organization = None
         if organization_id:
-            organization = Organization.objects.get(id=organization_id)
-            membership = get_object_or_404(
-                Membership, group=organization, user=request.user
-            )
+            organization, membership = membership_or_404(request.user, organization_id)
 
             # In case the organization is down to one member make sure
             # the remaining user gets admin permissions
@@ -752,7 +754,7 @@ class OrganizationManagementView(View, LoginRequiredMixin):
             organization_tables = get_tables_for_organization(organization=organization)
 
         # Redirect if the request is not triggered using htmx methods
-        if "HX-Request" not in request.headers:
+        if not is_htmx(request):
             return redirect("login:organizations", user_id=request.user.id)
 
         return render(
@@ -780,75 +782,66 @@ class OrganizationManagementView(View, LoginRequiredMixin):
         :param organization_id: An organization id
         :return: Profile renderer
         """
-        self.form_is_valid = False
-        user = request.user.id
-        organization = (
-            Organization.objects.get(id=organization_id) if organization_id else None
-        )
-        form = OrganizationForm(request.POST, instance=organization)
-        status = None
-        if form.is_valid():
-            self.form_is_valid = True
+        organization = None
+        if organization_id:
+            # who may edit is settled before the form touches the instance
+            organization, _ = membership_or_404(
+                request.user, organization_id, min_level=ADMIN_PERM
+            )
 
-        if not self.form_is_valid:
+        form = OrganizationForm(request.POST, instance=organization)
+        if not form.is_valid():
             return render(
                 request,
                 "login/partials/organization_form.html",
                 {"form": form},
             )
 
-        if self.form_is_valid:
-            # status = 201
-            if organization_id:
-                organization = form.save()
-                membership = get_object_or_404(
-                    Membership, group=organization, user=request.user
-                )
-                if membership.level < ADMIN_PERM:
-                    raise PermissionDenied
-                return render(
-                    request,
-                    "login/partials/organization_form.html",
-                    {"form": form, "organization": organization},
-                    status=status,
-                )
-            else:
-                organization = form.save()
-                membership = Membership.objects.create(
-                    user=request.user, group=organization, level=ADMIN_PERM
-                )
-                membership.save()
-                messages.add_message(
-                    request,
-                    level=messages.INFO,
-                    message=(
-                        "Organization created! "
-                        "Edit the organization to invite members."
-                    ),
-                    extra_tags="primary",
-                )
-                response = HttpResponse()
-                # response["profile_user"] = user
-                response["HX-Redirect"] = f"/user/profile/{user}/organizations"
-                return response
+        if organization_id:
+            organization = form.save()
+            return render(
+                request,
+                "login/partials/organization_form.html",
+                {"form": form, "organization": organization},
+            )
+
+        # a new organization and its first admin are one write, so an
+        # organization never exists without an owner
+        with transaction.atomic():
+            organization = form.save()
+            Membership.objects.create(
+                user=request.user, group=organization, level=ADMIN_PERM
+            )
+        messages.add_message(
+            request,
+            level=messages.INFO,
+            message="Organization created! Edit the organization to invite members.",
+            extra_tags="primary",
+        )
+        response = HttpResponse()
+        response["HX-Redirect"] = reverse(
+            "login:organizations", kwargs={"user_id": request.user.pk}
+        )
+        return response
 
 
-class OrganizationMembersView(TemplateView, LoginRequiredMixin):
+class OrganizationMembersView(LoginRequiredMixin, TemplateView):
+    """The member list of an organization, for its members only, and the
+    member changes their level allows.
+
+    The login mixin comes first in the bases, see ProfileOwnerRequiredMixin.
+    """
+
     template_name = "login/partials/organization_members.html"
 
     def get_context_data(self, **kwargs):
         """Render context."""
         context = super(OrganizationMembersView, self).get_context_data(**kwargs)
 
-        organization = get_object_or_404(
-            Organization, pk=self.kwargs["organization_id"]
+        organization, membership = membership_or_404(
+            self.request.user, self.kwargs["organization_id"]
         )
-        is_admin = False
-        membership = Membership.objects.filter(
-            group=organization, user=self.request.user
-        ).first()
-        if membership:
-            is_admin = membership.level >= ADMIN_PERM
+        is_admin = membership.level >= ADMIN_PERM
 
         context["organization"] = organization
         context["choices"] = Membership.choices
@@ -871,14 +864,11 @@ class OrganizationMembersView(TemplateView, LoginRequiredMixin):
                 "Post request required field 'mode' not specified!"
             )
 
-        organization = get_object_or_404(Organization, id=organization_id)
-        membership = get_object_or_404(
-            Membership, group=organization, user=request.user
-        )
+        organization, membership = membership_or_404(request.user, organization_id)
 
         error_message = None
         if mode == "add_user":
-            if membership.level < login.permissions.WRITE_PERM:
+            if membership.level < WRITE_PERM:
                 raise PermissionDenied
             try:
                 user = OepUser.objects.get(name=request.POST["name"])
@@ -890,7 +880,7 @@ class OrganizationMembersView(TemplateView, LoginRequiredMixin):
                 error_message = "User does not exist"
 
         elif mode == "remove_user":
-            if membership.level < login.permissions.DELETE_PERM:
+            if membership.level < DELETE_PERM:
                 raise PermissionDenied
 
             user_to_remove: OepUser = OepUser.objects.get(id=request.POST["user_id"])
@@ -902,7 +892,10 @@ class OrganizationMembersView(TemplateView, LoginRequiredMixin):
                 error_message = (
                     "Please leave the organization to remove your own membership."
                 )
-
+            elif membership.level < target_membership.level:
+                error_message = (
+                    "You cant remove memberships with higher permission level."
+                )
             elif target_membership.level >= ADMIN_PERM:
                 admins = (
                     Membership.objects.filter(group=organization, level=ADMIN_PERM)
@@ -911,15 +904,13 @@ class OrganizationMembersView(TemplateView, LoginRequiredMixin):
                 )
                 if admins == 0:
                     error_message = "A organization needs at least one admin"
-            elif membership.level < target_membership.level:
-                error_message = (
-                    "You cant remove memberships with higher permission level."
-                )
 
-            target_membership.delete()
+            # a refusal above is a refusal: nothing is removed
+            if error_message is None:
+                target_membership.delete()
 
         elif mode == "alter_user":
-            if membership.level < login.permissions.ADMIN_PERM:
+            if membership.level < ADMIN_PERM:
                 raise PermissionDenied
             user = OepUser.objects.get(id=request.POST["user_id"])
             if user == request.user:
@@ -940,17 +931,13 @@ class OrganizationMembersView(TemplateView, LoginRequiredMixin):
 ##############################################################################
 
 
-class EditUserView(View):
+class EditUserView(ProfileOwnerRequiredMixin, View):
     @method_decorator(never_cache)
     def get(self, request, user_id):
-        if not request.user.id == int(user_id):
-            raise PermissionDenied
         form = EditUserForm(instance=request.user)
         return render(request, "login/oepuser_edit_form.html", {"form": form})
 
     def post(self, request, user_id):
-        if not request.user.id == int(user_id):
-            raise PermissionDenied
         form = EditUserForm(
             instance=request.user,
             files=request.FILES or None,
@@ -988,6 +975,15 @@ class AccountDeleteView_TODO_UNUSED(LoginRequiredMixin, DeleteView):
         return render(request, "login/delete_account.html", {"profile_user": user})
 
 
+@profile_owner_required
+def account_delete_view(request, profile_user):
+    """Account deletion is not offered yet (see AccountDeleteView_TODO_UNUSED).
+
+    The route exists so its link resolves; it answers 404, to its owner too.
+    """
+    raise Http404
+
+
 # TODO: should be require_POST?
 def token_reset_view(request):
     if request.user.is_authenticated:
@@ -1003,8 +999,9 @@ def token_reset_view(request):
         return HttpResponseForbidden("You are not authorized to reset the token.")
 
 
+@profile_owner_required
 @never_cache
-def metadata_review_badge_indicator_icon_file_view(request, user_id, table_name):
+def metadata_review_badge_indicator_icon_file_view(request, profile_user, table_name):
     # is_badge : bool , msg : string -> either error msg or badge name
     table = get_object_or_404(Table, name=table_name)
     context = table.get_review_badge_from_table_metadata()

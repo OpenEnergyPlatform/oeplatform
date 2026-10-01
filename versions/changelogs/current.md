@@ -23,6 +23,9 @@ SPDX-License-Identifier: CC0-1.0
 - Deleting a peer review now checks the caller: only its reviewer or a platform
   admin may delete it
   [(#2544)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2544)
+- Restrict profile pages to their owner and check organization permissions
+  before saving
+  [(#2547)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2547)
 
 ## Documentation updates
 
