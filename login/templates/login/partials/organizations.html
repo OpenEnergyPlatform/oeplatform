@@ -100,7 +100,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
                           {{ membership.group.organization.member_count }} member
                         </div>
                       </div>
-                      <button class="organization-card__btn  organization-card__btn--edit"
+                      <button class="organization-card__btn organization-card__btn--edit"
                               hx-get="{% url 'login:organization-edit' organization_id=membership.group.organization.group_ptr_id %}"
                               hx-target=".htmxReplacementBox"
                               hx-push-url="true"

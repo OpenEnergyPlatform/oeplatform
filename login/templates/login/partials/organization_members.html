@@ -23,7 +23,9 @@ SPDX-License-Identifier: AGPL-3.0-or-later
                   hx-swap="outerHTML">
               {% csrf_token %}
               <input type="hidden" name="mode" value="alter_user" />
-              <input type="hidden" name="user_id" value="{{ membership.user.id }}" />
+              <input type="hidden"
+                     name="user_id"
+                     value="{{ membership.user.id }}" />
               <select aria-label="Group member's status" name="selected_value">
                 {% for value, choice in choices %}
                   <option value="{{ value }}"
@@ -40,9 +42,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
           <div class="profile-category__profile-name">{{ membership.user.name }}</div>
           <div class="profile-category__member-status">
             {% for value, choice in choices %}
-              <div>
-                {% if membership.level == value %}{{ choice }}{% endif %}
-              </div>
+              <div>{% if membership.level == value %}{{ choice }}{% endif %}</div>
             {% endfor %}
           </div>
         </div>
@@ -54,7 +54,9 @@ SPDX-License-Identifier: AGPL-3.0-or-later
               hx-swap="outerHTML">
           {% csrf_token %}
           <input type="hidden" name="mode" value="remove_user" />
-          <input type="hidden" name="user_id" value="{{ membership.user.id }}" />
+          <input type="hidden"
+                 name="user_id"
+                 value="{{ membership.user.id }}" />
           <input type="submit" class="btn btn-danger" value="Remove user" />
         </form>
       {% endif %}
