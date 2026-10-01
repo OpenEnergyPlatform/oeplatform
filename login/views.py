@@ -24,6 +24,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import F, Q
 from django.http import (
     Http404,
@@ -662,7 +663,9 @@ def organization_leave_view(request, organization_id: int):
 
     membership.delete()
     response = HttpResponse()
-    response["HX-Redirect"] = f"/user/profile/{user_id}/organizations"
+    response["HX-Redirect"] = reverse(
+        "login:organizations", kwargs={"user_id": user_id}
+    )
     return response
 
 
@@ -681,7 +684,9 @@ def organization_delete_view(request, organization_id: int):
         extra_tags="primary",
     )
     response = HttpResponse()
-    response["HX-Redirect"] = f"/user/profile/{request.user.id}/organizations"
+    response["HX-Redirect"] = reverse(
+        "login:organizations", kwargs={"user_id": request.user.id}
+    )
     return response
 
 
@@ -703,8 +708,12 @@ class OrganizationListView(ProfileOwnerRequiredMixin, View):
         )
 
 
-class OrganizationManagementView(View, LoginRequiredMixin):
-    form_is_valid = False
+class OrganizationManagementView(LoginRequiredMixin, View):
+    """Create an organization, or edit one the caller administers.
+
+    The login mixin comes first in the bases: ``View.dispatch`` does not call
+    further along the MRO, so a mixin after the view class never runs.
+    """
 
     @method_decorator(never_cache)
     def get(self, request, organization_id=None):
@@ -720,7 +729,7 @@ class OrganizationManagementView(View, LoginRequiredMixin):
         can_edit = False
         organization = None
         if organization_id:
-            organization = Organization.objects.get(id=organization_id)
+            organization = get_object_or_404(Organization, id=organization_id)
             membership = get_object_or_404(
                 Membership, group=organization, user=request.user
             )
@@ -777,60 +786,56 @@ class OrganizationManagementView(View, LoginRequiredMixin):
         :param organization_id: An organization id
         :return: Profile renderer
         """
-        self.form_is_valid = False
-        user = request.user.id
-        organization = (
-            Organization.objects.get(id=organization_id) if organization_id else None
-        )
-        form = OrganizationForm(request.POST, instance=organization)
-        status = None
-        if form.is_valid():
-            self.form_is_valid = True
+        organization = None
+        if organization_id:
+            # who may edit is settled before the form touches the instance
+            organization = get_object_or_404(Organization, id=organization_id)
+            membership = get_object_or_404(
+                Membership, group=organization, user=request.user
+            )
+            if membership.level < ADMIN_PERM:
+                raise PermissionDenied
 
-        if not self.form_is_valid:
+        form = OrganizationForm(request.POST, instance=organization)
+        if not form.is_valid():
             return render(
                 request,
                 "login/partials/organization_form.html",
                 {"form": form},
             )
 
-        if self.form_is_valid:
-            # status = 201
-            if organization_id:
-                organization = form.save()
-                membership = get_object_or_404(
-                    Membership, group=organization, user=request.user
-                )
-                if membership.level < ADMIN_PERM:
-                    raise PermissionDenied
-                return render(
-                    request,
-                    "login/partials/organization_form.html",
-                    {"form": form, "organization": organization},
-                    status=status,
-                )
-            else:
-                organization = form.save()
-                membership = Membership.objects.create(
-                    user=request.user, group=organization, level=ADMIN_PERM
-                )
-                membership.save()
-                messages.add_message(
-                    request,
-                    level=messages.INFO,
-                    message=(
-                        "Organization created! "
-                        "Edit the organization to invite members."
-                    ),
-                    extra_tags="primary",
-                )
-                response = HttpResponse()
-                # response["profile_user"] = user
-                response["HX-Redirect"] = f"/user/profile/{user}/organizations"
-                return response
+        if organization_id:
+            organization = form.save()
+            return render(
+                request,
+                "login/partials/organization_form.html",
+                {"form": form, "organization": organization},
+            )
+
+        # a new organization and its first admin are one write, so an
+        # organization never exists without an owner
+        with transaction.atomic():
+            organization = form.save()
+            Membership.objects.create(
+                user=request.user, group=organization, level=ADMIN_PERM
+            )
+        messages.add_message(
+            request,
+            level=messages.INFO,
+            message="Organization created! Edit the organization to invite members.",
+            extra_tags="primary",
+        )
+        response = HttpResponse()
+        response["HX-Redirect"] = reverse(
+            "login:organizations", kwargs={"user_id": request.user.pk}
+        )
+        return response
 
 
-class OrganizationMembersView(TemplateView, LoginRequiredMixin):
+class OrganizationMembersView(LoginRequiredMixin, TemplateView):
+    """The member list of an organization, for its members only, and the
+    member changes their level allows. Login mixin first, as above."""
+
     template_name = "login/partials/organization_members.html"
 
     def get_context_data(self, **kwargs):
@@ -840,12 +845,10 @@ class OrganizationMembersView(TemplateView, LoginRequiredMixin):
         organization = get_object_or_404(
             Organization, pk=self.kwargs["organization_id"]
         )
-        is_admin = False
-        membership = Membership.objects.filter(
-            group=organization, user=self.request.user
-        ).first()
-        if membership:
-            is_admin = membership.level >= ADMIN_PERM
+        membership = get_object_or_404(
+            Membership, group=organization, user=self.request.user
+        )
+        is_admin = membership.level >= ADMIN_PERM
 
         context["organization"] = organization
         context["choices"] = Membership.choices
@@ -899,7 +902,10 @@ class OrganizationMembersView(TemplateView, LoginRequiredMixin):
                 error_message = (
                     "Please leave the organization to remove your own membership."
                 )
-
+            elif membership.level < target_membership.level:
+                error_message = (
+                    "You cant remove memberships with higher permission level."
+                )
             elif target_membership.level >= ADMIN_PERM:
                 admins = (
                     Membership.objects.filter(group=organization, level=ADMIN_PERM)
@@ -908,12 +914,10 @@ class OrganizationMembersView(TemplateView, LoginRequiredMixin):
                 )
                 if admins == 0:
                     error_message = "A organization needs at least one admin"
-            elif membership.level < target_membership.level:
-                error_message = (
-                    "You cant remove memberships with higher permission level."
-                )
 
-            target_membership.delete()
+            # a refusal above is a refusal: nothing is removed
+            if error_message is None:
+                target_membership.delete()
 
         elif mode == "alter_user":
             if membership.level < login.permissions.ADMIN_PERM:
