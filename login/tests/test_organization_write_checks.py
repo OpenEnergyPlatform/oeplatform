@@ -53,9 +53,6 @@ class OrganizationFixture(TestCase):
         ).first()
         return membership.level if membership else None
 
-    def act_as(self, user):
-        act_as(self.client, user)
-
     def own_organizations_page(self, user):
         return reverse("login:organizations", kwargs={"user_id": user.pk})
 
@@ -74,7 +71,7 @@ class RenameIsCheckedBeforeSavingTests(OrganizationFixture):
         )
 
     def rename_as(self, user):
-        self.act_as(user)
+        act_as(self.client, user)
         return self.client.post(
             self.edit_url(),
             {"name": "org_check_renamed", "description": "renamed"},
@@ -111,7 +108,7 @@ class RenameIsCheckedBeforeSavingTests(OrganizationFixture):
         self.assert_unchanged()
 
     def test_unknown_organization_is_404(self):
-        self.act_as(self.admin)
+        act_as(self.client, self.admin)
         response = self.client.post(
             reverse("login:organization-edit", kwargs={"organization_id": 999999}),
             {"name": "org_check_renamed", "description": "renamed"},
@@ -139,7 +136,7 @@ class CreateAlwaysHasAnOwnerTests(OrganizationFixture):
         )
 
     def test_logged_in_create_makes_the_caller_its_admin(self):
-        self.act_as(self.stranger)
+        act_as(self.client, self.stranger)
         response = self.client.post(
             self.url, {"name": "org_check_new", "description": "d"}, **HTMX
         )
@@ -159,13 +156,13 @@ class LeaveAndDeleteRedirectTests(OrganizationFixture):
     """
 
     def caller_other_than_user_one(self, *candidates):
-        caller = next(user for user in candidates if user.pk != 1)
-        self.assertNotEqual(caller.pk, 1)
-        return caller
+        callers = [user for user in candidates if user.pk != 1]
+        self.assertTrue(callers, "every candidate caller has pk 1")
+        return callers[0]
 
     def test_leave_redirects_to_own_page(self):
         caller = self.caller_other_than_user_one(self.inviter, self.remover)
-        self.act_as(caller)
+        act_as(self.client, caller)
         response = self.client.post(
             reverse(
                 "login:organization-leave",
@@ -178,7 +175,7 @@ class LeaveAndDeleteRedirectTests(OrganizationFixture):
 
     def test_delete_redirects_to_own_page(self):
         caller = self.caller_other_than_user_one(self.admin, self.second_admin)
-        self.act_as(caller)
+        act_as(self.client, caller)
         response = self.client.post(
             reverse(
                 "login:organization-delete",
@@ -198,21 +195,21 @@ class MemberChangesAreCheckedFirstTests(OrganizationFixture):
         )
 
     def post_as(self, user, data):
-        self.act_as(user)
+        act_as(self.client, user)
         return self.client.post(self.members_url(), data, **HTMX)
 
     def test_member_list_needs_a_membership(self):
-        self.act_as(self.inviter)
+        act_as(self.client, self.inviter)
         self.assertContains(
             self.client.get(self.members_url(), **HTMX), "OrgCheckAdmin"
         )
 
-        self.act_as(self.stranger)
+        act_as(self.client, self.stranger)
         response = self.client.get(self.members_url(), **HTMX)
         self.assertEqual(response.status_code, 404)
         self.assertNotIn("OrgCheckAdmin", response.content.decode())
 
-        self.act_as(None)
+        act_as(self.client, None)
         response = self.client.get(self.members_url(), **HTMX)
         self.assertEqual(response.status_code, 302)
 

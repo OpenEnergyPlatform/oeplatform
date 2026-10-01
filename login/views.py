@@ -41,7 +41,6 @@ from django.views.generic import RedirectView, TemplateView, View
 from django.views.generic.edit import DeleteView
 from rest_framework.authtoken.models import Token
 
-import login.permissions
 from api.serializers import DatasetCreateSerializer, DatasetUpdateSerializer
 from api.services.dataset_creation import (
     DatasetNameTaken,
@@ -869,7 +868,7 @@ class OrganizationMembersView(LoginRequiredMixin, TemplateView):
 
         error_message = None
         if mode == "add_user":
-            if membership.level < login.permissions.WRITE_PERM:
+            if membership.level < WRITE_PERM:
                 raise PermissionDenied
             try:
                 user = OepUser.objects.get(name=request.POST["name"])
@@ -881,7 +880,7 @@ class OrganizationMembersView(LoginRequiredMixin, TemplateView):
                 error_message = "User does not exist"
 
         elif mode == "remove_user":
-            if membership.level < login.permissions.DELETE_PERM:
+            if membership.level < DELETE_PERM:
                 raise PermissionDenied
 
             user_to_remove: OepUser = OepUser.objects.get(id=request.POST["user_id"])
@@ -911,7 +910,7 @@ class OrganizationMembersView(LoginRequiredMixin, TemplateView):
                 target_membership.delete()
 
         elif mode == "alter_user":
-            if membership.level < login.permissions.ADMIN_PERM:
+            if membership.level < ADMIN_PERM:
                 raise PermissionDenied
             user = OepUser.objects.get(id=request.POST["user_id"])
             if user == request.user:

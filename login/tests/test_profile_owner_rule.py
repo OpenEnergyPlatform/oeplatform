@@ -16,6 +16,7 @@ from functools import wraps
 from urllib.parse import parse_qs, urlsplit
 
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpResponse
 from django.shortcuts import resolve_url
@@ -210,6 +211,16 @@ class OwnerRuleCheckSelfTests(TestCase):
     def test_rule_wrapped_by_another_decorator_is_rejected(self):
         # the rule must be the outermost layer, so nothing runs before it
         self.assertFalse(enforces_owner_rule(never_cache(_guarded_function)))
+
+    def test_wrapped_class_view_is_rejected(self):
+        # functools.wraps copies view_class onto the wrapper, so a decorator
+        # around as_view() looks like the class view while the wrapper runs
+        # first; the rule must be the outermost layer for class views too
+        for decorator in (login_required, never_cache):
+            with self.subTest(decorator=decorator.__name__):
+                wrapped = decorator(_Guarded.as_view())
+                self.assertIs(wrapped.view_class, _Guarded)
+                self.assertFalse(enforces_owner_rule(wrapped))
 
     def test_guarded_views_are_accepted(self):
         self.assertTrue(enforces_owner_rule(_Guarded.as_view()))

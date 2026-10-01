@@ -2,9 +2,18 @@
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
 
-Who may reach a view under ``profile/<user_id>/``: its owner, and nobody else.
+Access checks for the ``login`` views: who may reach a profile view, and who
+may act on an organization.
 
-A profile page is a user's own dashboard. There is no public profile and no
+- ``ProfileOwnerRequiredMixin`` / ``profile_owner_required``: the owner rule
+  for every view under ``profile/<user_id>/`` (below), and
+  ``enforces_owner_rule`` to tell whether it runs for a URL callback.
+- ``membership_or_404``: the caller's membership in an organization, with a
+  minimum level; not a member answers 404, a level too low 403.
+- ``is_htmx``: whether a request came from htmx, which decides between a
+  page answer and a fragment answer.
+
+The owner rule: a profile page is a user's own dashboard. There is no public profile and no
 "someone else's dashboard" to show, so every route carrying a ``user_id``
 answers only when that id is the caller's own:
 
@@ -29,9 +38,9 @@ This lives in its own module rather than in ``login/permissions.py`` because
 that one holds the permission levels and is imported by ``login/models.py`` at
 app-loading time, before the auth views this module needs can be imported.
 
-``enforces_owner_rule`` tells whether the rule actually runs for a URL
-callback. ``login/tests/test_profile_owner_rule`` walks every URL pattern and
-fails for a ``user_id`` route on which it does not.
+``login/tests/test_profile_owner_rule`` walks every URL pattern and fails for
+a ``user_id`` route on which ``enforces_owner_rule`` says the rule does not
+run.
 """  # noqa: 501
 
 from functools import wraps
@@ -83,6 +92,12 @@ class ProfileOwnerRequiredMixin:
         return super().dispatch(request, *args, **kwargs)
 
 
+# The wrappers profile_owner_required made. A registry rather than an
+# attribute, because functools.wraps copies attributes onto whatever wraps a
+# view, so an attribute would also mark a function that never runs the rule.
+_GUARDED_FUNCTIONS = WeakSet()
+
+
 def profile_owner_required(view_func):
     """The owner rule for function views.
 
@@ -101,25 +116,26 @@ def profile_owner_required(view_func):
     return wrapper
 
 
-# The wrappers profile_owner_required made. A registry rather than an
-# attribute, because functools.wraps copies attributes onto whatever wraps a
-# view, so an attribute would also mark a function that never runs the rule.
-_GUARDED_FUNCTIONS = WeakSet()
-
-
 def enforces_owner_rule(view) -> bool:
     """Whether the owner rule runs first for this URL callback.
 
     A class-based view must resolve ``dispatch`` to the mixin's own: that
     rejects the mixin listed after ``View`` (``View.dispatch`` wins and never
     calls along the MRO) and a ``dispatch`` override that could skip it. A
-    function view must be the decorator's wrapper itself, the outermost layer,
-    so nothing runs before the rule.
+    function view must be the decorator's wrapper itself. Either way the rule
+    is the outermost layer, so nothing runs before it: any other decorated
+    callable is rejected, including a decorator around ``as_view()``, which
+    ``functools.wraps`` makes look like the class view by copying
+    ``view_class`` onto it.
     """
+    if view in _GUARDED_FUNCTIONS:
+        return True
+    if hasattr(view, "__wrapped__"):
+        return False
     view_class = getattr(view, "view_class", None)
     if view_class is not None:
         return view_class.dispatch is ProfileOwnerRequiredMixin.dispatch
-    return view in _GUARDED_FUNCTIONS
+    return False
 
 
 def membership_or_404(user, organization_id, min_level=NO_PERM):

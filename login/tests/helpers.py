@@ -15,6 +15,9 @@ HTMX = {"HTTP_HX_REQUEST": "true"}
 
 
 def make_user(name, **extra):
+    """A verified user who has agreed to the terms, named ``name``; its
+    email is derived from the name. ``extra`` sets further fields, such as
+    ``is_admin``. Returns the existing user if one already matches."""
     user, _ = myuser.objects.get_or_create(
         name=name,
         email=f"{name.lower()}@test.com",
