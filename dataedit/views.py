@@ -1460,7 +1460,7 @@ class TablePeerReviewView(LoginRequiredMixin, View):
         # The delete path is handled directly (unified into ReviewService in a
         # later step); everything else is orchestrated by the service.
         if review_data.get("reviewType") == "delete":
-            return delete_peer_review(review_id)
+            return delete_peer_review(review_id, request.user)
 
         service = ReviewService(table_name=table_obj.name, actor=request.user)
         try:

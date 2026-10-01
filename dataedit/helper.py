@@ -264,15 +264,25 @@ def process_review_data(review_data, metadata, categories):
     return state_dict
 
 
-def delete_peer_review(review_id):
-    """Remove Peer Review by review_id."""
+def delete_peer_review(review_id, user):
+    """Remove Peer Review by review_id, on behalf of ``user``.
+
+    Only the review's reviewer may delete it: the delete button is rendered
+    for the reviewer alone (profile reviews page, reviewer's review page).
+    """
+    if not user.is_authenticated:
+        return JsonResponse({"error": "Authentication required."}, status=401)
     if review_id:
         peer_review = PeerReview.objects.filter(id=review_id).first()
-        if peer_review:
-            peer_review.delete()
-            return JsonResponse({"message": "PeerReview successfully deleted."})
-        else:
+        if peer_review is None:
             return JsonResponse({"error": "PeerReview not found."}, status=404)
+        if peer_review.reviewer_id != user.pk:
+            return JsonResponse(
+                {"error": "Only the reviewer may delete this peer review."},
+                status=403,
+            )
+        peer_review.delete()
+        return JsonResponse({"message": "PeerReview successfully deleted."})
     else:
         return JsonResponse({"error": "Review ID is required."}, status=400)
 
