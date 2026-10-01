@@ -54,6 +54,11 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=raw,value=latest
 
+      - name: Set up Docker Buildx
+        # The runner's default "docker" driver cannot export a build cache,
+        # so the type=gha cache below needs a docker-container builder.
+        uses: docker/setup-buildx-action@v3
+
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
@@ -91,6 +96,11 @@ jobs:
           tags: |
             type=semver,pattern={{version}}
             type=raw,value=latest
+
+      - name: Set up Docker Buildx
+        # The runner's default "docker" driver cannot export a build cache,
+        # so the type=gha cache below needs a docker-container builder.
+        uses: docker/setup-buildx-action@v3
 
       - name: Build and push
         uses: docker/build-push-action@v6
