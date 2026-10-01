@@ -13,6 +13,7 @@ exemption for platform admins.
 
 import re
 from functools import wraps
+from urllib.parse import parse_qs, urlsplit
 
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
@@ -23,6 +24,7 @@ from django.urls import URLResolver, get_resolver, re_path, reverse
 from django.urls.resolvers import RegexPattern
 from django.views.decorators.cache import never_cache
 from django.views.generic import View
+from rest_framework.authtoken.models import Token
 
 from base.tests import get_urlpattern_params
 from dataedit.models import Dataset, PeerReview, PeerReviewManager, Table
@@ -32,8 +34,7 @@ from login.access import (
     profile_owner_required,
 )
 from login.models import ADMIN_PERM, UserPermission, myuser
-
-HTMX = {"HTTP_HX_REQUEST": "true"}
+from login.tests.helpers import HTMX, act_as, make_user
 
 
 def without_csrf(response) -> str:
@@ -43,17 +44,6 @@ def without_csrf(response) -> str:
         r"\1",
         response.content.decode(),
     )
-
-
-def make_user(name, **extra):
-    user, _ = myuser.objects.get_or_create(
-        name=name,
-        email=f"{name.lower()}@test.com",
-        did_agree=True,
-        is_mail_verified=True,
-        **extra,
-    )
-    return user
 
 
 class OwnerRuleFixture(TestCase):
@@ -287,14 +277,17 @@ class ProfileRoutesTests(OwnerRuleFixture):
             ("login:account-delete", {}, 404),
         ]
 
-    post_routes = (
-        "login:datasets",
-        "login:dataset-edit",
-        "login:dataset-delete",
-        "login:dataset-assign",
-        "login:dataset-unassign",
-        "login:edit",
-    )
+    def post_routes(self):
+        """(name, extra kwargs) for every route that takes a POST."""
+        dataset = {"dataset_name": self.dataset_name}
+        return [
+            ("login:datasets", {}),
+            ("login:dataset-edit", dataset),
+            ("login:dataset-delete", dataset),
+            ("login:dataset-assign", dataset),
+            ("login:dataset-unassign", dataset),
+            ("login:edit", {}),
+        ]
 
     def url(self, name, user_id, extra):
         return reverse(name, kwargs={"user_id": user_id, **extra})
@@ -326,9 +319,9 @@ class ProfileRoutesTests(OwnerRuleFixture):
                 url = self.url(name, self.owner.pk, extra)
                 response = self.client.get(url)
                 self.assertEqual(response.status_code, 302)
-                location = response["Location"]
-                self.assertTrue(location.startswith(login_url), location)
-                self.assertIn("next=", location)
+                location = urlsplit(response["Location"])
+                self.assertEqual(location.path, login_url)
+                self.assertEqual(parse_qs(location.query)["next"], [url])
 
     def test_anonymous_htmx_gets_401_without_body(self):
         for name, extra, _ in self.routes():
@@ -351,12 +344,7 @@ class ProfileRoutesTests(OwnerRuleFixture):
 
     def test_foreign_post_is_refused_before_anything_else(self):
         self.client.force_login(self.foreign)
-        for name in self.post_routes:
-            extra = (
-                {}
-                if name in ("login:datasets", "login:edit")
-                else {"dataset_name": self.dataset_name}
-            )
+        for name, extra in self.post_routes():
             with self.subTest(route=name):
                 response = self.client.post(
                     self.url(name, self.owner.pk, extra),
@@ -366,12 +354,7 @@ class ProfileRoutesTests(OwnerRuleFixture):
                 self.assertEqual(response.status_code, 404)
 
     def test_anonymous_post_is_refused(self):
-        for name in self.post_routes:
-            extra = (
-                {}
-                if name in ("login:datasets", "login:edit")
-                else {"dataset_name": self.dataset_name}
-            )
+        for name, extra in self.post_routes():
             with self.subTest(route=name):
                 url = self.url(name, self.owner.pk, extra)
                 self.assertEqual(self.client.post(url, {}).status_code, 302)
@@ -381,22 +364,16 @@ class ProfileRoutesTests(OwnerRuleFixture):
 class RefusedGetsWriteNothingTests(OwnerRuleFixture):
     """Two profile GETs write; a refused caller must not reach either write."""
 
-    callers = ("foreign", "anonymous")
-
-    def act_as(self, caller):
-        self.client.logout()
-        if caller == "foreign":
-            self.client.force_login(self.foreign)
+    def callers(self):
+        return (("foreign", self.foreign), ("anonymous", None))
 
     def test_refused_settings_get_creates_no_token(self):
-        from rest_framework.authtoken.models import Token
-
         Token.objects.filter(user=self.owner).delete()
         url = reverse("login:settings", kwargs={"user_id": self.owner.pk})
-        for caller in self.callers:
+        for caller, user in self.callers():
             for headers in ({}, HTMX):
                 with self.subTest(caller=caller, htmx=bool(headers)):
-                    self.act_as(caller)
+                    act_as(self.client, user)
                     self.client.get(url, **headers)
                     self.assertFalse(Token.objects.filter(user=self.owner).exists())
 
@@ -409,10 +386,10 @@ class RefusedGetsWriteNothingTests(OwnerRuleFixture):
         )
         manager = PeerReviewManager.objects.create(opr=review, is_open_since="stale")
         url = reverse("login:reviews", kwargs={"user_id": self.owner.pk})
-        for caller in self.callers:
+        for caller, user in self.callers():
             for headers in ({}, HTMX):
                 with self.subTest(caller=caller, htmx=bool(headers)):
-                    self.act_as(caller)
+                    act_as(self.client, user)
                     self.client.get(url, **headers)
                     manager.refresh_from_db()
                     self.assertEqual(manager.is_open_since, "stale")

@@ -20,20 +20,8 @@ from login.models import (
     WRITE_PERM,
     Membership,
     Organization,
-    myuser,
 )
-
-HTMX = {"HTTP_HX_REQUEST": "true"}
-
-
-def make_user(name):
-    user, _ = myuser.objects.get_or_create(
-        name=name,
-        email=f"{name.lower()}@test.com",
-        did_agree=True,
-        is_mail_verified=True,
-    )
-    return user
+from login.tests.helpers import HTMX, act_as, make_user
 
 
 class OrganizationFixture(TestCase):
@@ -66,9 +54,16 @@ class OrganizationFixture(TestCase):
         return membership.level if membership else None
 
     def act_as(self, user):
-        self.client.logout()
-        if user is not None:
-            self.client.force_login(user)
+        act_as(self.client, user)
+
+    def own_organizations_page(self, user):
+        return reverse("login:organizations", kwargs={"user_id": user.pk})
+
+    def assert_redirects_to_own_page(self, response, user):
+        """HX-Redirect to the caller's own organizations page, which the
+        owner rule lets them open."""
+        self.assertEqual(response["HX-Redirect"], self.own_organizations_page(user))
+        self.assertEqual(self.client.get(response["HX-Redirect"]).status_code, 200)
 
 
 class RenameIsCheckedBeforeSavingTests(OrganizationFixture):
@@ -153,11 +148,46 @@ class CreateAlwaysHasAnOwnerTests(OrganizationFixture):
             Membership.objects.get(group=organization, user=self.stranger).level,
             ADMIN_PERM,
         )
-        # the redirect goes to the caller's own organizations page, which
-        # the owner rule lets them open
-        own_page = reverse("login:organizations", kwargs={"user_id": self.stranger.pk})
-        self.assertEqual(response["HX-Redirect"], own_page)
-        self.assertEqual(self.client.get(own_page).status_code, 200)
+        self.assert_redirects_to_own_page(response, self.stranger)
+
+
+class LeaveAndDeleteRedirectTests(OrganizationFixture):
+    """Leave and delete send the caller to their own organizations page.
+
+    WF-09 found these redirects hard-coded to user 1's page, so the caller
+    used here is deliberately one whose pk is not 1.
+    """
+
+    def caller_other_than_user_one(self, *candidates):
+        caller = next(user for user in candidates if user.pk != 1)
+        self.assertNotEqual(caller.pk, 1)
+        return caller
+
+    def test_leave_redirects_to_own_page(self):
+        caller = self.caller_other_than_user_one(self.inviter, self.remover)
+        self.act_as(caller)
+        response = self.client.post(
+            reverse(
+                "login:organization-leave",
+                kwargs={"organization_id": self.organization.pk},
+            ),
+            **HTMX,
+        )
+        self.assertIsNone(self.level_of(caller))
+        self.assert_redirects_to_own_page(response, caller)
+
+    def test_delete_redirects_to_own_page(self):
+        caller = self.caller_other_than_user_one(self.admin, self.second_admin)
+        self.act_as(caller)
+        response = self.client.post(
+            reverse(
+                "login:organization-delete",
+                kwargs={"organization_id": self.organization.pk},
+            ),
+            **HTMX,
+        )
+        self.assertFalse(Organization.objects.filter(pk=self.organization.pk).exists())
+        self.assert_redirects_to_own_page(response, caller)
 
 
 class MemberChangesAreCheckedFirstTests(OrganizationFixture):
