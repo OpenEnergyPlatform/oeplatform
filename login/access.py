@@ -38,20 +38,25 @@ from functools import wraps
 from weakref import WeakSet
 
 from django.contrib.auth.views import redirect_to_login
+from django.core.exceptions import PermissionDenied
 from django.http import Http404, HttpResponse
+from django.shortcuts import get_object_or_404
+
+from login.models import Membership, Organization
+from login.permissions import NO_PERM
 
 
-def _is_htmx(request) -> bool:
+def is_htmx(request) -> bool:
+    """Whether the request came from htmx (it sends ``HX-Request``)."""
     return "HX-Request" in request.headers
 
 
-def _refusal(request, user_id):
-    """The response that refuses this caller, or None for the owner.
-
-    Raises Http404 for a logged-in caller with another id.
+def _refusal_or_raise_404(request, user_id):
+    """Settle the caller: None for the owner, a refusal for an anonymous
+    caller, and ``Http404`` raised for a logged-in caller with another id.
     """
     if not request.user.is_authenticated:
-        if _is_htmx(request):
+        if is_htmx(request):
             return HttpResponse(status=401)
         return redirect_to_login(request.get_full_path())
     if str(request.user.pk) != str(user_id):
@@ -63,13 +68,15 @@ class ProfileOwnerRequiredMixin:
     """The owner rule for class-based views.
 
     List it FIRST in the bases: ``View.dispatch`` does not call further along
-    the MRO, so a mixin placed after the view class never runs.
+    the MRO, so a mixin placed after the view class never runs. The same holds
+    for every mixin that guards ``dispatch``, Django's ``LoginRequiredMixin``
+    included; the organization views point here for that reason.
 
     On a match ``self.profile_user`` is the caller.
     """
 
     def dispatch(self, request, *args, **kwargs):
-        refusal = _refusal(request, kwargs.get("user_id"))
+        refusal = _refusal_or_raise_404(request, kwargs.get("user_id"))
         if refusal is not None:
             return refusal
         self.profile_user = request.user
@@ -85,7 +92,7 @@ def profile_owner_required(view_func):
 
     @wraps(view_func)
     def wrapper(request, user_id, *args, **kwargs):
-        refusal = _refusal(request, user_id)
+        refusal = _refusal_or_raise_404(request, user_id)
         if refusal is not None:
             return refusal
         return view_func(request, request.user, *args, **kwargs)
@@ -113,3 +120,18 @@ def enforces_owner_rule(view) -> bool:
     if view_class is not None:
         return view_class.dispatch is ProfileOwnerRequiredMixin.dispatch
     return view in _GUARDED_FUNCTIONS
+
+
+def membership_or_404(user, organization_id, min_level=NO_PERM):
+    """The organization and ``user``'s membership in it, or a refusal.
+
+    404 when the organization does not exist or ``user`` is not a member, so
+    a non-member learns nothing about it; ``PermissionDenied`` (403) when the
+    member's level is below ``min_level``. Returns
+    ``(organization, membership)``.
+    """
+    organization = get_object_or_404(Organization, id=organization_id)
+    membership = get_object_or_404(Membership, group=organization, user=user)
+    if membership.level < min_level:
+        raise PermissionDenied
+    return organization, membership

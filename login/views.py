@@ -55,9 +55,14 @@ from api.services.dataset_creation import (
 )
 from dataedit.helper import delete_peer_review
 from dataedit.models import Dataset, PeerReviewManager, Table, Topic
-from login.access import ProfileOwnerRequiredMixin, profile_owner_required
+from login.access import (
+    ProfileOwnerRequiredMixin,
+    is_htmx,
+    membership_or_404,
+    profile_owner_required,
+)
 from login.forms import EditUserForm, OrganizationForm
-from login.models import Membership, Organization
+from login.models import Membership
 from login.models import myuser as OepUser
 from login.permissions import ADMIN_PERM, DELETE_PERM, WRITE_PERM
 from login.utils import get_tables_for_organization
@@ -125,7 +130,7 @@ class TablesView(ProfileOwnerRequiredMixin, View):
             "search_query": search_query,
         }
 
-        if "HX-Request" in request.headers and not has_search_param:
+        if is_htmx(request) and not has_search_param:
             return render(
                 request,
                 "login/partials/tables_sections.html",
@@ -209,7 +214,7 @@ class DatasetsView(ProfileOwnerRequiredMixin, View):
     def get(self, request, user_id):
         user = self.profile_user
         context = _datasets_context(request, user)
-        if "HX-Request" in request.headers:
+        if is_htmx(request):
             return render(request, "login/partials/datasets_sections.html", context)
         return render(request, "login/user_datasets.html", context)
 
@@ -593,8 +598,6 @@ class SettingsView(ProfileOwnerRequiredMixin, View):
         :return: Profile renderer
         """
 
-        from rest_framework.authtoken.models import Token
-
         for user in OepUser.objects.all():
             Token.objects.get_or_create(user=user)
         user = self.profile_user
@@ -641,8 +644,7 @@ def organization_leave_view(request, organization_id: int):
     """ """
     user: OepUser = request.user
     user_id: int = request.user.id
-    organization = get_object_or_404(Organization, id=organization_id)
-    membership = get_object_or_404(Membership, group=organization, user=request.user)
+    organization, membership = membership_or_404(request.user, organization_id)
 
     members = (
         Membership.objects.filter(group=organization).exclude(user=user.pk).count()
@@ -672,10 +674,9 @@ def organization_leave_view(request, organization_id: int):
 @login_required
 def organization_delete_view(request, organization_id: int):
     """View to delete an organization."""
-    organization = get_object_or_404(Organization, id=organization_id)
-    membership = get_object_or_404(Membership, group=organization, user=request.user)
-    if membership.level < login.permissions.ADMIN_PERM:
-        raise PermissionDenied
+    organization, _ = membership_or_404(
+        request.user, organization_id, min_level=ADMIN_PERM
+    )
     organization.delete()
     messages.add_message(
         request,
@@ -711,8 +712,7 @@ class OrganizationListView(ProfileOwnerRequiredMixin, View):
 class OrganizationManagementView(LoginRequiredMixin, View):
     """Create an organization, or edit one the caller administers.
 
-    The login mixin comes first in the bases: ``View.dispatch`` does not call
-    further along the MRO, so a mixin after the view class never runs.
+    The login mixin comes first in the bases, see ProfileOwnerRequiredMixin.
     """
 
     @method_decorator(never_cache)
@@ -729,10 +729,7 @@ class OrganizationManagementView(LoginRequiredMixin, View):
         can_edit = False
         organization = None
         if organization_id:
-            organization = get_object_or_404(Organization, id=organization_id)
-            membership = get_object_or_404(
-                Membership, group=organization, user=request.user
-            )
+            organization, membership = membership_or_404(request.user, organization_id)
 
             # In case the organization is down to one member make sure
             # the remaining user gets admin permissions
@@ -758,7 +755,7 @@ class OrganizationManagementView(LoginRequiredMixin, View):
             organization_tables = get_tables_for_organization(organization=organization)
 
         # Redirect if the request is not triggered using htmx methods
-        if "HX-Request" not in request.headers:
+        if not is_htmx(request):
             return redirect("login:organizations", user_id=request.user.id)
 
         return render(
@@ -789,12 +786,9 @@ class OrganizationManagementView(LoginRequiredMixin, View):
         organization = None
         if organization_id:
             # who may edit is settled before the form touches the instance
-            organization = get_object_or_404(Organization, id=organization_id)
-            membership = get_object_or_404(
-                Membership, group=organization, user=request.user
+            organization, _ = membership_or_404(
+                request.user, organization_id, min_level=ADMIN_PERM
             )
-            if membership.level < ADMIN_PERM:
-                raise PermissionDenied
 
         form = OrganizationForm(request.POST, instance=organization)
         if not form.is_valid():
@@ -834,7 +828,10 @@ class OrganizationManagementView(LoginRequiredMixin, View):
 
 class OrganizationMembersView(LoginRequiredMixin, TemplateView):
     """The member list of an organization, for its members only, and the
-    member changes their level allows. Login mixin first, as above."""
+    member changes their level allows.
+
+    The login mixin comes first in the bases, see ProfileOwnerRequiredMixin.
+    """
 
     template_name = "login/partials/organization_members.html"
 
@@ -842,11 +839,8 @@ class OrganizationMembersView(LoginRequiredMixin, TemplateView):
         """Render context."""
         context = super(OrganizationMembersView, self).get_context_data(**kwargs)
 
-        organization = get_object_or_404(
-            Organization, pk=self.kwargs["organization_id"]
-        )
-        membership = get_object_or_404(
-            Membership, group=organization, user=self.request.user
+        organization, membership = membership_or_404(
+            self.request.user, self.kwargs["organization_id"]
         )
         is_admin = membership.level >= ADMIN_PERM
 
@@ -871,10 +865,7 @@ class OrganizationMembersView(LoginRequiredMixin, TemplateView):
                 "Post request required field 'mode' not specified!"
             )
 
-        organization = get_object_or_404(Organization, id=organization_id)
-        membership = get_object_or_404(
-            Membership, group=organization, user=request.user
-        )
+        organization, membership = membership_or_404(request.user, organization_id)
 
         error_message = None
         if mode == "add_user":
