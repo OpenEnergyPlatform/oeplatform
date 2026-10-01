@@ -15,10 +15,9 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
-- Deleting a peer review now checks the caller: only the review's reviewer may
-  delete it, which is who the delete button is shown to. Other users receive
-  `403` and requests without a login `401`, on both delete entry points (the
-  profile reviews page and the reviewer's review page)
+- Deleting a peer review now checks the caller: only its reviewer or a platform
+  admin may delete it
+  [(#2544)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2544)
 
 ## Documentation updates
 

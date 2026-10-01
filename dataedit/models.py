@@ -604,6 +604,18 @@ class PeerReview(models.Model):
     review_id: QuerySet["PeerReviewManager"]  # related_name, for static type checking
     rounds: QuerySet["ReviewRound"]  # related_name, for static type checking
 
+    def deletable_by(self, user) -> bool:
+        """Whether `user` may delete this peer review.
+
+        Its reviewer and platform admins may, whether or not the review is
+        finished; nobody else.
+        """
+        if not getattr(user, "is_authenticated", False):
+            return False
+        if getattr(user, "is_admin", False):
+            return True
+        return self.reviewer_id is not None and self.reviewer_id == user.pk
+
     # laden
     @classmethod
     def load(cls, table: str) -> Union["PeerReview", None]:
