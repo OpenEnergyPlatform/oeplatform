@@ -578,7 +578,7 @@ def delete_peer_review_simple_view(request):
     """
     data = json.loads(request.body)
     review_id = data.get("review_id")
-    return delete_peer_review(review_id)
+    return delete_peer_review(review_id, request.user)
 
 
 class SettingsView(View):

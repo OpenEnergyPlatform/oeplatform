@@ -15,6 +15,10 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
+- Deleting a peer review now checks the caller: only its reviewer or a platform
+  admin may delete it
+  [(#2544)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2544)
+
 ## Documentation updates
 
 ## Code Quality
