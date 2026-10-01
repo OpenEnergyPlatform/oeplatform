@@ -18,10 +18,16 @@ def copy_groups_to_organizations(apps, schema_editor):
     OrganizationMembership = apps.get_model("login", "OrganizationMembership")
 
     for ug in UserGroup.objects.all():
-        org, _ = Organization.objects.get_or_create(
+        # Reuse the auth.Group row the UserGroup already extends, so the
+        # organization keeps its name and its primary key (Membership.group
+        # and GroupPermission.holder end up pointing at auth.Group).
+        org = Organization(
+            group_ptr_id=ug.group_ptr_id,
+            name=ug.name,
             description=ug.description,
             is_admin=ug.is_admin,
         )
+        org.save_base(raw=True)
         # Copy permissions
         for gp in GroupPermission.objects.filter(holder=ug):
             OrganizationPermission.objects.get_or_create(
@@ -48,10 +54,15 @@ def copy_organizations_to_groups(apps, schema_editor):
     OrganizationMembership = apps.get_model("login", "OrganizationMembership")
 
     for org in Organization.objects.all():
-        ug, _ = UserGroup.objects.get_or_create(
+        # Mirror of the forward step: the UserGroup goes back onto the same
+        # auth.Group row, so name and primary key survive the round trip.
+        ug = UserGroup(
+            group_ptr_id=org.group_ptr_id,
+            name=org.name,
             description=org.description,
             is_admin=org.is_admin,
         )
+        ug.save_base(raw=True)
         # Copy permissions
         for p in OrganizationPermission.objects.filter(holder=org):
             GroupPermission.objects.get_or_create(
@@ -64,7 +75,7 @@ def copy_organizations_to_groups(apps, schema_editor):
         for m in OrganizationMembership.objects.filter(organization=org):
             GroupMembership.objects.get_or_create(
                 user=m.user,
-                group=org,
+                group=ug,
                 level=m.level,
             )
 

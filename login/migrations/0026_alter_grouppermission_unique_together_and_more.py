@@ -28,10 +28,6 @@ class Migration(migrations.Migration):
             model_name="grouppermission",
             name="table",
         ),
-        migrations.RemoveField(
-            model_name="usergroup",
-            name="group_ptr",
-        ),
         migrations.DeleteModel(
             name="GroupMembership",
         ),
