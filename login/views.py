@@ -26,6 +26,7 @@ from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.db.models import F, Q
 from django.http import (
+    Http404,
     HttpResponse,
     HttpResponseForbidden,
     HttpResponseNotAllowed,
@@ -53,6 +54,7 @@ from api.services.dataset_creation import (
 )
 from dataedit.helper import delete_peer_review
 from dataedit.models import Dataset, PeerReviewManager, Table, Topic
+from login.access import ProfileOwnerRequiredMixin, profile_owner_required
 from login.forms import EditUserForm, OrganizationForm
 from login.models import Membership, Organization
 from login.models import myuser as OepUser
@@ -71,7 +73,7 @@ ITEMS_PER_PAGE = 8
 ###########################################################################
 
 
-class TablesView(View):
+class TablesView(ProfileOwnerRequiredMixin, View):
 
     def _get_filtered_tables(self, user, search_query=""):
         """Return filtered querysets for draft and published tables."""
@@ -96,7 +98,7 @@ class TablesView(View):
 
     @method_decorator(never_cache)
     def get(self, request, user_id):
-        user = get_object_or_404(OepUser, pk=user_id)
+        user = self.profile_user
         search_query = request.GET.get("search", "").strip()
         has_search_param = "search" in request.GET
 
@@ -179,41 +181,39 @@ def _serializer_errors(serializer):
 
 
 def dataset_creator_required(view_func):
-    """Resolve profile user and dataset for the dataset partial views and
-    enforce that only the dataset's creator may act (403 otherwise)."""
+    """Resolve the dataset for the dataset partial views and enforce that
+    only the dataset's creator may act (403 otherwise).
+
+    Stacks under ``profile_owner_required``, which has already settled that
+    ``profile_user`` is the caller."""
 
     @wraps(view_func)
-    def wrapper(request, user_id, dataset_name, *args, **kwargs):
+    def wrapper(request, profile_user, dataset_name, *args, **kwargs):
         dataset = get_object_or_404(Dataset, name=dataset_name)
         if dataset.creator is None or dataset.creator != request.user:
             return HttpResponseForbidden(
                 "Only the dataset creator may manage this dataset."
             )
-        profile_user = get_object_or_404(OepUser, pk=user_id)
         return view_func(request, profile_user, dataset, *args, **kwargs)
 
     return wrapper
 
 
-class DatasetsView(LoginRequiredMixin, View):
+class DatasetsView(ProfileOwnerRequiredMixin, View):
     """Dataset-first dashboard view: list the user's datasets and create
     new ones via HTMX without page reloads. The name is immutable after
     creation; title and description stay editable."""
 
     @method_decorator(never_cache)
     def get(self, request, user_id):
-        user = get_object_or_404(OepUser, pk=user_id)
+        user = self.profile_user
         context = _datasets_context(request, user)
         if "HX-Request" in request.headers:
             return render(request, "login/partials/datasets_sections.html", context)
         return render(request, "login/user_datasets.html", context)
 
     def post(self, request, user_id):
-        user = get_object_or_404(OepUser, pk=user_id)
-        if user != request.user:
-            return HttpResponseForbidden(
-                "Datasets can only be created on your own dashboard."
-            )
+        user = self.profile_user
 
         # the permanent URL name is derived from the title, so users can
         # style the title freely without thinking in slugs
@@ -245,7 +245,7 @@ class DatasetsView(LoginRequiredMixin, View):
         return render(request, "login/partials/datasets_sections.html", context)
 
 
-@login_required
+@profile_owner_required
 @dataset_creator_required
 def dataset_edit_view(request, profile_user, dataset):
     """Inline edit of a dataset card: title, description and topics; the
@@ -288,7 +288,7 @@ def dataset_edit_view(request, profile_user, dataset):
     )
 
 
-@login_required
+@profile_owner_required
 @dataset_creator_required
 def dataset_card_view(request, profile_user, dataset):
     """A single dataset card, used to close an open edit or manage panel
@@ -301,7 +301,7 @@ def dataset_card_view(request, profile_user, dataset):
     )
 
 
-@login_required
+@profile_owner_required
 @require_POST
 @dataset_creator_required
 def dataset_delete_view(request, profile_user, dataset):
@@ -338,7 +338,7 @@ def _render_dataset_manage(request, profile_user, dataset, search=""):
     return render(request, "login/partials/dataset_manage.html", context)
 
 
-@login_required
+@profile_owner_required
 @dataset_creator_required
 def dataset_manage_view(request, profile_user, dataset):
     """Manage panel for a dataset's resources: current tables with draft
@@ -346,7 +346,7 @@ def dataset_manage_view(request, profile_user, dataset):
     return _render_dataset_manage(request, profile_user, dataset)
 
 
-@login_required
+@profile_owner_required
 @dataset_creator_required
 def dataset_table_search_view(request, profile_user, dataset):
     """Picker search: only tables the user may assign under the curation
@@ -360,7 +360,7 @@ def dataset_table_search_view(request, profile_user, dataset):
     return render(request, "login/partials/dataset_table_search_results.html", context)
 
 
-@login_required
+@profile_owner_required
 @require_POST
 @dataset_creator_required
 def dataset_assign_view(request, profile_user, dataset):
@@ -373,7 +373,7 @@ def dataset_assign_view(request, profile_user, dataset):
     return _render_dataset_manage(request, profile_user, dataset)
 
 
-@login_required
+@profile_owner_required
 @require_POST
 @dataset_creator_required
 def dataset_unassign_view(request, profile_user, dataset):
@@ -388,7 +388,7 @@ def dataset_unassign_view(request, profile_user, dataset):
 ##############################################################################
 
 
-class ReviewsView(View):
+class ReviewsView(ProfileOwnerRequiredMixin, View):
     @method_decorator(never_cache)
     def get(self, request, user_id):
         """
@@ -398,7 +398,7 @@ class ReviewsView(View):
         :param user_id: An user id
         :return: Profile renderer
         """
-        user = get_object_or_404(OepUser, pk=user_id)
+        user = self.profile_user
 
         ##################################################################
         # get reviewer pov reviews
@@ -581,7 +581,7 @@ def delete_peer_review_simple_view(request):
     return delete_peer_review(review_id, request.user)
 
 
-class SettingsView(View):
+class SettingsView(ProfileOwnerRequiredMixin, View):
     @method_decorator(never_cache)
     def get(self, request, user_id):
         """
@@ -596,12 +596,9 @@ class SettingsView(View):
 
         for user in OepUser.objects.all():
             Token.objects.get_or_create(user=user)
-        user = get_object_or_404(OepUser, pk=user_id)
-        token = None
-        user_organizations = None
-        if request.user.is_authenticated:
-            token = Token.objects.get(user=request.user)
-            user_organizations = request.user.memberships
+        user = self.profile_user
+        token = Token.objects.get(user=request.user)
+        user_organizations = request.user.memberships
         return render(
             request,
             "login/user_settings.html",
@@ -614,7 +611,7 @@ class SettingsView(View):
 ###########################################################################
 
 
-class OrganizationsView(View):
+class OrganizationsView(ProfileOwnerRequiredMixin, View):
     @method_decorator(never_cache)
     def get(self, request, user_id: int):
         """
@@ -628,7 +625,7 @@ class OrganizationsView(View):
         :return: Profile renderer
         """
 
-        user = get_object_or_404(OepUser, pk=user_id)
+        user = self.profile_user
 
         return render(
             request,
@@ -688,7 +685,7 @@ def organization_delete_view(request, organization_id: int):
     return response
 
 
-class OrganizationListView(View):
+class OrganizationListView(ProfileOwnerRequiredMixin, View):
     @method_decorator(never_cache)
     def get(self, request, user_id: int):
         """
@@ -697,7 +694,7 @@ class OrganizationListView(View):
         :param user_id: An user id
         :return: Profile renderer
         """
-        user = get_object_or_404(OepUser, pk=user_id)
+        user = self.profile_user
 
         return render(
             request,
@@ -940,17 +937,13 @@ class OrganizationMembersView(TemplateView, LoginRequiredMixin):
 ##############################################################################
 
 
-class EditUserView(View):
+class EditUserView(ProfileOwnerRequiredMixin, View):
     @method_decorator(never_cache)
     def get(self, request, user_id):
-        if not request.user.id == int(user_id):
-            raise PermissionDenied
         form = EditUserForm(instance=request.user)
         return render(request, "login/oepuser_edit_form.html", {"form": form})
 
     def post(self, request, user_id):
-        if not request.user.id == int(user_id):
-            raise PermissionDenied
         form = EditUserForm(
             instance=request.user,
             files=request.FILES or None,
@@ -988,6 +981,15 @@ class AccountDeleteView_TODO_UNUSED(LoginRequiredMixin, DeleteView):
         return render(request, "login/delete_account.html", {"profile_user": user})
 
 
+@profile_owner_required
+def account_delete_view(request, profile_user):
+    """Account deletion is not offered yet (see AccountDeleteView_TODO_UNUSED).
+
+    The route exists so its link resolves; it answers 404, to its owner too.
+    """
+    raise Http404
+
+
 # TODO: should be require_POST?
 def token_reset_view(request):
     if request.user.is_authenticated:
@@ -1003,8 +1005,9 @@ def token_reset_view(request):
         return HttpResponseForbidden("You are not authorized to reset the token.")
 
 
+@profile_owner_required
 @never_cache
-def metadata_review_badge_indicator_icon_file_view(request, user_id, table_name):
+def metadata_review_badge_indicator_icon_file_view(request, profile_user, table_name):
     # is_badge : bool , msg : string -> either error msg or badge name
     table = get_object_or_404(Table, name=table_name)
     context = table.get_review_badge_from_table_metadata()

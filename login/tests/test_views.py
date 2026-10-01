@@ -30,19 +30,21 @@ class TestViewsLogin(TestViewsTestCase):
             kwargs={"organization_id": organization_id},
             logged_in=True,
         )
-        self.get("login:organizations", kwargs={"user_id": user_id})
+        self.get("login:organizations", kwargs={"user_id": user_id}, logged_in=True)
         self.get(
             "login:partial-organization-membership",
             kwargs={"organization_id": organization_id},
             logged_in=True,
         )
-        self.get("login:partial-organizations", kwargs={"user_id": user_id})
+        self.get(
+            "login:partial-organizations", kwargs={"user_id": user_id}, logged_in=True
+        )
         self.get("login:password_reset")
         self.get("login:password_reset_complete")
         self.get("login:password_reset_done")
-        self.get("login:profile", kwargs={"user_id": user_id})
+        self.get("login:profile", kwargs={"user_id": user_id}, logged_in=True)
         self.get("login:redirect")
         self.get("login:reset-token", logged_in=True)
-        self.get("login:reviews", kwargs={"user_id": user_id})
-        self.get("login:settings", kwargs={"user_id": user_id})
-        self.get("login:tables", kwargs={"user_id": user_id})
+        self.get("login:reviews", kwargs={"user_id": user_id}, logged_in=True)
+        self.get("login:settings", kwargs={"user_id": user_id}, logged_in=True)
+        self.get("login:tables", kwargs={"user_id": user_id}, logged_in=True)

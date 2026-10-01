@@ -18,7 +18,6 @@ from django.contrib.auth.views import (
 )
 from django.urls import path, re_path
 
-from base.views import handler404
 from login.views import (
     DatasetsView,
     EditUserView,
@@ -29,6 +28,7 @@ from login.views import (
     ReviewsView,
     SettingsView,
     TablesView,
+    account_delete_view,
     dataset_assign_view,
     dataset_card_view,
     dataset_delete_view,
@@ -150,8 +150,7 @@ urlpatterns = [
     # TODO: implement tests before we allow user deletion
     re_path(
         r"^profile/(?P<user_id>[\d]+)/delete_acc$",
-        # AccountDeleteView.as_view(),
-        handler404,
+        account_delete_view,
         name="account-delete",
     ),
     re_path(
