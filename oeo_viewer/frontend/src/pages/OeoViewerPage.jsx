@@ -54,6 +54,7 @@ export default function OeoViewerPage() {
 
   // Single source of truth for the selected entity
   const [selectedEntity, setSelectedEntity] = useState({ iri: "", type: "class" });
+  const [hierarchyTargetIri, setHierarchyTargetIri] = useState("");
 
   // State for Toast Notifications
   const [toasts, setToasts] = useState([]);
@@ -75,7 +76,7 @@ export default function OeoViewerPage() {
       setSelectedEntity({
         iri: decodedIri,
         type: decodedType,
-      });
+      });setHierarchyTargetIri(decodedIri);
 
       // 2. Clear URL parameters after delay to ensure widgets initialize
       setTimeout(() => {
@@ -149,16 +150,23 @@ export default function OeoViewerPage() {
   };
 
   const handleAutocompleteChange = (sel) => {
-    if (!sel) {
-      setSelectedEntity({ iri: "", type: "class" });
-      return;
-    }
-    const item = Array.isArray(sel) ? sel[0] : sel;
-    setSelectedEntity({
-      iri: item?.iri || "",
-      type: item?.type || "class",
-    });
-  };
+  if (!sel) {
+    setSelectedEntity({ iri: "", type: "class" });
+    setHierarchyTargetIri("");
+    return;
+  }
+
+  const item = Array.isArray(sel) ? sel[0] : sel;
+  const iri = item?.iri || "";
+  const type = item?.type || "class";
+
+  setSelectedEntity({
+    iri,
+    type,
+  });
+
+  setHierarchyTargetIri(iri);
+};
 
   const handleHierarchyClick = (...args) => {
     let iri = "";
@@ -195,7 +203,7 @@ export default function OeoViewerPage() {
 
   const hierarchyComponent = (
     <TssHierarchy
-      iri={selectedEntity.iri}
+      iri={hierarchyTargetIri}
       keepExpansionStates={true}
       onNavigateToEntity={handleHierarchyClick}
       onNavigateToOntology={handleNavigateToOntology}
