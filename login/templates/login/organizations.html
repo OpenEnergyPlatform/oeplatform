@@ -1,0 +1,25 @@
+<!--
+SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2026 Hendrik Huyskens <https://github.com/henhuy> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+{% extends "base/base-profile.html" %}
+{% load django_bootstrap5 %}
+{% load static %}
+{% load compress %}
+{% block main-content-body %}
+  {% include "login/user_nav.html" %}
+  {% if request.user.is_authenticated and request.user == user %}
+    {% include "login/partials/organizations.html" %}
+  {% endif %}
+{% endblock %}
+{% block main-right-sidebar-content %}
+  {% include "login/sidebar_user.html" %}
+{% endblock %}
+{% block after-body-bottom-js %}
+  {% compress js %}
+    <script src="{% static 'ontology/htmx.js' %}"></script>
+  {% endcompress %}
+{% endblock after-body-bottom-js %}
