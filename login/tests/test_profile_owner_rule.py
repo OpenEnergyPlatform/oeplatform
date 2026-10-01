@@ -12,14 +12,25 @@ exemption for platform admins.
 """  # noqa: 501
 
 import re
+from functools import wraps
 
 from django.conf import settings
+from django.contrib.auth.models import AnonymousUser
+from django.http import HttpResponse
 from django.shortcuts import resolve_url
-from django.test import TestCase
-from django.urls import get_resolver, reverse
+from django.test import RequestFactory, TestCase
+from django.urls import URLResolver, get_resolver, re_path, reverse
+from django.urls.resolvers import RegexPattern
+from django.views.decorators.cache import never_cache
+from django.views.generic import View
 
-from base.tests import get_urlpattern_params, recursively_get_patterns
+from base.tests import get_urlpattern_params
 from dataedit.models import Dataset, PeerReview, PeerReviewManager, Table
+from login.access import (
+    ProfileOwnerRequiredMixin,
+    enforces_owner_rule,
+    profile_owner_required,
+)
 from login.models import ADMIN_PERM, UserPermission, myuser
 
 HTMX = {"HTTP_HX_REQUEST": "true"}
@@ -119,11 +130,18 @@ class TablesListIsTheOwnersOnlyTests(OwnerRuleFixture):
         self.assert_no_owner_tables(response)
 
 
-def carries_owner_rule(callback) -> bool:
-    view_class = getattr(callback, "view_class", None)
-    if view_class is not None:
-        return getattr(view_class, "owner_rule", False) is True
-    return getattr(callback, "owner_rule", False) is True
+def routes_capturing(param, resolver, inherited=frozenset()):
+    """Every URL pattern below ``resolver`` whose address captures ``param``.
+
+    A parameter captured by an ``include()`` prefix counts for every route
+    below it, so a ``user_id`` in a prefix covers all of its children.
+    """
+    for entry in resolver.url_patterns:
+        captured = inherited | set(get_urlpattern_params(entry))
+        if isinstance(entry, URLResolver):
+            yield from routes_capturing(param, entry, captured)
+        elif param in captured:
+            yield entry
 
 
 class EveryProfileRouteCarriesTheRuleTest(TestCase):
@@ -131,19 +149,102 @@ class EveryProfileRouteCarriesTheRuleTest(TestCase):
 
     The same pattern as the OEKG API's ``AllowlistTest``: joining the profile
     has to be a decision somebody made, not something a route does by
-    accident of where it was mounted.
+    accident of where it was mounted. The walk starts at the site's root, so
+    a ``user_id`` route in any app counts, however it is included.
     """
 
     def test_every_user_id_route_carries_the_owner_rule(self):
-        routes = [
-            pattern
-            for pattern in recursively_get_patterns(get_resolver("login.urls"))
-            if "user_id" in get_urlpattern_params(pattern)
-        ]
+        routes = list(routes_capturing("user_id", get_resolver()))
         # a guard against the walk silently finding nothing
         self.assertIn("tables", {p.name for p in routes})
-        missing = [p.name for p in routes if not carries_owner_rule(p.callback)]
+        missing = [p.name for p in routes if not enforces_owner_rule(p.callback)]
         self.assertEqual(missing, [], "profile routes without the owner rule")
+
+
+def _plain_view(request, *args, **kwargs):
+    return HttpResponse("served")
+
+
+class _MixinAfterView(View, ProfileOwnerRequiredMixin):
+    """Wrong order: View.dispatch runs and the mixin's never does."""
+
+    def get(self, request, user_id):
+        return HttpResponse("served")
+
+
+class _DispatchOverridden(ProfileOwnerRequiredMixin, View):
+    """Right order, but a dispatch of its own that skips the rule."""
+
+    def dispatch(self, request, *args, **kwargs):
+        return View.dispatch(self, request, *args, **kwargs)
+
+    def get(self, request, user_id):
+        return HttpResponse("served")
+
+
+class _Guarded(ProfileOwnerRequiredMixin, View):
+    def get(self, request, user_id):
+        return HttpResponse("served")
+
+
+@profile_owner_required
+def _guarded_function(request, profile_user):
+    return HttpResponse("served")
+
+
+@wraps(_guarded_function)
+def _impostor(request, user_id):
+    """Looks like the guarded view (wraps copies its attributes) but is not."""
+    return HttpResponse("served")
+
+
+class OwnerRuleCheckSelfTests(TestCase):
+    """The structural check must fail for a view on which the rule does not
+    run, even when the view mentions the rule."""
+
+    def test_wrong_class_is_rejected_and_really_skips_the_rule(self):
+        self.assertFalse(enforces_owner_rule(_MixinAfterView.as_view()))
+        # the reason it must be rejected: the rule does not run
+        request = RequestFactory().get("/")
+        request.user = AnonymousUser()
+        response = _MixinAfterView.as_view()(request, user_id="1")
+        self.assertEqual(response.status_code, 200)
+
+    def test_dispatch_override_is_rejected(self):
+        self.assertFalse(enforces_owner_rule(_DispatchOverridden.as_view()))
+
+    def test_impostor_function_is_rejected(self):
+        self.assertFalse(enforces_owner_rule(_impostor))
+        self.assertFalse(enforces_owner_rule(_plain_view))
+
+    def test_rule_wrapped_by_another_decorator_is_rejected(self):
+        # the rule must be the outermost layer, so nothing runs before it
+        self.assertFalse(enforces_owner_rule(never_cache(_guarded_function)))
+
+    def test_guarded_views_are_accepted(self):
+        self.assertTrue(enforces_owner_rule(_Guarded.as_view()))
+        self.assertTrue(enforces_owner_rule(_guarded_function))
+
+    def test_walk_follows_include_prefixes(self):
+        """A ``user_id`` captured by an include prefix covers its children."""
+        prefix = URLResolver(
+            RegexPattern(r"^profile/(?P<user_id>\d+)/"),
+            [
+                re_path(r"^unguarded$", _plain_view, name="unguarded"),
+                re_path(r"^guarded$", _guarded_function, name="guarded"),
+            ],
+        )
+        root = URLResolver(
+            RegexPattern(r"^"),
+            [
+                re_path(r"^outside$", _plain_view, name="outside"),
+                URLResolver(RegexPattern(r"^nested/"), [prefix]),
+            ],
+        )
+        routes = {p.name: p for p in routes_capturing("user_id", root)}
+        self.assertEqual(set(routes), {"unguarded", "guarded"})
+        self.assertFalse(enforces_owner_rule(routes["unguarded"].callback))
+        self.assertTrue(enforces_owner_rule(routes["guarded"].callback))
 
 
 class ProfileRoutesTests(OwnerRuleFixture):

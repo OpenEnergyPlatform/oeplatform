@@ -29,11 +29,13 @@ This lives in its own module rather than in ``login/permissions.py`` because
 that one holds the permission levels and is imported by ``login/models.py`` at
 app-loading time, before the auth views this module needs can be imported.
 
-Both forms carry ``owner_rule = True``. ``login/tests/test_profile_owner_rule``
-walks the URL patterns and fails for a ``user_id`` route without it.
+``enforces_owner_rule`` tells whether the rule actually runs for a URL
+callback. ``login/tests/test_profile_owner_rule`` walks every URL pattern and
+fails for a ``user_id`` route on which it does not.
 """  # noqa: 501
 
 from functools import wraps
+from weakref import WeakSet
 
 from django.contrib.auth.views import redirect_to_login
 from django.http import Http404, HttpResponse
@@ -66,8 +68,6 @@ class ProfileOwnerRequiredMixin:
     On a match ``self.profile_user`` is the caller.
     """
 
-    owner_rule = True
-
     def dispatch(self, request, *args, **kwargs):
         refusal = _refusal(request, kwargs.get("user_id"))
         if refusal is not None:
@@ -90,5 +90,26 @@ def profile_owner_required(view_func):
             return refusal
         return view_func(request, request.user, *args, **kwargs)
 
-    wrapper.owner_rule = True
+    _GUARDED_FUNCTIONS.add(wrapper)
     return wrapper
+
+
+# The wrappers profile_owner_required made. A registry rather than an
+# attribute, because functools.wraps copies attributes onto whatever wraps a
+# view, so an attribute would also mark a function that never runs the rule.
+_GUARDED_FUNCTIONS = WeakSet()
+
+
+def enforces_owner_rule(view) -> bool:
+    """Whether the owner rule runs first for this URL callback.
+
+    A class-based view must resolve ``dispatch`` to the mixin's own: that
+    rejects the mixin listed after ``View`` (``View.dispatch`` wins and never
+    calls along the MRO) and a ``dispatch`` override that could skip it. A
+    function view must be the decorator's wrapper itself, the outermost layer,
+    so nothing runs before the rule.
+    """
+    view_class = getattr(view, "view_class", None)
+    if view_class is not None:
+        return view_class.dispatch is ProfileOwnerRequiredMixin.dispatch
+    return view in _GUARDED_FUNCTIONS
