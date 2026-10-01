@@ -463,6 +463,11 @@ SPDX-License-Identifier: CC0-1.0
   name, it is now hermetic
   [(#2429)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2429)
 
+- Nodes in the OEO Graph View are no longer clipped when dragged below the
+  previously fixed graph container height. The graph container now provides more
+  vertical space, allowing nodes to remain visible when moved further down.
+  [(#2514)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2514)
+
 ## Documentation updates
 
 - Rule 3 of the client guide for scenario bundles described `replace/` as an
