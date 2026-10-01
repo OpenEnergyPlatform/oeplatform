@@ -10,12 +10,33 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 from django.forms import ModelForm
+from django.utils.functional import cached_property
 
 from modelview.models import Energyframework, Energymodel
 
 
+class FactsheetTagsMixin:
+    """The tag selection this form carries, as a set of raw primary keys.
+
+    `tag_selector.html` needs a membership test per rendered checkbox, and the
+    only safe shape for that is a small in-memory collection. Testing `in`
+    against a `QuerySet` is what made the list page quadratic (Django defines
+    no `QuerySet.__contains__`, so `in` falls back to iterating the whole
+    result cache); the same mistake here would scan the vocabulary once per
+    checkbox.
+
+    Reading it off the *bound* form is what makes a failed submit come back
+    with the user's selection intact -- and what makes an unbound edit form
+    show that factsheet's own tags and nothing else.
+    """
+
+    @cached_property
+    def selected_tag_pks(self) -> set:
+        return {str(pk) for pk in (self["tags"].value() or [])}
+
+
 # Create the form class.
-class EnergymodelForm(ModelForm):
+class EnergymodelForm(FactsheetTagsMixin, ModelForm):
     def __init__(self, *args, **kwargs):
         super(EnergymodelForm, self).__init__(*args, **kwargs)
         # set some as required
@@ -32,7 +53,7 @@ class EnergymodelForm(ModelForm):
         exclude = []
 
 
-class EnergyframeworkForm(ModelForm):
+class EnergyframeworkForm(FactsheetTagsMixin, ModelForm):
     def __init__(self, *args, **kwargs):
         super(EnergyframeworkForm, self).__init__(*args, **kwargs)
         for key in self.fields:

@@ -35,6 +35,7 @@ from factsheet.helper import (
     OEO_MODEL,
     OEO_PUBLICATION,
     OEO_SCENARIO,
+    PROP_BASED_ON_SECTOR_DIVISION,
     PUB_AUTHOR,
     PUB_DATE,
     PUB_DOI,
@@ -45,9 +46,9 @@ from factsheet.helper import (
     SCENARIO_REGION,
     SCENARIO_YEAR,
     SECTOR,
-    SECTOR_DIVISION,
     TECHNOLOGY,
     build_sector_dropdowns_from_oeo,
+    build_study_descriptors_from_oeo,
     clean_name,
     get_all_sub_classes,
     get_scenario_type_iri,
@@ -462,7 +463,7 @@ def create_factsheet_view(request, *args, **kwargs):
         )
         for item in _sector_divisions:
             sector_divisions_URI = URIRef(item["class"])
-            bundle.add((study_URI, OEO.OEO_00390079, sector_divisions_URI))
+            bundle.add((study_URI, PROP_BASED_ON_SECTOR_DIVISION, sector_divisions_URI))
 
         _sectors = json.loads(sectors) if sectors is not None else []
         for item in _sectors:
@@ -959,7 +960,9 @@ def update_factsheet_view(request, *args, **kwargs):
         )
         for item in _sector_divisions:
             sector_divisions_URI = URIRef(item["class"])
-            new_bundle.add((study_URI, OEO.OEO_00390079, sector_divisions_URI))
+            new_bundle.add(
+                (study_URI, PROP_BASED_ON_SECTOR_DIVISION, sector_divisions_URI)
+            )
 
         _sectors = json.loads(sectors) if sectors is not None else []
         for item in _sectors:
@@ -1163,7 +1166,7 @@ def factsheet_by_id_view(request, *args, **kwargs):
 
     # --- Sector divisions / sectors / technologies / keywords ---
     factsheet["sector_divisions"] = []
-    for _, _, o in oekg.triples((study_URI, SECTOR_DIVISION, None)):
+    for _, _, o in oekg.triples((study_URI, PROP_BASED_ON_SECTOR_DIVISION, None)):
         label = oeo.value(o, RDFS.label)
         if label is not None:
             factsheet["sector_divisions"].append(
@@ -1757,6 +1760,7 @@ def populate_factsheets_elements_view(request, *args, **kwargs):
     elements["sectors"] = sectors_list
     elements["scenario_descriptors"] = scenario_subclasses
     elements["technologies"] = technology_subclasses
+    elements["study_descriptors"] = build_study_descriptors_from_oeo(oeo)
 
     # for s, p, o in oeo.triples(( None, RDFS.subClassOf, OEO.OEO_00020003 )):
     #     sl = oeo.value(s, RDFS.label)

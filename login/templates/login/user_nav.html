@@ -22,6 +22,16 @@
 </script>
 <div class="pages-nav-tabs" id="profileTabs">
   {% if request.user.is_authenticated and profile_user == request.user %}
+    <a href="{% url 'login:datasets' profile_user.id %}">
+      <svg height="16"
+           width="16"
+           fill="currentColor"
+           xmlns="http://www.w3.org/2000/svg"
+           viewBox="0 0 16 16">
+        <path d="M8 1c-3.87 0-7 1.12-7 2.5v9C1 13.88 4.13 15 8 15s7-1.12 7-2.5v-9C15 2.12 11.87 1 8 1m0 1c3.71 0 6 1.04 6 1.5S11.71 5 8 5 2 3.96 2 3.5 4.29 2 8 2M2 5.08C3.29 5.65 5.47 6 8 6s4.71-.35 6-.92V7.5C14 7.96 11.71 9 8 9S2 7.96 2 7.5zm0 4C3.29 9.65 5.47 10 8 10s4.71-.35 6-.92v3.42c0 .46-2.29 1.5-6 1.5s-6-1.04-6-1.5z" />
+      </svg>
+      Datasets
+    </a>
     <a href="{% url 'login:tables' profile_user.id %}">
       <svg height="16"
            width="16"

@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+
 # Install and setup the OpenEnergyPlatform Application
 
 Below we describe the manual installation of the oeplatform code and
@@ -244,6 +250,22 @@ then run:
 
     python manage.py collectstatic
     python manage.py compress
+
+Then fetch the two artifacts the OEKG API validates scenario bundles against:
+
+    python manage.py fetch_oekg_shapes
+
+This downloads the canonical SHACL shape from a **pinned** revision of the
+[oekg repository](https://github.com/OpenEnergyPlatform/oekg) and generates the
+small `rdfs:label` subset the validator needs out of the OEO release you
+unpacked in step 3 — the ontology itself is not downloaded again. Both files
+land in a `shapes/` directory alongside `ontologies/`. The command is safe to
+re-run and tells you whether either file changed.
+
+The revision is pinned in `oeplatform/settings.py`
+(`OEKG_SHAPES_PINNED_COMMIT`); a branch or a moving name such as `latest` is
+refused on purpose, because an unpinned fetch would change the validator without
+a deploy.
 
 ## 5 Databases setup
 

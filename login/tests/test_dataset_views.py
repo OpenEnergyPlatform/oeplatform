@@ -1,0 +1,704 @@
+"""
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
+
+from django.test import TestCase
+from django.urls import reverse
+
+from dataedit.models import Dataset, Embargo, Table, Topic
+from login.models import WRITE_PERM, UserPermission, myuser
+from login.views import ITEMS_PER_PAGE
+from oeplatform.settings import PSEUDO_TOPIC_DRAFT
+
+
+class DatasetDashboardTests(TestCase):
+    """The user dashboard opens dataset-first with a switch to My Tables."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user, _ = myuser.objects.get_or_create(
+            name="DashboardUser",
+            email="dashboard-user@test.com",
+            did_agree=True,
+            is_mail_verified=True,
+        )
+        cls.other_user, _ = myuser.objects.get_or_create(
+            name="OtherDashboardUser",
+            email="other-dashboard-user@test.com",
+            did_agree=True,
+            is_mail_verified=True,
+        )
+
+    def setUp(self):
+        self.client.force_login(self.user)
+        self.datasets_url = reverse("login:datasets", args=[self.user.id])
+
+    def create_dataset(self, name, creator=None):
+        return Dataset.objects.create(
+            name=name,
+            metadata={"name": name, "title": name, "description": ""},
+            creator=creator or self.user,
+        )
+
+    def test_requires_login(self):
+        self.client.logout()
+        response = self.client.get(self.datasets_url)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("login", response["Location"])
+
+    def test_profile_opens_dataset_first(self):
+        response = self.client.get(reverse("login:profile", args=[self.user.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Create dataset")
+
+    def test_lists_only_own_datasets(self):
+        self.create_dataset("my_dataset")
+        self.create_dataset("foreign_dataset", creator=self.other_user)
+
+        response = self.client.get(self.datasets_url)
+        self.assertContains(response, "my_dataset")
+        self.assertNotContains(response, "foreign_dataset")
+
+    def test_view_switch_links_to_tables_view(self):
+        response = self.client.get(self.datasets_url)
+        self.assertContains(response, reverse("login:tables", args=[self.user.id]))
+
+    def test_create_dataset_via_post(self):
+        response = self.client.post(
+            self.datasets_url,
+            {
+                "title": "Fresh Dataset",
+                "description": "Created from the dashboard",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        dataset = Dataset.objects.get(name="fresh_dataset")
+        self.assertEqual(dataset.creator, self.user)
+        self.assertEqual(dataset.metadata["title"], "Fresh Dataset")
+        self.assertContains(response, "fresh_dataset")
+
+    def test_create_form_has_no_name_field(self):
+        response = self.client.get(self.datasets_url)
+        self.assertNotContains(response, 'name="name"')
+
+    def test_create_derives_normalized_name_from_styled_title(self):
+        response = self.client.post(
+            self.datasets_url,
+            {
+                "title": "  Wind Power (Germany) 2024!  ",
+                "description": "User-preferred styling stays in the title",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        dataset = Dataset.objects.get(name="wind_power_germany_2024")
+        self.assertEqual(dataset.metadata["title"], "Wind Power (Germany) 2024!")
+
+    def test_create_returns_partial_not_full_page(self):
+        response = self.client.post(
+            self.datasets_url,
+            {
+                "title": "Partial",
+                "description": "HTMX swap target only",
+            },
+        )
+        self.assertNotContains(response, "<html")
+
+    def test_create_title_without_letters_or_digits_shows_inline_error(self):
+        response = self.client.post(
+            self.datasets_url,
+            {
+                "title": "!!! ???",
+                "description": "Should fail",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Dataset.objects.filter(metadata__title="!!! ???").exists())
+        self.assertContains(response, "invalid-feedback")
+
+    def test_create_duplicate_normalized_name_shows_inline_error(self):
+        self.create_dataset("taken_name")
+        response = self.client.post(
+            self.datasets_url,
+            {
+                "title": "Taken -- Name",
+                "description": "Should fail",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Dataset.objects.filter(name="taken_name").count(), 1)
+        self.assertContains(response, "invalid-feedback")
+        # the error names the clashing URL name so the user can restyle
+        self.assertContains(response, "taken_name")
+
+    def test_cannot_create_on_foreign_profile(self):
+        response = self.client.post(
+            reverse("login:datasets", args=[self.other_user.id]),
+            {
+                "title": "Sneaky Dataset",
+                "description": "Posting on someone else's dashboard",
+            },
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertFalse(Dataset.objects.filter(name="sneaky_dataset").exists())
+
+    def test_card_links_to_public_detail_in_new_tab(self):
+        self.create_dataset("linked_dataset")
+
+        response = self.client.get(self.datasets_url)
+        self.assertContains(
+            response,
+            reverse(
+                "dataedit:dataset-detail", kwargs={"dataset_name": "linked_dataset"}
+            ),
+        )
+        self.assertContains(response, 'target="_blank"')
+
+    def test_tables_view_still_works(self):
+        response = self.client.get(reverse("login:tables", args=[self.user.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "tables")
+
+
+class DatasetDashboardSearchTests(TestCase):
+    """The dashboard dataset list is searchable and paginated so a creator
+    with many datasets can still find and browse them."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user, _ = myuser.objects.get_or_create(
+            name="SearchUser",
+            email="search-user@test.com",
+            did_agree=True,
+            is_mail_verified=True,
+        )
+
+    def setUp(self):
+        self.client.force_login(self.user)
+        self.datasets_url = reverse("login:datasets", args=[self.user.id])
+
+    def make_dataset(self, name, title=None, description=""):
+        return Dataset.objects.create(
+            name=name,
+            metadata={
+                "name": name,
+                "title": title if title is not None else name,
+                "description": description,
+            },
+            creator=self.user,
+        )
+
+    def test_search_filters_by_name(self):
+        self.make_dataset("wind_atlas")
+        self.make_dataset("solar_atlas")
+        response = self.client.get(self.datasets_url, {"search": "wind"})
+        self.assertContains(response, "wind_atlas")
+        self.assertNotContains(response, "solar_atlas")
+
+    def test_search_matches_title(self):
+        self.make_dataset("ds_one", title="Offshore Wind Farms")
+        self.make_dataset("ds_two", title="Rooftop Solar")
+        response = self.client.get(self.datasets_url, {"search": "offshore"})
+        self.assertContains(response, "ds_one")
+        self.assertNotContains(response, "ds_two")
+
+    def test_search_matches_description(self):
+        self.make_dataset("ds_desc_hit", description="Hourly demand curves")
+        self.make_dataset("ds_desc_miss", description="Nothing relevant")
+        response = self.client.get(self.datasets_url, {"search": "demand"})
+        self.assertContains(response, "ds_desc_hit")
+        self.assertNotContains(response, "ds_desc_miss")
+
+    def test_search_is_case_insensitive(self):
+        self.make_dataset("ds_case", title="Grid Capacity")
+        response = self.client.get(self.datasets_url, {"search": "GRID"})
+        self.assertContains(response, "ds_case")
+
+    def test_empty_search_lists_all_within_a_page(self):
+        self.make_dataset("ds_a")
+        self.make_dataset("ds_b")
+        response = self.client.get(self.datasets_url, {"search": ""})
+        self.assertContains(response, "ds_a")
+        self.assertContains(response, "ds_b")
+
+    def test_first_page_is_capped_at_the_page_size(self):
+        for index in range(ITEMS_PER_PAGE + 3):
+            self.make_dataset(f"ds_page_{index:02d}")
+        response = self.client.get(self.datasets_url)
+        page = response.context["datasets_page"]
+        self.assertEqual(len(page), ITEMS_PER_PAGE)
+        self.assertEqual(page.paginator.num_pages, 2)
+
+    def test_second_page_shows_the_remainder(self):
+        for index in range(ITEMS_PER_PAGE + 3):
+            self.make_dataset(f"ds_rem_{index:02d}")
+        response = self.client.get(self.datasets_url, {"datasets_page": 2})
+        page = response.context["datasets_page"]
+        self.assertEqual(len(page), 3)
+
+    def test_pagination_preserves_the_search_filter(self):
+        for index in range(ITEMS_PER_PAGE + 3):
+            self.make_dataset(f"keep_{index:02d}", title="Keeper")
+        for index in range(3):
+            self.make_dataset(f"drop_{index:02d}", title="Other")
+        response = self.client.get(
+            self.datasets_url, {"search": "keeper", "datasets_page": 2}
+        )
+        page = response.context["datasets_page"]
+        self.assertEqual(page.paginator.count, ITEMS_PER_PAGE + 3)
+        for dataset in page:
+            self.assertTrue(dataset.name.startswith("keep_"))
+
+    def test_search_box_is_rendered_on_the_full_page(self):
+        response = self.client.get(self.datasets_url)
+        self.assertContains(response, 'id="dataset-search"')
+        self.assertContains(response, 'name="search"')
+
+    def test_search_box_lives_in_the_datasets_section_not_over_create(self):
+        # the box refreshes only the list container, so it must sit outside
+        # it and swap it; this keeps focus while typing and places the box
+        # with the datasets rather than above the create form
+        response = self.client.get(self.datasets_url)
+        self.assertContains(response, 'id="dataset-list-container"')
+        self.assertContains(response, 'hx-target="#dataset-list-container"')
+        body = response.content.decode()
+        self.assertLess(
+            body.index("Create dataset"),
+            body.index('id="dataset-search"'),
+            "search box should render below the create section",
+        )
+
+    def test_create_still_returns_the_first_page(self):
+        # a fresh dataset is newest, so it lands on page 1 after creation
+        for index in range(ITEMS_PER_PAGE + 3):
+            self.make_dataset(f"existing_{index:02d}")
+        response = self.client.post(
+            self.datasets_url,
+            {"title": "Brand New", "description": "Newest dataset"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "brand_new")
+
+
+class DatasetQuickActionsTests(TestCase):
+    """Edit and delete quick actions on the dashboard dataset cards."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user, _ = myuser.objects.get_or_create(
+            name="QuickActionUser",
+            email="quick-action-user@test.com",
+            did_agree=True,
+            is_mail_verified=True,
+        )
+        cls.other_user, _ = myuser.objects.get_or_create(
+            name="OtherQuickActionUser",
+            email="other-quick-action-user@test.com",
+            did_agree=True,
+            is_mail_verified=True,
+        )
+
+    def setUp(self):
+        self.client.force_login(self.user)
+        self.dataset = Dataset.objects.create(
+            name="quick_dataset",
+            metadata={
+                "name": "quick_dataset",
+                "title": "Quick Dataset",
+                "description": "A dataset with quick actions",
+            },
+            creator=self.user,
+        )
+        self.edit_url = reverse(
+            "login:dataset-edit", args=[self.user.id, "quick_dataset"]
+        )
+        self.delete_url = reverse(
+            "login:dataset-delete", args=[self.user.id, "quick_dataset"]
+        )
+
+    def test_edit_form_keeps_name_readonly(self):
+        response = self.client.get(self.edit_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "quick_dataset")
+        self.assertContains(response, 'name="title"')
+        self.assertNotContains(response, 'name="name"')
+
+    def test_edit_updates_title_and_description(self):
+        response = self.client.post(
+            self.edit_url,
+            {"title": "New Title", "description": "New description"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.dataset.refresh_from_db()
+        self.assertEqual(self.dataset.metadata["title"], "New Title")
+        self.assertEqual(self.dataset.metadata["description"], "New description")
+        self.assertEqual(self.dataset.name, "quick_dataset")
+        self.assertContains(response, "New Title")
+
+    def test_edit_validation_error_is_shown_inline(self):
+        response = self.client.post(
+            self.edit_url, {"title": "", "description": "Still here"}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.dataset.refresh_from_db()
+        self.assertEqual(self.dataset.metadata["title"], "Quick Dataset")
+        self.assertContains(response, "invalid-feedback")
+
+    def test_edit_forbidden_for_non_creator(self):
+        self.client.force_login(self.other_user)
+        response = self.client.post(
+            self.edit_url,
+            {"title": "Hijacked", "description": "Should fail"},
+        )
+        self.assertEqual(response.status_code, 403)
+        self.dataset.refresh_from_db()
+        self.assertEqual(self.dataset.metadata["title"], "Quick Dataset")
+
+    def test_delete_removes_only_the_dataset(self):
+        table = Table.objects.create(
+            name="t_survives",
+            oemetadata={"resources": [{"name": "t_survives"}]},
+        )
+        self.dataset.tables.add(table)
+
+        response = self.client.post(self.delete_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Dataset.objects.filter(name="quick_dataset").exists())
+        self.assertTrue(Table.objects.filter(name="t_survives").exists())
+        self.assertNotContains(response, "quick_dataset")
+
+    def test_card_partial_returns_single_card_only(self):
+        response = self.client.get(
+            reverse("login:dataset-card", args=[self.user.id, "quick_dataset"])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "quick_dataset")
+        # a single card, not the whole dashboard section
+        self.assertNotContains(response, "Create dataset")
+
+    def test_edit_cancel_swaps_only_its_own_card(self):
+        response = self.client.get(self.edit_url)
+        self.assertContains(
+            response,
+            reverse("login:dataset-card", args=[self.user.id, "quick_dataset"]),
+        )
+        # cancelling must not re-render the whole container (that would
+        # collapse every other open edit or manage panel)
+        self.assertNotContains(response, 'hx-target="#datasets-container"')
+
+    def test_delete_removes_only_its_own_card(self):
+        response = self.client.post(self.delete_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Dataset.objects.filter(name="quick_dataset").exists())
+        # empty swap target: the card disappears, the rest of the page
+        # (other open panels, the create form) stays untouched
+        self.assertNotContains(response, "Create dataset")
+
+    def test_delete_forbidden_for_non_creator(self):
+        self.client.force_login(self.other_user)
+        response = self.client.post(self.delete_url)
+        self.assertEqual(response.status_code, 403)
+        self.assertTrue(Dataset.objects.filter(name="quick_dataset").exists())
+
+    def test_delete_confirm_copy_mentions_tables_survive(self):
+        response = self.client.get(reverse("login:datasets", args=[self.user.id]))
+        self.assertContains(response, "hx-confirm")
+        self.assertContains(response, "not deleted")
+
+    def test_actions_not_rendered_for_other_users(self):
+        self.client.force_login(self.other_user)
+        response = self.client.get(reverse("login:datasets", args=[self.user.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "quick_dataset")
+        self.assertNotContains(response, "hx-confirm")
+
+
+class DatasetResourceManagementTests(TestCase):
+    """Assign and unassign tables from the dataset manage panel."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user, _ = myuser.objects.get_or_create(
+            name="ResourceManager",
+            email="resource-manager@test.com",
+            did_agree=True,
+            is_mail_verified=True,
+        )
+        cls.other_user, _ = myuser.objects.get_or_create(
+            name="OtherResourceManager",
+            email="other-resource-manager@test.com",
+            did_agree=True,
+            is_mail_verified=True,
+        )
+
+    def setUp(self):
+        self.client.force_login(self.user)
+        self.dataset = Dataset.objects.create(
+            name="managed_dataset",
+            metadata={
+                "name": "managed_dataset",
+                "title": "Managed Dataset",
+                "description": "",
+            },
+            creator=self.user,
+        )
+        self.manage_url = reverse(
+            "login:dataset-manage", args=[self.user.id, "managed_dataset"]
+        )
+        self.search_url = reverse(
+            "login:dataset-table-search", args=[self.user.id, "managed_dataset"]
+        )
+        self.assign_url = reverse(
+            "login:dataset-assign", args=[self.user.id, "managed_dataset"]
+        )
+        self.unassign_url = reverse(
+            "login:dataset-unassign", args=[self.user.id, "managed_dataset"]
+        )
+
+    def make_table(self, name, published=True, writable_by=None):
+        table = Table.objects.create(
+            name=name,
+            is_publish=published,
+            oemetadata={"resources": [{"name": name}]},
+        )
+        if writable_by is not None:
+            UserPermission.objects.create(
+                holder=writable_by, table=table, level=WRITE_PERM
+            )
+        return table
+
+    def test_manage_close_swaps_only_its_own_card(self):
+        response = self.client.get(self.manage_url)
+        self.assertContains(
+            response,
+            reverse("login:dataset-card", args=[self.user.id, "managed_dataset"]),
+        )
+        self.assertNotContains(response, 'hx-target="#datasets-container"')
+
+    def test_manage_view_creator_only(self):
+        self.client.force_login(self.other_user)
+        response = self.client.get(self.manage_url)
+        self.assertEqual(response.status_code, 403)
+
+    def test_manage_lists_resources_with_links_and_status_badges(self):
+        published = self.make_table("t_pub_resource", published=True)
+        draft = self.make_table(
+            "t_draft_resource", published=False, writable_by=self.user
+        )
+        self.dataset.tables.add(published, draft)
+
+        response = self.client.get(self.manage_url)
+        self.assertContains(response, "t_pub_resource")
+        self.assertContains(response, "t_draft_resource")
+        # each resource shows its status: one Published, one Draft
+        self.assertContains(response, "Published", count=1)
+        self.assertContains(response, "Draft", count=1)
+        self.assertContains(
+            response, reverse("dataedit:view", kwargs={"table": "t_pub_resource"})
+        )
+
+    def test_manage_shows_resource_topic_badges(self):
+        table = self.make_table("t_topical", published=True)
+        table.topics.add(Topic.objects.create(name="grids"))
+        self.dataset.tables.add(table)
+
+        response = self.client.get(self.manage_url)
+        self.assertContains(response, "grids")
+
+    def test_picker_offers_only_assignable_tables(self):
+        self.make_table("t_free", published=True)
+        self.make_table("t_foreign_draft", published=False, writable_by=self.other_user)
+        self.make_table("t_own_draft", published=False, writable_by=self.user)
+        embargoed = self.make_table("t_embargoed_foreign", published=True)
+        Embargo.objects.create(table=embargoed, date_ended=None, duration="6_months")
+        assigned = self.make_table("t_already_in", published=True)
+        self.dataset.tables.add(assigned)
+
+        response = self.client.get(self.search_url)
+        self.assertContains(response, "t_free")
+        self.assertContains(response, "t_own_draft")
+        self.assertNotContains(response, "t_foreign_draft")
+        self.assertNotContains(response, "t_embargoed_foreign")
+        self.assertNotContains(response, "t_already_in")
+
+    def test_picker_caps_results_and_hints_at_refining(self):
+        for index in range(25):
+            self.make_table(f"t_bulk_{index:02d}", published=True)
+
+        response = self.client.get(self.search_url)
+        self.assertEqual(response.status_code, 200)
+        # capped at 20 result rows (one hx-vals per Add button) plus a
+        # hint to refine the search
+        self.assertContains(response, "hx-vals", count=20)
+        self.assertContains(response, "refine your search")
+
+    def test_picker_search_filters_by_name(self):
+        self.make_table("solar_capacity", published=True)
+        self.make_table("wind_capacity", published=True)
+
+        response = self.client.get(self.search_url, {"q": "solar"})
+        self.assertContains(response, "solar_capacity")
+        self.assertNotContains(response, "wind_capacity")
+
+    def test_assign_adds_table(self):
+        self.make_table("t_pickable", published=True)
+
+        response = self.client.post(self.assign_url, {"table": "t_pickable"})
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(self.dataset.tables.filter(name="t_pickable").exists())
+        self.assertContains(response, "t_pickable")
+
+    def test_assign_foreign_draft_forbidden(self):
+        self.make_table("t_locked", published=False, writable_by=self.other_user)
+
+        response = self.client.post(self.assign_url, {"table": "t_locked"})
+        self.assertEqual(response.status_code, 403)
+        self.assertFalse(self.dataset.tables.filter(name="t_locked").exists())
+
+    def test_assign_forbidden_for_non_creator(self):
+        self.make_table("t_free_for_all", published=True)
+        self.client.force_login(self.other_user)
+
+        response = self.client.post(self.assign_url, {"table": "t_free_for_all"})
+        self.assertEqual(response.status_code, 403)
+        self.assertFalse(self.dataset.tables.filter(name="t_free_for_all").exists())
+
+    def test_unassign_removes_table_but_keeps_it(self):
+        table = self.make_table("t_removable", published=True)
+        self.dataset.tables.add(table)
+
+        response = self.client.post(self.unassign_url, {"table": "t_removable"})
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(self.dataset.tables.filter(name="t_removable").exists())
+        self.assertTrue(Table.objects.filter(name="t_removable").exists())
+        # the refreshed fragment shows an empty resource list (the table
+        # itself reappears in the picker, so match the empty-state copy)
+        self.assertContains(response, "No tables assigned yet")
+
+
+class DatasetTopicTests(TestCase):
+    """Dataset topics are seeded additively from assigned tables and stay
+    editable by the creator; nothing is ever removed automatically."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user, _ = myuser.objects.get_or_create(
+            name="TopicUser",
+            email="topic-user@test.com",
+            did_agree=True,
+            is_mail_verified=True,
+        )
+        cls.wind = Topic.objects.create(name="wind")
+        cls.solar = Topic.objects.create(name="solar")
+        cls.draft_topic = Topic.objects.create(name=PSEUDO_TOPIC_DRAFT)
+
+    def setUp(self):
+        self.client.force_login(self.user)
+        self.dataset = Dataset.objects.create(
+            name="topical_dataset",
+            metadata={
+                "name": "topical_dataset",
+                "title": "Topical Dataset",
+                "description": "",
+            },
+            creator=self.user,
+        )
+        self.assign_url = reverse(
+            "login:dataset-assign", args=[self.user.id, "topical_dataset"]
+        )
+        self.unassign_url = reverse(
+            "login:dataset-unassign", args=[self.user.id, "topical_dataset"]
+        )
+        self.edit_url = reverse(
+            "login:dataset-edit", args=[self.user.id, "topical_dataset"]
+        )
+
+    def make_table(self, name, topics=()):
+        table = Table.objects.create(
+            name=name,
+            is_publish=True,
+            oemetadata={"resources": [{"name": name}]},
+        )
+        for topic in topics:
+            table.topics.add(topic)
+        return table
+
+    def topic_names(self):
+        return set(self.dataset.topics.values_list("name", flat=True))
+
+    def test_assign_seeds_topics_from_table(self):
+        self.make_table("t_windy", topics=[self.wind])
+
+        response = self.client.post(self.assign_url, {"table": "t_windy"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.topic_names(), {"wind"})
+
+    def test_assign_never_seeds_the_draft_pseudo_topic(self):
+        self.make_table("t_staged", topics=[self.wind, self.draft_topic])
+
+        self.client.post(self.assign_url, {"table": "t_staged"})
+        self.assertEqual(self.topic_names(), {"wind"})
+
+    def test_unassign_removes_no_topics(self):
+        self.make_table("t_leaving", topics=[self.wind])
+        self.client.post(self.assign_url, {"table": "t_leaving"})
+
+        self.client.post(self.unassign_url, {"table": "t_leaving"})
+        self.assertFalse(self.dataset.tables.exists())
+        self.assertEqual(self.topic_names(), {"wind"})
+
+    def test_edit_form_offers_topics_with_current_ones_checked(self):
+        self.dataset.topics.add(self.wind)
+
+        response = self.client.get(self.edit_url)
+        self.assertContains(response, 'name="topics"')
+        self.assertContains(response, 'value="wind"')
+        self.assertContains(response, 'value="solar"')
+        self.assertNotContains(response, f'value="{PSEUDO_TOPIC_DRAFT}"')
+        # only the dataset's own topic is preselected
+        self.assertContains(response, "checked", count=1)
+
+    def test_edit_can_add_and_remove_topics(self):
+        self.dataset.topics.add(self.wind)
+
+        response = self.client.post(
+            self.edit_url,
+            {
+                "title": "Topical Dataset",
+                "description": "now on solar",
+                "topics": ["solar"],
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.topic_names(), {"solar"})
+
+    def test_edit_cannot_smuggle_in_the_draft_pseudo_topic(self):
+        self.client.post(
+            self.edit_url,
+            {
+                "title": "Topical Dataset",
+                "description": "no drafts",
+                "topics": ["solar", PSEUDO_TOPIC_DRAFT],
+            },
+        )
+        self.assertEqual(self.topic_names(), {"solar"})
+
+    def test_creator_removal_survives_later_assigns(self):
+        self.dataset.topics.add(self.wind)
+        self.client.post(
+            self.edit_url,
+            {"title": "Topical Dataset", "description": "topics cleared"},
+        )
+        self.assertEqual(self.topic_names(), set())
+
+        self.make_table("t_sunny", topics=[self.solar])
+        self.client.post(self.assign_url, {"table": "t_sunny"})
+        # the assign adds its own topics but does not resurrect removed ones
+        self.assertEqual(self.topic_names(), {"solar"})
+
+    def test_dashboard_card_shows_topic_badges(self):
+        self.dataset.topics.add(self.wind, self.solar)
+
+        response = self.client.get(reverse("login:datasets", args=[self.user.id]))
+        self.assertContains(response, "wind")
+        self.assertContains(response, "solar")

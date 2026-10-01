@@ -26,10 +26,10 @@ SPDX-License-Identifier: AGPL-3.0-or-later
     </a>
   </div>
   <!-- Group creation / editing form: name and description -->
-  {% include 'login/partials/organization_form.html' %}
+  {% include "login/partials/organization_form.html" %}
   {% if organization %}
-    {% include 'login/partials/organization_tables.html' %}
-    {% include 'login/partials/organization_members.html' %}
+    {% include "login/partials/organization_tables.html" %}
+    {% include "login/partials/organization_members.html" %}
     <section class="profile-category">
       <div class="profile-category__danger">
         <h2 class="profile-category__heading profile-category__heading--border-btm">

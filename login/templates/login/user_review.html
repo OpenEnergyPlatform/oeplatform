@@ -27,9 +27,7 @@
         <div>
           <p class="profile-sidebar__name">{{ profile_user.name }}</p>
         </div>
-        <p>
-          {% if profile_user.fullname %}{{ profile_user.fullname }}{% endif %}
-        </p>
+        <p>{% if profile_user.fullname %}{{ profile_user.fullname }}{% endif %}</p>
         {% if profile_user.affiliation %}
           <div class="profile-sidebar__affiliation">{{ profile_user.affiliation }}</div>
         {% endif %}
@@ -179,7 +177,8 @@
                    class="btn btn-primary">
                   {{ reviewer_reviewed.latest_active.table }}
                 </a>
-                <button class="btn btn-dark" id="peer_review-delete">Delete</button>
+                <button class="btn btn-dark"
+                        id="peer_review-delete">Delete</button>
               </div>
               <div class="profile-rvw__item-history">
                 <!-- remove button wrapper div once history dropdown is implemented -->
@@ -517,7 +516,7 @@
       review_id: "{{ latest_review_id }}",
     };
   </script>
-  <script src="{% static '/peer_review/opr_reviewer.js' %}"></script>
+  <script src="{% static '/peer_review/roles/opr_reviewer.js' %}"></script>
   <script>
     $(function () {
       $('[data-bs-toggle="popover"]').popover();
