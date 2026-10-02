@@ -1,0 +1,21 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+The roles one Holder on the Table's permission page may be changed to, its
+own selected: ``holder.roles`` from the permission service, so an
+Organization stops at Data maintainer and one holding Admin from before
+that rule can only be lowered. A grant stored below every role ("None")
+shows as "No role" until it is changed. Expects ``holder``.
+{% endcomment %}
+{% if not holder.has_role %}
+  <option value="{{ holder.level }}"
+          selected
+          disabled>{{ holder.role }}</option>
+{% endif %}
+{% for role in holder.roles %}
+  <option value="{{ role.level }}"
+          {% if role.level == holder.level %}selected="selected"{% endif %}>
+    {{ role.label }}
+  </option>
+{% endfor %}

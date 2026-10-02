@@ -336,6 +336,12 @@ TEMPLATES = [
     }
 ]
 
+# base/messages.html renders a message as a Bootstrap alert of its level's
+# tag; Bootstrap calls the error level "danger". 40 is
+# django.contrib.messages.ERROR, written as its number because nothing that
+# touches Django is imported here.
+MESSAGE_TAGS = {40: "danger"}
+
 CORS_ORIGIN_WHITELIST = ["http://localhost:3000", "http://127.0.0.1:3000"]
 
 GRAPHENE = {"SCHEMA": "factsheet.schema.schema"}

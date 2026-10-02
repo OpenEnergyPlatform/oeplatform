@@ -23,6 +23,7 @@ from api.actions import table_change_column, table_change_constraint
 from api.error import APIError
 from api.tests import APITestCaseWithTable
 from dataedit.models import Table
+from login.permissions import WRITE_PERM
 from oeplatform.settings import TOPIC_SCENARIO
 
 
@@ -229,9 +230,9 @@ class StatusChangesStampNothingTests(StampTestCase):
         self.client.force_login(self.user)
         response = self.client.post(
             reverse("dataedit:table-permission", kwargs={"table": self.test_table}),
-            {"mode": "add_user", "name": self.other_user.name},
+            {"mode": "add_user", "name": self.other_user.name, "level": WRITE_PERM},
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 302)
         self.assertTrue(
             Table.objects.get(name=self.test_table)
             .userpermission_set.filter(holder=self.other_user)
