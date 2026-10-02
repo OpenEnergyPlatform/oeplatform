@@ -1,0 +1,18 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+Cell type "review pill": Reviewed as a pill showing the badge level, linked
+to the finished review; In review and Not reviewed as muted text.
+{% endcomment %}
+{% if row.review_state == "reviewed" %}
+  <a id="rev-{{ row.table.pk }}"
+     class="badge rounded-pill dash-pill dash-pill--{{ row.review_badge|lower|default:'none' }}"
+     href="{% url 'dataedit:peer_review_reviewer' table=row.table.name review_id=row.review_id %}"
+     hx-boost="false"
+     aria-label="Reviewed{% if row.review_badge %}, badge {{ row.review_badge }}{% endif %}. Open the review">{{ row.review_badge|default:"Reviewed" }}</a>
+{% elif row.review_state == "in_review" %}
+  <span class="dash-muted">In review</span>
+{% else %}
+  <span class="dash-muted">Not reviewed</span>
+{% endif %}
