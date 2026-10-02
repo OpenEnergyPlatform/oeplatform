@@ -28,6 +28,7 @@ sidebar on 2026-10-02, so the column collapse (#2555) works with that width.
   {% include "login/user_nav.html" %}
   <div id="tables-tab"
        class="dash"
+       data-login-url="{% url 'account_login' %}"
        hx-boost="true"
        hx-target="#tables-results"
        hx-swap="outerHTML"
@@ -87,6 +88,31 @@ sidebar on 2026-10-02, so the column collapse (#2555) works with that width.
          aria-live="polite"
          aria-atomic="true"></div>
     {% include "login/partials/tables_region.html" %}
+  </div>
+  {% comment %}
+  The one action dialog, outside the tab so its requests are not synced
+  with (and cannot cancel) the list's. Its contents come from the action's
+  preflight endpoint; tables_tab.js opens it once they are in.
+  {% endcomment %}
+  <div id="table-action"
+       class="modal fade"
+       tabindex="-1"
+       aria-labelledby="table-action-title"
+       aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+      <div id="table-action-body" class="modal-content"></div>
+    </div>
+  </div>
+  {% comment %}
+  Messages after an action. Two persistent live regions, so a message is
+  announced when it is added: success politely (and it dismisses itself),
+  refusals and failures assertively (and they stay until dismissed).
+  {% endcomment %}
+  <div class="toast-container position-fixed bottom-0 end-0 p-3 dash-toasts">
+    <div id="tables-toasts-polite" aria-live="polite" aria-atomic="false"></div>
+    <div id="tables-toasts-assertive"
+         aria-live="assertive"
+         aria-atomic="false"></div>
   </div>
 {% endblock main-content-body %}
 {% block after-body-bottom-js %}

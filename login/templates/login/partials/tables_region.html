@@ -10,9 +10,16 @@ after a swap. ``data-announce`` is what the persistent live region outside
 reads after the swap; ``data-filters`` is what each filter keeps in the URL
 and ``data-more`` how many filters behind "More filters" apply, so the bar
 outside can follow a change made in here (a chip removed, a Reset).
+
+After an action the region re-fetches itself with the state it shows
+(``tables-changed``, sent by the action's response). The request names the
+region as its trigger, so the view answers with HX-Replace-Url: an action
+adds no history entry.
 {% endcomment %}
 <div id="tables-results"
      class="dash-results"
+     hx-get="{{ page.url }}"
+     hx-trigger="tables-changed from:body"
      data-announce="{{ page.announcement }}"
      data-filters="{{ page.filters_json }}"
      data-more="{{ page.more_count }}">
@@ -93,8 +100,7 @@ outside can follow a change made in here (a chip removed, a Reset).
                 </td>
                 <td class="c-ds">{% include "login/partials/cells/datasets.html" %}</td>
                 <td class="c-topics">{% include "login/partials/cells/chips.html" %}</td>
-                {% comment %}The row's ⋯ slot, sticky at the right edge; its menu comes with the action pipeline (#2561).{% endcomment %}
-                <td class="c-menu"></td>
+                <td class="c-menu">{% include "login/partials/cells/menu.html" %}</td>
               </tr>
             {% endfor %}
           </tbody>

@@ -418,3 +418,69 @@
 .dash-table thead .c-menu {
   background: #f8f9fa;
 }
+
+/* the row's ⋯ menu (#2561). A sticky cell is a stacking context of its
+   own, so the later rows' ⋯ cells would paint over an open menu: the cell
+   holding it is raised above them. */
+.c-menu:focus-within,
+.c-menu:has(.dropdown-menu.show) {
+  z-index: 2;
+}
+
+/* the row's ⋯ menu (#2561) */
+.dash-menu__toggle {
+  padding: 0 0.5rem;
+  font-size: 1.1rem;
+  line-height: 1.4;
+}
+
+.dash-menu__list {
+  font-size: 0.875rem;
+}
+
+/* an action above the user's role: still focusable, so the reason is
+   reachable by keyboard; aria-disabled, not Bootstrap's .disabled */
+.dash-menu__off,
+.dash-menu__off:hover,
+.dash-menu__off:focus {
+  color: var(--dash-muted);
+  cursor: not-allowed;
+  background: transparent;
+}
+
+.dash-menu__why {
+  display: block;
+  font-size: 0.75rem;
+}
+
+/* the action dialog */
+.dash-leftout {
+  font-size: 0.875rem;
+}
+
+.dash-action-list {
+  max-height: 12rem;
+  overflow-y: auto;
+}
+
+/* messages after an action */
+.dash-toasts {
+  z-index: 1090;
+}
+
+.dash-toast {
+  margin-top: 0.5rem;
+  background: #fff;
+}
+
+.dash-toast--ok {
+  border-left: 4px solid #198754;
+}
+
+.dash-toast--error {
+  border-left: 4px solid #dc3545;
+}
+
+.dash-toast .toast-body a {
+  font-weight: 600;
+}
