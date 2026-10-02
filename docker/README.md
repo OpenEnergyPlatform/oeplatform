@@ -92,6 +92,10 @@ the database to our current branch.
 docker run -p "5432:5432" -v "$(pwd)/oeplatform_data:/var/lib/postgresql/data" ghcr.io/openenergyplatform/oeplatform-postgres:latest
 ```
 
+If port 5432 is already taken on your machine (by a local PostgreSQL, for
+example), publish the container on another one, e.g. `-p "5433:5432"`, and set
+both `OEP_DJANGO_PORT` and `LOCAL_DB_PORT` to that port (see the table below).
+
 This command starts a container with the `oeplatform-postgres` docker image. It
 automagically creates the needed tables. The database saves its information at
 your current working directory within the `oeplatform_data` folder. It also
@@ -109,7 +113,7 @@ values **OR** set the correct environment, if you use the default values.
 | Database User        | postgres   | `OEP_DJANGO_USER`,`LOCAL_DB_USER` |
 | Database Password    | postgres   | `OEP_DB_PW`,`LOCAL_DB_PASSWORD`   |
 | Database Host        | localhost  | `OEP_DJANGO_HOST`,`LOCAL_DB_HOST` |
-| Database Port        | 5432       | `LOCAL_DB_PORT`                   |
+| Database Port        | 5432       | `OEP_DJANGO_PORT`,`LOCAL_DB_PORT` |
 
 Afterwards, the application should be able to connect to the empty databases.
 You need to run the Django preparations and migrations as usual. The following

@@ -12,6 +12,10 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- The Django database port can be set with `OEP_DJANGO_PORT` in the
+  `securitysettings.py` template, like the OEDB's `LOCAL_DB_PORT`. Without it a
+  local database container could not be published on any port but 5432
+  [(#2581)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2581)
 - The dev image caches pip downloads and built wheels in a BuildKit cache mount
   instead of discarding them. A single new line in `requirements.txt` used to
   re-download and re-compile all ~47 packages, several minutes of it building
