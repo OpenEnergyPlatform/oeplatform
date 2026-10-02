@@ -27,14 +27,21 @@
   align-items: center;
 }
 
+/* With the profile sidebar the list is about 974 px wide at 1440 px. The
+   selects are capped (a long Dataset or Organization name would otherwise
+   set the width) and the search box gives way, so the primary row stays one
+   line there. */
 .dash-search {
-  flex: 1 1 14rem;
+  flex: 1 1 9rem;
+  min-width: 9rem;
   max-width: 28rem;
 }
 
 .dash-select {
+  flex: 0 1 auto;
   width: auto;
-  max-width: 14rem;
+  max-width: 10.5rem;
+  text-overflow: ellipsis;
 }
 
 .dash-more {
