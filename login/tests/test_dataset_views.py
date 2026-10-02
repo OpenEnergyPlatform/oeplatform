@@ -7,7 +7,14 @@ from django.test import TestCase
 from django.urls import reverse
 
 from dataedit.models import Dataset, Embargo, Table, Topic
-from login.models import WRITE_PERM, UserPermission, myuser
+from login.models import (
+    WRITE_PERM,
+    GroupPermission,
+    Membership,
+    Organization,
+    UserPermission,
+    myuser,
+)
 from login.views import ITEMS_PER_PAGE
 from oeplatform.settings import PSEUDO_TOPIC_DRAFT
 
@@ -564,6 +571,22 @@ class DatasetResourceManagementTests(TestCase):
         response = self.client.post(self.assign_url, {"table": "t_locked"})
         self.assertEqual(response.status_code, 403)
         self.assertFalse(self.dataset.tables.filter(name="t_locked").exists())
+
+    def test_a_draft_offered_through_an_organization_is_also_accepted(self):
+        """WF-03 finding 6: the picker offered a draft the user could write
+        through an Organization, and the assign then refused it. The rule
+        and the picker are now one rule (#2563)."""
+        organization = Organization.objects.create(name="Resource team")
+        Membership.objects.create(user=self.user, group=organization)
+        table = self.make_table("t_group_writable", published=False)
+        GroupPermission.objects.create(
+            holder=organization, table=table, level=WRITE_PERM
+        )
+
+        self.assertContains(self.client.get(self.search_url), "t_group_writable")
+        response = self.client.post(self.assign_url, {"table": "t_group_writable"})
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(self.dataset.tables.filter(name="t_group_writable").exists())
 
     def test_assign_forbidden_for_non_creator(self):
         self.make_table("t_free_for_all", published=True)

@@ -22,7 +22,8 @@ DATABASES = {
         'NAME': os.environ.get("OEP_DJANGO_NAME", "oep_django"),
 	    'USER': os.environ.get("OEP_DJANGO_USER", "postgres"),
 	    'PASSWORD': os.environ.get("OEP_DB_PW", "postgres"),
-	    'HOST': os.environ.get("OEP_DJANGO_HOST", "localhost")
+	    'HOST': os.environ.get("OEP_DJANGO_HOST", "localhost"),
+	    'PORT': os.environ.get("OEP_DJANGO_PORT", "5432"),
 	}
 }
 

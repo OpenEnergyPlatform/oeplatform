@@ -13,11 +13,22 @@ takes, whoever calls it. Two operations:
   (``ActionRefused``, nothing written); otherwise writes all of them in one
   transaction and logs one line per Table once it has committed.
 
+Delete spans two databases that share no transaction. ``execute`` removes
+the Django rows of every Table in its one transaction and drops the OEDB
+tables after that has committed, one Table at a time. A drop that fails
+leaves an OEDB table nothing points at any more: it is logged with
+``drop=failed`` and named in the ``Outcome``, never reported as a plain
+success. The other order would be worse: a Table whose rows are gone while
+its record still lists it.
+
 A row action is a bulk action of one: both operations take a list of names,
 and the dashboard sends one name from a row's menu.
 
-The actions so far are ``publish`` and ``unpublish``; delete and the Dataset
-assignment join as their tickets land (#2562, #2563).
+The actions are ``publish``, ``unpublish``, ``delete``, and adding a Table to
+or removing it from one of the user's own Datasets (``dataset_add``,
+``dataset_remove``, with the Dataset as the ``dataset`` parameter). Whether a Table may be added at all is the
+curation rule of ``api.services.dataset_creation.assignable_tables``, the
+same rule the dataset assign API and the Dataset tab's picker read.
 
 The role an action needs is read off ``table_levels`` (``login.table_roles``,
 the permission service), which states the platform's permission rule
@@ -31,10 +42,12 @@ changing who may do what.
 Log lines, on the ``oeplatform.table_actions`` logger, one per Table::
 
     table_action table=<name> action=<action> by=<user pk> via=<entry point>
-        batch=<id>|- [topic=<topic> embargo=<period>]
+        batch=<id>|- [topic=<topic> embargo=<period>] [dataset=<name>]
+        [datasets=<names left>|- published=yes|no drop=ok|failed]
 
 ``batch`` ties together the Tables of one request with more than one Table,
-and is ``-`` for a single Table. No audit model: these lines are the record.
+and is ``-`` for a single Table. A failed drop is logged at WARNING with its
+traceback. No audit model: these lines are the record.
 """  # noqa: 501
 
 import logging
@@ -42,20 +55,25 @@ import uuid
 from dataclasses import dataclass, field
 
 from django.db import transaction
+from django.db.models import Count, Q
+from django.utils import timezone
 
 from api.actions import move_publish
 from api.error import APIError
-from dataedit.models import Dataset, Table, Topic
+from api.services.dataset_creation import assign_table, assignable_tables
+from dataedit.models import Dataset, Embargo, PeerReview, Table, Topic
 from dataedit.publish_gate import publish_checks
-from login.permissions import ADMIN_PERM, NO_PERM
+from login.permissions import ADMIN_PERM, DELETE_PERM, NO_PERM, WRITE_PERM
 from login.table_roles import table_levels
 from login.tables_tab import visible_datasets
 from oeplatform.settings import PSEUDO_TOPIC_DRAFT
 
 logger = logging.getLogger("oeplatform.table_actions")
 
-PUBLISH, UNPUBLISH = "publish", "unpublish"
-ACTIONS = (PUBLISH, UNPUBLISH)
+PUBLISH, UNPUBLISH, DELETE = "publish", "unpublish", "delete"
+DATASET_ADD, DATASET_REMOVE = "dataset_add", "dataset_remove"
+ACTIONS = (PUBLISH, UNPUBLISH, DELETE, DATASET_ADD, DATASET_REMOVE)
+DATASET_ACTIONS = (DATASET_ADD, DATASET_REMOVE)
 
 # What an embargo may be when publishing, in the order the dialog offers
 # them; the values are the ones ``api.actions.move_publish`` reads.
@@ -79,13 +97,45 @@ class RoleGate:
 ROLE_GATES = {
     PUBLISH: RoleGate(ADMIN_PERM, "Only Table admins can publish"),
     UNPUBLISH: RoleGate(ADMIN_PERM, "Only Table admins can unpublish"),
+    DATASET_ADD: RoleGate(WRITE_PERM, "Only Data editors can add to a dataset"),
+    DATASET_REMOVE: RoleGate(WRITE_PERM, "Only Data editors can remove from a dataset"),
+    DELETE: RoleGate(DELETE_PERM, "Only Data maintainers and Table admins can delete"),
 }
+
+# The most Tables one request may name, per action; an action not listed has
+# no ceiling yet (publish, unpublish and the Dataset actions get theirs in
+# #2564). The dashboard is synchronous by design (no task queue), so a request
+# has to finish inside the host's timeout; mass work stays possible through
+# the API, one call per Table.
+#
+# Delete: 50. The host's limit is Apache's ``Timeout 300`` and mod_wsgi's
+# ``socket-timeout=300`` on both daemon groups, with no ``request-timeout``
+# (read from /data/httpd/conf on production, 2026-10-02; the config is in no
+# repository and has drifted before, so read it again rather than trusting
+# this line). Deleting one Table, measured locally with
+# ``benchmarks/tables_tab/delete_cost.py`` (Postgres 14, three rounds): 17-38
+# ms typical from an empty Table to 1M rows (83 MB), the drop being 9-24 ms
+# of it; the worst single drop was 1.13 s (10M rows, 0.83 GB; one 1M-row drop
+# also took 1.02 s). At a worst case of 1.2 s per Table, 50 Tables take 60 s:
+# a safety factor of 5 against the 300 s, which covers production's OEDB
+# sitting on another host and its larger buffer pool. Typical: 1-2 s. Not
+# covered: a drop waiting for a lock another session holds on that Table.
+CEILINGS = {
+    DELETE: 50,
+}
+
+# A batch of more than this many Tables is confirmed by typing its count.
+TYPED_COUNT_ABOVE = 10
 
 # Left-out reasons that do not depend on the role. A gate failure is
 # "Fails the Publish gate: <check>" (``_gate_reason``).
 NOT_YOURS = "Not one of your tables"
 ALREADY_PUBLISHED = "Already published"
 NOT_PUBLISHED = "Not published"
+# The curation rule (``assignable_tables``) refusing a Table the role allows:
+# a draft or embargoed Table the user holds no grant on. Only a platform
+# admin gets that far, and the rule gives them no exemption.
+MAY_NOT_ASSIGN = "Drafts and embargoed tables need Data editor on the table"
 
 
 class ActionError(Exception):
@@ -132,10 +182,12 @@ class Preflight:
 
     ``eligible`` are the Tables it would act on, in the order named;
     ``left_out`` the rest, grouped by reason. ``ceiling`` is the most Tables
-    the action takes in one request, None while no limit is set (the bulk
-    ceilings are measured in #2564). ``consequences`` holds what the dialog
-    has to state for this action, and ``subject`` is what the request is
-    about: the one Table's title, or "n tables".
+    the action takes in one request (``CEILINGS``), None where no limit is
+    set; ``over_ceiling`` says the names sent exceed it, and then nothing
+    can be confirmed. ``consequences`` holds what the dialog has to state
+    for this action, and ``subject`` is what the request is about: the one
+    Table's title, or "n tables". ``confirmation`` is what the user has to
+    type to confirm, "" for a plain confirmation (``_confirmation``).
     """
 
     action: str
@@ -145,20 +197,57 @@ class Preflight:
     ceiling: int = None
     consequences: dict = field(default_factory=dict)
     subject: str = ""
+    confirmation: str = ""
+    # The Dataset actions only: the user's own Datasets the action could
+    # change for these Tables, and the one it is about (None until chosen).
+    datasets: list = field(default_factory=list)
+    dataset: Dataset = None
 
     @property
     def names(self) -> list:
         return [table.name for table in self.eligible]
 
+    @property
+    def confirmable(self) -> bool:
+        """Whether the dialog can be confirmed: something is eligible, the
+        names are within the ceiling and, for the Dataset actions, there is a
+        Dataset to choose."""
+        if self.over_ceiling:
+            return False
+        if self.action in DATASET_ACTIONS and not self.datasets:
+            return False
+        return bool(self.eligible)
+
+    @property
+    def over_ceiling(self) -> bool:
+        return self.ceiling is not None and self.total > self.ceiling
+
+    @property
+    def ceiling_message(self) -> str:
+        return _ceiling_message(self.action, self.ceiling, self.total)
+
 
 @dataclass(frozen=True)
 class Outcome:
     """What ``execute`` did: the action and the Tables it changed, as they
-    are now."""
+    are now. After a delete the Tables have no primary key any more, and
+    ``drop_failed`` names those whose OEDB table could not be dropped."""
 
     action: str
     tables: list
     params: dict
+    drop_failed: list = field(default_factory=list)
+
+
+def own_datasets(user):
+    """The Datasets ``user`` created: the only ones they may add a Table to
+    or remove one from."""
+    return Dataset.objects.filter(creator=user)
+
+
+def dataset_title(dataset) -> str:
+    """What a Dataset is called where the user reads it."""
+    return (dataset.metadata or {}).get("title") or dataset.name
 
 
 def publish_topics():
@@ -194,10 +283,37 @@ def _gate_reason(table) -> str:
     return "Fails the Publish gate: " + ", ".join(failed)
 
 
-def _check(user, action, table, level) -> str:
-    """Why ``action`` would leave ``table`` out, or "" when it would act."""
+def _ceiling_message(action, ceiling, total) -> str:
+    return (
+        f"{action.capitalize()} takes at most {ceiling} tables at a time; "
+        f"you selected {total}."
+    )
+
+
+def _confirmation(action, eligible) -> str:
+    """What the user has to type to confirm ``action`` on ``eligible``, or
+    "" for a plain confirmation. Only delete asks: the Table's name for one
+    published Table, the number of Tables for a batch holding a published
+    Table or more than ``TYPED_COUNT_ABOVE``."""
+    if action != DELETE or not eligible:
+        return ""
+    published = any(table.is_publish for table in eligible)
+    if len(eligible) == 1:
+        return eligible[0].name if published else ""
+    if published or len(eligible) > TYPED_COUNT_ABOVE:
+        return str(len(eligible))
+    return ""
+
+
+def _check(user, action, table, level, assignable=frozenset()) -> str:
+    """Why ``action`` would leave ``table`` out, or "" when it would act.
+    ``assignable`` holds the primary keys the curation rule accepts; only
+    adding to a Dataset reads it. Whether the Table is in the chosen Dataset
+    is decided afterwards (``_by_membership``)."""
     if level < ROLE_GATES[action].level:
         return ROLE_GATES[action].refusal
+    if action == DATASET_ADD and table.pk not in assignable:
+        return MAY_NOT_ASSIGN
     if action == PUBLISH:
         if table.is_publish:
             return ALREADY_PUBLISHED
@@ -222,18 +338,125 @@ def _others_datasets(user, tables) -> list:
     return [(owner or "Unknown owner", name) for owner, name in rows]
 
 
+def _delete_consequences(user, tables) -> dict:
+    """What deleting ``tables`` breaks, for the dialog: the Datasets they
+    leave (the user's own by name, other people's by owner and name, since
+    their membership goes silently), which are published, their Review
+    state, an active embargo, and whether knowledge-graph links may point at
+    them. Five queries whatever the number of Tables."""
+    names = [table.name for table in tables]
+    published = [table for table in tables if table.is_publish]
+    datasets = (
+        Dataset.objects.filter(tables__in=tables)
+        .filter(pk__in=visible_datasets(user).values("pk"))
+        .order_by("name")
+        .distinct()
+    )
+    reviews = {}
+    for name, finished in PeerReview.objects.filter(table__in=names).values_list(
+        "table", "is_finished"
+    ):
+        reviews[name] = reviews.get(name, False) or finished
+    embargoes = dict(
+        Embargo.objects.filter(table__in=tables, date_ended__gt=timezone.now())
+        .order_by("date_ended")
+        .values_list("table__name", "date_ended")
+    )
+    by_name = {table.name: table for table in tables}
+    return {
+        "published": published,
+        "own_datasets": list(
+            datasets.filter(creator=user).values_list("name", flat=True)
+        ),
+        "others_datasets": _others_datasets(user, tables),
+        "reviewed": [
+            (by_name[name], "Reviewed" if finished else "In review")
+            for name, finished in sorted(reviews.items())
+        ],
+        "embargoed": [
+            (by_name[name], until) for name, until in sorted(embargoes.items())
+        ],
+        # Scenario bundles cite published Tables by address; a deleted one
+        # reads ``resolvable: false`` from then on (oekg/resolution.py).
+        "knowledge_graph": bool(published),
+    }
+
+
+def _dataset_choices(user, action, tables) -> list:
+    """The user's own Datasets ``action`` could change for ``tables``: for
+    adding, those still missing at least one of them; for removing, those
+    holding at least one. By title. One query."""
+    if not tables:
+        return []
+    ids = [table.pk for table in tables]
+    datasets = own_datasets(user).annotate(
+        held=Count("tables", filter=Q(tables__in=ids))
+    )
+    if action == DATASET_ADD:
+        datasets = datasets.filter(held__lt=len(ids))
+    else:
+        datasets = datasets.filter(held__gt=0)
+    return sorted(datasets, key=lambda d: (dataset_title(d).lower(), d.name))
+
+
+def _chosen_dataset(user, value, choices):
+    """The Dataset a request is about: ``value`` (a checked Dataset or a
+    name) if it is one of the user's own, else nothing. Without a value,
+    the only choice when there is exactly one, so a row whose Table is in
+    one of the user's Datasets is removed from it in one confirmation."""
+    if isinstance(value, Dataset):
+        return value if value.creator_id == user.pk else None
+    if value:
+        for dataset in choices:
+            if dataset.name == value:
+                return dataset
+        return own_datasets(user).filter(name=value).first()
+    return choices[0] if len(choices) == 1 else None
+
+
+def _by_membership(action, dataset, tables):
+    """Split ``tables`` into those ``action`` changes in ``dataset`` and
+    those it leaves out: already in it (add), not in it (remove)."""
+    members = set(
+        dataset.tables.filter(pk__in=[t.pk for t in tables]).values_list(
+            "pk", flat=True
+        )
+    )
+    title = _quoted([dataset_title(dataset)])
+    if action == DATASET_ADD:
+        keep, reason = (lambda t: t.pk not in members), f"Already in {title}"
+    else:
+        keep, reason = (lambda t: t.pk in members), f"Not in {title}"
+    kept = [table for table in tables if keep(table)]
+    left = [table.name for table in tables if not keep(table)]
+    return kept, ([LeftOut(reason, left)] if left else [])
+
+
 def preflight(user, action, names, params=None) -> Preflight:
     """What ``action`` would do with the Tables ``names``. Writes nothing.
 
     A name that is not a Table, or a Table the user holds no role on, is
     left out as "Not one of your tables", the same for both, so the answer
     does not reveal which Tables exist.
+
+    For the Dataset actions, ``params["dataset"]`` names the Dataset (see
+    ``_chosen_dataset``); the Tables already in it (add) or not in it
+    (remove) are left out. Without one, nothing is left out for that
+    reason, and ``datasets`` lists what the user can choose.
     """
     if action not in ACTIONS:
         raise ValueError(f"unknown table action: {action}")
+    params = params or {}
     names = _unique(names)
     found = {table.name: table for table in Table.objects.filter(name__in=names)}
     levels = table_levels(user, found.values())
+    assignable = frozenset()
+    if action == DATASET_ADD and found:
+        assignable = frozenset(
+            assignable_tables(user)
+            .filter(pk__in=[table.pk for table in found.values()])
+            .values_list("pk", flat=True)
+        )
 
     eligible, reasons = [], {}
     subject = f"{len(names)} tables"
@@ -244,7 +467,7 @@ def preflight(user, action, names, params=None) -> Preflight:
             if len(names) == 1:
                 subject = _quoted([name])
         else:
-            reason = _check(user, action, table, levels[table.pk])
+            reason = _check(user, action, table, levels[table.pk], assignable)
             if len(names) == 1:
                 subject = _quoted([table.human_readable_name or name])
         if reason:
@@ -252,16 +475,31 @@ def preflight(user, action, names, params=None) -> Preflight:
         else:
             eligible.append(table)
 
+    left_out = [LeftOut(reason, group) for reason, group in reasons.items()]
+    datasets, dataset = [], None
+    if action in DATASET_ACTIONS:
+        datasets = _dataset_choices(user, action, eligible)
+        dataset = _chosen_dataset(user, params.get("dataset"), datasets)
+        if dataset is not None and eligible:
+            eligible, by_membership = _by_membership(action, dataset, eligible)
+            left_out += by_membership
+
     consequences = {}
     if action == UNPUBLISH and eligible:
         consequences["others_datasets"] = _others_datasets(user, eligible)
+    elif action == DELETE and eligible:
+        consequences = _delete_consequences(user, eligible)
     return Preflight(
         action=action,
         total=len(names),
         eligible=eligible,
-        left_out=[LeftOut(reason, group) for reason, group in reasons.items()],
+        left_out=left_out,
+        ceiling=CEILINGS.get(action),
         consequences=consequences,
         subject=subject,
+        confirmation=_confirmation(action, eligible),
+        datasets=datasets,
+        dataset=dataset,
     )
 
 
@@ -283,10 +521,34 @@ def _publish_params(params) -> dict:
     return {"topic": topic, "embargo": embargo}
 
 
-def _checked_params(action, params) -> dict:
+def _dataset_params(user, params) -> dict:
+    """The Dataset parameter, checked: one of the user's own Datasets."""
+    value = params.get("dataset")
+    name = value.name if isinstance(value, Dataset) else (value or "").strip()
+    if not name:
+        raise InvalidParameters({"dataset": "Choose one of your datasets."})
+    dataset = own_datasets(user).filter(name=name).first()
+    if dataset is None:
+        raise InvalidParameters({"dataset": f"“{name}” is not one of your datasets."})
+    return {"dataset": dataset}
+
+
+def _checked_params(user, action, params) -> dict:
     if action == PUBLISH:
         return _publish_params(params)
+    if action in DATASET_ACTIONS:
+        return _dataset_params(user, params)
+    if action == DELETE:
+        # checked against what the preflight asks for inside ``execute``,
+        # because that depends on the Tables as they are then
+        return {"confirm": (params.get("confirm") or "").strip()}
     return {}
+
+
+def _confirm_error(check) -> str:
+    if check.total == 1:
+        return f"Type the table's name, {check.confirmation}, to confirm."
+    return f"Type the number of tables, {check.confirmation}, to confirm."
 
 
 def _write(action, table, params):
@@ -294,40 +556,107 @@ def _write(action, table, params):
         move_publish(table, params["topic"], params["embargo"])
     elif action == UNPUBLISH:
         table.set_not_published()
+    elif action == DATASET_ADD:
+        assign_table(params["dataset"], table)
+    elif action == DATASET_REMOVE:
+        params["dataset"].tables.remove(table)
+    elif action == DELETE:
+        table.delete_record()
 
 
-def _log(user, action, tables, params, via):
+@dataclass(frozen=True)
+class _Deleted:
+    """What the log line of one deleted Table says, read before its rows
+    went: the Datasets it left (all of them, for the operator) and whether
+    it was published."""
+
+    table: Table
+    datasets: list
+    published: bool
+
+
+def _deleted(tables) -> list:
+    left = {}
+    for table_id, dataset in Dataset.tables.through.objects.filter(
+        table__in=tables
+    ).values_list("table_id", "dataset__name"):
+        left.setdefault(table_id, []).append(dataset)
+    return [
+        _Deleted(table, sorted(left.get(table.pk, [])), table.is_publish)
+        for table in tables
+    ]
+
+
+def _drop(table):
+    """Drop ``table``'s OEDB tables; the exception when that failed, None
+    when it worked. Whatever went wrong, the Django rows are gone already,
+    so the failure is reported, not raised."""
+    try:
+        table.drop_oedb_table()
+    except Exception as error:
+        return error
+    return None
+
+
+def _log(user, action, tables, params, via, deleted=None, dropped=None):
     batch = uuid.uuid4().hex[:12] if len(tables) > 1 else "-"
     extra = ""
     if action == PUBLISH:
         extra = f" topic={params['topic']} embargo={params['embargo']}"
-    for table in tables:
-        logger.info(
+    elif action in DATASET_ACTIONS:
+        extra = f" dataset={params['dataset'].name}"
+    for index, table in enumerate(tables):
+        fields, level, exc_info = extra, logging.INFO, None
+        if deleted is not None:
+            record, error = deleted[index], dropped[index]
+            fields = (
+                f" datasets={','.join(record.datasets) or '-'}"
+                f" published={'yes' if record.published else 'no'}"
+                f" drop={'failed' if error else 'ok'}"
+            )
+            if error:
+                level, exc_info = logging.WARNING, error
+        logger.log(
+            level,
             "table_action table=%s action=%s by=%s via=%s batch=%s%s",
             table.name,
             action,
             user.pk,
             via,
             batch,
-            extra,
+            fields,
+            exc_info=exc_info,
         )
 
 
 def execute(user, action, names, params=None, via="dashboard") -> Outcome:
     """Do ``action`` on every Table in ``names``, or on none of them.
 
-    The parameters are checked first (``InvalidParameters``). Then, inside
-    one transaction holding a row lock on every named Table, each of them is
-    checked again: if any is left out now, for whatever reason, the request
-    is refused whole (``ActionRefused``). The lock makes the check and the
+    The parameters are checked first (``InvalidParameters``), and so is the
+    ceiling: more names than ``CEILINGS`` allows is refused before anything
+    is read. Then, inside one transaction holding a row lock on every named
+    Table, each of them is checked again: if any is left out now, for
+    whatever reason, the request is refused whole (``ActionRefused``). A
+    typed confirmation that does not match what the check asks for now is
+    an ``InvalidParameters`` on ``confirm``. The lock makes the check and the
     write one step, so two requests publishing the same draft cannot both
     pass the check (the second would add a second Topic). A failure
     part-way leaves nothing behind, and the log lines are written only once
     the transaction has committed.
+
+    A delete's transaction is durable (it refuses to run nested in another
+    one), so once it is left the rows are committed and the OEDB tables are
+    dropped, one at a time. A failed drop is in ``Outcome.drop_failed``.
     """
-    params = _checked_params(action, params or {})
+    params = _checked_params(user, action, params or {})
+    ceiling = CEILINGS.get(action)
+    if ceiling is not None and len(_unique(names)) > ceiling:
+        raise InvalidParameters(
+            {"table": _ceiling_message(action, ceiling, len(_unique(names)))}
+        )
+    deleted = None
     try:
-        with transaction.atomic():
+        with transaction.atomic(durable=action == DELETE):
             list(
                 Table.objects.select_for_update()
                 .filter(name__in=_unique(names))
@@ -338,13 +667,18 @@ def execute(user, action, names, params=None, via="dashboard") -> Outcome:
                 raise ActionRefused(check, check.left_out)
             if not check.eligible:
                 raise InvalidParameters({"table": "Name at least one table."})
+            if check.confirmation and params["confirm"] != check.confirmation:
+                raise InvalidParameters({"confirm": _confirm_error(check)})
             tables = check.eligible
+            if action == DELETE:
+                deleted = _deleted(tables)
             for table in tables:
                 try:
                     _write(action, table, params)
                 except APIError as error:
                     raise _WriteRefused(table, error) from error
-            transaction.on_commit(lambda: _log(user, action, tables, params, via))
+            if action != DELETE:
+                transaction.on_commit(lambda: _log(user, action, tables, params, via))
     except _WriteRefused as refused:
         # ``move_publish`` validates the gate live and refuses on its own, as
         # it does for a stored pass gone stale; the transaction has rolled
@@ -352,7 +686,12 @@ def execute(user, action, names, params=None, via="dashboard") -> Outcome:
         again = preflight(user, action, names, params)
         reason = LeftOut(str(refused.error), [refused.table.name])
         raise ActionRefused(again, again.left_out or [reason]) from refused.error
-    return Outcome(action, tables, params)
+    if action != DELETE:
+        return Outcome(action, tables, params)
+    dropped = [_drop(table) for table in tables]
+    _log(user, action, tables, params, via, deleted=deleted, dropped=dropped)
+    failed = [table for table, error in zip(tables, dropped) if error]
+    return Outcome(action, tables, params, drop_failed=failed)
 
 
 class _WriteRefused(Exception):

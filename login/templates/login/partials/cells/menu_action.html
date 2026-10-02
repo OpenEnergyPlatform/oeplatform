@@ -5,11 +5,12 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 One action entry of a row's ⋯ menu: it loads the action's preflight into
 the dialog for this one Table, or, below the role the action needs, stays
 visible and focusable with the reason as text (see menu.html). Expects
-``pk``, ``row``, ``verb`` (the action), ``label`` and ``gate`` (a RoleGate).
+``pk``, ``row``, ``verb`` (the action), ``label`` and ``gate`` (a RoleGate),
+and optionally ``tone``, a class for an entry that stands out (Delete).
 {% endcomment %}
 {% if row.level >= gate.level %}
   <button type="button"
-          class="dropdown-item"
+          class="dropdown-item{% if tone %} {{ tone }}{% endif %}"
           id="menu-{{ pk }}-{{ verb }}"
           hx-get="{% url 'login:table-action' user_id=profile_user.pk action=verb %}?table={{ row.table.name|urlencode }}"
           hx-target="#table-action-body"

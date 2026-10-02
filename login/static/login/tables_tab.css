@@ -476,6 +476,11 @@
 
 /* an action above the user's role: still focusable, so the reason is
    reachable by keyboard; aria-disabled, not Bootstrap's .disabled */
+/* Delete, last in the menu */
+.dash-menu__danger {
+  color: #b02a37;
+}
+
 .dash-menu__off,
 .dash-menu__off:hover,
 .dash-menu__off:focus {
@@ -666,6 +671,11 @@
 
 .dash-toast--error {
   border-left: 4px solid #dc3545;
+}
+
+/* done, but not cleanly: a delete whose database table stayed behind */
+.dash-toast--warning {
+  border-left: 4px solid #ffc107;
 }
 
 .dash-toast .toast-body a {

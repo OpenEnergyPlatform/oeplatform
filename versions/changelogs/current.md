@@ -12,6 +12,10 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- The Django database port can be set with `OEP_DJANGO_PORT` in the
+  `securitysettings.py` template, like the OEDB's `LOCAL_DB_PORT`. Without it a
+  local database container could not be published on any port but 5432
+  [(#2581)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2581)
 - The dev image caches pip downloads and built wheels in a BuildKit cache mount
   instead of discarding them. A single new line in `requirements.txt` used to
   re-download and re-compile all ~47 packages, several minutes of it building
@@ -28,8 +32,8 @@ SPDX-License-Identifier: CC0-1.0
   and published card sections: every Table you can write, directly or through an
   organization, with its status and where your access comes from. A status
   segment with counts, a search, sorting, 25 rows per page and the whole state
-  in the address bar. Until the row actions follow (#2561, #2562), publishing,
-  unpublishing and deleting are not offered on the dashboard
+  in the address bar. Publishing, unpublishing and deleting moved into each
+  row's ⋯ menu (#2561, #2562)
   [(#2572)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2572)
 - Each row of the tables tab now says whether the Table would pass the publish
   check (with the reasons and links to fix it on click, published Tables
@@ -66,6 +70,24 @@ SPDX-License-Identifier: CC0-1.0
   list then refreshes itself, keeping its filters, and a message says what
   happened. Each action writes one log line per table
   [(#2561)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2561)
+- The tables tab's ⋯ menu adds a table to one of your own datasets, or removes
+  it from one (offered only when one of yours holds it). A draft or embargoed
+  table may be added by anyone holding Data editor on it, directly or through an
+  organization: before, a draft you could write only through an organization was
+  offered on the Datasets tab and then refused. The dataset assign API and the
+  Datasets tab follow the same rule, and the API's assign and unassign now
+  change all the named tables or none
+  [(#2563)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2563)
+- Tables can be deleted from the ⋯ menu of the tables tab again, published ones
+  included (Data maintainer or above). A draft asks for a plain confirmation.
+  For a published table the dialog says what deleting breaks (the datasets it
+  leaves, other people's named with their owner, its review state, an active
+  embargo, and that links from scenario bundles stop resolving) and asks you to
+  type the table's name. A batch holding a published table or more than ten is
+  confirmed by typing the number of tables, and at most 50 are deleted at once.
+  If the database table cannot be removed after the table's record is gone, a
+  warning that stays on screen names it, and the log says `drop=failed`
+  [(#2562)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2562)
 - A table's Access cell, or "Manage access" in its ⋯ menu, opens a side drawer
   listing who holds which role (Data editor, Data maintainer, Admin), your own
   entries marked. A Table admin adds a person or one of their own organizations

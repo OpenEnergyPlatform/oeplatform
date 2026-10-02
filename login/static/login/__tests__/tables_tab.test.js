@@ -549,6 +549,18 @@ describe("showToast", () => {
     expect(toast.isConnected).toBe(false);
   });
 
+  it("puts a warning in the assertive region and leaves it until dismissed", () => {
+    const schedule = vi.fn();
+    const toast = showToast(document, "Deleted “Go”. The database table…", {
+      warning: true,
+      schedule,
+    });
+    const assertive = document.getElementById("tables-toasts-assertive");
+    expect(assertive.contains(toast)).toBe(true);
+    expect(toast.classList.contains("dash-toast--warning")).toBe(true);
+    expect(schedule).not.toHaveBeenCalled();
+  });
+
   it("writes the message as text, never as markup", () => {
     const toast = showToast(document, "<img src=x>", { error: true });
     expect(toast.querySelector("img")).toBeNull();
@@ -676,6 +688,30 @@ describe("bindTablesTab, actions", () => {
     document.getElementById("tables-search").focus();
     swapRegion(REGION("x", {}, ROW_MENU(7)));
     expect(document.activeElement.id).toBe("tables-search");
+  });
+
+  it("after a delete focuses the list heading, the row being gone", () => {
+    const entry = document.getElementById("menu-8-publish");
+    swapDialog(entry);
+    serverTrigger(entry, "tables-changed", { message: "Deleted “Go”." });
+    swapRegion(REGION("1 table", {}, ROW_MENU(7)));
+    expect(document.activeElement.id).toBe("tables-heading");
+  });
+
+  it("keeps a delete whose database table stayed behind on screen", () => {
+    const entry = document.getElementById("menu-8-publish");
+    swapDialog(entry);
+    serverTrigger(entry, "tables-changed", {
+      message: "Deleted “Go”. The database table of “Go” (go) could not…",
+      warning: true,
+    });
+    expect(dialog.closed).toBe(1);
+    const assertive = document.getElementById("tables-toasts-assertive");
+    expect(assertive.textContent).toContain("could not");
+    expect(assertive.querySelector(".dash-toast--warning")).not.toBeNull();
+    expect(document.getElementById("tables-toasts-polite").textContent).toBe(
+      "",
+    );
   });
 
   it("keeps a refusal on screen, assertively", () => {
