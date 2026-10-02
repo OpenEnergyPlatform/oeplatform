@@ -26,6 +26,15 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
+- The table page no longer stores a new saved view on every visit. Production
+  had collected ~195,000 of them, scanned twice per page view. A migration
+  removes the empty copies and adds a unique constraint on (table, type, name),
+  which keeps them out and indexes the lookup; saved views that carry filters or
+  options are never deleted, and if two of them share a name, one is renamed
+  "name (id)". Saving a view under a name the table already uses now says so
+  instead of failing, a graph marked as default no longer replaces the Table
+  tab, and setting the default view or deleting a view requires POST
+  [(#2218)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2218)
 - The docker development setup works on macOS: bind-mounted folders are given to
   the container user by numeric id (macOS' group id already exists in the image,
   so the named group was never created), and a `.DS_Store` left by Finder no
