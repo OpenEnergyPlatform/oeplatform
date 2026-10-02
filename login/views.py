@@ -470,8 +470,9 @@ def _done_message(outcome, hidden) -> str:
     what = _title(tables[0]) if count == 1 else f"{count} tables"
     if outcome.action == table_actions.PUBLISH:
         message = f"Published {what} under {outcome.params['topic']}"
-        embargo = dict(table_actions.EMBARGO_PERIODS)[outcome.params["embargo"]]
-        if outcome.params["embargo"] != "none":
+        # ``KEEP_EMBARGO`` is not one of the periods; nothing to say then
+        embargo = dict(table_actions.EMBARGO_PERIODS).get(outcome.params["embargo"])
+        if embargo and outcome.params["embargo"] != "none":
             message += f", embargoed for {embargo}"
         message += "."
     elif outcome.action == table_actions.UNPUBLISH:

@@ -12,6 +12,22 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- For API clients: `tables/<table>/move_publish/<topic>/`, `unpublish/` and
+  deleting a table now take the same path as the tables tab, with the same
+  request and response bodies (`{}`, or `{"reason": …}` on a refusal) and one
+  log line per call (`via=api`). Publishing writes everything or nothing: an
+  unknown topic used to set the embargo before failing with "Invalid request",
+  and now answers 400 naming the topic with nothing changed. Two requests that
+  used to succeed now answer 400 with the reason: publishing under `draft` (a
+  status, not a topic), and an embargo duration other than `none`, `6_months` or
+  `1_year` (it used to be ignored). A missing open data license is still a 400,
+  worded as the tables tab words it ("Fails the Publish gate: License").
+  Unchanged: a published table can be published again under another topic, an
+  omitted embargo leaves the existing one as it is, unpublishing a draft
+  succeeds, and a published table can be deleted. If a table's record is deleted
+  but its database table cannot be dropped, the delete answers 500 naming the
+  table instead of 400 "Invalid request"
+  [(#2569)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2569)
 - The Django database port can be set with `OEP_DJANGO_PORT` in the
   `securitysettings.py` template, like the OEDB's `LOCAL_DB_PORT`. Without it a
   local database container could not be published on any port but 5432

@@ -36,8 +36,8 @@ set-based, as ``myuser.get_table_permission_level``
 does for one Table: the highest of the user's direct grant and the grants of
 their Organizations, and Table admin on every Table for a platform admin or a
 member of an admin Organization. It is the same rule the API's permission
-decorators read, so the API can move onto this service (#2569) without
-changing who may do what.
+decorators read, so the API's publish, unpublish and delete endpoints call
+this service (#2569) without changing who may do what.
 
 Log lines, on the ``oeplatform.table_actions`` logger, one per Table::
 
@@ -82,6 +82,12 @@ EMBARGO_PERIODS = (
     ("6_months", "6 months"),
     ("1_year", "1 year"),
 )
+
+# Publishing without naming an embargo leaves the Table's embargo as it is,
+# which ``move_publish`` does for any value but the three above. The dialog
+# never sends it; the publish API does when its request names no embargo,
+# because there an omitted embargo has never lifted one.
+KEEP_EMBARGO = "keep"
 
 
 @dataclass(frozen=True)
@@ -337,17 +343,18 @@ def _confirmation(action, eligible) -> str:
     return ""
 
 
-def _check(user, action, table, level, assignable=frozenset()) -> str:
+def _check(user, action, table, level, assignable=frozenset(), republish=False) -> str:
     """Why ``action`` would leave ``table`` out, or "" when it would act.
     ``assignable`` holds the primary keys the curation rule accepts; only
     adding to a Dataset reads it. Whether the Table is in the chosen Dataset
-    is decided afterwards (``_by_membership``)."""
+    is decided afterwards (``_by_membership``). ``republish`` lets a publish
+    take a Table that is published already (``_publish_params``)."""
     if level < ROLE_GATES[action].level:
         return ROLE_GATES[action].refusal
     if action == DATASET_ADD and table.pk not in assignable:
         return MAY_NOT_ASSIGN
     if action == PUBLISH:
-        if table.is_publish:
+        if table.is_publish and not republish:
             return ALREADY_PUBLISHED
         return _gate_reason(table)
     if action == UNPUBLISH and not table.is_publish:
@@ -471,6 +478,9 @@ def preflight(user, action, names, params=None) -> Preflight:
     left out as "Not one of your tables", the same for both, so the answer
     does not reveal which Tables exist.
 
+    A publish leaves out Tables that are published already, unless
+    ``params["republish"]`` is set (``_publish_params``).
+
     For the Dataset actions, ``params["dataset"]`` names the Dataset (see
     ``_chosen_dataset``); the Tables already in it (add) or not in it
     (remove) are left out. Without one, nothing is left out for that
@@ -503,6 +513,8 @@ def preflight(user, action, names, params=None) -> Preflight:
             .values_list("pk", flat=True)
         )
 
+    republish = action == PUBLISH and bool(params.get("republish"))
+
     eligible, reasons = [], {}
     subject = f"{len(names)} tables"
     for name in names:
@@ -512,7 +524,9 @@ def preflight(user, action, names, params=None) -> Preflight:
             if len(names) == 1:
                 subject = _quoted([name])
         else:
-            reason = _check(user, action, table, levels[table.pk], assignable)
+            reason = _check(
+                user, action, table, levels[table.pk], assignable, republish
+            )
             if len(names) == 1:
                 subject = _quoted([table.human_readable_name or name])
         if reason:
@@ -549,7 +563,14 @@ def preflight(user, action, names, params=None) -> Preflight:
 
 
 def _publish_params(params) -> dict:
-    """The publish parameters, checked: a real Topic and a known embargo."""
+    """The publish parameters, checked: a real Topic and a known embargo
+    (or ``KEEP_EMBARGO``).
+
+    ``republish`` publishes a Table that is published already again: under
+    one more Topic, with the embargo given. Only the publish API sets it,
+    because there it has always been the way to add a Topic or change an
+    embargo; the dashboard leaves published Tables out, so that a bulk
+    publish cannot quietly change Tables that are out already."""
     errors = {}
     topic = (params.get("topic") or "").strip()
     if not topic:
@@ -559,11 +580,15 @@ def _publish_params(params) -> dict:
     elif not Topic.objects.filter(name=topic).exists():
         errors["topic"] = f"There is no topic “{topic}”."
     embargo = (params.get("embargo") or "none").strip()
-    if embargo not in dict(EMBARGO_PERIODS):
+    if embargo not in dict(EMBARGO_PERIODS) and embargo != KEEP_EMBARGO:
         errors["embargo"] = f"“{embargo}” is not an embargo period."
     if errors:
         raise InvalidParameters(errors)
-    return {"topic": topic, "embargo": embargo}
+    return {
+        "topic": topic,
+        "embargo": embargo,
+        "republish": bool(params.get("republish")),
+    }
 
 
 def _dataset_params(user, params) -> dict:
