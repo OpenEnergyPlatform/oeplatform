@@ -20,7 +20,10 @@
 //   changed it (a Reset).
 //
 // Newer requests replace older ones through `hx-sync` on the tab, so a
-// stale response never overwrites a newer state.
+// stale response never overwrites a newer state. The cells' popovers are
+// `list_popovers.js`, wired here so the page has one thing to bind.
+
+import { bindPopovers } from "./list_popovers.js";
 
 export const REGION_ID = "tables-results";
 export const HEADING_ID = "tables-heading";
@@ -185,9 +188,11 @@ export function bindTablesTab(doc, { announceDelay = 60 } = {}) {
   for (const [name, listener] of listeners) {
     doc.body.addEventListener(name, listener);
   }
+  const popovers = bindPopovers(doc);
   return () => {
     for (const [name, listener] of listeners) {
       doc.body.removeEventListener(name, listener);
     }
+    popovers.unbind();
   };
 }

@@ -65,7 +65,7 @@ from login.forms import EditUserForm, OrganizationForm
 from login.models import Membership
 from login.models import myuser as OepUser
 from login.permissions import ADMIN_PERM, DELETE_PERM, WRITE_PERM
-from login.tables_tab import TABLES, accessible_tables, table_rows
+from login.tables_tab import accessible_tables, table_rows, tables_listing
 from login.utils import get_tables_for_organization
 from oeplatform.settings import PSEUDO_TOPIC_DRAFT
 
@@ -93,7 +93,7 @@ class TablesView(ProfileOwnerRequiredMixin, View):
     @method_decorator(never_cache)
     def get(self, request, user_id):
         user = self.profile_user
-        page = TABLES.page(
+        page = tables_listing(user).page(
             accessible_tables(user), request.GET, request.path, rows=table_rows(user)
         )
         context = {"profile_user": user, "page": page}

@@ -31,6 +31,12 @@ SPDX-License-Identifier: CC0-1.0
   in the address bar. Until the row actions follow (#2561, #2562), publishing,
   unpublishing and deleting are not offered on the dashboard
   [(#2572)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2572)
+- Each row of the tables tab now says whether the Table would pass the publish
+  check (with the reasons and links to fix it on click, published Tables
+  included), its review state with the badge linked to the review, how many
+  datasets it is in (yours first, never another user's draft) and its topics.
+  The list sorts by review state and by dataset count too
+  [(#2554)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2554)
 
 ## Bugs
 

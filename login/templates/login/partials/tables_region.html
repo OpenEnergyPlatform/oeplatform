@@ -3,6 +3,7 @@ SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 
 The tables tab's results region: status segment, chips slot, table, pager.
+Each cell type is its own partial under ``cells/``.
 A direct load and an htmx request render this same state; htmx gets only
 this. Every control carries a stable id, so focus can be put back by id
 after a swap. ``data-announce`` is what the persistent live region outside
@@ -44,7 +45,14 @@ should hold (a Reset clears it).
             <tr>
               {% include "login/partials/list_sort_header.html" with link=page.sort_links.table cell="c-table" %}
               {% include "login/partials/list_sort_header.html" with link=page.sort_links.status cell="c-status" %}
+              <th class="c-pub" scope="col">Publishable</th>
+              {% include "login/partials/list_sort_header.html" with link=page.sort_links.review cell="c-review" %}
               <th class="c-access" scope="col">Access</th>
+              {% include "login/partials/list_sort_header.html" with link=page.sort_links.datasets cell="c-ds" %}
+              <th class="c-topics" scope="col">Topics</th>
+              <th class="c-menu" scope="col">
+                <span class="visually-hidden">Actions</span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -67,13 +75,24 @@ should hold (a Reset clears it).
                     <span class="badge dash-badge dash-badge--published">Published</span>
                   {% endif %}
                 </td>
+                <td class="c-pub">{% include "login/partials/cells/gate.html" %}</td>
+                <td class="c-review">{% include "login/partials/cells/review.html" %}</td>
                 <td class="c-access">
-                  {% if row.direct %}<span class="dash-achip dash-achip--you">You</span>{% endif %}
-                  {% for organization in row.organizations %}<span class="dash-achip">{{ organization }}</span>{% endfor %}
-                  {% if row.role_label %}
-                    <span class="dash-role"><span class="visually-hidden">Your role:</span> {{ row.role_label }}</span>
-                  {% endif %}
+                  {% comment %}The Table's permission page until the access drawer (#2566) takes its place.{% endcomment %}
+                  <a id="acc-{{ row.table.pk }}"
+                     class="dash-access"
+                     href="{% url 'dataedit:table-permission' table=row.table.name %}"
+                     hx-boost="false"
+                     aria-label="{{ row.access_label }}">
+                    {% if row.direct %}<span class="dash-achip dash-achip--you">You</span>{% endif %}
+                    {% for organization in row.organizations %}<span class="dash-achip">{{ organization }}</span>{% endfor %}
+                    {% if row.role_label %}<span class="dash-role">{{ row.role_label }}</span>{% endif %}
+                  </a>
                 </td>
+                <td class="c-ds">{% include "login/partials/cells/datasets.html" %}</td>
+                <td class="c-topics">{% include "login/partials/cells/chips.html" %}</td>
+                {% comment %}The row's ⋯ slot, sticky at the right edge; its menu comes with the action pipeline (#2561).{% endcomment %}
+                <td class="c-menu"></td>
               </tr>
             {% endfor %}
           </tbody>

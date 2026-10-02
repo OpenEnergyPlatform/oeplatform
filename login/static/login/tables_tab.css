@@ -187,3 +187,141 @@
   font-size: 1.1rem;
   font-weight: 600;
 }
+
+.dash-muted {
+  color: var(--dash-muted);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+/* Publishable: the Publish gate's result */
+.dash-gate {
+  padding: 0.1rem 0.3rem;
+  white-space: nowrap;
+  background: none;
+  border: 0;
+  border-radius: 4px;
+}
+
+.dash-gate--ok {
+  color: #198754;
+}
+
+.dash-gate--bad {
+  color: #b02a37;
+}
+
+/* Review: a pill per badge level, colours from the prototype */
+.dash-pill {
+  font-weight: 600;
+  text-decoration: none;
+  color: #333;
+  background: #e9ecef;
+}
+
+.dash-pill--iron {
+  color: #333;
+  background: #d5d5d5;
+}
+
+.dash-pill--bronze {
+  color: #5a3a1a;
+  background: #e8c9a8;
+}
+
+.dash-pill--silver {
+  color: #3a3f44;
+  background: #dfe3e6;
+}
+
+.dash-pill--gold {
+  color: #5c4800;
+  background: #f6e3a1;
+}
+
+.dash-pill--platinum {
+  color: #0c4a5c;
+  background: #d7ecf3;
+}
+
+/* Access: the whole cell manages access */
+.dash-access {
+  display: inline-block;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Datasets and the Topics' "+n": a count that opens a popover */
+.dash-count {
+  padding: 0.1rem 0.4rem;
+  background: none;
+  border: 0;
+  border-radius: 4px;
+}
+
+.dash-count--small {
+  font-size: 0.75rem;
+}
+
+.dash-gate:hover,
+.dash-count:hover,
+.dash-access:hover {
+  background: #eef2f5;
+}
+
+.dash-tchip {
+  display: inline-block;
+  margin: 1px 2px 1px 0;
+  padding: 0 0.35rem;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  background: #f1f3f5;
+  border-radius: 3px;
+}
+
+/* a cell's popover, placed beside its button by list_popovers.js */
+.dash-pop {
+  z-index: 1070;
+  max-width: 22rem;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.8125rem;
+  background: #fff;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15);
+}
+
+.dash-pop:focus {
+  outline: 2px solid var(--dash-primary);
+}
+
+.dash-pop__title {
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+}
+
+.dash-pop__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dash-pop__list li {
+  overflow-wrap: anywhere;
+}
+
+.dash-pop__links {
+  margin-top: 0.35rem;
+}
+
+/* the row's ⋯ slot stays at the right edge while the list scrolls sideways */
+.c-menu {
+  position: sticky;
+  right: 0;
+  width: 3rem;
+  background: #fff;
+}
+
+.dash-table thead .c-menu {
+  background: #f8f9fa;
+}

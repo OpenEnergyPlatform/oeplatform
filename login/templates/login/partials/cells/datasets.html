@@ -1,0 +1,44 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+Cell type "count with popover": how many Datasets the Table is in, of those
+the viewer may see, and their names on click, the viewer's own first. Other
+people's are named with their owner; another user's draft never appears.
+{% endcomment %}
+{% with count=row.datasets|length %}
+  {% if count %}
+    <button type="button"
+            id="ds-{{ row.table.pk }}"
+            class="dash-count"
+            aria-expanded="false"
+            aria-controls="ds-{{ row.table.pk }}-pop"
+            aria-label="In {{ count }} dataset{{ count|pluralize }}. Show {{ count|pluralize:'it,them' }}"
+            data-dash-popover>{{ count }}</button>
+    <div id="ds-{{ row.table.pk }}-pop"
+         class="dash-pop"
+         role="dialog"
+         aria-label="Datasets containing {{ row.title }}"
+         tabindex="-1"
+         hidden>
+      <ul class="dash-pop__list">
+        {% for dataset in row.datasets %}
+          <li>
+            {% if dataset.own %}
+              <a href="{% url 'login:datasets' user_id=profile_user.pk %}?search={{ dataset.name|urlencode }}#dataset-card-{{ dataset.name }}"
+                 hx-boost="false">{{ dataset.name }}</a>
+              <span class="dash-muted">your dataset</span>
+            {% else %}
+              in {% if dataset.owner %}{{ dataset.owner }}'s{% endif %}
+              <a href="{% url 'dataedit:dataset-detail' dataset_name=dataset.name %}"
+                 hx-boost="false">{{ dataset.name }}</a>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% else %}
+    <span class="dash-muted"
+          aria-hidden="true">–</span><span class="visually-hidden">In no dataset</span>
+  {% endif %}
+{% endwith %}

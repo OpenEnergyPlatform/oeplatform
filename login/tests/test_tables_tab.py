@@ -18,7 +18,7 @@ from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from django.utils import timezone
 
-from dataedit.models import Embargo, Table
+from dataedit.models import Dataset, Embargo, PeerReview, Table, Topic
 from login.models import (
     ADMIN_PERM,
     DELETE_PERM,
@@ -523,7 +523,8 @@ class LayoutTests(TablesTabTestCase):
 
 
 class QueryCountTests(TablesTabTestCase):
-    """A page costs the same number of queries whatever the account size."""
+    """A page costs the same number of queries whatever the account size,
+    the sorts that read other tables (Review, Datasets) included."""
 
     def fill(self, count, organization):
         tables = Table.objects.bulk_create(
@@ -539,17 +540,51 @@ class QueryCountTests(TablesTabTestCase):
             for table in tables[1::2]
         )
         Embargo.objects.create(table=tables[0], duration="1_year")
+        topics = [Topic.objects.get_or_create(name=n)[0] for n in ("a", "b", "c")]
+        own = Dataset.objects.create(name=f"own_{count}", creator=self.user)
+        theirs = Dataset.objects.create(name=f"theirs_{count}", creator=self.stranger)
+        for index, table in enumerate(tables):
+            table.topics.add(*topics[: index % 4])
+            if index % 2:
+                own.tables.add(table)
+            if index % 3:
+                theirs.tables.add(table)
+            if index % 5 == 0:
+                PeerReview.objects.create(
+                    table=table.name,
+                    contributor=self.user,
+                    reviewer=self.stranger,
+                    is_finished=index % 10 == 0,
+                    review={"badge": "Silver"},
+                )
+
+    def empty(self):
+        Table.objects.filter(name__startswith="q_").delete()
+        Dataset.objects.all().delete()
+        PeerReview.objects.all().delete()
 
     def queries(self, query=None):
         with CaptureQueriesContext(connection) as captured:
             self.get(query, htmx=True)
         return len(captured)
 
-    def test_four_and_a_hundred_and_thirty_tables_cost_the_same(self):
+    def test_four_a_hundred_and_thirty_and_three_hundred_tables_cost_the_same(self):
+        """Seven: the session and the user; the facet aggregate and the page
+        (embargo, Review and Topics ride in it); direct grants, organization
+        grants and Datasets for the page. Django caches the current Site for
+        the process after its first request, so one request runs first, or
+        the count would depend on which test ran before this one."""
         organization = self.organization("Org Count")
-        self.fill(4, organization)
-        small = self.queries()
-        Table.objects.filter(name__startswith="q_").delete()
-        self.fill(130, organization)
-        self.assertEqual(self.queries(), small)
-        self.assertEqual(self.queries({"page": "6", "search": "q_"}), small)
+        self.get(htmx=True)
+        queries = (
+            {},
+            {"page": "2", "search": "q_"},
+            {"sort": "-review"},
+            {"sort": "datasets"},
+        )
+        counts = {}
+        for size in (4, 130, 300):
+            self.empty()
+            self.fill(size, organization)
+            counts[size] = [self.queries(query) for query in queries]
+        self.assertEqual(counts, {size: [7] * len(queries) for size in counts})

@@ -1,0 +1,32 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+Cell type "chip list with +n": the Table's Topics, the first two as chips
+and the rest behind "+n". A Table unpublished later keeps its Topics.
+{% endcomment %}
+{% if row.topics %}
+  {% for topic in row.shown_topics %}<span class="dash-tchip">{{ topic }}</span>{% endfor %}
+  {% if row.more_topics %}
+    {% with more=row.more_topics|length %}
+      <button type="button"
+              id="tp-{{ row.table.pk }}"
+              class="dash-count dash-count--small"
+              aria-expanded="false"
+              aria-controls="tp-{{ row.table.pk }}-pop"
+              aria-label="{{ more }} more topic{{ more|pluralize }}. Show {{ more|pluralize:'it,them' }}"
+              data-dash-popover>+{{ more }}</button>
+      <div id="tp-{{ row.table.pk }}-pop"
+           class="dash-pop"
+           role="dialog"
+           aria-label="Topics of {{ row.title }}"
+           tabindex="-1"
+           hidden>
+        {% for topic in row.topics %}<span class="dash-tchip">{{ topic }}</span>{% endfor %}
+      </div>
+    {% endwith %}
+  {% endif %}
+{% else %}
+  <span class="dash-muted"
+        aria-hidden="true">–</span><span class="visually-hidden">No topics</span>
+{% endif %}
