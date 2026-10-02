@@ -17,9 +17,16 @@ container queries in ``tables_tab.css`` hide a column by its cell class, and
 on the narrowest lists stack each row into two lines and show the "Sort by"
 select in place of the column headers. Every cell therefore carries its
 column's class.
+
+After an action the region re-fetches itself with the state it shows
+(``tables-changed``, sent by the action's response). The request names the
+region as its trigger, so the view answers with HX-Replace-Url: an action
+adds no history entry.
 {% endcomment %}
 <div id="tables-results"
      class="dash-results"
+     hx-get="{{ page.url }}"
+     hx-trigger="tables-changed from:body"
      data-announce="{{ page.announcement }}"
      data-filters="{{ page.filters_json }}"
      data-more="{{ page.more_count }}"
@@ -104,8 +111,7 @@ column's class.
                 </td>
                 <td class="c-ds">{% include "login/partials/cells/datasets.html" %}</td>
                 <td class="c-topics">{% include "login/partials/cells/chips.html" %}</td>
-                {% comment %}The row's ⋯ slot, sticky at the right edge; its menu comes with the action pipeline (#2561).{% endcomment %}
-                <td class="c-menu"></td>
+                <td class="c-menu">{% include "login/partials/cells/menu.html" %}</td>
               </tr>
             {% endfor %}
           </tbody>

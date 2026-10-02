@@ -8,14 +8,21 @@
 // Django test cannot see. htmx is not loaded here: its events are dispatched
 // by hand with the detail htmx 1.9 gives them, which is the whole contract
 // the module relies on.
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
+  LOGGED_OUT,
+  SERVER_FAILED,
+  UNREACHABLE,
   announce,
   bindTablesTab,
   controlValue,
   filterParameters,
+  focusAfterAction,
+  isUnavailable,
+  loginLink,
   restoreFocus,
+  showToast,
   syncFilters,
 } from "../tables_tab.js";
 
@@ -411,5 +418,308 @@ describe("bindTablesTab", () => {
       }),
     );
     expect(parameters).toEqual({ page: "2" });
+  });
+});
+
+/** One row's ⋯ menu: an action entry, and one above the user's role. */
+const ROW_MENU = (pk) => `
+  <button id="menu-${pk}" type="button">⋯</button>
+  <button id="menu-${pk}-publish" type="button"
+          data-action-origin="menu-${pk}">Publish…</button>
+  <button id="menu-${pk}-unpublish" type="button" aria-disabled="true">
+    Unpublish <span>Only Table admins can unpublish</span></button>`;
+
+/** The page around the region: dialog body and the two toast regions. */
+function renderActionPage(region) {
+  renderPage(region);
+  const tab = document.getElementById("tables-tab");
+  tab.dataset.loginUrl = "/user/login/";
+  document.body.insertAdjacentHTML(
+    "beforeend",
+    `<div id="table-action"><div id="table-action-body"></div></div>
+     <div id="tables-toasts-polite" aria-live="polite"></div>
+     <div id="tables-toasts-assertive" aria-live="assertive"></div>`,
+  );
+}
+
+/** A dialog that records what was asked of it, like Bootstrap's modal. */
+function fakeDialog() {
+  const dialog = { opened: 0, closed: 0, hidden: null };
+  dialog.open = () => {
+    dialog.opened += 1;
+  };
+  dialog.close = () => {
+    dialog.closed += 1;
+  };
+  dialog.onHidden = (callback) => {
+    dialog.hidden = callback;
+  };
+  return dialog;
+}
+
+/** htmx 1.9's swap events for the dialog body, as a menu entry or the
+ * dialog's form causes them: dispatched on the target, with `elt` set to
+ * the target and the requesting element in `requestConfig.elt`. */
+function swapDialog(source, status = 200) {
+  const target = document.getElementById("table-action-body");
+  const detail = {
+    elt: target,
+    target,
+    requestConfig: { elt: source },
+    xhr: { status },
+    shouldSwap: status < 300,
+    isError: status >= 400,
+  };
+  const fire = (name) =>
+    target.dispatchEvent(new CustomEvent(name, { bubbles: true, detail }));
+  fire("htmx:beforeSwap");
+  if (detail.shouldSwap) {
+    fire("htmx:afterSwap");
+  }
+  return detail;
+}
+
+/** An `HX-Trigger` response header's event, as htmx dispatches it. */
+const serverTrigger = (elt, name, detail) =>
+  elt.dispatchEvent(new CustomEvent(name, { bubbles: true, detail }));
+
+describe("focusAfterAction", () => {
+  beforeEach(() => renderActionPage(REGION("x", {}, ROW_MENU(7))));
+
+  it("focuses the row's ⋯", () => {
+    focusAfterAction(document, "menu-7");
+    expect(document.activeElement.id).toBe("menu-7");
+  });
+
+  it("falls back to the list heading when the row is gone", () => {
+    focusAfterAction(document, "menu-99");
+    expect(document.activeElement.id).toBe("tables-heading");
+  });
+
+  it("moves focus even when something else holds it", () => {
+    document.getElementById("tables-search").focus();
+    focusAfterAction(document, "menu-7");
+    expect(document.activeElement.id).toBe("menu-7");
+  });
+});
+
+describe("isUnavailable", () => {
+  beforeEach(() => renderActionPage(REGION("x", {}, ROW_MENU(7))));
+
+  it("is true inside an entry marked aria-disabled", () => {
+    const reason = document.querySelector("#menu-7-unpublish span");
+    expect(isUnavailable(reason)).toBe(true);
+  });
+
+  it("is false for an available entry", () => {
+    const entry = document.getElementById("menu-7-publish");
+    expect(isUnavailable(entry)).toBe(false);
+  });
+});
+
+describe("showToast", () => {
+  beforeEach(() => renderActionPage(REGION("x")));
+
+  it("puts a success in the polite region and removes it after the timeout", () => {
+    let later = null;
+    const toast = showToast(document, "Published “Go” under climate.", {
+      schedule: (callback, ms) => {
+        later = [callback, ms];
+      },
+    });
+    const polite = document.getElementById("tables-toasts-polite");
+    expect(polite.contains(toast)).toBe(true);
+    expect(toast.textContent).toContain("Published “Go” under climate.");
+    expect(later[1]).toBe(5000);
+    later[0]();
+    expect(polite.contains(toast)).toBe(false);
+  });
+
+  it("puts an error in the assertive region and leaves it until dismissed", () => {
+    const schedule = vi.fn();
+    const toast = showToast(document, "Nothing was changed: …", {
+      error: true,
+      schedule,
+    });
+    const assertive = document.getElementById("tables-toasts-assertive");
+    expect(assertive.contains(toast)).toBe(true);
+    expect(schedule).not.toHaveBeenCalled();
+    toast.querySelector('button[aria-label="Dismiss"]').click();
+    expect(toast.isConnected).toBe(false);
+  });
+
+  it("writes the message as text, never as markup", () => {
+    const toast = showToast(document, "<img src=x>", { error: true });
+    expect(toast.querySelector("img")).toBeNull();
+  });
+});
+
+describe("loginLink", () => {
+  it("comes back to this view, filters included", () => {
+    renderActionPage(REGION("x"));
+    const here = "/user/profile/3/tables?status=draft";
+    window.history.replaceState(null, "", here);
+    expect(loginLink(document)).toEqual({
+      href: "/user/login/?next=%2Fuser%2Fprofile%2F3%2Ftables%3Fstatus%3Ddraft",
+      text: "Log in again",
+    });
+  });
+});
+
+describe("bindTablesTab, actions", () => {
+  let unbind;
+  let dialog;
+
+  beforeEach(() => {
+    renderActionPage(REGION("2 tables", {}, ROW_MENU(7) + ROW_MENU(8)));
+    dialog = fakeDialog();
+    unbind = bindTablesTab(document, {
+      announceDelay: 0,
+      dialog,
+      schedule: () => {},
+    });
+  });
+
+  afterEach(() => unbind());
+
+  it("opens the dialog once a menu entry has filled it", () => {
+    swapDialog(document.getElementById("menu-7-publish"));
+    expect(dialog.opened).toBe(1);
+  });
+
+  it("swaps a refusal or a field error into the open dialog", () => {
+    const form = document.createElement("form");
+    document.getElementById("table-action-body").append(form);
+    for (const status of [409, 400]) {
+      const detail = swapDialog(form, status);
+      expect(detail.shouldSwap).toBe(true);
+      expect(detail.isError).toBe(false);
+    }
+    expect(dialog.opened).toBe(0);
+  });
+
+  it("leaves other failed swaps as errors", () => {
+    const detail = swapDialog(document.getElementById("menu-7-publish"), 500);
+    expect(detail.shouldSwap).toBe(false);
+    expect(detail.isError).toBe(true);
+  });
+
+  it("swallows a click on an entry above the user's role", () => {
+    const seen = vi.fn();
+    document.addEventListener("click", seen);
+    const reason = document.querySelector("#menu-7-unpublish span");
+    const event = new MouseEvent("click", { bubbles: true, cancelable: true });
+    reason.dispatchEvent(event);
+    document.removeEventListener("click", seen);
+    expect(event.defaultPrevented).toBe(true);
+    expect(seen).not.toHaveBeenCalled();
+  });
+
+  it("lets a click on an available entry through", () => {
+    const seen = vi.fn();
+    document.addEventListener("click", seen);
+    document.getElementById("menu-7-publish").click();
+    document.removeEventListener("click", seen);
+    expect(seen).toHaveBeenCalled();
+  });
+
+  it("after an action closes the dialog, says so, then focuses the row", () => {
+    const entry = document.getElementById("menu-7-publish");
+    swapDialog(entry);
+    serverTrigger(entry, "tables-changed", {
+      message: "Published “Go” under climate.",
+      focus: "menu-7",
+    });
+    expect(dialog.closed).toBe(1);
+    expect(
+      document.getElementById("tables-toasts-polite").textContent,
+    ).toContain("Published “Go” under climate.");
+    // the dialog's own button held focus; the region comes back without it
+    swapRegion(REGION("1 table", {}, ROW_MENU(7)));
+    expect(document.activeElement.id).toBe("menu-7");
+  });
+
+  it("focuses the list heading when the row has left the list", () => {
+    const entry = document.getElementById("menu-8-publish");
+    swapDialog(entry);
+    serverTrigger(entry, "tables-changed", {
+      message: "Done.",
+      focus: "menu-8",
+    });
+    swapRegion(REGION("1 table", {}, ROW_MENU(7)));
+    expect(document.activeElement.id).toBe("tables-heading");
+  });
+
+  it("falls back to the opening row when the server names no row", () => {
+    const entry = document.getElementById("menu-8-publish");
+    swapDialog(entry);
+    serverTrigger(entry, "tables-changed", { message: "Done." });
+    swapRegion(REGION("2 tables", {}, ROW_MENU(7) + ROW_MENU(8)));
+    expect(document.activeElement.id).toBe("menu-8");
+  });
+
+  it("returns focus to the ⋯ when the dialog is cancelled", () => {
+    swapDialog(document.getElementById("menu-8-publish"));
+    dialog.hidden();
+    expect(document.activeElement.id).toBe("menu-8");
+  });
+
+  it("only moves focus once after an action, then swaps restore as before", () => {
+    const entry = document.getElementById("menu-7-publish");
+    swapDialog(entry);
+    serverTrigger(entry, "tables-changed", {
+      message: "Done.",
+      focus: "menu-7",
+    });
+    swapRegion(REGION("x", {}, ROW_MENU(7)));
+    document.getElementById("tables-search").focus();
+    swapRegion(REGION("x", {}, ROW_MENU(7)));
+    expect(document.activeElement.id).toBe("tables-search");
+  });
+
+  it("keeps a refusal on screen, assertively", () => {
+    serverTrigger(document.body, "tables-refused", {
+      message: "Nothing was changed: Already published (“t”).",
+    });
+    const assertive = document.getElementById("tables-toasts-assertive");
+    expect(assertive.textContent).toContain("Nothing was changed");
+    expect(dialog.closed).toBe(0);
+  });
+
+  it("tells a logged-out user so, with a way back", () => {
+    const here = "/user/profile/3/tables?status=draft";
+    window.history.replaceState(null, "", here);
+    document.body.dispatchEvent(
+      new CustomEvent("htmx:responseError", {
+        bubbles: true,
+        detail: { xhr: { status: 401 } },
+      }),
+    );
+    const toast = document.getElementById("tables-toasts-assertive");
+    expect(toast.textContent).toContain(LOGGED_OUT);
+    expect(toast.querySelector("a").getAttribute("href")).toBe(
+      "/user/login/?next=%2Fuser%2Fprofile%2F3%2Ftables%3Fstatus%3Ddraft",
+    );
+  });
+
+  it("says a server error may have left the change undone", () => {
+    document.body.dispatchEvent(
+      new CustomEvent("htmx:responseError", {
+        bubbles: true,
+        detail: { xhr: { status: 500 } },
+      }),
+    );
+    expect(
+      document.getElementById("tables-toasts-assertive").textContent,
+    ).toContain(SERVER_FAILED);
+  });
+
+  it("says so when the server cannot be reached", () => {
+    document.body.dispatchEvent(
+      new CustomEvent("htmx:sendError", { bubbles: true, detail: {} }),
+    );
+    expect(
+      document.getElementById("tables-toasts-assertive").textContent,
+    ).toContain(UNREACHABLE);
   });
 });

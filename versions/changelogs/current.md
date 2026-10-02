@@ -58,6 +58,14 @@ SPDX-License-Identifier: CC0-1.0
   `python manage.py recompute_publish_gate --apply` once; until it has run, the
   Publishable filter matches no existing Table
   [(#2560)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2560)
+- Every row of the tables tab has a ⋯ menu: edit metadata, upload data, and
+  publish (topic and embargo in a dialog) or unpublish, without a page reload or
+  an alert. An action above your role on that table stays in the menu, disabled,
+  with the reason. The dialog says first what would be left out and why; the
+  server checks again and changes nothing if anything changed in between. The
+  list then refreshes itself, keeping its filters, and a message says what
+  happened. Each action writes one log line per table
+  [(#2561)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2561)
 
 ## Bugs
 

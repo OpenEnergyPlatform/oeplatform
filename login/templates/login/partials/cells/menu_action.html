@@ -1,0 +1,27 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+One action entry of a row's ⋯ menu: it loads the action's preflight into
+the dialog for this one Table, or, below the role the action needs, stays
+visible and focusable with the reason as text (see menu.html). Expects
+``pk``, ``row``, ``verb`` (the action), ``label`` and ``gate`` (a RoleGate).
+{% endcomment %}
+{% if row.level >= gate.level %}
+  <button type="button"
+          class="dropdown-item"
+          id="menu-{{ pk }}-{{ verb }}"
+          hx-get="{% url 'login:table-action' user_id=profile_user.pk action=verb %}?table={{ row.table.name|urlencode }}"
+          hx-target="#table-action-body"
+          hx-swap="innerHTML"
+          hx-sync="this:replace"
+          data-action-origin="menu-{{ pk }}">{{ label }}</button>
+{% else %}
+  <button type="button"
+          class="dropdown-item dash-menu__off"
+          id="menu-{{ pk }}-{{ verb }}"
+          aria-disabled="true">
+    {{ label }}
+    <span class="dash-menu__why">{{ gate.refusal }}</span>
+  </button>
+{% endif %}

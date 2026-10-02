@@ -30,9 +30,24 @@
 //   `aria-expanded`; the CSS reads that to show the panel, and on a wider
 //   list shows it regardless, so a toggle left open by a narrow window
 //   cannot hide anything on a wide one.
+// - actions (#2561): a row's ⋯ entry loads the action's preflight into the
+//   one dialog, which opens once it is filled. A refusal (409) or an
+//   unusable parameter (400) is swapped into the still-open dialog rather
+//   than treated as an error. A success answers `HX-Trigger:
+//   tables-changed`: the dialog closes, a polite toast says what happened
+//   and goes after a few seconds, the region re-fetches itself (declared in
+//   the region, `hx-trigger="tables-changed from:body"`), and focus goes to
+//   the row's ⋯ once it has settled, or to the list heading if the row is
+//   gone. `tables-refused` and every failed request leave an assertive toast
+//   that stays until dismissed; a 401 says the user was logged out and links
+//   to the login page with `next` set to this view.
+// - menu entries above the user's role carry `aria-disabled="true"` and
+//   their reason as text. They stay in the keyboard order, unlike
+//   Bootstrap's `.disabled`; their clicks are swallowed here.
 //
 // Newer requests replace older ones through `hx-sync` on the tab, so a
-// stale response never overwrites a newer state. The cells' popovers are
+// stale response never overwrites a newer state. The dialog sits outside
+// the tab, so its requests never cancel the list's. The cells' popovers are
 // `list_popovers.js`, wired here so the page has one thing to bind.
 
 import { bindPopovers } from "./list_popovers.js";
@@ -46,6 +61,24 @@ export const MORE_ID = "tables-more";
 export const MORE_COUNT_ID = "tables-more-count";
 export const FOLD_ID = "tables-fold";
 export const FOLD_COUNT_ID = "tables-fold-count";
+export const TAB_ID = "tables-tab";
+export const DIALOG_ID = "table-action";
+export const DIALOG_BODY_ID = "table-action-body";
+export const TOASTS_POLITE_ID = "tables-toasts-polite";
+export const TOASTS_ASSERTIVE_ID = "tables-toasts-assertive";
+
+// How long a success message stays, in ms. Refusals and failures stay.
+export const TOAST_TIMEOUT = 5000;
+
+// Statuses an action answers with the dialog itself: a refused request
+// (409, the check run again) and an unusable parameter (400).
+const DIALOG_STATUSES = [400, 409];
+
+export const LOGGED_OUT = "You have been logged out.";
+const RELOAD =
+  "The change may not have been made; reload the page to see the current state.";
+export const SERVER_FAILED = `Something went wrong on the server. ${RELOAD}`;
+export const UNREACHABLE = `The server could not be reached. ${RELOAD}`;
 
 /**
  * The query a changed filter sends: every other parameter of the current
@@ -190,6 +223,128 @@ export function syncFilters(doc, region) {
 }
 
 /**
+ * Move focus after an action, whatever holds it now: to the element with
+ * `id` (the row's ⋯), or to the list heading when that row is gone.
+ *
+ * @param {Document} doc the document.
+ * @param {string|null} id the element to focus.
+ */
+export function focusAfterAction(doc, id) {
+  const target =
+    (id && doc.getElementById(id)) || doc.getElementById(HEADING_ID);
+  if (target) {
+    target.focus();
+  }
+}
+
+/**
+ * Whether a click landed on something marked unavailable
+ * (`aria-disabled="true"`), and so must do nothing.
+ *
+ * @param {EventTarget} target the click's target.
+ * @return {boolean} true when the click must be swallowed.
+ */
+export function isUnavailable(target) {
+  return Boolean(
+    target && target.closest && target.closest('[aria-disabled="true"]'),
+  );
+}
+
+/**
+ * Add a message to the page's toast region. A success goes to the polite
+ * region and removes itself after `timeout`; an error goes to the assertive
+ * one and stays until dismissed.
+ *
+ * @param {Document} doc the document.
+ * @param {string} message the text, from the server or this module.
+ * @param {object} options `error`, an optional `link` ({href, text}),
+ *     `timeout` and `schedule` (setTimeout, a test seam).
+ * @return {Element|null} the toast, or null without a toast region.
+ */
+export function showToast(
+  doc,
+  message,
+  {
+    error = false,
+    link = null,
+    timeout = TOAST_TIMEOUT,
+    schedule = setTimeout,
+  } = {},
+) {
+  const region = doc.getElementById(
+    error ? TOASTS_ASSERTIVE_ID : TOASTS_POLITE_ID,
+  );
+  if (!region) {
+    return null;
+  }
+  const toast = doc.createElement("div");
+  const kind = error ? "dash-toast--error" : "dash-toast--ok";
+  toast.className = `toast show dash-toast ${kind}`;
+  const row = doc.createElement("div");
+  row.className = "d-flex";
+  const body = doc.createElement("div");
+  body.className = "toast-body";
+  body.textContent = message;
+  if (link) {
+    const anchor = doc.createElement("a");
+    anchor.href = link.href;
+    anchor.textContent = link.text;
+    body.append(" ", anchor);
+  }
+  const close = doc.createElement("button");
+  close.type = "button";
+  close.className = "btn-close me-2 m-auto";
+  close.setAttribute("aria-label", "Dismiss");
+  close.addEventListener("click", () => toast.remove());
+  row.append(body, close);
+  toast.append(row);
+  region.append(toast);
+  if (!error && timeout) {
+    schedule(() => toast.remove(), timeout);
+  }
+  return toast;
+}
+
+/**
+ * The login link a 401 offers: the login page, coming back to this view.
+ *
+ * @param {Document} doc the document.
+ * @return {{href: string, text: string}} the link.
+ */
+export function loginLink(doc) {
+  const tab = doc.getElementById(TAB_ID);
+  const login = (tab && tab.dataset.loginUrl) || "/accounts/login/";
+  const here = doc.location.pathname + doc.location.search;
+  return {
+    href: `${login}?next=${encodeURIComponent(here)}`,
+    text: "Log in again",
+  };
+}
+
+/**
+ * The action dialog as Bootstrap's modal. Tests pass their own object with
+ * the same three members.
+ *
+ * @param {Document} doc the document.
+ * @return {{open: function(), close: function(), onHidden: function(function())}}
+ */
+export function bootstrapDialog(doc) {
+  const element = () => doc.getElementById(DIALOG_ID);
+  const modal = () => {
+    const bootstrap = doc.defaultView && doc.defaultView.bootstrap;
+    return element() && bootstrap
+      ? bootstrap.Modal.getOrCreateInstance(element())
+      : null;
+  };
+  return {
+    open: () => modal() && modal().show(),
+    close: () => modal() && modal().hide(),
+    onHidden: (callback) =>
+      element() && element().addEventListener("hidden.bs.modal", callback),
+  };
+}
+
+/**
  * Open or close the "More filters" panel.
  *
  * @param {Document} doc the document.
@@ -220,13 +375,28 @@ export function toggleFold(button) {
  * Wire the tab to htmx's events on `doc`.
  *
  * @param {Document} doc the document.
- * @param {{announceDelay: number}} options test seams.
+ * @param {object} options test seams: `announceDelay`, `dialog` (see
+ *     `bootstrapDialog`) and `schedule` (setTimeout, for the toasts).
  * @return {function(): void} removes the listeners again.
  */
-export function bindTablesTab(doc, { announceDelay = 60 } = {}) {
+export function bindTablesTab(
+  doc,
+  {
+    announceDelay = 60,
+    dialog = bootstrapDialog(doc),
+    schedule = setTimeout,
+  } = {},
+) {
   let focusedId = null;
+  // the row whose ⋯ opened the dialog, and where focus goes after an action
+  let origin = null;
+  let afterAction = null;
   const isRegion = (event) =>
     event.detail && event.detail.target && event.detail.target.id === REGION_ID;
+  const isDialog = (event) =>
+    event.detail &&
+    event.detail.target &&
+    event.detail.target.id === DIALOG_BODY_ID;
 
   const onConfigRequest = (event) => {
     const elt = event.detail.elt;
@@ -265,9 +435,38 @@ export function bindTablesTab(doc, { announceDelay = 60 } = {}) {
     }
   };
 
+  const onGuard = (event) => {
+    if (isUnavailable(event.target)) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  };
+
   const onBeforeSwap = (event) => {
     if (isRegion(event)) {
       focusedId = focusedIdWithin(doc, event.detail.target);
+    } else if (
+      isDialog(event) &&
+      event.detail.xhr &&
+      DIALOG_STATUSES.includes(event.detail.xhr.status)
+    ) {
+      event.detail.shouldSwap = true;
+      event.detail.isError = false;
+    }
+  };
+
+  const onAfterSwap = (event) => {
+    if (!isDialog(event)) {
+      return;
+    }
+    // htmx sets `detail.elt` to the swap target; what sent the request is
+    // `requestConfig.elt`
+    const config = event.detail.requestConfig;
+    const elt = config && config.elt;
+    const from = elt && elt.dataset && elt.dataset.actionOrigin;
+    if (from) {
+      origin = from;
+      dialog.open();
     }
   };
 
@@ -281,9 +480,56 @@ export function bindTablesTab(doc, { announceDelay = 60 } = {}) {
       announce(live, region.dataset.announce || "", announceDelay);
     }
     syncFilters(doc, region);
-    restoreFocus(doc, focusedId);
+    if (afterAction !== null) {
+      focusAfterAction(doc, afterAction);
+      afterAction = null;
+    } else {
+      restoreFocus(doc, focusedId);
+    }
     focusedId = null;
   };
+
+  const onChanged = (event) => {
+    const detail = event.detail || {};
+    afterAction = detail.focus || origin || "";
+    origin = null;
+    dialog.close();
+    if (detail.message) {
+      showToast(doc, detail.message, { schedule });
+    }
+  };
+
+  const onRefused = (event) => {
+    const detail = event.detail || {};
+    if (detail.message) {
+      showToast(doc, detail.message, { error: true });
+    }
+  };
+
+  const onResponseError = (event) => {
+    const status = event.detail && event.detail.xhr && event.detail.xhr.status;
+    if (status === 401) {
+      showToast(doc, LOGGED_OUT, { error: true, link: loginLink(doc) });
+    } else {
+      showToast(doc, SERVER_FAILED, { error: true });
+    }
+  };
+
+  const onSendError = () => {
+    showToast(doc, UNREACHABLE, { error: true });
+  };
+
+  // Cancelled: focus goes back to the ⋯ that opened the dialog. After an
+  // action the region's settle does that instead.
+  dialog.onHidden(() => {
+    if (afterAction === null && origin) {
+      const target = doc.getElementById(origin);
+      if (target) {
+        target.focus();
+      }
+    }
+    origin = null;
+  });
 
   const onHistoryRestore = () => {
     syncFilters(doc, doc.getElementById(REGION_ID));
@@ -292,18 +538,27 @@ export function bindTablesTab(doc, { announceDelay = 60 } = {}) {
   const listeners = [
     ["htmx:configRequest", onConfigRequest],
     ["htmx:beforeSwap", onBeforeSwap],
+    ["htmx:afterSwap", onAfterSwap],
     ["htmx:afterSettle", onAfterSettle],
     ["htmx:historyRestore", onHistoryRestore],
+    ["htmx:responseError", onResponseError],
+    ["htmx:sendError", onSendError],
+    ["tables-changed", onChanged],
+    ["tables-refused", onRefused],
     ["click", onClick],
   ];
   for (const [name, listener] of listeners) {
     doc.body.addEventListener(name, listener);
   }
+  // in the capture phase, so the swallowed click reaches neither htmx nor
+  // Bootstrap's dropdown, which would close the menu and hide the reason
+  doc.body.addEventListener("click", onGuard, true);
   const popovers = bindPopovers(doc);
   return () => {
     for (const [name, listener] of listeners) {
       doc.body.removeEventListener(name, listener);
     }
+    doc.body.removeEventListener("click", onGuard, true);
     popovers.unbind();
   };
 }

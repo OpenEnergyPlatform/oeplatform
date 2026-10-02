@@ -18,6 +18,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 import json
 from functools import wraps
 from itertools import groupby
+from urllib.parse import urlsplit
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -31,6 +32,7 @@ from django.http import (
     HttpResponse,
     HttpResponseForbidden,
     HttpResponseNotAllowed,
+    QueryDict,
 )
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
@@ -43,6 +45,7 @@ from django.views.generic.edit import DeleteView
 from rest_framework.authtoken.models import Token
 
 from api.serializers import DatasetCreateSerializer, DatasetUpdateSerializer
+from api.services import table_actions
 from api.services.dataset_creation import (
     DatasetNameTaken,
     assign_table,
@@ -80,14 +83,20 @@ ITEMS_PER_PAGE = 8
 ###########################################################################
 
 
+# The results region's id: when it is the element that triggered a request,
+# the request is its re-fetch after an action.
+REGION_ID = "tables-results"
+
+
 class TablesView(ProfileOwnerRequiredMixin, View):
     """The tables tab: one list of every Table the user may write.
 
     A direct load renders the whole page; an htmx request gets only the
     results region, carrying the canonical address of what it shows in
     ``HX-Push-Url`` (defaults left out, the page clamped), so the address bar
-    always names the state on screen. A history restore is a full page,
-    because htmx swaps it into the body.
+    always names the state on screen; the region's own re-fetch after an
+    action (``tables-changed``) gets ``HX-Replace-Url`` instead. A history
+    restore is a full page, because htmx swaps it into the body.
     """
 
     @method_decorator(never_cache)
@@ -96,14 +105,151 @@ class TablesView(ProfileOwnerRequiredMixin, View):
         page = tables_listing(user).page(
             accessible_tables(user), request.GET, request.path, rows=table_rows(user)
         )
-        context = {"profile_user": user, "page": page}
+        context = {
+            "profile_user": user,
+            "page": page,
+            "gates": table_actions.ROLE_GATES,
+        }
         if is_htmx(request) and "HX-History-Restore-Request" not in request.headers:
             response = render(request, "login/partials/tables_region.html", context)
-            response["HX-Push-Url"] = page.url
+            # The region re-fetching itself after an action changes nothing
+            # the user navigated to, so it replaces the history entry rather
+            # than adding one per action.
+            if request.headers.get("HX-Trigger") == REGION_ID:
+                response["HX-Replace-Url"] = page.url
+            else:
+                response["HX-Push-Url"] = page.url
         else:
             response = render(request, "login/user_tables.html", context)
         patch_vary_headers(response, ["HX-Request"])
         return response
+
+
+class TableActionView(ProfileOwnerRequiredMixin, View):
+    """One action on Tables from the dashboard, for a row (one name) or a
+    batch: GET is the preflight, POST the execution. Both take the Tables as
+    repeated ``table`` parameters and answer HTML for the action dialog.
+
+    - GET: the dialog, from ``table_actions.preflight``.
+    - POST, done: 204 with ``HX-Trigger: tables-changed``, carrying the
+      message and, for one Table, the id of the row's menu to focus. The
+      results region re-fetches itself on that event.
+    - POST, refused (a named Table is no longer allowed): 409, the dialog
+      re-run with "Nothing was changed: …", and ``HX-Trigger:
+      tables-refused`` for the persistent message.
+    - POST, unusable parameters (no Topic, the draft pseudo-topic): 400,
+      the dialog with the error beside its field.
+
+    Whether a changed Table is still shown is read off ``HX-Current-URL``,
+    the address the request was sent from, through the list's own filters.
+    """
+
+    def _names(self, data):
+        return data.getlist("table")
+
+    def _dialog(self, request, check, status=200, **extra):
+        context = {
+            "profile_user": self.profile_user,
+            "preflight": check,
+            "topics": table_actions.publish_topics(),
+            "embargo_periods": table_actions.EMBARGO_PERIODS,
+            "errors": {},
+            "values": {},
+            **extra,
+        }
+        return render(
+            request, "login/partials/table_action_dialog.html", context, status=status
+        )
+
+    def _action(self, action):
+        if action not in table_actions.ACTIONS:
+            raise Http404
+        return action
+
+    @method_decorator(never_cache)
+    def get(self, request, user_id, action):
+        action = self._action(action)
+        check = table_actions.preflight(
+            self.profile_user, action, self._names(request.GET)
+        )
+        return self._dialog(request, check)
+
+    def post(self, request, user_id, action):
+        action = self._action(action)
+        user = self.profile_user
+        names = self._names(request.POST)
+        params = {key: request.POST.get(key, "") for key in ("topic", "embargo")}
+        try:
+            outcome = table_actions.execute(
+                user, action, names, params, via="dashboard"
+            )
+        except table_actions.InvalidParameters as error:
+            check = table_actions.preflight(user, action, names)
+            return self._dialog(
+                request, check, status=400, errors=error.errors, values=params
+            )
+        except table_actions.ActionRefused as refusal:
+            response = self._dialog(
+                request, refusal.preflight, status=409, notice=refusal.message
+            )
+            response["HX-Trigger"] = json.dumps(
+                {"tables-refused": {"message": refusal.message}}
+            )
+            return response
+
+        hidden = _not_shown(request, user, outcome.tables)
+        detail = {"message": _done_message(outcome, hidden)}
+        if len(outcome.tables) == 1:
+            detail["focus"] = f"menu-{outcome.tables[0].pk}"
+        response = HttpResponse(status=204)
+        response["HX-Trigger"] = json.dumps({"tables-changed": detail})
+        return response
+
+
+def _not_shown(request, user, tables) -> list:
+    """Which of ``tables`` the list the request came from no longer shows
+    under its filters. Empty when the request does not say where it came
+    from."""
+    current = request.headers.get("HX-Current-URL")
+    if not current:
+        return []
+    query = QueryDict(urlsplit(current).query)
+    shown = set(
+        tables_listing(user)
+        .matching(accessible_tables(user), query)
+        .filter(pk__in=[table.pk for table in tables])
+        .values_list("pk", flat=True)
+    )
+    return [table for table in tables if table.pk not in shown]
+
+
+def _title(table) -> str:
+    return f"\u201c{table.human_readable_name or table.name}\u201d"
+
+
+def _done_message(outcome, hidden) -> str:
+    """The success message: what was done, and which changed Tables the
+    current filter no longer shows, so they do not seem to vanish."""
+    tables = outcome.tables
+    count = len(tables)
+    what = _title(tables[0]) if count == 1 else f"{count} tables"
+    if outcome.action == table_actions.PUBLISH:
+        message = f"Published {what} under {outcome.params['topic']}"
+        embargo = dict(table_actions.EMBARGO_PERIODS)[outcome.params["embargo"]]
+        if outcome.params["embargo"] != "none":
+            message += f", embargoed for {embargo}"
+        message += "."
+    else:
+        their = "its" if count == 1 else "their"
+        message = f"Unpublished {what}. No longer listed under {their} topics."
+    if hidden and count == 1:
+        message += " It is not shown under the current filter."
+    elif hidden:
+        message += (
+            f" Not shown under the current filter: "
+            f"{', '.join(_title(table) for table in hidden)}."
+        )
+    return message
 
 
 ##############################################################################
