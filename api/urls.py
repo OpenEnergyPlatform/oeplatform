@@ -19,6 +19,7 @@ from drf_spectacular.views import (
     SpectacularSwaggerView,
 )
 
+from api.table_permission_views import TableHolderAPIView, TablePermissionsAPIView
 from api.views import (
     AdvancedCloseAllAPIView,
     AdvancedConnectionCloseAPIView,
@@ -295,6 +296,18 @@ urlpatterns_v0 = [
     re_path(  # legacy API url for tables
         r"^schema/{qual}/tables/".format(qual=pgsql_qualifier),
         include(urlpatterns_v0_schema_table),
+    ),
+    # A Table's Holders. Only at this spelling: the schema-qualified one above
+    # is superseded, and an endpoint that never had it should not gain it.
+    re_path(
+        r"^tables/(?P<table>[\w\d_\s]+)/permissions/$",
+        TablePermissionsAPIView.as_view(),
+        name="table-permissions",
+    ),
+    re_path(
+        r"^tables/(?P<table>[\w\d_\s]+)/permissions/(?P<holder>[^/]+)/$",
+        TableHolderAPIView.as_view(),
+        name="table-holder",
     ),
     path("tables/", include(urlpatterns_v0_schema_table)),
     path("advanced/", include(urlpatterns_v0_advanced)),

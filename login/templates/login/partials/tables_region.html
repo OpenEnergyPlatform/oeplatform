@@ -18,6 +18,15 @@ on the narrowest lists stack each row into two lines and show the "Sort by"
 select in place of the column headers. Every cell therefore carries its
 column's class.
 
+Selecting (#2564): a checkbox per row, labelled with the Table's title, and a
+tri-state one in the header for the page. The selection itself is the
+browser's (tables_tab.js), a list of names in page memory; the region only
+says which scope it shows (``data-scope``, its filters without sort and
+page: another scope clears the selection) and where the names of every
+matching Table come from (the banner's ``data-names-url``). The banner offers
+"Select all N matching tables" once the whole page is ticked; tables_tab.js
+shows it and picks its wording.
+
 After an action the region re-fetches itself with the state it shows
 (``tables-changed``, sent by the action's response). The request names the
 region as its trigger, so the view answers with HX-Replace-Url: an action
@@ -30,7 +39,8 @@ adds no history entry.
      data-announce="{{ page.announcement }}"
      data-filters="{{ page.filters_json }}"
      data-more="{{ page.more_count }}"
-     data-folded="{{ page.folded_count }}">
+     data-folded="{{ page.folded_count }}"
+     data-scope="{{ page.scope }}">
   <h2 id="tables-heading" class="visually-hidden" tabindex="-1">Your tables</h2>
   {% if not page.has_any %}
     <div class="dash-empty">
@@ -58,11 +68,36 @@ adds no history entry.
     </div>
     {% include "login/partials/list_chips.html" with id="tables-chips" %}
     {% if page.total %}
+      {% with on_page=page.rows|length %}
+        <div id="tables-select-all"
+             class="dash-selectall"
+             data-total="{{ page.total }}"
+             data-names-url="{% url 'login:table-names' user_id=profile_user.pk %}{{ page.scope }}"
+             hidden>
+          <span data-when="page">All {{ on_page }} table{{ on_page|pluralize }} on this page {{ on_page|pluralize:"is,are" }} selected.</span>
+          <button type="button"
+                  id="tables-select-matching"
+                  class="btn btn-link btn-sm dash-selectall__button"
+                  data-when="page">Select all {{ page.total }} matching tables</button>
+          <span data-when="all">All {{ page.total }} matching table{{ page.total|pluralize }} {{ page.total|pluralize:"is,are" }} selected.</span>
+          <button type="button"
+                  id="tables-select-none"
+                  class="btn btn-link btn-sm dash-selectall__button"
+                  data-when="all">Clear selection</button>
+        </div>
+      {% endwith %}
       <div class="dash-table-wrap">
         <table class="table dash-table">
           <caption class="visually-hidden">Your tables, {{ page.summary }}</caption>
           <thead>
             <tr>
+              <th class="c-select" scope="col">
+                <input type="checkbox"
+                       class="form-check-input dash-check"
+                       id="select-page"
+                       data-select-page
+                       aria-label="Select all {{ page.rows|length }} tables on this page" />
+              </th>
               {% include "login/partials/list_sort_header.html" with link=page.sort_links.table cell="c-table" %}
               {% include "login/partials/list_sort_header.html" with link=page.sort_links.status cell="c-status" %}
               {% include "login/partials/list_sort_header.html" with link=page.sort_links.publishable cell="c-pub" %}
@@ -79,6 +114,14 @@ adds no history entry.
           <tbody>
             {% for row in page.rows %}
               <tr id="row-{{ row.table.pk }}">
+                <td class="c-select">
+                  <input type="checkbox"
+                         class="form-check-input dash-check"
+                         id="select-{{ row.table.pk }}"
+                         value="{{ row.table.name }}"
+                         data-select-row
+                         aria-label="Select {{ row.title }}" />
+                </td>
                 <td class="c-table">
                   <a id="title-{{ row.table.pk }}"
                      class="dash-title"

@@ -86,6 +86,72 @@ sidebar on 2026-10-02, so the column collapse (#2555) works with that width.
           </div>
         </div>
       {% endwith %}
+      {% comment %}
+      The bulk bar (#2564), sticky at the top of the list and outside the
+      region, so a swap neither moves it nor takes focus out of it. Its slot
+      is reserved while nothing is selected: a muted line, hidden from screen
+      readers and not focusable, turns into the bar on the first tick, so the
+      list does not jump under the pointer. tables_tab.js holds the selection
+      and sends it, comma-joined, as the ``tables`` parameter of an action's
+      preflight, POSTed (TableActionCheckView), since a selection does not
+      fit in an address. Every action is enabled while anything is selected: the
+      preflight says what it would leave out. Where the rows stack, the
+      actions fold into "Actions ▾". Its requests are synced only with
+      themselves, never with the list's.
+      {% endcomment %}
+      <div id="tables-bulk"
+           class="dash-bulk"
+           hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+        <p id="tables-bulk-idle"
+           class="dash-bulk__idle"
+           aria-hidden="true">Tick tables to act on several at once.</p>
+        <p id="tables-bulk-note" class="dash-bulk__note" role="status"></p>
+        <div id="tables-bulk-bar"
+             class="dash-bulk__bar"
+             role="group"
+             aria-label="Selected tables"
+             hidden>
+          <span id="tables-bulk-count" class="dash-bulk__count"></span>
+          <button type="button"
+                  id="tables-bulk-clear"
+                  class="btn btn-link btn-sm dash-bulk__clear">Clear</button>
+          <div class="dash-bulk__actions">
+            {% for verb, label in bulk_actions %}
+              <button type="button"
+                      id="bulk-{{ verb }}"
+                      class="btn btn-outline-primary btn-sm"
+                      hx-post="{% url 'login:table-action-check' user_id=profile_user.pk action=verb %}"
+                      hx-target="#table-action-body"
+                      hx-swap="innerHTML"
+                      hx-sync="this:replace"
+                      data-bulk-action
+                      data-action-origin="bulk-{{ verb }}">{{ label }}</button>
+            {% endfor %}
+          </div>
+          <div class="dropdown dash-bulk__menu">
+            <button type="button"
+                    id="bulk-menu"
+                    class="btn btn-outline-primary btn-sm dropdown-toggle"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false">Actions</button>
+            <ul class="dropdown-menu" aria-labelledby="bulk-menu">
+              {% for verb, label in bulk_actions %}
+                <li>
+                  <button type="button"
+                          id="bulk-menu-{{ verb }}"
+                          class="dropdown-item"
+                          hx-post="{% url 'login:table-action-check' user_id=profile_user.pk action=verb %}"
+                          hx-target="#table-action-body"
+                          hx-swap="innerHTML"
+                          hx-sync="this:replace"
+                          data-bulk-action
+                          data-action-origin="bulk-menu">{{ label }}</button>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
     {% endif %}
     <div id="tables-live"
          class="visually-hidden"

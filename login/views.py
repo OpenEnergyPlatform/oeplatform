@@ -32,6 +32,7 @@ from django.http import (
     HttpResponse,
     HttpResponseForbidden,
     HttpResponseNotAllowed,
+    JsonResponse,
     QueryDict,
 )
 from django.shortcuts import get_object_or_404, redirect, render
@@ -88,6 +89,14 @@ ITEMS_PER_PAGE = 8
 # the request is its re-fetch after an action.
 REGION_ID = "tables-results"
 
+# The bulk bar's actions, in the order it shows them, with their labels: an
+# ellipsis where the dialog asks for more than a confirmation. Bulk delete
+# and the Dataset actions join in #2565, the Organization actions in #2568.
+BULK_ACTIONS = (
+    (table_actions.PUBLISH, "Publish…"),
+    (table_actions.UNPUBLISH, "Unpublish"),
+)
+
 
 class TablesView(ProfileOwnerRequiredMixin, View):
     """The tables tab: one list of every Table the user may write.
@@ -110,6 +119,7 @@ class TablesView(ProfileOwnerRequiredMixin, View):
             "profile_user": user,
             "page": page,
             "gates": table_actions.ROLE_GATES,
+            "bulk_actions": BULK_ACTIONS,
         }
         if is_htmx(request) and "HX-History-Restore-Request" not in request.headers:
             response = render(request, "login/partials/tables_region.html", context)
@@ -146,7 +156,15 @@ class TableActionView(ProfileOwnerRequiredMixin, View):
       as above, but the message says so and carries ``warning``, so it
       stays until dismissed instead of reading as a success.
 
-    The parameters are ``topic`` and ``embargo`` (publish), ``dataset``
+    A done batch of several Tables also carries ``tables``, their titles,
+    which the message lists under "Show tables"; a delete carries ``gone``,
+    the names that left the dashboard, so the bulk selection drops them.
+    The bulk bar's preflight is ``TableActionCheckView``, because a
+    selection does not fit in a GET address.
+
+    The Tables come as repeated ``table`` parameters or as one
+    comma-joined ``tables`` (``_names``). The parameters are ``topic`` and
+    ``embargo`` (publish), ``dataset``
     (the Dataset actions) and ``confirm`` (delete's typed confirmation); the
     preflight reads ``dataset`` too, to leave out the Tables already in it
     or not in it.
@@ -158,7 +176,14 @@ class TableActionView(ProfileOwnerRequiredMixin, View):
     PARAMS = ("topic", "embargo", "dataset", "confirm")
 
     def _names(self, data):
-        return data.getlist("table")
+        """The Tables a request names: repeated ``table`` parameters (a
+        row's menu) and one comma-joined ``tables`` (the bulk bar and the
+        dialog's form). A selection goes joined because Django refuses a
+        request with more than ``DATA_UPLOAD_MAX_NUMBER_FIELDS`` (1,000)
+        parameters, while the largest dashboard holds 2,068 Tables and a
+        ceiling is 1,000; a Table's name holds no comma."""
+        joined = data.get("tables", "").split(",")
+        return data.getlist("table") + [name.strip() for name in joined if name.strip()]
 
     def _params(self, data):
         return {key: data.get(key, "") for key in self.PARAMS}
@@ -182,14 +207,17 @@ class TableActionView(ProfileOwnerRequiredMixin, View):
             raise Http404
         return action
 
-    @method_decorator(never_cache)
-    def get(self, request, user_id, action):
+    def _preflight(self, request, action, data):
         action = self._action(action)
-        params = self._params(request.GET)
+        params = self._params(data)
         check = table_actions.preflight(
-            self.profile_user, action, self._names(request.GET), params
+            self.profile_user, action, self._names(data), params
         )
         return self._dialog(request, check, values=params)
+
+    @method_decorator(never_cache)
+    def get(self, request, user_id, action):
+        return self._preflight(request, action, request.GET)
 
     def post(self, request, user_id, action):
         action = self._action(action)
@@ -215,8 +243,12 @@ class TableActionView(ProfileOwnerRequiredMixin, View):
             return response
 
         if outcome.action == table_actions.DELETE:
-            # the rows are gone: nothing to name as hidden, no ⋯ to focus
-            detail = {"message": _deleted_message(outcome)}
+            # the rows are gone: nothing to name as hidden, no ⋯ to focus,
+            # and the selection lets go of them
+            detail = {
+                "message": _deleted_message(outcome),
+                "gone": [table.name for table in outcome.tables],
+            }
             if outcome.drop_failed:
                 detail["warning"] = True
         else:
@@ -224,9 +256,47 @@ class TableActionView(ProfileOwnerRequiredMixin, View):
             detail = {"message": _done_message(outcome, hidden)}
             if len(outcome.tables) == 1:
                 detail["focus"] = f"menu-{outcome.tables[0].pk}"
+        if len(outcome.tables) > 1:
+            # a bulk success: the summary line, and "Show tables" lists them
+            detail["tables"] = [_title(table) for table in outcome.tables]
         response = HttpResponse(status=204)
         response["HX-Trigger"] = json.dumps({"tables-changed": detail})
         return response
+
+
+class TableActionCheckView(TableActionView):
+    """The preflight of a bulk action, sent as a POST: the bulk bar sends
+    the whole selection, which may be every Table on the dashboard (2,068
+    names on the largest account, about 58 KB), more than any GET address
+    can carry. It answers exactly what ``TableActionView``'s GET answers,
+    the dialog, and writes nothing."""
+
+    http_method_names = ["post"]
+
+    def post(self, request, user_id, action):
+        return self._preflight(request, action, request.POST)
+
+
+class TableNamesView(ProfileOwnerRequiredMixin, View):
+    """The names of every Table the list's filters select, across all
+    pages: what "Select all N matching tables" puts in the selection.
+
+    The query is the list's own, parsed by the same declarations
+    (``Listing.matching``), so the names and the list cannot disagree; a
+    sort or a page in it is ignored. JSON: ``{"names": [...], "total": n}``,
+    by name.
+    """
+
+    @method_decorator(never_cache)
+    def get(self, request, user_id):
+        user = self.profile_user
+        names = list(
+            tables_listing(user)
+            .matching(accessible_tables(user), request.GET)
+            .order_by("name")
+            .values_list("name", flat=True)
+        )
+        return JsonResponse({"names": names, "total": len(names)})
 
 
 class TableAccessView(ProfileOwnerRequiredMixin, View):
@@ -340,14 +410,11 @@ class TableAccessView(ProfileOwnerRequiredMixin, View):
         listed = accessible_tables(user).filter(pk=table.pk).exists()
         hidden = _not_shown(request, user, [table]) if listed else []
         response = self._drawer(request, table, gone=not listed)
-        response["HX-Trigger"] = json.dumps(
-            {
-                "tables-changed": {
-                    "message": _access_message(change, listed, hidden),
-                    "stay": True,
-                }
-            }
-        )
+        detail = {"message": _access_message(change, listed, hidden), "stay": True}
+        if not listed:
+            # the bulk selection lets go of a Table that left the dashboard
+            detail["gone"] = [table.name]
+        response["HX-Trigger"] = json.dumps({"tables-changed": detail})
         return response
 
 
@@ -394,8 +461,9 @@ def _done_message(outcome, hidden) -> str:
     what = _title(tables[0]) if count == 1 else f"{count} tables"
     if outcome.action == table_actions.PUBLISH:
         message = f"Published {what} under {outcome.params['topic']}"
-        embargo = dict(table_actions.EMBARGO_PERIODS)[outcome.params["embargo"]]
-        if outcome.params["embargo"] != "none":
+        # ``KEEP_EMBARGO`` is not one of the periods; nothing to say then
+        embargo = dict(table_actions.EMBARGO_PERIODS).get(outcome.params["embargo"])
+        if embargo and outcome.params["embargo"] != "none":
             message += f", embargoed for {embargo}"
         message += "."
     elif outcome.action == table_actions.UNPUBLISH:
@@ -411,11 +479,12 @@ def _done_message(outcome, hidden) -> str:
             message = f"Removed {what} from {dataset}."
     if hidden and count == 1:
         message += " It is not shown under the current filter."
+    elif len(hidden) == count:
+        message += " They are not shown under the current filter."
     elif hidden:
-        message += (
-            f" Not shown under the current filter: "
-            f"{', '.join(_title(table) for table in hidden)}."
-        )
+        # counted, not named: a bulk action may move hundreds out of view,
+        # and "Show tables" lists what it changed
+        message += f" {len(hidden)} of them are not shown under the current filter."
     return message
 
 

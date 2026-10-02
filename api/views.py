@@ -117,7 +117,6 @@ from api.actions import (
     has_schema,
     has_table,
     list_table_sizes,
-    move_publish,
     open_cursor,
     open_raw_connection,
     queue_column_change,
@@ -208,6 +207,7 @@ from api.serializers import (
     ScenarioBundleScenarioDatasetSerializer,
     ScenarioDataTablesSerializer,
 )
+from api.services import table_actions
 from api.services.dataset_creation import (
     DatasetNameTaken,
     assemble_dataset_metadata,
@@ -956,8 +956,22 @@ class TableAPIView(APIView):
     @api_exception
     @require_delete_permission
     def delete(self, request: Request, table: str) -> JsonLikeResponse:
-        table_obj = table_or_404(table=table)
-        table_obj.delete()
+        # The address names the Table, which is all the dashboard's typed
+        # confirmation asks for. Whether the API should guard deleting a
+        # published Table is a platform rule outside spec #2551.
+        outcome = table_action(
+            request.user, table_actions.DELETE, table, {"confirm": table}
+        )
+        if outcome and outcome.drop_failed:
+            # The record is gone (a retry is a 404), its data is not.
+            return JsonResponse(
+                {
+                    "reason": f"The table {table} was deleted, but its data "
+                    "could not be removed from the database. This is logged; "
+                    "please tell the platform's operators."
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
         return JsonResponse({}, status=status.HTTP_200_OK)
 
 
@@ -1049,6 +1063,43 @@ class TableColumnAPIView(APIView):
         return JsonResponse({}, status=201)
 
 
+_ROLE_REFUSALS = frozenset(gate.refusal for gate in table_actions.ROLE_GATES.values())
+
+
+def table_action(user, action, table, params=None, holds_already=None):
+    """Do ``action`` on the one Table ``table`` through the table action
+    service, the path the dashboard takes (spec #2551), and answer its
+    refusals as this API answers the same situations elsewhere.
+
+    The permission decorators have checked the Table and the role already;
+    the service checks both again under a row lock, so a refusal there means
+    something changed in between: a Table gone is a 404, a role gone a 403
+    (the service says "Not one of your tables" for both, and the API tells
+    them apart, as its decorators do). Anything else the service refuses,
+    and every unusable parameter, is a 400 naming why. ``holds_already`` is
+    a refusal that means the request's outcome holds already: it answers
+    success, with nothing written, and returns None.
+
+    Never called inside a transaction: a delete's is durable, and the
+    service refuses to run it nested. ``ATOMIC_REQUESTS`` is off.
+    """
+    try:
+        return table_actions.execute(user, action, [table], params, via="api")
+    except table_actions.InvalidParameters as error:
+        raise APIError(str(error), 400) from error
+    except table_actions.ActionRefused as refused:
+        reasons = {group.reason for group in refused.refused}
+        if reasons == {holds_already}:
+            return None
+        if table_actions.NOT_YOURS in reasons:
+            if not Table.objects.filter(name=table).exists():
+                raise APIError("Table does not exist", 404) from refused
+            raise APIError("Permission denied", 403) from refused
+        if reasons & _ROLE_REFUSALS:
+            raise APIError("Permission denied", 403) from refused
+        raise APIError(refused.message, 400) from refused
+
+
 @extend_schema(tags=[TABLES])
 class TableMovePublishAPIView(APIView):
     @extend_schema(
@@ -1075,16 +1126,25 @@ class TableMovePublishAPIView(APIView):
     @api_exception
     @require_admin_permission
     def post(self, request: Request, table: str, topic: str) -> JsonLikeResponse:
-        table_obj = table_or_404(table=table)
-
         # Make payload more friendly as users tend to use the query wrapper in payload
         request_data_dict = get_request_data_dict(request)
         payload_query = request_data_dict.get("query", {})
         embargo_period = request_data_dict.get("embargo", {}).get(
             "duration", None
         ) or payload_query.get("embargo", {}).get("duration", None)
-        move_publish(table_obj, topic, embargo_period)
-
+        # A published Table is published again (one more Topic, the embargo
+        # given), and an omitted embargo leaves it as it is: what this
+        # endpoint has always done, unlike the dashboard's publish.
+        table_action(
+            request.user,
+            table_actions.PUBLISH,
+            table,
+            {
+                "topic": topic,
+                "embargo": embargo_period or table_actions.KEEP_EMBARGO,
+                "republish": True,
+            },
+        )
         return JsonResponse({}, status=status.HTTP_200_OK)
 
 
@@ -1107,9 +1167,13 @@ class TableUnpublishAPIView(APIView):
     @require_admin_permission
     def post(self, request: HttpRequest, table: str) -> JsonLikeResponse:
         """Set table to `not published`"""
-        table_obj = table_or_404(table=table)
-        table_obj.is_publish = False
-        table_obj.save()
+        # a draft is unpublished already: success, as it has always been
+        table_action(
+            request.user,
+            table_actions.UNPUBLISH,
+            table,
+            holds_already=table_actions.NOT_PUBLISHED,
+        )
         return JsonResponse({}, status=status.HTTP_200_OK)
 
 

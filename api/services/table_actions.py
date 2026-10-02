@@ -36,8 +36,8 @@ set-based, as ``myuser.get_table_permission_level``
 does for one Table: the highest of the user's direct grant and the grants of
 their Organizations, and Table admin on every Table for a platform admin or a
 member of an admin Organization. It is the same rule the API's permission
-decorators read, so the API can move onto this service (#2569) without
-changing who may do what.
+decorators read, so the API's publish, unpublish and delete endpoints call
+this service (#2569) without changing who may do what.
 
 Log lines, on the ``oeplatform.table_actions`` logger, one per Table::
 
@@ -83,6 +83,12 @@ EMBARGO_PERIODS = (
     ("1_year", "1 year"),
 )
 
+# Publishing without naming an embargo leaves the Table's embargo as it is,
+# which ``move_publish`` does for any value but the three above. The dialog
+# never sends it; the publish API does when its request names no embargo,
+# because there an omitted embargo has never lifted one.
+KEEP_EMBARGO = "keep"
+
 
 @dataclass(frozen=True)
 class RoleGate:
@@ -103,10 +109,28 @@ ROLE_GATES = {
 }
 
 # The most Tables one request may name, per action; an action not listed has
-# no ceiling yet (publish, unpublish and the Dataset actions get theirs in
-# #2564). The dashboard is synchronous by design (no task queue), so a request
-# has to finish inside the host's timeout; mass work stays possible through
-# the API, one call per Table.
+# no ceiling yet (the Dataset actions get theirs in #2565). The dashboard is
+# synchronous by design (no task queue), so a request has to finish inside
+# the host's timeout; mass work stays possible through the API, one call per
+# Table. Over the ceiling the preflight reads nothing and nothing can be
+# confirmed.
+#
+# Publish and unpublish: 1,000 each. The same host limit as delete's below
+# (300 s). Measured locally with ``benchmarks/tables_tab/publish_cost.py``
+# (Postgres 14, batches of 100, 400 and 1,000, three rounds), per Table,
+# against 6 / 60 / 500 KB of metadata: publishing (with an embargo, the
+# heaviest) 6.0-7.5 / 7.2-9.1 / 20-34 ms, unpublishing 1.6-2.1 / 2.8-4.2 /
+# 16-21 ms; the preflight is 0.1-0.5 / 0.4-0.5 / 3.0-5.0 ms of that and costs
+# the same whether the Publish gate is read from the stored flag or run
+# live, because decoding the metadata is what it pays for. Both writes save
+# the whole row, which is why they grow with the metadata. At the worst 34
+# ms, 1,000 Tables take 34 s: a safety factor of about 9 against the 300 s,
+# room for production's database answering each of the eight or so queries
+# a publish makes per Table more slowly than a local one. Typical (60 KB):
+# about 9 s. The largest account (2,068 Tables) publishes in three requests.
+# A selection of that size travels as one comma-joined field, never as one
+# parameter per Table: Django refuses more than 1,000 parameters
+# (``DATA_UPLOAD_MAX_NUMBER_FIELDS``), which a full batch would exceed.
 #
 # Delete: 50. The host's limit is Apache's ``Timeout 300`` and mod_wsgi's
 # ``socket-timeout=300`` on both daemon groups, with no ``request-timeout``
@@ -121,6 +145,8 @@ ROLE_GATES = {
 # sitting on another host and its larger buffer pool. Typical: 1-2 s. Not
 # covered: a drop waiting for a lock another session holds on that Table.
 CEILINGS = {
+    PUBLISH: 1000,
+    UNPUBLISH: 1000,
     DELETE: 50,
 }
 
@@ -267,13 +293,25 @@ def _unique(names) -> list:
 def _gate_reason(table) -> str:
     """Why ``table`` fails the Publish gate, or "" when it passes.
 
-    A Table whose stored verdict (``Table.publishable``) is a pass is not
-    validated again here, so a batch of publishable Tables costs no validator
-    pass; publishing itself validates live (``move_publish``), and a Table
-    that fails there refuses the whole request. A stored fail, or no verdict
-    yet (before ``recompute_publish_gate`` ran), runs the checks live: that
-    names the failed check, and it agrees with the Publishable cell, where
-    the live result wins over a stale stored one.
+    The stored verdict (``Table.publishable``, kept by the one metadata write
+    path) decides what needs a validator pass:
+
+    - a stored pass is taken at its word, so a batch of publishable Tables
+      costs no validator pass at all;
+    - a stored fail runs the checks for that Table only, because the reason
+      the dialog names is the failed check (``dataedit.publish_gate``). When
+      they pass after all, the flag was stale and the Table is eligible: the
+      live result wins, as it does in the Publishable cell, which the user
+      has just read;
+    - no verdict yet (NULL: a Table untouched since before the flag existed,
+      until ``recompute_publish_gate`` has run) runs the checks too, since a
+      Table that has never been judged can be neither kept out nor let
+      through on faith.
+
+    So only the Tables the preflight may leave out are validated. Publishing
+    itself validates live (``move_publish``), and a Table that fails there
+    refuses the whole request: a stale pass can mislabel a row in the
+    dialog, never publish it.
     """
     if table.publishable:
         return ""
@@ -285,8 +323,8 @@ def _gate_reason(table) -> str:
 
 def _ceiling_message(action, ceiling, total) -> str:
     return (
-        f"{action.capitalize()} takes at most {ceiling} tables at a time; "
-        f"you selected {total}."
+        f"{action.capitalize()} takes at most {ceiling:,} tables at a time; "
+        f"you selected {total:,}."
     )
 
 
@@ -305,17 +343,18 @@ def _confirmation(action, eligible) -> str:
     return ""
 
 
-def _check(user, action, table, level, assignable=frozenset()) -> str:
+def _check(user, action, table, level, assignable=frozenset(), republish=False) -> str:
     """Why ``action`` would leave ``table`` out, or "" when it would act.
     ``assignable`` holds the primary keys the curation rule accepts; only
     adding to a Dataset reads it. Whether the Table is in the chosen Dataset
-    is decided afterwards (``_by_membership``)."""
+    is decided afterwards (``_by_membership``). ``republish`` lets a publish
+    take a Table that is published already (``_publish_params``)."""
     if level < ROLE_GATES[action].level:
         return ROLE_GATES[action].refusal
     if action == DATASET_ADD and table.pk not in assignable:
         return MAY_NOT_ASSIGN
     if action == PUBLISH:
-        if table.is_publish:
+        if table.is_publish and not republish:
             return ALREADY_PUBLISHED
         return _gate_reason(table)
     if action == UNPUBLISH and not table.is_publish:
@@ -439,6 +478,9 @@ def preflight(user, action, names, params=None) -> Preflight:
     left out as "Not one of your tables", the same for both, so the answer
     does not reveal which Tables exist.
 
+    A publish leaves out Tables that are published already, unless
+    ``params["republish"]`` is set (``_publish_params``).
+
     For the Dataset actions, ``params["dataset"]`` names the Dataset (see
     ``_chosen_dataset``); the Tables already in it (add) or not in it
     (remove) are left out. Without one, nothing is left out for that
@@ -448,6 +490,19 @@ def preflight(user, action, names, params=None) -> Preflight:
         raise ValueError(f"unknown table action: {action}")
     params = params or {}
     names = _unique(names)
+    ceiling = CEILINGS.get(action)
+    if ceiling is not None and len(names) > ceiling:
+        # Nothing can be confirmed over the ceiling, so nothing is read: a
+        # selection of every Table on a large account would otherwise load
+        # each of them, metadata and all, only to be refused.
+        return Preflight(
+            action=action,
+            total=len(names),
+            eligible=[],
+            left_out=[],
+            ceiling=ceiling,
+            subject=f"{len(names)} tables",
+        )
     found = {table.name: table for table in Table.objects.filter(name__in=names)}
     levels = table_levels(user, found.values())
     assignable = frozenset()
@@ -458,6 +513,8 @@ def preflight(user, action, names, params=None) -> Preflight:
             .values_list("pk", flat=True)
         )
 
+    republish = action == PUBLISH and bool(params.get("republish"))
+
     eligible, reasons = [], {}
     subject = f"{len(names)} tables"
     for name in names:
@@ -467,7 +524,9 @@ def preflight(user, action, names, params=None) -> Preflight:
             if len(names) == 1:
                 subject = _quoted([name])
         else:
-            reason = _check(user, action, table, levels[table.pk], assignable)
+            reason = _check(
+                user, action, table, levels[table.pk], assignable, republish
+            )
             if len(names) == 1:
                 subject = _quoted([table.human_readable_name or name])
         if reason:
@@ -494,7 +553,7 @@ def preflight(user, action, names, params=None) -> Preflight:
         total=len(names),
         eligible=eligible,
         left_out=left_out,
-        ceiling=CEILINGS.get(action),
+        ceiling=ceiling,
         consequences=consequences,
         subject=subject,
         confirmation=_confirmation(action, eligible),
@@ -504,7 +563,14 @@ def preflight(user, action, names, params=None) -> Preflight:
 
 
 def _publish_params(params) -> dict:
-    """The publish parameters, checked: a real Topic and a known embargo."""
+    """The publish parameters, checked: a real Topic and a known embargo
+    (or ``KEEP_EMBARGO``).
+
+    ``republish`` publishes a Table that is published already again: under
+    one more Topic, with the embargo given. Only the publish API sets it,
+    because there it has always been the way to add a Topic or change an
+    embargo; the dashboard leaves published Tables out, so that a bulk
+    publish cannot quietly change Tables that are out already."""
     errors = {}
     topic = (params.get("topic") or "").strip()
     if not topic:
@@ -514,11 +580,15 @@ def _publish_params(params) -> dict:
     elif not Topic.objects.filter(name=topic).exists():
         errors["topic"] = f"There is no topic “{topic}”."
     embargo = (params.get("embargo") or "none").strip()
-    if embargo not in dict(EMBARGO_PERIODS):
+    if embargo not in dict(EMBARGO_PERIODS) and embargo != KEEP_EMBARGO:
         errors["embargo"] = f"“{embargo}” is not an embargo period."
     if errors:
         raise InvalidParameters(errors)
-    return {"topic": topic, "embargo": embargo}
+    return {
+        "topic": topic,
+        "embargo": embargo,
+        "republish": bool(params.get("republish")),
+    }
 
 
 def _dataset_params(user, params) -> dict:

@@ -58,6 +58,23 @@
 // - menu entries above the user's role carry `aria-disabled="true"` and
 //   their reason as text. They stay in the keyboard order, unlike
 //   Bootstrap's `.disabled`; their clicks are swallowed here.
+// - the selection (#2564): an explicit list of Table names in page memory,
+//   never in the URL, so a bulk action sends exactly the names its dialog
+//   showed. A row's checkbox adds or removes its name, Shift+click a range
+//   from the last row clicked, the header checkbox the page (tri-state). Once
+//   the page is ticked, the region's banner offers "Select all N matching
+//   tables", which fetches the names once. The selection survives paging,
+//   sorting and actions, because the region's `data-scope` (its filters,
+//   without sort and page) stays the same; a swap to another scope clears it
+//   and says so in the bulk bar's slot. Names that left the dashboard
+//   (`gone` in `tables-changed`) leave the selection. After every swap the
+//   boxes are ticked again from the selection.
+// - the bulk bar: outside the region, its slot reserved by a muted line
+//   while nothing is selected, then "n selected · Clear" and the actions. An
+//   action's preflight is POSTed with the selection as its `tables`
+//   parameter, comma-joined, and opens the one dialog, as a row's ⋯ entry does; after the
+//   action focus goes back to the bar. A bulk success lists the Tables under
+//   "Show tables" in its message, which then stays until dismissed.
 //
 // Newer requests replace older ones through `hx-sync` on the tab, so a
 // stale response never overwrites a newer state. The dialog and the drawer
@@ -84,6 +101,20 @@ export const DRAWER_TITLE_ID = "table-access-title";
 export const DRAWER_CONFIRM_ID = "table-access-confirm-box";
 export const TOASTS_POLITE_ID = "tables-toasts-polite";
 export const TOASTS_ASSERTIVE_ID = "tables-toasts-assertive";
+export const BULK_IDLE_ID = "tables-bulk-idle";
+export const BULK_NOTE_ID = "tables-bulk-note";
+export const BULK_BAR_ID = "tables-bulk-bar";
+export const BULK_COUNT_ID = "tables-bulk-count";
+export const BULK_CLEAR_ID = "tables-bulk-clear";
+export const SELECT_PAGE_ID = "select-page";
+export const SELECT_ALL_ID = "tables-select-all";
+export const SELECT_MATCHING_ID = "tables-select-matching";
+export const SELECT_NONE_ID = "tables-select-none";
+
+// What the bulk bar's slot says once a filter change has cleared the
+// selection.
+export const SELECTION_CLEARED =
+  "The filters changed, so the selection was cleared.";
 
 // How long a success message stays, in ms. Refusals and failures stay.
 export const TOAST_TIMEOUT = 5000;
@@ -279,8 +310,13 @@ export function isUnavailable(target) {
  *
  * @param {Document} doc the document.
  * @param {string} message the text, from the server or this module.
+ * A bulk success passes the Tables it changed as `details`: "Show tables"
+ * lists them, and a message the user has opened that way, or holds focus in,
+ * stays until dismissed rather than vanishing while being read.
+ *
  * @param {object} options `error`, `warning`, an optional `link`
- *     ({href, text}), `timeout` and `schedule` (setTimeout, a test seam).
+ *     ({href, text}), `details` (strings listed under "Show tables"),
+ *     `timeout` and `schedule` (setTimeout, a test seam).
  * @return {Element|null} the toast, or null without a toast region.
  */
 export function showToast(
@@ -290,6 +326,7 @@ export function showToast(
     error = false,
     warning = false,
     link = null,
+    details = null,
     timeout = TOAST_TIMEOUT,
     schedule = setTimeout,
   } = {},
@@ -319,6 +356,29 @@ export function showToast(
     anchor.textContent = link.text;
     body.append(" ", anchor);
   }
+  if (details && details.length) {
+    const toggle = doc.createElement("button");
+    toggle.type = "button";
+    toggle.className = "btn btn-link btn-sm dash-toast__more";
+    toggle.textContent = "Show tables";
+    toggle.setAttribute("aria-expanded", "false");
+    const list = doc.createElement("ul");
+    list.className = "dash-toast__list";
+    list.hidden = true;
+    for (const detail of details) {
+      const item = doc.createElement("li");
+      item.textContent = detail;
+      list.append(item);
+    }
+    toggle.addEventListener("click", () => {
+      const open = list.hidden;
+      list.hidden = !open;
+      toggle.setAttribute("aria-expanded", String(open));
+      toggle.textContent = open ? "Hide tables" : "Show tables";
+      toast.dataset.kept = "true";
+    });
+    body.append(" ", toggle, list);
+  }
   const close = doc.createElement("button");
   close.type = "button";
   close.className = "btn-close me-2 m-auto";
@@ -328,7 +388,11 @@ export function showToast(
   toast.append(row);
   region.append(toast);
   if (!lasting && timeout) {
-    schedule(() => toast.remove(), timeout);
+    schedule(() => {
+      if (!toast.dataset.kept && !toast.contains(doc.activeElement)) {
+        toast.remove();
+      }
+    }, timeout);
   }
   return toast;
 }
@@ -444,12 +508,131 @@ export function toggleFold(button) {
 }
 
 /**
+ * The region's row checkboxes, in the order the page lists them.
+ *
+ * @param {Element|null} region the results region.
+ * @return {HTMLInputElement[]} one box per row; its value is the name.
+ */
+export function rowBoxes(region) {
+  return region ? [...region.querySelectorAll("input[data-select-row]")] : [];
+}
+
+/**
+ * The names from one row to another, both included, in page order: what a
+ * Shift+click ticks or unticks. Just `to` when `from` is not on this page.
+ *
+ * @param {HTMLInputElement[]} boxes the page's row boxes.
+ * @param {string|null} from the name clicked before.
+ * @param {string} to the name clicked now.
+ * @return {string[]} the names of the range.
+ */
+export function rangeOf(boxes, from, to) {
+  const names = boxes.map((box) => box.value);
+  const start = names.indexOf(from);
+  const end = names.indexOf(to);
+  if (start < 0 || end < 0) {
+    return [to];
+  }
+  return names.slice(Math.min(start, end), Math.max(start, end) + 1);
+}
+
+/**
+ * Show the selection: tick the page's boxes from it, set the header box
+ * (checked, indeterminate or neither), offer the banner's "Select all N
+ * matching tables" once the page is ticked or say that all of them are, and
+ * turn the bulk bar's slot into the bar while anything is selected.
+ *
+ * @param {Document} doc the document.
+ * @param {Set<string>} selection the selected names.
+ * @param {object} options `matching`, the names "Select all" fetched under
+ *     this scope (or null), and `note`, what the empty slot says instead of
+ *     its muted line.
+ */
+export function renderSelection(
+  doc,
+  selection,
+  { matching = null, note = "" } = {},
+) {
+  const boxes = rowBoxes(doc.getElementById(REGION_ID));
+  for (const box of boxes) {
+    box.checked = selection.has(box.value);
+  }
+  const ticked = boxes.filter((box) => box.checked).length;
+  const pageFull = boxes.length > 0 && ticked === boxes.length;
+  const header = doc.getElementById(SELECT_PAGE_ID);
+  if (header) {
+    header.checked = pageFull;
+    header.indeterminate = ticked > 0 && !pageFull;
+  }
+
+  const banner = doc.getElementById(SELECT_ALL_ID);
+  if (banner) {
+    const total = Number(banner.dataset.total || 0);
+    const allMatching =
+      matching !== null &&
+      matching.length === total &&
+      matching.every((name) => selection.has(name));
+    let mode = "";
+    if (pageFull && total > boxes.length) {
+      mode = allMatching ? "all" : "page";
+    }
+    banner.hidden = !mode;
+    for (const part of banner.querySelectorAll("[data-when]")) {
+      part.hidden = part.dataset.when !== mode;
+    }
+  }
+
+  const count = selection.size;
+  const bar = doc.getElementById(BULK_BAR_ID);
+  const idle = doc.getElementById(BULK_IDLE_ID);
+  const said = doc.getElementById(BULK_NOTE_ID);
+  if (bar) {
+    bar.hidden = count === 0;
+  }
+  const counter = doc.getElementById(BULK_COUNT_ID);
+  if (counter) {
+    counter.textContent = `${count.toLocaleString("en")} selected`;
+  }
+  const showNote = count === 0 && Boolean(note);
+  if (said) {
+    // always present and only its text changes: a live region that is
+    // shown when it gets its text is not announced reliably
+    said.textContent = showNote ? note : "";
+  }
+  if (idle) {
+    idle.hidden = count > 0 || showNote;
+  }
+}
+
+/**
+ * The names of every Table the list's filters select, from the banner's
+ * `data-names-url` (login:table-names). Rejects with the HTTP status on a
+ * refusal, so a 401 can say the user was logged out.
+ *
+ * @param {string} url the names endpoint with the scope's query.
+ * @return {Promise<string[]>} the names.
+ */
+export async function fetchMatchingNames(url) {
+  const response = await fetch(url, {
+    credentials: "same-origin",
+    headers: { Accept: "application/json", "HX-Request": "true" },
+  });
+  if (!response.ok) {
+    const error = new Error(`names: ${response.status}`);
+    error.status = response.status;
+    throw error;
+  }
+  return (await response.json()).names;
+}
+
+/**
  * Wire the tab to htmx's events on `doc`.
  *
  * @param {Document} doc the document.
  * @param {object} options test seams: `announceDelay`, `dialog` (see
- *     `bootstrapDialog`), `drawer` (see `bootstrapDrawer`) and `schedule`
- *     (setTimeout, for the toasts).
+ *     `bootstrapDialog`), `drawer` (see `bootstrapDrawer`), `schedule`
+ *     (setTimeout, for the toasts) and `fetchNames` (see
+ *     `fetchMatchingNames`).
  * @return {function(): void} removes the listeners again.
  */
 export function bindTablesTab(
@@ -459,9 +642,60 @@ export function bindTablesTab(
     dialog = bootstrapDialog(doc),
     drawer = bootstrapDrawer(doc),
     schedule = setTimeout,
+    fetchNames = fetchMatchingNames,
   } = {},
 ) {
   let focusedId = null;
+  // the selection: names in page memory, the scope they were chosen under,
+  // the last row clicked (a Shift+click's other end), what "Select all
+  // matching" fetched, and what the bulk bar's empty slot says
+  const selection = new Set();
+  const scopeOf = (region) => (region ? region.dataset.scope || "" : "");
+  let scope = scopeOf(doc.getElementById(REGION_ID));
+  let anchor = null;
+  let matching = null;
+  let note = "";
+  const render = () => renderSelection(doc, selection, { matching, note });
+  const select = (names, on) => {
+    note = "";
+    for (const name of names) {
+      if (on) {
+        selection.add(name);
+      } else {
+        selection.delete(name);
+      }
+    }
+    render();
+  };
+  const clearSelection = () => {
+    note = "";
+    selection.clear();
+    render();
+  };
+  // A region of another scope (a filter, the search or the status changed)
+  // clears the selection, and the slot says so; paging and sorting keep it.
+  const followScope = (region) => {
+    const now = scopeOf(region);
+    if (now !== scope) {
+      scope = now;
+      matching = null;
+      anchor = null;
+      if (selection.size) {
+        selection.clear();
+        note = SELECTION_CLEARED;
+      }
+    }
+    render();
+  };
+  const forget = (names) => {
+    for (const name of names || []) {
+      selection.delete(name);
+    }
+    if (matching !== null && names && names.length) {
+      matching = matching.filter((name) => !names.includes(name));
+    }
+    render();
+  };
   // what opened the drawer, and the control focused in it before a swap
   let drawerOrigin = null;
   let drawerFocusedId = null;
@@ -483,6 +717,12 @@ export function bindTablesTab(
   const onConfigRequest = (event) => {
     const elt = event.detail.elt;
     const bar = doc.getElementById(FILTERS_ID);
+    if (elt && elt.hasAttribute && elt.hasAttribute("data-bulk-action")) {
+      // a bulk action's preflight: exactly the selected names, in one
+      // comma-joined field (Django refuses more than 1,000 parameters)
+      event.detail.parameters.tables = [...selection].join(",");
+      return;
+    }
     if (!elt || !elt.name) {
       return;
     }
@@ -503,8 +743,77 @@ export function bindTablesTab(
     }
   };
 
+  const selectMatching = async (banner) => {
+    const asked = scope;
+    let names;
+    try {
+      names = await fetchNames(banner.dataset.namesUrl);
+    } catch (error) {
+      if (error && error.status === 401) {
+        showToast(doc, LOGGED_OUT, { error: true, link: loginLink(doc) });
+      } else if (error && error.status) {
+        showToast(doc, SERVER_FAILED, { error: true });
+      } else {
+        showToast(doc, UNREACHABLE, { error: true });
+      }
+      return;
+    }
+    if (asked !== scope) {
+      // the filters changed while the names were on their way
+      return;
+    }
+    matching = names;
+    select(names, true);
+    const next = doc.getElementById(SELECT_NONE_ID);
+    if (next) {
+      next.focus();
+    }
+  };
+
+  const onSelect = (event) => {
+    const target = event.target;
+    const row = target.closest("input[data-select-row]");
+    if (row) {
+      const region = doc.getElementById(REGION_ID);
+      const names =
+        event.shiftKey && anchor
+          ? rangeOf(rowBoxes(region), anchor, row.value)
+          : [row.value];
+      select(names, row.checked);
+      anchor = row.value;
+      return true;
+    }
+    if (target.closest(`#${SELECT_PAGE_ID}`)) {
+      const boxes = rowBoxes(doc.getElementById(REGION_ID));
+      select(
+        boxes.map((box) => box.value),
+        target.checked,
+      );
+      return true;
+    }
+    const banner = target.closest(`#${SELECT_ALL_ID}`);
+    if (target.closest(`#${SELECT_MATCHING_ID}`) && banner) {
+      selectMatching(banner);
+      return true;
+    }
+    if (target.closest(`#${SELECT_NONE_ID}`)) {
+      clearSelection();
+      focusAfterAction(doc, SELECT_PAGE_ID);
+      return true;
+    }
+    if (target.closest(`#${BULK_CLEAR_ID}`)) {
+      clearSelection();
+      focusAfterAction(doc, SELECT_PAGE_ID);
+      return true;
+    }
+    return false;
+  };
+
   const onClick = (event) => {
     if (!event.target.closest) {
+      return;
+    }
+    if (onSelect(event)) {
       return;
     }
     const more = event.target.closest(`#${MORE_ID}`);
@@ -572,6 +881,7 @@ export function bindTablesTab(
       announce(live, region.dataset.announce || "", announceDelay);
     }
     syncFilters(doc, region);
+    followScope(region);
     if (afterAction !== null) {
       focusAfterAction(doc, afterAction);
       afterAction = null;
@@ -583,6 +893,8 @@ export function bindTablesTab(
 
   const onChanged = (event) => {
     const detail = event.detail || {};
+    // Tables that left the dashboard leave the selection
+    forget(detail.gone);
     if (detail.stay) {
       // a change in the drawer: it stays open and keeps focus
       if (detail.message) {
@@ -596,6 +908,7 @@ export function bindTablesTab(
     if (detail.message) {
       showToast(doc, detail.message, {
         warning: Boolean(detail.warning),
+        details: detail.tables || null,
         schedule,
       });
     }
@@ -643,7 +956,9 @@ export function bindTablesTab(
   });
 
   const onHistoryRestore = () => {
-    syncFilters(doc, doc.getElementById(REGION_ID));
+    const region = doc.getElementById(REGION_ID);
+    syncFilters(doc, region);
+    followScope(region);
   };
 
   const listeners = [
@@ -665,6 +980,7 @@ export function bindTablesTab(
   // Bootstrap's dropdown, which would close the menu and hide the reason
   doc.body.addEventListener("click", onGuard, true);
   const popovers = bindPopovers(doc);
+  render();
   return () => {
     for (const [name, listener] of listeners) {
       doc.body.removeEventListener(name, listener);
