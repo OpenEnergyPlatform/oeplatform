@@ -132,7 +132,7 @@ class RowMenuTests(ActionTestCase):
     def test_entries_whose_ticket_has_not_landed_are_absent(self):
         table = self.draft("t_later")
         html = self.html()
-        for entry in ("delete", "access", "dataset-add", "dataset-remove"):
+        for entry in ("delete", "dataset-add", "dataset-remove"):
             with self.subTest(entry=entry):
                 self.assertEqual(element_with_id(html, f"menu-{table.pk}-{entry}"), "")
 

@@ -108,6 +108,18 @@ sidebar on 2026-10-02, so the column collapse (#2555) works with that width.
     </div>
   </div>
   {% comment %}
+  The access drawer, outside the tab for the same reason as the dialog. Its
+  contents come from the drawer endpoint (login:table-access) and every
+  write in it replaces them, so it stays open; tables_tab.js opens it once
+  an Access cell or "Manage access" has filled it.
+  {% endcomment %}
+  <div id="table-access"
+       class="offcanvas offcanvas-end dash-access-offcanvas"
+       tabindex="-1"
+       aria-labelledby="table-access-title">
+    <div id="table-access-body" class="dash-access-body"></div>
+  </div>
+  {% comment %}
   Messages after an action. Two persistent live regions, so a message is
   announced when it is added: success politely (and it dismisses itself),
   refusals and failures assertively (and they stay until dismissed).

@@ -98,16 +98,20 @@ adds no history entry.
                 <td class="c-pub">{% include "login/partials/cells/gate.html" %}</td>
                 <td class="c-review">{% include "login/partials/cells/review.html" %}</td>
                 <td class="c-access">
-                  {% comment %}The Table's permission page until the access drawer (#2566) takes its place.{% endcomment %}
-                  <a id="acc-{{ row.table.pk }}"
-                     class="dash-access"
-                     href="{% url 'dataedit:table-permission' table=row.table.name %}"
-                     hx-boost="false"
-                     aria-label="{{ row.access_label }}">
+                  {% comment %}Opens the access drawer (#table-access), outside the tab, so its request is synced only with itself.{% endcomment %}
+                  <button type="button"
+                          id="acc-{{ row.table.pk }}"
+                          class="dash-access"
+                          hx-get="{% url 'login:table-access' user_id=profile_user.pk table_name=row.table.name %}"
+                          hx-target="#table-access-body"
+                          hx-swap="innerHTML"
+                          hx-sync="this:replace"
+                          data-access-origin="acc-{{ row.table.pk }}"
+                          aria-label="{{ row.access_label }}">
                     {% if row.direct %}<span class="dash-achip dash-achip--you">You</span>{% endif %}
                     {% for organization in row.organizations %}<span class="dash-achip" title="{{ organization }}">{{ organization }}</span>{% endfor %}
                     {% if row.role_label %}<span class="dash-role">{{ row.role_label }}</span>{% endif %}
-                  </a>
+                  </button>
                 </td>
                 <td class="c-ds">{% include "login/partials/cells/datasets.html" %}</td>
                 <td class="c-topics">{% include "login/partials/cells/chips.html" %}</td>

@@ -58,6 +58,7 @@ from api.services.dataset_creation import (
 )
 from dataedit.helper import delete_peer_review
 from dataedit.models import Dataset, PeerReviewManager, Table, Topic
+from login import table_roles
 from login.access import (
     ProfileOwnerRequiredMixin,
     is_htmx,
@@ -204,6 +205,151 @@ class TableActionView(ProfileOwnerRequiredMixin, View):
         response = HttpResponse(status=204)
         response["HX-Trigger"] = json.dumps({"tables-changed": detail})
         return response
+
+
+class TableAccessView(ProfileOwnerRequiredMixin, View):
+    """The access drawer for one Table: who holds which role on it. GET
+    renders the drawer; POST makes one change through the permission service
+    (``login.table_roles``) and renders the drawer again in place, so it
+    stays open for the next change.
+
+    POST takes ``op``: ``add`` (``kind`` user with ``name``, or org with
+    ``organization``, and ``level``), ``change`` (``holder`` as ``user:<pk>``
+    or ``org:<pk>``, and ``level``), ``remove`` (``holder``) or ``leave``;
+    ``confirm=yes`` once the user has confirmed losing their own Admin or
+    the Table from their dashboard.
+
+    - done: 200 with ``HX-Trigger: tables-changed``, carrying the message
+      and ``stay`` (the drawer stays open and keeps focus); the results
+      region re-fetches itself on that event. When the Table has left the
+      user's dashboard the drawer says so instead of listing its Holders.
+    - needs confirmation: 200, the drawer asking, nothing written, no event.
+    - unusable request: 400, the drawer with the error beside its field.
+    - not a Table admin: 403, the drawer with the reason.
+    - the last user with direct Admin would lose it: 409, the drawer with
+      "Give someone else Admin first". This is checked before any
+      confirmation is asked for.
+
+    A Table that is not on the user's dashboard (a name that is not a Table,
+    or a Table they hold no role on) answers 404, the same for both.
+    """
+
+    def _table(self, table_name):
+        table = accessible_tables(self.profile_user).filter(name=table_name).first()
+        if table is None:
+            raise Http404
+        return table
+
+    def _drawer(self, request, table, status=200, **extra):
+        context = {
+            "profile_user": self.profile_user,
+            "table": table,
+            "title": table.human_readable_name or table.name,
+            "roles": table_roles.ROLES,
+            "organization_roles": table_roles.ORGANIZATION_ROLES,
+            "errors": {},
+            "values": {},
+            **extra,
+        }
+        if not context.get("gone"):
+            context["access"] = table_roles.table_access(self.profile_user, table)
+        return render(
+            request,
+            "login/partials/table_access_drawer.html",
+            context,
+            status=status,
+        )
+
+    @method_decorator(never_cache)
+    def get(self, request, user_id, table_name):
+        return self._drawer(request, self._table(table_name))
+
+    def _write(self, table, data):
+        user = self.profile_user
+        op = data.get("op", "")
+        confirmed = data.get("confirm") == "yes"
+        if op == table_roles.ADD:
+            kind = data.get("kind")
+            who = data.get(
+                "organization" if kind == table_roles.ORGANIZATION else "name"
+            )
+            return table_roles.add(user, table, kind, who, data.get("level"))
+        if op == table_roles.CHANGE:
+            return table_roles.change(
+                user, table, data.get("holder"), data.get("level"), confirmed=confirmed
+            )
+        if op == table_roles.REMOVE:
+            return table_roles.remove(
+                user, table, data.get("holder"), confirmed=confirmed
+            )
+        if op == table_roles.LEAVE:
+            return table_roles.leave(user, table, confirmed=confirmed)
+        raise table_roles.InvalidRequest("Choose a change to make.", "op")
+
+    def post(self, request, user_id, table_name):
+        user = self.profile_user
+        table = self._table(table_name)
+        values = {
+            key: request.POST.get(key, "")
+            for key in ("op", "kind", "name", "organization", "holder", "level")
+        }
+        try:
+            change = self._write(table, request.POST)
+        except table_roles.ConfirmationNeeded as question:
+            return self._drawer(
+                request, table, confirm=question.message, pending=values
+            )
+        except table_roles.InvalidRequest as error:
+            return self._drawer(
+                request,
+                table,
+                status=400,
+                errors={error.field: error.message},
+                values=values,
+            )
+        except table_roles.NotAllowed as refusal:
+            return self._drawer(request, table, status=403, notice=refusal.message)
+        except table_roles.LastAdmin as refusal:
+            return self._drawer(request, table, status=409, notice=refusal.message)
+
+        if change is None:
+            # the Holder already holds that role: nothing to do
+            return self._drawer(request, table)
+        listed = accessible_tables(user).filter(pk=table.pk).exists()
+        hidden = _not_shown(request, user, [table]) if listed else []
+        response = self._drawer(request, table, gone=not listed)
+        response["HX-Trigger"] = json.dumps(
+            {
+                "tables-changed": {
+                    "message": _access_message(change, listed, hidden),
+                    "stay": True,
+                }
+            }
+        )
+        return response
+
+
+def _access_message(change, listed, hidden) -> str:
+    """What a change of access says: what was done, and whether the Table
+    left the user's dashboard or is hidden by the current filter."""
+    title = _title(change.table)
+    if change.action == table_roles.ADD and change.kind == table_roles.USER:
+        message = f"Gave {change.name} {change.role} on {title}."
+    elif change.action == table_roles.ADD:
+        message = f"Shared {title} with {change.name} as {change.role}."
+    elif change.action == table_roles.CHANGE:
+        message = f"{change.name} is now {change.role} on {title}."
+    elif change.action == table_roles.LEAVE:
+        message = f"You left {title}."
+    else:
+        message = f"Removed {change.name} from {title}."
+    if not listed and change.action == table_roles.LEAVE:
+        message = f"You left {title} and no longer have access to it."
+    elif not listed:
+        message += f" You no longer have access to {title}."
+    elif hidden:
+        message += " It is not shown under the current filter."
+    return message
 
 
 def _not_shown(request, user, tables) -> list:

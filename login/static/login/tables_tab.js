@@ -41,13 +41,24 @@
 //   gone. `tables-refused` and every failed request leave an assertive toast
 //   that stays until dismissed; a 401 says the user was logged out and links
 //   to the login page with `next` set to this view.
+// - the access drawer (#2566): an Access cell or "Manage access" loads the
+//   Table's Holders into the one drawer, which opens once it is filled.
+//   Every write in it answers with the drawer again, swapped in place, so
+//   it stays open; a refusal (409), a "not an Admin" (403) and an unusable
+//   request (400) are swapped like a success. Focus stays in the drawer: on
+//   a confirmation question when there is one, else on the control with the
+//   same id, else on the drawer's title. A done change sends
+//   `tables-changed` with `stay`: a toast says what happened and the region
+//   re-fetches behind the drawer, but nothing closes and focus does not
+//   move. Closed, focus goes back to what opened it, or to the list heading
+//   when that row has left the list.
 // - menu entries above the user's role carry `aria-disabled="true"` and
 //   their reason as text. They stay in the keyboard order, unlike
 //   Bootstrap's `.disabled`; their clicks are swallowed here.
 //
 // Newer requests replace older ones through `hx-sync` on the tab, so a
-// stale response never overwrites a newer state. The dialog sits outside
-// the tab, so its requests never cancel the list's. The cells' popovers are
+// stale response never overwrites a newer state. The dialog and the drawer
+// sit outside the tab, so their requests never cancel the list's. The cells' popovers are
 // `list_popovers.js`, wired here so the page has one thing to bind.
 
 import { bindPopovers } from "./list_popovers.js";
@@ -64,6 +75,10 @@ export const FOLD_COUNT_ID = "tables-fold-count";
 export const TAB_ID = "tables-tab";
 export const DIALOG_ID = "table-action";
 export const DIALOG_BODY_ID = "table-action-body";
+export const DRAWER_ID = "table-access";
+export const DRAWER_BODY_ID = "table-access-body";
+export const DRAWER_TITLE_ID = "table-access-title";
+export const DRAWER_CONFIRM_ID = "table-access-confirm-box";
 export const TOASTS_POLITE_ID = "tables-toasts-polite";
 export const TOASTS_ASSERTIVE_ID = "tables-toasts-assertive";
 
@@ -73,6 +88,10 @@ export const TOAST_TIMEOUT = 5000;
 // Statuses an action answers with the dialog itself: a refused request
 // (409, the check run again) and an unusable parameter (400).
 const DIALOG_STATUSES = [400, 409];
+// Statuses a write in the access drawer answers with the drawer itself:
+// an unusable request (400), a viewer who is not a Table admin (403) and
+// the last-admin guard (409).
+const DRAWER_STATUSES = [400, 403, 409];
 
 export const LOGGED_OUT = "You have been logged out.";
 const RELOAD =
@@ -345,6 +364,50 @@ export function bootstrapDialog(doc) {
 }
 
 /**
+ * The access drawer as Bootstrap's offcanvas, with the members of
+ * `bootstrapDialog`.
+ *
+ * @param {Document} doc the document.
+ * @return {{open: function(), close: function(), onHidden: function(function())}}
+ */
+export function bootstrapDrawer(doc) {
+  const element = () => doc.getElementById(DRAWER_ID);
+  const offcanvas = () => {
+    const bootstrap = doc.defaultView && doc.defaultView.bootstrap;
+    return element() && bootstrap
+      ? bootstrap.Offcanvas.getOrCreateInstance(element())
+      : null;
+  };
+  return {
+    open: () => offcanvas() && offcanvas().show(),
+    close: () => offcanvas() && offcanvas().hide(),
+    onHidden: (callback) =>
+      element() && element().addEventListener("hidden.bs.offcanvas", callback),
+  };
+}
+
+/**
+ * Put focus back inside the drawer after its contents were replaced, if it
+ * was inside before: on the confirmation question when the server asks
+ * one, else on the control with the same id, else on the drawer's title.
+ *
+ * @param {Document} doc the document.
+ * @param {string|null} id the id focused in the drawer before the swap.
+ */
+export function restoreDrawerFocus(doc, id) {
+  if (!id) {
+    return;
+  }
+  const target =
+    doc.getElementById(DRAWER_CONFIRM_ID) ||
+    doc.getElementById(id) ||
+    doc.getElementById(DRAWER_TITLE_ID);
+  if (target) {
+    target.focus();
+  }
+}
+
+/**
  * Open or close the "More filters" panel.
  *
  * @param {Document} doc the document.
@@ -376,7 +439,8 @@ export function toggleFold(button) {
  *
  * @param {Document} doc the document.
  * @param {object} options test seams: `announceDelay`, `dialog` (see
- *     `bootstrapDialog`) and `schedule` (setTimeout, for the toasts).
+ *     `bootstrapDialog`), `drawer` (see `bootstrapDrawer`) and `schedule`
+ *     (setTimeout, for the toasts).
  * @return {function(): void} removes the listeners again.
  */
 export function bindTablesTab(
@@ -384,10 +448,14 @@ export function bindTablesTab(
   {
     announceDelay = 60,
     dialog = bootstrapDialog(doc),
+    drawer = bootstrapDrawer(doc),
     schedule = setTimeout,
   } = {},
 ) {
   let focusedId = null;
+  // what opened the drawer, and the control focused in it before a swap
+  let drawerOrigin = null;
+  let drawerFocusedId = null;
   // the row whose ⋯ opened the dialog, and where focus goes after an action
   let origin = null;
   let afterAction = null;
@@ -397,6 +465,11 @@ export function bindTablesTab(
     event.detail &&
     event.detail.target &&
     event.detail.target.id === DIALOG_BODY_ID;
+  const isDrawer = (event) =>
+    event.detail &&
+    event.detail.target &&
+    event.detail.target.id === DRAWER_BODY_ID;
+  const status = (event) => event.detail.xhr && event.detail.xhr.status;
 
   const onConfigRequest = (event) => {
     const elt = event.detail.elt;
@@ -445,32 +518,42 @@ export function bindTablesTab(
   const onBeforeSwap = (event) => {
     if (isRegion(event)) {
       focusedId = focusedIdWithin(doc, event.detail.target);
-    } else if (
-      isDialog(event) &&
-      event.detail.xhr &&
-      DIALOG_STATUSES.includes(event.detail.xhr.status)
-    ) {
+    } else if (isDialog(event) && DIALOG_STATUSES.includes(status(event))) {
       event.detail.shouldSwap = true;
       event.detail.isError = false;
+    } else if (isDrawer(event)) {
+      drawerFocusedId = focusedIdWithin(doc, event.detail.target);
+      if (DRAWER_STATUSES.includes(status(event))) {
+        event.detail.shouldSwap = true;
+        event.detail.isError = false;
+      }
     }
   };
 
   const onAfterSwap = (event) => {
-    if (!isDialog(event)) {
+    if (!isDialog(event) && !isDrawer(event)) {
       return;
     }
     // htmx sets `detail.elt` to the swap target; what sent the request is
     // `requestConfig.elt`
     const config = event.detail.requestConfig;
     const elt = config && config.elt;
-    const from = elt && elt.dataset && elt.dataset.actionOrigin;
-    if (from) {
-      origin = from;
+    const data = (elt && elt.dataset) || {};
+    if (isDialog(event) && data.actionOrigin) {
+      origin = data.actionOrigin;
       dialog.open();
+    } else if (isDrawer(event) && data.accessOrigin) {
+      drawerOrigin = data.accessOrigin;
+      drawer.open();
     }
   };
 
   const onAfterSettle = (event) => {
+    if (isDrawer(event)) {
+      restoreDrawerFocus(doc, drawerFocusedId);
+      drawerFocusedId = null;
+      return;
+    }
     if (!isRegion(event)) {
       return;
     }
@@ -491,6 +574,13 @@ export function bindTablesTab(
 
   const onChanged = (event) => {
     const detail = event.detail || {};
+    if (detail.stay) {
+      // a change in the drawer: it stays open and keeps focus
+      if (detail.message) {
+        showToast(doc, detail.message, { schedule });
+      }
+      return;
+    }
     afterAction = detail.focus || origin || "";
     origin = null;
     dialog.close();
@@ -529,6 +619,15 @@ export function bindTablesTab(
       }
     }
     origin = null;
+  });
+
+  // Closed: focus goes back to what opened the drawer, or to the list
+  // heading when that row has left the list.
+  drawer.onHidden(() => {
+    if (drawerOrigin !== null) {
+      focusAfterAction(doc, drawerOrigin);
+    }
+    drawerOrigin = null;
   });
 
   const onHistoryRestore = () => {

@@ -21,6 +21,7 @@ import {
   focusAfterAction,
   isUnavailable,
   loginLink,
+  restoreDrawerFocus,
   restoreFocus,
   showToast,
   syncFilters,
@@ -721,5 +722,178 @@ describe("bindTablesTab, actions", () => {
     expect(
       document.getElementById("tables-toasts-assertive").textContent,
     ).toContain(UNREACHABLE);
+  });
+});
+
+/** A row's two drawer openers: its Access cell and "Manage access". */
+const ROW_ACCESS = (pk) => `
+  <button id="acc-${pk}" type="button" data-access-origin="acc-${pk}">You</button>
+  <button id="menu-${pk}" type="button">⋯</button>
+  <button id="menu-${pk}-access" type="button"
+          data-access-origin="menu-${pk}">Manage access</button>`;
+
+/** The drawer's contents as the server renders them. */
+const DRAWER_BODY = (extra = "") => `
+  <h2 id="table-access-title" tabindex="-1">Access to Go</h2>
+  ${extra}
+  <select id="access-role-user-3" name="level"></select>
+  <button id="access-remove-user-3" type="button">Remove</button>`;
+
+/** htmx 1.9's swap of the drawer body: events on the target, the
+ * requesting element in `requestConfig.elt`, the contents replaced
+ * between beforeSwap and afterSettle. */
+function swapDrawer(source, status = 200, html = DRAWER_BODY()) {
+  const target = document.getElementById("table-access-body");
+  const detail = {
+    elt: target,
+    target,
+    requestConfig: { elt: source },
+    xhr: { status },
+    shouldSwap: status < 300,
+    isError: status >= 400,
+  };
+  const fire = (name) =>
+    target.dispatchEvent(new CustomEvent(name, { bubbles: true, detail }));
+  fire("htmx:beforeSwap");
+  if (detail.shouldSwap) {
+    target.innerHTML = html;
+    fire("htmx:afterSwap");
+    fire("htmx:afterSettle");
+  }
+  return detail;
+}
+
+describe("restoreDrawerFocus", () => {
+  beforeEach(() => {
+    document.body.innerHTML = `<div id="table-access-body">${DRAWER_BODY()}</div>`;
+  });
+
+  it("does nothing when focus was not in the drawer", () => {
+    restoreDrawerFocus(document, null);
+    expect(document.activeElement).toBe(document.body);
+  });
+
+  it("puts focus back on the same control", () => {
+    restoreDrawerFocus(document, "access-role-user-3");
+    expect(document.activeElement.id).toBe("access-role-user-3");
+  });
+
+  it("falls back to the title when the control is gone", () => {
+    restoreDrawerFocus(document, "access-remove-user-9");
+    expect(document.activeElement.id).toBe("table-access-title");
+  });
+
+  it("prefers the confirmation question when the server asks one", () => {
+    document
+      .getElementById("table-access-body")
+      .insertAdjacentHTML(
+        "afterbegin",
+        '<div id="table-access-confirm-box" tabindex="-1">Sure?</div>',
+      );
+    restoreDrawerFocus(document, "access-remove-user-3");
+    expect(document.activeElement.id).toBe("table-access-confirm-box");
+  });
+});
+
+describe("bindTablesTab, access drawer", () => {
+  let unbind;
+  let dialog;
+  let drawer;
+
+  beforeEach(() => {
+    renderActionPage(REGION("2 tables", {}, ROW_ACCESS(7) + ROW_ACCESS(8)));
+    document.body.insertAdjacentHTML(
+      "beforeend",
+      '<div id="table-access"><div id="table-access-body"></div></div>',
+    );
+    dialog = fakeDialog();
+    drawer = fakeDialog();
+    unbind = bindTablesTab(document, {
+      announceDelay: 0,
+      dialog,
+      drawer,
+      schedule: () => {},
+    });
+  });
+
+  afterEach(() => unbind());
+
+  it("opens the drawer once the Access cell or the menu has filled it", () => {
+    swapDrawer(document.getElementById("acc-7"));
+    swapDrawer(document.getElementById("menu-8-access"));
+    expect(drawer.opened).toBe(2);
+    expect(dialog.opened).toBe(0);
+  });
+
+  it("does not reopen it for a write made inside it", () => {
+    swapDrawer(document.getElementById("acc-7"));
+    const form = document.createElement("form");
+    document.getElementById("table-access-body").append(form);
+    swapDrawer(form);
+    expect(drawer.opened).toBe(1);
+  });
+
+  it("swaps a refusal, a not-an-Admin and a field error into the drawer", () => {
+    const form = document.createElement("form");
+    document.getElementById("table-access-body").append(form);
+    for (const status of [400, 403, 409]) {
+      const detail = swapDrawer(form, status);
+      expect(detail.shouldSwap).toBe(true);
+      expect(detail.isError).toBe(false);
+    }
+    const failed = swapDrawer(form, 500);
+    expect(failed.shouldSwap).toBe(false);
+    expect(failed.isError).toBe(true);
+  });
+
+  it("keeps focus on the control used after a change", () => {
+    swapDrawer(document.getElementById("acc-7"));
+    document.getElementById("access-role-user-3").focus();
+    swapDrawer(document.getElementById("access-role-user-3"));
+    expect(document.activeElement.id).toBe("access-role-user-3");
+  });
+
+  it("moves focus to a confirmation question", () => {
+    swapDrawer(document.getElementById("acc-7"));
+    document.getElementById("access-remove-user-3").focus();
+    swapDrawer(
+      document.getElementById("access-remove-user-3"),
+      200,
+      DRAWER_BODY(
+        '<div id="table-access-confirm-box" tabindex="-1">Sure?</div>',
+      ),
+    );
+    expect(document.activeElement.id).toBe("table-access-confirm-box");
+  });
+
+  it("after a change says so, but stays open and keeps focus", () => {
+    swapDrawer(document.getElementById("acc-7"));
+    const select = document.getElementById("access-role-user-3");
+    select.focus();
+    serverTrigger(select, "tables-changed", {
+      message: "AccessAlice is now Admin on “Go”.",
+      stay: true,
+    });
+    expect(drawer.closed).toBe(0);
+    expect(dialog.closed).toBe(0);
+    expect(
+      document.getElementById("tables-toasts-polite").textContent,
+    ).toContain("AccessAlice is now Admin");
+    // the list re-fetches behind the drawer and leaves focus where it is
+    swapRegion(REGION("2 tables", {}, ROW_ACCESS(7) + ROW_ACCESS(8)));
+    expect(document.activeElement.id).toBe("access-role-user-3");
+  });
+
+  it("returns focus to what opened it when it closes", () => {
+    swapDrawer(document.getElementById("menu-8-access"));
+    drawer.hidden();
+    expect(document.activeElement.id).toBe("menu-8");
+  });
+
+  it("returns focus to the list heading when that row has left", () => {
+    swapDrawer(document.getElementById("acc-8"));
+    swapRegion(REGION("1 table", {}, ROW_ACCESS(7)));
+    drawer.hidden();
+    expect(document.activeElement.id).toBe("tables-heading");
   });
 });

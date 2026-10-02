@@ -66,6 +66,17 @@ SPDX-License-Identifier: CC0-1.0
   list then refreshes itself, keeping its filters, and a message says what
   happened. Each action writes one log line per table
   [(#2561)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2561)
+- A table's Access cell, or "Manage access" in its ⋯ menu, opens a side drawer
+  listing who holds which role (Data editor, Data maintainer, Admin), your own
+  entries marked. A Table admin adds a person or one of their own organizations
+  with a role in one step, changes or removes any holder; everyone else sees the
+  list read-only with the table's Admins, and anyone with a role of their own
+  can leave the table. Organizations go up to Data maintainer, Admin is given to
+  people by name, and a table always keeps one person with Admin. Losing your
+  own Admin, or the table from your dashboard, asks once. The drawer stays open
+  while the list refreshes behind it; each change writes one log line with the
+  role before and after
+  [(#2566)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2566)
 
 ## Bugs
 
