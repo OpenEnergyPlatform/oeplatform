@@ -13,8 +13,20 @@ Nothing here knows about Tables. A tab is a ``Listing``, which declares
 - one ``segment``: a filter shown as buttons that carry counts;
 - its ``sorts`` and the ``tiebreak`` every sort ends with, so that paging is
   deterministic;
-``Listing.page`` turns a base queryset and a request's query string into one
-``ListPage``. Its ``rows`` argument turns one page of model instances into
+A filter is one of two kinds. A ``Filter`` takes free text (a search). A
+``ChoiceFilter`` takes one value, or several comma-joined ones, out of a set of
+``Option`` objects; the option source may be a function of the viewer, and it is
+called only when the request names that filter or the filter bar is rendered,
+so a filter nobody uses costs no query. A value that is not among the options
+(an Organization the user left, a deleted Dataset, an unknown tag) is ignored
+and kept in ``ListState.stale``: it narrows nothing, it shows as a muted chip,
+and it stays in every link the page builds until it is dismissed or reset, so
+the chip does not vanish on the next unrelated click.
+
+``Listing.matching`` narrows a base queryset by every active filter, which is
+the one statement of what the URL selects: the list, its counts and (later)
+"select all matching" all read it. ``Listing.page`` turns a base queryset and a
+request's query string into one ``ListPage``. Its ``rows`` argument turns one page of model instances into
 rows, which is where a tab attaches, in a fixed number of queries, what one
 query per row would otherwise fetch. Every link the page offers (segment, sort headers, pager,
 Reset) is built by ``ListState.url``, so the URL rules hold in one place:
@@ -32,6 +44,7 @@ the same aggregate, so a page costs one aggregate plus one slice whatever the
 account size.
 """  # noqa: 501
 
+import json
 from dataclasses import dataclass, field
 from typing import Any, Callable
 from urllib.parse import urlencode
@@ -42,19 +55,179 @@ PAGE_SIZE = 25
 
 
 @dataclass(frozen=True)
+class Reading:
+    """What one filter made of a query string.
+
+    ``value`` is what ``apply`` receives, None for "not filtering". ``raw`` is
+    what the URL keeps for the filter, stale values included, None when the
+    URL does not name it. ``stale`` lists the given values that no longer
+    apply.
+    """
+
+    value: Any = None
+    raw: Any = None
+    stale: tuple = ()
+
+
+@dataclass(frozen=True)
+class ChipSpec:
+    """A chip a filter asks for: its text, what the filter's parameter reads
+    once the chip is removed (None clears it), and whether it is stale."""
+
+    text: str
+    remaining: Any = None
+    stale: bool = False
+
+
+@dataclass(frozen=True)
 class Filter:
-    """One URL parameter that narrows the list.
+    """A free-text URL parameter that narrows the list.
 
     ``parse`` turns the raw parameter into a value, or None for "not
-    filtering", which is also the answer for a value that no longer applies.
-    ``apply`` narrows a queryset by a parsed value; ``serialize`` writes the
-    value back into the URL.
+    filtering". ``apply`` narrows a queryset by a parsed value; ``serialize``
+    writes the value back into the URL. Free text has no options, so it is
+    never stale.
     """
 
     param: str
     parse: Callable[[str], Any]
     apply: Callable[[QuerySet, Any], QuerySet]
     serialize: Callable[[Any], str] = str
+    label: str = ""
+    more: bool = False
+
+    def read(self, query) -> Reading:
+        value = self.parse(query.get(self.param, ""))
+        if value is None:
+            return Reading()
+        return Reading(value, self.serialize(value))
+
+    def chips(self, reading: Reading) -> list:
+        return [ChipSpec(f"{self.label}: \u201c{reading.raw}\u201d")]
+
+
+@dataclass(frozen=True)
+class Option:
+    """One value a ``ChoiceFilter`` offers: what the URL carries, what the
+    control shows, the group it is listed under, and what its chip says when
+    "<filter label>: <label>" would read badly."""
+
+    value: str
+    label: str
+    group: str = ""
+    chip: str = ""
+
+
+@dataclass(frozen=True)
+class ChoiceFilter:
+    """A URL parameter whose values come out of a set of ``Option`` objects.
+
+    ``options`` is a sequence, or a function returning one; a function is
+    called only when the request names this filter (to tell known values from
+    stale ones, and to label the chips) or when the bar is rendered, so wrap
+    it in ``functools.cache`` when it queries. Single-valued unless
+    ``multiple``: then the values are comma-joined, the repeated form
+    (``?tags=a&tags=b``) is read too, and ``apply`` receives a list.
+    ``apply`` only ever receives known values. ``blank`` is what the control
+    says when nothing is chosen, ``hint`` how several values combine, and
+    ``more`` puts the control behind "More filters".
+    """
+
+    param: str
+    label: str
+    options: Any
+    apply: Callable[[QuerySet, Any], QuerySet]
+    multiple: bool = False
+    more: bool = False
+    blank: str = ""
+    hint: str = ""
+
+    def choices(self) -> list:
+        return list(self.options() if callable(self.options) else self.options)
+
+    def option(self, value):
+        return next((o for o in self.choices() if o.value == value), None)
+
+    def given(self, query) -> list:
+        """The values the query names, in its order, without repeats."""
+        if self.multiple:
+            raws = query.getlist(self.param) if hasattr(query, "getlist") else []
+            raws = raws or [query.get(self.param, "")]
+            parts = [part.strip() for raw in raws for part in raw.split(",")]
+        else:
+            parts = [query.get(self.param, "").strip()]
+        return list(dict.fromkeys(part for part in parts if part))
+
+    def read(self, query) -> Reading:
+        given = self.given(query)
+        if not given:
+            return Reading()
+        known = {option.value for option in self.choices()}
+        valid = [value for value in given if value in known]
+        stale = tuple(value for value in given if value not in known)
+        if self.multiple:
+            value = valid or None
+        else:
+            value = valid[0] if valid else None
+        return Reading(value, ",".join(given) if self.multiple else given[0], stale)
+
+    def chips(self, reading: Reading) -> list:
+        given = reading.raw.split(",") if self.multiple else [reading.raw]
+
+        def without(value):
+            if not self.multiple:
+                return None
+            return ",".join(v for v in given if v != value) or None
+
+        if reading.value is None:
+            valid = []
+        else:
+            valid = reading.value if self.multiple else [reading.value]
+        chips = []
+        for value in valid:
+            option = self.option(value)
+            text = option.chip or f"{self.label}: {option.label}"
+            chips.append(ChipSpec(text, without(value)))
+        for value in reading.stale:
+            chips.append(
+                ChipSpec(
+                    f"Filter \u2039{self.label}: {value}\u203a no longer applies",
+                    without(value),
+                    stale=True,
+                )
+            )
+        return chips
+
+
+@dataclass(frozen=True)
+class ControlOption:
+    value: str
+    label: str
+    group: str
+    selected: bool
+
+
+@dataclass(frozen=True)
+class FilterControl:
+    """What the filter bar renders for one ``ChoiceFilter``."""
+
+    param: str
+    label: str
+    blank: str
+    hint: str
+    multiple: bool
+    more: bool
+    options: list
+
+
+@dataclass(frozen=True)
+class Chip:
+    """One removable chip: an active filter value, or a stale one."""
+
+    id: str
+    text: str
+    url: str
+    stale: bool = False
 
 
 @dataclass(frozen=True)
@@ -100,8 +273,10 @@ class Sort:
 class ListState:
     """What the URL says: the active filter values, the sort and the page.
 
-    ``raw`` holds the canonical string of each active filter (the segment
-    included), in declaration order; ``values`` the parsed ones.
+    ``raw`` holds the string each filter keeps in the URL (the segment
+    included), in declaration order, stale values included so that every link
+    keeps them; ``values`` the parsed ones that apply; ``readings`` what each
+    filter made of the query, for the chips.
     """
 
     listing: "Listing"
@@ -109,6 +284,16 @@ class ListState:
     values: dict
     sort: str
     page: int
+    readings: dict = field(default_factory=dict)
+
+    @property
+    def stale(self) -> list:
+        """``(param, value)`` for every given value that no longer applies."""
+        return [
+            (param, value)
+            for param, reading in self.readings.items()
+            for value in reading.stale
+        ]
 
     @property
     def sort_key(self) -> str:
@@ -144,7 +329,8 @@ class ListState:
         page = self.page if page is None else page
         if page > 1:
             params.append(("page", str(page)))
-        return f"{path}?{urlencode(params)}" if params else path
+        # commas stay as they are: multi-valued filters are comma-joined
+        return f"{path}?{urlencode(params, safe=',')}" if params else path
 
 
 @dataclass(frozen=True)
@@ -215,6 +401,72 @@ class ListPage:
         return self.state.url(self.path, **{p: None for p in self.state.raw})
 
     @property
+    def chips(self) -> list:
+        """A chip for every active filter value, then one for every stale
+        value, each linking to this state without it. The ids are by
+        position, so after a removal focus lands on the chip that moved into
+        its place."""
+        active, stale = [], []
+        for f in self.listing.filters:
+            reading = self.state.readings.get(f.param)
+            if reading is None:
+                continue
+            for spec in f.chips(reading):
+                (stale if spec.stale else active).append((f.param, spec))
+        chips = []
+        for n, (param, spec) in enumerate(active + stale):
+            chips.append(
+                Chip(
+                    f"chip-{n}",
+                    spec.text,
+                    self.state.url(self.path, **{param: spec.remaining}),
+                    spec.stale,
+                )
+            )
+        return chips
+
+    @property
+    def controls(self) -> list:
+        """The bar's control for every ``ChoiceFilter``, its options marked
+        with what this state has chosen. Reading it calls every option
+        source, so only a whole page does."""
+        controls = []
+        for f in self.listing.filters:
+            if not isinstance(f, ChoiceFilter):
+                continue
+            chosen = self.state.values.get(f.param)
+            chosen = set(chosen) if f.multiple and chosen else {chosen}
+            controls.append(
+                FilterControl(
+                    f.param,
+                    f.label,
+                    f.blank or f"{f.label}: any",
+                    f.hint,
+                    f.multiple,
+                    f.more,
+                    [
+                        ControlOption(o.value, o.label, o.group, o.value in chosen)
+                        for o in f.choices()
+                    ],
+                )
+            )
+        return controls
+
+    @property
+    def more_count(self) -> int:
+        """How many filters behind "More filters" apply."""
+        return sum(
+            1 for f in self.listing.filters if f.more and f.param in self.state.values
+        )
+
+    @property
+    def filters_json(self) -> str:
+        """What each filter keeps in the URL, for the bar outside the region
+        to follow after a swap (a chip removed, a Reset)."""
+        segment = self.listing.segment.param
+        return json.dumps({p: v for p, v in self.state.raw.items() if p != segment})
+
+    @property
     def range_text(self) -> str:
         """ "176–200 of 2,068"."""
         return f"{self.start:,}–{self.end:,} of {self.total:,}"
@@ -235,7 +487,7 @@ class ListPage:
             return f"No {self.listing.plural} match these filters"
         one = self.total == 1
         noun = self.listing.singular if one else self.listing.plural
-        match = (" matches" if one else " match") if self.state.raw else ""
+        match = (" matches" if one else " match") if self.state.values else ""
         return f"{self.total:,} {noun}{match}, showing {self.start:,} to {self.end:,}"
 
     @property
@@ -295,12 +547,15 @@ class Listing:
         return next(s for s in self.sorts if s.key == key)
 
     def state(self, query) -> ListState:
-        raw, values = {}, {}
+        raw, values, readings = {}, {}, {}
         for f in self.filters:
-            value = f.parse(query.get(f.param, ""))
-            if value is not None:
-                values[f.param] = value
-                raw[f.param] = f.serialize(value)
+            reading = f.read(query)
+            if reading.raw is None:
+                continue
+            readings[f.param] = reading
+            raw[f.param] = reading.raw
+            if reading.value is not None:
+                values[f.param] = reading.value
         segment_value = self.segment.parse(query.get(self.segment.param, ""))
         if segment_value is not None:
             raw[self.segment.param] = values[self.segment.param] = segment_value
@@ -313,17 +568,31 @@ class Listing:
             page = max(1, int(query.get("page", "1")))
         except ValueError:
             page = 1
-        return ListState(self, raw, values, sort, page)
+        return ListState(self, raw, values, sort, page, readings)
+
+    def _filtered(self, base: QuerySet, state: ListState) -> QuerySet:
+        """``base`` narrowed by every active filter but the segment."""
+        for f in self.filters:
+            if f.param in state.values:
+                base = f.apply(base, state.values[f.param])
+        return base
+
+    def matching(self, base: QuerySet, query) -> QuerySet:
+        """Every row of ``base`` the query selects, across all pages: the
+        same filters, parsed the same way, as the list and its counts."""
+        state = self.state(query)
+        narrowed = self._filtered(base, state)
+        selected = state.values.get(self.segment.param)
+        if selected is not None:
+            narrowed = narrowed.filter(self.segment.condition(selected))
+        return narrowed
 
     def page(
         self, base: QuerySet, query, path: str, rows: Callable[[QuerySet], list] = list
     ) -> ListPage:
         state = self.state(query)
 
-        narrowed = base
-        for f in self.filters:
-            if f.param in state.values:
-                narrowed = f.apply(narrowed, state.values[f.param])
+        narrowed = self._filtered(base, state)
 
         counts = narrowed.aggregate(
             all=Count("pk"),

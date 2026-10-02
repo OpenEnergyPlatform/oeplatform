@@ -16,6 +16,12 @@ sees there, how the list filters and sorts, and what each row says.
 - ``visible_datasets``: the one statement of which Datasets a viewer may see
   in a row, read by both the Datasets cell and its sort, so the number shown
   and the order it sorts by cannot disagree.
+- the filters: Search, Review, Access, Dataset, and behind "More filters"
+  Topic and Tags, each one declaration. Every clause is a primary-key
+  subquery, so no filter joins anything into the list that could multiply a
+  row or a count. Each option source is scoped to the viewer's whole list and
+  does not narrow as other filters change, and each costs one query (Access
+  two), run only when the request names that filter or the bar is rendered.
 - ``table_rows``: one page of Tables as ``TableRow`` objects. The embargo,
   the Review state and the Topics are read in the page query; the Access cell
   and the Datasets cell in three more queries for the whole page, whatever
@@ -24,6 +30,7 @@ sees there, how the list filters and sorts, and what each row says.
 
 from dataclasses import dataclass, field
 from datetime import datetime
+from functools import cache
 from typing import Callable
 
 from django.contrib.postgres.aggregates import ArrayAgg
@@ -41,9 +48,17 @@ from django.db.models import (
 )
 from django.db.models.functions import Coalesce, Lower, Now, NullIf
 
-from dataedit.models import Dataset, Embargo, PeerReview, Table
+from dataedit.models import Dataset, Embargo, PeerReview, Table, Tag
 from dataedit.peer_review.badges import badge_label, normalize_badge
-from login.listing import Choice, Filter, Listing, Segment, Sort
+from login.listing import (
+    Choice,
+    ChoiceFilter,
+    Filter,
+    Listing,
+    Option,
+    Segment,
+    Sort,
+)
 from login.models import GroupPermission, UserPermission
 from login.permissions import ADMIN_PERM, DELETE_PERM, WRITE_PERM
 from oeplatform.settings import PSEUDO_TOPIC_DRAFT
@@ -82,6 +97,17 @@ REVIEW_RANK = Case(
     output_field=IntegerField(),
 )
 REVIEW_STATES = {2: REVIEWED, 1: IN_REVIEW, 0: NOT_REVIEWED}
+REVIEW_RANK_OF = {state: rank for rank, state in REVIEW_STATES.items()}
+REVIEW_OPTIONS = (
+    Option(REVIEWED, "Reviewed"),
+    Option(IN_REVIEW, "In review"),
+    Option(NOT_REVIEWED, "Not reviewed"),
+)
+
+# The Access filter's value for "a grant of my own", beside Organization ids.
+DIRECT = "direct"
+# The Dataset filter's two values beside a Dataset name.
+IN_ANY, IN_NONE = "any", "none"
 
 # Which Datasets count as published. Dataset has no lifecycle yet, so today
 # every Dataset is published (they are all publicly listed). When the
@@ -115,12 +141,8 @@ PUBLISH_GATE = (
 def accessible_tables(user):
     """Every non-sandbox Table ``user`` holds at least Data editor on,
     directly or through an Organization they are a member of."""
-    direct = UserPermission.objects.filter(holder=user, level__gte=WRITE_PERM).values(
-        "table_id"
-    )
-    through_organizations = GroupPermission.objects.filter(
-        holder__memberships__user=user, level__gte=WRITE_PERM
-    ).values("table_id")
+    direct = _direct_grants(user).values("table_id")
+    through_organizations = _organization_grants(user).values("table_id")
     return Table.objects.filter(
         Q(pk__in=direct) | Q(pk__in=through_organizations), is_sandbox=False
     )
@@ -155,12 +177,208 @@ def _search(queryset, text):
     )
 
 
+def _review(queryset, state):
+    """The Review filter reads ``REVIEW_RANK``, the expression the column and
+    its sort read, so the filter cannot disagree with the pill."""
+    return queryset.alias(review_filter=REVIEW_RANK).filter(
+        review_filter=REVIEW_RANK_OF[state]
+    )
+
+
+def _direct_grants(user):
+    return UserPermission.objects.filter(holder=user, level__gte=WRITE_PERM)
+
+
+def _organization_grants(user):
+    return GroupPermission.objects.filter(
+        holder__memberships__user=user, level__gte=WRITE_PERM
+    )
+
+
+def access_options(user) -> list:
+    """Direct, if the user holds a grant of their own on any listed Table,
+    then each Organization through which they reach at least one. Two
+    queries."""
+    options = []
+    if _direct_grants(user).filter(table__is_sandbox=False).exists():
+        options.append(Option(DIRECT, "Direct", chip="Access: direct"))
+    organizations = (
+        _organization_grants(user)
+        .filter(table__is_sandbox=False)
+        .order_by("holder__name", "holder_id")
+        .values_list("holder_id", "holder__name")
+        .distinct()
+    )
+    options.extend(
+        Option(str(pk), name, group="Your organizations") for pk, name in organizations
+    )
+    return options
+
+
+def _access(user):
+    def apply(queryset, value):
+        if value == DIRECT:
+            grants = _direct_grants(user)
+        else:
+            grants = GroupPermission.objects.filter(
+                holder_id=int(value), level__gte=WRITE_PERM
+            )
+        return queryset.filter(pk__in=grants.values("table_id"))
+
+    return apply
+
+
+def _memberships():
+    return Dataset.tables.through.objects
+
+
+def dataset_options(user) -> list:
+    """In any, In none, then each Dataset the user may see that holds at
+    least one of their Tables, their own first, each group by name. One
+    query."""
+    datasets = visible_datasets(user).filter(
+        pk__in=_memberships()
+        .filter(table__in=accessible_tables(user))
+        .values("dataset_id")
+    )
+    rows = sorted(
+        datasets.values_list("name", "creator_id", "creator__name"),
+        key=lambda row: (row[1] != user.pk, row[0]),
+    )
+    options = [
+        Option(IN_ANY, "In any dataset", chip="In any dataset"),
+        Option(IN_NONE, "In no dataset", chip="In no dataset"),
+    ]
+    for name, creator_id, creator_name in rows:
+        # A Dataset named "any" or "none" is a legal name the spec's URL
+        # contract cannot address: the keyword wins. It is left out rather
+        # than offered as an option that would select something else.
+        if name in (IN_ANY, IN_NONE):
+            continue
+        own = creator_id == user.pk
+        options.append(
+            Option(
+                name,
+                name if own or not creator_name else f"{name} ({creator_name})",
+                group="Your datasets" if own else "Other people's datasets",
+                chip=f"Dataset: {name}",
+            )
+        )
+    return options
+
+
+def _dataset(user):
+    """In any and In none read ``visible_datasets``, the rule the Datasets
+    cell reads, so "In none" is exactly the rows whose cell reads "–"."""
+
+    def apply(queryset, value):
+        if value in (IN_ANY, IN_NONE):
+            members = _memberships().filter(dataset__in=visible_datasets(user))
+            members = members.values("table_id")
+            if value == IN_ANY:
+                return queryset.filter(pk__in=members)
+            return queryset.exclude(pk__in=members)
+        members = _memberships().filter(dataset__name=value).values("table_id")
+        return queryset.filter(pk__in=members)
+
+    return apply
+
+
+def _topic_links():
+    return Table.topics.through.objects
+
+
+def topic_options(user) -> list:
+    """The Topics on the user's Tables. The draft pseudo-topic is a status,
+    never a Topic, so it is never offered. One query."""
+    names = (
+        _topic_links()
+        .filter(table__in=accessible_tables(user))
+        .exclude(topic_id=PSEUDO_TOPIC_DRAFT)
+        .order_by("topic_id")
+        .values_list("topic_id", flat=True)
+        .distinct()
+    )
+    return [Option(name, name) for name in names]
+
+
+def _topics(queryset, names):
+    """Any of the chosen Topics."""
+    links = _topic_links().filter(topic_id__in=names).values("table_id")
+    return queryset.filter(pk__in=links)
+
+
+def _tag_links():
+    return Table.tags.through.objects
+
+
+def tag_options(user) -> list:
+    """The tags on the user's Tables. A tag's key is its normalised name
+    (``Tag.get_name_normalized``), the value ``dataedit``'s table list puts
+    in its URL too, matched as it is there: verbatim, since a stored key need
+    not be in today's normal form. One query."""
+    tags = (
+        Tag.objects.filter(
+            pk__in=_tag_links()
+            .filter(table__in=accessible_tables(user))
+            .values("tag_id")
+        )
+        .order_by(Lower("name"), "pk")
+        .values_list("pk", "name")
+    )
+    return [Option(pk, name) for pk, name in tags]
+
+
+def _tags(queryset, keys):
+    """All of the chosen tags, the platform's tag convention: one subquery
+    per tag, ANDed."""
+    for key in keys:
+        queryset = queryset.filter(
+            pk__in=_tag_links().filter(tag_id=key).values("table_id")
+        )
+    return queryset
+
+
 def tables_listing(user) -> Listing:
     """The tables tab's list as ``user`` sees it."""
     return Listing(
         singular="table",
         plural="tables",
-        filters=(Filter("search", lambda raw: raw.strip() or None, _search),),
+        filters=(
+            Filter("search", lambda raw: raw.strip() or None, _search, label="Search"),
+            ChoiceFilter("review", "Review", REVIEW_OPTIONS, _review),
+            ChoiceFilter(
+                "access",
+                "Access",
+                cache(lambda: access_options(user)),
+                _access(user),
+            ),
+            ChoiceFilter(
+                "dataset",
+                "Dataset",
+                cache(lambda: dataset_options(user)),
+                _dataset(user),
+                blank="Dataset: any or none",
+            ),
+            ChoiceFilter(
+                "topics",
+                "Topic",
+                cache(lambda: topic_options(user)),
+                _topics,
+                multiple=True,
+                more=True,
+                hint="any of the ticked",
+            ),
+            ChoiceFilter(
+                "tags",
+                "Tag",
+                cache(lambda: tag_options(user)),
+                _tags,
+                multiple=True,
+                more=True,
+                hint="all of the ticked",
+            ),
+        ),
         # Embargoed counts as published: an embargo restricts the data of a
         # published Table, it is not a third state.
         segment=Segment(

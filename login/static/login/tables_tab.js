@@ -14,10 +14,13 @@
 // - focus: every control in the region has a stable id; focus goes back to
 //   the element with the same id after a swap, or to the list heading when
 //   that control is gone (the page it pointed at, say).
-// - the search box, which sits outside the region so typing survives a
-//   swap: its request keeps every other part of the URL state and returns to
-//   page 1, and it follows the region's `data-search` when something else
-//   changed it (a Reset).
+// - the filter bar, which sits outside the region so typing and an open
+//   "More filters" panel survive a swap. Each control's request keeps every
+//   other part of the URL state and returns to page 1; a multi-valued filter
+//   sends its ticked values comma-joined. After a swap every control follows
+//   the region's `data-filters` (what the URL holds) unless the user is in
+//   it, so a chip removed or a Reset inside the region shows in the bar, and
+//   "More filters (n)" follows `data-more`.
 //
 // Newer requests replace older ones through `hx-sync` on the tab, so a
 // stale response never overwrites a newer state. The cells' popovers are
@@ -29,26 +32,48 @@ export const REGION_ID = "tables-results";
 export const HEADING_ID = "tables-heading";
 export const LIVE_ID = "tables-live";
 export const SEARCH_ID = "tables-search";
+export const FILTERS_ID = "tables-filters";
+export const MORE_ID = "tables-more";
+export const MORE_COUNT_ID = "tables-more-count";
 
 /**
- * The query a new search sends: every other parameter of the current state
- * kept, the page dropped (a filter change returns to page 1), an empty
- * search left out (defaults are never written).
+ * The query a changed filter sends: every other parameter of the current
+ * state kept, the page dropped (a filter change returns to page 1), an empty
+ * value left out (defaults are never written).
  *
  * @param {string} currentSearch the current `location.search`.
- * @param {string} text what the search box holds.
+ * @param {string} name the filter's parameter.
+ * @param {string} value its new value, comma-joined if several.
  * @return {URLSearchParams} the parameters of the new request.
  */
-export function searchParameters(currentSearch, text) {
+export function filterParameters(currentSearch, name, value) {
   const params = new URLSearchParams(currentSearch);
-  const value = text.trim();
-  if (value) {
-    params.set("search", value);
+  const trimmed = value.trim();
+  if (trimmed) {
+    params.set(name, trimmed);
   } else {
-    params.delete("search");
+    params.delete(name);
   }
   params.delete("page");
   return params;
+}
+
+/**
+ * What a bar control says its filter is: the ticked values of its group for
+ * a checkbox, in the order the bar lists them, otherwise its value.
+ *
+ * @param {Element} bar the filter bar.
+ * @param {Element} control the control that changed.
+ * @return {string} the filter's new value.
+ */
+export function controlValue(bar, control) {
+  if (control.type !== "checkbox") {
+    return control.value;
+  }
+  return [...bar.querySelectorAll('input[type="checkbox"]')]
+    .filter((box) => box.name === control.name && box.checked)
+    .map((box) => box.value)
+    .join(",");
 }
 
 /**
@@ -109,21 +134,59 @@ export function restoreFocus(doc, id) {
 }
 
 /**
- * Make the search box hold what the region says the search is, unless the
- * user is typing in it.
+ * Make every bar control hold what the region says the URL holds, except the
+ * one the user is in. A select whose value is not among its options (a value
+ * that no longer applies) shows its blank option.
  *
  * @param {Document} doc the document.
  * @param {Element} region the current region.
  */
-export function syncSearch(doc, region) {
-  const input = doc.getElementById(SEARCH_ID);
-  if (!input || !region || doc.activeElement === input) {
+export function syncFilters(doc, region) {
+  const bar = doc.getElementById(FILTERS_ID);
+  if (!bar || !region) {
     return;
   }
-  const value = region.dataset.search || "";
-  if (input.value !== value) {
-    input.value = value;
+  let state = {};
+  try {
+    state = JSON.parse(region.dataset.filters || "{}");
+  } catch {
+    state = {};
   }
+  for (const control of bar.querySelectorAll("[name]")) {
+    if (control === doc.activeElement && control.type !== "checkbox") {
+      continue;
+    }
+    const value = state[control.name] || "";
+    if (control.type === "checkbox") {
+      control.checked = value.split(",").includes(control.value);
+    } else if (control.tagName === "SELECT") {
+      const known = [...control.options].some((o) => o.value === value);
+      control.value = known ? value : "";
+    } else if (control.value !== value) {
+      control.value = value;
+    }
+  }
+  const count = doc.getElementById(MORE_COUNT_ID);
+  if (count) {
+    const more = Number(region.dataset.more || 0);
+    count.textContent = more ? ` (${more})` : "";
+  }
+}
+
+/**
+ * Open or close the "More filters" panel.
+ *
+ * @param {Document} doc the document.
+ * @param {Element} button the "More filters" button.
+ */
+export function toggleMore(doc, button) {
+  const panel = doc.getElementById(button.getAttribute("aria-controls"));
+  if (!panel) {
+    return;
+  }
+  const open = button.getAttribute("aria-expanded") !== "true";
+  button.setAttribute("aria-expanded", String(open));
+  panel.hidden = !open;
 }
 
 /**
@@ -140,18 +203,27 @@ export function bindTablesTab(doc, { announceDelay = 60 } = {}) {
 
   const onConfigRequest = (event) => {
     const elt = event.detail.elt;
-    if (!elt || elt.id !== SEARCH_ID) {
+    const bar = doc.getElementById(FILTERS_ID);
+    if (!elt || !elt.name || !bar || !bar.contains(elt)) {
       return;
     }
     const parameters = event.detail.parameters;
     for (const key of Object.keys(parameters)) {
       delete parameters[key];
     }
-    for (const [key, value] of searchParameters(
+    for (const [key, value] of filterParameters(
       doc.location.search,
-      elt.value,
+      elt.name,
+      controlValue(bar, elt),
     )) {
       parameters[key] = value;
+    }
+  };
+
+  const onClick = (event) => {
+    const button = event.target.closest && event.target.closest(`#${MORE_ID}`);
+    if (button) {
+      toggleMore(doc, button);
     }
   };
 
@@ -170,13 +242,13 @@ export function bindTablesTab(doc, { announceDelay = 60 } = {}) {
     if (region && live) {
       announce(live, region.dataset.announce || "", announceDelay);
     }
-    syncSearch(doc, region);
+    syncFilters(doc, region);
     restoreFocus(doc, focusedId);
     focusedId = null;
   };
 
   const onHistoryRestore = () => {
-    syncSearch(doc, doc.getElementById(REGION_ID));
+    syncFilters(doc, doc.getElementById(REGION_ID));
   };
 
   const listeners = [
@@ -184,6 +256,7 @@ export function bindTablesTab(doc, { announceDelay = 60 } = {}) {
     ["htmx:beforeSwap", onBeforeSwap],
     ["htmx:afterSettle", onAfterSettle],
     ["htmx:historyRestore", onHistoryRestore],
+    ["click", onClick],
   ];
   for (const [name, listener] of listeners) {
     doc.body.addEventListener(name, listener);
