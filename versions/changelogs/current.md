@@ -12,6 +12,12 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- The dev image caches pip downloads and built wheels in a BuildKit cache mount
+  instead of discarding them. A single new line in `requirements.txt` used to
+  re-download and re-compile all ~47 packages, several minutes of it building
+  `psycopg2`, `shapely` and `owlready2` from source. The image stays the same
+  size, because the cache lives outside it
+  [(#2436)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2436)
 - Refactor user groups into organizations; add fields to the organization model;
   refactor HTMX for organization management pages
   [(#2261)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2261)
