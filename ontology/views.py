@@ -215,8 +215,7 @@ class OntologyStaticsView(View):
 
         if not extension:
             extension = "owl"
-        if not version:
-            version = get_ontology_version(onto_base_path, version)
+        version = get_ontology_version(onto_base_path, version)
         if imports:
             file_path = onto_base_path / version / "imports" / f"{file}.{extension}"
         elif glossary:

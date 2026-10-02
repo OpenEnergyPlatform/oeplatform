@@ -26,6 +26,13 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
+- The docker development setup works on macOS: bind-mounted folders are given to
+  the container user by numeric id (macOS' group id already exists in the image,
+  so the named group was never created), and a `.DS_Store` left by Finder no
+  longer stops the OEO version lookup, the ontology module list or the about
+  page. The build context now leaves out `.git/`, `static/`, `data/` and cache
+  files at any depth, which also applies to the production images
+  [(#2344)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2344)
 - Deleting a peer review now checks the caller: only its reviewer or a platform
   admin may delete it
   [(#2544)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2544)

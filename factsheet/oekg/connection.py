@@ -26,7 +26,7 @@ from ontology.utils import get_ontology_version
 
 onto_base_path = Path(ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOGY_NAME)
 version = get_ontology_version(onto_base_path)
-path = onto_base_path / version  # TODO bad - windows dev will get path error
+path = onto_base_path / version
 file = "oeo-full.owl"  # TODO- set in settings
 
 Ontology_URI = path / file

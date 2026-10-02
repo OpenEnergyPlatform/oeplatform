@@ -22,13 +22,15 @@ media/
 static/
 data/
 
-# editor / OS / build noise
+# editor / OS / build noise. A pattern without a leading **/ matches only at the
+# root of the build context, so the per-directory ones need it.
 .vscode/
 .idea/
-__pycache__/
-*.pyc
-*.bak
-*.bak-*
+**/__pycache__/
+**/*.pyc
+**/*.bak
+**/*.bak-*
+**/.DS_Store
 
 # podman/ must stay in the context: podman/Dockerfile copies apache2.conf and
 # entrypoint.sh out of it, so excluding it breaks the production image build.
