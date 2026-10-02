@@ -1,7 +1,13 @@
+# Python virtualenvs (note: "venv*" does NOT match ".venv" — list both)
 venv*
 env*
+.venv/
+.env/
+
+# local secrets / generated config
 oeplatform/securitysettings.py
 
+# node deps (installed inside the image / named volume)
 node_modules/
 
 # Runtime artifacts — must NOT be copied into the build context. The image bakes
@@ -9,3 +15,22 @@ node_modules/
 # would bloat the context and collide with the baked version.
 ontologies/
 media/
+
+# VCS + other runtime data that is bind-mounted, never needed at build time
+.git/
+.gitignore
+static/
+data/
+
+# editor / OS / build noise. A pattern without a leading **/ matches only at the
+# root of the build context, so the per-directory ones need it.
+.vscode/
+.idea/
+**/__pycache__/
+**/*.pyc
+**/*.bak
+**/*.bak-*
+**/.DS_Store
+
+# podman/ must stay in the context: podman/Dockerfile copies apache2.conf and
+# entrypoint.sh out of it, so excluding it breaks the production image build.
