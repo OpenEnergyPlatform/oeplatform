@@ -24,6 +24,15 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Features
 
+- The tables tab of the profile dashboard shows one list instead of the draft
+  and published card sections: every Table you can write, directly or through an
+  organization, with its status and where your access comes from. A status
+  segment with counts, a search, sorting, 25 rows per page and the whole state
+  in the address bar; on this tab a slim strip replaces the profile sidebar.
+  Until the row actions follow (#2561, #2562), publishing, unpublishing and
+  deleting are not offered on the dashboard
+  [(#2572)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2572)
+
 ## Bugs
 
 - The table page no longer stores a new saved view on every visit. Production
