@@ -259,14 +259,29 @@ class Segment:
 
 @dataclass(frozen=True)
 class Sort:
-    """A sortable column: its URL key, and the expression it orders by."""
+    """A sortable column: its URL key, and the expression it orders by.
+
+    ``ascending`` and ``descending`` say what each direction puts first, for
+    the "Sort by" select a narrow list shows in place of its column headers
+    ("Status: drafts first").
+
+    ``nulls_last`` puts rows whose value is unknown (NULL) at the end in both
+    directions, rather than wherever the database's default puts them, which
+    flips with the direction.
+    """
 
     key: str
     label: str
     expression: Any
+    ascending: str = "ascending"
+    descending: str = "descending"
+    nulls_last: bool = False
 
     def order(self, descending: bool) -> list:
-        return [self.expression.desc() if descending else self.expression.asc()]
+        nulls = {"nulls_last": True} if self.nulls_last else {}
+        if descending:
+            return [self.expression.desc(**nulls)]
+        return [self.expression.asc(**nulls)]
 
 
 @dataclass(frozen=True)
@@ -355,6 +370,15 @@ class SortLink:
         if not self.active:
             return ""
         return "descending" if self.descending else "ascending"
+
+
+@dataclass(frozen=True)
+class SortOption:
+    """One entry of the "Sort by" select: a sort key, "-" for descending."""
+
+    value: str
+    label: str
+    selected: bool
 
 
 @dataclass(frozen=True)
@@ -458,6 +482,26 @@ class ListPage:
         return sum(
             1 for f in self.listing.filters if f.more and f.param in self.state.values
         )
+
+    @property
+    def folded_count(self) -> int:
+        """How many filters with a control apply, every filter but free
+        text: what "Filters (n)" counts on a list too narrow to show them."""
+        return sum(
+            1
+            for f in self.listing.filters
+            if not isinstance(f, Filter) and f.param in self.state.values
+        )
+
+    @property
+    def sort_options(self) -> list:
+        """Every sort in both directions, for a list too narrow for its
+        column headers; the current one selected."""
+        return [
+            SortOption(value, f"{s.label}: {words}", value == self.state.sort)
+            for s in self.listing.sorts
+            for value, words in ((s.key, s.ascending), (f"-{s.key}", s.descending))
+        ]
 
     @property
     def filters_json(self) -> str:

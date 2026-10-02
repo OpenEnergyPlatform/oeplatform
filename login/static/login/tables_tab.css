@@ -5,7 +5,7 @@
  * The profile dashboard's tables tab (spec #2551). Plain CSS beside the
  * page rather than in the theme build, so the tab can change without a
  * rebuild of bootstrap.min.css. The column collapse by the list's own width
- * (#2555) lands here, as container queries on `.dash`.
+ * (#2555) is the container queries at the end of this file.
  */
 
 .dash {
@@ -44,11 +44,22 @@
   text-overflow: ellipsis;
 }
 
+/* "Filters (n)": on a wide list the fold panel is not a box at all, so its
+   controls sit in the row; below 900 px it folds (see the container queries) */
+.dash-fold {
+  display: contents;
+}
+
+.dash-fold-toggle {
+  display: none;
+}
+
 .dash-more {
   display: flex;
+  flex: 1 0 100%;
   flex-wrap: wrap;
   gap: 0.75rem 1.5rem;
-  margin-top: 0.5rem;
+  margin-top: 0.1rem;
   padding: 0.5rem 0.75rem;
   border: 1px solid #dee2e6;
   border-radius: 6px;
@@ -139,6 +150,20 @@
   opacity: 0.75;
 }
 
+/* "Sort by": shown only where the rows stack and lose their headers */
+.dash-sortby {
+  display: none;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.dash-sortby__label {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--dash-muted);
+  white-space: nowrap;
+}
+
 .dash-summary {
   margin-left: auto;
   color: var(--dash-muted);
@@ -219,12 +244,19 @@
   white-space: nowrap;
 }
 
+/* An Organization's name may be 150 characters; capped, so that the Access
+   column is bounded and the thresholds below hold for any name. The full
+   name is in the chip's title, and every holder in the link's label. */
 .dash-achip {
   display: inline-block;
+  max-width: 11rem;
   margin: 1px 2px 1px 0;
   padding: 0 0.45rem;
+  overflow: hidden;
   font-size: 0.75rem;
   white-space: nowrap;
+  text-overflow: ellipsis;
+  vertical-align: middle;
   color: var(--dash-secondary);
   background: #f5f9fc;
   border: 1px solid #c5d6e3;
@@ -427,7 +459,6 @@
   z-index: 2;
 }
 
-/* the row's ⋯ menu (#2561) */
 .dash-menu__toggle {
   padding: 0 0.5rem;
   font-size: 1.1rem;
@@ -483,4 +514,153 @@
 
 .dash-toast .toast-body a {
   font-weight: 600;
+}
+
+/* ------------------------------------------------------------------------
+ * Columns collapse by the list's own width (container queries on `.dash`),
+ * not the viewport's: the profile sidebar takes a different share of each
+ * screen. Drop order: Topics (and Created, once it exists), then Review and
+ * Datasets, then the rows stack. The filter bar folds by its own width.
+ *
+ * Measured 2026-10-02 (#2555) in headless Chrome 152: the narrowest list
+ * each set of columns fits without scrolling, worst of the first six pages
+ * of accounts with 130 and 2,068 Tables (benchmarks/tables_tab, which holds
+ * the measuring script). Taken in DejaVu Sans, the widest font the system
+ * stack falls back to; Segoe UI needs about 7 % less. Two rows are
+ * measured: this slice's, and the same with the two slices built beside it
+ * (#2560's sortable Publishable header, #2561's ⋯ menu), whose row is wider
+ * by 50 px. The thresholds are set for the wider one, about 2 % above it,
+ * so that whichever lands first, nothing scrolls.
+ *
+ *                          this slice       with #2560   threshold
+ *                       DejaVu   Segoe UI    and #2561
+ *   every column           980        912        1,030       1,050
+ *   without Topics         863        803          913         930
+ *   also without Review,
+ *     Datasets             651        617          701         720
+ *   the filter bar on
+ *     one line             958        902          958         960
+ *
+ * With the sidebar the list is 1,392 px wide at a 1920 px screen (every
+ * column), 976 at 1440 (without Topics), 896 at 1280 (also without Review
+ * and Datasets) and 640 at 1024 (stacked); the bar folds at 1280 and below.
+ *
+ * Still to come: ☐ (#2564), Modified (#2557) and Created (#2559). Measured
+ * with stand-ins for them the complete row needs 1,294 / 1,047 / 835: at
+ * 1440 px Review would then drop too. A slice that adds a column re-runs
+ * the measurement and moves these numbers.
+ * ---------------------------------------------------------------------- */
+
+@container (width < 1050px) {
+  .c-created,
+  .c-topics {
+    display: none;
+  }
+}
+
+@container (width < 930px) {
+  .c-review,
+  .c-ds {
+    display: none;
+  }
+}
+
+/* Too narrow for the bar on one line: everything but Search folds behind
+   "Filters (n)", which shows it below as a block of its own. */
+@container (width < 960px) {
+  .dash-fold-toggle {
+    display: inline-block;
+  }
+
+  .dash-fold {
+    display: none;
+  }
+
+  .dash-fold-toggle[aria-expanded="true"] ~ .dash-fold {
+    display: flex;
+    flex: 1 0 100%;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+  }
+
+  .dash-search {
+    max-width: none;
+  }
+}
+
+/* A row stacks into two lines: ☐, title and ⋯, then Status, Publishable
+   and Modified. Every other cell is hidden, so a column added later has to
+   say here where it goes. The headers go with the columns, so "Sort by"
+   takes their place. */
+@container (width < 720px) {
+  .dash-sortby {
+    display: flex;
+  }
+
+  .dash-table,
+  .dash-table tbody {
+    display: block;
+  }
+
+  .dash-table thead {
+    display: none;
+  }
+
+  .dash-table tr {
+    display: grid;
+    grid-template-columns: auto auto auto 1fr auto;
+    align-items: center;
+    padding: 0.3rem 0;
+    border-bottom: 1px solid #dee2e6;
+  }
+
+  .dash-table tr:last-child {
+    border-bottom: 0;
+  }
+
+  .dash-table td {
+    display: none;
+    padding: 0.15rem 0.5rem;
+    border: 0;
+  }
+
+  .dash-table td.c-select {
+    display: block;
+    grid-row: 1 / span 2;
+    grid-column: 1;
+  }
+
+  .dash-table td.c-table {
+    display: block;
+    grid-row: 1;
+    grid-column: 2 / 5;
+    min-width: 0;
+  }
+
+  .dash-table td.c-menu {
+    display: block;
+    grid-row: 1;
+    grid-column: 5;
+    position: static;
+    width: auto;
+  }
+
+  .dash-table td.c-status {
+    display: block;
+    grid-row: 2;
+    grid-column: 2;
+  }
+
+  .dash-table td.c-pub {
+    display: block;
+    grid-row: 2;
+    grid-column: 3;
+  }
+
+  .dash-table td.c-modified {
+    display: block;
+    grid-row: 2;
+    grid-column: 4;
+  }
 }

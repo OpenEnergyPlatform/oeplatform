@@ -45,9 +45,10 @@ from django.db import transaction
 from api.actions import move_publish
 from api.error import APIError
 from dataedit.models import Dataset, Table, Topic
+from dataedit.publish_gate import publish_checks
 from login.models import GroupPermission, Organization, UserPermission
 from login.permissions import ADMIN_PERM, NO_PERM
-from login.tables_tab import PUBLISH_GATE, visible_datasets
+from login.tables_tab import visible_datasets
 from oeplatform.settings import PSEUDO_TOPIC_DRAFT
 
 logger = logging.getLogger("oeplatform.table_actions")
@@ -199,11 +200,17 @@ def _unique(names) -> list:
 def _gate_reason(table) -> str:
     """Why ``table`` fails the Publish gate, or "" when it passes.
 
-    Live: the gate is run on the named Tables. Once the result is stored
-    (#2560) the preflight reads the stored flag instead, which is why only
-    the preflight asks here; publishing itself validates live either way.
+    A Table whose stored verdict (``Table.publishable``) is a pass is not
+    validated again here, so a batch of publishable Tables costs no validator
+    pass; publishing itself validates live (``move_publish``), and a Table
+    that fails there refuses the whole request. A stored fail, or no verdict
+    yet (before ``recompute_publish_gate`` ran), runs the checks live: that
+    names the failed check, and it agrees with the Publishable cell, where
+    the live result wins over a stale stored one.
     """
-    failed = [check.name for check in PUBLISH_GATE if not check.run(table)["status"]]
+    if table.publishable:
+        return ""
+    failed = [check.name for check in publish_checks(table) if not check.passed]
     if not failed:
         return ""
     return "Fails the Publish gate: " + ", ".join(failed)
@@ -341,7 +348,6 @@ def execute(user, action, names, params=None, via="dashboard") -> Outcome:
     the transaction has committed.
     """
     params = _checked_params(action, params or {})
-    check = None
     try:
         with transaction.atomic():
             list(
@@ -356,13 +362,25 @@ def execute(user, action, names, params=None, via="dashboard") -> Outcome:
                 raise InvalidParameters({"table": "Name at least one table."})
             tables = check.eligible
             for table in tables:
-                _write(action, table, params)
+                try:
+                    _write(action, table, params)
+                except APIError as error:
+                    raise _WriteRefused(table, error) from error
             transaction.on_commit(lambda: _log(user, action, tables, params, via))
-    except APIError as error:
-        # ``move_publish`` validates the gate live and refuses on its own;
-        # the transaction has rolled back every Table written before it.
+    except _WriteRefused as refused:
+        # ``move_publish`` validates the gate live and refuses on its own, as
+        # it does for a stored pass gone stale; the transaction has rolled
+        # back every Table written before it.
         again = preflight(user, action, names, params)
-        raise ActionRefused(
-            again, again.left_out or [LeftOut(str(error), check.names)]
-        ) from error
+        reason = LeftOut(str(refused.error), [refused.table.name])
+        raise ActionRefused(again, again.left_out or [reason]) from refused.error
     return Outcome(action, tables, params)
+
+
+class _WriteRefused(Exception):
+    """A write refused one Table: which, and the ``APIError`` it raised."""
+
+    def __init__(self, table, error):
+        super().__init__(str(error))
+        self.table = table
+        self.error = error

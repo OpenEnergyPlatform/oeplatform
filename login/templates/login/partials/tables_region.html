@@ -7,9 +7,16 @@ Each cell type is its own partial under ``cells/``.
 A direct load and an htmx request render this same state; htmx gets only
 this. Every control carries a stable id, so focus can be put back by id
 after a swap. ``data-announce`` is what the persistent live region outside
-reads after the swap; ``data-filters`` is what each filter keeps in the URL
-and ``data-more`` how many filters behind "More filters" apply, so the bar
-outside can follow a change made in here (a chip removed, a Reset).
+reads after the swap; ``data-filters`` is what each filter keeps in the URL,
+``data-more`` how many filters behind "More filters" apply and
+``data-folded`` how many behind "Filters (n)", so the bar outside can follow
+a change made in here (a chip removed, a Reset).
+
+The columns collapse by the list's own width, not the viewport's: the
+container queries in ``tables_tab.css`` hide a column by its cell class, and
+on the narrowest lists stack each row into two lines and show the "Sort by"
+select in place of the column headers. Every cell therefore carries its
+column's class.
 
 After an action the region re-fetches itself with the state it shows
 (``tables-changed``, sent by the action's response). The request names the
@@ -22,7 +29,8 @@ adds no history entry.
      hx-trigger="tables-changed from:body"
      data-announce="{{ page.announcement }}"
      data-filters="{{ page.filters_json }}"
-     data-more="{{ page.more_count }}">
+     data-more="{{ page.more_count }}"
+     data-folded="{{ page.folded_count }}">
   <h2 id="tables-heading" class="visually-hidden" tabindex="-1">Your tables</h2>
   {% if not page.has_any %}
     <div class="dash-empty">
@@ -43,6 +51,9 @@ adds no history entry.
   {% else %}
     <div class="dash-bar">
       {% include "login/partials/list_segment.html" with links=page.segment_links label="Status" %}
+      {% if page.total %}
+        {% include "login/partials/list_sort_select.html" %}
+      {% endif %}
       <div class="dash-summary">{{ page.summary }}</div>
     </div>
     {% include "login/partials/list_chips.html" with id="tables-chips" %}
@@ -54,7 +65,7 @@ adds no history entry.
             <tr>
               {% include "login/partials/list_sort_header.html" with link=page.sort_links.table cell="c-table" %}
               {% include "login/partials/list_sort_header.html" with link=page.sort_links.status cell="c-status" %}
-              <th class="c-pub" scope="col">Publishable</th>
+              {% include "login/partials/list_sort_header.html" with link=page.sort_links.publishable cell="c-pub" %}
               {% include "login/partials/list_sort_header.html" with link=page.sort_links.review cell="c-review" %}
               <th class="c-access" scope="col">Access</th>
               {% include "login/partials/list_sort_header.html" with link=page.sort_links.datasets cell="c-ds" %}
@@ -94,7 +105,7 @@ adds no history entry.
                      hx-boost="false"
                      aria-label="{{ row.access_label }}">
                     {% if row.direct %}<span class="dash-achip dash-achip--you">You</span>{% endif %}
-                    {% for organization in row.organizations %}<span class="dash-achip">{{ organization }}</span>{% endfor %}
+                    {% for organization in row.organizations %}<span class="dash-achip" title="{{ organization }}">{{ organization }}</span>{% endfor %}
                     {% if row.role_label %}<span class="dash-role">{{ row.role_label }}</span>{% endif %}
                   </a>
                 </td>

@@ -8,7 +8,11 @@ The tables tab. Only the results region (#tables-results) is swapped; the
 filter bar and the live count sit outside it, so focus and half-typed input
 survive a swap and the live region is announced reliably. The primary row is
 Search, Publishable, Review, Access and Dataset; "More filters (n)" holds the
-rest. The chips and Reset are inside the region.
+rest. The chips and Reset are inside the region. Where the list is too
+narrow for the bar on one line (960 px, measured), everything but Search
+folds behind "Filters (n)": the fold panel is ``display: contents`` on a
+wider list, so the controls sit in the row as if it were not there
+(``tables_tab.css``).
 
 The tab keeps the profile sidebar, like every other profile tab. The spec
 decided on a slim identity strip instead, to give the list the width
@@ -51,34 +55,34 @@ sidebar on 2026-10-02, so the column collapse (#2555) works with that width.
                    value="{{ page.state.raw.search|default:'' }}"
                    hx-get="{{ request.path }}"
                    hx-trigger="input changed delay:300ms, search" />
-            {% comment %}A placeholder until the Publish gate result is stored (#2560): filtering on the live gate would run it for every Table.{% endcomment %}
-            <label class="visually-hidden"
-                   for="f-publishable">Publishable, not available yet</label>
-            <select id="f-publishable"
-                    class="form-select form-select-sm dash-select"
-                    disabled
-                    title="Not available yet">
-              <option>Publishable: any</option>
-            </select>
-            {% for control in controls %}
-              {% if not control.more %}
-                {% include "login/partials/list_filter_control.html" with path=request.path %}
-              {% endif %}
-            {% endfor %}
             <button type="button"
-                    id="tables-more"
-                    class="btn btn-outline-secondary btn-sm"
+                    id="tables-fold"
+                    class="btn btn-outline-secondary btn-sm dash-fold-toggle"
                     aria-expanded="false"
-                    aria-controls="tables-more-panel">
-              More filters<span id="tables-more-count">{% if page.more_count %} ({{ page.more_count }}){% endif %}</span>
+                    aria-controls="tables-fold-panel">
+              Filters<span id="tables-fold-count">{% if page.folded_count %} ({{ page.folded_count }}){% endif %}</span>
             </button>
-          </div>
-          <div id="tables-more-panel" class="dash-more" hidden>
-            {% for control in controls %}
-              {% if control.more %}
-                {% include "login/partials/list_filter_control.html" with path=request.path %}
-              {% endif %}
-            {% endfor %}
+            <div id="tables-fold-panel" class="dash-fold">
+              {% for control in controls %}
+                {% if not control.more %}
+                  {% include "login/partials/list_filter_control.html" with path=request.path %}
+                {% endif %}
+              {% endfor %}
+              <button type="button"
+                      id="tables-more"
+                      class="btn btn-outline-secondary btn-sm"
+                      aria-expanded="false"
+                      aria-controls="tables-more-panel">
+                More filters<span id="tables-more-count">{% if page.more_count %} ({{ page.more_count }}){% endif %}</span>
+              </button>
+              <div id="tables-more-panel" class="dash-more" hidden>
+                {% for control in controls %}
+                  {% if control.more %}
+                    {% include "login/partials/list_filter_control.html" with path=request.path %}
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </div>
           </div>
         </div>
       {% endwith %}

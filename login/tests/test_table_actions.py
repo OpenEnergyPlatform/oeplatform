@@ -325,6 +325,33 @@ class PublishTests(ActionTestCase):
                 self.assertEqual(response.status_code, 409)
         self.assertEqual(self.published("t_lost_license"), {"t_lost_license": False})
 
+    def test_a_stored_pass_is_not_trusted_by_publishing(self):
+        """The preflight takes a stored pass at its word; publishing does not,
+        so a flag gone stale refuses the request and writes nothing."""
+        self.draft("t_stale_pass", oemetadata=NO_LICENSE, publishable=True)
+        self.draft("t_fine_too", publishable=True)
+        self.assertEqual(
+            self.check("publish", "t_stale_pass", "t_fine_too").names,
+            ["t_stale_pass", "t_fine_too"],
+        )
+        response = self.run_action(
+            "publish", "t_stale_pass", "t_fine_too", topic="climate"
+        )
+        self.assertEqual(response.status_code, 409)
+        self.assertEqual(
+            self.published("t_stale_pass", "t_fine_too"),
+            {"t_stale_pass": False, "t_fine_too": False},
+        )
+        message = self.trigger(response, "tables-refused")["message"]
+        self.assertIn("t_stale_pass", message)
+        self.assertNotIn("t_fine_too", message)
+
+    def test_a_stored_fail_is_checked_again_live(self):
+        """Live wins, as in the Publishable cell: a Table whose metadata was
+        fixed past the write path is not kept out by its stale flag."""
+        self.draft("t_stale_fail", publishable=False)
+        self.assertEqual(self.check("publish", "t_stale_fail").names, ["t_stale_fail"])
+
     def test_a_row_action_is_a_batch_of_one_and_a_batch_is_all_or_nothing(self):
         self.draft("t_first")
         self.draft("t_second")
