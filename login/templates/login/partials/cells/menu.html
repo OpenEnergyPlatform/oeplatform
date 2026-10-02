@@ -5,8 +5,9 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 Cell type "actions slot": the row's ⋯ menu. Edit metadata and Upload data
 link to the existing pages; every action on the Table itself opens the one
 action dialog (#table-action) with this Table as a batch of one. Entries
-whose ticket has not landed (Manage access, the Dataset entries, Delete)
-are absent, not disabled.
+whose ticket has not landed (Manage access, Delete) are absent, not
+disabled. "Remove from dataset…" is offered only when one of the user's own
+Datasets holds the Table, so its choice is never empty.
 
 An action above the user's role stays in the menu, marked
 aria-disabled="true" with the reason as visible text, and tables_tab.js
@@ -49,6 +50,14 @@ an action on this row.
           {% include "login/partials/cells/menu_action.html" with verb="unpublish" label="Unpublish" gate=gates.unpublish %}
         {% endif %}
       </li>
+      <li>
+        {% include "login/partials/cells/menu_action.html" with verb="dataset_add" label="Add to dataset…" gate=gates.dataset_add %}
+      </li>
+      {% if row.in_own_dataset %}
+        <li>
+          {% include "login/partials/cells/menu_action.html" with verb="dataset_remove" label="Remove from dataset…" gate=gates.dataset_remove %}
+        </li>
+      {% endif %}
     </ul>
   </div>
 {% endwith %}

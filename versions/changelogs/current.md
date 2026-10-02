@@ -66,6 +66,14 @@ SPDX-License-Identifier: CC0-1.0
   list then refreshes itself, keeping its filters, and a message says what
   happened. Each action writes one log line per table
   [(#2561)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2561)
+- The tables tab's ⋯ menu adds a table to one of your own datasets, or removes
+  it from one (offered only when one of yours holds it). A draft or embargoed
+  table may be added by anyone holding Data editor on it, directly or through an
+  organization: before, a draft you could write only through an organization was
+  offered on the Datasets tab and then refused. The dataset assign API and the
+  Datasets tab follow the same rule, and the API's assign and unassign now
+  change all the named tables or none
+  [(#2563)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2563)
 
 ## Bugs
 

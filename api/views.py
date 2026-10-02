@@ -49,6 +49,7 @@ import zipstream
 from django.conf import settings as django_settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import TrigramSimilarity
+from django.db import transaction
 from django.db.models import Q
 from django.http import Http404, HttpRequest, JsonResponse
 from django.shortcuts import get_object_or_404
@@ -618,14 +619,16 @@ class AssignDatasetTables(APIView):
         ]
         if forbidden:
             raise PermissionDenied(
-                "Draft or embargoed tables require write permission on the "
-                f"table to be assigned: {', '.join(forbidden)}."
+                "Draft or embargoed tables require Data editor on the table, "
+                "directly or through an organization, to be assigned: "
+                f"{', '.join(forbidden)}."
             )
 
         added_tables = []
-        for table in tables:
-            assign_table(dataset, table)
-            added_tables.append(table.name)
+        with transaction.atomic():
+            for table in tables:
+                assign_table(dataset, table)
+                added_tables.append(table.name)
 
         return Response(
             {
@@ -679,13 +682,14 @@ class UnassignDatasetTables(APIView):
         missing = []
         removed_tables = []
 
-        for table_ref in table_refs:
-            table = dataset.tables.filter(name=table_ref["name"]).first()
-            if table is None:
-                missing.append(table_ref)
-            else:
-                dataset.tables.remove(table)
-                removed_tables.append(table.name)
+        with transaction.atomic():
+            for table_ref in table_refs:
+                table = dataset.tables.filter(name=table_ref["name"]).first()
+                if table is None:
+                    missing.append(table_ref)
+                else:
+                    dataset.tables.remove(table)
+                    removed_tables.append(table.name)
 
         return Response(
             {

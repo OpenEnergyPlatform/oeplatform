@@ -1,0 +1,68 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+The Dataset branch of the action dialog (table_action_dialog.html): which of
+the user's own Datasets to add the eligible Tables to, or remove them from.
+``check.datasets`` holds only Datasets the action can change, so a row's
+choice is never wrong; the only one is chosen already. Without any, the
+dialog says why and offers no confirmation.
+{% endcomment %}
+{% if check.datasets %}
+  <p>
+    {% if check.action == "dataset_add" %}
+      The dataset will list
+      {% if check.total == 1 %}
+        it
+      {% else %}
+        them
+      {% endif %}
+      among its resources. The table itself does not change.
+    {% else %}
+      The dataset will no longer list
+      {% if check.total == 1 %}
+        it.
+      {% else %}
+        them.
+      {% endif %}
+      The table itself stays as it is.
+    {% endif %}
+  </p>
+  <div class="mb-2">
+    <label class="form-label" for="action-dataset">Dataset</label>
+    <select id="action-dataset"
+            name="dataset"
+            class="form-select{% if errors.dataset %} is-invalid{% endif %}"
+            required
+            {% if errors.dataset %}aria-describedby="action-dataset-error" aria-invalid="true"{% endif %}>
+      {% if check.datasets|length > 1 %}<option value="">Choose a dataset</option>{% endif %}
+      {% for dataset in check.datasets %}
+        <option value="{{ dataset.name }}"
+                {% if check.dataset.name == dataset.name or values.dataset == dataset.name %}selected{% endif %}>
+          {{ dataset.metadata.title|default:dataset.name }}
+        </option>
+      {% endfor %}
+    </select>
+    {% if errors.dataset %}<div id="action-dataset-error"
+     class="invalid-feedback">{{ errors.dataset }}</div>{% endif %}
+  </div>
+{% elif check.action == "dataset_add" %}
+  <p id="table-action-no-dataset">
+    None of your datasets is left to add
+    {% if check.total == 1 %}
+      it
+    {% else %}
+      them
+    {% endif %}
+    to. Create one on the <a href="{% url 'login:datasets' user_id=profile_user.pk %}">Datasets tab</a>.
+  </p>
+{% else %}
+  <p id="table-action-no-dataset">
+    None of your datasets
+    {% if check.total == 1 %}
+      contains it.
+    {% else %}
+      contains them.
+    {% endif %}
+  </p>
+{% endif %}
