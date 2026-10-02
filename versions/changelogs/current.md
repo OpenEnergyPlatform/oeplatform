@@ -20,6 +20,12 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
+- The table page no longer stores a new saved view on every visit. Production
+  had collected ~195,000 of them, scanned twice per page view; a migration
+  removes the duplicates and a unique constraint on (table, type, name) keeps
+  them out and indexes the lookup. Setting the default view and deleting a view
+  now require POST, so following a link cannot change them
+  [(#2218)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2218)
 - Deleting a peer review now checks the caller: only its reviewer or a platform
   admin may delete it
   [(#2544)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2544)

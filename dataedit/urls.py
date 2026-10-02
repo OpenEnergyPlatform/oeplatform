@@ -72,15 +72,17 @@ urlpatterns_view_schema = [
     ),
     re_path(
         # TODO: not used yet
-        r"^(?P<table>{qual})/view/(?P<view_id>{qual})/set-default".format(
-            qual="[0-9]+"
+        r"^(?P<table>{qual})/view/(?P<view_id>[0-9]+)/set-default$".format(
+            qual=pgsql_qualifier
         ),
         table_view_set_default_view,
         name="table-view-set-default",
     ),
     re_path(
         # TODO: not used yet
-        r"^(?P<table>{qual})/view/(?P<view_id>{qual})/delete".format(qual="[0-9]+"),
+        r"^(?P<table>{qual})/view/(?P<view_id>[0-9]+)/delete$".format(
+            qual=pgsql_qualifier
+        ),
         table_view_delete_view,
         name="table-view-delete-default",
     ),

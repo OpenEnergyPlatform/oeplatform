@@ -742,26 +742,27 @@ def table_view_save_view(request: HttpRequest, table: str) -> HttpResponse:
 
 @require_POST
 def table_view_set_default_view(
-    request: HttpRequest, table: str, view_id: int
+    request: HttpRequest, table: str, view_id: str
 ) -> HttpResponse:
     table_obj = table_or_404(table=table)
+    # re_path passes the id as a string; compare as a number, explicitly
+    view = get_object_or_404(DBView, pk=int(view_id), table=table_obj.name)
 
-    for view in DBView.objects.filter(table=table_obj.name):
-        if str(view.pk) == view_id:
-            view.is_default = True
-        else:
-            view.is_default = False
-        view.save()
+    with transaction.atomic():
+        DBView.objects.filter(table=table_obj.name).exclude(pk=view.pk).update(
+            is_default=False
+        )
+        DBView.objects.filter(pk=view.pk).update(is_default=True)
     return redirect("dataedit:view", table=table_obj.name)
 
 
 @require_POST
 def table_view_delete_view(
-    request: HttpRequest, table: str, view_id: int
+    request: HttpRequest, table: str, view_id: str
 ) -> HttpResponse:
     table_obj = table_or_404(table=table)
 
-    view = DBView.objects.get(pk=view_id, table=table_obj.name)
+    view = get_object_or_404(DBView, pk=int(view_id), table=table_obj.name)
     view.delete()
 
     return redirect("dataedit:view", table=table_obj.name)
@@ -911,7 +912,8 @@ class TableDataView(View):
         try:
             # at first, try to use the view, that is passed as get argument
             current_view = table_views.get(id=view_id)
-        except ObjectDoesNotExist:
+        except (ObjectDoesNotExist, ValueError):
+            # no ?view=, an unknown one, or one that is not an id at all
             current_view = default_view
 
         table_views = [default_view, *table_views.exclude(pk=default_view.pk)]

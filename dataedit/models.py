@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING, Literal, Mapping, Union
 
 from django.contrib.postgres.search import SearchVectorField
 from django.core.exceptions import ValidationError
-from django.db import models, transaction
+from django.db import models
 from django.db.models import (
     BooleanField,
     CharField,
@@ -564,25 +564,25 @@ class View(models.Model):
     def get_or_create_default(
         cls, table: str, type: str = "table", name: str = "default"
     ) -> "View":
-        with transaction.atomic():
-            # technically, multiple views per table can be default (or none).
-            view = View.objects.filter(is_default=True, table=table).last()
-            if view:
-                return view
-            # its possible that we have a view named "default", that is not
-            # marked as is_default=True
-            view = View.objects.filter(table=table, type=type, name=name).last()
-            if view is not None:
-                # make it default for next time
-                view.is_default = True
-                view.save()
-                return view
+        """The table's default view, created on first use.
 
-            # create a new one
-            view = View.objects.create(
-                table=table, type=type, name=name, is_default=True
-            )
+        The table page asks for this on every visit, so the steady state must be
+        one SELECT: before #2217 it inserted a fresh view each time.
+        """
+        # technically, multiple views per table can be default (or none).
+        view = cls.objects.filter(table=table, is_default=True).order_by("pk").last()
+        if view is not None:
             return view
+        # get_or_create rather than create: two first visits at the same time
+        # would otherwise both insert and the second hit the unique constraint.
+        view, created = cls.objects.get_or_create(
+            table=table, type=type, name=name, defaults={"is_default": True}
+        )
+        if not created and not view.is_default:
+            # a view named "default" that is not marked as such: mark it, once
+            view.is_default = True
+            view.save(update_fields=["is_default"])
+        return view
 
 
 class Filter(models.Model):
