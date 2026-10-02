@@ -86,6 +86,24 @@
   font-size: 0.875rem;
 }
 
+/* a date range: two date inputs, from and to */
+.dash-range {
+  margin: 0;
+}
+
+/* the two ends one above the other, their inputs aligned */
+.dash-range__end {
+  display: grid;
+  grid-template-columns: 2.5rem auto;
+  align-items: center;
+  margin-bottom: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.dash-date-input {
+  width: 9.5rem;
+}
+
 /* active filters, inside the region */
 .dash-chips {
   display: flex;
@@ -267,6 +285,19 @@
   color: #fff;
   background: var(--dash-secondary);
   border-color: var(--dash-secondary);
+}
+
+/* Modified: the date, unbroken, and beneath it "data" when only the data
+   half is known, the way Status puts "until" beneath an embargo */
+.dash-date {
+  white-space: nowrap;
+}
+
+.dash-half {
+  display: block;
+  font-size: 0.6875rem;
+  color: var(--dash-muted);
+  cursor: help;
 }
 
 .dash-role {
@@ -526,39 +557,41 @@
  * each set of columns fits without scrolling, worst of the first six pages
  * of accounts with 130 and 2,068 Tables (benchmarks/tables_tab, which holds
  * the measuring script). Taken in DejaVu Sans, the widest font the system
- * stack falls back to; Segoe UI needs about 7 % less. Two rows are
- * measured: this slice's, and the same with the two slices built beside it
- * (#2560's sortable Publishable header, #2561's ⋯ menu), whose row is wider
- * by 50 px. The thresholds are set for the wider one, about 2 % above it,
- * so that whichever lands first, nothing scrolls.
+ * stack falls back to. The thresholds sit about 2 % above the row.
  *
- *                          this slice       with #2560   threshold
- *                       DejaVu   Segoe UI    and #2561
- *   every column           980        912        1,030       1,050
- *   without Topics         863        803          913         930
+ * Re-measured 2026-10-02 (#2557) with the Modified column (111 px: its
+ * header, "Modified ↓", is wider than any date), on the default sort it
+ * brings, newest first. #2555's numbers for the row before it, in brackets.
+ *
+ *                          DejaVu        Segoe UI   threshold
+ *   every column           1,133 (1,030)   1,033    1,160 (1,050)
+ *   without Topics         1,024   (913)     933    1,045   (930)
  *   also without Review,
- *     Datasets             651        617          701         720
+ *     Datasets               812   (701)     747      830   (720)
  *   the filter bar on
- *     one line             958        902          958         960
+ *     one line               958   (958)     902      960   (960)
  *
  * With the sidebar the list is 1,392 px wide at a 1920 px screen (every
- * column), 976 at 1440 (without Topics), 896 at 1280 (also without Review
- * and Datasets) and 640 at 1024 (stacked); the bar folds at 1280 and below.
+ * column), 976 at 1440, 896 at 1280 (both without Topics, Review and
+ * Datasets) and 640 at 1024 (stacked); the bar folds at 1280 and below.
+ * So since Modified, a 1440 px screen loses Review and Datasets too: the
+ * row is 48 px too wide for it. Keeping them there needs those 48 px
+ * trimmed from the row (the Table column's 13rem minimum is the largest
+ * candidate), a design call this measurement does not make.
  *
- * Still to come: ☐ (#2564), Modified (#2557) and Created (#2559). Measured
- * with stand-ins for them the complete row needs 1,294 / 1,047 / 835: at
- * 1440 px Review would then drop too. A slice that adds a column re-runs
- * the measurement and moves these numbers.
+ * Still to come: ☐ (#2564, 30 px) and Created (#2559, about 129 px with a
+ * stand-in). With both the row needs 1,292 / 1,054 / 842. A slice that adds
+ * a column re-runs the measurement and moves these numbers.
  * ---------------------------------------------------------------------- */
 
-@container (width < 1050px) {
+@container (width < 1160px) {
   .c-created,
   .c-topics {
     display: none;
   }
 }
 
-@container (width < 930px) {
+@container (width < 1045px) {
   .c-review,
   .c-ds {
     display: none;
@@ -593,7 +626,7 @@
    and Modified. Every other cell is hidden, so a column added later has to
    say here where it goes. The headers go with the columns, so "Sort by"
    takes their place. */
-@container (width < 720px) {
+@container (width < 830px) {
   .dash-sortby {
     display: flex;
   }

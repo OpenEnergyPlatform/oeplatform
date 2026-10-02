@@ -13,7 +13,7 @@ Nothing here knows about Tables. A tab is a ``Listing``, which declares
 - one ``segment``: a filter shown as buttons that carry counts;
 - its ``sorts`` and the ``tiebreak`` every sort ends with, so that paging is
   deterministic;
-A filter is one of two kinds. A ``Filter`` takes free text (a search). A
+A filter is one of three kinds. A ``Filter`` takes free text (a search). A
 ``ChoiceFilter`` takes one value, or several comma-joined ones, out of a set of
 ``Option`` objects; the option source may be a function of the viewer, and it is
 called only when the request names that filter or the filter bar is rendered,
@@ -21,7 +21,11 @@ so a filter nobody uses costs no query. A value that is not among the options
 (an Organization the user left, a deleted Dataset, an unknown tag) is ignored
 and kept in ``ListState.stale``: it narrows nothing, it shows as a muted chip,
 and it stays in every link the page builds until it is dismissed or reset, so
-the chip does not vanish on the next unrelated click.
+the chip does not vanish on the next unrelated click. A ``RangeFilter`` takes
+a range of days from two parameters, ``<name>_from`` and ``<name>_to``,
+either end optional. It is one filter wherever the user sees it (one
+control, one chip that removes both ends, one in "Filters (n)"); only the
+URL holds it as two, which is why each filter names its own ``params``.
 
 ``Listing.matching`` narrows a base queryset by every active filter, which is
 the one statement of what the URL selects: the list, its counts and (later)
@@ -46,10 +50,12 @@ account size.
 
 import json
 from dataclasses import dataclass, field
+from datetime import date, datetime, time, timedelta
 from typing import Any, Callable
 from urllib.parse import urlencode
 
 from django.db.models import Count, Q, QuerySet
+from django.utils import timezone
 
 PAGE_SIZE = 25
 
@@ -79,8 +85,26 @@ class ChipSpec:
     stale: bool = False
 
 
+class _OneParameter:
+    """A filter the URL holds as one parameter, named ``param``."""
+
+    @property
+    def params(self) -> tuple:
+        """The URL parameters this filter is written as."""
+        return (self.param,)
+
+    def url_values(self, reading: Reading) -> dict:
+        """What the URL keeps for ``reading``, by parameter."""
+        return {self.param: reading.raw}
+
+    def removed(self, spec: ChipSpec) -> dict:
+        """The parameters to change, and to what, once ``spec``'s chip is
+        removed."""
+        return {self.param: spec.remaining}
+
+
 @dataclass(frozen=True)
-class Filter:
+class Filter(_OneParameter):
     """A free-text URL parameter that narrows the list.
 
     ``parse`` turns the raw parameter into a value, or None for "not
@@ -119,7 +143,7 @@ class Option:
 
 
 @dataclass(frozen=True)
-class ChoiceFilter:
+class ChoiceFilter(_OneParameter):
     """A URL parameter whose values come out of a set of ``Option`` objects.
 
     ``options`` is a sequence, or a function returning one; a function is
@@ -199,6 +223,94 @@ class ChoiceFilter:
         return chips
 
 
+def _day(raw: str):
+    """An ISO date, or None for anything else."""
+    try:
+        return date.fromisoformat(raw.strip())
+    except ValueError:
+        return None
+
+
+def _shown(day: date) -> str:
+    """ "2 Oct 2026", the way the list shows a date."""
+    return f"{day.day} {day:%b %Y}"
+
+
+@dataclass(frozen=True)
+class RangeFilter:
+    """A range of days, from two URL parameters: ``<param>_from`` and
+    ``<param>_to``, ISO dates, either end optional and both inclusive.
+    ``param`` is the filter's own name, which the URL never carries.
+
+    ``apply`` receives ``(first, last)``, a ``date`` or None for an open
+    end; ``dates_within`` builds it for an expression whose unknown values
+    match no range. A date that cannot be read is ignored and dropped from
+    the URL, as an unreadable page number is: only a hand-edited address
+    carries one, because a date input sends an ISO date or nothing. The range
+    is one chip, which removes both ends. A first day after the last selects
+    nothing, as asked.
+    """
+
+    param: str
+    label: str
+    apply: Callable[[QuerySet, Any], QuerySet]
+    more: bool = False
+
+    @property
+    def params(self) -> tuple:
+        return (f"{self.param}_from", f"{self.param}_to")
+
+    def read(self, query) -> Reading:
+        days = [_day(query.get(param, "")) for param in self.params]
+        if days == [None, None]:
+            return Reading()
+        raw = {p: d.isoformat() for p, d in zip(self.params, days) if d}
+        return Reading(tuple(days), raw)
+
+    def url_values(self, reading: Reading) -> dict:
+        return dict(reading.raw)
+
+    def removed(self, spec: ChipSpec) -> dict:
+        return dict.fromkeys(self.params)
+
+    def chips(self, reading: Reading) -> list:
+        first, last = reading.value
+        if first and last:
+            text = f"{_shown(first)} \u2013 {_shown(last)}"
+        elif first:
+            text = f"from {_shown(first)}"
+        else:
+            text = f"until {_shown(last)}"
+        return [ChipSpec(f"{self.label}: {text}")]
+
+
+def _start_of(day: date) -> datetime:
+    """The first moment of ``day`` in the current time zone, the zone the
+    list shows dates in."""
+    return timezone.make_aware(datetime.combine(day, time.min))
+
+
+def dates_within(expression, name: str) -> Callable[[QuerySet, Any], QuerySet]:
+    """A ``RangeFilter``'s ``apply`` for a datetime ``expression``: the rows
+    whose value falls on a day of the range, as the current time zone counts
+    days. A row whose value is unknown (NULL) matches no range, an open one
+    included, because it is not certainly inside it. ``name`` is the alias
+    the expression is filtered under, unique per filter."""
+
+    def apply(queryset, days):
+        first, last = days
+        bounds = {}
+        if first and first > date.min:
+            bounds[f"{name}__gte"] = _start_of(first)
+        if last and last < date.max:
+            bounds[f"{name}__lt"] = _start_of(last + timedelta(days=1))
+        # a range open at both ends of the calendar still asks for a date
+        bounds = bounds or {f"{name}__isnull": False}
+        return queryset.alias(**{name: expression}).filter(**bounds)
+
+    return apply
+
+
 @dataclass(frozen=True)
 class ControlOption:
     value: str
@@ -218,6 +330,29 @@ class FilterControl:
     multiple: bool
     more: bool
     options: list
+    kind: str = "choice"
+
+
+@dataclass(frozen=True)
+class RangeEnd:
+    """One end of a ``RangeControl``: its parameter, what it is called and
+    the ISO date it holds, "" for open."""
+
+    param: str
+    label: str
+    value: str
+
+
+@dataclass(frozen=True)
+class RangeControl:
+    """What the filter bar renders for one ``RangeFilter``: two date
+    inputs."""
+
+    param: str
+    label: str
+    more: bool
+    ends: list
+    kind: str = "range"
 
 
 @dataclass(frozen=True)
@@ -436,14 +571,14 @@ class ListPage:
             if reading is None:
                 continue
             for spec in f.chips(reading):
-                (stale if spec.stale else active).append((f.param, spec))
+                (stale if spec.stale else active).append((f, spec))
         chips = []
-        for n, (param, spec) in enumerate(active + stale):
+        for n, (f, spec) in enumerate(active + stale):
             chips.append(
                 Chip(
                     f"chip-{n}",
                     spec.text,
-                    self.state.url(self.path, **{param: spec.remaining}),
+                    self.state.url(self.path, **f.removed(spec)),
                     spec.stale,
                 )
             )
@@ -451,11 +586,24 @@ class ListPage:
 
     @property
     def controls(self) -> list:
-        """The bar's control for every ``ChoiceFilter``, its options marked
-        with what this state has chosen. Reading it calls every option
+        """The bar's control for every ``ChoiceFilter`` and ``RangeFilter``,
+        holding what this state has chosen. Reading it calls every option
         source, so only a whole page does."""
         controls = []
         for f in self.listing.filters:
+            if isinstance(f, RangeFilter):
+                controls.append(
+                    RangeControl(
+                        f.param,
+                        f.label,
+                        f.more,
+                        [
+                            RangeEnd(param, end, self.state.raw.get(param, ""))
+                            for param, end in zip(f.params, ("from", "to"))
+                        ],
+                    )
+                )
+                continue
             if not isinstance(f, ChoiceFilter):
                 continue
             chosen = self.state.values.get(f.param)
@@ -585,7 +733,7 @@ class Listing:
     @property
     def params(self) -> list:
         """Every filter parameter, in the order a URL writes them."""
-        return [f.param for f in self.filters] + [self.segment.param]
+        return [p for f in self.filters for p in f.params] + [self.segment.param]
 
     def _sort(self, key) -> Sort:
         return next(s for s in self.sorts if s.key == key)
@@ -597,7 +745,7 @@ class Listing:
             if reading.raw is None:
                 continue
             readings[f.param] = reading
-            raw[f.param] = reading.raw
+            raw.update(f.url_values(reading))
             if reading.value is not None:
                 values[f.param] = reading.value
         segment_value = self.segment.parse(query.get(self.segment.param, ""))

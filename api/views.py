@@ -1844,6 +1844,7 @@ class TableBulkUploadAPIView(APIView):
             )
             raise
 
+        table_obj.stamp_data_modified()
         event = _record_bulk_load_event(
             table_obj,
             request.user,

@@ -40,6 +40,7 @@ import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import psycopg2
 from django.conf import settings as django_conf_settings
 from django.db.models import Func, Value
+from django.utils import timezone
 from omi.base import get_metadata_version
 from omi.conversion import convert_metadata
 from omi.validation import ValidationError, parse_metadata, validate_metadata
@@ -755,6 +756,8 @@ def column_alter(query, table_obj: Table, column):
             + read_pgid(query["name"])
         ).format(schema=table_obj.oedb_schema, table=table_obj.name, column=column)
         perform_sql(sql)
+    if {"data_type", "is_nullable", "column_default", "name"} & set(query):
+        table_obj.stamp_data_modified()
     return get_response_dict(success=True)
 
 
@@ -779,6 +782,7 @@ def column_add(table_obj: Table, column, description):
     perform_sql(s.format(schema=edit_sa_table.schema, table=edit_sa_table.name))
     perform_sql(s.format(schema=insert_sa_table.schema, table=insert_sa_table.name))
 
+    table_obj.stamp_data_modified()
     return get_response_dict(success=True)
 
 
@@ -876,7 +880,10 @@ def table_change_column(column_definition):
 
     sql_string = "".join(sql)
 
-    return perform_sql(sql_string)
+    result = perform_sql(sql_string)
+    if sql:
+        table_obj.stamp_data_modified()
+    return result
 
 
 def table_change_constraint(constraint_definition):
@@ -897,6 +904,7 @@ def table_change_constraint(constraint_definition):
 
     # There is a table named schema.table.
     sql = []
+    changed = False
 
     if "ADD" in get_or_403(constraint_definition, "action"):
         ctype = get_or_403(constraint_definition, "constraint_type").lower()
@@ -925,6 +933,7 @@ def table_change_constraint(constraint_definition):
             raise APIError("Not supported")
         # FIXME: check permissions
         constraint.create(_get_engine())
+        changed = True
     elif "DROP" in constraint_definition["action"]:
         sql.append(
             'ALTER TABLE "{schema}"."{table}" DROP CONSTRAINT "{constraint_name}"'.format(  # noqa
@@ -936,7 +945,10 @@ def table_change_constraint(constraint_definition):
 
     sql_string = "".join(sql)
 
-    return perform_sql(sql_string)
+    result = perform_sql(sql_string)
+    if changed or sql:
+        table_obj.stamp_data_modified()
+    return result
 
 
 """
@@ -1399,6 +1411,8 @@ def apply_changes(table_obj: Table, cursor: AbstractCursor | None = None):
             _apply_stack(cursor, sa_table, change_batch, prev_type)
         if artificial_connection:
             connection.commit()
+        if changes:
+            table_obj.stamp_data_modified()
     except Exception:
         if artificial_connection:
             connection.rollback()
@@ -1497,7 +1511,8 @@ def set_table_metadata(table: str, metadata):
     """saves metadata as json string on table comment.
 
     The one metadata write path: it also recomputes the stored Publish gate
-    verdict (``Table.publishable``) in the same save.
+    verdict (``Table.publishable``) and stamps ``Table.metadata_modified``,
+    both in the same save.
 
     Args:
         table(str): name of table
@@ -1525,8 +1540,10 @@ def set_table_metadata(table: str, metadata):
 
     django_table_obj = Table.objects.get(name=table)
     django_table_obj.oemetadata = metadata_obj  # type: ignore
-    # the Publish gate's verdict on the metadata just written, saved with it
+    # the Publish gate's verdict on the metadata just written, and when it
+    # was written, saved with it
     django_table_obj.publishable = is_publishable(django_table_obj)
+    django_table_obj.metadata_modified = timezone.now()
     django_table_obj.save()
 
     # ---------------------------------------

@@ -2,13 +2,31 @@
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
 
-One ``FilterControl`` of a list's filter bar, which sits outside the swapped
-region. A single-valued filter is a select, its options grouped; a
-multi-valued one a group of checkboxes. Each control requests ``path`` on
-change; the page's module rewrites the request from the address bar, so the
-rest of the state is kept and the page returns to 1.
+One control of a list's filter bar, which sits outside the swapped region.
+A ``FilterControl``: a single-valued filter is a select, its options grouped;
+a multi-valued one a group of checkboxes. A ``RangeControl``: two date
+inputs, one per end, each its own URL parameter; they apply on change, after
+a pause, so typing a year digit by digit sends one request rather than four.
+Each control requests ``path``; the page's module rewrites the request from
+the address bar, so the rest of the state is kept and the page returns to 1.
 {% endcomment %}
-{% if control.multiple %}
+{% if control.kind == "range" %}
+  <fieldset class="dash-range" id="f-{{ control.param }}">
+    <legend class="dash-multi__legend">{{ control.label }}</legend>
+    {% for end in control.ends %}
+      <label class="dash-range__end" for="f-{{ end.param }}">
+        {{ end.label }}
+        <input type="date"
+               id="f-{{ end.param }}"
+               name="{{ end.param }}"
+               value="{{ end.value }}"
+               class="form-control form-control-sm dash-date-input"
+               hx-get="{{ path }}"
+               hx-trigger="change delay:600ms" />
+      </label>
+    {% endfor %}
+  </fieldset>
+{% elif control.multiple %}
   <fieldset class="dash-multi" id="f-{{ control.param }}">
     <legend class="dash-multi__legend">
       {{ control.label }}
