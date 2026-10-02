@@ -32,8 +32,8 @@ SPDX-License-Identifier: CC0-1.0
   and published card sections: every Table you can write, directly or through an
   organization, with its status and where your access comes from. A status
   segment with counts, a search, sorting, 25 rows per page and the whole state
-  in the address bar. Until the row actions follow (#2561, #2562), publishing,
-  unpublishing and deleting are not offered on the dashboard
+  in the address bar. Publishing, unpublishing and deleting moved into each
+  row's ⋯ menu (#2561, #2562)
   [(#2572)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2572)
 - Each row of the tables tab now says whether the Table would pass the publish
   check (with the reasons and links to fix it on click, published Tables
@@ -78,6 +78,16 @@ SPDX-License-Identifier: CC0-1.0
   Datasets tab follow the same rule, and the API's assign and unassign now
   change all the named tables or none
   [(#2563)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2563)
+- Tables can be deleted from the ⋯ menu of the tables tab again, published ones
+  included (Data maintainer or above). A draft asks for a plain confirmation.
+  For a published table the dialog says what deleting breaks (the datasets it
+  leaves, other people's named with their owner, its review state, an active
+  embargo, and that links from scenario bundles stop resolving) and asks you to
+  type the table's name. A batch holding a published table or more than ten is
+  confirmed by typing the number of tables, and at most 50 are deleted at once.
+  If the database table cannot be removed after the table's record is gone, a
+  warning that stays on screen names it, and the log says `drop=failed`
+  [(#2562)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2562)
 
 ## Bugs
 

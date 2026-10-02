@@ -138,18 +138,23 @@ class TableActionView(ProfileOwnerRequiredMixin, View):
       re-run with "Nothing was changed: …", and ``HX-Trigger:
       tables-refused`` for the persistent message.
     - POST, unusable parameters (no Topic, the draft pseudo-topic, a
-      Dataset that is not the user's own): 400, the dialog with the error
-      beside its field.
+      Dataset that is not the user's own, a typed confirmation that does not
+      match, more Tables than the ceiling): 400, the dialog with the error
+      beside its field, and no toast.
+    - POST, a delete whose OEDB table could not be dropped afterwards: 204
+      as above, but the message says so and carries ``warning``, so it
+      stays until dismissed instead of reading as a success.
 
-    The parameters are ``topic`` and ``embargo`` (publish) and ``dataset``
-    (the Dataset actions); the preflight reads ``dataset`` too, to leave out
-    the Tables already in it or not in it.
+    The parameters are ``topic`` and ``embargo`` (publish), ``dataset``
+    (the Dataset actions) and ``confirm`` (delete's typed confirmation); the
+    preflight reads ``dataset`` too, to leave out the Tables already in it
+    or not in it.
 
     Whether a changed Table is still shown is read off ``HX-Current-URL``,
     the address the request was sent from, through the list's own filters.
     """
 
-    PARAMS = ("topic", "embargo", "dataset")
+    PARAMS = ("topic", "embargo", "dataset", "confirm")
 
     def _names(self, data):
         return data.getlist("table")
@@ -208,10 +213,16 @@ class TableActionView(ProfileOwnerRequiredMixin, View):
             )
             return response
 
-        hidden = _not_shown(request, user, outcome.tables)
-        detail = {"message": _done_message(outcome, hidden)}
-        if len(outcome.tables) == 1:
-            detail["focus"] = f"menu-{outcome.tables[0].pk}"
+        if outcome.action == table_actions.DELETE:
+            # the rows are gone: nothing to name as hidden, no ⋯ to focus
+            detail = {"message": _deleted_message(outcome)}
+            if outcome.drop_failed:
+                detail["warning"] = True
+        else:
+            hidden = _not_shown(request, user, outcome.tables)
+            detail = {"message": _done_message(outcome, hidden)}
+            if len(outcome.tables) == 1:
+                detail["focus"] = f"menu-{outcome.tables[0].pk}"
         response = HttpResponse(status=204)
         response["HX-Trigger"] = json.dumps({"tables-changed": detail})
         return response
@@ -267,6 +278,28 @@ def _done_message(outcome, hidden) -> str:
         message += (
             f" Not shown under the current filter: "
             f"{', '.join(_title(table) for table in hidden)}."
+        )
+    return message
+
+
+def _deleted_message(outcome) -> str:
+    """The message after a delete. When an OEDB table could not be dropped
+    it names that Table: its record is gone, its data is still in the
+    database, and only an administrator can remove it now."""
+    tables = outcome.tables
+    count = len(tables)
+    message = f"Deleted {_title(tables[0]) if count == 1 else f'{count} tables'}."
+    failed = outcome.drop_failed
+    if failed:
+        names = ", ".join(f"{_title(table)} ({table.name})" for table in failed)
+        message += (
+            f" The database table of {names} could not be removed, so its data"
+            " is still stored. This was logged; an administrator has to remove"
+            " it."
+            if len(failed) == 1
+            else f" The database tables of {names} could not be removed, so"
+            " their data is still stored. This was logged; an administrator"
+            " has to remove them."
         )
     return message
 

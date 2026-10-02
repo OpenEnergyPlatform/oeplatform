@@ -40,7 +40,10 @@
 //   the row's ⋯ once it has settled, or to the list heading if the row is
 //   gone. `tables-refused` and every failed request leave an assertive toast
 //   that stays until dismissed; a 401 says the user was logged out and links
-//   to the login page with `next` set to this view.
+//   to the login page with `next` set to this view. A `tables-changed` that
+//   carries `warning` (a delete whose database table stayed behind, #2562)
+//   was done, but not cleanly: its message is an assertive warning that
+//   stays, never a success that goes.
 // - menu entries above the user's role carry `aria-disabled="true"` and
 //   their reason as text. They stay in the keyboard order, unlike
 //   Bootstrap's `.disabled`; their clicks are swallowed here.
@@ -252,13 +255,13 @@ export function isUnavailable(target) {
 
 /**
  * Add a message to the page's toast region. A success goes to the polite
- * region and removes itself after `timeout`; an error goes to the assertive
- * one and stays until dismissed.
+ * region and removes itself after `timeout`; an error or a warning goes to
+ * the assertive one and stays until dismissed.
  *
  * @param {Document} doc the document.
  * @param {string} message the text, from the server or this module.
- * @param {object} options `error`, an optional `link` ({href, text}),
- *     `timeout` and `schedule` (setTimeout, a test seam).
+ * @param {object} options `error`, `warning`, an optional `link`
+ *     ({href, text}), `timeout` and `schedule` (setTimeout, a test seam).
  * @return {Element|null} the toast, or null without a toast region.
  */
 export function showToast(
@@ -266,19 +269,25 @@ export function showToast(
   message,
   {
     error = false,
+    warning = false,
     link = null,
     timeout = TOAST_TIMEOUT,
     schedule = setTimeout,
   } = {},
 ) {
+  const lasting = error || warning;
   const region = doc.getElementById(
-    error ? TOASTS_ASSERTIVE_ID : TOASTS_POLITE_ID,
+    lasting ? TOASTS_ASSERTIVE_ID : TOASTS_POLITE_ID,
   );
   if (!region) {
     return null;
   }
   const toast = doc.createElement("div");
-  const kind = error ? "dash-toast--error" : "dash-toast--ok";
+  const kind = error
+    ? "dash-toast--error"
+    : warning
+      ? "dash-toast--warning"
+      : "dash-toast--ok";
   toast.className = `toast show dash-toast ${kind}`;
   const row = doc.createElement("div");
   row.className = "d-flex";
@@ -299,7 +308,7 @@ export function showToast(
   row.append(body, close);
   toast.append(row);
   region.append(toast);
-  if (!error && timeout) {
+  if (!lasting && timeout) {
     schedule(() => toast.remove(), timeout);
   }
   return toast;
@@ -495,7 +504,10 @@ export function bindTablesTab(
     origin = null;
     dialog.close();
     if (detail.message) {
-      showToast(doc, detail.message, { schedule });
+      showToast(doc, detail.message, {
+        warning: Boolean(detail.warning),
+        schedule,
+      });
     }
   };
 
