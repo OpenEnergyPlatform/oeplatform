@@ -504,6 +504,12 @@ class TableRow:
         return self.table.human_readable_name or self.table.name
 
     @property
+    def in_own_dataset(self) -> bool:
+        """Whether one of the viewer's own Datasets holds the Table, so the
+        menu can offer to remove it from one."""
+        return any(dataset.own for dataset in self.datasets)
+
+    @property
     def has_title(self) -> bool:
         """Whether a title is shown, so the technical name goes beneath it
         rather than being shown twice."""

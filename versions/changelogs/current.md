@@ -12,6 +12,10 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- The Django database port can be set with `OEP_DJANGO_PORT` in the
+  `securitysettings.py` template, like the OEDB's `LOCAL_DB_PORT`. Without it a
+  local database container could not be published on any port but 5432
+  [(#2581)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2581)
 - The dev image caches pip downloads and built wheels in a BuildKit cache mount
   instead of discarding them. A single new line in `requirements.txt` used to
   re-download and re-compile all ~47 packages, several minutes of it building
@@ -75,6 +79,14 @@ SPDX-License-Identifier: CC0-1.0
   existing tables show "–" until they next change. Deploy: run
   `python manage.py migrate` (`dataedit.0056`, two empty columns)
   [(#2557)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2557)
+- The tables tab's ⋯ menu adds a table to one of your own datasets, or removes
+  it from one (offered only when one of yours holds it). A draft or embargoed
+  table may be added by anyone holding Data editor on it, directly or through an
+  organization: before, a draft you could write only through an organization was
+  offered on the Datasets tab and then refused. The dataset assign API and the
+  Datasets tab follow the same rule, and the API's assign and unassign now
+  change all the named tables or none
+  [(#2563)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2563)
 
 ## Bugs
 

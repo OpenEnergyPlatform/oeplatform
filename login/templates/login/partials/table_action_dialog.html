@@ -6,7 +6,8 @@ The one action dialog, for a row (a batch of one) and, later, the bulk bar:
 the contents of #table-action-body. It shows the preflight: which Tables are
 left out and why, what the action needs (publish: Topic and embargo), and
 the consequences it has to state (unpublish: other people's Datasets that
-will hold a draft member). The form posts the eligible names only, so what
+will hold a draft member). The Dataset actions choose one of the user's own
+Datasets (table_action_dataset.html). The form posts the eligible names only, so what
 runs is what was shown. A refused request comes back here with ``notice``
 ("Nothing was changed: …") and the preflight run again; an unusable
 parameter comes back with ``errors`` beside its field.
@@ -15,11 +16,14 @@ parameter comes back with ``errors`` beside its field.
   <div class="modal-header">
     <h2 class="modal-title h5 m-0" id="table-action-title">
       {% if check.action == "publish" %}
-        Publish
+        Publish {{ check.subject }}
+      {% elif check.action == "unpublish" %}
+        Unpublish {{ check.subject }}
+      {% elif check.action == "dataset_add" %}
+        Add {{ check.subject }} to a dataset
       {% else %}
-        Unpublish
+        Remove {{ check.subject }} from a dataset
       {% endif %}
-      {{ check.subject }}
     </h2>
     <button type="button"
             class="btn-close"
@@ -63,8 +67,12 @@ parameter comes back with ``errors`` beside its field.
           <p class="mb-1">
             {% if check.action == "publish" %}
               Will be published:
-            {% else %}
+            {% elif check.action == "unpublish" %}
               Will be unpublished:
+            {% elif check.action == "dataset_add" %}
+              Will be added:
+            {% else %}
+              Will be removed:
             {% endif %}
           </p>
           <ul class="dash-action-list">
@@ -108,7 +116,7 @@ parameter comes back with ``errors`` beside its field.
             {% if errors.embargo %}<div class="text-danger small">{{ errors.embargo }}</div>{% endif %}
             <div class="form-text">During an embargo the table is listed, but its data stays closed.</div>
           </fieldset>
-        {% else %}
+        {% elif check.action == "unpublish" %}
           <p>
             {% if check.total == 1 %}
               It
@@ -128,14 +136,20 @@ parameter comes back with ``errors`` beside its field.
               </ul>
             </div>
           {% endif %}
+        {% else %}
+          {% include "login/partials/table_action_dataset.html" %}
         {% endif %}
       {% else %}
         <p id="table-action-nothing">
           Nothing to
           {% if check.action == "publish" %}
             publish.
-          {% else %}
+          {% elif check.action == "unpublish" %}
             unpublish.
+          {% elif check.action == "dataset_add" %}
+            add.
+          {% else %}
+            remove.
           {% endif %}
         </p>
       {% endif %}
@@ -144,12 +158,16 @@ parameter comes back with ``errors`` beside its field.
       <button type="button"
               class="btn btn-outline-secondary"
               data-bs-dismiss="modal">Cancel</button>
-      {% if check.eligible %}
+      {% if check.confirmable %}
         <button type="submit" id="table-action-confirm" class="btn btn-primary">
           {% if check.action == "publish" %}
             Publish
-          {% else %}
+          {% elif check.action == "unpublish" %}
             Unpublish
+          {% elif check.action == "dataset_add" %}
+            Add
+          {% else %}
+            Remove
           {% endif %}
         </button>
       {% endif %}
