@@ -79,6 +79,16 @@ SPDX-License-Identifier: CC0-1.0
   existing tables show "–" until they next change. Deploy: run
   `python manage.py migrate` (`dataedit.0056`, two empty columns)
   [(#2557)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2557)
+- Existing tables get the data half of their Modified date where one can be
+  recovered: the latest applied change in their edit journal or their latest
+  successful bulk upload, whichever is later. The new command
+  `python manage.py backfill_data_modified` is a dry run that counts what it
+  found; with `--apply` it fills only tables that have no date yet, so a date
+  stamped since the release is never overwritten and a second run changes
+  nothing. It only reads the OEDB, and never creates a missing journal. The
+  metadata half stays empty, because no metadata save was ever timestamped.
+  Deploy: run it once after `dataedit.0056`
+  [(#2558)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2558)
 - The tables tab's ⋯ menu adds a table to one of your own datasets, or removes
   it from one (offered only when one of yours holds it). A draft or embargoed
   table may be added by anyone holding Data editor on it, directly or through an
