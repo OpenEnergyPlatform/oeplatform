@@ -44,6 +44,13 @@ SPDX-License-Identifier: CC0-1.0
   all", and a value from an old link that no longer applies shows as a muted
   chip instead of emptying the list
   [(#2556)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2556)
+- The tables tab fits its width without sideways scrolling, from a wide screen
+  to a phone: as the list narrows, Topics drops first, then Review and Datasets,
+  and on the narrowest screens each row stacks into two lines with a "Sort by"
+  select in place of the column headers. Where the filter bar does not fit on
+  one line, everything but the search folds behind "Filters (n)". Long
+  organization names are shortened in the Access column, in full on hover
+  [(#2555)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2555)
 
 ## Bugs
 

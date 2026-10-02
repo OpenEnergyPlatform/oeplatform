@@ -20,10 +20,10 @@ import {
 } from "../tables_tab.js";
 
 /** The region, its `data-filters` written the way Django escapes it. */
-const REGION = (announcement, filters = {}, body = "", more = 0) => `
+const REGION = (announcement, filters = {}, body = "", more = 0, folded = 0) => `
   <div id="tables-results" data-announce="${announcement}"
        data-filters="${JSON.stringify(filters).replaceAll('"', "&quot;")}"
-       data-more="${more}">
+       data-more="${more}" data-folded="${folded}">
     <h2 id="tables-heading" tabindex="-1">Your tables</h2>
     ${body}
   </div>`;
@@ -33,6 +33,10 @@ function renderPage(region) {
     <div id="tables-tab">
       <div id="tables-filters">
         <input type="search" id="tables-search" name="search" />
+        <button type="button" id="tables-fold" aria-expanded="false"
+                aria-controls="tables-fold-panel">Filters<span
+                id="tables-fold-count"></span></button>
+        <div id="tables-fold-panel">
         <select id="f-review" name="review">
           <option value="">Review: any</option>
           <option value="reviewed">Reviewed</option>
@@ -45,6 +49,7 @@ function renderPage(region) {
           <input type="checkbox" id="f-tags-1" name="tags" value="grid" />
           <input type="checkbox" id="f-tags-2" name="tags" value="wind" />
           <input type="checkbox" id="f-tags-3" name="tags" value="solar" />
+        </div>
         </div>
       </div>
       <div id="tables-live" aria-live="polite"></div>
@@ -336,6 +341,64 @@ describe("bindTablesTab", () => {
     expect(document.getElementById("tables-more-panel").hidden).toBe(false);
     expect(document.getElementById("f-tags-2").checked).toBe(true);
     expect(document.getElementById("tables-more-count").textContent).toBe(" (1)");
+  });
+
+  it("rewrites the Sort by request, keeping the filters and dropping the page", () => {
+    window.history.replaceState(
+      {},
+      "",
+      "/user/profile/1/tables?search=wind&status=draft&sort=table&page=3",
+    );
+    swapRegion(
+      REGION(
+        "x",
+        { search: "wind" },
+        `<select id="sort-select" name="sort" data-list-sort>
+           <option value="table">Table: A to Z</option>
+           <option value="-review">Review: reviewed first</option>
+         </select>`,
+      ),
+    );
+    const select = document.getElementById("sort-select");
+    select.value = "-review";
+    const parameters = { sort: "-review" };
+    configRequest(select, parameters);
+    expect(parameters).toEqual({ search: "wind", status: "draft", sort: "-review" });
+  });
+
+  it("puts focus back on Sort by after the swap it caused", () => {
+    const select = `<select id="sort-select" name="sort" data-list-sort></select>`;
+    swapRegion(REGION("x", {}, select));
+    document.getElementById("sort-select").focus();
+    swapRegion(REGION("y", {}, select));
+    expect(document.activeElement.id).toBe("sort-select");
+  });
+
+  it("opens and closes Filters, and leaves showing the panel to the CSS", () => {
+    const button = document.getElementById("tables-fold");
+    const panel = document.getElementById("tables-fold-panel");
+    button.click();
+    expect(button.getAttribute("aria-expanded")).toBe("true");
+    button.click();
+    expect(button.getAttribute("aria-expanded")).toBe("false");
+    // above 900 px of list the panel is part of the row, toggle or not
+    expect(panel.hidden).toBe(false);
+  });
+
+  it("keeps Filters (n) in step with the region", () => {
+    const count = document.getElementById("tables-fold-count");
+    swapRegion(REGION("x", { review: "reviewed", tags: "wind" }, "", 1, 2));
+    expect(count.textContent).toBe(" (2)");
+    swapRegion(REGION("x", {}, "", 0, 0));
+    expect(count.textContent).toBe("");
+  });
+
+  it("keeps an open Filters panel open across a swap", () => {
+    document.getElementById("tables-fold").click();
+    swapRegion(REGION("x", { review: "reviewed" }, "", 0, 1));
+    expect(document.getElementById("tables-fold").getAttribute("aria-expanded")).toBe(
+      "true",
+    );
   });
 
   it("leaves other requests' parameters alone", () => {
