@@ -2,6 +2,7 @@
 SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
 SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
+SPDX-FileCopyrightText: 2026 Hendrik Huyskens <https://github.com/henhuy> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2026 Vismaya Jochem <https://github.com/vismayajochem> © Reiner Lemoine Institut
 
 SPDX-License-Identifier: CC0-1.0
@@ -11,13 +12,20 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- Refactor user groups into organizations; add fields to the organization model;
+  refactor HTMX for organization management pages
+  [(#2261)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2261)
+
 ## Features
 
 ## Bugs
 
-- Fix navigation box during the OPR; show proper information and jump to next
-  field that needs review. Hide start button for OPR if metadata is empty.
-  [(#2310)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2310)
+- Deleting a peer review now checks the caller: only its reviewer or a platform
+  admin may delete it
+  [(#2544)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2544)
+- Restrict profile pages to their owner and check organization permissions
+  before saving
+  [(#2547)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2547)
 
 ## Documentation updates
 

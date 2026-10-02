@@ -270,11 +270,11 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "docs/oeplatform-code/web-api/oekg-api/oekg.yaml"
+path = "docs/oeplatform-code/web-api/openapi.yaml"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
-  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
@@ -672,16 +672,6 @@ SPDX-FileCopyrightText = [
   "2018 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
-  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
-]
-
-[[annotations]]
-path = "login/templates/login/list_memberships.html"
-precedence = "override"
-SPDX-License-Identifier = "AGPL-3.0-or-later"
-SPDX-FileCopyrightText = [
-  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 
@@ -2205,7 +2195,7 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "dataedit/static/peer_review/schema.json"
+path = "dataedit/static/peer_review/data/schema.json"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
@@ -2215,7 +2205,7 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "dataedit/static/peer_review/example_datenmodell.json"
+path = "dataedit/static/peer_review/data/example_datenmodell.json"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
@@ -2224,7 +2214,7 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "dataedit/static/peer_review/template_datenmodell.json"
+path = "dataedit/static/peer_review/data/template_datenmodell.json"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
@@ -3482,4 +3472,108 @@ precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
   "2020 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+]
+
+[[annotations]]
+path = "login/templates/login/user_datasets.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "login/templates/login/partials/datasets_sections.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "login/templates/login/partials/dataset_card.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "login/templates/login/partials/dataset_edit_form.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "login/templates/login/partials/dataset_manage.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "login/templates/login/partials/dataset_table_search_results.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "dataedit/templates/dataedit/dataedit_datasetlist.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "dataedit/templates/dataedit/dataedit_dataset_detail.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "benchmarks/**"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "dataedit/templates/dataedit/partials/tag_manager.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "dataedit/templates/dataedit/partials/tag_list.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "dataedit/templates/dataedit/partials/tag_editor_form.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = "modelview/templates/modelview/partials/factsheet_icon.html"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]

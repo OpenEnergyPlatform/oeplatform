@@ -15,6 +15,9 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 from django.urls import include, path, re_path
+from drf_spectacular.views import (
+    SpectacularSwaggerView,
+)
 
 from api.views import (
     AdvancedCloseAllAPIView,
@@ -49,22 +52,38 @@ from api.views import (
     AdvancedSetIsolationLevelAPIView,
     AdvancedUpdateAPIView,
     AllTableSizesAPIView,
+    AssignDatasetTables,
+    DatasetManager,
+    DatasetsListCreate,
+    DatasetsListResources,
     EnergyframeworkFactsheetListAPIView,
     EnergymodelFactsheetListAPIView,
     ManageOekgScenarioDatasetsAPIView,
     OekgSparqlAPIView,
+    OpenAPIDescriptionAPIView,
     ScenarioDataTablesListAPIView,
     TableAPIView,
+    TableBulkUploadAPIView,
     TableColumnAPIView,
     TableMetadataAPIView,
     TableMovePublishAPIView,
     TableRowsAPIView,
     TableUnpublishAPIView,
-    grpprop_api_view,
+    UnassignDatasetTables,
+    groupprop_api_view,
     oeo_search_api_view,
     oevkg_query_api_view,
     table_approx_row_count_view,
     usrprop_api_view,
+)
+from oekg.api_views import ScenarioBundleAPIView, ScenarioBundleCollectionAPIView
+from oekg.dataset_link_views import DatasetLinkAPIView, DatasetLinkCollectionAPIView
+from oekg.history_views import ScenarioBundleHistoryAPIView
+from oekg.replace_views import ScenarioBundleReplaceAPIView
+from oekg.scenario_views import ScenarioAPIView, ScenarioCollectionAPIView
+from oekg.study_report_views import (
+    StudyReportAPIView,
+    StudyReportCollectionAPIView,
 )
 
 app_name = "api"
@@ -111,6 +130,11 @@ urlpatterns_v0_schema_table = [
         TableRowsAPIView.as_view(),
         {"action": "new"},
         name="api_rows_new",
+    ),
+    re_path(
+        r"^(?P<table>[\w\d_\s]+)/bulk-upload/?$",
+        TableBulkUploadAPIView.as_view(),
+        name="api_bulk_upload",
     ),
     re_path(
         r"^(?P<table>[\w\d_\s]+)/rowcount$",
@@ -254,6 +278,18 @@ urlpatterns_v0_advanced = [
 ]
 
 urlpatterns_v0 = [
+    # OpenAPI Schema (JSON)
+    path(
+        "schema/",
+        OpenAPIDescriptionAPIView.as_view(),
+        name="openapi-schema",
+    ),
+    # Swagger UI
+    path(
+        "open-api/",
+        SpectacularSwaggerView.as_view(url_name="api:openapi-schema"),
+        name="swagger-ui",
+    ),
     # PROBLEM: redirect does not work with POST/PUT/..., only GET
     # so we cannot redirect
     re_path(  # legacy API url for tables
@@ -287,6 +323,98 @@ urlpatterns_v0 = [
         ManageOekgScenarioDatasetsAPIView.as_view(),
         name="add-scenario-datasets",
     ),
+    # The scenario-bundle REST API. Plural, and superseding the singular
+    # manage-datasets route above rather than extending it: that one writes
+    # predicates the canonical shape does not validate.
+    path(
+        "scenario-bundles/",
+        ScenarioBundleCollectionAPIView.as_view(),
+        name="scenario-bundles",
+    ),
+    path(
+        "scenario-bundles/<uid>/",
+        ScenarioBundleAPIView.as_view(),
+        name="scenario-bundle",
+    ),
+    # The one endpoint where leaving something out removes it. Named rather
+    # than a verb on the bundle's own URL: full replacement was rejected for
+    # being reachable by accident, not for its semantics, and an address a
+    # client has to spell out is not hit by habit.
+    path(
+        "scenario-bundles/<uid>/replace/",
+        ScenarioBundleReplaceAPIView.as_view(),
+        name="scenario-bundle-replace",
+    ),
+    path(
+        "scenario-bundles/<uid>/history/",
+        ScenarioBundleHistoryAPIView.as_view(),
+        name="scenario-bundle-history",
+    ),
+    # Scenario factsheets and study reports are sub-resources because the shape
+    # gives them their own has-uuid. Plural, like the bundle collection above
+    # them. `pid` is the part a URL addresses -- one name, because one
+    # implementation serves both; where a scenario is the PARENT of what a URL
+    # addresses, as it is for the dataset links below, it keeps its own `sid`.
+    path(
+        "scenario-bundles/<uid>/scenarios/",
+        ScenarioCollectionAPIView.as_view(),
+        name="scenario-bundle-scenarios",
+    ),
+    path(
+        "scenario-bundles/<uid>/scenarios/<pid>/",
+        ScenarioAPIView.as_view(),
+        name="scenario-bundle-scenario",
+    ),
+    path(
+        "scenario-bundles/<uid>/study-reports/",
+        StudyReportCollectionAPIView.as_view(),
+        name="scenario-bundle-study-reports",
+    ),
+    path(
+        "scenario-bundles/<uid>/study-reports/<pid>/",
+        StudyReportAPIView.as_view(),
+        name="scenario-bundle-study-report",
+    ),
+    # An OEKG input/output dataset: the link from a scenario to data held on
+    # this platform. NOT the OEP Dataset catalogue entity, and NOT the tables
+    # of the scenario topic -- the nested path is what disambiguates the three.
+    # Add-and-remove only, so no `PATCH`: every field is derived from the
+    # link's type, target and name.
+    path(
+        "scenario-bundles/<uid>/scenarios/<sid>/datasets/",
+        DatasetLinkCollectionAPIView.as_view(),
+        name="scenario-bundle-dataset-links",
+    ),
+    path(
+        "scenario-bundles/<uid>/scenarios/<sid>/datasets/<did>/",
+        DatasetLinkAPIView.as_view(),
+        name="scenario-bundle-dataset-link",
+    ),
+    path(
+        "datasets/",
+        DatasetsListCreate.as_view(),
+        name="dataset-list-create",
+    ),
+    path(
+        "datasets/<str:dataset_name>/assign-tables/",
+        AssignDatasetTables.as_view(),
+        name="dataset-assign-tables",
+    ),
+    path(
+        "datasets/<str:dataset_name>/unassign-tables/",
+        UnassignDatasetTables.as_view(),
+        name="dataset-unassign-tables",
+    ),
+    path(
+        "datasets/<str:dataset_name>/",
+        DatasetManager.as_view(),
+        name="dataset",
+    ),
+    path(
+        "datasets/<str:dataset_name>/resources/",
+        DatasetsListResources.as_view(),
+        name="dataset-resources",
+    ),
     path("db/table-sizes/", AllTableSizesAPIView.as_view(), name="table-sizes"),
 ]
 
@@ -294,7 +422,7 @@ urlpatterns_v0 = [
 urlpatterns = [
     path("v0/", include(urlpatterns_v0)),
     path("usrprop/", usrprop_api_view, name="usrprop"),
-    path("grpprop/", grpprop_api_view, name="grpprop"),
+    path("groupprop/", groupprop_api_view, name="groupprop"),
     path("oeo-search", oeo_search_api_view, name="oeo-search"),
     path("oevkg-query", oevkg_query_api_view, name="oevkg-query"),
 ]

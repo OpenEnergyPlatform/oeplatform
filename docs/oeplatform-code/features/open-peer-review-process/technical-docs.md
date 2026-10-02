@@ -14,11 +14,11 @@ View for the reviewer role of the Open Peer Review process.
 
 #### ::: dataedit.views.TablePeerReviewView
 
-### PeerRreviewContributorView
+### PeerReviewContributorView
 
 View for the contributor role of the Open Peer Review process.
 
-#### ::: dataedit.views.TablePeerRreviewContributorView
+#### ::: dataedit.views.TablePeerReviewContributorView
 
 ## Helper Functions
 

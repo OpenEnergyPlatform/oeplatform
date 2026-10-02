@@ -150,11 +150,16 @@ class PermissionHolder:
             return NO_PERM
 
 
-class UserGroup(Group, PermissionHolder):
+class Organization(Group, PermissionHolder):
+    acronym = models.CharField(max_length=50, blank=True, null=True)
     description = models.TextField(null=False, default="")
+    image = models.CharField(
+        max_length=1000, blank=True, null=True, verbose_name="Link to an image"
+    )
+    homepage = models.CharField(max_length=1000, blank=True, null=True)
     is_admin = models.BooleanField(null=False, default=False)
 
-    memberships: QuerySet["GroupMembership"]  # related_name, for static type checking
+    memberships: QuerySet["Membership"]  # related_name, for static type checking
     table_permissions: QuerySet[
         "GroupPermission"
     ]  # related_name, for static type checking
@@ -169,9 +174,9 @@ class UserGroup(Group, PermissionHolder):
             )
         )
 
-    # TODO @Jonas Huber: Check later - keep for now
-    # def get_table_group_memberships(self):
-    #     return GroupPermission.objects.filter(holder__in=self).prefetch_related('table') # noqa
+    def member_count(self):
+        """Return the number of members of the organization."""
+        return self.memberships.count()
 
 
 class TablePermission(models.Model):
@@ -230,7 +235,7 @@ class myuser(AbstractBaseUser, PermissionHolder):
     scenario_bundle_creator: QuerySet[
         "ScenarioBundleAccessControl"
     ]  # related_name, for static type checking
-    memberships: QuerySet["GroupMembership"]  # related_name, for static type checking
+    memberships: QuerySet["Membership"]  # related_name, for static type checking
     table_permissions: QuerySet[
         "UserPermission"
     ]  # related_name, for static type checking
@@ -257,8 +262,8 @@ class myuser(AbstractBaseUser, PermissionHolder):
         direct_memberships = self.table_permissions.all().prefetch_related("table")
         return direct_memberships
 
-    def get_groups_queryset(self) -> QuerySet["UserGroup"]:
-        return UserGroup.objects.filter(memberships__user=self)
+    def get_organizations_queryset(self) -> QuerySet["Organization"]:
+        return Organization.objects.filter(memberships__user=self)
 
     def get_tables_queryset(
         self, min_permission_level: int = NO_PERM
@@ -267,7 +272,7 @@ class myuser(AbstractBaseUser, PermissionHolder):
         combine filter (OR) of table with direct permissions
         and with group permissions
         """
-        groups = self.get_groups_queryset()
+        organizations = self.get_organizations_queryset()
 
         return (
             dataedit_models.Table.objects.filter(
@@ -277,7 +282,7 @@ class myuser(AbstractBaseUser, PermissionHolder):
             )
             | dataedit_models.Table.objects.filter(
                 # tables where user isin a group that has GroupPermission
-                grouppermission_set__holder__in=groups,
+                grouppermission_set__holder__in=organizations,
                 grouppermission_set__level__gte=min_permission_level,
             )
         ).distinct()
@@ -295,7 +300,7 @@ class myuser(AbstractBaseUser, PermissionHolder):
 
         # Check permissions of all groups and choose least restrictive one
         group_perm_levels = (
-            membership.group.get_table_permission_level(table)
+            membership.group.organization.get_table_permission_level(table)
             for membership in self.memberships.all()
         )
 
@@ -320,11 +325,11 @@ class UserPermission(TablePermission):
 
 class GroupPermission(TablePermission):
     holder = models.ForeignKey(
-        UserGroup, related_name="table_permissions", on_delete=models.CASCADE
+        Group, related_name="table_permissions", on_delete=models.CASCADE
     )
 
 
-class GroupMembership(models.Model):
+class Membership(models.Model):
     choices = (
         (NO_PERM, "None"),
         (WRITE_PERM, "Invite"),
@@ -335,7 +340,7 @@ class GroupMembership(models.Model):
         myuser, related_name="memberships", on_delete=models.CASCADE
     )
     group = models.ForeignKey(
-        UserGroup, related_name="memberships", on_delete=models.CASCADE
+        Group, related_name="memberships", on_delete=models.CASCADE
     )
     level = models.IntegerField(choices=choices, default=WRITE_PERM)
 

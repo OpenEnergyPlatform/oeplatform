@@ -58,7 +58,7 @@ The "oeplatform" project depends on the these technologies:
 - Django rest framework (WEB-API)
 - django-allauth (login / registration / SSO)
 - SQLAlchemy (Primary-Database access)
-- Postgresql (version 15, database)
+- Postgresql (version 14, database)
 - sparqlWrapper, RDFLib, owlready2 (Ontology & OEKG access)
 
 Below the services of the oeplatform are named and it is shown on which
@@ -100,4 +100,10 @@ oeplatform to interact with the databus.
 - Java
 - Virtuoso
 
-MOSS .....
+MOSS A microservice that stores oemetadata documents and serves as the primary,
+RDF-capable metadata store for the oeplatform. It powers extended semantic
+search and discoverability over the metadata of dataset/table resources, and
+communicates with the oeplatform server-to-server. See the datasets
+[tech stack](../features/oep-datasets/tech-stack.md) for how it is used.
+
+- RDF-capable metadata store
