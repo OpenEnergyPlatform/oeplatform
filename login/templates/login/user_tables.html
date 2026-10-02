@@ -6,52 +6,52 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 The tables tab. Only the results region (#tables-results) is swapped; the
 filter bar and the live count sit outside it, so focus and half-typed input
-survive a swap and the live region is announced reliably. The tab has no
-profile sidebar: a slim identity strip above the tabs gives the list the
-width (measured on the prototype: 928 px of list at 1440 px with the
-sidebar, against about 1,340 px for the full row).
+survive a swap and the live region is announced reliably.
+
+The tab keeps the profile sidebar, like every other profile tab. The spec
+decided on a slim identity strip instead, to give the list the width
+(measured on the prototype: 928 px of list at 1440 px with the sidebar,
+against about 1,340 px for all nine columns); the maintainer chose the
+sidebar on 2026-10-02, so the column collapse (#2555) works with that width.
 {% endcomment %}
 {% load compress %}
 {% load static %}
 {% block after-head %}
   <link rel="stylesheet" href="{% static 'login/tables_tab.css' %}" />
 {% endblock after-head %}
-{% block main-right-sidebar %}
-{% endblock main-right-sidebar %}
-{% block main-content %}
-  <section class="content__main content__main--100w">
-    {% include "base/messages.html" %}
-    {% include "login/partials/identity_strip.html" %}
-    {% include "login/user_nav.html" %}
-    <div id="tables-tab"
-         class="dash"
-         hx-boost="true"
-         hx-target="#tables-results"
-         hx-swap="outerHTML"
-         hx-sync="this:replace">
-      {% if page.has_any %}
-        <div class="dash-filters" role="search" aria-label="Filter your tables">
-          <label class="visually-hidden"
-                 for="tables-search">Search title or technical name</label>
-          <input type="search"
-                 id="tables-search"
-                 name="search"
-                 class="form-control form-control-sm dash-search"
-                 placeholder="Search title or technical name"
-                 autocomplete="off"
-                 value="{{ page.state.raw.search|default:'' }}"
-                 hx-get="{{ request.path }}"
-                 hx-trigger="input changed delay:300ms, search" />
-        </div>
-      {% endif %}
-      <div id="tables-live"
-           class="visually-hidden"
-           aria-live="polite"
-           aria-atomic="true"></div>
-      {% include "login/partials/tables_region.html" %}
-    </div>
-  </section>
-{% endblock main-content %}
+{% block main-right-sidebar-content %}
+  {% include "login/sidebar_user.html" %}
+{% endblock main-right-sidebar-content %}
+{% block main-content-body %}
+  {% include "login/user_nav.html" %}
+  <div id="tables-tab"
+       class="dash"
+       hx-boost="true"
+       hx-target="#tables-results"
+       hx-swap="outerHTML"
+       hx-sync="this:replace">
+    {% if page.has_any %}
+      <div class="dash-filters" role="search" aria-label="Filter your tables">
+        <label class="visually-hidden"
+               for="tables-search">Search title or technical name</label>
+        <input type="search"
+               id="tables-search"
+               name="search"
+               class="form-control form-control-sm dash-search"
+               placeholder="Search title or technical name"
+               autocomplete="off"
+               value="{{ page.state.raw.search|default:'' }}"
+               hx-get="{{ request.path }}"
+               hx-trigger="input changed delay:300ms, search" />
+      </div>
+    {% endif %}
+    <div id="tables-live"
+         class="visually-hidden"
+         aria-live="polite"
+         aria-atomic="true"></div>
+    {% include "login/partials/tables_region.html" %}
+  </div>
+{% endblock main-content-body %}
 {% block after-body-bottom-js %}
   {% compress js %}
     <script src="{% static 'ontology/htmx.js' %}"></script>

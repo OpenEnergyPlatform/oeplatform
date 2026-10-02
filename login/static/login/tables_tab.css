@@ -15,39 +15,6 @@
   container-type: inline-size;
 }
 
-/* identity strip: one line above the profile tabs */
-.dash-identity {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  margin-bottom: 0.4rem;
-  color: #495057;
-}
-
-.dash-identity__img {
-  display: inline-flex;
-  flex: none;
-  width: 32px;
-  height: 32px;
-  overflow: hidden;
-  border-radius: 50%;
-}
-
-.dash-identity__img img,
-.dash-identity__img svg {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.dash-identity__name {
-  font-weight: 600;
-}
-
-.dash-identity__fullname {
-  color: #6c757d;
-}
-
 /* filter bar */
 .dash-filters {
   display: flex;

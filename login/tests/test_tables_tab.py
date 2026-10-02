@@ -509,16 +509,9 @@ class EmptyStateTests(TablesTabTestCase):
 
 
 class LayoutTests(TablesTabTestCase):
-    def test_the_identity_strip_replaces_the_profile_sidebar(self):
+    def test_the_tab_keeps_the_profile_sidebar(self):
         names = {t.name for t in self.get().templates}
-        self.assertIn("login/partials/identity_strip.html", names)
-        self.assertNotIn("login/sidebar_user.html", names)
-
-    def test_other_tabs_keep_the_sidebar(self):
-        response = self.client.get(reverse("login:datasets", args=[self.user.pk]))
-        names = {t.name for t in response.templates}
         self.assertIn("login/sidebar_user.html", names)
-        self.assertNotIn("login/partials/identity_strip.html", names)
 
     def test_the_old_cards_reload_and_alert_are_gone(self):
         self.table("t_draft")
