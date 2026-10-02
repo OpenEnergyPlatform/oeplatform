@@ -39,6 +39,10 @@ import sys
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 from pathlib import Path
 
+# Data only, and imported here for that reason: the reference's tag list has to
+# be in the settings the generator reads, and nothing that touches Django can
+# be imported at this point.
+from api.api_tags import TAGS as API_REFERENCE_TAGS
 from oeplatform.securitysettings import (
     ALLOWED_HOSTS,
     ANON_CONNECTION_LIMIT,
@@ -196,6 +200,7 @@ INSTALLED_APPS = (
     "owlready2",
     "compressor",
     "oekg",
+    "drf_spectacular",
 )
 
 MIDDLEWARE = (
@@ -226,7 +231,7 @@ EXTERNAL_URLS = {
     "tutorials_create_database_conform_data": "https://openenergyplatform.github.io/academy/tutorials/99_other/database_data/",  # noqa E501
     "tutorials_oemetadata": "https://openenergyplatform.github.io/academy/tutorials/99_other/getting_started_with_OEMetadata/",  # noqa E501
     "tutorials_oemetabuilder": "https://openenergyplatform.github.io/academy/tutorials/99_other/oemetadata/",  # noqa E501
-    "readthedocs": "https://openenergyplatform.github.io/oeplatform/oeplatform-code/web-api/oedb-rest-api/",  # noqa E501
+    "rest_api_docs": "https://openenergyplatform.github.io/oeplatform/oeplatform-code/web-api/",  # noqa E501
     "mkdocs": "https://openenergyplatform.github.io/oeplatform/",
     "compendium": "https://openenergyplatform.github.io/organisation/",
     "tib_terminology_service": "https://terminology.tib.eu/ts/collections",
@@ -239,27 +244,6 @@ EXTERNAL_URLS = {
     "ORKG": "https://academy.orkg.org/orkg-academy/main/index.html",
     "open_plan": "https://open-plan-tool.org/",
     "open_egon": "https://rego-n.org/",
-    "open_mastr": "https://open-mastr.readthedocs.io/en/latest/",
-    "tutorials_index": "https://openenergyplatform.github.io/academy/",
-    "tutorials_faq": "https://openenergyplatform.github.io/academy/questions/",
-    "tutorials_api1": "https://openenergyplatform.github.io/academy/tutorials/01_api/01_api_download/",  # noqa E501
-    "tutorials_api_upload": "https://openenergyplatform.github.io/academy/tutorials/01_api/02_api_upload/",  # noqa E501
-    "tutorials_licenses": "https://openenergyplatform.github.io/academy/tutorials/metadata/tutorial_open-data-licenses/",  # noqa E501
-    "tutorials_wizard": "https://openenergyplatform.github.io/academy/tutorials/99_other/wizard/",  # noqa E501
-    "tutorials_create_database_conform_data": "https://openenergyplatform.github.io/academy/tutorials/99_other/database_data/",  # noqa E501
-    "tutorials_oemetadata": "https://openenergyplatform.github.io/academy/tutorials/99_other/getting_started_with_OEMetadata/",  # noqa E501
-    "tutorials_oemetabuilder": "https://openenergyplatform.github.io/academy/tutorials/99_other/oemetadata/",  # noqa E501
-    "readthedocs": "https://openenergyplatform.github.io/oeplatform/oeplatform-code/web-api/oedb-rest-api/",  # noqa E501
-    "mkdocs": "https://openenergyplatform.github.io/oeplatform/",
-    "compendium": "https://openenergyplatform.github.io/organisation/",
-    "tib_terminology_service": "https://terminology.tib.eu/ts/collections",
-    "tib_ts_oeo": "https://terminology.tib.eu/ts/ontologies/oeo",
-    "spdx_licenses": "https://spdx.github.io/license-list-data/",
-    "oemetadata_key_description": "https://github.com/OpenEnergyPlatform/oemetadata/blob/develop/oemetadata/latest/metadata_key_description.md",  # noqa E501
-    "oeo_extended_github": "https://github.com/OpenEnergyPlatform/oeo-extended",  # noqa E501
-    "oedatamodel": "https://github.com/OpenEnergyPlatform/oedatamodel",
-    "ORKG": "https://academy.orkg.org/orkg-academy/main/index.html",
-    "open_plan": "https://open-plan-tool.org/",
     "open_mastr": "https://open-mastr.readthedocs.io/en/latest/",
     "creativecommons_licenses_by_3_0_de": "http://creativecommons.org/licenses/by/3.0/de/",  # noqa:E501
     "iks_cs_ovgu_iks": "http://iks.cs.ovgu.de/IKS.html",
@@ -385,6 +369,11 @@ OEKG_SHAPES_SOURCE_FILE = "oekg/shapes/oekg_shapes.ttl"
 # pin is a commit sha. Bump this line to move the validator.
 OEKG_SHAPES_PINNED_COMMIT = "b4604e02060624b381bdbe2f872df94cfd0f5630"
 
+# The named graph the OEKG API reads and writes. None is the default graph,
+# which is where the platform's bundles live today; a test overrides it to work
+# in isolation.
+OEKG_GRAPH = None
+
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
@@ -413,7 +402,30 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.BasicAuthentication",
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.TokenAuthentication",
-    )
+    ),
+    # The OEKG bundle API reads publicly, so it carries its own ceiling rather
+    # than relying on there being one somewhere else.
+    "DEFAULT_THROTTLE_RATES": {
+        "oekg_bundles_anon": "60/minute",
+        "oekg_bundles_user": "600/minute",
+    },
+    # Use drf-spectacular's AutoSchema for generating OpenAPI schema
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Open Energy Platform API",
+    "DESCRIPTION": "OpenAPI schema for the Open Energy Platform REST API.",
+    "VERSION": "v0",
+    # The reference's groups, named and ordered rather than derived from the
+    # first path segment. `api.api_tags` imports nothing, which is what makes
+    # it safe to read here: this runs before the app registry exists.
+    "TAGS": API_REFERENCE_TAGS,
+    "POSTPROCESSING_HOOKS": [
+        "drf_spectacular.hooks.postprocess_schema_enums",
+        # The legacy schema-qualified table addresses cannot be repaired at
+        # the route, because one view serves both spellings. See the hook.
+        "api.api_description.name_the_legacy_table_routes",
+    ],
 }
 
 AUTHENTICATION_BACKENDS = [

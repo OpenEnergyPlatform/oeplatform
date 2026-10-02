@@ -27,6 +27,8 @@ from oekg.shape_artifacts import (
 
 COMMIT = "b4604e02060624b381bdbe2f872df94cfd0f5630"
 
+OEO = "https://openenergyplatform.org/ontology/oeo/"
+
 # A minimal but real SHACL shape: enough that a parse-and-recognise check passes.
 SHAPE_TTL = b"""
 @prefix sh: <http://www.w3.org/ns/shacl#> .
@@ -57,6 +59,20 @@ oeo:OEO_00020227 a owl:Class ;
 
 oeo:OEO_00010449 a owl:Class ;
     rdfs:label "wind technology" .
+
+# The OEO labels almost everything @en. The shape wants sh:datatype xsd:string,
+# and a language-tagged literal is rdf:langString, so a tag is a violation.
+oeo:OEO_00010455 a owl:Class ;
+    rdfs:label "solar technology"@en .
+
+# A handful of terms carry more than one label, which sh:maxCount 1 rejects.
+oeo:OEO_00010487 a owl:Class ;
+    rdfs:label "Matlab programming language"@en ;
+    rdfs:label "The Matlab programming language is one developed by MathWorks."@en .
+
+# Only a German label: still needs to end up as one plain string.
+oeo:OEO_00010471 a owl:Class ;
+    rdfs:label "Windkraft"@de .
 
 [] rdfs:label "a label on a blank node" .
 """
@@ -260,16 +276,32 @@ class LabelSubsetTest(TempArtifactsTestCase):
         self.assertEqual(
             labels,
             {
-                (
-                    "https://openenergyplatform.org/ontology/oeo/OEO_00020227",
-                    "scenario bundle",
-                ),
-                (
-                    "https://openenergyplatform.org/ontology/oeo/OEO_00010449",
-                    "wind technology",
-                ),
+                (OEO + "OEO_00020227", "scenario bundle"),
+                (OEO + "OEO_00010449", "wind technology"),
+                (OEO + "OEO_00010455", "solar technology"),
+                (OEO + "OEO_00010487", "Matlab programming language"),
+                (OEO + "OEO_00010471", "Windkraft"),
             },
         )
+
+    def test_no_label_keeps_its_language_tag(self):
+        # ex:CommonShape requires sh:datatype xsd:string on rdfs:label, and a
+        # language-tagged literal is rdf:langString. Keeping the tag makes every
+        # picked OEO term fail validation.
+        self.extract(self.oeo_full_owl, self.labels_path)
+
+        graph = Graph()
+        graph.parse(str(self.labels_path), format="turtle")
+        self.assertEqual([o.language for _, _, o in graph], [None] * len(graph))
+
+    def test_a_term_gets_exactly_one_label(self):
+        # sh:maxCount 1. A few OEO terms carry two, one of them a whole sentence.
+        self.extract(self.oeo_full_owl, self.labels_path)
+
+        graph = Graph()
+        graph.parse(str(self.labels_path), format="turtle")
+        subjects = [s for s, _, _ in graph]
+        self.assertEqual(len(subjects), len(set(subjects)))
 
     def test_the_ontology_version_is_recorded_in_the_file(self):
         # Two of the three environments fetch the OEO from an unpinned

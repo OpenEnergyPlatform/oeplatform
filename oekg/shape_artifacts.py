@@ -28,7 +28,7 @@ from pathlib import Path
 from typing import Callable, Optional
 
 import requests
-from rdflib import RDF, RDFS, Graph, URIRef
+from rdflib import RDF, RDFS, Graph, Literal, URIRef
 from rdflib.namespace import SH
 
 RAW_GITHUB_HOST = "https://raw.githubusercontent.com"
@@ -223,6 +223,14 @@ def build_label_subset_payload(oeo_full_owl: Path, oeo_version: str = "") -> byt
     OEO the labels came from can move even though the shape cannot. Recording
     it means a moved ontology shows up as a changed artifact rather than
     silently altering what the validator sees.
+
+    The labels are **normalised to exactly one plain string per term**, because
+    the shape they exist to satisfy requires ``sh:datatype xsd:string`` and
+    ``sh:maxCount 1`` on ``rdfs:label``. The OEO gives neither: 1,855 of its
+    2,058 labels carry ``@en`` (a language tag makes a literal
+    ``rdf:langString``, not ``xsd:string``), and four terms carry two labels,
+    one of them a whole sentence. Copied verbatim, every picked OEO term fails
+    validation -- measured, not feared.
     """
     oeo_full_owl = Path(oeo_full_owl)
     if not oeo_full_owl.is_file():
@@ -240,11 +248,15 @@ def build_label_subset_payload(oeo_full_owl: Path, oeo_version: str = "") -> byt
             "subset cannot be generated. Re-download the ontology release."
         ) from error
 
-    subset = Graph()
-    subset.bind("rdfs", RDFS)
+    candidates = {}
     for subject, label in ontology.subject_objects(RDFS.label):
         if isinstance(subject, URIRef):
-            subset.add((subject, RDFS.label, label))
+            candidates.setdefault(subject, []).append(label)
+
+    subset = Graph()
+    subset.bind("rdfs", RDFS)
+    for subject, labels in candidates.items():
+        subset.add((subject, RDFS.label, Literal(_preferred_label(labels))))
 
     if not len(subset):
         raise UnusableOntologyError(
@@ -257,6 +269,21 @@ def build_label_subset_payload(oeo_full_owl: Path, oeo_version: str = "") -> byt
         f"# source: {oeo_full_owl.name} {oeo_version}\n"
     )
     return header.encode("utf-8") + subset.serialize(format="turtle").encode("utf-8")
+
+
+def _preferred_label(labels: list) -> str:
+    """Pick the one label a term keeps, as a plain string.
+
+    English first, then untagged, then whatever is left; ties broken by the
+    text itself so the artifact is byte-stable across runs. Deterministic
+    rather than clever: where a term really has two labels the choice is
+    arbitrary, and being repeatable matters more than being right.
+    """
+    for language in ("en", None):
+        tagged = sorted(str(label) for label in labels if label.language == language)
+        if tagged:
+            return tagged[0]
+    return sorted(str(label) for label in labels)[0]
 
 
 def _reject_if_not_a_shape_graph(payload: bytes, url: str) -> None:

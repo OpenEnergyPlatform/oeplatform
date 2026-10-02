@@ -1,7 +1,9 @@
 """
 Creating a table with a FOREIGN KEY or CHECK constraint returned 201 and
 silently dropped the constraint, because the create path only ever recognised
-PRIMARY KEY and UNIQUE and fell through for everything else.
+PRIMARY KEY and UNIQUE and fell through for everything else. A FOREIGN KEY is
+now built when it names its target (test_table_create_foreign_key); what is
+still refused here is refused by name.
 
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
@@ -43,7 +45,9 @@ class TestTableCreateConstraintRejection(APITestCase):
         self.assertFalse(has_table({"table": table}))
         return json_resp
 
-    def test_foreign_key_is_rejected_and_points_at_the_alter_path(self):
+    def test_foreign_key_without_a_target_is_rejected_naming_what_is_missing(self):
+        # A FOREIGN KEY with a target is created now; see
+        # test_table_create_foreign_key. This one names no table to point at.
         json_resp = self._create_expecting_rejection(
             "reject_foreign_key",
             [
@@ -56,7 +60,7 @@ class TestTableCreateConstraintRejection(APITestCase):
         )
 
         self.assertIn("FOREIGN KEY", json_resp["reason"])
-        self.assertIn("add the constraint", json_resp["reason"])
+        self.assertIn("target_table", json_resp["reason"])
 
     def test_check_is_rejected_as_unsupported(self):
         json_resp = self._create_expecting_rejection(

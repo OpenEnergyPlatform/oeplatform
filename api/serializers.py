@@ -17,7 +17,7 @@ from oeplatform.settings import URL
 class EnergyframeworkSerializer(serializers.ModelSerializer):
     url = serializers.SerializerMethodField()
 
-    def get_url(self, obj):
+    def get_url(self, obj) -> str:
         kwargs = {"sheettype": "framework", "pk": obj.id}
         detail_url = reverse(
             "modelview:show-factsheet",
@@ -33,7 +33,7 @@ class EnergyframeworkSerializer(serializers.ModelSerializer):
 class EnergymodelSerializer(serializers.ModelSerializer):
     url = serializers.SerializerMethodField()
 
-    def get_url(self, obj):
+    def get_url(self, obj) -> str:
         kwargs = {"sheettype": "model", "pk": obj.id}
         detail_url = reverse(
             "modelview:show-factsheet",
@@ -49,7 +49,7 @@ class EnergymodelSerializer(serializers.ModelSerializer):
 class ScenarioDataTablesSerializer(serializers.ModelSerializer):
     url = serializers.SerializerMethodField()
 
-    def get_url(self, obj):
+    def get_url(self, obj) -> str:
         kwargs = {"table": obj.name}
         detail_url = reverse(
             "dataedit:view",
@@ -153,8 +153,10 @@ class ScenarioBundleScenarioDatasetSerializer(serializers.Serializer):
 
         return value
 
-    # Custom validation for the entire dataset list
-    def validate_dataset(self, value):
+    # Custom validation for the entire dataset list. DRF calls
+    # `validate_<field name>`, so this must be `validate_datasets`; it was
+    # `validate_dataset` and never ran (#2508).
+    def validate_datasets(self, value):
         if not value:
             raise serializers.ValidationError("The dataset list cannot be empty.")
 
@@ -173,7 +175,7 @@ class DatasetReadSerializer(serializers.ModelSerializer):
         model = Dataset
         fields = ["uuid", "name", "metadata", "created_at"]
 
-    def get_metadata(self, obj):
+    def get_metadata(self, obj) -> dict:
         # resources are never stored on the dataset: assemble them live
         # from the member tables so reads can not go stale
         metadata = dict(obj.metadata)
@@ -184,10 +186,15 @@ class DatasetReadSerializer(serializers.ModelSerializer):
 class DatasetCreateSerializer(serializers.Serializer):
     # the name is the dataset's permanent identifier (URL key, oemetadata
     # name) and is immutable after creation
-    name = serializers.SlugField()
-    title = serializers.CharField()
-    description = serializers.CharField()
-    at_id = serializers.URLField(required=False)
+    name = serializers.SlugField(help_text="Name of the dataset")
+    title = serializers.CharField(
+        help_text="Display name of the dataset, e.g. 'Wind Power Dataset Germany'"
+    )
+    description = serializers.CharField(help_text="Short description of the dataset")
+    at_id = serializers.URLField(
+        required=False,
+        help_text="Optional: persistent identifier or URL for the dataset",
+    )
 
 
 class DatasetUpdateSerializer(serializers.Serializer):

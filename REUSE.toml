@@ -270,11 +270,11 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "docs/oeplatform-code/web-api/oekg-api/oekg.yaml"
+path = "docs/oeplatform-code/web-api/openapi.yaml"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
-  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
@@ -672,16 +672,6 @@ SPDX-FileCopyrightText = [
   "2018 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
   "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
-  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
-]
-
-[[annotations]]
-path = "login/templates/login/list_memberships.html"
-precedence = "override"
-SPDX-License-Identifier = "AGPL-3.0-or-later"
-SPDX-FileCopyrightText = [
-  "2017 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2019 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
   "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
 ]
 

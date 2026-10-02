@@ -15,6 +15,7 @@ export default defineConfig({
       "dataedit/static/dataedit/**/*.test.js",
       "dataedit/static/peer_review/**/*.test.js",
       "modelview/static/modelview/**/*.test.js",
+      "factsheet/frontend/src/components/__tests__/**/*.test.js",
     ],
     environment: "node",
   },

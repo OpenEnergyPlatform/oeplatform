@@ -22,6 +22,7 @@ from sqlalchemy import (
     BigInteger,
     Column,
     ForeignKey,
+    ForeignKeyConstraint,
     PrimaryKeyConstraint,
     UniqueConstraint,
     and_,
@@ -48,7 +49,7 @@ from sqlalchemy.sql.elements import Slice
 from sqlalchemy.sql.expression import ClauseElement, CompoundSelect, Select
 
 from api.error import APIError
-from api.utils import get_or_403, table_or_404_from_dict, table_or_none
+from api.utils import get_or_403, table_or_404, table_or_404_from_dict, table_or_none
 from oedb.utils import MAX_NAME_LENGTH, NAME_PATTERN
 from oeplatform.settings import SCHEMA_DEFAULT_TEST_SANDBOX
 
@@ -134,6 +135,81 @@ def get_column_definition_query(d: dict) -> Column:
     return c
 
 
+def _referenced_column(table_obj: "Table", name: str) -> Column:
+    """A column of an existing table, for a key to point at.
+
+    The same construction the column-level `foreign_key` uses: the target's
+    SQLAlchemy table is not in the new table's MetaData, so the column is bound
+    to it directly rather than named by a string that would not resolve.
+    """
+    referenced = Column(name)
+    referenced.table = table_obj.get_oedb_table_proxy()._main_table.get_sa_table()
+    return referenced
+
+
+def _column_foreign_keys(column_definitions: list) -> set:
+    """(columns, target table, target columns) of every column-level key."""
+    keys = set()
+    for cdef in column_definitions:
+        for fk in cdef.get("foreign_key", []):
+            keys.add(((cdef.get("name"),), fk.get("table"), (fk.get("column"),)))
+    return keys
+
+
+def _foreign_key_constraint(
+    constraint: dict, column_keys: set
+) -> ForeignKeyConstraint | None:
+    """A table-level FOREIGN KEY, or None when it repeats a column's key.
+
+    `oedialect` sends every key twice when it creates a table -- on the column
+    and as this constraint -- because SQLAlchemy lists the column's key under
+    the table's constraints too. Rejecting this half made every dialect
+    `create_all` with a key answer 400 from v1.9.0 on. Two spellings are read:
+    the dialect's (`columns`, `target_table`, `target_columns`) and the
+    reference fields older payloads use (`constraint_parameter`,
+    `reference_table`, `reference_column`). A target may be schema-qualified;
+    table names are unique here, so its last part identifies it.
+    """
+    columns = constraint.get("columns") or (
+        [constraint["constraint_parameter"]]
+        if constraint.get("constraint_parameter")
+        else None
+    )
+    target = constraint.get("target_table") or constraint.get("reference_table")
+    target_columns = constraint.get("target_columns") or (
+        [constraint["reference_column"]] if constraint.get("reference_column") else None
+    )
+    if not columns or not target or not target_columns:
+        raise APIError(
+            "A FOREIGN KEY needs its columns, a target_table and target_columns "
+            "(or constraint_parameter, reference_table and reference_column)."
+        )
+    if len(columns) != len(target_columns):
+        raise APIError("A FOREIGN KEY needs as many target_columns as it has columns.")
+    # Not built here, and dropping them silently is what df393ee32 stopped.
+    for option in ("match", "cascades", "deferrable"):
+        value = (constraint.get(option) or "").strip()
+        if value:
+            raise APIError(
+                "FOREIGN KEY options are not supported when creating a table: "
+                "%s" % value
+            )
+
+    target_name = str(target).split(".")[-1]
+    if (tuple(columns), target_name, tuple(target_columns)) in column_keys:
+        return None
+
+    target_table = table_or_404(target_name)
+    kwargs = {}
+    if constraint.get("name"):
+        kwargs["name"] = constraint["name"]
+    return ForeignKeyConstraint(
+        columns,
+        [_referenced_column(target_table, name) for name in target_columns],
+        **kwargs,
+    )
+
+
 def parse_table_parts(
     column_definitions: list, constraints_definitions: list
 ) -> tuple[list, list]:
@@ -165,6 +241,7 @@ def parse_table_parts(
             primary_key_col_names = [col.name]
 
     constraints = []
+    column_keys = _column_foreign_keys(column_definitions)
 
     for constraint in constraints_definitions:
         constraint_type = constraint.get("constraint_type") or constraint.get("type")
@@ -203,13 +280,9 @@ def parse_table_parts(
                 ccolumns = [constraint["constraint_parameter"]]
             constraints.append(UniqueConstraint(*ccolumns, **kwargs))
         elif constraint_type == "foreign_key":
-            # Reject rather than silently drop: adding the constraint is a
-            # separate step, and the caller has to know that.
-            raise APIError(
-                "FOREIGN KEY is not supported when creating a table. Create the "
-                "table first, then add the constraint with a POST to the table "
-                "endpoint."
-            )
+            key = _foreign_key_constraint(constraint, column_keys)
+            if key is not None:
+                constraints.append(key)
         elif constraint_type == "check":
             raise APIError("CHECK constraints are not supported.")
         else:

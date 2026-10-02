@@ -37,8 +37,18 @@ else:
     ALLOWED_HOSTS = [] if DEBUG else ['localhost']
 
 TIME_OUT = 30
+# Both connection limits are counted per server process (see _LOCK in
+# api/sessions.py), so one account's real ceiling is processes x the limit.
+# They are a real ceiling while the daemon group serving /api/v0/advanced runs
+# one process, which that group's Apache configuration sets -- issue #2492.
 USER_CONNECTION_LIMIT = 4
-ANON_CONNECTION_LIMIT = 40
+# Shared by ALL anonymous clients together, not per visitor, and it counts only
+# explicit sessions (advanced/connection/open): each one holds a pooled
+# connection across requests. Kept well below the pool's per-process ceiling
+# (OEDB_POOL_SIZE + OEDB_MAX_OVERFLOW in oedb/connection.py, currently 17) so
+# that anonymous sessions cannot crowd out the one-request connections the
+# table view and the REST API need -- issues #2495 and #2492.
+ANON_CONNECTION_LIMIT = 4
 
 # This database connection is used for the actual data interfaces (App: dataedit)
 # This should not be linked with a potential user account of the OpenEnergyDatabase !!!
@@ -145,7 +155,15 @@ LOGGING = {
     },
     "root": {
         "handlers": ["console"],
-        "level": "DEBUG",
+        "level": "INFO",
+    },
+    "loggers": {
+        # Pinned rather than left to the root level, so turning the root back
+        # up to DEBUG to trace our own code does not also reinstate this. The
+        # test suite talks to a real Fuseki over HTTP, so at DEBUG urllib3
+        # writes one line per SPARQL query and update -- tens of thousands of
+        # lines per run, in which anything worth reading is lost.
+        "urllib3": {"level": "WARNING"},
     },
 }
 

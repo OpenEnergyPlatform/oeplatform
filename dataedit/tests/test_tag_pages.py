@@ -282,6 +282,38 @@ class TestATagWithAnUnusualKey(TagPageTestCase):
         self.assertIn("Legacy tag", self.editor(self.odd))
 
 
+class TestATagWithAnEmptyKey(TagPageTestCase):
+    """A tag whose primary key is the empty string must not 500 the overview.
+
+    No route can address it -- `tags-edit` needs at least one character -- so
+    reversing it raised `NoReverseMatch` for every visitor. Such a row cannot
+    come from `save()`, which maps an empty normalised name to `None`; it comes
+    from `migrate_tags2`, which copies `name_normalized` verbatim out of the
+    OEDB. Found on staging, 2026-09-23. `bulk_create` skips `save()` the same
+    way that copy did.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        Tag.objects.bulk_create([Tag(name_normalized="", name="Blank key", color=1)])
+        cls.ordinary = cls.make_tag(name="Ordinary")
+
+    def test_the_overview_still_renders_every_tag(self):
+        page = self.overview()
+        self.assertIn("Blank key", page)
+        self.assertIn("Ordinary", page)
+
+    def test_the_other_tags_stay_editable(self):
+        self.assertIn(
+            reverse("dataedit:tags-edit", kwargs={"tag_pk": self.ordinary.pk}),
+            self.overview(),
+        )
+
+    def test_it_is_shown_as_not_editable_rather_than_linked(self):
+        page = self.overview()
+        self.assertIn("cannot be edited here", page)
+
+
 class TestCreatingATagCannotHijackAnExistingOne(TagPageTestCase):
     """A tag's primary key is its NORMALISED name, so two display names
     collide: "Wind Onshore" and "wind onshore" are both `wind_onshore`.
@@ -496,3 +528,27 @@ class TestTheOverviewList(TagPageTestCase):
 
         self.assertIn("<li", html)
         self.assertNotIn("float: left", html)
+
+
+class TestTheDatabasePagesLinkToTheTagManager(TagPageTestCase):
+    """The way in sits with the Database's other tools, not below the topics.
+
+    It was a sentence under the last topic card, far from the tag search it
+    belongs to. It is now a button in the info section's row of actions,
+    which every Database page shares through `filter.html`.
+    """
+
+    def actions(self):
+        page = self.get("dataedit:topic-list").content.decode("utf-8")
+        start = page.index('class="info-section__actions')
+        return page, page[start : page.index("</div>", start)]
+
+    def test_the_info_section_actions_link_to_the_tag_manager(self):
+        _, actions = self.actions()
+
+        self.assertIn(reverse("dataedit:tags"), actions)
+
+    def test_the_topic_list_links_to_it_once(self):
+        page, _ = self.actions()
+
+        self.assertEqual(1, page.count(f'href="{reverse("dataedit:tags")}"'))

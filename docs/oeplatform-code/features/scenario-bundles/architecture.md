@@ -135,33 +135,65 @@ Both patterns are established in the codebase; pick per use case:
 
 ## The OEO-driven form fields
 
-Several form fields offer terms from the OEO. How each list is currently
-sourced:
+Several form fields offer terms from the OEO. All of them are now sourced from
+the ontology; the payload is assembled by `populate_factsheets_elements_view`
+and served at `scenario-bundles/populate_factsheets_elements/`.
 
-| Field                      | Sourced from                                                                                                             | Dynamic?        |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------ | --------------- |
-| Sectors (under a division) | OEO graph via `is defined by` (`OEO_00000504`), `factsheet/helper.py`                                                    | ✅ queried live |
-| Sector **divisions**       | Hardcoded IRI list `SECTOR_DEVISIONS`, `factsheet/helper.py`                                                             | ❌ fixed list   |
-| Study **descriptors**      | Hardcoded `StudyKeywords` array, `factsheet/frontend/src/components/scenarioBundleUtilityComponents/StudyDescriptors.js` | ❌ fixed list   |
-| Technologies               | OEO graph, served by `populate_factsheets_elements_view`                                                                 | ✅ queried live |
+| Field                      | Sourced from                                                                                                                  | Dynamic?        |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| Sectors (under a division) | OEO graph via `is defined by` (`OEO_00000504`), `factsheet/helper.py`                                                         | ✅ queried live |
+| Sector **divisions**       | OEO graph, `build_sector_dropdowns_from_oeo`, `factsheet/helper.py`                                                           | ✅ queried live |
+| Study **descriptors**      | OEO graph, terms annotated `oekg annotation` (`OEO_00020425`) with a value starting `study descriptor`, `factsheet/helper.py` | ✅ queried live |
+| Technologies               | OEO graph, served by `populate_factsheets_elements_view`                                                                      | ✅ queried live |
 
-Study descriptors are consumed in four places, all importing the same
-`StudyKeywords` array — keep them in sync when changing the shape:
+Both builders are **memoized at module level** on first call, because the OEO
+only changes when the process restarts.
 
-- bundle **edit** checkboxes — `scenarioBundle.tsx`
-- bundle **overview** chips — `scenarioBundle.tsx`
-- the all-bundles **filter** dialog — `FactsheetFilterDialog.jsx` (driven by
-  `customTable.jsx`)
+### Sector divisions
+
+`build_sector_dropdowns_from_oeo` returns `(divisions, sectors)`. Two things
+about it are easy to get wrong and are pinned by
+`factsheet/tests/test_sector_dropdowns.py`:
+
+- **Divisions are modelled two ways in the OEO.** Some carry their members as
+  individuals (KSG, CRF 2006); others are classes whose members declare the
+  division through an `rdf:type` restriction (NC/BR, EU legislation). An
+  individual-only query misses the second kind entirely — which is what the
+  former hardcoded list papered over. Each division reports which it is via
+  `kind` (`individuals` or `tree`).
+- **A division with no members is still listed** (NACE has none), and the
+  division asserting `is defined by` about itself is filtered out of its own
+  options — CRF 2006 offers 108, not 109.
+
+The last entry is the `Other` division, which carries the full sector tree
+rather than a flat list. The legacy flat `sectors` list is still served
+alongside, so older consumers keep working.
+
+### Study descriptors
+
+Served as `study_descriptors`, an array of `[label, iri, definition]` triples —
+the same shape as the former hardcoded `StudyKeywords` array, so consumers did
+not have to change their rendering. The annotation match is deliberately a
+prefix, because the OEO carries both `study descriptor` and the inconsistent
+`study descriptor tag`.
+
+Three places consume the list, by **two different routes** — worth knowing
+before changing the shape:
+
+- bundle **edit** checkboxes and **overview** chips — `scenarioBundle.tsx`,
+  which already fetches the populate endpoint for its other fields and reads
+  `data.study_descriptors` straight off that payload
+- the all-bundles **filter** dialog — `FactsheetFilterDialog.jsx`
 - the **comparison** board — `comparisonBoardItems.jsx`
 
-!!! info "In progress — making these dynamic"
+The latter two use the `useStudyDescriptors` hook
+(`scenarioBundleUtilityComponents/useStudyDescriptors.js`), which holds a
+module-level cache and a shared in-flight promise, so N mounts trigger one
+request. It also exports `getStudyDescriptors()` for plain helper functions,
+returning `[]` until the fetch resolves.
 
-    Two of the lists above are hardcoded and are being migrated to load
-    dynamically from the OEO (so new sector divisions / study-descriptor terms
-    appear automatically as the ontology grows), plus a richer "Other" →
-    Sector-Entity hierarchy interaction. This is planned in the *Scenario Bundles
-    frontend* wayfinder map (maintainer's vault). Update this table as each piece
-    lands.
+`customTable.jsx` is not a consumer: it holds the selected-keyword state and
+passes it down to the filter dialog, which resolves the labels itself.
 
 ## Related surfaces
 
@@ -171,8 +203,13 @@ Study descriptors are consumed in four places, all importing the same
 - **OEKG chat** — an external chatbot for asking questions about the OEKG,
   `https://oekg-chat.openenergyplatform.org/`. (Being linked from the Scenario
   Bundles nav and the overview page — see the wayfinder map.)
-- **OEKG Web-API** — see [OEKG API](../../web-api/oekg-api/index.md) and
-  [Edit scenario datasets](../../web-api/oekg-api/scenario-dataset.md).
+- **OEKG Web-API** — see [OEKG API](../../web-api/oekg-api/index.md) for the
+  read-only SPARQL endpoint and
+  [Writing scenario bundles](../../web-api/oekg-api/scenario-bundles.md) for the
+  REST API that writes them. The singular
+  `scenario-bundle/scenario/manage-datasets/` route is superseded by that API
+  and still served; it is described in the reference under
+  [Scenario Bundles (legacy)](<../../web-api/api-reference.md#/Scenario%20Bundles%20(legacy)>).
 
 ## How to extend this feature
 
@@ -186,6 +223,91 @@ Study descriptors are consumed in four places, all importing the same
 - **Rebuild the frontend:** `npm run build` (Vite; output under `assets/`,
   served via django-vite). See the
   [frontend workflow](../../../dev/frontend/workflow.md).
+- **Add an addressable sub-resource to the REST API:** add a field table and a
+  `BundlePart` entry, then a route. The machinery works against a subject plus a
+  table rather than against the bundle, so a new part is a table entry and a
+  route — not a module. See [The API write path](#the-api-write-path).
+
+## The API write path
+
+The feature has **two** write paths, and everything above this section describes
+the first one: the UI's. Session-authenticated RPC endpoints in `factsheet/`
+build the bundle triple by triple through rdflib, which is a thin client over
+Fuseki — so a create writing ~200 triples is ~200 HTTP requests, and it is not
+atomic.
+
+The second is the **OEKG REST API** under `/api/v0/scenario-bundles/`, in the
+`oekg` app. It is a standalone surface built beside the UI's rather than on top
+of it, and it differs from the UI path in four ways a contributor needs to know
+before touching it:
+
+- **One request, one transaction.** The API does not use rdflib as transport. It
+  builds the graph in memory and sends **one** SPARQL update request, and one
+  update request is one transaction across `;`-separated operations. A write
+  therefore either lands whole or not at all.
+- **The shape is enforced before the write.** The canonical SHACL shape comes
+  from the [`oekg` repository](https://github.com/OpenEnergyPlatform/oekg) as a
+  build-time artifact — `manage.py fetch_oekg_shapes` — and the API validates
+  the bundle's **post-state** in-process before committing. Validating a `PATCH`
+  diff instead would pass vacuously, because nothing targets an untyped node.
+- **A write is judged by what it _introduces_.** The pre-state is validated too,
+  and only violations the write adds are refused. Without this the API could not
+  write to any bundle the browser had created. A create has no pre-state and so
+  stays strict.
+- **Writes are guarded by a version.** Every mutating request carries the
+  version it believes it is editing; the guard binds that version _and the
+  bundle's existence_ into the update's `WHERE`, and reads a write token back to
+  tell a winner from a loser.
+
+Two constraints hold for anything added here. The API **must not import**
+`factsheet/oekg/connection.py`, which parses the full OEO at module import; and
+the graph store and Postgres cannot share a transaction, so **the graph commits
+first** and a failed history write is reported rather than rolled back.
+
+### The write sequence
+
+The sequence every mutating endpoint shares — exists, owned, precondition,
+validate the whole bundle, guard, read back, record — lives in one place, so an
+endpoint is a payload and a field table rather than a repetition of that order.
+
+#### ::: oekg.writes
+
+#### ::: oekg.preconditions
+
+#### ::: oekg.permissions
+
+### Validation and the shape
+
+#### ::: oekg.validation
+
+#### ::: oekg.shape
+
+### Versioning
+
+#### ::: oekg.versioning
+
+### Transport to the graph store
+
+#### ::: oekg.graph_store
+
+### Payloads and triples
+
+One field table per resource drives both directions, so a field is declared once
+rather than written twice.
+
+#### ::: oekg.bundles
+
+#### ::: oekg.fields
+
+#### ::: oekg.reads
+
+### History
+
+#### ::: oekg.history
+
+### Shared endpoint behaviour
+
+#### ::: oekg.api_support
 
 ## API reference
 

@@ -22,13 +22,23 @@
 <ul class="tag-list tag-list--scroll" data-tag-list>
   {% for t in tags %}
     <li data-tag-name="{{ t.name }}" data-tag-usage="{{ t.tag_usage }}">
-      <a href="{% url 'dataedit:tags-edit' t.pk %}"
-         hx-get="{% url 'dataedit:tags-edit' t.pk %}"
-         hx-target="#tag-manager"
-         hx-swap="outerHTML"
-         class="btn tag"
-         style="color:{% readable_text_color t.color_hex %};
-                background:{{ t.color_hex }}">{{ t.name }}</a>
+      {% if t.pk %}
+        <a href="{% url 'dataedit:tags-edit' t.pk %}"
+           hx-get="{% url 'dataedit:tags-edit' t.pk %}"
+           hx-target="#tag-manager"
+           hx-swap="outerHTML"
+           class="btn tag"
+           style="color:{% readable_text_color t.color_hex %};
+                  background:{{ t.color_hex }}">{{ t.name }}</a>
+      {% else %}
+        {# An empty key, from data migrated verbatim out of the OEDB: no #}
+        {# route can address it, and reversing one 500ed the whole page. #}
+        <span class="btn tag disabled"
+              title="This tag has an empty identifier and cannot be edited here."
+              style="color:{% readable_text_color t.color_hex %};
+                     background:{{ t.color_hex }}">{{ t.name }}</span>
+        <span class="visually-hidden">(cannot be edited here: empty identifier)</span>
+      {% endif %}
     </li>
   {% empty %}
     <li class="text-muted">No tags yet.</li>

@@ -28,6 +28,7 @@ from oeplatform.settings import (  # OEO_EXT_NAME,; OEO_EXT_PATH,
     OPEN_ENERGY_ONTOLOGY_NAME,
 )
 from ontology.utils import collect_modules, get_common_data, get_ontology_version
+from ontology.vocabularies import is_file_backed
 
 logger = logging.getLogger("oeplatform")
 
@@ -142,13 +143,34 @@ class PartialOntologyAboutSidebarContentView(View):
         return HttpResponse(partial)
 
 
+def _refuse_unknown(ontology) -> None:
+    """Refuse a name this platform does not serve from files.
+
+    One sentence, in one place, because "an unknown name is 404, once,
+    everywhere" is the whole point of the registry -- and two copies of a
+    refusal are two refusals that can come to differ.
+
+    False for a name nobody serves and for one served from a store alike: from
+    inside a view that lists a directory those are the same fault.
+    """
+    if not is_file_backed(ontology):
+        raise Http404(f"{ontology!r} is not an ontology served by this platform.")
+
+
 def ontology_react_view(request, ontology=None, term_id=None):
     """
     Serves the React frontend for both the Search listing and the Entity Detail page.
 
     The actual routing logic (deciding whether to show search results or
     details) is handled client-side by React Router based on the URL.
+
+    The name is checked against the registry first. This route is the catch-all
+    under `/ontology/`, so without that check it rendered a working term page
+    for any name at all -- which a reader cannot tell from a real one, and
+    which is how a scenario bundle came to render as an ontology term.
     """
+    _refuse_unknown(ontology)
+
     context = {
         "ontology_id": ontology,
         "term_id": term_id,
@@ -180,7 +202,23 @@ class OntologyStaticsView(View):
         :return:
         """
 
+        # Two checks, and they answer different questions. The registry says
+        # whether we serve this name at all -- a permanent answer, and the one
+        # that used to be missing entirely. The directory check says whether
+        # this deployment has the files for a name we do serve, which is a
+        # deployment fault rather than a client error. Both are 404 to a
+        # client, because there is nothing at the address either way; what
+        # neither may be is the 500 `os.listdir` raised for both.
+        _refuse_unknown(ontology)
+
         onto_base_path = Path(ONTOLOGY_ROOT, ontology)
+        if not onto_base_path.is_dir():
+            logger.error(
+                "The ontology %r is registered but %s is not on disk.",
+                ontology,
+                onto_base_path,
+            )
+            raise Http404(f"The files for {ontology!r} are not available here.")
 
         if not extension:
             extension = "owl"
