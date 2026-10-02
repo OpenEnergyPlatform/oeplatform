@@ -7,24 +7,29 @@ the contents of #table-action-body. It shows the preflight: which Tables are
 left out and why, what the action needs (publish: Topic and embargo), and
 the consequences it has to state (unpublish: other people's Datasets that
 will hold a draft member; delete: the Datasets left, Review state, an active
-embargo and knowledge-graph links). Delete may ask for a typed confirmation
-(``preflight.confirmation``: the Table's name or the number of Tables). Over
-the action's ceiling nothing can be confirmed. The form posts the eligible
-names only, so what runs is what was shown. A refused request comes back
-here with ``notice`` ("Nothing was changed: …") and the preflight run again;
-an unusable parameter comes back with ``errors`` beside its field.
+embargo and knowledge-graph links). The Dataset actions choose one of the
+user's own Datasets (table_action_dataset.html). Delete may ask for a typed
+confirmation (``preflight.confirmation``: the Table's name or the number of
+Tables; table_action_delete.html). Over the action's ceiling nothing can be
+confirmed. The form posts the eligible names only, so what runs is what was
+shown. A refused request comes back here with ``notice`` ("Nothing was
+changed: …") and the preflight run again; an unusable parameter comes back
+with ``errors`` beside its field.
 {% endcomment %}
 {% with check=preflight %}
   <div class="modal-header">
     <h2 class="modal-title h5 m-0" id="table-action-title">
       {% if check.action == "publish" %}
-        Publish
+        Publish {{ check.subject }}
+      {% elif check.action == "unpublish" %}
+        Unpublish {{ check.subject }}
       {% elif check.action == "delete" %}
-        Delete
+        Delete {{ check.subject }}
+      {% elif check.action == "dataset_add" %}
+        Add {{ check.subject }} to a dataset
       {% else %}
-        Unpublish
+        Remove {{ check.subject }} from a dataset
       {% endif %}
-      {{ check.subject }}
     </h2>
     <button type="button"
             class="btn-close"
@@ -77,10 +82,14 @@ an unusable parameter comes back with ``errors`` beside its field.
           <p class="mb-1">
             {% if check.action == "publish" %}
               Will be published:
+            {% elif check.action == "unpublish" %}
+              Will be unpublished:
             {% elif check.action == "delete" %}
               Will be deleted:
+            {% elif check.action == "dataset_add" %}
+              Will be added:
             {% else %}
-              Will be unpublished:
+              Will be removed:
             {% endif %}
           </p>
           <ul class="dash-action-list">
@@ -126,7 +135,7 @@ an unusable parameter comes back with ``errors`` beside its field.
           </fieldset>
         {% elif check.action == "delete" %}
           {% include "login/partials/table_action_delete.html" %}
-        {% else %}
+        {% elif check.action == "unpublish" %}
           <p>
             {% if check.total == 1 %}
               It
@@ -146,16 +155,22 @@ an unusable parameter comes back with ``errors`` beside its field.
               </ul>
             </div>
           {% endif %}
+        {% else %}
+          {% include "login/partials/table_action_dataset.html" %}
         {% endif %}
       {% elif not check.over_ceiling %}
         <p id="table-action-nothing">
           Nothing to
           {% if check.action == "publish" %}
             publish.
+          {% elif check.action == "unpublish" %}
+            unpublish.
           {% elif check.action == "delete" %}
             delete.
+          {% elif check.action == "dataset_add" %}
+            add.
           {% else %}
-            unpublish.
+            remove.
           {% endif %}
         </p>
       {% endif %}
@@ -164,16 +179,20 @@ an unusable parameter comes back with ``errors`` beside its field.
       <button type="button"
               class="btn btn-outline-secondary"
               data-bs-dismiss="modal">Cancel</button>
-      {% if check.eligible and not check.over_ceiling %}
+      {% if check.confirmable %}
         <button type="submit"
                 id="table-action-confirm"
                 class="btn {% if check.action == "delete" %}btn-danger{% else %}btn-primary{% endif %}">
           {% if check.action == "publish" %}
             Publish
+          {% elif check.action == "unpublish" %}
+            Unpublish
           {% elif check.action == "delete" %}
             Delete
+          {% elif check.action == "dataset_add" %}
+            Add
           {% else %}
-            Unpublish
+            Remove
           {% endif %}
         </button>
       {% endif %}

@@ -137,19 +137,30 @@ class TableActionView(ProfileOwnerRequiredMixin, View):
     - POST, refused (a named Table is no longer allowed): 409, the dialog
       re-run with "Nothing was changed: …", and ``HX-Trigger:
       tables-refused`` for the persistent message.
-    - POST, unusable parameters (no Topic, the draft pseudo-topic, a typed
-      confirmation that does not match, more Tables than the ceiling): 400,
-      the dialog with the error beside its field, and no toast.
+    - POST, unusable parameters (no Topic, the draft pseudo-topic, a
+      Dataset that is not the user's own, a typed confirmation that does not
+      match, more Tables than the ceiling): 400, the dialog with the error
+      beside its field, and no toast.
     - POST, a delete whose OEDB table could not be dropped afterwards: 204
       as above, but the message says so and carries ``warning``, so it
       stays until dismissed instead of reading as a success.
+
+    The parameters are ``topic`` and ``embargo`` (publish), ``dataset``
+    (the Dataset actions) and ``confirm`` (delete's typed confirmation); the
+    preflight reads ``dataset`` too, to leave out the Tables already in it
+    or not in it.
 
     Whether a changed Table is still shown is read off ``HX-Current-URL``,
     the address the request was sent from, through the list's own filters.
     """
 
+    PARAMS = ("topic", "embargo", "dataset", "confirm")
+
     def _names(self, data):
         return data.getlist("table")
+
+    def _params(self, data):
+        return {key: data.get(key, "") for key in self.PARAMS}
 
     def _dialog(self, request, check, status=200, **extra):
         context = {
@@ -173,18 +184,17 @@ class TableActionView(ProfileOwnerRequiredMixin, View):
     @method_decorator(never_cache)
     def get(self, request, user_id, action):
         action = self._action(action)
+        params = self._params(request.GET)
         check = table_actions.preflight(
-            self.profile_user, action, self._names(request.GET)
+            self.profile_user, action, self._names(request.GET), params
         )
-        return self._dialog(request, check)
+        return self._dialog(request, check, values=params)
 
     def post(self, request, user_id, action):
         action = self._action(action)
         user = self.profile_user
         names = self._names(request.POST)
-        params = {
-            key: request.POST.get(key, "") for key in ("topic", "embargo", "confirm")
-        }
+        params = self._params(request.POST)
         try:
             outcome = table_actions.execute(
                 user, action, names, params, via="dashboard"
@@ -251,9 +261,17 @@ def _done_message(outcome, hidden) -> str:
         if outcome.params["embargo"] != "none":
             message += f", embargoed for {embargo}"
         message += "."
-    else:
+    elif outcome.action == table_actions.UNPUBLISH:
         their = "its" if count == 1 else "their"
         message = f"Unpublished {what}. No longer listed under {their} topics."
+    else:
+        dataset = (
+            f"\u201c{table_actions.dataset_title(outcome.params['dataset'])}\u201d"
+        )
+        if outcome.action == table_actions.DATASET_ADD:
+            message = f"Added {what} to {dataset}."
+        else:
+            message = f"Removed {what} from {dataset}."
     if hidden and count == 1:
         message += " It is not shown under the current filter."
     elif hidden:
@@ -519,7 +537,8 @@ def dataset_assign_view(request, profile_user, dataset):
     table = get_object_or_404(Table, name=request.POST.get("table", ""))
     if not user_may_assign_table(request.user, table):
         return HttpResponseForbidden(
-            "Draft or embargoed tables require write permission on the table."
+            "Draft or embargoed tables require Data editor on the table, "
+            "directly or through an organization."
         )
     assign_table(dataset, table)
     return _render_dataset_manage(request, profile_user, dataset)

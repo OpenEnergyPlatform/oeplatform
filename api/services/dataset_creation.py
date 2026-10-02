@@ -6,6 +6,7 @@ import re
 from copy import deepcopy
 from typing import Any
 
+from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.utils import timezone
 from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE
@@ -67,42 +68,52 @@ def create_dataset(validated_data: dict[str, Any], creator) -> Dataset:
     return Dataset.objects.create(metadata=metadata, name=name, creator=creator)
 
 
-def user_may_assign_table(user, table: Table) -> bool:
-    """Curation model: any published table may be assigned to a dataset;
-    draft tables and tables under an active embargo only by users holding
-    write permission on the table (owners staging a release)."""
-    from api.helper import check_embargo
+def assignable_tables(user) -> QuerySet[Table]:
+    """Every Table ``user`` may assign to a Dataset of their own: the one
+    curation rule, which the dashboard's row actions, the Dataset tab's
+    picker and the dataset assign API all read.
 
-    if table.is_publish and not check_embargo(table):
-        return True
-    return user.has_write_permissions(table.name)
+    Curation model: anyone may assign a published Table that is not under an
+    active embargo; its holders have no say. A draft, or a Table under an
+    active embargo, only a user holding Data editor or above on it, directly
+    or through an Organization they are a member of (owners staging a
+    release). There is no platform-admin exemption: only grants count, so a
+    Table offered anywhere is a Table this rule accepts.
+    """
+    writable = user.get_tables_queryset(min_permission_level=WRITE_PERM)
+    freely_assignable = Q(is_publish=True) & ~Q(embargos__date_ended__gt=timezone.now())
+    return Table.objects.filter(
+        freely_assignable | Q(id__in=writable.values("id"))
+    ).distinct()
+
+
+def user_may_assign_table(user, table: Table) -> bool:
+    """Whether ``user`` may assign ``table`` to a Dataset of their own, under
+    ``assignable_tables``. One query."""
+    return assignable_tables(user).filter(pk=table.pk).exists()
 
 
 def assignable_tables_for(user, dataset: Dataset, search: str = "") -> QuerySet[Table]:
     """Tables the user may assign to the dataset under the curation rules,
-    excluding tables already assigned. Queryset twin of
-    user_may_assign_table for the dashboard picker."""
-    now = timezone.now()
-    writable_ids = user.get_tables_queryset(
-        min_permission_level=WRITE_PERM
-    ).values_list("id", flat=True)
-
-    freely_assignable = Q(is_publish=True) & ~Q(embargos__date_ended__gt=now)
-    tables = Table.objects.filter(freely_assignable | Q(id__in=writable_ids))
-    tables = tables.exclude(id__in=dataset.tables.values_list("id", flat=True))
+    excluding tables already assigned: the dashboard picker."""
+    tables = assignable_tables(user).exclude(
+        id__in=dataset.tables.values_list("id", flat=True)
+    )
 
     if search:
         tables = tables.filter(
             Q(name__icontains=search) | Q(human_readable_name__icontains=search)
         )
 
-    return tables.distinct().order_by("name").prefetch_related("topics")
+    return tables.order_by("name").prefetch_related("topics")
 
 
+@transaction.atomic
 def assign_table(dataset: Dataset, table: Table) -> None:
     """Add a table to a dataset and seed the dataset's topics additively:
     the table's topics are added (except the draft pseudo-topic), existing
-    topics are never removed, so creator-curated removals survive."""
+    topics are never removed, so creator-curated removals survive. Both
+    writes, or neither."""
     dataset.tables.add(table)
     dataset.topics.add(*table.topics.exclude(name=PSEUDO_TOPIC_DRAFT))
 

@@ -24,8 +24,11 @@ its record still lists it.
 A row action is a bulk action of one: both operations take a list of names,
 and the dashboard sends one name from a row's menu.
 
-The actions so far are ``publish``, ``unpublish`` and ``delete``; the
-Dataset assignment joins as its ticket lands (#2563).
+The actions are ``publish``, ``unpublish``, ``delete``, and adding a Table to
+or removing it from one of the user's own Datasets (``dataset_add``,
+``dataset_remove``, with the Dataset as the ``dataset`` parameter). Whether a Table may be added at all is the
+curation rule of ``api.services.dataset_creation.assignable_tables``, the
+same rule the dataset assign API and the Dataset tab's picker read.
 
 The role an action needs is read off ``table_levels``, which states the
 platform's permission rule set-based, as ``myuser.get_table_permission_level``
@@ -38,7 +41,7 @@ changing who may do what.
 Log lines, on the ``oeplatform.table_actions`` logger, one per Table::
 
     table_action table=<name> action=<action> by=<user pk> via=<entry point>
-        batch=<id>|- [topic=<topic> embargo=<period>]
+        batch=<id>|- [topic=<topic> embargo=<period>] [dataset=<name>]
         [datasets=<names left>|- published=yes|no drop=ok|failed]
 
 ``batch`` ties together the Tables of one request with more than one Table,
@@ -51,21 +54,25 @@ import uuid
 from dataclasses import dataclass, field
 
 from django.db import transaction
+from django.db.models import Count, Q
 from django.utils import timezone
 
 from api.actions import move_publish
 from api.error import APIError
+from api.services.dataset_creation import assign_table, assignable_tables
 from dataedit.models import Dataset, Embargo, PeerReview, Table, Topic
 from dataedit.publish_gate import publish_checks
 from login.models import GroupPermission, Organization, UserPermission
-from login.permissions import ADMIN_PERM, DELETE_PERM, NO_PERM
+from login.permissions import ADMIN_PERM, DELETE_PERM, NO_PERM, WRITE_PERM
 from login.tables_tab import visible_datasets
 from oeplatform.settings import PSEUDO_TOPIC_DRAFT
 
 logger = logging.getLogger("oeplatform.table_actions")
 
 PUBLISH, UNPUBLISH, DELETE = "publish", "unpublish", "delete"
-ACTIONS = (PUBLISH, UNPUBLISH, DELETE)
+DATASET_ADD, DATASET_REMOVE = "dataset_add", "dataset_remove"
+ACTIONS = (PUBLISH, UNPUBLISH, DELETE, DATASET_ADD, DATASET_REMOVE)
+DATASET_ACTIONS = (DATASET_ADD, DATASET_REMOVE)
 
 # What an embargo may be when publishing, in the order the dialog offers
 # them; the values are the ones ``api.actions.move_publish`` reads.
@@ -89,14 +96,16 @@ class RoleGate:
 ROLE_GATES = {
     PUBLISH: RoleGate(ADMIN_PERM, "Only Table admins can publish"),
     UNPUBLISH: RoleGate(ADMIN_PERM, "Only Table admins can unpublish"),
+    DATASET_ADD: RoleGate(WRITE_PERM, "Only Data editors can add to a dataset"),
+    DATASET_REMOVE: RoleGate(WRITE_PERM, "Only Data editors can remove from a dataset"),
     DELETE: RoleGate(DELETE_PERM, "Only Data maintainers and Table admins can delete"),
 }
 
 # The most Tables one request may name, per action; an action not listed has
-# no ceiling yet (publish and unpublish get theirs in #2564). The dashboard is
-# synchronous by design (no task queue), so a request has to finish inside
-# the host's timeout; mass work stays possible through the API, one call per
-# Table.
+# no ceiling yet (publish, unpublish and the Dataset actions get theirs in
+# #2564). The dashboard is synchronous by design (no task queue), so a request
+# has to finish inside the host's timeout; mass work stays possible through
+# the API, one call per Table.
 #
 # Delete: 50. The host's limit is Apache's ``Timeout 300`` and mod_wsgi's
 # ``socket-timeout=300`` on both daemon groups, with no ``request-timeout``
@@ -122,6 +131,10 @@ TYPED_COUNT_ABOVE = 10
 NOT_YOURS = "Not one of your tables"
 ALREADY_PUBLISHED = "Already published"
 NOT_PUBLISHED = "Not published"
+# The curation rule (``assignable_tables``) refusing a Table the role allows:
+# a draft or embargoed Table the user holds no grant on. Only a platform
+# admin gets that far, and the rule gives them no exemption.
+MAY_NOT_ASSIGN = "Drafts and embargoed tables need Data editor on the table"
 
 
 class ActionError(Exception):
@@ -184,10 +197,25 @@ class Preflight:
     consequences: dict = field(default_factory=dict)
     subject: str = ""
     confirmation: str = ""
+    # The Dataset actions only: the user's own Datasets the action could
+    # change for these Tables, and the one it is about (None until chosen).
+    datasets: list = field(default_factory=list)
+    dataset: Dataset = None
 
     @property
     def names(self) -> list:
         return [table.name for table in self.eligible]
+
+    @property
+    def confirmable(self) -> bool:
+        """Whether the dialog can be confirmed: something is eligible, the
+        names are within the ceiling and, for the Dataset actions, there is a
+        Dataset to choose."""
+        if self.over_ceiling:
+            return False
+        if self.action in DATASET_ACTIONS and not self.datasets:
+            return False
+        return bool(self.eligible)
 
     @property
     def over_ceiling(self) -> bool:
@@ -231,6 +259,17 @@ def table_levels(user, tables) -> dict:
     for table_id, level in grants:
         levels[table_id] = max(levels[table_id], level)
     return levels
+
+
+def own_datasets(user):
+    """The Datasets ``user`` created: the only ones they may add a Table to
+    or remove one from."""
+    return Dataset.objects.filter(creator=user)
+
+
+def dataset_title(dataset) -> str:
+    """What a Dataset is called where the user reads it."""
+    return (dataset.metadata or {}).get("title") or dataset.name
 
 
 def publish_topics():
@@ -288,10 +327,15 @@ def _confirmation(action, eligible) -> str:
     return ""
 
 
-def _check(user, action, table, level) -> str:
-    """Why ``action`` would leave ``table`` out, or "" when it would act."""
+def _check(user, action, table, level, assignable=frozenset()) -> str:
+    """Why ``action`` would leave ``table`` out, or "" when it would act.
+    ``assignable`` holds the primary keys the curation rule accepts; only
+    adding to a Dataset reads it. Whether the Table is in the chosen Dataset
+    is decided afterwards (``_by_membership``)."""
     if level < ROLE_GATES[action].level:
         return ROLE_GATES[action].refusal
+    if action == DATASET_ADD and table.pk not in assignable:
+        return MAY_NOT_ASSIGN
     if action == PUBLISH:
         if table.is_publish:
             return ALREADY_PUBLISHED
@@ -360,18 +404,81 @@ def _delete_consequences(user, tables) -> dict:
     }
 
 
+def _dataset_choices(user, action, tables) -> list:
+    """The user's own Datasets ``action`` could change for ``tables``: for
+    adding, those still missing at least one of them; for removing, those
+    holding at least one. By title. One query."""
+    if not tables:
+        return []
+    ids = [table.pk for table in tables]
+    datasets = own_datasets(user).annotate(
+        held=Count("tables", filter=Q(tables__in=ids))
+    )
+    if action == DATASET_ADD:
+        datasets = datasets.filter(held__lt=len(ids))
+    else:
+        datasets = datasets.filter(held__gt=0)
+    return sorted(datasets, key=lambda d: (dataset_title(d).lower(), d.name))
+
+
+def _chosen_dataset(user, value, choices):
+    """The Dataset a request is about: ``value`` (a checked Dataset or a
+    name) if it is one of the user's own, else nothing. Without a value,
+    the only choice when there is exactly one, so a row whose Table is in
+    one of the user's Datasets is removed from it in one confirmation."""
+    if isinstance(value, Dataset):
+        return value if value.creator_id == user.pk else None
+    if value:
+        for dataset in choices:
+            if dataset.name == value:
+                return dataset
+        return own_datasets(user).filter(name=value).first()
+    return choices[0] if len(choices) == 1 else None
+
+
+def _by_membership(action, dataset, tables):
+    """Split ``tables`` into those ``action`` changes in ``dataset`` and
+    those it leaves out: already in it (add), not in it (remove)."""
+    members = set(
+        dataset.tables.filter(pk__in=[t.pk for t in tables]).values_list(
+            "pk", flat=True
+        )
+    )
+    title = _quoted([dataset_title(dataset)])
+    if action == DATASET_ADD:
+        keep, reason = (lambda t: t.pk not in members), f"Already in {title}"
+    else:
+        keep, reason = (lambda t: t.pk in members), f"Not in {title}"
+    kept = [table for table in tables if keep(table)]
+    left = [table.name for table in tables if not keep(table)]
+    return kept, ([LeftOut(reason, left)] if left else [])
+
+
 def preflight(user, action, names, params=None) -> Preflight:
     """What ``action`` would do with the Tables ``names``. Writes nothing.
 
     A name that is not a Table, or a Table the user holds no role on, is
     left out as "Not one of your tables", the same for both, so the answer
     does not reveal which Tables exist.
+
+    For the Dataset actions, ``params["dataset"]`` names the Dataset (see
+    ``_chosen_dataset``); the Tables already in it (add) or not in it
+    (remove) are left out. Without one, nothing is left out for that
+    reason, and ``datasets`` lists what the user can choose.
     """
     if action not in ACTIONS:
         raise ValueError(f"unknown table action: {action}")
+    params = params or {}
     names = _unique(names)
     found = {table.name: table for table in Table.objects.filter(name__in=names)}
     levels = table_levels(user, found.values())
+    assignable = frozenset()
+    if action == DATASET_ADD and found:
+        assignable = frozenset(
+            assignable_tables(user)
+            .filter(pk__in=[table.pk for table in found.values()])
+            .values_list("pk", flat=True)
+        )
 
     eligible, reasons = [], {}
     subject = f"{len(names)} tables"
@@ -382,13 +489,22 @@ def preflight(user, action, names, params=None) -> Preflight:
             if len(names) == 1:
                 subject = _quoted([name])
         else:
-            reason = _check(user, action, table, levels[table.pk])
+            reason = _check(user, action, table, levels[table.pk], assignable)
             if len(names) == 1:
                 subject = _quoted([table.human_readable_name or name])
         if reason:
             reasons.setdefault(reason, []).append(name)
         else:
             eligible.append(table)
+
+    left_out = [LeftOut(reason, group) for reason, group in reasons.items()]
+    datasets, dataset = [], None
+    if action in DATASET_ACTIONS:
+        datasets = _dataset_choices(user, action, eligible)
+        dataset = _chosen_dataset(user, params.get("dataset"), datasets)
+        if dataset is not None and eligible:
+            eligible, by_membership = _by_membership(action, dataset, eligible)
+            left_out += by_membership
 
     consequences = {}
     if action == UNPUBLISH and eligible:
@@ -399,11 +515,13 @@ def preflight(user, action, names, params=None) -> Preflight:
         action=action,
         total=len(names),
         eligible=eligible,
-        left_out=[LeftOut(reason, group) for reason, group in reasons.items()],
+        left_out=left_out,
         ceiling=CEILINGS.get(action),
         consequences=consequences,
         subject=subject,
         confirmation=_confirmation(action, eligible),
+        datasets=datasets,
+        dataset=dataset,
     )
 
 
@@ -425,9 +543,23 @@ def _publish_params(params) -> dict:
     return {"topic": topic, "embargo": embargo}
 
 
-def _checked_params(action, params) -> dict:
+def _dataset_params(user, params) -> dict:
+    """The Dataset parameter, checked: one of the user's own Datasets."""
+    value = params.get("dataset")
+    name = value.name if isinstance(value, Dataset) else (value or "").strip()
+    if not name:
+        raise InvalidParameters({"dataset": "Choose one of your datasets."})
+    dataset = own_datasets(user).filter(name=name).first()
+    if dataset is None:
+        raise InvalidParameters({"dataset": f"“{name}” is not one of your datasets."})
+    return {"dataset": dataset}
+
+
+def _checked_params(user, action, params) -> dict:
     if action == PUBLISH:
         return _publish_params(params)
+    if action in DATASET_ACTIONS:
+        return _dataset_params(user, params)
     if action == DELETE:
         # checked against what the preflight asks for inside ``execute``,
         # because that depends on the Tables as they are then
@@ -446,6 +578,10 @@ def _write(action, table, params):
         move_publish(table, params["topic"], params["embargo"])
     elif action == UNPUBLISH:
         table.set_not_published()
+    elif action == DATASET_ADD:
+        assign_table(params["dataset"], table)
+    elif action == DATASET_REMOVE:
+        params["dataset"].tables.remove(table)
     elif action == DELETE:
         table.delete_record()
 
@@ -489,6 +625,8 @@ def _log(user, action, tables, params, via, deleted=None, dropped=None):
     extra = ""
     if action == PUBLISH:
         extra = f" topic={params['topic']} embargo={params['embargo']}"
+    elif action in DATASET_ACTIONS:
+        extra = f" dataset={params['dataset'].name}"
     for index, table in enumerate(tables):
         fields, level, exc_info = extra, logging.INFO, None
         if deleted is not None:
@@ -532,7 +670,7 @@ def execute(user, action, names, params=None, via="dashboard") -> Outcome:
     one), so once it is left the rows are committed and the OEDB tables are
     dropped, one at a time. A failed drop is in ``Outcome.drop_failed``.
     """
-    params = _checked_params(action, params or {})
+    params = _checked_params(user, action, params or {})
     ceiling = CEILINGS.get(action)
     if ceiling is not None and len(_unique(names)) > ceiling:
         raise InvalidParameters(
