@@ -53,6 +53,8 @@ function renderPage(region) {
                 aria-controls="tables-more-panel">More filters<span
                 id="tables-more-count"></span></button>
         <div id="tables-more-panel" hidden>
+          <input type="date" id="f-modified_from" name="modified_from" />
+          <input type="date" id="f-modified_to" name="modified_to" />
           <input type="checkbox" id="f-tags-1" name="tags" value="grid" />
           <input type="checkbox" id="f-tags-2" name="tags" value="wind" />
           <input type="checkbox" id="f-tags-3" name="tags" value="solar" />
@@ -219,6 +221,24 @@ describe("syncFilters", () => {
     expect(document.getElementById("f-review").value).toBe("");
   });
 
+  it("fills both ends of a date range from the URL", () => {
+    renderPage(
+      REGION("x", { modified_from: "2026-10-02", modified_to: "2026-10-03" }),
+    );
+    syncFilters(document, region());
+    expect(document.getElementById("f-modified_from").value).toBe("2026-10-02");
+    expect(document.getElementById("f-modified_to").value).toBe("2026-10-03");
+  });
+
+  it("empties both ends once the range's one chip is removed", () => {
+    renderPage(REGION("x", { search: "wind" }));
+    document.getElementById("f-modified_from").value = "2026-10-02";
+    document.getElementById("f-modified_to").value = "2026-10-03";
+    syncFilters(document, region());
+    expect(document.getElementById("f-modified_from").value).toBe("");
+    expect(document.getElementById("f-modified_to").value).toBe("");
+  });
+
   it("clears the bar after a Reset", () => {
     renderPage(REGION("x", {}));
     document.getElementById("f-review").value = "reviewed";
@@ -310,6 +330,22 @@ describe("bindTablesTab", () => {
       tags: "grid",
       sort: "-status",
       review: "reviewed",
+    });
+  });
+
+  it("sends one end of a date range, keeping the other", () => {
+    window.history.replaceState(
+      {},
+      "",
+      "/user/profile/1/tables?modified_from=2026-10-01&page=2",
+    );
+    const end = document.getElementById("f-modified_to");
+    end.value = "2026-10-03";
+    const parameters = { modified_to: "2026-10-03" };
+    configRequest(end, parameters);
+    expect(parameters).toEqual({
+      modified_from: "2026-10-01",
+      modified_to: "2026-10-03",
     });
   });
 

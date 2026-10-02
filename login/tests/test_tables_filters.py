@@ -15,6 +15,7 @@ from unittest import mock
 from django.db import connection
 from django.db.models import Q
 from django.test.utils import CaptureQueriesContext
+from django.utils import timezone
 
 from dataedit.models import Dataset, PeerReview, Table, Tag, Topic
 from login.models import (
@@ -516,7 +517,9 @@ class FilterBarTests(FilterTestCase):
     def test_the_chosen_values_are_selected_in_the_bar(self):
         page = self.page({"topics": "climate", "review": "in_review"})
         selected = {
-            c.param: [o.value for o in c.options if o.selected] for c in page.controls
+            c.param: [o.value for o in c.options if o.selected]
+            for c in page.controls
+            if c.kind == "choice"
         }
         self.assertEqual(selected["topics"], ["climate"])
         self.assertEqual(selected["review"], ["in_review"])
@@ -536,13 +539,20 @@ class FilterQueryCountTests(FilterTestCase):
         "topics": "a",
         "tags": "t1",
         "dataset": "any",
+        "modified_from": "2000-01-01",
     }
 
     def fill(self, count, organization):
         tables = Table.objects.bulk_create(
             # without metadata none passes the gate, and storing that lets
             # the Publishable filter in ALL_FILTERS leave rows on the page
-            Table(name=f"q_{index:04d}", is_publish=index % 3 == 0, publishable=False)
+            Table(
+                name=f"q_{index:04d}",
+                is_publish=index % 3 == 0,
+                publishable=False,
+                # stamped, so the Modified range in ALL_FILTERS leaves rows
+                data_modified=timezone.now(),
+            )
             for index in range(count)
         )
         UserPermission.objects.bulk_create(
@@ -591,7 +601,7 @@ class FilterQueryCountTests(FilterTestCase):
         sizes = list(counts)
         # 7 unfiltered (pinned in QueryCountTests); 7 with Publishable and
         # Review; 7 + 2 (Access) + 1 (Topics) + 1 (Tags) + 1 (Dataset) with
-        # all of them.
+        # all of them. The Modified range has no options and costs none.
         self.assertEqual(counts[sizes[0]][:3], [7, 7, 12])
         for size in sizes[1:]:
             self.assertEqual(counts[size], counts[sizes[0]], size)

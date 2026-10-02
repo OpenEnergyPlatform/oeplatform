@@ -286,10 +286,13 @@ class SortTests(TablesTabTestCase):
         self.second_b = self.table("t_b_second", title="Beta")
         self.charlie = self.table("charlie_untitled", published=True)
 
-    def test_default_is_displayed_title_case_insensitive_then_pk(self):
-        self.assertEqual(
-            self.names(), ["t_alpha", "t_b_first", "t_b_second", "charlie_untitled"]
-        )
+    def test_title_is_displayed_title_case_insensitive_then_pk(self):
+        """The default sort is Modified (``test_tables_modified``); these
+        Tables carry no stamps, so it ties and falls through to the title,
+        the order a title sort gives too."""
+        expected = ["t_alpha", "t_b_first", "t_b_second", "charlie_untitled"]
+        self.assertEqual(self.names({"sort": "table"}), expected)
+        self.assertEqual(self.names(), expected)
 
     def test_descending_title_keeps_the_pk_tiebreak_ascending(self):
         self.assertEqual(
@@ -314,13 +317,16 @@ class SortTests(TablesTabTestCase):
 
     def test_a_click_sorts_by_the_column_then_toggles_it(self):
         links = self.page().sort_links
-        self.assertEqual(links["table"].aria_sort, "ascending")
-        self.assertEqual(links["table"].url, f"{self.path}?sort=-table")
-        self.assertEqual(links["status"].aria_sort, "")
+        self.assertEqual(links["modified"].aria_sort, "descending")
+        self.assertEqual(links["table"].aria_sort, "")
+        self.assertEqual(links["table"].url, f"{self.path}?sort=table")
         self.assertEqual(links["status"].url, f"{self.path}?sort=status")
+        ascending = self.page({"sort": "table"}).sort_links["table"]
+        self.assertEqual(ascending.aria_sort, "ascending")
+        self.assertEqual(ascending.url, f"{self.path}?sort=-table")
         toggled = self.page({"sort": "-table"}).sort_links["table"]
         self.assertEqual(toggled.aria_sort, "descending")
-        self.assertEqual(toggled.url, self.path)
+        self.assertEqual(toggled.url, f"{self.path}?sort=table")
 
 
 class PagingTests(TablesTabTestCase):
@@ -397,7 +403,9 @@ class UrlStateTests(TablesTabTestCase):
         self.assertEqual(page.segment_links[0].url, self.path)
 
     def test_defaults_are_never_written(self):
-        page = self.page({"sort": "table", "page": "1", "search": "  ", "status": ""})
+        page = self.page(
+            {"sort": "-modified", "page": "1", "search": "  ", "status": ""}
+        )
         self.assertEqual(page.url, self.path)
 
     def test_a_segment_link_returns_to_page_one_and_keeps_the_rest(self):
@@ -420,7 +428,12 @@ class UrlStateTests(TablesTabTestCase):
 
     def test_the_htmx_answer_names_its_canonical_address(self):
         response = self.get(
-            {"page": "99", "sort": "table", "status": "draft", "published_page": "2"},
+            {
+                "page": "99",
+                "sort": "-modified",
+                "status": "draft",
+                "published_page": "2",
+            },
             htmx=True,
         )
         self.assertEqual(response["HX-Push-Url"], f"{self.path}?status=draft&page=2")
@@ -527,8 +540,15 @@ class QueryCountTests(TablesTabTestCase):
     the sorts that read other tables (Review, Datasets) included."""
 
     def fill(self, count, organization):
+        now = timezone.now()
         tables = Table.objects.bulk_create(
-            Table(name=f"q_{index:04d}", is_publish=index % 3 == 0)
+            Table(
+                name=f"q_{index:04d}",
+                is_publish=index % 3 == 0,
+                # every kind of Modified: unknown, data only, both halves
+                data_modified=now - timedelta(hours=index) if index % 3 else None,
+                metadata_modified=now - timedelta(days=index) if index % 2 else None,
+            )
             for index in range(count)
         )
         UserPermission.objects.bulk_create(
@@ -581,6 +601,7 @@ class QueryCountTests(TablesTabTestCase):
             {"page": "2", "search": "q_"},
             {"sort": "-review"},
             {"sort": "datasets"},
+            {"sort": "modified"},
         )
         counts = {}
         for size in (4, 130, 300):

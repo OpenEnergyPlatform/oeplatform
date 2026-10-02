@@ -15,10 +15,14 @@ at all, or one not in the SPDX list), about 10 % of published Tables are
 under embargo, 15-20 % have no title, and Topics sit mostly on published
 Tables. Deterministic for a given account key.
 
-Only the columns that exist are seeded (no Modified or Created yet). Every
-Table carries ``metadata_kb`` of oemetadata, because the page query decodes
-each row's whole document for the live Publish gate; real documents range
-from a few KB to several hundred.
+Modified is seeded as it will look once #2558 has backfilled the data half:
+about 15 % unknown, 45 % data only (marked "data"), 40 % both halves. The
+stamps come from their own random stream, so the rest of an account is
+seeded as before. Created is not seeded yet.
+
+Every Table carries ``metadata_kb`` of oemetadata, because the page query
+decodes each row's whole document for the live Publish gate; real documents
+range from a few KB to several hundred.
 
 Used by ``run.py`` and, for the browser check, from ``manage.py shell``::
 
@@ -295,6 +299,20 @@ def seed_account(
         )
 
     now = timezone.now()
+    stamps = random.Random(f"{key}-{account.n}-modified")
+
+    def modified():
+        """``(data_modified, metadata_modified)``, in the mix above."""
+        roll = stamps.random()
+        if roll < 0.15:
+            return None, None
+        data = now - timedelta(
+            days=stamps.randint(0, 900), minutes=stamps.randint(0, 1439)
+        )
+        if roll < 0.6:
+            return data, None
+        return data, now - timedelta(days=stamps.randint(0, 30))
+
     plans = []
     for _ in range(account.n):
         while True:
@@ -348,6 +366,7 @@ def seed_account(
                     ),
                     is_publish=published,
                     oemetadata=metadata(license_name, metadata_kb),
+                    **dict(zip(("data_modified", "metadata_modified"), modified())),
                 ),
                 embargo=embargo,
                 review=review,

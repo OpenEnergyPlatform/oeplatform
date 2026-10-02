@@ -38,12 +38,14 @@ class SortSelectTests(FilterTestCase):
                 ("-review", "Review: reviewed first"),
                 ("datasets", "Datasets: fewest first"),
                 ("-datasets", "Datasets: most first"),
+                ("modified", "Modified: oldest first"),
+                ("-modified", "Modified: newest first"),
             ],
         )
 
     def test_the_current_sort_is_selected(self):
         selected = [value for value, _, chosen in self.options() if chosen]
-        self.assertEqual(selected, ["table"])
+        self.assertEqual(selected, ["-modified"])
         selected = [
             value for value, _, chosen in self.options({"sort": "-review"}) if chosen
         ]
@@ -53,7 +55,7 @@ class SortSelectTests(FilterTestCase):
         selected = [
             value for value, _, chosen in self.options({"sort": "rows"}) if chosen
         ]
-        self.assertEqual(selected, ["table"])
+        self.assertEqual(selected, ["-modified"])
 
     def test_the_region_carries_it_so_it_follows_every_swap(self):
         response = self.get({"sort": "-status"}, htmx=True)

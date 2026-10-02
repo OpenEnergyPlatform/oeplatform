@@ -70,6 +70,15 @@ SPDX-License-Identifier: CC0-1.0
   list then refreshes itself, keeping its filters, and a message says what
   happened. Each action writes one log line per table
   [(#2561)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2561)
+- A Table now records when its content last changed, its data (rows, a bulk
+  upload, columns and constraints) and its metadata separately. Publishing,
+  unpublishing, embargoes and role changes do not count. The tables tab shows
+  the later of the two in a new Modified column, sorts by it by default (newest
+  first, tables with no recorded change last) and filters by a Modified date
+  range under "More filters". Nothing was recorded before this release, so
+  existing tables show "–" until they next change. Deploy: run
+  `python manage.py migrate` (`dataedit.0056`, two empty columns)
+  [(#2557)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2557)
 - The tables tab's ⋯ menu adds a table to one of your own datasets, or removes
   it from one (offered only when one of yours holds it). A draft or embargoed
   table may be added by anyone holding Data editor on it, directly or through an

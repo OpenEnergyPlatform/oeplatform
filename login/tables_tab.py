@@ -17,7 +17,7 @@ sees there, how the list filters and sorts, and what each row says.
   in a row, read by both the Datasets cell and its sort, so the number shown
   and the order it sorts by cannot disagree.
 - the filters: Search, Publishable, Review, Access, Dataset, and behind
-  "More filters" Topic and Tags, each one declaration. Every clause is a
+  "More filters" Modified, Topic and Tags, each one declaration. Every clause is a
   column test or a primary-key subquery, so no filter joins anything into
   the list that could multiply a row or a count. Each option source is scoped to the viewer's whole list and
   does not narrow as other filters change, and each costs one query (Access
@@ -35,6 +35,11 @@ result and a warning names the Table. A Table whose flag is still NULL
 (before the recompute command ran) shows the live result too, and is matched
 by neither filter value and sorted last both ways, because nothing is known
 about it that a filter could rely on.
+
+Modified is the later of a Table's two stamps, ``data_modified`` and
+``metadata_modified`` (``MODIFIED``), which the write paths set. It is the
+default sort, newest first, and like every date the list cannot know it sorts
+last in both directions and matches no Modified range.
 """  # noqa: 501
 
 import logging
@@ -55,7 +60,7 @@ from django.db.models import (
     Value,
     When,
 )
-from django.db.models.functions import Coalesce, Lower, Now, NullIf
+from django.db.models.functions import Coalesce, Greatest, Lower, Now, NullIf
 
 from dataedit.models import Dataset, Embargo, PeerReview, Table, Tag
 from dataedit.peer_review.badges import badge_label, normalize_badge
@@ -66,8 +71,10 @@ from login.listing import (
     Filter,
     Listing,
     Option,
+    RangeFilter,
     Segment,
     Sort,
+    dates_within,
 )
 from login.models import GroupPermission, UserPermission
 from login.permissions import ADMIN_PERM, DELETE_PERM, WRITE_PERM
@@ -94,6 +101,21 @@ TOPICS_SHOWN = 2
 # for a Table without one. Lower-cased for sorting, so case does not split
 # the alphabet in two.
 DISPLAYED_TITLE = Lower(Coalesce(NullIf(F("human_readable_name"), Value("")), "name"))
+
+# What the Modified column shows, sorts and filters by: the later of the two
+# stamps. Postgres's GREATEST ignores NULLs, so a Table with one half stamped
+# shows that half, and one with neither is NULL.
+MODIFIED = Greatest(F("data_modified"), F("metadata_modified"))
+
+# The release that started recording Modifications. What the column says
+# when it knows nothing, or only the data half (which #2558 backfills from
+# the Edit Journals and Bulk Load Events; metadata edits were never
+# recorded before). Check it names the release that ships dataedit.0056.
+MODIFIED_RECORDED_SINCE = "v1.11.0"
+DATA_ONLY_NOTE = (
+    f"Last data change. Metadata edits are recorded since {MODIFIED_RECORDED_SINCE}."
+)
+UNKNOWN_NOTE = f"No change recorded since {MODIFIED_RECORDED_SINCE}."
 
 # A peer review names its Table by name, not by key.
 _REVIEWS = PeerReview.objects.filter(table=OuterRef("name"))
@@ -367,6 +389,12 @@ def tables_listing(user) -> Listing:
                 _dataset(user),
                 blank="Dataset: any or none",
             ),
+            RangeFilter(
+                "modified",
+                "Modified",
+                dates_within(MODIFIED, "modified_range"),
+                more=True,
+            ),
             ChoiceFilter(
                 "topics",
                 "Topic",
@@ -430,10 +458,16 @@ def tables_listing(user) -> Listing:
                 "fewest first",
                 "most first",
             ),
+            Sort(
+                "modified",
+                "Modified",
+                MODIFIED,
+                "oldest first",
+                "newest first",
+                nulls_last=True,
+            ),
         ),
-        # Interim default until the Modified column lands (#2557), which makes
-        # "-modified" the default.
-        default_sort="table",
+        default_sort="-modified",
         tiebreak=(DISPLAYED_TITLE.asc(), F("pk").asc()),
     )
 
@@ -515,6 +549,28 @@ class TableRow:
         if len(failed) == 1:
             return failed[0].name
         return f"{len(failed)} of {len(self.checks)}"
+
+    @property
+    def modified(self):
+        """When the Table's content last changed, as far as recorded: the
+        later of its two stamps, None when neither is known. ``MODIFIED``,
+        which the list sorts and filters by, says the same in SQL."""
+        stamps = [self.table.data_modified, self.table.metadata_modified]
+        return max((stamp for stamp in stamps if stamp), default=None)
+
+    @property
+    def data_only(self) -> bool:
+        """Whether only the data half is known, so a metadata edit before
+        recording began may be later than the date shown."""
+        return bool(self.table.data_modified and not self.table.metadata_modified)
+
+    @property
+    def modified_note(self) -> str:
+        """What the Modified cell explains on hover and to a screen reader:
+        why the date may be early, or why there is none."""
+        if self.modified is None:
+            return UNKNOWN_NOTE
+        return DATA_ONLY_NOTE if self.data_only else ""
 
     @property
     def shown_topics(self) -> list:

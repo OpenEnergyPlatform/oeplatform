@@ -70,6 +70,7 @@ adds no history entry.
               <th class="c-access" scope="col">Access</th>
               {% include "login/partials/list_sort_header.html" with link=page.sort_links.datasets cell="c-ds" %}
               <th class="c-topics" scope="col">Topics</th>
+              {% include "login/partials/list_sort_header.html" with link=page.sort_links.modified cell="c-modified" %}
               <th class="c-menu" scope="col">
                 <span class="visually-hidden">Actions</span>
               </th>
@@ -111,6 +112,7 @@ adds no history entry.
                 </td>
                 <td class="c-ds">{% include "login/partials/cells/datasets.html" %}</td>
                 <td class="c-topics">{% include "login/partials/cells/chips.html" %}</td>
+                <td class="c-modified">{% include "login/partials/cells/modified.html" %}</td>
                 <td class="c-menu">{% include "login/partials/cells/menu.html" %}</td>
               </tr>
             {% endfor %}
