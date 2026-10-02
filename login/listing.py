@@ -28,8 +28,9 @@ control, one chip that removes both ends, one in "Filters (n)"); only the
 URL holds it as two, which is why each filter names its own ``params``.
 
 ``Listing.matching`` narrows a base queryset by every active filter, which is
-the one statement of what the URL selects: the list, its counts and (later)
-"select all matching" all read it. ``Listing.page`` turns a base queryset and a
+the one statement of what the URL selects: the list, its counts and "select
+all matching" all read it. ``ListPage.scope`` is that statement as a query
+string, without sort and page: a selection belongs to one scope. ``Listing.page`` turns a base queryset and a
 request's query string into one ``ListPage``. Its ``rows`` argument turns one page of model instances into
 rows, which is where a tab attaches, in a fixed number of queries, what one
 query per row would otherwise fetch. Every link the page offers (segment, sort headers, pager,
@@ -553,6 +554,14 @@ class ListPage:
     def url(self) -> str:
         """The canonical address of what is shown (page clamped)."""
         return self.state.url(self.path, page=self.number)
+
+    @property
+    def scope(self) -> str:
+        """The filter state a selection is made under: every filter and the
+        segment as the URL keeps them, without the sort and the page ("" when
+        unfiltered). Paging and sorting keep a selection; moving to another
+        scope clears it."""
+        return self.state.url("", page=1, sort=self.listing.default_sort)
 
     @property
     def reset_url(self) -> str:

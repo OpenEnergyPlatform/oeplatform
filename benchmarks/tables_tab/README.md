@@ -15,6 +15,8 @@ take:
   happy-dom has no layout, so this runs in a real browser.
 - **`delete_cost.py`**: what deleting one Table costs (#2562), which sets the
   delete ceiling `CEILINGS["delete"]` in `api/services/table_actions.py`.
+- **`publish_cost.py`**: what publishing and unpublishing one Table cost
+  (#2564), which sets `CEILINGS["publish"]` and `CEILINGS["unpublish"]`.
 
 Both use accounts shaped like production (`seed.py`, a port of the WF-06
 prototype's generator, sized from WF-01's census): `p90` (130 Tables), `max`
@@ -103,3 +105,35 @@ production timeout is `Timeout 300` / `socket-timeout=300` (read on the host
 2026-10-02). At a worst case of 1.2 s per Table, 50 Tables take 60 s: the
 ceiling is 50, a safety factor of 5, which covers production's OEDB sitting on
 another host. The reasoning is beside the constant.
+
+## Publish and unpublish cost
+
+Same throwaway database; publishing moves nothing in the OEDB, so no OEDB table
+is created.
+
+```bash
+python -m benchmarks.tables_tab.publish_cost
+python -m benchmarks.tables_tab.publish_cost --tables 100,400,1000 --metadata-kb 6,60,500
+```
+
+For each metadata size and batch size it creates draft Tables with an open
+license, a Table admin grant and a finished peer review (which publishing
+rewrites), then times the preflight (stored Publish gate verdict, and none,
+which runs the gate live), a publish with a 6-month embargo and an unpublish,
+through `table_actions`. Results append to
+`benchmarks/results/tables_tab_publish.csv`.
+
+Measured 2026-10-02/03, local Postgres 14, batches of 100, 400 and 1,000, three
+rounds, per Table:
+
+| metadata per Table | preflight  | publish  | unpublish  |
+| ------------------ | ---------- | -------- | ---------- |
+| 6 KB               | 0.1-0.3 ms | 6-7.5 ms | 1.6-2.1 ms |
+| 60 KB              | 0.4-0.5 ms | 7-9 ms   | 2.8-4.2 ms |
+| 500 KB             | 3.0-5.0 ms | 20-34 ms | 16-21 ms   |
+
+The preflight costs the same with the stored verdict as with the gate run live:
+decoding the metadata is what it pays for. Both writes save the whole row, which
+is why they grow with the metadata. At the worst 34 ms, 1,000 Tables take 34 s
+against production's 300 s timeout: the ceiling is 1,000 for both, a safety
+factor of about 9. The reasoning is beside the constant.

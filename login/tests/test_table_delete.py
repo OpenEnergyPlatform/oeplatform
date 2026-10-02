@@ -218,7 +218,8 @@ class DeleteTests(DeleteTestCase):
         self.assertFalse(Dataset.objects.get(name="ds_left").tables.exists())
         self.assertFalse(self.in_oedb(table.name))
         detail = self.trigger(response, "tables-changed")
-        self.assertEqual(detail, {"message": "Deleted “Gone”."})
+        # ``gone`` lets the bulk selection drop it (#2564)
+        self.assertEqual(detail, {"message": "Deleted “Gone”.", "gone": [table.name]})
 
     def test_a_published_table_without_its_name_typed_is_kept(self):
         table = self.oedb_table(title="Typed")
