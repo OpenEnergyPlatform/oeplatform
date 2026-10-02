@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1
+# The syntax directive is what enables RUN --mount below.
 # We currently stick to this python version
 FROM python:3.10.14
 
@@ -31,8 +33,17 @@ WORKDIR /home/appuser/app
 COPY requirements.txt ./requirements.txt
 COPY requirements-dev.txt ./requirements-dev.txt
 COPY requirements-docs.txt ./requirements-docs.txt
-RUN pip install --upgrade pip \
-     && pip install --no-cache-dir -r requirements-dev.txt
+# The pip cache lives in a BuildKit cache mount, NOT in the image: the image
+# stays as small as --no-cache-dir made it, and a rebuild reuses the downloads
+# and the wheels it already built.
+#
+# This matters because the COPY lines above invalidate this layer, so ONE new
+# line in requirements.txt used to re-download and re-compile all ~47 packages
+# -- psycopg2, shapely and owlready2 build from source against build-essential,
+# which is most of the several minutes that took.
+RUN --mount=type=cache,target=/root/.cache/pip \
+     pip install --upgrade pip \
+     && pip install -r requirements-dev.txt
 
 # bring in your dev-entrypoint (in docker/)
 COPY docker/docker-entrypoint.dev.sh .
