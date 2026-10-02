@@ -97,6 +97,17 @@ SPDX-License-Identifier: CC0-1.0
   If the database table cannot be removed after the table's record is gone, a
   warning that stays on screen names it, and the log says `drop=failed`
   [(#2562)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2562)
+- A table's Access cell, or "Manage access" in its ⋯ menu, opens a side drawer
+  listing who holds which role (Data editor, Data maintainer, Admin), your own
+  entries marked. A Table admin adds a person or one of their own organizations
+  with a role in one step, changes or removes any holder; everyone else sees the
+  list read-only with the table's Admins, and anyone with a role of their own
+  can leave the table. Organizations go up to Data maintainer, Admin is given to
+  people by name, and a table always keeps one person with Admin. Losing your
+  own Admin, or the table from your dashboard, asks once. The drawer stays open
+  while the list refreshes behind it; each change writes one log line with the
+  role before and after
+  [(#2566)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2566)
 
 ## Bugs
 

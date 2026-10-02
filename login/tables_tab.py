@@ -77,18 +77,14 @@ from login.listing import (
     dates_within,
 )
 from login.models import GroupPermission, UserPermission
-from login.permissions import ADMIN_PERM, DELETE_PERM, WRITE_PERM
+from login.permissions import ADMIN_PERM, WRITE_PERM
+from login.table_roles import ROLES
 from oeplatform.settings import PSEUDO_TOPIC_DRAFT
 
 logger = logging.getLogger("oeplatform.publish_gate")
 
-# The Table roles by level. "Admin" rather than "Table admin" because the
-# row is always about one Table.
-ROLE_LABELS = {
-    WRITE_PERM: "Data editor",
-    DELETE_PERM: "Data maintainer",
-    ADMIN_PERM: "Admin",
-}
+# The Table roles by level, from the permission service's one list.
+ROLE_LABELS = {role.level: role.label for role in ROLES}
 
 DRAFT, PUBLISHED, EMBARGOED = "draft", "published", "embargoed"
 

@@ -400,11 +400,16 @@
   background: #d7ecf3;
 }
 
-/* Access: the whole cell manages access */
+/* Access: the whole cell opens the access drawer */
 .dash-access {
   display: inline-block;
+  padding: 0;
   color: inherit;
+  text-align: left;
   text-decoration: none;
+  background: none;
+  border: 0;
+  border-radius: 4px;
 }
 
 /* Datasets and the Topics' "+n": a count that opens a popover */
@@ -528,6 +533,157 @@
 .dash-action-list {
   max-height: 12rem;
   overflow-y: auto;
+}
+
+/* The access drawer (#2566). It sits outside .dash, so it states the
+   colours it uses itself. Its body is a wrapper the drawer's contents are
+   swapped into, so it carries the offcanvas' column layout on. */
+.dash-access-offcanvas {
+  --dash-muted: #6c757d;
+  --dash-secondary: #1f567d;
+}
+
+.dash-access-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+/* the list's .dash-muted keeps a cell on one line; prose here wraps */
+.dash-access-drawer .dash-muted {
+  font-size: 0.8125rem;
+  color: var(--dash-muted);
+  white-space: normal;
+}
+
+.dash-holders {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dash-holder {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+  padding: 0.35rem 0.4rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+/* the viewer's own entries */
+.dash-holder--you {
+  background: #f5f9fc;
+  box-shadow: inset 3px 0 0 var(--dash-secondary);
+}
+
+.dash-holder__name {
+  flex: 1 1 10rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.dash-holder__you,
+.dash-holder__members {
+  margin-left: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--dash-muted);
+}
+
+.dash-holder__you {
+  font-weight: 600;
+  color: var(--dash-secondary);
+}
+
+/* the role choice and Remove stay together, and wrap below the name as one */
+.dash-holder__controls {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+  margin-left: auto;
+}
+
+.dash-holder__role .form-select {
+  width: auto;
+}
+
+.dash-holder__rolename {
+  font-size: 0.875rem;
+}
+
+.dash-access-add__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.dash-access-add__row .form-control {
+  flex: 1 1 9rem;
+  width: auto;
+}
+
+.dash-access-add__row .form-select {
+  flex: 0 1 auto;
+  width: auto;
+}
+
+.dash-roles dt {
+  font-size: 0.875rem;
+}
+
+.dash-roles dd {
+  margin-bottom: 0.4rem;
+  font-size: 0.8125rem;
+  color: var(--dash-muted);
+}
+
+/* The Table's Admins for someone who cannot change access: small round
+   avatars, named on hover AND on focus, so the name also reaches keyboard
+   and touch users. The name is drawn below the avatar, inside the drawer,
+   so the drawer's own scrolling cannot clip it. */
+.dash-avatars {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding-bottom: 1.6rem;
+}
+
+.dash-avatar {
+  position: relative;
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+.dash-avatar img,
+.dash-avatar svg {
+  display: block;
+  width: 24px;
+  height: 24px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.dash-avatar:focus-visible {
+  outline: 2px solid var(--dash-secondary);
+  outline-offset: 2px;
+}
+
+.dash-avatar:hover::after,
+.dash-avatar:focus::after {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 1;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.75rem;
+  color: #fff;
+  white-space: nowrap;
+  content: attr(data-tip);
+  background: #212529;
+  border-radius: 4px;
 }
 
 /* messages after an action */

@@ -1,0 +1,243 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+The access drawer: the contents of #table-access-body, one Table's Holders.
+Every write posts here and the answer replaces these contents, so the
+drawer stays open for the next change while the list re-fetches behind it
+(``tables-changed``). What the user may do is decided by the permission
+service (``login.table_roles``) and checked again on every write; this only
+offers it:
+
+- a Table admin changes or removes any Holder, adds a user or one of their
+  own Organizations with a role in one step;
+- anyone else sees the list read-only, "Only Admins can change access", and
+  the Table's Admins as small avatars (focusable, named on hover and focus);
+- anyone with a direct grant may leave the Table.
+
+``confirm`` is the question the service asked (losing your own Admin, or the
+Table from your dashboard); ``pending`` the change it is about, posted again
+with ``confirm=yes``. ``notice`` is a refusal, ``errors`` maps a field to
+its error. ``gone`` means the Table has left the user's dashboard. Every
+control has a stable id, so focus can be put back after a swap.
+{% endcomment %}
+{% url 'login:table-access' user_id=profile_user.pk table_name=table.name as access_url %}
+<div class="offcanvas-header">
+  <h2 class="offcanvas-title h5" id="table-access-title" tabindex="-1">
+    Access to {{ title }}
+  </h2>
+  <button type="button"
+          class="btn-close"
+          data-bs-dismiss="offcanvas"
+          aria-label="Close"></button>
+</div>
+<div class="offcanvas-body dash-access-drawer">
+  {% if gone %}
+    <p id="table-access-gone" class="alert alert-info">
+      You no longer have access to “{{ title }}”. It has left your dashboard.
+    </p>
+  {% else %}
+    {% if notice %}
+      <div id="table-access-notice"
+           class="alert alert-danger"
+           role="alert">{{ notice }}</div>
+    {% endif %}
+    {% if errors.op %}
+      <div id="table-access-error"
+           class="alert alert-danger"
+           role="alert">{{ errors.op }}</div>
+    {% endif %}
+    {% if confirm %}
+      <div id="table-access-confirm-box"
+           class="alert alert-warning dash-access-confirm"
+           tabindex="-1"
+           role="alertdialog"
+           aria-labelledby="table-access-confirm-text">
+        <p id="table-access-confirm-text" class="mb-2">{{ confirm }}</p>
+        <form hx-post="{{ access_url }}"
+              hx-target="#table-access-body"
+              hx-swap="innerHTML">
+          {% csrf_token %}
+          {% for key, value in pending.items %}
+            {% if value %}
+              <input type="hidden" name="{{ key }}" value="{{ value }}" />
+            {% endif %}
+          {% endfor %}
+          <input type="hidden" name="confirm" value="yes" />
+          <button type="submit"
+                  id="table-access-confirm"
+                  class="btn btn-warning btn-sm">Confirm</button>
+          <button type="button"
+                  id="table-access-cancel"
+                  class="btn btn-outline-secondary btn-sm"
+                  hx-get="{{ access_url }}"
+                  hx-target="#table-access-body"
+                  hx-swap="innerHTML">Cancel</button>
+        </form>
+      </div>
+    {% endif %}
+    {% if not access.can_manage %}
+      <div id="table-access-readonly" class="dash-access-readonly">
+        <p class="mb-1">Only Admins can change access.</p>
+        {% if access.admins %}
+          <div class="dash-avatars" aria-label="Admins of this table">
+            {% for admin in access.admins %}
+              <span id="access-admin-{{ admin.pk }}"
+                    class="dash-avatar"
+                    role="img"
+                    tabindex="0"
+                    aria-label="{{ admin.name }}, Admin"
+                    data-tip="{{ admin.name }}, Admin">
+                {% if admin.image %}
+                  <img src="{{ admin.image }}" alt="" width="24" height="24" />
+                {% else %}
+                  {% include "login/partials/avatar_placeholder.html" %}
+                {% endif %}
+              </span>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+    <h3 class="h6 mt-3">People</h3>
+    {% if access.users %}
+      <ul id="table-access-users" class="dash-holders">
+        {% for holder in access.users %}
+          {% include "login/partials/table_access_holder.html" %}
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="dash-muted">Nobody holds a role of their own.</p>
+    {% endif %}
+    <h3 class="h6 mt-3">Organizations</h3>
+    {% if access.organizations %}
+      <ul id="table-access-organizations" class="dash-holders">
+        {% for holder in access.organizations %}
+          {% include "login/partials/table_access_holder.html" %}
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="dash-muted">Not shared with any organization.</p>
+    {% endif %}
+    {% if access.can_manage %}
+      <form id="table-access-add-user"
+            class="dash-access-add"
+            hx-post="{{ access_url }}"
+            hx-target="#table-access-body"
+            hx-swap="innerHTML">
+        {% csrf_token %}
+        <input type="hidden" name="op" value="add" />
+        <input type="hidden" name="kind" value="user" />
+        <h3 class="h6 mt-3">Add a person</h3>
+        <div class="dash-access-add__row">
+          <label class="visually-hidden" for="access-add-name">User name</label>
+          <input type="text"
+                 id="access-add-name"
+                 name="name"
+                 class="form-control form-control-sm{% if errors.name and values.kind == 'user' %} is-invalid{% endif %}"
+                 placeholder="User name"
+                 autocomplete="off"
+                 required
+                 {% if values.kind == "user" %}value="{{ values.name }}"{% endif %}
+                 {% if errors.name and values.kind == "user" %}aria-describedby="access-add-name-error"{% endif %} />
+          <label class="visually-hidden"
+                 for="access-add-user-level">Role</label>
+          <select id="access-add-user-level"
+                  name="level"
+                  class="form-select form-select-sm{% if errors.level and values.kind == 'user' %} is-invalid{% endif %}">
+            {% for role in roles %}
+              <option value="{{ role.level }}"
+                      {% if values.kind == "user" and values.level == role.level|stringformat:"d" %}selected{% endif %}>
+                {{ role.label }}
+              </option>
+            {% endfor %}
+          </select>
+          <button type="submit"
+                  id="access-add-user"
+                  class="btn btn-primary btn-sm">Add</button>
+        </div>
+        {% if values.kind == "user" %}
+          {% if errors.name %}
+            <div id="access-add-name-error"
+                 class="invalid-feedback d-block">{{ errors.name }}</div>
+          {% endif %}
+          {% if errors.level %}<div class="invalid-feedback d-block">{{ errors.level }}</div>{% endif %}
+        {% endif %}
+      </form>
+      {% if access.shareable %}
+        <form id="table-access-add-org"
+              class="dash-access-add"
+              hx-post="{{ access_url }}"
+              hx-target="#table-access-body"
+              hx-swap="innerHTML">
+          {% csrf_token %}
+          <input type="hidden" name="op" value="add" />
+          <input type="hidden" name="kind" value="org" />
+          <h3 class="h6 mt-3">Share with one of your organizations</h3>
+          <div class="dash-access-add__row">
+            <label class="visually-hidden"
+                   for="access-add-org">Organization</label>
+            <select id="access-add-org"
+                    name="organization"
+                    class="form-select form-select-sm{% if errors.organization %} is-invalid{% endif %}">
+              {% for organization in access.shareable %}
+                <option value="{{ organization.pk }}"
+                        {% if values.organization == organization.pk|stringformat:"d" %}selected{% endif %}>
+                  {{ organization.name }}
+                </option>
+              {% endfor %}
+            </select>
+            <label class="visually-hidden"
+                   for="access-add-org-level">Role</label>
+            <select id="access-add-org-level"
+                    name="level"
+                    class="form-select form-select-sm">
+              {% for role in organization_roles %}
+                <option value="{{ role.level }}"
+                        {% if values.kind == "org" and values.level == role.level|stringformat:"d" %}selected{% endif %}>
+                  {{ role.label }}
+                </option>
+              {% endfor %}
+            </select>
+            <button type="submit"
+                    id="access-add-org-submit"
+                    class="btn btn-primary btn-sm">Share</button>
+          </div>
+          {% if values.kind == "org" %}
+            {% if errors.organization %}<div class="invalid-feedback d-block">{{ errors.organization }}</div>{% endif %}
+            {% if errors.level %}<div class="invalid-feedback d-block">{{ errors.level }}</div>{% endif %}
+          {% endif %}
+          <p class="dash-muted mt-1 mb-0">
+            Every member gets the role. Organizations go up to Data maintainer; Admin is given to people, by name.
+          </p>
+        </form>
+      {% endif %}
+    {% endif %}
+    {% if access.own_grant %}
+      <form id="table-access-leave"
+            class="mt-3"
+            hx-post="{{ access_url }}"
+            hx-target="#table-access-body"
+            hx-swap="innerHTML">
+        {% csrf_token %}
+        <input type="hidden" name="op" value="leave" />
+        <button type="submit"
+                id="access-leave"
+                class="btn btn-outline-danger btn-sm">Leave this table</button>
+      </form>
+    {% endif %}
+    <h3 class="h6 mt-4">Roles</h3>
+    <dl id="table-access-roles" class="dash-roles">
+      {% for role in roles %}
+        <dt>{{ role.label }}</dt>
+        <dd>
+          {{ role.description }}
+        </dd>
+      {% endfor %}
+    </dl>
+  {% endif %}
+  <p class="mt-3 mb-0">
+    <a id="table-access-page"
+       href="{% url 'dataedit:table-permission' table=table.name %}">Open the table's permission page</a>
+  </p>
+</div>

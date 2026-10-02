@@ -30,8 +30,9 @@ or removing it from one of the user's own Datasets (``dataset_add``,
 curation rule of ``api.services.dataset_creation.assignable_tables``, the
 same rule the dataset assign API and the Dataset tab's picker read.
 
-The role an action needs is read off ``table_levels``, which states the
-platform's permission rule set-based, as ``myuser.get_table_permission_level``
+The role an action needs is read off ``table_levels`` (``login.table_roles``,
+the permission service), which states the platform's permission rule
+set-based, as ``myuser.get_table_permission_level``
 does for one Table: the highest of the user's direct grant and the grants of
 their Organizations, and Table admin on every Table for a platform admin or a
 member of an admin Organization. It is the same rule the API's permission
@@ -62,8 +63,8 @@ from api.error import APIError
 from api.services.dataset_creation import assign_table, assignable_tables
 from dataedit.models import Dataset, Embargo, PeerReview, Table, Topic
 from dataedit.publish_gate import publish_checks
-from login.models import GroupPermission, Organization, UserPermission
 from login.permissions import ADMIN_PERM, DELETE_PERM, NO_PERM, WRITE_PERM
+from login.table_roles import table_levels
 from login.tables_tab import visible_datasets
 from oeplatform.settings import PSEUDO_TOPIC_DRAFT
 
@@ -236,29 +237,6 @@ class Outcome:
     tables: list
     params: dict
     drop_failed: list = field(default_factory=list)
-
-
-def table_levels(user, tables) -> dict:
-    """The user's effective Table role on each of ``tables``, by primary
-    key. See the module docstring for the rule. Three queries whatever the
-    number of Tables (one for a platform admin)."""
-    ids = [table.pk for table in tables]
-    if user.is_admin or (
-        Organization.objects.filter(is_admin=True, memberships__user=user).exists()
-    ):
-        return dict.fromkeys(ids, ADMIN_PERM)
-    levels = dict.fromkeys(ids, NO_PERM)
-    grants = list(
-        UserPermission.objects.filter(holder=user, table_id__in=ids).values_list(
-            "table_id", "level"
-        )
-    )
-    grants += GroupPermission.objects.filter(
-        holder__memberships__user=user, table_id__in=ids
-    ).values_list("table_id", "level")
-    for table_id, level in grants:
-        levels[table_id] = max(levels[table_id], level)
-    return levels
 
 
 def own_datasets(user):

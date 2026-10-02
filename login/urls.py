@@ -27,6 +27,7 @@ from login.views import (
     OrganizationsView,
     ReviewsView,
     SettingsView,
+    TableAccessView,
     TableActionView,
     TablesView,
     account_delete_view,
@@ -132,6 +133,11 @@ urlpatterns = [
         r"^profile/(?P<user_id>[\d]+)/tables/actions/(?P<action>[a-z_]+)$",
         TableActionView.as_view(),
         name="table-action",
+    ),
+    re_path(
+        r"^profile/(?P<user_id>[\d]+)/tables/(?P<table_name>[\w]+)/access$",
+        TableAccessView.as_view(),
+        name="table-access",
     ),
     re_path(
         r"^profile/(?P<user_id>[\d]+)/tables/(?P<table_name>[\w]+)/review-badge$",

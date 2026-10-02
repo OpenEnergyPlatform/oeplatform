@@ -129,12 +129,16 @@ class RowMenuTests(ActionTestCase):
             element_with_id(html, f"menu-{table.pk}-upload"),
         )
 
-    def test_entries_whose_ticket_has_not_landed_are_absent(self):
-        table = self.draft("t_later")
+    def test_every_entry_of_the_menu_is_there(self):
+        """Every ticket that adds a menu entry has landed (#2561, #2562,
+        #2563, #2566), so nothing in the menu is still absent."""
+        table = self.draft("t_complete")
         html = self.html()
-        for entry in ("access",):
+        for entry in ("edit", "upload", "access", "publish", "dataset_add", "delete"):
             with self.subTest(entry=entry):
-                self.assertEqual(element_with_id(html, f"menu-{table.pk}-{entry}"), "")
+                self.assertNotEqual(
+                    element_with_id(html, f"menu-{table.pk}-{entry}"), ""
+                )
 
     def test_the_menu_costs_no_query(self):
         """The role gates come from the page's context and the row's level,
