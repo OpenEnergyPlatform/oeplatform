@@ -190,6 +190,12 @@ class Table(Tagable):
     # For now, we only set it on creation
     date_updated = DateTimeField(auto_now_add=True, null=True)
 
+    # The Publish gate's verdict (dataedit.publish_gate), stored so a list can
+    # filter and sort on it. Recomputed on every write through
+    # api.actions.set_table_metadata and by the recompute_publish_gate
+    # command; NULL until that command first ran. Publishing never reads it.
+    publishable = BooleanField(null=True)
+
     embargos: QuerySet["Embargo"]  # related_name, for static type checking
     userpermission_set: QuerySet[
         "UserPermission"  # TODO: import

@@ -32,6 +32,8 @@ class SortSelectTests(FilterTestCase):
                 ("-table", "Table: Z to A"),
                 ("status", "Status: drafts first"),
                 ("-status", "Status: published first"),
+                ("publishable", "Publishable: not publishable first"),
+                ("-publishable", "Publishable: publishable first"),
                 ("review", "Review: not reviewed first"),
                 ("-review", "Review: reviewed first"),
                 ("datasets", "Datasets: fewest first"),
@@ -98,12 +100,13 @@ class FilterFoldTests(FilterTestCase):
         self.assertEqual(self.page().folded_count, 0)
         query = {
             "search": "one",
+            "publishable": "no",
             "review": "not_reviewed",
             "access": str(self.organization_pk),
             "topics": "climate",
             "tags": "wind",
         }
-        self.assertEqual(self.page(query).folded_count, 4)
+        self.assertEqual(self.page(query).folded_count, 5)
 
     def test_search_and_status_are_not_behind_the_toggle(self):
         self.assertEqual(

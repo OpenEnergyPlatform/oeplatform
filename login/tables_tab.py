@@ -16,22 +16,31 @@ sees there, how the list filters and sorts, and what each row says.
 - ``visible_datasets``: the one statement of which Datasets a viewer may see
   in a row, read by both the Datasets cell and its sort, so the number shown
   and the order it sorts by cannot disagree.
-- the filters: Search, Review, Access, Dataset, and behind "More filters"
-  Topic and Tags, each one declaration. Every clause is a primary-key
-  subquery, so no filter joins anything into the list that could multiply a
-  row or a count. Each option source is scoped to the viewer's whole list and
+- the filters: Search, Publishable, Review, Access, Dataset, and behind
+  "More filters" Topic and Tags, each one declaration. Every clause is a
+  column test or a primary-key subquery, so no filter joins anything into
+  the list that could multiply a row or a count. Each option source is scoped to the viewer's whole list and
   does not narrow as other filters change, and each costs one query (Access
   two), run only when the request names that filter or the bar is rendered.
 - ``table_rows``: one page of Tables as ``TableRow`` objects. The embargo,
   the Review state and the Topics are read in the page query; the Access cell
   and the Datasets cell in three more queries for the whole page, whatever
   its size. The Publish gate is computed live for the rows on the page only.
+
+The Publish gate is ``dataedit.publish_gate``. Its stored verdict,
+``Table.publishable``, decides what the Publishable filter and sort see; the
+row runs the same checks live for its reasons. Where the two disagree,
+something wrote metadata past the one write path: the row shows the live
+result and a warning names the Table. A Table whose flag is still NULL
+(before the recompute command ran) shows the live result too, and is matched
+by neither filter value and sorted last both ways, because nothing is known
+about it that a filter could rely on.
 """  # noqa: 501
 
+import logging
 from dataclasses import dataclass, field
 from datetime import datetime
 from functools import cache
-from typing import Callable
 
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.db.models import (
@@ -50,6 +59,7 @@ from django.db.models.functions import Coalesce, Lower, Now, NullIf
 
 from dataedit.models import Dataset, Embargo, PeerReview, Table, Tag
 from dataedit.peer_review.badges import badge_label, normalize_badge
+from dataedit.publish_gate import passes, publish_checks
 from login.listing import (
     Choice,
     ChoiceFilter,
@@ -62,6 +72,8 @@ from login.listing import (
 from login.models import GroupPermission, UserPermission
 from login.permissions import ADMIN_PERM, DELETE_PERM, WRITE_PERM
 from oeplatform.settings import PSEUDO_TOPIC_DRAFT
+
+logger = logging.getLogger("oeplatform.publish_gate")
 
 # The Table roles by level. "Admin" rather than "Table admin" because the
 # row is always about one Table.
@@ -104,6 +116,14 @@ REVIEW_OPTIONS = (
     Option(NOT_REVIEWED, "Not reviewed"),
 )
 
+# The Publishable filter's values. Fixed, so naming the filter costs no
+# query.
+YES, NO = "yes", "no"
+PUBLISHABLE_OPTIONS = (
+    Option(YES, "Publishable", chip="Publishable"),
+    Option(NO, "Not publishable", chip="Not publishable"),
+)
+
 # The Access filter's value for "a grant of my own", beside Organization ids.
 DIRECT = "direct"
 # The Dataset filter's two values beside a Dataset name.
@@ -114,28 +134,6 @@ IN_ANY, IN_NONE = "any", "none"
 # lifecycle gives Dataset its flag, this condition is the one line to change:
 # the Datasets cell and its sort both read it through ``visible_datasets``.
 PUBLISHED_DATASETS = Q(uuid__isnull=False)
-
-
-@dataclass(frozen=True)
-class GateCheck:
-    """One check of the Publish gate: ``name`` is what a failing row shows,
-    ``label`` what the reasons popover calls it, ``run`` the check itself,
-    answering ``{"status": bool, "error": str}`` like
-    ``Table.validate_open_data_license``."""
-
-    name: str
-    label: str
-    run: Callable[[Table], dict]
-
-
-# The checks the Publish gate enforces, in the order a row names them. Today
-# that is the open data license alone, the one content refusal publishing
-# makes (``api.actions`` refuses a publish on exactly this check). A check
-# joins this list in the same change that adds it to the gate, so ✓ keeps
-# meaning "publishing will not refuse this Table on its content".
-PUBLISH_GATE = (
-    GateCheck("License", "Open data license", lambda t: t.validate_open_data_license()),
-)
 
 
 def accessible_tables(user):
@@ -175,6 +173,12 @@ def _search(queryset, text):
     return queryset.filter(
         Q(name__icontains=text) | Q(human_readable_name__icontains=text)
     )
+
+
+def _publishable(queryset, value):
+    """The stored verdict. A NULL flag matches neither value: until the
+    recompute ran nothing is known about that Table."""
+    return queryset.filter(publishable=value == YES)
 
 
 def _review(queryset, state):
@@ -346,6 +350,9 @@ def tables_listing(user) -> Listing:
         plural="tables",
         filters=(
             Filter("search", lambda raw: raw.strip() or None, _search, label="Search"),
+            ChoiceFilter(
+                "publishable", "Publishable", PUBLISHABLE_OPTIONS, _publishable
+            ),
             ChoiceFilter("review", "Review", REVIEW_OPTIONS, _review),
             ChoiceFilter(
                 "access",
@@ -390,7 +397,8 @@ def tables_listing(user) -> Listing:
             ),
         ),
         # Ascending is "least done first" throughout: drafts before published
-        # Tables, unreviewed before reviewed, in no Dataset before in many.
+        # Tables, not publishable before publishable, unreviewed before
+        # reviewed, in no Dataset before in many.
         sorts=(
             Sort("table", "Table", DISPLAYED_TITLE, "A to Z", "Z to A"),
             Sort(
@@ -399,6 +407,14 @@ def tables_listing(user) -> Listing:
                 F("is_publish"),
                 "drafts first",
                 "published first",
+            ),
+            Sort(
+                "publishable",
+                "Publishable",
+                F("publishable"),
+                "not publishable first",
+                "publishable first",
+                nulls_last=True,
             ),
             Sort(
                 "review",
@@ -420,16 +436,6 @@ def tables_listing(user) -> Listing:
         default_sort="table",
         tiebreak=(DISPLAYED_TITLE.asc(), F("pk").asc()),
     )
-
-
-@dataclass(frozen=True)
-class CheckResult:
-    """What one Publish gate check said about one Table."""
-
-    name: str
-    label: str
-    passed: bool
-    reason: str = ""
 
 
 @dataclass(frozen=True)
@@ -488,7 +494,12 @@ class TableRow:
 
     @property
     def publishable(self) -> bool:
-        return all(check.passed for check in self.checks)
+        """What the Publishable cell shows. Normally the stored verdict and
+        the live ``checks`` agree, and this is both. Where they disagree,
+        live wins, so the cell never contradicts the reasons beneath it
+        (``table_rows`` logs the disagreement); a NULL verdict shows the live
+        result too. The filter and the sort read the stored verdict."""
+        return passes(self.checks)
 
     @property
     def failed_label(self) -> str:
@@ -506,20 +517,6 @@ class TableRow:
     @property
     def more_topics(self) -> list:
         return self.topics[TOPICS_SHOWN:]
-
-
-def publish_checks(table) -> list:
-    """Every check of the Publish gate, run on ``table`` now."""
-    results = []
-    for check in PUBLISH_GATE:
-        outcome = check.run(table)
-        passed = bool(outcome["status"])
-        results.append(
-            CheckResult(
-                check.name, check.label, passed, "" if passed else outcome["error"]
-            )
-        )
-    return results
 
 
 def table_rows(user):
@@ -600,6 +597,16 @@ def table_rows(user):
             else:
                 status = PUBLISHED
             reviewed = table.review_rank == 2
+            checks = publish_checks(table)
+            live = passes(checks)
+            if table.publishable is not None and table.publishable != live:
+                # something wrote metadata past api.actions.set_table_metadata
+                logger.warning(
+                    "publish_gate_disagreement table=%s stored=%s live=%s",
+                    table.name,
+                    str(table.publishable).lower(),
+                    str(live).lower(),
+                )
             result.append(
                 TableRow(
                     table=table,
@@ -608,7 +615,7 @@ def table_rows(user):
                     direct=direct_level >= WRITE_PERM,
                     organizations=[name for name, _ in organizations],
                     level=max([direct_level] + [level for _, level in organizations]),
-                    checks=publish_checks(table),
+                    checks=checks,
                     review_state=REVIEW_STATES[table.review_rank],
                     # the badge the linked review granted, so the pill and
                     # the review it opens describe the same record

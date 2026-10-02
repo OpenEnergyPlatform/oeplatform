@@ -51,6 +51,13 @@ SPDX-License-Identifier: CC0-1.0
   one line, everything but the search folds behind "Filters (n)". Long
   organization names are shortened in the Access column, in full on hover
   [(#2555)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2555)
+- Whether a Table passes the publish check is now stored with it and recomputed
+  on every metadata write, so the tables tab filters by "Publishable" and sorts
+  by it (not publishable first). Publishing itself still checks the metadata at
+  that moment. Deploy: run `python manage.py migrate`, then
+  `python manage.py recompute_publish_gate --apply` once; until it has run, the
+  Publishable filter matches no existing Table
+  [(#2560)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2560)
 
 ## Bugs
 
