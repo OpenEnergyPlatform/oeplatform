@@ -649,6 +649,24 @@ def dataset_metadata_json_view(request: HttpRequest, dataset_name: str) -> JsonR
     return JsonResponse(metadata)
 
 
+def view_name_taken(
+    request: HttpRequest, table: str, view_type: str, name: str
+) -> HttpResponse:
+    """Refuse a view name the table already uses for that type of view.
+
+    Names are unique per (table, type) since #2217. Shows the existing view, so
+    the user sees what holds the name.
+    """
+    messages.error(
+        request,
+        f'This table already has a {view_type} view named "{name}". '
+        "Please choose another name.",
+    )
+    existing = DBView.objects.filter(table=table, type=view_type, name=name).first()
+    url = reverse("dataedit:view", kwargs={"table": table})
+    return redirect(f"{url}?view={existing.pk}" if existing else url)
+
+
 @require_POST
 def table_view_save_view(request: HttpRequest, table: str) -> HttpResponse:
     table_obj = table_or_404(table=table)
@@ -695,7 +713,13 @@ def table_view_save_view(request: HttpRequest, table: str) -> HttpResponse:
             name=post_name, type=post_type, options=post_options, table=table_obj.name
         )
 
-    update_view.save()
+    try:
+        with transaction.atomic():
+            update_view.save()
+    except IntegrityError:
+        return view_name_taken(
+            request, table_obj.name, update_view.type, update_view.name
+        )
 
     # create and update filters
     post_filter_json = request.POST.get("filter")
@@ -785,14 +809,18 @@ class TableCreateGraphView(View):
         # save an instance of View, look at GraphViewForm fields in forms.py
         # for information to the options
         opt = dict(x=request.POST.get("column_x"), y=request.POST.get("column_y"))
-        gview = DataViewModel.objects.create(
-            name=request.POST.get("name"),
-            table=table_obj.name,
-            type="graph",
-            options=opt,
-            is_default=request.POST.get("is_default", False),
-        )
-        gview.save()
+        name = request.POST.get("name")
+        try:
+            with transaction.atomic():
+                gview = DataViewModel.objects.create(
+                    name=name,
+                    table=table_obj.name,
+                    type="graph",
+                    options=opt,
+                    is_default=request.POST.get("is_default", False),
+                )
+        except IntegrityError:
+            return view_name_taken(request, table_obj.name, "graph", name)
 
         return redirect(
             reverse("dataedit:view", kwargs={"table": table_obj.name})
@@ -831,7 +859,11 @@ class TableCreateMapView(View):
         form.table = table
         form.options = options
         if form.is_valid():
-            view_id = form.save(commit=True)
+            try:
+                with transaction.atomic():
+                    view_id = form.save(commit=True)
+            except IntegrityError:
+                return view_name_taken(request, table, "map", request.POST.get("name"))
             return redirect(
                 reverse("dataedit:view", kwargs={"table": table}) + f"?view={view_id}"
             )

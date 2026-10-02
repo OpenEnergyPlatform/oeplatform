@@ -378,6 +378,7 @@ class Table(Tagable):
             )
 
         except Exception:
+
             return self.name
 
     def validate_open_data_license(
@@ -554,29 +555,32 @@ class View(models.Model):
 
     filter: QuerySet["Filter"]  # related_name, for static type checking
 
-    def __str__(self):
-        return '{}--"{}"({})'.format(self.table, self.name, self.type.upper())
-
     class Meta:
         unique_together = [("table", "type", "name")]
 
-    @classmethod
-    def get_or_create_default(
-        cls, table: str, type: str = "table", name: str = "default"
-    ) -> "View":
-        """The table's default view, created on first use.
+    def __str__(self):
+        return '{}--"{}"({})'.format(self.table, self.name, self.type.upper())
 
-        The table page asks for this on every visit, so the steady state must be
-        one SELECT: before #2217 it inserted a fresh view each time.
+    @classmethod
+    def get_or_create_default(cls, table: str) -> "View":
+        """The table page's default view, created on first use.
+
+        The page asks for this on every visit, so the steady state must be one
+        SELECT: before #2217 it inserted a fresh view each time. Only a table
+        view qualifies - the graph form can mark a graph default, and that must
+        not take over the page's Table tab.
         """
-        # technically, multiple views per table can be default (or none).
-        view = cls.objects.filter(table=table, is_default=True).order_by("pk").last()
+        view = (
+            cls.objects.filter(table=table, type="table", is_default=True)
+            .order_by("pk")
+            .last()
+        )
         if view is not None:
             return view
         # get_or_create rather than create: two first visits at the same time
         # would otherwise both insert and the second hit the unique constraint.
         view, created = cls.objects.get_or_create(
-            table=table, type=type, name=name, defaults={"is_default": True}
+            table=table, type="table", name="default", defaults={"is_default": True}
         )
         if not created and not view.is_default:
             # a view named "default" that is not marked as such: mark it, once
@@ -787,12 +791,13 @@ class PeerReview(models.Model):
 
             return (
                 True,
-                f"Set current version of table's: '{table}' oemetadata for review.",
+                f"Set current version of table's: '{table}' " "oemetadata for review.",
             )
 
         return (
             False,
-            f"This tables (name: {table}) review already got a version of oemetadata.",
+            f"This tables (name: {table}) review "
+            "already got a version of oemetadata.",
         )
 
     def update_all_table_peer_reviews_after_table_moved(self, *args, topic, **kwargs):
