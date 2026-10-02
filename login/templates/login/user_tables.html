@@ -6,7 +6,9 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 The tables tab. Only the results region (#tables-results) is swapped; the
 filter bar and the live count sit outside it, so focus and half-typed input
-survive a swap and the live region is announced reliably.
+survive a swap and the live region is announced reliably. The primary row is
+Search, Publishable, Review, Access and Dataset; "More filters (n)" holds the
+rest. The chips and Reset are inside the region.
 
 The tab keeps the profile sidebar, like every other profile tab. The spec
 decided on a slim identity strip instead, to give the list the width
@@ -31,19 +33,54 @@ sidebar on 2026-10-02, so the column collapse (#2555) works with that width.
        hx-swap="outerHTML"
        hx-sync="this:replace">
     {% if page.has_any %}
-      <div class="dash-filters" role="search" aria-label="Filter your tables">
-        <label class="visually-hidden"
-               for="tables-search">Search title or technical name</label>
-        <input type="search"
-               id="tables-search"
-               name="search"
-               class="form-control form-control-sm dash-search"
-               placeholder="Search title or technical name"
-               autocomplete="off"
-               value="{{ page.state.raw.search|default:'' }}"
-               hx-get="{{ request.path }}"
-               hx-trigger="input changed delay:300ms, search" />
-      </div>
+      {% with controls=page.controls %}
+        <div id="tables-filters"
+             class="dash-filters"
+             role="search"
+             aria-label="Filter your tables">
+          <div class="dash-filters__row">
+            <label class="visually-hidden"
+                   for="tables-search">Search title or technical name</label>
+            <input type="search"
+                   id="tables-search"
+                   name="search"
+                   class="form-control form-control-sm dash-search"
+                   placeholder="Search title or technical name"
+                   autocomplete="off"
+                   value="{{ page.state.raw.search|default:'' }}"
+                   hx-get="{{ request.path }}"
+                   hx-trigger="input changed delay:300ms, search" />
+            {% comment %}A placeholder until the Publish gate result is stored (#2560): filtering on the live gate would run it for every Table.{% endcomment %}
+            <label class="visually-hidden"
+                   for="f-publishable">Publishable, not available yet</label>
+            <select id="f-publishable"
+                    class="form-select form-select-sm dash-select"
+                    disabled
+                    title="Not available yet">
+              <option>Publishable: any</option>
+            </select>
+            {% for control in controls %}
+              {% if not control.more %}
+                {% include "login/partials/list_filter_control.html" with path=request.path %}
+              {% endif %}
+            {% endfor %}
+            <button type="button"
+                    id="tables-more"
+                    class="btn btn-outline-secondary btn-sm"
+                    aria-expanded="false"
+                    aria-controls="tables-more-panel">
+              More filters<span id="tables-more-count">{% if page.more_count %} ({{ page.more_count }}){% endif %}</span>
+            </button>
+          </div>
+          <div id="tables-more-panel" class="dash-more" hidden>
+            {% for control in controls %}
+              {% if control.more %}
+                {% include "login/partials/list_filter_control.html" with path=request.path %}
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      {% endwith %}
     {% endif %}
     <div id="tables-live"
          class="visually-hidden"

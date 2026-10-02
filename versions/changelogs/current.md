@@ -37,6 +37,13 @@ SPDX-License-Identifier: CC0-1.0
   datasets it is in (yours first, never another user's draft) and its topics.
   The list sorts by review state and by dataset count too
   [(#2554)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2554)
+- The tables tab filters by review state, by where your access comes from
+  (direct or one of your organizations), by dataset (in any, in none, or one),
+  and behind "More filters" by topic (any of) and tags (all of). Options come
+  from your own tables only. Active filters show as removable chips with "Reset
+  all", and a value from an old link that no longer applies shows as a muted
+  chip instead of emptying the list
+  [(#2556)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2556)
 
 ## Bugs
 
