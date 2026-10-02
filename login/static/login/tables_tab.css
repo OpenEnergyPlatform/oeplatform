@@ -1,0 +1,327 @@
+/*
+ * SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
+ * The profile dashboard's tables tab (spec #2551). Plain CSS beside the
+ * page rather than in the theme build, so the tab can change without a
+ * rebuild of bootstrap.min.css. The column collapse by the list's own width
+ * (#2555) lands here, as container queries on `.dash`.
+ */
+
+.dash {
+  --dash-muted: #6c757d;
+  --dash-primary: #2972a6;
+  --dash-secondary: #1f567d;
+  container-type: inline-size;
+}
+
+/* filter bar */
+.dash-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+  margin-bottom: 0.6rem;
+}
+
+.dash-search {
+  flex: 1 1 14rem;
+  max-width: 28rem;
+}
+
+/* results region */
+.dash-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.dash-seg--zero:not(.active) {
+  opacity: 0.55;
+}
+
+.dash-seg__count {
+  opacity: 0.75;
+}
+
+.dash-summary {
+  margin-left: auto;
+  color: var(--dash-muted);
+  font-size: 0.875rem;
+}
+
+.dash-table-wrap {
+  overflow-x: auto;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+}
+
+.dash-table {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.dash-table th {
+  white-space: nowrap;
+  font-weight: 600;
+  color: #495057;
+  background: #f8f9fa;
+  vertical-align: middle;
+}
+
+.dash-table td {
+  vertical-align: middle;
+}
+
+.dash-sort {
+  color: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.dash-sort:hover,
+.dash-sort--active {
+  color: var(--dash-primary);
+}
+
+.c-table {
+  min-width: 13rem;
+}
+
+.dash-title {
+  font-weight: 600;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+/* technical names are unbreakable snake_case; letting them break anywhere
+   is what keeps the Table column from holding the row wide */
+.dash-tname {
+  font: 0.75rem ui-monospace, Consolas, monospace;
+  color: var(--dash-muted);
+  overflow-wrap: anywhere;
+}
+
+.dash-badge--draft {
+  background: #e9ecef;
+  color: #495057;
+}
+
+.dash-badge--published {
+  background: #d1e7dd;
+  color: #0f5132;
+}
+
+.dash-badge--embargoed {
+  background: #fff3cd;
+  color: #664d03;
+}
+
+.dash-until {
+  display: block;
+  font-size: 0.6875rem;
+  color: #664d03;
+  white-space: nowrap;
+}
+
+.dash-achip {
+  display: inline-block;
+  margin: 1px 2px 1px 0;
+  padding: 0 0.45rem;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  color: var(--dash-secondary);
+  background: #f5f9fc;
+  border: 1px solid #c5d6e3;
+  border-radius: 1rem;
+}
+
+.dash-achip--you {
+  color: #fff;
+  background: var(--dash-secondary);
+  border-color: var(--dash-secondary);
+}
+
+.dash-role {
+  display: block;
+  font-size: 0.6875rem;
+  color: #664d03;
+}
+
+.dash-pager {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.dash-pager .btn {
+  min-width: 2.2rem;
+}
+
+.dash-pager__gap {
+  padding: 0 0.25rem;
+  color: var(--dash-muted);
+}
+
+.dash-pager__range {
+  margin-left: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--dash-muted);
+}
+
+.dash-empty {
+  padding: 3rem 1rem;
+  text-align: center;
+}
+
+.dash-empty--nomatch {
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+}
+
+.dash-empty__title {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.dash-muted {
+  color: var(--dash-muted);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+/* Publishable: the Publish gate's result */
+.dash-gate {
+  padding: 0.1rem 0.3rem;
+  white-space: nowrap;
+  background: none;
+  border: 0;
+  border-radius: 4px;
+}
+
+.dash-gate--ok {
+  color: #198754;
+}
+
+.dash-gate--bad {
+  color: #b02a37;
+}
+
+/* Review: a pill per badge level, colours from the prototype */
+.dash-pill {
+  font-weight: 600;
+  text-decoration: none;
+  color: #333;
+  background: #e9ecef;
+}
+
+.dash-pill--iron {
+  color: #333;
+  background: #d5d5d5;
+}
+
+.dash-pill--bronze {
+  color: #5a3a1a;
+  background: #e8c9a8;
+}
+
+.dash-pill--silver {
+  color: #3a3f44;
+  background: #dfe3e6;
+}
+
+.dash-pill--gold {
+  color: #5c4800;
+  background: #f6e3a1;
+}
+
+.dash-pill--platinum {
+  color: #0c4a5c;
+  background: #d7ecf3;
+}
+
+/* Access: the whole cell manages access */
+.dash-access {
+  display: inline-block;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Datasets and the Topics' "+n": a count that opens a popover */
+.dash-count {
+  padding: 0.1rem 0.4rem;
+  background: none;
+  border: 0;
+  border-radius: 4px;
+}
+
+.dash-count--small {
+  font-size: 0.75rem;
+}
+
+.dash-gate:hover,
+.dash-count:hover,
+.dash-access:hover {
+  background: #eef2f5;
+}
+
+.dash-tchip {
+  display: inline-block;
+  margin: 1px 2px 1px 0;
+  padding: 0 0.35rem;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  background: #f1f3f5;
+  border-radius: 3px;
+}
+
+/* a cell's popover, placed beside its button by list_popovers.js */
+.dash-pop {
+  z-index: 1070;
+  max-width: 22rem;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.8125rem;
+  background: #fff;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15);
+}
+
+.dash-pop:focus {
+  outline: 2px solid var(--dash-primary);
+}
+
+.dash-pop__title {
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+}
+
+.dash-pop__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dash-pop__list li {
+  overflow-wrap: anywhere;
+}
+
+.dash-pop__links {
+  margin-top: 0.35rem;
+}
+
+/* the row's ⋯ slot stays at the right edge while the list scrolls sideways */
+.c-menu {
+  position: sticky;
+  right: 0;
+  width: 3rem;
+  background: #fff;
+}
+
+.dash-table thead .c-menu {
+  background: #f8f9fa;
+}

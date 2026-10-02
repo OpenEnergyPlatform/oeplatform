@@ -1,0 +1,111 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+The tables tab's results region: status segment, chips slot, table, pager.
+Each cell type is its own partial under ``cells/``.
+A direct load and an htmx request render this same state; htmx gets only
+this. Every control carries a stable id, so focus can be put back by id
+after a swap. ``data-announce`` is what the persistent live region outside
+reads after the swap, and ``data-search`` is what the search box outside
+should hold (a Reset clears it).
+{% endcomment %}
+<div id="tables-results"
+     class="dash-results"
+     data-announce="{{ page.announcement }}"
+     data-search="{{ page.state.raw.search|default:'' }}">
+  <h2 id="tables-heading" class="visually-hidden" tabindex="-1">Your tables</h2>
+  {% if not page.has_any %}
+    <div class="dash-empty">
+      <h3 class="dash-empty__title">You have no tables yet</h3>
+      <p>
+        Tables you create, or that someone shares with you or with one of your
+        organizations, appear here.
+      </p>
+      <a class="btn btn-primary"
+         id="empty-create"
+         href="{% url 'dataedit:wizard_create' %}"
+         hx-boost="false">Create a table</a>
+      <a class="btn btn-outline-primary"
+         id="empty-api"
+         href="{{ EXTERNAL_URLS.tutorials_api_upload }}"
+         hx-boost="false">Upload via the API</a>
+    </div>
+  {% else %}
+    <div class="dash-bar">
+      {% include "login/partials/list_segment.html" with links=page.segment_links label="Status" %}
+      <div class="dash-summary">{{ page.summary }}</div>
+    </div>
+    <div id="tables-chips" class="dash-chips"></div>
+    {% if page.total %}
+      <div class="dash-table-wrap">
+        <table class="table dash-table">
+          <caption class="visually-hidden">Your tables, {{ page.summary }}</caption>
+          <thead>
+            <tr>
+              {% include "login/partials/list_sort_header.html" with link=page.sort_links.table cell="c-table" %}
+              {% include "login/partials/list_sort_header.html" with link=page.sort_links.status cell="c-status" %}
+              <th class="c-pub" scope="col">Publishable</th>
+              {% include "login/partials/list_sort_header.html" with link=page.sort_links.review cell="c-review" %}
+              <th class="c-access" scope="col">Access</th>
+              {% include "login/partials/list_sort_header.html" with link=page.sort_links.datasets cell="c-ds" %}
+              <th class="c-topics" scope="col">Topics</th>
+              <th class="c-menu" scope="col">
+                <span class="visually-hidden">Actions</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in page.rows %}
+              <tr id="row-{{ row.table.pk }}">
+                <td class="c-table">
+                  <a id="title-{{ row.table.pk }}"
+                     class="dash-title"
+                     href="{% url 'dataedit:view' table=row.table.name %}"
+                     hx-boost="false">{{ row.title }}</a>
+                  {% if row.has_title %}<div class="dash-tname">{{ row.table.name }}</div>{% endif %}
+                </td>
+                <td class="c-status">
+                  {% if row.status == "draft" %}
+                    <span class="badge dash-badge dash-badge--draft">Draft</span>
+                  {% elif row.status == "embargoed" %}
+                    <span class="badge dash-badge dash-badge--embargoed">Embargoed</span>
+                    <span class="dash-until">until {{ row.embargo_until|date:"j M Y" }}</span>
+                  {% else %}
+                    <span class="badge dash-badge dash-badge--published">Published</span>
+                  {% endif %}
+                </td>
+                <td class="c-pub">{% include "login/partials/cells/gate.html" %}</td>
+                <td class="c-review">{% include "login/partials/cells/review.html" %}</td>
+                <td class="c-access">
+                  {% comment %}The Table's permission page until the access drawer (#2566) takes its place.{% endcomment %}
+                  <a id="acc-{{ row.table.pk }}"
+                     class="dash-access"
+                     href="{% url 'dataedit:table-permission' table=row.table.name %}"
+                     hx-boost="false"
+                     aria-label="{{ row.access_label }}">
+                    {% if row.direct %}<span class="dash-achip dash-achip--you">You</span>{% endif %}
+                    {% for organization in row.organizations %}<span class="dash-achip">{{ organization }}</span>{% endfor %}
+                    {% if row.role_label %}<span class="dash-role">{{ row.role_label }}</span>{% endif %}
+                  </a>
+                </td>
+                <td class="c-ds">{% include "login/partials/cells/datasets.html" %}</td>
+                <td class="c-topics">{% include "login/partials/cells/chips.html" %}</td>
+                {% comment %}The row's ⋯ slot, sticky at the right edge; its menu comes with the action pipeline (#2561).{% endcomment %}
+                <td class="c-menu"></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% include "login/partials/list_pager.html" %}
+    {% else %}
+      <div class="dash-empty dash-empty--nomatch">
+        <h3 class="dash-empty__title">No tables match these filters</h3>
+        <a class="btn btn-outline-primary btn-sm"
+           id="nomatch-reset"
+           href="{{ page.reset_url }}">Reset filters</a>
+      </div>
+    {% endif %}
+  {% endif %}
+</div>

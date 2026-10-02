@@ -4,7 +4,6 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 import logging
-import os
 from collections import defaultdict
 from pathlib import Path
 from typing import Iterable
@@ -20,17 +19,28 @@ from oeplatform.settings import OEO_EXT_NAME, ONTOLOGY_ROOT, OPEN_ENERGY_ONTOLOG
 logger = logging.getLogger("oeplatform")
 
 
-def get_ontology_version(path, version=None):
+def get_ontology_version(path: Path, version: str | None = None) -> str:
+    """The OEO release to serve from `path`: `version` if given, else the newest.
+
+    Only directories named like a release ("2.13.0") count. The ontology folder
+    is bind-mounted in the docker dev setup, so it can hold whatever the host
+    leaves there, such as macOS' `.DS_Store`.
+    """
     if not path.exists():
         raise Http404
+    if version:
+        return version
 
-    versions = os.listdir(path)
-    if not version:
-        version = max(
-            (d for d in versions), key=lambda d: [int(x) for x in d.split(".")]
+    releases = [
+        entry.name
+        for entry in path.iterdir()
+        if entry.is_dir() and all(part.isdigit() for part in entry.name.split("."))
+    ]
+    if not releases:
+        raise FileNotFoundError(
+            f"No OEO release directory (named like 2.13.0) in {path}"
         )
-
-    return version
+    return max(releases, key=lambda name: [int(part) for part in name.split(".")])
 
 
 def _extract_description_fast(g):
@@ -102,8 +112,8 @@ def collect_modules(path_str):
         return modules
 
     for file_path in target_path.iterdir():
-        # Skip directories
-        if file_path.is_dir():
+        # Skip directories and hidden files (macOS leaves a .DS_Store behind)
+        if file_path.is_dir() or file_path.name.startswith("."):
             continue
 
         # Extract filename (e.g., 'oeo-core') and extension without the dot

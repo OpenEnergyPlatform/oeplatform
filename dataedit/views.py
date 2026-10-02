@@ -22,7 +22,6 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 import csv
 import json
 from io import TextIOWrapper
-from itertools import chain
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -92,6 +91,7 @@ from dataedit.peer_review.metadata_serializer import (
 from dataedit.peer_review.projection import field_history
 from dataedit.peer_review.service import (
     ContributorNotFoundError,
+    MetadataRefusedError,
     NotYourTurnError,
     ReviewFinishedError,
     ReviewService,
@@ -650,6 +650,24 @@ def dataset_metadata_json_view(request: HttpRequest, dataset_name: str) -> JsonR
     return JsonResponse(metadata)
 
 
+def view_name_taken(
+    request: HttpRequest, table: str, view_type: str, name: str
+) -> HttpResponse:
+    """Refuse a view name the table already uses for that type of view.
+
+    Names are unique per (table, type) since #2217. Shows the existing view, so
+    the user sees what holds the name.
+    """
+    messages.error(
+        request,
+        f'This table already has a {view_type} view named "{name}". '
+        "Please choose another name.",
+    )
+    existing = DBView.objects.filter(table=table, type=view_type, name=name).first()
+    url = reverse("dataedit:view", kwargs={"table": table})
+    return redirect(f"{url}?view={existing.pk}" if existing else url)
+
+
 @require_POST
 def table_view_save_view(request: HttpRequest, table: str) -> HttpResponse:
     table_obj = table_or_404(table=table)
@@ -696,7 +714,13 @@ def table_view_save_view(request: HttpRequest, table: str) -> HttpResponse:
             name=post_name, type=post_type, options=post_options, table=table_obj.name
         )
 
-    update_view.save()
+    try:
+        with transaction.atomic():
+            update_view.save()
+    except IntegrityError:
+        return view_name_taken(
+            request, table_obj.name, update_view.type, update_view.name
+        )
 
     # create and update filters
     post_filter_json = request.POST.get("filter")
@@ -741,28 +765,29 @@ def table_view_save_view(request: HttpRequest, table: str) -> HttpResponse:
     )
 
 
-def table_view_set_default_view(request: HttpRequest, table: str) -> HttpResponse:
+@require_POST
+def table_view_set_default_view(
+    request: HttpRequest, table: str, view_id: str
+) -> HttpResponse:
     table_obj = table_or_404(table=table)
+    # re_path passes the id as a string; compare as a number, explicitly
+    view = get_object_or_404(DBView, pk=int(view_id), table=table_obj.name)
 
-    # TODO: shouldnt this be POST only?
-    post_id = request.GET.get("id")
-
-    for view in DBView.objects.filter(table=table_obj.name):
-        if str(view.pk) == post_id:
-            view.is_default = True
-        else:
-            view.is_default = False
-        view.save()
+    with transaction.atomic():
+        DBView.objects.filter(table=table_obj.name).exclude(pk=view.pk).update(
+            is_default=False
+        )
+        DBView.objects.filter(pk=view.pk).update(is_default=True)
     return redirect("dataedit:view", table=table_obj.name)
 
 
-def table_view_delete_view(request: HttpRequest, table: str) -> HttpResponse:
+@require_POST
+def table_view_delete_view(
+    request: HttpRequest, table: str, view_id: str
+) -> HttpResponse:
     table_obj = table_or_404(table=table)
 
-    # TODO: shouldnt this be POST only?
-    post_id = request.GET.get("id")
-
-    view = DBView.objects.get(id=post_id, table=table_obj.name)
+    view = get_object_or_404(DBView, pk=int(view_id), table=table_obj.name)
     view.delete()
 
     return redirect("dataedit:view", table=table_obj.name)
@@ -785,14 +810,18 @@ class TableCreateGraphView(View):
         # save an instance of View, look at GraphViewForm fields in forms.py
         # for information to the options
         opt = dict(x=request.POST.get("column_x"), y=request.POST.get("column_y"))
-        gview = DataViewModel.objects.create(
-            name=request.POST.get("name"),
-            table=table_obj.name,
-            type="graph",
-            options=opt,
-            is_default=request.POST.get("is_default", False),
-        )
-        gview.save()
+        name = request.POST.get("name")
+        try:
+            with transaction.atomic():
+                gview = DataViewModel.objects.create(
+                    name=name,
+                    table=table_obj.name,
+                    type="graph",
+                    options=opt,
+                    is_default=request.POST.get("is_default", False),
+                )
+        except IntegrityError:
+            return view_name_taken(request, table_obj.name, "graph", name)
 
         return redirect(
             reverse("dataedit:view", kwargs={"table": table_obj.name})
@@ -831,7 +860,11 @@ class TableCreateMapView(View):
         form.table = table
         form.options = options
         if form.is_valid():
-            view_id = form.save(commit=True)
+            try:
+                with transaction.atomic():
+                    view_id = form.save(commit=True)
+            except IntegrityError:
+                return view_name_taken(request, table, "map", request.POST.get("name"))
             return redirect(
                 reverse("dataedit:view", kwargs={"table": table}) + f"?view={view_id}"
             )
@@ -896,7 +929,7 @@ class TableDataView(View):
         table_label = table_obj.human_readable_name
 
         table_views = DBView.objects.filter(table=table)
-        default = DBView(name="default", type="table", table=table)
+        default_view = DBView.get_or_create_default(table=table)
         view_id = request.GET.get("view")
 
         embargo = Embargo.objects.filter(table=table_obj).first()
@@ -909,18 +942,14 @@ class TableDataView(View):
         else:
             embargo_time_left = "No embargo data available"
 
-        if view_id == "default":
-            current_view = default
-            current_view.save()
-        else:
-            try:
-                # at first, try to use the view, that is passed as get argument
-                current_view = table_views.get(id=view_id)
-            except ObjectDoesNotExist:
-                current_view = default
-                current_view.save()
+        try:
+            # at first, try to use the view, that is passed as get argument
+            current_view = table_views.get(id=view_id)
+        except (ObjectDoesNotExist, ValueError):
+            # no ?view=, an unknown one, or one that is not an id at all
+            current_view = default_view
 
-        table_views = list(chain((default,), table_views))
+        table_views = [default_view, *table_views.exclude(pk=default_view.pk)]
 
         #########################################################
         #   Get open peer review process related metadata       #
@@ -1465,7 +1494,7 @@ class TablePeerReviewView(LoginRequiredMixin, View):
         service = ReviewService(table_name=table_obj.name, actor=request.user)
         try:
             service.submit_reviewer_review(review_data, review_id=review_id)
-        except ContributorNotFoundError as exc:
+        except (ContributorNotFoundError, MetadataRefusedError) as exc:
             return JsonResponse({"error": str(exc)}, status=400)
         except (ReviewFinishedError, NotYourTurnError) as exc:
             return JsonResponse({"error": str(exc)}, status=409)
@@ -1575,6 +1604,8 @@ class TablePeerReviewContributorView(TablePeerReviewView):
         service = ReviewService(table_name=table, actor=request.user)
         try:
             service.submit_contributor_review(review_data, review_id=review_id)
+        except MetadataRefusedError as exc:
+            return JsonResponse({"error": str(exc)}, status=400)
         except (ReviewFinishedError, NotYourTurnError) as exc:
             return JsonResponse({"error": str(exc)}, status=409)
         return JsonResponse({"status": "success"}, status=200)

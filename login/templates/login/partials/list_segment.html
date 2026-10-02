@@ -1,0 +1,16 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+A list's segment: ``links`` from ``ListPage.segment_links``. A button with
+no matches stays visible but greyed, so the controls do not move as the
+filters change.
+{% endcomment %}
+<div class="btn-group dash-seg" role="group" aria-label="{{ label }}">
+  {% for link in links %}
+    <a id="{{ link.id }}"
+       href="{{ link.url }}"
+       class="btn btn-sm {% if link.active %}btn-primary active{% else %}btn-outline-primary{% endif %}{% if not link.count %} dash-seg--zero{% endif %}"
+       {% if link.active %}aria-current="true"{% endif %}>{{ link.label }} <span class="dash-seg__count">({{ link.count }})</span></a>
+  {% endfor %}
+</div>

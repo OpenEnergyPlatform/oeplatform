@@ -86,6 +86,10 @@ def get_json_content(path, json_id=None):
     if path is not None:
         all_jsons = []
         for _json in os.listdir(path=path):
+            # only the project pages: the directory is bind-mounted in the docker
+            # dev setup and can hold other files, such as macOS' .DS_Store
+            if not _json.endswith(".json"):
+                continue
             with open(os.path.join(path, _json), "r", encoding="utf-8") as json_content:
                 content = json.load(json_content)
                 all_jsons.append(content)

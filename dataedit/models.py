@@ -555,8 +555,38 @@ class View(models.Model):
 
     filter: QuerySet["Filter"]  # related_name, for static type checking
 
+    class Meta:
+        unique_together = [("table", "type", "name")]
+
     def __str__(self):
         return '{}--"{}"({})'.format(self.table, self.name, self.type.upper())
+
+    @classmethod
+    def get_or_create_default(cls, table: str) -> "View":
+        """The table page's default view, created on first use.
+
+        The page asks for this on every visit, so the steady state must be one
+        SELECT: before #2217 it inserted a fresh view each time. Only a table
+        view qualifies - the graph form can mark a graph default, and that must
+        not take over the page's Table tab.
+        """
+        view = (
+            cls.objects.filter(table=table, type="table", is_default=True)
+            .order_by("pk")
+            .last()
+        )
+        if view is not None:
+            return view
+        # get_or_create rather than create: two first visits at the same time
+        # would otherwise both insert and the second hit the unique constraint.
+        view, created = cls.objects.get_or_create(
+            table=table, type="table", name="default", defaults={"is_default": True}
+        )
+        if not created and not view.is_default:
+            # a view named "default" that is not marked as such: mark it, once
+            view.is_default = True
+            view.save(update_fields=["is_default"])
+        return view
 
 
 class Filter(models.Model):
