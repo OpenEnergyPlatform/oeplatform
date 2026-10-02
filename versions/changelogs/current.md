@@ -108,6 +108,19 @@ SPDX-License-Identifier: CC0-1.0
   while the list refreshes behind it; each change writes one log line with the
   role before and after
   [(#2566)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2566)
+- Tables in the tables tab can be selected and published or unpublished in one
+  go. Each row has a checkbox, the header ticks the page, Shift+click ticks a
+  range, and "Select all N matching tables" takes every table under the current
+  filters across all pages. The selection survives paging, sorting and actions,
+  and is cleared, with a note, when the filters or the search change. A bar
+  above the list shows how many are selected; its place is kept while nothing
+  is, so the list does not move on the first tick. Publish takes one topic and
+  embargo for the whole batch and leaves out, by name and with the reason,
+  tables already published, tables failing the publish check and tables you are
+  not Table admin of. Unpublish names other people's datasets that will then
+  hold a draft. At most 1,000 tables are published or unpublished at once, and a
+  batch is done whole or not at all
+  [(#2564)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2564)
 
 ## Bugs
 

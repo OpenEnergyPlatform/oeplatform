@@ -273,6 +273,7 @@ class ProfileRoutesTests(OwnerRuleFixture):
             ("login:dataset-manage", dataset, 200),
             ("login:dataset-table-search", dataset, 200),
             ("login:tables", {}, 200),
+            ("login:table-names", {}, 200),
             (
                 "login:metadata-review-badge-icon",
                 {"table_name": self.owner_table_draft},
@@ -297,6 +298,7 @@ class ProfileRoutesTests(OwnerRuleFixture):
             ("login:dataset-delete", dataset),
             ("login:dataset-assign", dataset),
             ("login:dataset-unassign", dataset),
+            ("login:table-action-check", {"action": "publish"}),
             ("login:edit", {}),
         ]
 

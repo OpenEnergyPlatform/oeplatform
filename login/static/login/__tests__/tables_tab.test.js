@@ -12,6 +12,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   LOGGED_OUT,
+  SELECTION_CLEARED,
   SERVER_FAILED,
   UNREACHABLE,
   announce,
@@ -21,8 +22,11 @@ import {
   focusAfterAction,
   isUnavailable,
   loginLink,
+  rangeOf,
+  renderSelection,
   restoreDrawerFocus,
   restoreFocus,
+  rowBoxes,
   showToast,
   syncFilters,
 } from "../tables_tab.js";
@@ -967,5 +971,400 @@ describe("bindTablesTab, access drawer", () => {
     swapRegion(REGION("1 table", {}, ROW_ACCESS(7)));
     drawer.hidden();
     expect(document.activeElement.id).toBe("tables-heading");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The selection and the bulk bar (#2564). The region says which scope it
+// shows (`data-scope`) and how many Tables match (the banner's
+// `data-total`); everything else is page memory.
+
+/** A region of `names` rows, under `scope`, out of `total` matching. */
+const SELECT_REGION = (names, { scope = "", total = names.length } = {}) => `
+  <div id="tables-results" data-announce="x" data-filters="{}"
+       data-more="0" data-folded="0" data-scope="${scope}">
+    <h2 id="tables-heading" tabindex="-1">Your tables</h2>
+    <div id="tables-select-all" data-total="${total}"
+         data-names-url="/names${scope}" hidden>
+      <span data-when="page">All on this page are selected.</span>
+      <button type="button" id="tables-select-matching"
+              data-when="page">Select all ${total} matching tables</button>
+      <span data-when="all">All ${total} matching tables are selected.</span>
+      <button type="button" id="tables-select-none"
+              data-when="all">Clear selection</button>
+    </div>
+    <table><thead><tr><th>
+      <input type="checkbox" id="select-page" data-select-page />
+    </th></tr></thead><tbody>
+    ${names
+      .map(
+        (name, i) => `<tr><td><input type="checkbox" id="select-${i}"
+          value="${name}" data-select-row aria-label="Select ${name}" />
+          </td></tr>`,
+      )
+      .join("")}
+    </tbody></table>
+  </div>`;
+
+/** The page with the bulk bar outside the region. */
+function renderSelectPage(region) {
+  renderActionPage(region);
+  document
+    .getElementById("tables-live")
+    .insertAdjacentHTML(
+      "beforebegin",
+      `<div id="tables-bulk">
+         <p id="tables-bulk-idle" aria-hidden="true">Tick tables to act on several at once.</p>
+         <p id="tables-bulk-note" role="status"></p>
+         <div id="tables-bulk-bar" hidden>
+           <span id="tables-bulk-count"></span>
+           <button type="button" id="tables-bulk-clear">Clear</button>
+           <button type="button" id="bulk-publish" data-bulk-action
+                   data-action-origin="bulk-publish">Publish…</button>
+         </div>
+       </div>`,
+    );
+}
+
+const box = (name) =>
+  [...document.querySelectorAll("input[data-select-row]")].find(
+    (b) => b.value === name,
+  );
+
+/** A click as a browser makes it: a checkbox toggles, then the event. */
+function tick(element, { shiftKey = false } = {}) {
+  element.dispatchEvent(
+    new MouseEvent("click", { bubbles: true, cancelable: true, shiftKey }),
+  );
+}
+
+const ticked = () => rowBoxes(document.getElementById("tables-results"))
+  .filter((b) => b.checked)
+  .map((b) => b.value);
+
+const requestParameters = (elt) => {
+  const parameters = {};
+  elt.dispatchEvent(
+    new CustomEvent("htmx:configRequest", {
+      bubbles: true,
+      detail: { elt, parameters },
+    }),
+  );
+  return parameters;
+};
+
+describe("rangeOf", () => {
+  beforeEach(() => renderPage(SELECT_REGION(["a", "b", "c", "d"])));
+
+  it("runs from one row to the other in page order, either way", () => {
+    const boxes = rowBoxes(document.getElementById("tables-results"));
+    expect(rangeOf(boxes, "b", "d")).toEqual(["b", "c", "d"]);
+    expect(rangeOf(boxes, "d", "b")).toEqual(["b", "c", "d"]);
+  });
+
+  it("is the one row when the other end is not on this page", () => {
+    const boxes = rowBoxes(document.getElementById("tables-results"));
+    expect(rangeOf(boxes, "zz", "c")).toEqual(["c"]);
+  });
+});
+
+describe("renderSelection", () => {
+  beforeEach(() =>
+    renderSelectPage(SELECT_REGION(["a", "b"], { total: 130 })),
+  );
+
+  it("reserves the bar's slot with the muted line while nothing is selected", () => {
+    renderSelection(document, new Set());
+    expect(document.getElementById("tables-bulk-bar").hidden).toBe(true);
+    const idle = document.getElementById("tables-bulk-idle");
+    expect(idle.hidden).toBe(false);
+    expect(idle.getAttribute("aria-hidden")).toBe("true");
+  });
+
+  it("turns the slot into the bar with the count on the first tick", () => {
+    renderSelection(document, new Set(["a"]));
+    expect(document.getElementById("tables-bulk-bar").hidden).toBe(false);
+    expect(document.getElementById("tables-bulk-idle").hidden).toBe(true);
+    expect(document.getElementById("tables-bulk-count").textContent).toBe(
+      "1 selected",
+    );
+  });
+
+  it("makes the header box indeterminate for part of the page", () => {
+    renderSelection(document, new Set(["a"]));
+    const header = document.getElementById("select-page");
+    expect(header.checked).toBe(false);
+    expect(header.indeterminate).toBe(true);
+    renderSelection(document, new Set(["a", "b"]));
+    expect(header.checked).toBe(true);
+    expect(header.indeterminate).toBe(false);
+  });
+
+  it("offers every matching table once the page is ticked", () => {
+    const banner = document.getElementById("tables-select-all");
+    renderSelection(document, new Set(["a"]));
+    expect(banner.hidden).toBe(true);
+    renderSelection(document, new Set(["a", "b"]));
+    expect(banner.hidden).toBe(false);
+    expect(
+      document.getElementById("tables-select-matching").hidden,
+    ).toBe(false);
+    expect(document.getElementById("tables-select-none").hidden).toBe(true);
+  });
+
+  it("offers nothing more when the page holds every matching table", () => {
+    renderSelectPage(SELECT_REGION(["a", "b"], { total: 2 }));
+    renderSelection(document, new Set(["a", "b"]));
+    expect(document.getElementById("tables-select-all").hidden).toBe(true);
+  });
+});
+
+describe("bindTablesTab, selection", () => {
+  let unbind;
+  let dialog;
+  let fetchNames;
+
+  beforeEach(() => {
+    renderSelectPage(
+      SELECT_REGION(["a", "b", "c", "d"], { scope: "?status=draft", total: 6 }),
+    );
+    dialog = fakeDialog();
+    fetchNames = vi.fn(async () => ["a", "b", "c", "d", "e", "f"]);
+    unbind = bindTablesTab(document, {
+      announceDelay: 0,
+      dialog,
+      schedule: () => {},
+      fetchNames,
+    });
+  });
+
+  afterEach(() => unbind());
+
+  it("ticks and unticks a row", () => {
+    tick(box("b"));
+    expect(ticked()).toEqual(["b"]);
+    expect(document.getElementById("tables-bulk-count").textContent).toBe(
+      "1 selected",
+    );
+    tick(box("b"));
+    expect(ticked()).toEqual([]);
+    expect(document.getElementById("tables-bulk-bar").hidden).toBe(true);
+  });
+
+  it("ticks a range with Shift+click", () => {
+    tick(box("a"));
+    tick(box("c"), { shiftKey: true });
+    expect(ticked()).toEqual(["a", "b", "c"]);
+  });
+
+  it("unticks a range with Shift+click on a ticked row", () => {
+    for (const name of ["a", "b", "c", "d"]) {
+      tick(box(name));
+    }
+    tick(box("b"));
+    tick(box("d"), { shiftKey: true });
+    expect(ticked()).toEqual(["a"]);
+  });
+
+  it("ticks the page with the header box, and unticks it again", () => {
+    tick(box("a"));
+    const header = document.getElementById("select-page");
+    tick(header);
+    expect(ticked()).toEqual(["a", "b", "c", "d"]);
+    tick(header);
+    expect(ticked()).toEqual([]);
+  });
+
+  it("keeps the selection across paging and sorting", () => {
+    tick(box("a"));
+    // page 2 of the same scope, then back, sorted differently
+    swapRegion(SELECT_REGION(["e", "f"], { scope: "?status=draft", total: 6 }));
+    expect(document.getElementById("tables-bulk-count").textContent).toBe(
+      "1 selected",
+    );
+    tick(box("e"));
+    swapRegion(
+      SELECT_REGION(["d", "c", "b", "a"], { scope: "?status=draft", total: 6 }),
+    );
+    expect(ticked()).toEqual(["a"]);
+    expect(document.getElementById("tables-bulk-count").textContent).toBe(
+      "2 selected",
+    );
+  });
+
+  it("clears the selection with a note when the filters change", () => {
+    tick(box("a"));
+    swapRegion(SELECT_REGION(["a", "b"], { scope: "?status=published" }));
+    expect(ticked()).toEqual([]);
+    expect(document.getElementById("tables-bulk-bar").hidden).toBe(true);
+    expect(document.getElementById("tables-bulk-note").textContent).toBe(
+      SELECTION_CLEARED,
+    );
+    expect(document.getElementById("tables-bulk-idle").hidden).toBe(true);
+    // the next tick replaces the note with the bar
+    tick(box("b"));
+    expect(document.getElementById("tables-bulk-note").textContent).toBe("");
+  });
+
+  it("says nothing when the filters change with nothing selected", () => {
+    swapRegion(SELECT_REGION(["a"], { scope: "?search=x" }));
+    expect(document.getElementById("tables-bulk-note").textContent).toBe("");
+    expect(document.getElementById("tables-bulk-idle").hidden).toBe(false);
+  });
+
+  it("selects every matching table with one request, then can clear it", async () => {
+    tick(document.getElementById("select-page"));
+    tick(document.getElementById("tables-select-matching"));
+    await nextTick();
+    expect(fetchNames).toHaveBeenCalledWith("/names?status=draft");
+    expect(document.getElementById("tables-bulk-count").textContent).toBe(
+      "6 selected",
+    );
+    expect(document.getElementById("tables-select-none").hidden).toBe(false);
+    expect(document.activeElement.id).toBe("tables-select-none");
+    tick(document.getElementById("tables-select-none"));
+    expect(document.getElementById("tables-bulk-bar").hidden).toBe(true);
+    expect(document.activeElement.id).toBe("select-page");
+  });
+
+  it("lets a table be unticked after selecting every matching one", async () => {
+    tick(document.getElementById("select-page"));
+    tick(document.getElementById("tables-select-matching"));
+    await nextTick();
+    tick(box("b"));
+    expect(document.getElementById("tables-bulk-count").textContent).toBe(
+      "5 selected",
+    );
+    expect(document.getElementById("tables-select-all").hidden).toBe(true);
+  });
+
+  it("drops names that arrive after the filters changed", async () => {
+    let answer;
+    fetchNames.mockImplementation(
+      () => new Promise((resolve) => (answer = resolve)),
+    );
+    tick(document.getElementById("select-page"));
+    tick(document.getElementById("tables-select-matching"));
+    swapRegion(SELECT_REGION(["x"], { scope: "?search=x" }));
+    answer(["a", "b", "c", "d", "e", "f"]);
+    await nextTick();
+    expect(document.getElementById("tables-bulk-bar").hidden).toBe(true);
+  });
+
+  it("says when the names could not be fetched", async () => {
+    fetchNames.mockRejectedValue(Object.assign(new Error("x"), { status: 401 }));
+    tick(document.getElementById("select-page"));
+    tick(document.getElementById("tables-select-matching"));
+    await nextTick();
+    expect(
+      document.getElementById("tables-toasts-assertive").textContent,
+    ).toContain(LOGGED_OUT);
+    expect(document.getElementById("tables-bulk-count").textContent).toBe(
+      "4 selected",
+    );
+  });
+
+  it("sends exactly the selected names with a bulk action", () => {
+    tick(box("a"));
+    tick(box("c"));
+    const parameters = requestParameters(
+      document.getElementById("bulk-publish"),
+    );
+    expect(parameters.tables).toBe("a,c");
+  });
+
+  it("empties the bar with Clear and moves focus to the header box", () => {
+    tick(box("a"));
+    document.getElementById("tables-bulk-clear").focus();
+    tick(document.getElementById("tables-bulk-clear"));
+    expect(ticked()).toEqual([]);
+    expect(document.getElementById("tables-bulk-bar").hidden).toBe(true);
+    expect(document.activeElement.id).toBe("select-page");
+  });
+
+  it("keeps the selection after an action, ticked again on the new region", () => {
+    tick(box("a"));
+    tick(box("b"));
+    const button = document.getElementById("bulk-publish");
+    swapDialog(button);
+    expect(dialog.opened).toBe(1);
+    serverTrigger(button, "tables-changed", {
+      message: "Published 2 tables under climate.",
+      tables: ["“A”", "“B”"],
+    });
+    swapRegion(
+      SELECT_REGION(["a", "b", "c", "d"], { scope: "?status=draft", total: 6 }),
+    );
+    expect(ticked()).toEqual(["a", "b"]);
+    // focus goes back to the bar's button, which the swap left alone
+    expect(document.activeElement.id).toBe("bulk-publish");
+  });
+
+  it("lets go of the tables that left the dashboard", () => {
+    tick(box("a"));
+    tick(box("b"));
+    serverTrigger(document.body, "tables-changed", {
+      message: "Deleted 1 table.",
+      gone: ["b"],
+    });
+    swapRegion(SELECT_REGION(["a", "c", "d"], { scope: "?status=draft" }));
+    expect(ticked()).toEqual(["a"]);
+    expect(document.getElementById("tables-bulk-count").textContent).toBe(
+      "1 selected",
+    );
+  });
+
+  it("lets go of a table the access drawer took off the dashboard", () => {
+    tick(box("c"));
+    serverTrigger(document.body, "tables-changed", {
+      message: "You left “C”.",
+      stay: true,
+      gone: ["c"],
+    });
+    expect(document.getElementById("tables-bulk-bar").hidden).toBe(true);
+  });
+
+  it("lists a bulk success's tables under Show tables", () => {
+    serverTrigger(document.body, "tables-changed", {
+      message: "Published 2 tables under climate.",
+      tables: ["“A”", "“B”"],
+    });
+    const toast = document.querySelector("#tables-toasts-polite .dash-toast");
+    expect(toast.textContent).toContain("Published 2 tables under climate.");
+    const more = toast.querySelector(".dash-toast__more");
+    const list = toast.querySelector(".dash-toast__list");
+    expect(list.hidden).toBe(true);
+    more.click();
+    expect(list.hidden).toBe(false);
+    expect([...list.children].map((li) => li.textContent)).toEqual([
+      "“A”",
+      "“B”",
+    ]);
+    expect(more.getAttribute("aria-expanded")).toBe("true");
+  });
+});
+
+describe("showToast, Show tables", () => {
+  beforeEach(() => renderActionPage(REGION("x")));
+
+  it("stays once opened, rather than vanishing while being read", () => {
+    const pending = [];
+    const toast = showToast(document, "Published 2 tables.", {
+      details: ["“A”", "“B”"],
+      schedule: (fn) => pending.push(fn),
+    });
+    toast.querySelector(".dash-toast__more").click();
+    pending.forEach((fn) => fn());
+    expect(toast.isConnected).toBe(true);
+  });
+
+  it("goes after the timeout when nobody opened it", () => {
+    const pending = [];
+    const toast = showToast(document, "Published 2 tables.", {
+      details: ["“A”", "“B”"],
+      schedule: (fn) => pending.push(fn),
+    });
+    pending.forEach((fn) => fn());
+    expect(toast.isConnected).toBe(false);
   });
 });

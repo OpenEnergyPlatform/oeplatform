@@ -475,6 +475,87 @@
   margin-top: 0.35rem;
 }
 
+/* the select column (#2564): a checkbox per row, the page's in the header */
+.c-select {
+  width: 2.25rem;
+  padding-right: 0;
+}
+
+.dash-check {
+  margin: 0;
+  cursor: pointer;
+}
+
+/* The bulk bar: sticky at the top of the list while it scrolls, outside
+   the region. Its slot keeps one height whether it holds the muted line,
+   the note or the bar, so the first tick moves nothing. */
+.dash-bulk {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  min-height: 2.5rem;
+  margin-bottom: 0.4rem;
+  padding: 0.2rem 0.5rem;
+  background: #fff;
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+.dash-bulk__idle,
+.dash-bulk__note {
+  margin: 0;
+  color: var(--dash-muted);
+}
+
+.dash-bulk:has(.dash-bulk__bar:not([hidden])) {
+  background: #eef4f9;
+}
+
+.dash-bulk__bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+  width: 100%;
+}
+
+.dash-bulk__count {
+  font-weight: 600;
+}
+
+.dash-bulk__clear {
+  padding: 0 0.25rem;
+}
+
+.dash-bulk__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-left: auto;
+}
+
+/* "Actions ▾": only where the rows stack (see the container queries) */
+.dash-bulk__menu {
+  display: none;
+  margin-left: auto;
+}
+
+/* "Select all N matching tables", once the page is ticked */
+.dash-selectall {
+  margin-bottom: 0.5rem;
+  padding: 0.35rem 0.6rem;
+  background: #eef4f9;
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
+
+.dash-selectall__button {
+  padding: 0 0.25rem;
+  vertical-align: baseline;
+}
+
 /* the row's ⋯ slot stays at the right edge while the list scrolls sideways */
 .c-menu {
   position: sticky;
@@ -713,6 +794,19 @@
   font-weight: 600;
 }
 
+/* a bulk success: "Show tables" opens the list of what it changed */
+.dash-toast__more {
+  padding: 0;
+  vertical-align: baseline;
+}
+
+.dash-toast__list {
+  max-height: 10rem;
+  margin: 0.35rem 0 0;
+  padding-left: 1.1rem;
+  overflow-y: auto;
+}
+
 /* ------------------------------------------------------------------------
  * Columns collapse by the list's own width (container queries on `.dash`),
  * not the viewport's: the profile sidebar takes a different share of each
@@ -745,19 +839,35 @@
  * trimmed from the row (the Table column's 13rem minimum is the largest
  * candidate), a design call this measurement does not make.
  *
- * Still to come: ☐ (#2564, 30 px) and Created (#2559, about 129 px with a
- * stand-in). With both the row needs 1,292 / 1,054 / 842. A slice that adds
- * a column re-runs the measurement and moves these numbers.
+ * Re-measured 2026-10-03 (#2564) with ☐ (30 px), the same way, on a
+ * worktree's throwaway database. #2557's numbers in brackets.
+ *
+ *                          DejaVu          threshold
+ *   every column           1,155 (1,133)   1,180 (1,160)
+ *   without Topics         1,046 (1,024)   1,070 (1,045)
+ *   also without Review,
+ *     Datasets               834   (812)     850   (830)
+ *   the filter bar on
+ *     one line               958   (958)     960   (960)
+ *
+ * The screens keep their column sets: every column at 1920, without Topics,
+ * Review and Datasets at 1440 and 1280, stacked at 1024 and below. In the
+ * stacked row ☐ takes only its own width, so 390 px fits without scrolling
+ * (360 px scrolls by 25 px).
+ *
+ * Still to come: Created (#2559, 129 px with a stand-in). With it the row
+ * needs 1,285 for every column. A slice that adds a column re-runs the
+ * measurement and moves these numbers.
  * ---------------------------------------------------------------------- */
 
-@container (width < 1160px) {
+@container (width < 1180px) {
   .c-created,
   .c-topics {
     display: none;
   }
 }
 
-@container (width < 1045px) {
+@container (width < 1070px) {
   .c-review,
   .c-ds {
     display: none;
@@ -792,9 +902,17 @@
    and Modified. Every other cell is hidden, so a column added later has to
    say here where it goes. The headers go with the columns, so "Sort by"
    takes their place. */
-@container (width < 830px) {
+@container (width < 850px) {
   .dash-sortby {
     display: flex;
+  }
+
+  .dash-bulk__actions {
+    display: none;
+  }
+
+  .dash-bulk__menu {
+    display: block;
   }
 
   .dash-table,
@@ -828,6 +946,9 @@
     display: block;
     grid-row: 1 / span 2;
     grid-column: 1;
+    width: auto;
+    padding-right: 0;
+    padding-left: 0.25rem;
   }
 
   .dash-table td.c-table {
