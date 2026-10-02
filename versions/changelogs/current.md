@@ -26,6 +26,14 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
+- Finishing a peer review now writes the merged metadata the way every other
+  metadata write does: it is validated, and the table's displayed title and its
+  search entry follow the accepted values. Before, a review that accepted a new
+  title left the old one on the table page and in lists, and the search kept
+  finding the pre-review words. A merge that fails validation is refused with a
+  readable message and writes nothing: the review stays unfinished, and no badge
+  or "reviewed" flag is set
+  [(#2552)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2552)
 - The table page no longer stores a new saved view on every visit. Production
   had collected ~195,000 of them, scanned twice per page view. A migration
   removes the empty copies and adds a unique constraint on (table, type, name),

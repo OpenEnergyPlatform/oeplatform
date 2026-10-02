@@ -34,7 +34,12 @@ resource from the database. The oemetadata is the object of a review.
 
 ### Save Metadata to Database
 
-#### ::: dataedit.metadata.save_metadata_to_db
+Finishing a review writes the merged metadata through the platform's one
+metadata write path, the same one the API uses: it is validated, saved, and the
+displayed title and the search index are refreshed. A merge that fails
+validation is refused and the review stays unfinished.
+
+#### ::: api.actions.set_table_metadata
 
 ### Load Metadata from Database
 

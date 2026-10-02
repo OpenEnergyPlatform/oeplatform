@@ -91,6 +91,7 @@ from dataedit.peer_review.metadata_serializer import (
 from dataedit.peer_review.projection import field_history
 from dataedit.peer_review.service import (
     ContributorNotFoundError,
+    MetadataRefusedError,
     NotYourTurnError,
     ReviewFinishedError,
     ReviewService,
@@ -1493,7 +1494,7 @@ class TablePeerReviewView(LoginRequiredMixin, View):
         service = ReviewService(table_name=table_obj.name, actor=request.user)
         try:
             service.submit_reviewer_review(review_data, review_id=review_id)
-        except ContributorNotFoundError as exc:
+        except (ContributorNotFoundError, MetadataRefusedError) as exc:
             return JsonResponse({"error": str(exc)}, status=400)
         except (ReviewFinishedError, NotYourTurnError) as exc:
             return JsonResponse({"error": str(exc)}, status=409)
@@ -1603,6 +1604,8 @@ class TablePeerReviewContributorView(TablePeerReviewView):
         service = ReviewService(table_name=table, actor=request.user)
         try:
             service.submit_contributor_review(review_data, review_id=review_id)
+        except MetadataRefusedError as exc:
+            return JsonResponse({"error": str(exc)}, status=400)
         except (ReviewFinishedError, NotYourTurnError) as exc:
             return JsonResponse({"error": str(exc)}, status=409)
         return JsonResponse({"status": "success"}, status=200)
