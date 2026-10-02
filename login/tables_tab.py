@@ -392,10 +392,28 @@ def tables_listing(user) -> Listing:
         # Ascending is "least done first" throughout: drafts before published
         # Tables, unreviewed before reviewed, in no Dataset before in many.
         sorts=(
-            Sort("table", "Table", DISPLAYED_TITLE),
-            Sort("status", "Status", F("is_publish")),
-            Sort("review", "Review", REVIEW_RANK),
-            Sort("datasets", "Datasets", visible_dataset_count(user)),
+            Sort("table", "Table", DISPLAYED_TITLE, "A to Z", "Z to A"),
+            Sort(
+                "status",
+                "Status",
+                F("is_publish"),
+                "drafts first",
+                "published first",
+            ),
+            Sort(
+                "review",
+                "Review",
+                REVIEW_RANK,
+                "not reviewed first",
+                "reviewed first",
+            ),
+            Sort(
+                "datasets",
+                "Datasets",
+                visible_dataset_count(user),
+                "fewest first",
+                "most first",
+            ),
         ),
         # Interim default until the Modified column lands (#2557), which makes
         # "-modified" the default.
