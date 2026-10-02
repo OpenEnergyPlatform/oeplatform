@@ -51,14 +51,15 @@ that reason. Prefer the short form.
 
 ## What sits where
 
-|                           |                                                                                                |
-| ------------------------- | ---------------------------------------------------------------------------------------------- |
-| **A table's structure**   | `/api/v0/tables/<name>/` — its columns, indexes and constraints                                |
-| **A table's rows**        | `/api/v0/tables/<name>/rows/` — read, insert, update, delete                                   |
-| **A whole CSV at once**   | `/api/v0/tables/<name>/bulk-upload/` — see below                                               |
-| **A table's metadata**    | `/api/v0/tables/<name>/meta/` — its OEMetadata document                                        |
-| **Datasets**              | `/api/v0/datasets/` — the catalogue entries that group tables                                  |
-| **The `advanced/` block** | a thin passthrough to the database, meant to be driven by a client library rather than by hand |
+|                            |                                                                                                |
+| -------------------------- | ---------------------------------------------------------------------------------------------- |
+| **A table's structure**    | `/api/v0/tables/<name>/` — its columns, indexes and constraints                                |
+| **A table's rows**         | `/api/v0/tables/<name>/rows/` — read, insert, update, delete                                   |
+| **A whole CSV at once**    | `/api/v0/tables/<name>/bulk-upload/` — see below                                               |
+| **A table's metadata**     | `/api/v0/tables/<name>/meta/` — its OEMetadata document                                        |
+| **Who holds a role on it** | `/api/v0/tables/<name>/permissions/` — see below                                               |
+| **Datasets**               | `/api/v0/datasets/` — the catalogue entries that group tables                                  |
+| **The `advanced/` block**  | a thin passthrough to the database, meant to be driven by a client library rather than by hand |
 
 ## Creating a table: the one thing to get right
 
@@ -82,6 +83,23 @@ either the whole file lands or none of it does.
 Send it gzipped (`Content-Encoding: gzip`) unless the file is small. On a large
 upload the platform is not the bottleneck — the client's uplink is — and CSV
 compresses well enough to change what is reachable in practice.
+
+## Sharing a table
+
+`GET /api/v0/tables/<name>/permissions/` lists the users and organizations
+holding a role on the table. A Table admin adds one with `POST` to the same
+address (`{"user": "<name>", "level": 4}` or
+`{"organization": <id>, "level": 4}`), and changes or removes one at
+`permissions/user:<id>/` or `permissions/org:<id>/` with `PATCH` or `DELETE`.
+The rules are the same as on the table's access drawer and permission page:
+Admin goes to users only, an organization stops at Data maintainer and is shared
+only by its members, and a table always keeps a user with direct Admin.
+
+A change that takes **your own** Admin, or all your access, away is answered
+`409` with `"code": "confirmation_needed"` and writes nothing. Send the same
+request again with `"confirm": true` in the `PATCH` body, or `?confirm=true` on
+the `DELETE`. A `409` with `"code": "last_admin"` cannot be confirmed: give
+someone else Admin first.
 
 ## Authentication
 

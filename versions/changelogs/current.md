@@ -28,6 +28,15 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Features
 
+- A Table's Holders can be managed through the REST API:
+  `GET`/`POST /api/v0/tables/<name>/permissions/` lists them and adds one, and
+  `PATCH`/`DELETE .../permissions/user:<id>/` (or `org:<id>/`) changes or
+  removes one. Every write goes through the same permission service as the
+  access drawer, so every rule holds there too, and logs `via=api`. A change
+  that takes your own Admin away answers `409` until it is sent again with
+  `confirm`
+  [(#2570)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2570)
+
 - The tables tab of the profile dashboard shows one list instead of the draft
   and published card sections: every Table you can write, directly or through an
   organization, with its status and where your access comes from. A status
