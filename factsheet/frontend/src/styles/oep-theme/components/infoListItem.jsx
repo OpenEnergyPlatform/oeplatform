@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import { Grid } from '@mui/material';
-import { styled } from '@mui/material/styles';
+import styled from '@mui/material/styles/styled';
+
 import variables from '../variables';
 
 const InfoListItemContainer = styled(Grid)(({ theme }) => ({

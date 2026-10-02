@@ -22,7 +22,8 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 // import Paper from '@mui/material/Paper';
 import { visuallyHidden } from '@mui/utils';
-import { styled } from '@mui/material/styles';
+import styled from '@mui/material/styles/styled';
+
 import { tableCellClasses } from '@mui/material/TableCell';
 import Button from '@mui/material/Button';
 import { Link } from 'react-router-dom';
@@ -45,6 +46,7 @@ import conf from "../conf.json";
 // import SelectAllIcon from '@mui/icons-material/SelectAll';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 import AddIcon from '@mui/icons-material/Add';
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 // import RuleIcon from '@mui/icons-material/Rule';
 import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles'
 import Tooltip from '@mui/material/Tooltip';
@@ -65,9 +67,15 @@ import '../styles/App.css';
 import variables from '../styles/oep-theme/variables.js';
 // import palette from '../styles/oep-theme/palette.js';
 import CSRFToken from './csrfToken.js';
-// import StudyKeywords from './scenarioBundleUtilityComponents/StudyDescriptors.js';
 import FactsheetFilterDialog from './FactsheetFilterDialog.jsx';
 import FilterFeedbackBanner from './filterFeedbackBanner';
+
+
+import TextField from '@mui/material/TextField';
+import InputAdornment from '@mui/material/InputAdornment';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
+
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -234,6 +242,15 @@ function EnhancedTableHead(props) {
             </TableSortLabel>
           </StyledTableCell>
         ))}
+        {/* Empty header cell for the expand-details column so the header's
+            column count matches the body's 5 columns (no TableSortLabel here,
+            so no stray sort arrow — see the commented-out more_details headCell). */}
+        <StyledTableCell
+          variant="light"
+          key="more_details_head"
+          aria-hidden="true"
+          sx={{ width: '40px', paddingLeft: '20px' }}
+        />
       </TableRow>
     </TableHead>
   );
@@ -252,8 +269,21 @@ EnhancedTableHead.propTypes = {
 };
 
 function EnhancedTableToolbar(props) {
-  const { numSelected, handleOpenQuery, handleShowAll, handleOpenAspectsOfComparison, handleChangeView, alignment, selected, logged_in, filterApplied, handleReset } = props;
-  const [isDisabled, setIsDisabled] = useState(true);
+  const {
+    numSelected,
+    handleOpenQuery,
+    handleShowAll,
+    handleOpenAspectsOfComparison,
+    handleChangeView,
+    alignment,
+    selected,
+    logged_in,
+    filterApplied,
+    handleReset,
+    searchText,
+    setSearchText,
+  } = props;
+
   return (
     <div>
       <Grid
@@ -285,36 +315,53 @@ function EnhancedTableToolbar(props) {
         </Grid>
       </Grid>
       <Toolbar sx={{ marginBottom: theme => theme.spacing(4) }}>
-        <Grid container justifyContent="space-between"
-          spacing={2}>
+        <Grid container justifyContent="space-between" spacing={2}>
 
-          <Grid item xs={12} md={4}>
-            {/* <Tooltip title="Show all">
-              <Button variant="outlined" size="small"><SelectAllIcon onClick={handleShowAll}/></Button>
-            </Tooltip> */}
-            <Button variant="outlined" size="small" key="Query" sx={{ marginLeft: '8px' }} onClick={handleOpenQuery} startIcon={<FilterAltOutlinedIcon />}>Search</Button>
+          {/* LEFT: buttons */}
+          <Grid item xs={12} lg={4}>
             <Button
-              disabled={!filterApplied}
+              variant="outlined"
+              size="small"
+              key="Query"
+              sx={{ marginLeft: '8px' }}
+              onClick={handleOpenQuery}
+              startIcon={<FilterAltOutlinedIcon />}
+            >
+              Search
+            </Button>
+
+            <Button
+              disabled={!filterApplied && !searchText.trim()}
               size="small"
               key="resetFilterButton"
               sx={{ marginLeft: '8px' }}
               startIcon={<ReplayIcon />}
-              onClick={handleReset}>Reset</Button>
-            <Tooltip title="Compare">
+              onClick={handleReset}
+            >
+              Reset
+            </Button>
 
-              {numSelected > 1 ? <Link to={`scenario-bundles/compare/${[...selected].join('&')}`} onClick={() => this.forceUpdate} style={{ color: 'white' }}>
-                <Button size="small"
-                  style={{ 'marginLeft': '5px', 'color': 'white', 'textTransform': 'none' }}
-                  variant="contained"
-                  key="compareScenariosBtn"
-                  startIcon={<CompareArrowsIcon />}
+            <Tooltip title="Compare">
+              {numSelected > 1 ? (
+                <Link
+                  to={`scenario-bundles/compare/${[...selected].join('&')}`}
+                  onClick={() => this.forceUpdate}
+                  style={{ color: 'white' }}
                 >
-                  Compare scenarios
-                </Button>
-              </Link>
-                :
-                <Button size="small"
-                  style={{ 'marginLeft': '5px', 'color': 'white', 'textTransform': 'none' }}
+                  <Button
+                    size="small"
+                    style={{ marginLeft: '5px', color: 'white', textTransform: 'none' }}
+                    variant="contained"
+                    key="compareScenariosBtn"
+                    startIcon={<CompareArrowsIcon />}
+                  >
+                    Compare scenarios
+                  </Button>
+                </Link>
+              ) : (
+                <Button
+                  size="small"
+                  style={{ marginLeft: '5px', color: 'white', textTransform: 'none' }}
                   variant="contained"
                   key="compareScenariosBtn"
                   startIcon={<CompareArrowsIcon />}
@@ -322,11 +369,41 @@ function EnhancedTableToolbar(props) {
                 >
                   Compare scenarios
                 </Button>
-              }
-
+              )}
             </Tooltip>
           </Grid>
-          <Grid item xs={6} md={4}>
+
+          {/* MIDDLE: quick search */}
+          <Grid item xs={12} lg={3}>
+            <TextField
+              size="small"
+              fullWidth
+              placeholder="Filter by study name or acronym…"
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+                endAdornment: searchText ? (
+                  <InputAdornment position="end">
+                    <IconButton
+                      size="small"
+                      aria-label="clear search"
+                      onClick={() => setSearchText('')}
+                    >
+                      <ClearIcon fontSize="small" />
+                    </IconButton>
+                  </InputAdornment>
+                ) : null,
+              }}
+            />
+          </Grid>
+
+          {/* RIGHT: view toggle + create */}
+          <Grid item xs={12} sm={6} lg={2}>
             <ToggleButtonGroup
               color="primary"
               value={alignment}
@@ -339,7 +416,15 @@ function EnhancedTableToolbar(props) {
               <ToggleButton value="cards"><ViewAgendaOutlinedIcon />Cards</ToggleButton>
             </ToggleButtonGroup>
           </Grid>
-          <Grid item xs={6} md={4}>
+
+          <Grid item xs={12} sm={6} lg={3}>
+            <Stack
+              direction={{ xs: 'column', sm: 'row' }}
+              spacing={1}
+              justifyContent={{ xs: 'flex-start', sm: 'flex-end' }}
+              alignItems={{ xs: 'flex-start', sm: 'center' }}
+              sx={{ flexWrap: 'wrap', rowGap: 1, mt: { xs: 1, md: 0 } }}
+            >
             <HtmlTooltip
               style={{ marginLeft: '10px' }}
               placement="top"
@@ -352,13 +437,35 @@ function EnhancedTableToolbar(props) {
               }
             >
               <span>
-                <Button disabled={logged_in === "NOT_LOGGED_IN"} component={Link} variant="contained" size="small" className="linkButton" to={`scenario-bundles/id/new`} onClick={() => this.forceUpdate}>
+                <Button
+                  disabled={logged_in === "NOT_LOGGED_IN"}
+                  component={Link}
+                  variant="contained"
+                  size="small"
+                  className="linkButton"
+                  to={`scenario-bundles/id/new`}
+                  onClick={() => this.forceUpdate}
+                >
                   <AddIcon />
                   Create new
                 </Button>
               </span>
             </HtmlTooltip>
+              <Button
+                variant="outlined"
+                size="small"
+                key="oekgChatButton"
+                component="a"
+                href={(typeof window !== 'undefined' && window.OEP_EXTERNAL_URLS && window.OEP_EXTERNAL_URLS.oekg_chat) || 'https://oekg-chat.openenergyplatform.org/'}
+                target="_blank"
+                rel="noopener noreferrer"
+                startIcon={<ChatBubbleOutlineIcon />}
+              >
+                OEKG Chat
+              </Button>
+            </Stack>
           </Grid>
+
         </Grid>
       </Toolbar>
     </div>
@@ -367,7 +474,10 @@ function EnhancedTableToolbar(props) {
 
 EnhancedTableToolbar.propTypes = {
   numSelected: PropTypes.number.isRequired,
+  searchText: PropTypes.string.isRequired,
+  setSearchText: PropTypes.func.isRequired,
 };
+
 
 export default function CustomTable(props) {
   const { factsheets } = props;
@@ -404,6 +514,7 @@ export default function CustomTable(props) {
   const [feedbackType, setFeedbackType] = useState(''); // 'noFilters' or 'noResults'
   const [filterApplied, setFilterApplied] = useState(false);
 
+  const [searchText, setSearchText] = useState('');
 
   const handleChangeView = (event, newAlignment) => {
     if (newAlignment !== null) {
@@ -412,11 +523,22 @@ export default function CustomTable(props) {
   };
 
 
-  // const [rows, setRows] = useState(factsheets);
-  const data = React.useMemo(
+  const baseData = React.useMemo(
     () => (filterApplied ? filteredFactsheets : factsheets),
     [filterApplied, filteredFactsheets, factsheets]
   );
+
+  const data = React.useMemo(() => {
+    const q = searchText.trim().toLowerCase();
+    if (!q) return baseData;
+
+    return baseData.filter((row) => {
+      const study = String(row.study_name ?? '').toLowerCase();
+      const acr = String(row.acronym ?? '').toLowerCase();
+      return study.includes(q) || acr.includes(q);
+    });
+  }, [baseData, searchText]);
+
 
 
   const [openBackDrop, setOpenBackDrop] = useState(false);
@@ -729,7 +851,7 @@ export default function CustomTable(props) {
 
             </StyledTableRow>
             <TableRow >
-              <TableCell colSpan={8} >
+              <TableCell colSpan={5} >
                 <Collapse in={open.includes(index)} timeout="auto" unmountOnExit>
                   <Box>
                     <Grid container
@@ -966,6 +1088,7 @@ export default function CustomTable(props) {
 
 
       <Container maxWidth="xl">
+
         <EnhancedTableToolbar
           logged_in={logged_in}
           numSelected={selected.size}
@@ -977,7 +1100,10 @@ export default function CustomTable(props) {
           handleOpenAspectsOfComparison={handleOpenAspectsOfComparison}
           filterApplied={filterApplied}
           handleReset={handleReset}
+          searchText={searchText}
+          setSearchText={setSearchText}
         />
+
         {feedbackType === 'noResults' && feedbackOpen && (
           <Box sx={{ mx: 2, mb: 2 }}>
             <FilterFeedbackBanner
@@ -987,7 +1113,15 @@ export default function CustomTable(props) {
             />
           </Box>
         )}
-
+        <TablePagination
+          rowsPerPageOptions={[5, 15, 25, 50]}
+          component="div"
+          count={data.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
         {alignment === "list" && data.length > 0 && (
           <>
             <TableContainer>
@@ -1013,17 +1147,9 @@ export default function CustomTable(props) {
         )}
 
         {/* CARDS VIEW */}
-        {alignment === "cards" && data.length > 0 && renderCards(visibleRows)}
+
+        {alignment === "cards" && data.length > 0 && (renderCards(visibleRows))}
       </Container>
-      <TablePagination
-        rowsPerPageOptions={[5, 15, 25, 50]}
-        component="div"
-        count={data.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-      />
     </Box>
 
   );

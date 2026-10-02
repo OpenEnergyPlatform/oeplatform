@@ -2,40 +2,25 @@
 
 __license__ = """
 SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
-SPDX-FileCopyrightText: 2025 Pierre Francois <https://github.com/Bachibouzouk> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
 SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 Eike Broda <https://github.com/ebroda>
 SPDX-FileCopyrightText: 2025 Hendrik Huyskens <https://github.com/henhuy> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg
-SPDX-FileCopyrightText: 2025 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg
-SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 Kirann Bhavaraju <https://github.com/KirannBhavaraju> © Otto-von-Guericke-Universität Magdeburg
 SPDX-FileCopyrightText: 2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut
-SPDX-FileCopyrightText: 2025 Ludwig Hülk <https://github.com/Ludee> © Reiner Lemoine Institut
-SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
-SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
 SPDX-FileCopyrightText: 2025 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg
 SPDX-FileCopyrightText: 2025 Tom Heimbrodt <https://github.com/tom-heimbrodt>
-SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
 SPDX-FileCopyrightText: 2025 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut
-SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> © Reiner Lemoine Institut
-SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
-SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2025 shara <https://github.com/SharanyaMohan-30> © Otto-von-Guericke-Universität Magdeburg
 SPDX-FileCopyrightText: 2025 Stephan Uller <https://github.com/steull> © Reiner Lemoine Institut
-SPDX-FileCopyrightText: 2025 user <https://github.com/Darynarli> © Reiner Lemoine Institut
-SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.
-
+SPDX-FileCopyrightText: 2025 Vismaya Jochem <https://github.com/vismayajochem> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 import csv
 import json
-import re
-from collections import defaultdict
 from io import TextIOWrapper
 
 from django.contrib import messages
@@ -43,13 +28,15 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.core.paginator import Paginator
-from django.db.models import Count, F
+from django.db import transaction
+from django.db.models import Count, F, Q
 from django.db.utils import IntegrityError
 from django.http import (
     Http404,
     HttpRequest,
     HttpResponse,
     HttpResponseBadRequest,
+    HttpResponseForbidden,
     JsonResponse,
 )
 from django.shortcuts import get_object_or_404, redirect, render
@@ -68,11 +55,13 @@ from api.actions import (
     assert_add_tag_permission,
     data_insert,
     describe_columns,
+    list_table_sizes,
     remove_queued_column,
     remove_queued_constraint,
     table_get_row_count,
 )
 from api.error import APIError
+from api.helper import get_column_description
 from api.utils import table_or_404, table_or_404_from_dict
 from dataedit.forms import GeomViewForm, GraphViewForm, LatLonViewForm
 from dataedit.helper import (
@@ -82,21 +71,30 @@ from dataedit.helper import (
     delete_tag,
     edit_tag,
     find_tables,
+    get_all_tags_with_usage,
     get_cancle_state,
-    get_column_description,
     get_page,
-    merge_field_reviews,
     process_review_data,
-    recursive_update,
     update_keywords_from_tags,
 )
-from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
+from dataedit.metadata import has_valid_filled_metadata, load_metadata_from_db
 from dataedit.metadata.widget import MetaDataWidget
-from dataedit.models import Embargo
+from dataedit.models import Dataset, Embargo
 from dataedit.models import Filter as DBFilter
 from dataedit.models import PeerReview, PeerReviewManager, Table, Tag, Topic
 from dataedit.models import View as DBView
 from dataedit.models import View as DataViewModel
+from dataedit.peer_review.metadata_serializer import (
+    get_all_field_descriptions,
+    sort_in_category,
+)
+from dataedit.peer_review.projection import field_history
+from dataedit.peer_review.service import (
+    ContributorNotFoundError,
+    NotYourTurnError,
+    ReviewFinishedError,
+    ReviewService,
+)
 from login import models as login_models
 from oeplatform.settings import (
     DOCUMENTATION_LINKS,
@@ -113,7 +111,11 @@ class StandaloneMetaEditView(View):
     def get(self, request: HttpRequest) -> HttpResponse:
         context_dict = {
             "config": json.dumps(
-                {"cancle_url": get_cancle_state(self.request), "standalone": True}
+                {
+                    "cancle_url": get_cancle_state(self.request),
+                    "standalone": True,
+                    "create_url": reverse("oeo_ext:oeo-ext-plugin-ui-create"),
+                }
             ),
             "oem_key_desc": EXTERNAL_URLS["oemetadata_key_description"],
             "oemetadata_tutorial": EXTERNAL_URLS["tutorials_oemetadata"],
@@ -126,48 +128,54 @@ class StandaloneMetaEditView(View):
         )
 
 
+def _review_queued_change(request: HttpRequest, deny, apply) -> HttpResponse:
+    """Apply or deny one change from the table change queue.
+
+    Admin-only, and the id must be a number (#2490). These views carried
+    nothing but `@require_POST`, so an anonymous POST reached the statements
+    that alter a table and mark a change reviewed, and the posted `id` was
+    interpolated into them. CSRF does not stop a scripted request: any page
+    hands an anonymous visitor a token. Admin-only is the interim rule while
+    #2490 decides whether the queue is deleted or repaired; the table owner,
+    whose review the queue was meant to be, is refused too until then.
+    """
+    if not getattr(request.user, "is_admin", False):
+        return HttpResponseForbidden("Only admins may review queued changes.")
+
+    action = request.POST.get("action")
+    try:
+        change_id = int(request.POST.get("id", ""))
+    except ValueError:
+        return HttpResponseBadRequest("The change id must be a number.")
+
+    table_obj = table_or_404_from_dict(request.POST)
+
+    if action == "deny":
+        deny(change_id)
+    elif action == "apply":
+        apply(change_id)
+    else:
+        return HttpResponseBadRequest("The action must be 'apply' or 'deny'.")
+
+    return redirect("dataedit:view", table=table_obj.name)
+
+
 @require_POST
+@login_required
 def admin_constraints_view(request: HttpRequest) -> HttpResponse:
-    """
-    Way to apply changes
-    :param request:
-    :return:
-    """
-    action = request.POST.get("action")
-    id = request.POST.get("id")
-
-    table_obj = table_or_404_from_dict(request.POST)
-
-    if action == "deny":
-        remove_queued_constraint(id)
-    elif action == "apply":
-        apply_queued_constraint(id)
-    else:
-        raise NotImplementedError(action)
-
-    return redirect("dataedit:view", table=table_obj.name)
+    """Apply or deny a queued constraint change."""
+    return _review_queued_change(
+        request, deny=remove_queued_constraint, apply=apply_queued_constraint
+    )
 
 
 @require_POST
+@login_required
 def admin_column_view(request: HttpRequest) -> HttpResponse:
-    """
-    Way to apply changes
-    :param request:
-    :return:
-    """
-
-    action = request.POST.get("action")
-    id = request.POST.get("id")
-    table_obj = table_or_404_from_dict(request.POST)
-
-    if action == "deny":
-        remove_queued_column(id)
-    elif action == "apply":
-        apply_queued_column(id)
-    else:
-        raise NotImplementedError(action)
-
-    return redirect("dataedit:view", table=table_obj.name)
+    """Apply or deny a queued column change."""
+    return _review_queued_change(
+        request, deny=remove_queued_column, apply=apply_queued_column
+    )
 
 
 @never_cache
@@ -247,70 +255,169 @@ def topic_view(request: HttpRequest) -> HttpResponse:
     )
 
 
+def _is_htmx(request: HttpRequest) -> bool:
+    return "HX-Request" in request.headers
+
+
+def tag_usage(tag: Tag) -> dict:
+    """How many objects would lose this tag if it were deleted.
+
+    Both sides, because `Tag` is ONE vocabulary with two consumers. This page
+    used to ask `tag.tables` alone, so a tag carrying 200 factsheets and no
+    table reported itself unused and offered a Delete button underneath.
+    """
+    tables = tag.tables.count()
+    factsheets = tag.factsheets.count()
+    return {
+        "tables": tables,
+        "factsheets": factsheets,
+        "total": tables + factsheets,
+    }
+
+
+def tag_editor_context(
+    tag: Tag | None = None, name: str = "", color_hex: str = "#000000", error: str = ""
+) -> dict:
+    """What the editor form needs, as one `editing` object.
+
+    One function because the three render paths used to disagree: the
+    standalone page offered a Delete button gated on an `is_admin` variable no
+    view ever passed, and the failed-save path rendered nothing at all -- it
+    redirected to the overview and dropped what the user had typed.
+    """
+    if tag is not None:
+        return {
+            "pk": tag.pk,
+            "name": name or tag.name,
+            "color_hex": color_hex if error else tag.color_hex,
+            "usage": tag_usage(tag),
+            "error": error,
+        }
+    return {
+        "pk": None,
+        "name": name,
+        "color_hex": color_hex,
+        "usage": None,
+        "error": error,
+    }
+
+
+def render_tag_manager(request, editing=None, saved: str = "") -> HttpResponse:
+    """The list and the editor panel, as one fragment.
+
+    Every htmx path answers with exactly this -- the piece it replaces, never
+    a redirect and never a whole page. A redirect is followed transparently by
+    htmx, so answering a save with one put an entire rendered site inside the
+    editor panel. Same shape as `dataset_edit_view` in the login app.
+    """
+    return render(
+        request,
+        "dataedit/partials/tag_manager.html",
+        {
+            "tags": get_all_tags_with_usage(),
+            "editing": editing,
+            "saved": saved,
+        },
+    )
+
+
 @login_required
 @never_cache
 def tag_overview_view(request: HttpRequest) -> HttpResponse:
-    # if rename or adding of tag fails: display error message
-    context = {
-        "errorMsg": (
-            "Tag name is not valid" if request.GET.get("status") == "invalid" else ""
-        )
-    }
-
+    # Cancel comes back here through htmx to close the panel, so the bare
+    # overview has to be answerable as a fragment too.
+    if _is_htmx(request):
+        return render_tag_manager(request)
     return render(
-        request=request, template_name="dataedit/tag_overview.html", context=context
+        request=request,
+        template_name="dataedit/tag_overview.html",
+        context={"tags": get_all_tags_with_usage()},
     )
 
 
 @login_required
 @never_cache
 def tag_editor_view(request: HttpRequest, tag_pk: str | None = None) -> HttpResponse:
-    tag = Tag.get_or_none(tag_pk or "")
-    if tag:
-        assigned = tag.tables.count() > 0
-        return render(
-            request=request,
-            template_name="dataedit/tag_editor.html",
-            context={
-                "name": tag.name,
-                "pk": tag.pk,
-                "color_hex": tag.color_hex,
-                "assigned": assigned,
-            },
-        )
-    else:
-        return render(
-            request=request,
-            template_name="dataedit/tag_editor.html",
-            context={"name": "", "color_hex": "#000000", "assigned": False},
-        )
+    """The create/edit form: the overview's panel, or a page of its own.
+
+    The panel is the common path and the page is the fallback for a bookmark
+    or a browser without javascript. Both render the same form partial, so
+    neither can drift from the other.
+    """
+    editing = tag_editor_context(Tag.get_or_none(tag_pk or ""))
+    if _is_htmx(request):
+        return render_tag_manager(request, editing=editing)
+    return render(
+        request=request,
+        template_name="dataedit/tag_editor.html",
+        context={"editing": editing},
+    )
 
 
 @require_POST
 @login_required
 def tag_update_view(request: HttpRequest) -> HttpResponse:
-    status = ""  # error status if operation fails
+    htmx = _is_htmx(request)
+    tag_id = request.POST.get("tag_id") or None
 
-    if "submit_save" in request.POST:
-        try:
-            if "tag_id" in request.POST:
-                id = request.POST["tag_id"]
-                name = request.POST["tag_text"]
-                color = request.POST["tag_color"]
-                edit_tag(id, name, color)
+    if "submit_delete" in request.POST:
+        # Admin-only, checked HERE and not only on the button. The button was
+        # gated on a context variable no view passed, so it rendered for
+        # nobody; the view behind it was gated on nothing but a login, so any
+        # account could delete any tag with a crafted POST -- and a tag is
+        # shared platform-wide, so that strips it from every table and
+        # factsheet carrying it, with no record anywhere.
+        if not getattr(request.user, "is_admin", False):
+            return HttpResponseForbidden("Only admins may delete tags.")
+        tag = Tag.get_or_none(tag_id or "")
+        done = ""
+        if tag:
+            removed = tag_usage(tag)
+            delete_tag(tag.pk)
+            done = "Deleted the tag and removed it from %d object(s)." % (
+                removed["total"],
+            )
+        if htmx:
+            return render_tag_manager(request, saved=done)
+        if done:
+            messages.success(request, done)
+        return redirect(reverse("dataedit:tags"))
+
+    name = request.POST.get("tag_text", "")
+    color = request.POST.get("tag_color", "#000000")
+    try:
+        # The savepoint keeps a rejected insert from poisoning the surrounding
+        # transaction, so the error path below can still read the database.
+        with transaction.atomic():
+            if tag_id:
+                edit_tag(tag_id, name, color)
             else:
-                name = request.POST["tag_text"]
-                color = request.POST["tag_color"]
                 add_tag(name, color)
-        except IntegrityError:
-            # requested changes are not valid because of name conflicts
-            status = "invalid"
+    except IntegrityError:
+        # A name conflict, or a name that normalises to nothing. Come back
+        # with what was typed: the redirect this used to do sent the user to
+        # the overview and discarded it.
+        editing = tag_editor_context(
+            Tag.get_or_none(tag_id or ""),
+            name=name,
+            color_hex=color,
+            error="That tag name is not valid, or a tag by that name exists.",
+        )
+        if htmx:
+            return render_tag_manager(request, editing=editing)
+        return render(
+            request=request,
+            template_name="dataedit/tag_editor.html",
+            context={"editing": editing},
+        )
 
-    elif "submit_delete" in request.POST:
-        id = request.POST["tag_id"]
-        delete_tag(id)
-
-    return redirect(reverse("dataedit:tags") + f"?status={status}")
+    if htmx:
+        # The panel closes and the list re-renders with the result in it,
+        # which is the confirmation. A Django message would be queued into the
+        # session and surface on some later full page load instead.
+        return render_tag_manager(request, saved="Saved the tag.")
+    messages.success(request, "Saved the tag.")
+    return redirect(reverse("dataedit:tags"))
 
 
 @require_POST
@@ -435,6 +542,111 @@ def tables_view(request: HttpRequest, topic: str) -> HttpResponse:
             "doc_oem_builder_link": DOCUMENTATION_LINKS["oemetabuilder"],
         },
     )
+
+
+@never_cache
+def datasets_view(request: HttpRequest, topic: str) -> HttpResponse:
+    """Public, paginated card list of the datasets in one topic: name,
+    description, resource count and combined size of the member tables.
+    Datasets never list under the draft pseudo-topic — it stays
+    tables-only (dataset drafts become private with the publish PR)."""
+    is_draft_topic = topic == PSEUDO_TOPIC_DRAFT
+    if not is_draft_topic:
+        get_object_or_404(Topic, name=topic)
+
+    searched_query_string = request.GET.get("query")
+    searched_tag_ids = request.GET.getlist("tags")
+
+    # all query params without "page", so pagination keeps the filter state
+    params_wo_page = request.GET.copy()
+    params_wo_page.pop("page", None)
+    params_wo_page = params_wo_page.urlencode()
+
+    Tag.increment_usage_count_many(searched_tag_ids)
+
+    datasets = Dataset.objects.filter(topics__name=topic)
+    if searched_query_string:
+        datasets = datasets.filter(
+            Q(name__icontains=searched_query_string)
+            | Q(metadata__title__icontains=searched_query_string)
+            | Q(metadata__description__icontains=searched_query_string)
+        )
+    # a dataset carries a tag when any member table does; several selected
+    # tags AND together, mirroring the table filter's semantics
+    for tag_id in searched_tag_ids:
+        datasets = datasets.filter(tables__tags__pk=tag_id)
+
+    datasets = (
+        datasets.distinct().order_by("-created_at").prefetch_related("tables", "topics")
+    )
+
+    paginator = Paginator(datasets, ITEMS_PER_PAGE)
+    datasets_paginated = paginator.get_page(get_page(request))
+
+    # one query for all table sizes; tables missing from the data schema
+    # (e.g. drafts) count as zero
+    sizes = {row["table_name"]: row["total_bytes"] for row in list_table_sizes()}
+    for dataset in datasets_paginated:
+        dataset.total_size_bytes = sum(
+            sizes.get(table.name, 0) for table in dataset.tables.all()
+        )
+
+    return render(
+        request,
+        "dataedit/dataedit_datasetlist.html",
+        {
+            "datasets_paginated": datasets_paginated,
+            "topic": topic,
+            "is_draft_topic": is_draft_topic,
+            "query": searched_query_string,
+            "tags": searched_tag_ids,
+            "params_wo_page": params_wo_page,
+        },
+    )
+
+
+def dataset_detail_view(request: HttpRequest, dataset_name: str) -> HttpResponse:
+    """Public read view for one dataset. Deliberately not topic-bound
+    (datasets carry several topics); linked from the cards and the
+    dashboard, opening in a new tab."""
+    dataset = get_object_or_404(
+        Dataset.objects.prefetch_related("tables__topics", "topics"),
+        name=dataset_name,
+    )
+    resources = dataset.tables.all().order_by("name")
+
+    sizes = {row["table_name"]: row["total_bytes"] for row in list_table_sizes()}
+    total_size_bytes = sum(sizes.get(table.name, 0) for table in resources)
+
+    is_creator = (
+        request.user.is_authenticated
+        and dataset.creator is not None
+        and dataset.creator == request.user
+    )
+
+    return render(
+        request,
+        "dataedit/dataedit_dataset_detail.html",
+        {
+            "dataset": dataset,
+            "resources": resources,
+            "total_size_bytes": total_size_bytes,
+            "is_creator": is_creator,
+            "metadata_url": reverse(
+                "dataedit:dataset-metadata", kwargs={"dataset_name": dataset.name}
+            ),
+        },
+    )
+
+
+def dataset_metadata_json_view(request: HttpRequest, dataset_name: str) -> JsonResponse:
+    """The dataset's oemetadata document with live resources, as plain
+    JSON: feeds the metadata viewer on the detail page and doubles as
+    the raw-JSON download."""
+    dataset = get_object_or_404(Dataset, name=dataset_name)
+    metadata = dict(dataset.metadata)
+    metadata["resources"] = dataset.resource_entries()
+    return JsonResponse(metadata)
 
 
 @require_POST
@@ -716,17 +928,18 @@ class TableDataView(View):
         opr_manager = PeerReviewManager()
         reviews = opr_manager.filter_opr_by_table(table=table)
 
+        # Check if metadata has any valid (non-empty) fields
+        has_metadata = has_valid_filled_metadata(metadata)
+
         opr_context = {
             "contributor": PeerReviewManager.load_contributor(table=table),
             "reviewer": PeerReviewManager.load_reviewer(table=table),
-            "opr_enabled": False,
-            # oemetadata
-            # is not None,  # check if the table has the metadata
+            "opr_enabled": has_metadata,  # Only enable if metadata exists
         }
 
         opr_result_context = {}
         if reviews.exists():
-            latest_review: PeerReview = reviews.last()  # type:ignore (reviews.exists())
+            latest_review: PeerReview = reviews.last()  # type: ignore (reviews.exists()) # noqa: E501
             opr_manager.update_open_since(opr=latest_review)
             current_reviewer = opr_manager.load(latest_review).current_reviewer
             opr_context.update(
@@ -781,6 +994,7 @@ class TableDataView(View):
             "opr": opr_context,
             "opr_result": opr_result_context,
             "embargo_time_left": embargo_time_left,
+            "has_metadata": has_metadata,
         }
 
         return render(request, "dataedit/dataview.html", context=context_dict)
@@ -923,7 +1137,7 @@ class TablePermissionView(View):
             # Return an HTTP 400 Bad Request response
             return HttpResponseBadRequest("Group name is required.")
 
-        group = get_object_or_404(login_models.UserGroup, name=group_name)
+        group = get_object_or_404(login_models.Group, name=group_name)
 
         p, _ = login_models.GroupPermission.objects.get_or_create(
             holder=group, table=table_obj
@@ -937,7 +1151,7 @@ class TablePermissionView(View):
             # Return an HTTP 400 Bad Request response
             return HttpResponseBadRequest("Group id is required.")
 
-        group = get_object_or_404(login_models.UserGroup, id=group_id)
+        group = get_object_or_404(login_models.Group, id=group_id)
 
         p = get_object_or_404(
             login_models.GroupPermission, holder=group, table=table_obj
@@ -952,7 +1166,7 @@ class TablePermissionView(View):
             # Return an HTTP 400 Bad Request response
             return HttpResponseBadRequest("Group id is required.")
 
-        group = get_object_or_404(login_models.UserGroup, id=group_id)
+        group = get_object_or_404(login_models.Group, id=group_id)
 
         p = get_object_or_404(
             login_models.GroupPermission, holder=group, table=table_obj
@@ -1031,6 +1245,7 @@ class TableMetaEditView(LoginRequiredMixin, View):
                         "api:api_table_meta",
                         kwargs={"table": table},
                     ),
+                    "create_url": reverse("oeo_ext:oeo-ext-plugin-ui-create"),
                     "url_view_table": reverse("dataedit:view", kwargs={"table": table}),
                     "cancle_url": get_cancle_state(self.request),
                     "standalone": False,
@@ -1091,163 +1306,6 @@ class TablePeerReviewView(LoginRequiredMixin, View):
         json_schema = OEMETADATA_V20_SCHEMA
         return json_schema
 
-    def parse_keys(self, val, old=""):
-        """
-        Recursively parse keys from a nested dictionary or list and return them
-        as a list of dictionaries.
-
-        Args:
-            val (dict or list): The input dictionary or list to parse.
-            old (str, optional): The prefix for nested keys. Defaults to an
-                empty string.
-
-        Returns:
-            list: A list of dictionaries, each containing 'field' and 'value'
-                keys.
-        """
-        lines = []
-        if isinstance(val, dict):
-            for k in val.keys():
-                lines += self.parse_keys(val[k], old + "." + str(k))
-        elif isinstance(val, list):
-            if not val:
-                # handles empty list
-                lines += [{"field": old[1:], "value": str(val)}]
-            else:
-                for i, k in enumerate(val):
-                    lines += self.parse_keys(
-                        k, old + "." + str(i)
-                    )  # handles user value
-        else:
-            lines += [{"field": old[1:], "value": str(val)}]
-        return lines
-
-    def sort_in_category(self, table: str, oemetadata):
-        """
-        Group flattened OEMetadata v2 fields into thematic buckets and attach
-        placeholders required by the review UI.
-
-        Each entry has six keys:
-        {
-          "field": "<dot-path>",
-          "label": "<display label without 'resources.<idx>.'>",
-          "value": "<current value>",
-          "newValue": "",
-          "reviewer_suggestion": "",
-          "suggestion_comment": ""
-        }
-        """
-
-        flattened = self.parse_keys(oemetadata)
-        flattened = [
-            item for item in flattened if item["field"].startswith("resources.")
-        ]
-
-        bucket_map = {
-            "spatial": "spatial",
-            "temporal": "temporal",
-            "sources": "source",
-            "licenses": "license",
-        }
-
-        def make_label(dot_path: str) -> str:
-            # remove leading resources.<idx>.
-            trimmed = re.sub(r"^resources\.[0-9]+\.", "", dot_path)
-            parts = trimmed.split(".")
-            out = []
-            for p in parts:
-                if p in {"@id", "@type"}:
-                    out.append(p)
-                else:
-                    out.append(p.replace("_", " "))
-            if out:
-                out[0] = out[0][:1].upper() + out[0][1:]
-            return " ".join(out)
-
-        tmp = defaultdict(list)
-
-        for item in flattened:
-            raw_key = item["field"]
-            parts = raw_key.split(".")
-
-            if parts[0] == "resources" and len(parts) >= 3:
-                root = parts[2]
-            else:
-                root = parts[0]
-
-            bucket = bucket_map.get(root, "general")
-
-            tmp[bucket].append(
-                {
-                    "field": raw_key,
-                    "label": make_label(raw_key),
-                    "value": item["value"],
-                    "newValue": "",
-                    "reviewer_suggestion": "",
-                    "suggestion_comment": "",
-                }
-            )
-
-        return {
-            "general": tmp["general"],
-            "spatial": tmp["spatial"],
-            "temporal": tmp["temporal"],
-            "source": tmp["source"],
-            "license": tmp["license"],
-        }
-
-    def get_all_field_descriptions(self, json_schema, prefix=""):
-        """
-        Collects the field title, descriptions, examples, and badge information
-        for each field of the oemetadata from the JSON schema and prepares them
-        for further processing.
-
-        Args:
-            json_schema (dict): The JSON schema to extract field descriptions
-                from.
-            prefix (str, optional): The prefix for nested keys. Defaults to an
-                empty string.
-
-        Returns:
-            dict: A dictionary containing field descriptions, examples, and
-                other information.
-        """
-
-        field_descriptions = {}
-
-        def extract_descriptions(properties, prefix=""):
-            for field, value in properties.items():
-                key = f"{prefix}.{field}" if prefix else field
-
-                if any(
-                    attr in value
-                    for attr in ["description", "examples", "example", "badge", "title"]
-                ):
-                    field_descriptions[key] = {}
-                    if "description" in value:
-                        field_descriptions[key]["description"] = value["description"]
-                    # Prefer v2 "examples" (array) over v1 "example" (single value)
-                    if "examples" in value and value["examples"]:
-                        # v2: first item of the examples array
-                        field_descriptions[key]["example"] = value["examples"][0]
-                    elif "example" in value:
-                        # v1 fallback
-                        field_descriptions[key]["example"] = value["example"]
-                    if "badge" in value:
-                        field_descriptions[key]["badge"] = value["badge"]
-                    if "title" in value:
-                        field_descriptions[key]["title"] = value["title"]
-                if "properties" in value:
-                    new_prefix = f"{prefix}.{field}" if prefix else field
-                    extract_descriptions(value["properties"], new_prefix)
-                if "items" in value:
-                    new_prefix = f"{prefix}.{field}" if prefix else field
-                    if "properties" in value["items"]:
-                        extract_descriptions(value["items"]["properties"], new_prefix)
-
-        extract_descriptions(json_schema["properties"], prefix)
-        return field_descriptions
-
     @method_decorator(never_cache)
     def get(
         self,
@@ -1269,12 +1327,12 @@ class TablePeerReviewView(LoginRequiredMixin, View):
         """
 
         table_obj = table_or_404(table=table)
-        topic = table_obj.topics
+        topic = list(table_obj.topics.values_list("name", flat=True))
 
         # review_state = PeerReview.is_finished  # TODO: Use later
         json_schema = self.load_json_schema()
         can_add = False
-        field_descriptions = self.get_all_field_descriptions(json_schema)
+        field_descriptions = get_all_field_descriptions(json_schema)
 
         # Check user permissions
         user: login_models.myuser = request.user  # type: ignore
@@ -1283,8 +1341,8 @@ class TablePeerReviewView(LoginRequiredMixin, View):
             can_add = level >= login.permissions.WRITE_PERM
 
         oemetadata = self.load_json(table, review_id)
-        metadata = self.sort_in_category(
-            table, oemetadata=oemetadata
+        metadata = sort_in_category(
+            oemetadata=oemetadata
         )  # Generate URL for peer_review_reviewer
         if review_id is not None:
             url_peer_review = reverse(
@@ -1305,6 +1363,12 @@ class TablePeerReviewView(LoginRequiredMixin, View):
             state_dict = process_review_data(
                 review_data=existing_review, metadata=metadata, categories=categories
             )
+            field_history_data = field_history(existing_review)
+            # Read-only unless it is the reviewer's turn (and not finished).
+            manager = PeerReviewManager.objects.filter(opr=opr_review).first()
+            read_only = bool(review_finished) or (
+                manager is not None and manager.current_reviewer != "reviewer"
+            )
         else:
             url_peer_review = reverse(
                 "dataedit:peer_review_create",
@@ -1313,6 +1377,8 @@ class TablePeerReviewView(LoginRequiredMixin, View):
             # existing_review={}
             state_dict = None
             review_finished = None
+            field_history_data = {}
+            read_only = False
 
         config_data = {
             "can_add": can_add,
@@ -1321,6 +1387,7 @@ class TablePeerReviewView(LoginRequiredMixin, View):
             "topic": topic,
             "table": table,
             "review_finished": review_finished,
+            "read_only": read_only,
             "review_id": review_id,
         }
         context_meta = {
@@ -1333,6 +1400,7 @@ class TablePeerReviewView(LoginRequiredMixin, View):
             "json_schema": json_schema,
             "field_descriptions_json": json.dumps(field_descriptions),
             "state_dict": json.dumps(state_dict),
+            "field_history_json": json.dumps(field_history_data),
             "review_finished": review_finished,
             "review_id": review_id,
         }
@@ -1379,89 +1447,27 @@ class TablePeerReviewView(LoginRequiredMixin, View):
         """
         table_obj = table_or_404(table=table)
 
-        context = {}
-        user: login_models.myuser = request.user  # type: ignore
-
         # get the review data and additional application metadata
         # from user peer review submit/save
         review_data = json.loads(request.body)
-        if review_id:
-            contributor_review = PeerReview.objects.filter(id=review_id).first()
-            if contributor_review:
-                contributor_review_data = (contributor_review.review or {}).get(
-                    "reviews", []
-                )
-                review_data["reviewData"]["reviews"].extend(contributor_review_data)
 
-        # The type can be "save" or "submit" as this triggers different behavior
-        review_post_type = review_data.get("reviewType")
-        # The opr datamodel that includes the field review data and metadata
-        review_datamodel = review_data.get("reviewData")
-        review_finished = review_datamodel.get("reviewFinished")
-        # TODO: Send a notification to the user that he can't review tables
-        # he is the table holder.
-        if review_post_type == "delete":
-            return delete_peer_review(review_id)
+        # The delete path is handled directly (unified into ReviewService in a
+        # later step); everything else is orchestrated by the service.
+        if review_data.get("reviewType") == "delete":
+            return delete_peer_review(review_id, request.user)
 
-        contributor = PeerReviewManager.load_contributor(table=table_obj.name)
+        service = ReviewService(table_name=table_obj.name, actor=request.user)
+        try:
+            service.submit_reviewer_review(review_data, review_id=review_id)
+        except ContributorNotFoundError as exc:
+            return JsonResponse({"error": str(exc)}, status=400)
+        except (ReviewFinishedError, NotYourTurnError) as exc:
+            return JsonResponse({"error": str(exc)}, status=409)
 
-        if contributor is not None:
-            # Überprüfen, ob ein aktiver PeerReview existiert
-            active_peer_review = PeerReview.load(table=table_obj.name)
-            if active_peer_review is None or active_peer_review.is_finished:
-                # Kein aktiver PeerReview vorhanden
-                # oder der aktive PeerReview ist abgeschlossen
-                table_review = PeerReview(
-                    table=table_obj.name,
-                    is_finished=review_finished,
-                    review=review_datamodel,
-                    reviewer=user,
-                    contributor=contributor,
-                    oemetadata=load_metadata_from_db(table=table_obj.name),
-                )
-                table_review.save(review_type=review_post_type)
-            else:
-                # Aktiver PeerReview ist vorhanden ... aktualisieren
-                current_review_data = active_peer_review.review
-                merged_review_data = merge_field_reviews(
-                    current_json=current_review_data, new_json=review_datamodel
-                )
-
-                # Set new review values and update existing review
-                active_peer_review.review = merged_review_data
-                active_peer_review.reviewer = user  # type:ignore TODO why type warning?
-                active_peer_review.contributor = contributor  # type:ignore TODO
-                active_peer_review.update(review_type=review_post_type)
-        else:
-            error_msg = (
-                "Failed to retrieve any user that identifies "
-                f"as table holder for the current table: {table_obj.name}!"
-            )
-            return JsonResponse({"error": error_msg}, status=400)
-
-        # TODO: Check for topic as reviewed finished also indicates the table
-        # needs to be or has to be moved.
-        if review_finished is True:
-            review_table = Table.load(name=table_obj.name)
-            review_table.set_is_reviewed()
-            metadata = self.load_json(table_obj.name, review_id=review_id)
-            updated_metadata = recursive_update(metadata, review_data)
-            save_metadata_to_db(table_obj.name, updated_metadata)
-            active_peer_review = PeerReview.load(table=table_obj.name)
-
-            if active_peer_review:
-                updated_oemetadata = recursive_update(
-                    active_peer_review.oemetadata, review_data
-                )
-                active_peer_review.oemetadata = updated_oemetadata
-                active_peer_review.save()
-
-            # TODO: also update reviewFinished in review datamodel json
-
-        return render(request, "dataedit/opr_review.html", context=context)
+        return JsonResponse({"status": "success"}, status=200)
 
 
-class TablePeerRreviewContributorView(TablePeerReviewView):
+class TablePeerReviewContributorView(TablePeerReviewView):
     """
     A view handling the contributor's side of the peer review process.
     This view supports rendering the review template and handling GET and
@@ -1492,9 +1498,9 @@ class TablePeerRreviewContributorView(TablePeerReviewView):
             level = user.get_table_permission_level(table_obj)
             can_add = level >= login.permissions.WRITE_PERM
         oemetadata = self.load_json(table_obj.name, review_id)
-        metadata = self.sort_in_category(table_obj.name, oemetadata=oemetadata)
+        metadata = sort_in_category(oemetadata=oemetadata)
         json_schema = self.load_json_schema()
-        field_descriptions = self.get_all_field_descriptions(json_schema)
+        field_descriptions = get_all_field_descriptions(json_schema)
         review_data = (peer_review.review or {}).get("reviews", [])
 
         categories = [
@@ -1506,6 +1512,12 @@ class TablePeerRreviewContributorView(TablePeerReviewView):
         ]
         state_dict = process_review_data(
             review_data=review_data, metadata=metadata, categories=categories
+        )
+        review_finished = peer_review.is_finished
+        # Read-only unless it is the contributor's turn (and not finished).
+        manager = PeerReviewManager.objects.filter(opr=peer_review).first()
+        read_only = bool(review_finished) or (
+            manager is not None and manager.current_reviewer != "contributor"
         )
         context_meta = {
             "config": json.dumps(
@@ -1521,16 +1533,21 @@ class TablePeerRreviewContributorView(TablePeerReviewView):
                     "url_table": reverse(
                         "dataedit:view", kwargs={"table": table_obj.name}
                     ),
-                    "topic": table_obj.topics,
+                    # "topic": table_obj.topics,
                     "table": table_obj.name,
+                    "review_finished": review_finished,
+                    "read_only": read_only,
+                    "review_id": review_id,
                 }
             ),
             "table": table_obj.name,
-            "topic": table_obj.topics,
+            # "topic": table_obj.topics,
             "meta": metadata,
             "json_schema": json_schema,
             "field_descriptions_json": json.dumps(field_descriptions),
             "state_dict": json.dumps(state_dict),
+            "field_history_json": json.dumps(field_history(review_data)),
+            "review_finished": review_finished,
         }
         return render(request, "dataedit/opr_contributor.html", context=context_meta)
 
@@ -1548,21 +1565,10 @@ class TablePeerRreviewContributorView(TablePeerReviewView):
             HttpResponse: Rendered HTML response for contributor review.
 
         """
-        # table_obj = table_or_404(table=table)
-        # TODO: why unused argument "table"?
-
-        context = {}
-        if request.method == "POST":
-            review_data = json.loads(request.body)
-            review_post_type = review_data.get("reviewType")
-            review_datamodel = review_data.get("reviewData")
-            current_opr = PeerReviewManager.get_opr_by_id(opr_id=review_id)
-            existing_reviews = current_opr.review
-            merged_review = merge_field_reviews(
-                current_json=existing_reviews, new_json=review_datamodel
-            )
-
-            current_opr.review = merged_review
-            current_opr.update(review_type=review_post_type)
-
-        return render(request, "dataedit/opr_contributor.html", context=context)
+        review_data = json.loads(request.body)
+        service = ReviewService(table_name=table, actor=request.user)
+        try:
+            service.submit_contributor_review(review_data, review_id=review_id)
+        except (ReviewFinishedError, NotYourTurnError) as exc:
+            return JsonResponse({"error": str(exc)}, status=409)
+        return JsonResponse({"status": "success"}, status=200)

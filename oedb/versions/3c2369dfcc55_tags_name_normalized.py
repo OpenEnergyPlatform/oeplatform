@@ -30,8 +30,7 @@ def upgrade():
     )
 
     # create normalized names
-    op.execute(
-        """
+    op.execute("""
         -- create normalized names
         UPDATE public.tags
         SET name_normalized =
@@ -92,8 +91,7 @@ def upgrade():
         -- drop temporary table
         ALTER TABLE public.tags DROP COLUMN id_normalized
         ;
-        """
-    )
+        """)
 
     # change column to unique not null
     op.alter_column(

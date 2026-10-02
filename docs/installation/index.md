@@ -23,10 +23,9 @@ find two main options to install everything:
 Production deployments without containerization solutions like docker tend to be
 very specific and depend on your infrastructure.
 
-You will also find information on which further setup steps which should which
-either help with some common issues and help with writing well formatted and
-quality checked code to get started with contributing to developments on the
-oeplatform.
+You will also find additional setup steps to help you troubleshoot common
+issues, write well-formatted, quality-checked code, and easily start
+contributing to the oeplatform.
 
 ## Guides
 

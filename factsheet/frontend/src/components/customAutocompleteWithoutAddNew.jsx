@@ -8,7 +8,8 @@ import {
   Chip,
   Typography
 } from '@mui/material';
-import { styled } from '@mui/material/styles';
+import styled from '@mui/material/styles/styled';
+
 import { createFilterOptions } from '@mui/material/Autocomplete';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';

@@ -29,7 +29,7 @@
       /
       {% if model.model_name %}
         {{ model.model_name }}
-        {% if  model.acronym %}({{ model.acronym }}){% endif %}
+        {% if model.acronym %}({{ model.acronym }}){% endif %}
       {% endif %}
     </div>
   </div>
@@ -37,7 +37,7 @@
     {{ displaySheetType }}
     {% if model.model_name %}
       {{ model.model_name }}
-      {% if  model.acronym %}({{ model.acronym }}){% endif %}
+      {% if model.acronym %}({{ model.acronym }}){% endif %}
     {% endif %}
     {% if model.name_of_scenario %}{{ model.name_of_scenario }}{% endif %}
   </h2>

@@ -1,0 +1,21 @@
+/* SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+
+.resource-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.resource-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 .5rem 1rem rgba(0,0,0,.08)!important;
+}
+.table-link:hover {
+  color: #3B77A0 !important;
+}
+.tag-badge {
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.tag-badge:hover {
+  background-color: #e9ecef !important;
+  border-color: #ced4da !important;
+}

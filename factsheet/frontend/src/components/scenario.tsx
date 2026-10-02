@@ -2,18 +2,21 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Grid, Box, Typography, TextField, IconButton, Autocomplete } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import AddIcon from "@mui/icons-material/Add";
-import uuid from "react-uuid";
-import CustomAutocomplete from "./customAutocomplete.jsx";
 import CustomAutocompleteWithoutAddNew from "./customAutocompleteWithoutAddNew.jsx";
 import CustomTreeViewWithCheckBox from "./customTreeViewWithCheckbox.jsx";
 import HtmlTooltip from "../styles/oep-theme/components/tooltipStyles";
 import BundleScenariosGridItem from "../styles/oep-theme/components/editBundleScenariosForms.jsx";
+import { getCheckedWithParents } from './scenarioBundleUtilityComponents/treeUtils';
 import axios from "axios";
 import CSRFToken from "./csrfToken.js";
+import uuid from "react-uuid";
+import {
+  mergeSelection,
+  unlistedLinks,
+  visibleSelection,
+} from "./datasetSelection.js";
 import conf from "../conf.json";
 import LCC from "../data/countries.json";
-
 
 
 
@@ -61,64 +64,45 @@ export default function Scenario(props) {
       []
     ) || [];
 
-  // Handlers for input/output dataset arrays
-  const addInputDatasetItem = () =>
-    setScenariosInputDatasetsObj((prev) => [
-      ...prev,
-      { key: uuid(), idx: prev.length, value: { label: "", url: "" } },
-    ]);
-  const removeInputDataset = (key) => {
-    const filtered = scenariosInputDatasetsObj.filter((e) => e.key !== key);
-    setScenariosInputDatasetsObj(filtered);
-    scenariosInputDatasetsHandler(filtered, data.id);
-  };
-  const updateInputDatasetName = (value, key, index) => {
-    setScenariosInputDatasetsObj((prev) => {
-      const copy = [...prev];
-      // prevent duplicates
-      if (
-        copy.some(
-          (d, i) =>
-            i !== index &&
-            (d.value.label === value.label || d.value.url === value.url)
-        )
-      ) {
-        console.warn("Duplicate dataset detected. Update aborted.");
-        return prev;
+  // Helper to handle multiselect changes for input/output datasets
+  // It converts the simple array from Autocomplete back to your { key, value } structure
+  const handleMultiselectChange = (newValue, type) => {
+    // 1. Merge the selection into the stored links: a link the field cannot
+    // show is kept, a kept link keeps its key, a new one gets a fresh uuid.
+    // The save replaces the whole bundle, so anything dropped here is deleted
+    // from the graph (#2522).
+    const stored = type === 'input' ? scenariosInputDatasetsObj : scenariosOutputDatasetsObj;
+    const updatedStructure = mergeSelection(stored, newValue, dataTableList, uuid);
+
+    // 2. Update Local State AND Call the Backend/Parent Handler
+    if (type === 'input') {
+      setScenariosInputDatasetsObj(updatedStructure);
+
+      // logic form old code: scenariosInputDatasetsHandler(copy, data.id);
+      // ADD THIS LINE:
+      if (typeof scenariosInputDatasetsHandler === 'function') {
+        scenariosInputDatasetsHandler(updatedStructure, data.id);
       }
-      copy[index] = { key, idx: index, value };
-      scenariosInputDatasetsHandler(copy, data.id);
-      return copy;
-    });
+
+    } else {
+      setScenariosOutputDatasetsObj(updatedStructure);
+
+      // logic form old code: scenariosOutputDatasetsHandler(copy, data.id);
+      // ADD THIS LINE:
+      if (typeof scenariosOutputDatasetsHandler === 'function') {
+        scenariosOutputDatasetsHandler(updatedStructure, data.id);
+      }
+    }
   };
 
-  const addOutputDatasetItem = () =>
-    setScenariosOutputDatasetsObj((prev) => [
-      ...prev,
-      { key: uuid(), idx: prev.length, value: { label: "", url: "" } },
-    ]);
-  const removeOutputDataset = (key) => {
-    const filtered = scenariosOutputDatasetsObj.filter((e) => e.key !== key);
-    setScenariosOutputDatasetsObj(filtered);
-    scenariosOutputDatasetsHandler(filtered, data.id);
-  };
-  const updateOutputDatasetName = (value, key, index) => {
-    setScenariosOutputDatasetsObj((prev) => {
-      const copy = [...prev];
-      if (
-        copy.some(
-          (d, i) =>
-            i !== index &&
-            (d.value.label === value.label || d.value.url === value.url)
-        )
-      ) {
-        console.warn("Duplicate dataset detected. Update aborted.");
-        return prev;
-      }
-      copy[index] = { key, idx: index, value };
-      scenariosOutputDatasetsHandler(copy, data.id);
-      return copy;
-    });
+  // Links the dataset field cannot show are still stored and still saved;
+  // say so under the field rather than letting them look deleted.
+  const unlistedHint = (stored) => {
+    if (dataTableList.length === 0) return undefined; // list not loaded yet
+    const rest = unlistedLinks(stored, dataTableList);
+    if (rest.length === 0) return undefined;
+    const names = rest.map((link) => link.value?.label || link.value?.url).join(", ");
+    return `Also linked, not in this list (kept when you save): ${names}`;
   };
 
   // Sorted country list
@@ -132,7 +116,7 @@ export default function Scenario(props) {
   }, [data.id, removeScenario]);
 
   return (
-    <Typography variant="body2">
+    <Typography component="div" variant="body2">
       <Grid container spacing={2}>
         {/* Delete Button */}
         <BundleScenariosGridItem
@@ -166,7 +150,7 @@ export default function Scenario(props) {
               variant="outlined"
               fullWidth
               name={`name_${data.id}`}
-              value={data.name}
+              value={data.name || ""}
               onChange={handleScenariosInputChange}
             />
           )}
@@ -187,7 +171,7 @@ export default function Scenario(props) {
               variant="outlined"
               fullWidth
               name={`acronym_${data.id}`}
-              value={data.acronym}
+              value={data.acronym || ""}
               onChange={handleScenariosInputChange}
             />
           )}
@@ -210,7 +194,7 @@ export default function Scenario(props) {
               multiline
               rows={8}
               name={`abstract_${data.id}`}
-              value={data.abstract}
+              value={data.abstract || ""}
               onChange={handleScenariosInputChange}
             />
           )}
@@ -308,9 +292,13 @@ export default function Scenario(props) {
               size="300px"
               checked={data.descriptors}
               expanded={getNodeIds(descriptors)}
-              handler={(list, nodes) =>
-                scenarioDescriptorHandler(list, nodes, data.id)
-              }
+              handler={(list, nodes) => {
+                // Calculate parents based on the user's selection ('list') and the full tree ('descriptors')
+                const listWithParents = getCheckedWithParents(list, descriptors);
+
+                // Pass the extended list to your existing handler
+                scenarioDescriptorHandler(listWithParents, nodes, data.id);
+              }}
               expandedHandler={(list) =>
                 scenarioDescriptorHandler(list, null, data.id)
               }
@@ -324,7 +312,7 @@ export default function Scenario(props) {
           )}
         />
 
-        {/* Input datasets */}
+        {/* Input datasets - MULTISELECT REFACTOR */}
         <BundleScenariosGridItem
           {...props}
           labelGridSize={3}
@@ -333,55 +321,38 @@ export default function Scenario(props) {
           tooltipText="Endogenous data is a data item whose quantity..."
           hrefLink="https://openenergyplatform.org/ontology/oeo/OEO_00000364"
           TooltipComponent={HtmlTooltip}
-          customSpan={
-            <IconButton color="primary" size="small" onClick={addInputDatasetItem}>
-              <AddIcon />
-            </IconButton>
-          }
-          renderField={() =>
-            scenariosInputDatasetsObj.map((item, idx) => (
-              <Grid
-                container
-                spacing={2}
-                alignItems="center"
-                key={item.key}
-                sx={{ mb: 1 }}
-              >
-                <Grid item xs={11}>
-                  <Autocomplete
-                    disableCloseOnSelect
-                    options={dataTableList}
-                    getOptionLabel={(o) => o.label}
-                    value={dataTableList.find((o) => o.label === item.value.label) || null}
-                    onChange={(_, val) =>
-                      updateInputDatasetName(val, item.key, idx)
-                    }
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="Name"
-                        size="small"
-                        variant="outlined"
-                        fullwidth
-                      />
-                    )}
-                  />
-                </Grid>
-                <Grid item xs={1}>
-                  <IconButton
-                    color="primary"
-                    size="small"
-                    onClick={() => removeInputDataset(item.key)}
-                  >
-                    <DeleteOutlineIcon />
-                  </IconButton>
-                </Grid>
-              </Grid>
-            ))
-          }
+          // We no longer need the customSpan '+' button because multiselect allows adding infinitely
+          customSpan={null}
+          renderField={() => (
+            <Autocomplete
+              multiple
+              disableCloseOnSelect
+              id="input-datasets-autocomplete"
+              options={dataTableList}
+              getOptionLabel={(option) => option.label || ""}
+
+              // 1. We transform your state {key, value} into a simple array [value, value] for MUI
+              value={visibleSelection(scenariosInputDatasetsObj, dataTableList)}
+
+              // 2. When selection changes, we rebuild your state structure
+              onChange={(_, newValue) => handleMultiselectChange(newValue, 'input')}
+
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  variant="outlined"
+                  label="Select Input Datasets"
+                  helperText={unlistedHint(scenariosInputDatasetsObj)}
+                  placeholder="Search datasets..."
+                  size="small"
+                  fullWidth // corrected lowercase 'fullwidth' warning
+                />
+              )}
+            />
+          )}
         />
 
-        {/* Output datasets */}
+        {/* Output datasets - MULTISELECT REFACTOR */}
         <BundleScenariosGridItem
           {...props}
           labelGridSize={3}
@@ -390,52 +361,34 @@ export default function Scenario(props) {
           tooltipText="Exogenous data is a data item whose quantity..."
           hrefLink="https://openenergyplatform.org/ontology/oeo/OEO_00030030"
           TooltipComponent={HtmlTooltip}
-          customSpan={
-            <IconButton color="primary" size="small" onClick={addOutputDatasetItem}>
-              <AddIcon />
-            </IconButton>
-          }
-          renderField={() =>
-            scenariosOutputDatasetsObj.map((item, idx) => (
-              <Grid
-                container
-                spacing={2}
-                alignItems="center"
-                key={item.key}
-                sx={{ mb: 1 }}
-              >
-                <Grid item xs={11}>
-                  <Autocomplete
-                    disableCloseOnSelect
-                    options={dataTableList}
-                    getOptionLabel={(o) => o.label}
-                    value={dataTableList.find((o) => o.label === item.value.label) || null}
-                    onChange={(_, val) =>
-                      updateOutputDatasetName(val, item.key, idx)
-                    }
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="Name"
-                        size="small"
-                        variant="outlined"
-                        fullwidth
-                      />
-                    )}
-                  />
-                </Grid>
-                <Grid item xs={1}>
-                  <IconButton
-                    color="primary"
-                    size="small"
-                    onClick={() => removeOutputDataset(item.key)}
-                  >
-                    <DeleteOutlineIcon />
-                  </IconButton>
-                </Grid>
-              </Grid>
-            ))
-          }
+          customSpan={null}
+          renderField={() => (
+            <Autocomplete
+              multiple
+              disableCloseOnSelect
+              id="output-datasets-autocomplete"
+              options={dataTableList}
+              getOptionLabel={(option) => option.label || ""}
+
+              // 1. Transform State -> View
+              value={visibleSelection(scenariosOutputDatasetsObj, dataTableList)}
+
+              // 2. Transform View -> State
+              onChange={(_, newValue) => handleMultiselectChange(newValue, 'output')}
+
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  variant="outlined"
+                  label="Select Output Datasets"
+                  helperText={unlistedHint(scenariosOutputDatasetsObj)}
+                  placeholder="Search datasets..."
+                  size="small"
+                  fullWidth
+                />
+              )}
+            />
+          )}
         />
       </Grid>
     </Typography>

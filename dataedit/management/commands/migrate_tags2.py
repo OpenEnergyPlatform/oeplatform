@@ -36,14 +36,12 @@ class Command(BaseCommand):
             usage_tracked_since,
             category,
         ) in con.execute(
-            text(
-                """
+            text("""
                 select
                 id, name_normalized, usage_count, name, color, usage_tracked_since,
                 category
                 from public.tags
-                """
-            )
+                """)
         ).fetchall():
             tag_names[tag_id] = tag_name_normalized
             tag = TagOEP.objects.filter(name_normalized=tag_name_normalized).first()
@@ -61,18 +59,18 @@ class Command(BaseCommand):
                 )
             else:
                 if category:
-                    tag.category = category  # type:ignore
+                    tag.category = category  # type: ignore
                     tag.save()
 
         # update factsheets
         for factsheet_class in [BasicFactsheet, Energymodel, Energyframework]:
             for factsheet in factsheet_class.objects.all():
-                tag_int_ids = factsheet.tags_TODO_deprecated  # type:ignore
+                tag_int_ids = factsheet.tags_TODO_deprecated  # type: ignore
                 for tag_int_id in tag_int_ids:
                     if tag_int_id not in tag_names:
                         print(f"Missing tag: {tag_int_id}")
                         continue
                     tag_name_normalized = tag_names[tag_int_id]
                     tag = TagOEP.objects.get(name_normalized=tag_name_normalized)
-                    factsheet.tags.add(tag)  # type:ignore
+                    factsheet.tags.add(tag)  # type: ignore
                 factsheet.save()

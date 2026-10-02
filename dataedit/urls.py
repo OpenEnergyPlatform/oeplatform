@@ -24,12 +24,15 @@ from dataedit.views import (
     TableCreateMapView,
     TableDataView,
     TableMetaEditView,
+    TablePeerReviewContributorView,
     TablePeerReviewView,
-    TablePeerRreviewContributorView,
     TablePermissionView,
     TableWizardView,
     admin_column_view,
     admin_constraints_view,
+    dataset_detail_view,
+    dataset_metadata_json_view,
+    datasets_view,
     metadata_widget_view,
     table_view_delete_view,
     table_view_save_view,
@@ -109,7 +112,7 @@ urlpatterns_view_schema = [
         r"^(?P<table>{qual})/opr_contributor/(?P<review_id>\d*)/$".format(  # noqa
             qual=pgsql_qualifier
         ),
-        TablePeerRreviewContributorView.as_view(),
+        TablePeerReviewContributorView.as_view(),
         name="peer_review_contributor",
     ),
 ]
@@ -117,7 +120,13 @@ urlpatterns_view_schema = [
 urlpatterns_tag = [
     re_path(r"^$", tag_overview_view, name="tags"),
     re_path(r"^new/?$", tag_editor_view, name="tags-new"),
-    re_path(r"^edit/(?P<tag_pk>[a-z0-9_]+)/?$", tag_editor_view, name="tags-edit"),
+    # `[^/]+`, not `[a-z0-9_]+`: a tag's primary key is a CharField(40) and
+    # nothing renormalises it on the way in -- `migrate_tags2` copies
+    # `name_normalized` verbatim out of the OEDB. A single legacy pk carrying
+    # anything else took the whole overview down with a NoReverseMatch, because
+    # that page reverses this route once per tag. `edit/` keeps it clear of the
+    # sibling routes.
+    re_path(r"^edit/(?P<tag_pk>[^/]+?)/?$", tag_editor_view, name="tags-edit"),
     re_path(r"^add/?$", tag_table_add_view, name="tags-add"),
     re_path(r"^set/?$", tag_update_view, name="tags-set"),
 ]
@@ -147,6 +156,27 @@ urlpatterns = [
         r"^topic/(?P<topic>{qual})$".format(qual=pgsql_qualifier),
         tables_view,
         name="tables-in-topic",
+    ),
+    re_path(
+        r"^topic/(?P<topic>{qual})/datasets$".format(qual=pgsql_qualifier),
+        datasets_view,
+        name="datasets-in-topic",
+    ),
+    # datasets are browsed per topic; the bare URL falls back to the topics
+    path(
+        "datasets/",
+        RedirectView.as_view(pattern_name="dataedit:topic-list"),
+        name="dataset-list",
+    ),
+    path(
+        "datasets/<str:dataset_name>",
+        dataset_detail_view,
+        name="dataset-detail",
+    ),
+    path(
+        "datasets/<str:dataset_name>/metadata",
+        dataset_metadata_json_view,
+        name="dataset-metadata",
     ),
     re_path(r"^$", topic_view, name="topic-list"),
     re_path(

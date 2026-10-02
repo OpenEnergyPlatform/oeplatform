@@ -4,7 +4,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -41,7 +41,7 @@ import conf from "../conf.json";
 import { colors, Tooltip } from '@mui/material';
 import HtmlTooltip from '../styles/oep-theme/components/tooltipStyles'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline.js';
-import { styled } from '@mui/material/styles';
+
 import SaveIcon from '@mui/icons-material/Save.js';
 import uuid from "react-uuid";
 import Alert from '@mui/material/Alert';
@@ -54,10 +54,10 @@ import sunburstKapsule from 'sunburst-chart';
 import fromKapsule from 'react-kapsule';
 // import Select from '@mui/material/Select';
 import CustomAutocompleteWithoutAddNew from './customAutocompleteWithoutAddNew.jsx';
+import SectorSelector from './scenarioBundleUtilityComponents/SectorSelector.jsx';
 import IconButton from '@mui/material/IconButton';
 // import Divider from '@mui/material/Divider';
 import BreadcrumbsNavGrid from '../styles/oep-theme/components/breadcrumbsNavigation.jsx';
-import { VerticalTab, AddTabWrapper } from '../styles/oep-theme/components/factsheetsStyles.tsx';
 import TableContainer from '@mui/material/TableContainer';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -80,9 +80,10 @@ import '../styles/App.css';
 import { TableRow } from '@mui/material';
 import variables from '../styles/oep-theme/variables.js';
 
-import StudyKeywords from './scenarioBundleUtilityComponents/StudyDescriptors.js';
 import handleOpenURL from './scenarioBundleUtilityComponents/handleOnClickTableIRI.jsx';
-import { RichTreeView } from '@mui/x-tree-view/RichTreeView';
+
+import { getCheckedWithParents, filterTree } from './scenarioBundleUtilityComponents/treeUtils';
+import HierarchyViewer from './scenarioBundleUtilityComponents/HierarchyViewer';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -96,7 +97,7 @@ function TabPanel(props) {
     >
       {value === index && (
         <Box sx={{ p: 3 }}>
-          <Typography>{children}</Typography>
+          <Typography component="div">{children}</Typography>
         </Box>
       )}
     </div>
@@ -129,6 +130,9 @@ function Factsheet(props) {
 
   const { id, fsData } = props;
 
+  const [isOwner, setIsOwner] = useState(id === "new");
+  const [isOwnerLoading, setIsOwnerLoading] = useState(id !== "new");
+
   const [openSavedDialog, setOpenSavedDialog] = useState(false);
   const [openUpdatedDialog, setOpenUpdatedDialog] = useState(false);
   const [openExistDialog, setOpenExistDialog] = useState(false);
@@ -144,7 +148,6 @@ function Factsheet(props) {
   const [studyName, setStudyName] = useState(id !== 'new' ? fsData.study_name : '');
   const [abstract, setAbstract] = useState(id !== 'new' ? fsData.abstract : '');
   const [selectedSectors, setSelectedSectors] = useState(id !== 'new' ? fsData.sectors || [] : []);
-  const [expandedSectors, setExpandedSectors] = useState(id !== 'new' ? [] : []);
   const [expandedTechnologies, setExpandedTechnologies] = useState(id !== 'new' ? [] : []);
 
   const [institutions, setInstitutions] = useState([]);
@@ -159,6 +162,42 @@ function Factsheet(props) {
   const [sunburstData, setSunburstData] = useState([]);
 
   const [openBackDrop, setOpenBackDrop] = React.useState(false);
+
+  useEffect(() => {
+    if (!id || id === "new") {
+      setIsOwner(true);
+      setIsOwnerLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setIsOwnerLoading(true);
+
+    axios
+      .post(
+        conf.toep + `scenario-bundles/check-owner/${id}/`,
+        { uid: id },
+        { headers: { "X-CSRFToken": CSRFToken() } }
+      )
+      .then((res) => {
+        if (cancelled) return;
+        setIsOwner(Boolean(res.data?.isOwner));
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        console.error("Error checking ownership:", err);
+        setIsOwner(false);
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setIsOwnerLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
 
 
   const scenarioYears = Array.from({ length: 101 }, (_, i) => ({
@@ -217,10 +256,44 @@ function Factsheet(props) {
   // const [sectors, setSectors] = useState(sectors_json);
   const myChartRef = useRef(0);
 
-  const [sectors, setSectors] = useState([]);
+  // Sector divisions come from the OEO (see helper.build_sector_dropdowns_from_oeo):
+  // each entry carries its own options, plus a trailing "Other" entry holding the
+  // OEO sector hierarchy as a tree.
   const [sectorDivisions, setSectorDivisions] = useState([]);
-  const [filteredSectors, setFilteredSectors] = useState([]);
   const [selectedSectorDivisions, setSelectedSectorDivisions] = useState(id !== 'new' ? fsData.sector_divisions || [] : []);
+
+  // Sectors picked from the OEO sector hierarchy (the "Other" row of the edit
+  // form) are shown as that hierarchy in overview mode too; sectors defined by a
+  // sector division have no hierarchy and stay flat chips.
+  const sectorTreeOptions = useMemo(
+    () => sectorDivisions.find(item => item.kind === 'tree')?.options || [],
+    [sectorDivisions]
+  );
+
+  const sectorTreeNodes = useMemo(() => {
+    const flatten = (nodes = [], acc = []) => {
+      nodes.forEach(node => {
+        if (!node) return;
+        acc.push(node);
+        if (node.children) flatten(node.children, acc);
+      });
+      return acc;
+    };
+    return flatten(sectorTreeOptions);
+  }, [sectorTreeOptions]);
+
+  const sectorHierarchyIris = useMemo(
+    () => new Set(sectorTreeNodes.map(node => String(node.iri))),
+    [sectorTreeNodes]
+  );
+
+  const selectedSectorHierarchy = useMemo(() => {
+    const byIri = new Map(sectorTreeNodes.map(node => [String(node.iri), node]));
+    const values = selectedSectors
+      .filter(sector => byIri.has(String(sector.class)))
+      .map(sector => byIri.get(String(sector.class)).value);
+    return filterTree(sectorTreeOptions, values);
+  }, [sectorTreeOptions, sectorTreeNodes, selectedSectors]);
   const [selectedInstitution, setSelectedInstitution] = useState(id !== 'new' ? fsData.institution || [] : []);
   const [selectedFundingSource, setSelectedFundingSource] = useState(id !== 'new' ? fsData.funding_sources || [] : []);
   const [selectedContactPerson, setselectedContactPerson] = useState(id !== 'new' ? fsData.contact_person || [] : []);
@@ -251,6 +324,9 @@ function Factsheet(props) {
 
   const [scenariosObject, setScenariosObject] = useState({});
   const [selectedStudyKewords, setSelectedStudyKewords] = useState(id !== 'new' ? fsData.study_keywords : []);
+  // Study descriptors, loaded dynamically from the OEO via
+  // populate_factsheets_elements (replaces the former hardcoded StudyKeywords).
+  const [studyKeywords, setStudyKeywords] = useState([]);
   const [selectedModels, setSelectedModels] = useState(id !== 'new' ? fsData.models || [] : []);
   const [selectedFrameworks, setSelectedFrameworks] = useState(id !== 'new' ? fsData.frameworks || [] : []);
   const [removeReport, setRemoveReport] = useState(false);
@@ -360,6 +436,8 @@ function Factsheet(props) {
   useEffect(() => {
     populateFactsheetElements().then((data) => {
 
+      setStudyKeywords(data.study_descriptors || []);
+
       function parse(arr) {
         return arr.map(obj => {
           Object.keys(obj).forEach(key => {
@@ -395,35 +473,7 @@ function Factsheet(props) {
 
       // rephrase scenario descriptors to - types
       setScenarioTypes(data.scenario_descriptors);
-      const sectors_with_tooltips = data.sectors.map(item =>
-      ({
-        ...item,
-        label: <span>
-          <HtmlTooltip
-            title={
-              <React.Fragment>
-                <Typography color="inherit" variant="subtitle1">
-                  {item.sector_difinition}
-                  <br />
-                  <a href={item.iri}>More info from Open Energy Ontology (OEO)....</a>
-                </Typography>
-              </React.Fragment>
-            }
-          >
-            <InfoOutlinedIcon sx={{ color: '#708696', marginRight: "7px" }} />
-          </HtmlTooltip>
-          {item.label}
-        </span>
-      })
-      );
-
-      setSectors(sectors_with_tooltips);
-      setFilteredSectors(sectors_with_tooltips);
-      //setFilteredSectors([]);
-
-      const sector_d = data.sector_divisions;
-      sector_d.push({ "label": "Others", "name": "Others", "class": "Others", "value": "Others" });
-      setSectorDivisions(sector_d);
+      setSectorDivisions(data.sector_divisions || []);
 
       myChartRef.current = Sunburst
       const sampleData = {
@@ -478,7 +528,8 @@ function Factsheet(props) {
             contact_person: JSON.stringify(selectedContactPerson),
             sector_divisions: JSON.stringify(selectedSectorDivisions),
             sectors: JSON.stringify(selectedSectors),
-            expanded_sectors: JSON.stringify(expandedSectors),
+            // kept for wire compatibility; the backend ignores it
+            expanded_sectors: JSON.stringify([]),
             technologies: JSON.stringify(selectedTechnologies),
             study_keywords: JSON.stringify(selectedStudyKewords),
             scenarios: JSON.stringify(scenarios),
@@ -530,7 +581,8 @@ function Factsheet(props) {
               contact_person: JSON.stringify(selectedContactPerson),
               sector_divisions: JSON.stringify(selectedSectorDivisions),
               sectors: JSON.stringify(selectedSectors),
-              expanded_sectors: JSON.stringify(expandedSectors),
+              // kept for wire compatibility; the backend ignores it
+              expanded_sectors: JSON.stringify([]),
               technologies: JSON.stringify(selectedTechnologies),
               study_keywords: JSON.stringify(selectedStudyKewords),
               scenarios: JSON.stringify(scenarios),
@@ -572,25 +624,8 @@ function Factsheet(props) {
     }
   };
 
-  const handleRemoveFactsheet = () => {
-    axios.post(conf.toep + 'scenario-bundles/delete/', null, { params: { id: id } }, { headers: { 'X-CSRFToken': CSRFToken() } }
-    ).then(response => setOpenRemovedDialog(true));
-  }
-
-  const handleCloseSavedDialog = () => {
-    setOpenSavedDialog(false);
-  };
-
   const handleCloseExistDialog = () => {
     setOpenExistDialog(false);
-  };
-
-  const handleCloseUpdatedDialog = () => {
-    setOpenUpdatedDialog(false);
-  };
-
-  const handleCloseRemovedDialog = () => {
-    setOpenRemovedDialog(false);
   };
 
   const handleAcronym = e => {
@@ -621,11 +656,6 @@ function Factsheet(props) {
     setPublications(updatePublications);
   };
 
-  const handleFactsheetName = e => {
-    setFactsheetName(e.target.value);
-    factsheetObjectHandler('name', e.target.value);
-  };
-
   // const handlePlaceOfPublication = e => {
   //   setPlaceOfPublication(e.target.value);
   //   factsheetObjectHandler('place_of_publication', e.target.value);
@@ -641,14 +671,6 @@ function Factsheet(props) {
   //   setDateOfPublication(e.target.value);
   //   factsheetObjectHandler('date_of_publication', e.target.value);
   // };
-
-  const handleClickOpenSavedDialog = () => {
-    openSavedDialog(true);
-  };
-
-  const handleClickOpenUpdatedDialog = () => {
-    openSavedDialog(true);
-  };
 
   const handleClickOpenRemovedDialog = () => {
     setOpenRemovedDialog(true);
@@ -757,16 +779,6 @@ function Factsheet(props) {
     let newFactsheetObject = factsheetObject;
     newFactsheetObject[key] = obj
     setFactsheetObject(newFactsheetObject);
-  }
-
-  const scenariosObjectHandler = (key, obj) => {
-    let newScenariosObject = scenariosObject;
-    newScenariosObject[key] = obj
-    setScenariosObject(newScenariosObject);
-  }
-
-  const renderFactsheet = () => {
-    return <div>'studyName'</div>
   }
 
   const getOrganization = async () => {
@@ -1171,12 +1183,9 @@ function Factsheet(props) {
   }
 
   const sectorDivisionsHandler = (sectorDivisionsList) => {
+    // The sectors pane reacts to this list on its own (master-detail), so there
+    // is nothing left to filter here.
     setSelectedSectorDivisions(sectorDivisionsList);
-    let sectorsBasedOnDivisions = sectors.filter(item => sectorDivisionsList.map(item => item.class).includes(item.sector_division));
-    if (sectorDivisionsList.some(e => e.label == 'Others')) {
-      sectorsBasedOnDivisions = sectors;
-    }
-    setFilteredSectors(sectorsBasedOnDivisions);
   };
 
 
@@ -1278,31 +1287,12 @@ function Factsheet(props) {
     setExpandedTechnologyList(zipped);
   };
 
-  const sectorsHandler = (sectorsList, nodes) => {
-    const zipped = []
-    sectorsList.map((v) => zipped.push({ "value": findNestedObj(nodes, 'value', v).value, "label": findNestedObj(nodes, 'value', v).value, "class": findNestedObj(nodes, 'value', v).iri }));
-    setSelectedSectors(zipped);
+  // Sector selection is owned by <SectorSelector />; it hands back the flat
+  // `{value, label, class}` list the save path writes.
+  const sectorsHandler = (sectorsList) => {
+    setSelectedSectors(sectorsList);
   };
 
-  const expandedSectorsHandler = (expandedSectorsList) => {
-    const zipped = []
-    expandedSectorsList.map((v) => zipped.push({ "value": v, "label": v }));
-    setExpandedSectors(zipped);
-  };
-
-  const expandedTechnologiesHandler = (expandedTechnologiesList) => {
-    const zipped = []
-    expandedTechnologiesList.map((v) => zipped.push({ "value": v, "label": v }));
-    setExpandedTechnologies(zipped);
-  };
-
-
-  function a11yProps(index: number) {
-    return {
-      id: `vertical-tab-${index}`,
-      'aria-controls': `vertical-tabpanel-${index}`,
-    };
-  }
 
   const handleStudyKeywords = (event) => {
     if (event.target.checked) {
@@ -1702,7 +1692,7 @@ function Factsheet(props) {
           <FormGroup>
             <div >
               {
-                StudyKeywords.map((item) =>
+                studyKeywords.map((item) =>
                   <span key={item[0]}>
                     {item[1] !== '' ? <HtmlTooltip
                       style={{ marginLeft: '10px' }}
@@ -1768,7 +1758,7 @@ function Factsheet(props) {
         renderField={() => (
           <CustomAutocompleteWithoutAddNew
             showSelectedElements={true}
-            optionsSet={sectorDivisions}
+            optionsSet={sectorDivisions.filter(item => item.kind !== 'tree')}
             kind=''
             handler={sectorDivisionsHandler}
             selectedElements={selectedSectorDivisions}
@@ -1782,17 +1772,12 @@ function Factsheet(props) {
         tooltipText="A sector is generically dependent continuant that is a subdivision of a system."
         hrefLink="https://openenergyplatform.org/ontology/oeo/OEO_00000367"
         renderField={() => (
-          <CustomTreeViewWithCheckBox
-            flat={true}
-            showFilter={false}
+          <SectorSelector
+            divisions={sectorDivisions}
+            selectedDivisions={selectedSectorDivisions}
+            selectedSectors={selectedSectors}
+            onSectorsChange={sectorsHandler}
             size="360px"
-            checked={selectedSectors}
-            expanded={expandedSectors}
-            handler={sectorsHandler}
-            expandedHandler={expandedSectorsHandler}
-            data={filteredSectors}
-            title={"Which sectors are considered in the study?"}
-            toolTipInfo={['A sector is generically dependent continuant that is a subdivision of a system.', 'https://openenergyplatform.org/ontology/oeo/OEO_00000367']}
           />
         )}
         TooltipComponent={HtmlTooltip}
@@ -1808,7 +1793,17 @@ function Factsheet(props) {
             size="360px"
             checked={selectedTechnologies}
             expanded={getNodeIds(technologies['children'])}
-            handler={technologyHandler}
+            handler={(list, nodes) => {
+                // 1. Use 'technologies' (not descriptors) to find parents
+                const listWithParents = getCheckedWithParents(list, technologies);
+
+                // 2. Use the correct handler for this file (check if it is technologyHandler)
+                if (typeof technologyHandler === 'function') {
+                   technologyHandler(listWithParents, nodes);
+                } else {
+                   console.error("technologyHandler is missing");
+                }
+            }}
             expandedHandler={expandedTechnologyHandler}
             data={technologies}
             title={"What technologies are considered?"}
@@ -1891,7 +1886,7 @@ const renderScenariosOverview = () => (
                   <Typography color="inherit" variant="subtitle1">
                     {'This can be used to copy the universal identifier for the scenario object below. You need the scenario UID if you want to edit the scenario using Web-API functionality.'}
                     <br />
-                    <a href="https://openenergyplatform.github.io/oeplatform/oeplatform-code/web-api/oekg-api/scenario-dataset/">How to use the Web-API</a>
+                    <a href="https://openenergyplatform.github.io/oeplatform/oeplatform-code/web-api/oekg-api/scenario-bundles/">How to use the Web-API</a>
                   </Typography>
                 </React.Fragment>
               }
@@ -2333,9 +2328,15 @@ const renderScenariosOverview = () => (
               </div>
             </FirstRowTableCell>
             <ContentTableCell>
-              {selectedSectors.map((v, i) => (
-                <span> <span> <Chip label={v.label} size="small" variant="outlined" onClick={() => handleOpenURL(v.class)} /> </span> <span>   <b className="separator-dot">  </b></span> </span>
-              ))}
+              {/* Sectors picked from the OEO hierarchy are shown as that
+                  hierarchy (like the technologies row below); sectors defined by
+                  a sector division have no hierarchy and stay chips. */}
+              {selectedSectors
+                .filter(v => !sectorHierarchyIris.has(String(v.class)))
+                .map((v, i) => (
+                  <span> <span> <Chip label={v.label} size="small" variant="outlined" onClick={() => handleOpenURL(v.class)} /> </span> <span>   <b className="separator-dot">  </b></span> </span>
+                ))}
+              <HierarchyViewer nodes={selectedSectorHierarchy} onLinkClick={handleOpenURL} />
             </ContentTableCell>
           </TableRow>
           <TableRow>
@@ -2358,9 +2359,24 @@ const renderScenariosOverview = () => (
               </div>
             </FirstRowTableCell>
             <ContentTableCell>
-              {selectedTechnologies.map((v, i) => (
-                <span> <span> <Chip label={v.value} size="small" variant="outlined" onClick={() => handleOpenURL(v.class)} /> </span> <span>   <b className="separator-dot">  </b></span> </span>
-              ))}
+              {(() => {
+                // 1. Get IDs of selected items safely
+                const selectedIds = Array.isArray(selectedTechnologies)
+                  ? selectedTechnologies.map(t => t.value)
+                  : [];
+
+                // 2. Filter the main 'technologies' tree to get the hierarchy
+                // Note: 'technologies' here contains the full tree with JSX labels created in useEffect
+                const hierarchyData = filterTree(technologies, selectedIds);
+
+                // 3. Render
+                return (
+                  <HierarchyViewer
+                    nodes={hierarchyData}
+                    onLinkClick={handleOpenURL}
+                  />
+                );
+              })()}
               {/* <RichTreeView items={selectedTechnologiesTree} expandedItems={allNodeIds} /> */}
             </ContentTableCell>
           </TableRow>
@@ -2497,7 +2513,11 @@ const renderScenariosOverview = () => (
                 justifyContent="space-between"
                 alignItems="center"
               >
-                <ColorToggleButton handleSwap={handleSwap} />
+                <ColorToggleButton
+                  handleSwap={handleSwap}
+                  isOwner={isOwner}
+                  isOwnerLoading={isOwnerLoading}
+                />
                 <div style={{ 'textAlign': 'center' }}>
                   {/* <Box sx={{ position: 'relative', display: 'inline-flex' }}>
                     <CircularProgress variant="determinate" value={60} size={60} />
@@ -2528,11 +2548,22 @@ const renderScenariosOverview = () => (
                       <Button disableElevation={true} size="small" sx={{ mr: 1 }} variant="outlined" color="primary" startIcon={<ShareIcon />} disabled> Share </Button>
                     </span>
                   </Tooltip>
-                  <Tooltip title="Delete factsheet">
-                  <span>
-                    <Button disableElevation={true} size="small" variant="outlined" color="primary" onClick={handleClickOpenRemovedDialog} startIcon={<DeleteOutlineIcon />}> Delete </Button>
-                  </span>
-                  </Tooltip>
+                  {isOwner && id !== "new" && (
+                    <Tooltip title="Delete factsheet">
+                      <span>
+                        <Button
+                          disableElevation
+                          size="small"
+                          variant="outlined"
+                          color="secondary"
+                          onClick={handleClickOpenRemovedDialog}
+                          startIcon={<DeleteOutlineIcon />}
+                        >
+                          Delete
+                        </Button>
+                      </span>
+                    </Tooltip>
+                  )}
                 </div >
               </Grid>
             </Grid>
@@ -2822,7 +2853,7 @@ const renderScenariosOverview = () => (
                       </Grid>
                       <Grid item xs={9} style={{ paddingTop: '10px' }}>
                         {selectedStudyKewords.map((v, i) => {
-                          const match = StudyKeywords.find((it) => it[1] === v) || [v, ""];
+                          const match = studyKeywords.find((it) => it[1] === v) || [v, ""];
                           const [label, url] = match;
                           const variant = url ? "outlined" : "filled";
 

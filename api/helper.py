@@ -33,10 +33,12 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpRequest, JsonResponse, StreamingHttpResponse
 from django.http.response import Http404
 from django.utils import timezone
+from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from sqlalchemy.exc import TimeoutError as PoolTimeout
 
 import login.permissions
 from api import parser, sessions
@@ -44,11 +46,19 @@ from api.actions import (
     assert_permission,
     close_cursor,
     close_raw_connection,
+    commit_raw_connection,
+    describe_columns,
+    describe_constraints,
     load_cursor_from_context,
-    load_session_from_context,
     open_cursor,
-    open_raw_connection,
+    open_request_connection,
     translate_fetched_cell,
+)
+from api.api_description import (
+    ADVANCED_SESSION_NOTE,
+    AdvancedRequestSerializer,
+    AdvancedResponseSerializer,
+    responses,
 )
 from api.encode import GeneratorJSONEncoder
 from api.error import APIError
@@ -116,7 +126,7 @@ def load_cursor(named=False):
                 if not artificial_connection:
                     context["connection_id"] = args[1].data["connection_id"]
                 else:
-                    context.update(open_raw_connection({}, context))
+                    context.update(open_request_connection(context))
                     args[1].data["connection_id"] = context["connection_id"]
                 if "cursor_id" in args[1].data:
                     context["cursor_id"] = args[1].data["cursor_id"]
@@ -127,8 +137,6 @@ def load_cursor(named=False):
                 result = f(*args, **kwargs)
                 if fetch_all:
                     cursor = load_cursor_from_context(context)
-                    session = load_session_from_context(context)
-                    connection = session.connection
 
                     if not result:
                         result = {}
@@ -141,12 +149,36 @@ def load_cursor(named=False):
 
                     # Set of triggers after all the data was fetched.
                     # The cursor must not be closed earlier!
+                    #
+                    # Two properties of this list are load-bearing, and issue
+                    # #2491 is what happened when neither held:
+                    #
+                    # 1. The commit runs BEFORE the connection goes back to the
+                    #    pool, because afterwards another request may hold it.
+                    # 2. Every trigger resolves the connection through `context`
+                    #    at the moment it fires, never here. A reference taken
+                    #    here outlives the checkout: the session's connection is
+                    #    a SQLAlchemy `_ConnectionFairy` with no `commit` of its
+                    #    own, so `connection.commit` used to capture a bound
+                    #    method of the raw psycopg2 connection, which stays
+                    #    callable after the fairy has given it back.
+                    #
+                    # 2 is the correctness condition and 1 rests on it, so do
+                    # not trade one for the other.
+                    #
+                    # The commit is kept rather than dropped, which was the
+                    # other candidate fix: the pool rolls a returned connection
+                    # back anyway and a `SELECT` has nothing to commit -- but
+                    # this decorator also serves a caller-supplied connection
+                    # (how `oedialect` works), and there it is what commits the
+                    # client's open transaction. All of it is measured in
+                    # api/tests/test_regression/test_issue_2491_commit_after_release.py
                     triggers = [
                         close_cursor,
+                        commit_raw_connection,
                         close_raw_connection,
-                        connection.commit,
                     ]
-                    trigger_args = [({}, context), ({}, context), tuple()]
+                    trigger_args = [({}, context), ({}, context), ({}, context)]
                     first = None
                     if not named or cursor.statusmessage:
                         try:
@@ -183,7 +215,10 @@ def load_cursor(named=False):
                             result["rowcount"] = cursor.rowcount
                             triggered_close = True
                     if not triggered_close and artificial_connection:
-                        connection.commit()
+                        # Same rule off the streaming path: resolve the
+                        # connection through the context, never hold a
+                        # reference to it across the close below.
+                        commit_raw_connection({}, context)
             finally:
                 if not triggered_close:
                     if fetch_all and not artificial_connection:
@@ -212,6 +247,27 @@ def cors(allow):
     return doublewrapper
 
 
+def _request_path(args) -> str:
+    """The path of whichever argument is the request, for the log line.
+
+    The decorator sits on bound view methods and on plain functions, and
+    `create_ajax_handler` calls one of them as `(request, request)`, so the
+    request is not reliably at a fixed position. Never raises: this runs while
+    something has already gone wrong.
+    """
+    for arg in args:
+        path = getattr(arg, "path", None)
+        if isinstance(path, str):
+            return path
+    return "<unknown path>"
+
+
+#: Seconds a client is asked to wait after a pool timeout. An estimate, not a
+#: promise: the pool frees a connection whenever any request ends, so a short
+#: wait is usually enough and the client's own retry policy decides the rest.
+POOL_TIMEOUT_RETRY_AFTER = 5
+
+
 def api_exception(
     f: Callable[..., JsonLikeResponse],
 ) -> Callable[..., JsonLikeResponse]:
@@ -229,10 +285,33 @@ def api_exception(
             return JsonResponse({"reason": e.message}, status=e.status)
         except (Table.DoesNotExist, Http404):
             return JsonResponse({"reason": "table does not exist"}, status=404)
+        except PoolTimeout:
+            # The pool had no connection to give within its timeout. That says
+            # nothing about the request, which a retry may well serve -- so it
+            # is not the generic 400 below, which tells a client not to retry
+            # (issue #2492).
+            logger.warning(
+                "pool timeout on %s: no database connection became free",
+                _request_path(args),
+            )
+            response = JsonResponse(
+                {
+                    "reason": "The server is busy: no database connection became "
+                    "free in time. Please try again shortly."
+                },
+                status=503,
+            )
+            response["Retry-After"] = str(POOL_TIMEOUT_RETRY_AFTER)
+            return response
         except Exception as exc:
             # All other Errors: dont accidently return sensitive data from error
             # but return generic error message
-            logger.error(str(exc))
+            logger.exception(
+                "unhandled %s on %s: %s",
+                type(exc).__name__,
+                _request_path(args),
+                exc,
+            )
             return JsonResponse({"reason": "Invalid request"}, status=400)
 
     return wrapper
@@ -288,21 +367,49 @@ def date_handler(obj):
         return str(obj)
 
 
-def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
+def create_ajax_handler(func, allow_cors=False, requires_cursor=False, refusals=None):
     """
     Implements a mapper from api pages to the corresponding functions in
     api/actions.py
     :param func: The name of the callable function
+    :param refusals: The refusals beyond 400/403 this action can give, for the
+      description -- `USES_POOL` or `OPENS_SESSION` from `api.api_description`,
+      or none for an action that touches neither the pool nor a session
     :return: A JSON-Response that contains a dictionary with
       the corresponding response stored in *content*
     """
 
     class AJAX_View(APIView):
+        @extend_schema(exclude=True)
         @cors(allow_cors)
         @api_exception
         def options(self, request: HttpRequest, *args, **kwargs) -> JsonLikeResponse:
             return JsonResponse({})
 
+        # Annotated here rather than at each of the thirty-odd routes this
+        # factory serves: the envelope is the factory's, and writing it per
+        # endpoint would be writing it thirty times. What differs per endpoint
+        # is the shape of `query`, which only the action knows -- so the
+        # description names the action and the rest is shared.
+        @extend_schema(
+            request=AdvancedRequestSerializer,
+            responses=responses(
+                {
+                    200: OpenApiResponse(
+                        response=AdvancedResponseSerializer,
+                        description=(
+                            f"The result of `{func.__name__}`, under `content`."
+                        ),
+                    )
+                },
+                400,
+                403,
+                also=refusals,
+            ),
+            description=(
+                f"Runs `{func.__name__}` against the OEDB.\n\n" + ADVANCED_SESSION_NOTE
+            ),
+        )
         @cors(allow_cors)
         @api_exception
         def post(self, request: HttpRequest) -> JsonLikeResponse:
@@ -392,3 +499,166 @@ def get_request_data_dict(request: Request) -> dict:
     if isinstance(request.data, dict):
         return request.data
     raise TypeError(type(request.data))
+
+
+def get_column_description(table_obj: Table):
+    """Return list of column descriptions:
+    [{
+       "name": str,
+       "data_type": str,
+       "is_nullable": bool,
+       "is_pk": bool
+    }]
+
+    """
+
+    def get_datatype_str(column_def):
+        """get single string sql type definition.
+
+        We want the data type definition to be a simple string, e.g. decimal(10, 6)
+        or varchar(128), so we need to combine the various fields
+        (type, numeric_precision, numeric_scale, ...)
+        """
+        # for reverse validation, see also api.parser.parse_type(dt_string)
+        dt = column_def["data_type"].lower()
+        precisions = None
+        if dt.startswith("character"):
+            if dt == "character varying":
+                dt = "varchar"
+            else:
+                dt = "char"
+            precisions = [column_def["character_maximum_length"]]
+        elif dt.endswith(" without time zone"):  # this is the default
+            dt = dt.replace(" without time zone", "")
+        elif re.match("(numeric|decimal)", dt):
+            precisions = [column_def["numeric_precision"], column_def["numeric_scale"]]
+        elif dt == "interval":
+            precisions = [column_def["interval_precision"]]
+        elif re.match(".*int", dt) and re.match(
+            "nextval", column_def.get("column_default") or ""
+        ):
+            # dt = dt.replace('int', 'serial')
+            pass
+        elif dt.startswith("double"):
+            dt = "float"
+        if precisions:  # remove None
+            precisions = [x for x in precisions if x is not None]
+        if precisions:
+            dt += "(%s)" % ", ".join(str(x) for x in precisions)
+        return dt
+
+    def get_pk_fields(constraints):
+        """Get the column names that make up the primary key
+        from the constraints definitions.
+
+        NOTE: Currently, the wizard to create tables only supports
+            single fields primary keys (which is advisable anyways)
+        """
+        pk_fields = []
+        for _name, constraint in constraints.items():
+            if constraint.get("constraint_type") == "PRIMARY KEY":
+                m = re.match(
+                    r"PRIMARY KEY[ ]*\(([^)]+)", constraint.get("definition") or ""
+                )
+                if m:
+                    # "f1, f2" -> ["f1", "f2"]
+                    pk_fields = [x.strip() for x in m.groups()[0].split(",")]
+        return pk_fields
+
+    _columns = describe_columns(table_obj)
+    _constraints = describe_constraints(table_obj)
+    pk_fields = get_pk_fields(_constraints)
+    # order by ordinal_position
+    columns = []
+    for name, col in sorted(
+        _columns.items(), key=lambda kv: int(kv[1]["ordinal_position"])
+    ):
+        columns.append(
+            {
+                "name": name,
+                "data_type": get_datatype_str(col),
+                "is_nullable": col["is_nullable"],
+                "is_pk": name in pk_fields,
+                "unit": None,
+                "description": None,
+            }
+        )
+    return columns
+
+
+def sync_api_metadata_columns(metadata: dict, table_obj: Table) -> dict:
+    """
+    Enforces that the metadata 'fields' exactly match the physical database columns,
+    while preserving human annotations (isAbout, valueReference, etc.).
+    """
+    # 1. Get the physical truths from the database
+    physical_columns = get_column_description(table_obj)
+
+    # Ensure resources array exists safely
+    if not metadata.get("resources"):
+        metadata["resources"] = [{}]
+    resource = metadata["resources"][0]
+
+    if "schema" not in resource:
+        resource["schema"] = {}
+
+    # 2. Extract incoming fields from the API payload
+    incoming_fields = resource["schema"].get("fields", [])
+
+    # Create a fast lookup dict by column name
+    incoming_fields_lookup = {
+        field.get("name"): field
+        for field in incoming_fields
+        if isinstance(field, dict) and field.get("name")
+    }
+
+    updated_fields = []
+
+    # 3. Iterate through physical database columns (The Source of Truth)
+    for db_col in physical_columns:
+        col_name = db_col["name"]
+
+        # Grab the incoming human data if it exists, otherwise empty dict
+        incoming_col = incoming_fields_lookup.get(col_name, {})
+
+        # Ensure 'id' is strictly not nullable
+        is_nullable = db_col["is_nullable"]
+        if col_name == "id":
+            is_nullable = False
+
+        # Start with a copy of the incoming column to preserve all human annotations
+        # (isAbout, valueReference, description, unit, etc.)
+        merged_col = incoming_col.copy()
+
+        # Overwrite physical constraints strictly based on the database
+        merged_col.update(
+            {
+                "name": col_name,
+                "type": db_col["data_type"],
+                "nullable": is_nullable,
+            }
+        )
+
+        # Ensure default keys exist if they weren't in the incoming payload
+        merged_col.setdefault("description", None)
+        merged_col.setdefault("unit", None)
+
+        # --- ARTIFACT SCRUBBER ---
+        # Just in case a user copy-pasted raw JSON from the UI into an API tool,
+        # we scrub the UI-only 'openModalButton' to keep the DB clean.
+        if isinstance(merged_col.get("isAbout"), list):
+            for item in merged_col["isAbout"]:
+                item.pop("openModalButton", None)
+
+        if isinstance(merged_col.get("valueReference"), list):
+            for item in merged_col["valueReference"]:
+                item.pop("openModalButton", None)
+
+        updated_fields.append(merged_col)
+
+    # 4. Overwrite the payload's fields with our perfectly reconciled list
+    # Note: Because we iterate over `physical_columns`, any "phantom" columns
+    # that were in the JSON but not in the DB are automatically dropped!
+    resource["schema"]["fields"] = updated_fields
+
+    return metadata

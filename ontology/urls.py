@@ -10,17 +10,34 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 from django.urls import path, re_path
 from django.views.generic import TemplateView
 
+from oekg.iri_views import IRI_ROUTES as OEKG_IRI_ROUTES
 from ontology.views import (
     OeoExtendedFileServeView,
     OntologyAboutView,
     OntologyStaticsView,
-    OntologyViewClassesView,
     PartialOntologyAboutContentView,
     PartialOntologyAboutSidebarContentView,
+    ontology_react_view,
 )
 
 app_name = "ontology"
+
+# The store-backed vocabularies, each with the routes that resolve its
+# addresses. Keyed by name so `KnowledgeGraphRoutingTest` can hold it against
+# the registry: a knowledge graph registered with no routes here would fall
+# through to the ontology views and answer as though its contents were gone.
+KNOWLEDGE_GRAPH_ROUTES = {
+    "oekg": OEKG_IRI_ROUTES,
+}
+
 urlpatterns = [
+    # The knowledge graphs come FIRST, and the ordering is load-bearing. The
+    # last route below is a catch-all that matches `<name>/<term>/` perfectly
+    # well, so whichever is reached first wins -- which is how a scenario
+    # bundle came to render as an ontology term. `KnowledgeGraphRoutingTest` pins
+    # this order, because a route added at the top of the list is exactly what
+    # would undo it without anything failing.
+    *(pattern for patterns in KNOWLEDGE_GRAPH_ROUTES.values() for pattern in patterns),
     # oeo-extended
     re_path(r"^$", OntologyAboutView.as_view(), name="index"),
     path("oeox/", OeoExtendedFileServeView.as_view(), name="oeox"),
@@ -78,9 +95,25 @@ urlpatterns = [
         OntologyStaticsView.as_view(),
         name="oeo-initializer",
     ),
+    # ------------------------------------------------------------------
+    # 1. Search Page Listing
+    # Pattern: /ontology/<ontology_name>/entities/
+    # Matches: /ontology/oeo/entities/ OR /ontology/xyz/entities/
+    # ------------------------------------------------------------------
     re_path(
-        r"^(?P<ontology>[\w_-]+)?/(?P<module_or_id>[\w\d_-]+)?/$",
-        OntologyViewClassesView.as_view(),
-        name="oeo-classes",
+        r"^(?P<ontology>[\w-]+)/entities/$",
+        ontology_react_view,
+        name="ontology-entity-search",
+    ),
+    # ------------------------------------------------------------------
+    # 2. Specific Entity Page (The Catch-All)
+    # Pattern: /ontology/<ontology_name>/<short_form>/
+    # Matches: /ontology/oeo/OEO_00000040/
+    # NOTE: This must come AFTER 'entities' so 'entities' isn't mistaken for an ID.
+    # ------------------------------------------------------------------
+    re_path(
+        r"^(?P<ontology>[\w-]+)/(?P<term_id>[\w\d:_-]+)/$",
+        ontology_react_view,
+        name="oeo-class-detail",
     ),
 ]

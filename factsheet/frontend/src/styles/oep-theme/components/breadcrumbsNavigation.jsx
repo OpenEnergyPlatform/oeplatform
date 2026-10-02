@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 import { Grid } from '@mui/material';
-import { styled } from '@mui/material/styles';
+import styled from '@mui/material/styles/styled';
+
 import Container from '@mui/material/Container';
 import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined';
 import palette from '../palette';

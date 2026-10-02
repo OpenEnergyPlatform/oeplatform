@@ -1,8 +1,21 @@
+<!--
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+
 # Docker based installation
 
-!!! Warning "🚧"
+!!! warning "Development / CI only"
 
-    This section is still new and might change. The information presented here is tested by the developer and is currently rolled out within our team and close collaborators. Any suggestions are welcome and can be added in this GitHub discussion.
+    This Docker Compose guide is for **local development and CI**, not production. For a
+    production deployment use the rootless Podman / Quadlets path in
+    [Production deployment (Podman)](../production-podman/index.md).
+
+This Guide walks you thru the steps required to setup the oeplatform
+infrastructure on your local computer for development purposes using the docker
+software. This way you can automatically (using a single command) install the
+oeplatform service infrastructure.
 
 !!! Info "Manual installation"
 
@@ -61,8 +74,11 @@ You can set these environment variablesto override defaults:
 
 #### Setup ontop service
 
-The ontop service requires a special database driver which must be
-[downloaded manually first](./setuo-ontop.md).
+The ontop service is **self-provisioning** — its PostgreSQL JDBC driver,
+ontology and (empty) mapping are baked into the image at build time, so
+**nothing needs to be downloaded manually**. See
+[Setup ontop service](./setup-ontop.md) for details and the canonical Ontop
+documentation.
 
 #### Docker compose command
 

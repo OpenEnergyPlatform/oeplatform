@@ -13,5 +13,10 @@ from oeplatform.settings import EXTERNAL_URLS
 
 def viewer_index_view(request, *args, **kwargs):
     return render(
-        request, "index.html", context={"tib_ts_oeo_link": EXTERNAL_URLS["tib_ts_oeo"]}
+        request,
+        "index.html",
+        context={
+            "tib_ts_oeo_link": EXTERNAL_URLS["tib_ts_oeo"],
+            "technoportal_link": EXTERNAL_URLS["technoportal"],
+        },
     )

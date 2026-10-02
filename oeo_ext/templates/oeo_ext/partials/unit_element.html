@@ -61,8 +61,7 @@
                 const link = document.createElement("a");
                 link.href = "#";
                 link.textContent = String(item.label[0])
-                  .replaceAll("<b>", "")
-                  .replaceAll("</b>", "");
+                  .replace(/<\/?b>/gi, ""); // Remove <b> tags if present
                 link.addEventListener("click", function (event) {
                   event.preventDefault(); // Prevent the default action of the anchor tag
                   input.value = this.textContent;

@@ -4,7 +4,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { styled } from '@mui/material/styles';
+import styled from '@mui/material/styles/styled';
+
 import Button from '@mui/material/Button';
 
 import { purple } from '@mui/material/colors';
