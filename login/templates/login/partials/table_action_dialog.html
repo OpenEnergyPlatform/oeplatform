@@ -6,16 +6,21 @@ The one action dialog, for a row (a batch of one) and, later, the bulk bar:
 the contents of #table-action-body. It shows the preflight: which Tables are
 left out and why, what the action needs (publish: Topic and embargo), and
 the consequences it has to state (unpublish: other people's Datasets that
-will hold a draft member). The form posts the eligible names only, so what
-runs is what was shown. A refused request comes back here with ``notice``
-("Nothing was changed: …") and the preflight run again; an unusable
-parameter comes back with ``errors`` beside its field.
+will hold a draft member; delete: the Datasets left, Review state, an active
+embargo and knowledge-graph links). Delete may ask for a typed confirmation
+(``preflight.confirmation``: the Table's name or the number of Tables). Over
+the action's ceiling nothing can be confirmed. The form posts the eligible
+names only, so what runs is what was shown. A refused request comes back
+here with ``notice`` ("Nothing was changed: …") and the preflight run again;
+an unusable parameter comes back with ``errors`` beside its field.
 {% endcomment %}
 {% with check=preflight %}
   <div class="modal-header">
     <h2 class="modal-title h5 m-0" id="table-action-title">
       {% if check.action == "publish" %}
         Publish
+      {% elif check.action == "delete" %}
+        Delete
       {% else %}
         Unpublish
       {% endif %}
@@ -41,6 +46,15 @@ parameter comes back with ``errors`` beside its field.
              class="alert alert-danger"
              role="alert">{{ notice }}</div>
       {% endif %}
+      {% if errors.table %}
+        <div id="table-action-error"
+             class="alert alert-danger"
+             role="alert">{{ errors.table }}</div>
+      {% endif %}
+      {% if check.over_ceiling %}
+        <p id="table-action-ceiling"
+           class="alert alert-warning">{{ check.ceiling_message }}</p>
+      {% endif %}
       {% if check.left_out %}
         <div id="table-action-left-out" class="dash-leftout">
           {% if check.eligible %}
@@ -58,11 +72,13 @@ parameter comes back with ``errors`` beside its field.
           </ul>
         </div>
       {% endif %}
-      {% if check.eligible %}
+      {% if check.eligible and not check.over_ceiling %}
         {% if check.total > 1 %}
           <p class="mb-1">
             {% if check.action == "publish" %}
               Will be published:
+            {% elif check.action == "delete" %}
+              Will be deleted:
             {% else %}
               Will be unpublished:
             {% endif %}
@@ -108,6 +124,8 @@ parameter comes back with ``errors`` beside its field.
             {% if errors.embargo %}<div class="text-danger small">{{ errors.embargo }}</div>{% endif %}
             <div class="form-text">During an embargo the table is listed, but its data stays closed.</div>
           </fieldset>
+        {% elif check.action == "delete" %}
+          {% include "login/partials/table_action_delete.html" %}
         {% else %}
           <p>
             {% if check.total == 1 %}
@@ -129,11 +147,13 @@ parameter comes back with ``errors`` beside its field.
             </div>
           {% endif %}
         {% endif %}
-      {% else %}
+      {% elif not check.over_ceiling %}
         <p id="table-action-nothing">
           Nothing to
           {% if check.action == "publish" %}
             publish.
+          {% elif check.action == "delete" %}
+            delete.
           {% else %}
             unpublish.
           {% endif %}
@@ -144,10 +164,14 @@ parameter comes back with ``errors`` beside its field.
       <button type="button"
               class="btn btn-outline-secondary"
               data-bs-dismiss="modal">Cancel</button>
-      {% if check.eligible %}
-        <button type="submit" id="table-action-confirm" class="btn btn-primary">
+      {% if check.eligible and not check.over_ceiling %}
+        <button type="submit"
+                id="table-action-confirm"
+                class="btn {% if check.action == "delete" %}btn-danger{% else %}btn-primary{% endif %}">
           {% if check.action == "publish" %}
             Publish
+          {% elif check.action == "delete" %}
+            Delete
           {% else %}
             Unpublish
           {% endif %}

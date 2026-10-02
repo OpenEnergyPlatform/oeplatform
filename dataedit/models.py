@@ -208,7 +208,20 @@ class Table(Tagable):
         unique_together = (("name",),)
 
     def delete(self, *args, **kwargs):
-        super().delete(*args, **kwargs)
+        self.delete_record(*args, **kwargs)
+        self.drop_oedb_table()
+
+    def delete_record(self, *args, **kwargs):
+        """Delete the Django rows only (this Table and everything that
+        cascades from it), leaving the OEDB table in place. For a caller
+        that drops it once its own transaction has committed, as the table
+        action service does: the two databases share no transaction."""
+        return super().delete(*args, **kwargs)
+
+    def drop_oedb_table(self):
+        """Drop the OEDB table and its meta tables, if they exist. Needs
+        only the name and the schema, so it works once the Django row is
+        gone."""
         # ensure oedb tables are deleted, so we use ADMIN_PERM
         self._get_oeb_table_proxy_w_permission(
             permission_level=ADMIN_PERM

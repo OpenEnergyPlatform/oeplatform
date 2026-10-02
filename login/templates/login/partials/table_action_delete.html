@@ -1,0 +1,94 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+The delete branch of the action dialog (table_action_dialog.html): what
+deleting breaks, then the typed confirmation when the preflight asks for one
+(the Table's name for one published Table, the number of Tables for a batch
+holding a published Table or more than ten). A mismatch comes back as
+``errors.confirm`` beside the field; the server is what enforces it.
+{% endcomment %}
+<p>
+  This deletes the {{ check.total|pluralize:"table,tables" }} and {{ check.total|pluralize:"its,their" }} data for
+  good. It cannot be undone.
+</p>
+{% with c=check.consequences %}
+  {% if c.published or c.own_datasets or c.others_datasets or c.reviewed or c.embargoed %}
+    <div id="table-action-consequences" class="dash-consequences">
+      <p class="mb-1">What this breaks:</p>
+      <ul>
+        {% if c.published %}
+          <li id="table-action-published">
+            {% if check.total == 1 %}
+              It is published: anyone may have found, cited or downloaded it.
+            {% else %}
+              {{ c.published|length }} of them {{ c.published|length|pluralize:"is,are" }} published:
+              {% for table in c.published %}
+                {{ table.human_readable_name|default:table.name }}{% if not forloop.last %},{% endif %}
+              {% endfor %}
+            {% endif %}
+          </li>
+        {% endif %}
+        {% if c.own_datasets %}
+          <li id="table-action-own-datasets">
+            Removed from your {{ c.own_datasets|length|pluralize:"dataset,datasets" }}:
+            {% for name in c.own_datasets %}
+              {{ name }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+          </li>
+        {% endif %}
+        {% if c.others_datasets %}
+          <li id="table-action-datasets">
+            Removed from {{ c.others_datasets|length|pluralize:"another person's dataset,other people's datasets" }}, without telling {{ c.others_datasets|length|pluralize:"its owner,their owners" }}:
+            <ul>
+              {% for owner, name in c.others_datasets %}
+                <li>
+                  {{ name }} <span class="dash-muted">({{ owner }})</span>
+                </li>
+              {% endfor %}
+            </ul>
+          </li>
+        {% endif %}
+        {% for table, state in c.reviewed %}
+          <li class="table-action-review">
+            {% if check.total > 1 %}{{ table.human_readable_name|default:table.name }}:{% endif %}
+            {{ state }}. The review stays on record without its table.
+          </li>
+        {% endfor %}
+        {% for table, until in c.embargoed %}
+          <li class="table-action-embargo">
+            {% if check.total > 1 %}{{ table.human_readable_name|default:table.name }}:{% endif %}
+            Under embargo until {{ until|date:"j M Y" }}.
+          </li>
+        {% endfor %}
+        {% if c.knowledge_graph %}
+          <li id="table-action-knowledge-graph">
+            Links to {{ c.published|length|pluralize:"it,them" }} from the knowledge graph (scenario bundles) stop resolving.
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  {% endif %}
+{% endwith %}
+{% if check.confirmation %}
+  <div class="mb-2">
+    <label class="form-label" for="action-confirm">
+      {% if check.total == 1 %}
+        Type the table's name, <code>{{ check.confirmation }}</code>, to confirm
+      {% else %}
+        Type the number of tables, <strong>{{ check.confirmation }}</strong>, to confirm
+      {% endif %}
+    </label>
+    <input id="action-confirm"
+           name="confirm"
+           type="text"
+           class="form-control{% if errors.confirm %} is-invalid{% endif %}"
+           value="{{ values.confirm|default:'' }}"
+           autocomplete="off"
+           spellcheck="false"
+           required
+           {% if errors.confirm %}aria-describedby="action-confirm-error" aria-invalid="true"{% endif %} />
+    {% if errors.confirm %}<div id="action-confirm-error"
+     class="invalid-feedback">{{ errors.confirm }}</div>{% endif %}
+  </div>
+{% endif %}

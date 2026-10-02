@@ -5,14 +5,16 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 # Profile dashboard tables tab: row cost and column widths
 
-Two measurements spec #2551 owes for the tables tab (#2555), neither of which a
-test can take:
+Three measurements spec #2551 owes for the tables tab, none of which a test can
+take:
 
 - **`run.py`**: what one row of the list costs the server, against the old
   profile cards' 6-10 ms each;
 - **`widths.mjs`**: how wide the list must be for each set of columns, which
   sets the container-query thresholds in `login/static/login/tables_tab.css`.
   happy-dom has no layout, so this runs in a real browser.
+- **`delete_cost.py`**: what deleting one Table costs (#2562), which sets the
+  delete ceiling `CEILINGS["delete"]` in `api/services/table_actions.py`.
 
 Both use accounts shaped like production (`seed.py`, a port of the WF-06
 prototype's generator, sized from WF-01's census): `p90` (130 Tables), `max`
@@ -68,3 +70,36 @@ The numbers it produced, and the thresholds taken from them, are written beside
 the container queries in `tables_tab.css`. A slice that adds a column re-runs it
 and moves the thresholds; with `STAND_INS=1` it also measures the complete row,
 standing in only for the columns that are still missing.
+
+## Delete cost
+
+Same throwaway database as the row cost; the OEDB tables go into the sandbox
+schema under names nobody else uses, and the measurement drops them itself.
+
+```bash
+python -m benchmarks.tables_tab.delete_cost
+python -m benchmarks.tables_tab.delete_cost --rows 10000000 --tables 2
+```
+
+Each size creates `--tables` Tables filled with that many rows (an OEDB table
+with a primary key and three data columns, its three meta tables, 6 KB of
+metadata, a grant, a Topic and a Dataset membership) and deletes them all in one
+`table_actions.execute` call, the dashboard's path. Results append to
+`benchmarks/results/tables_tab_delete.csv`. Keep the 1M- and 10M-row batches
+small: filling them is what takes the time.
+
+Measured 2026-10-02, local Postgres 14 (`shared_buffers` 128 MB), three rounds:
+
+| rows per Table      | per Table, total | of which the drop | slowest single drop |
+| ------------------- | ---------------- | ----------------- | ------------------- |
+| 0 (16 KB)           | 17-18 ms         | 9-10 ms           | 13 ms               |
+| 100,000 (8 MB)      | 17-18 ms         | 10-11 ms          | 14 ms               |
+| 1,000,000 (83 MB)   | 33-38 ms         | 22-24 ms          | 1,020 ms (once)     |
+| 10,000,000 (0.8 GB) | 0.64 s           | 0.62 s            | 1,126 ms            |
+
+The drop is most of it and grows with the table's size; a single drop
+occasionally takes about a second (one 1M-row drop in three rounds). The
+production timeout is `Timeout 300` / `socket-timeout=300` (read on the host
+2026-10-02). At a worst case of 1.2 s per Table, 50 Tables take 60 s: the
+ceiling is 50, a safety factor of 5, which covers production's OEDB sitting on
+another host. The reasoning is beside the constant.
