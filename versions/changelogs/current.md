@@ -88,7 +88,7 @@ SPDX-License-Identifier: CC0-1.0
   nothing. It only reads the OEDB, and never creates a missing journal. The
   metadata half stays empty, because no metadata save was ever timestamped.
   Deploy: run it once after `dataedit.0056`
-  [(#2558)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2558)
+  [(#2589)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2589)
 - The tables tab's ⋯ menu adds a table to one of your own datasets, or removes
   it from one (offered only when one of yours holds it). A draft or embargoed
   table may be added by anyone holding Data editor on it, directly or through an
