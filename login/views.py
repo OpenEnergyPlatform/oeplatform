@@ -25,7 +25,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import F, Q
+from django.db.models import Q
 from django.http import (
     Http404,
     HttpResponse,
@@ -34,6 +34,7 @@ from django.http import (
 )
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
+from django.utils.cache import patch_vary_headers
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
@@ -64,6 +65,7 @@ from login.forms import EditUserForm, OrganizationForm
 from login.models import Membership
 from login.models import myuser as OepUser
 from login.permissions import ADMIN_PERM, DELETE_PERM, WRITE_PERM
+from login.tables_tab import TABLES, accessible_tables, table_rows
 from login.utils import get_tables_for_organization
 from oeplatform.settings import PSEUDO_TOPIC_DRAFT
 
@@ -79,64 +81,29 @@ ITEMS_PER_PAGE = 8
 
 
 class TablesView(ProfileOwnerRequiredMixin, View):
+    """The tables tab: one list of every Table the user may write.
 
-    def _get_filtered_tables(self, user, search_query=""):
-        """Return filtered querysets for draft and published tables."""
-        tables_set = user.get_tables_queryset(min_permission_level=WRITE_PERM)
-
-        draft_tables = tables_set.filter(is_publish=False).order_by(
-            F("date_updated").desc(nulls_last=True), "human_readable_name"
-        )
-        published_tables = tables_set.filter(is_publish=True).order_by(
-            F("date_updated").desc(nulls_last=True), "human_readable_name"
-        )
-
-        if search_query:
-
-            q_filter = Q(name__icontains=search_query) | Q(
-                human_readable_name__icontains=search_query
-            )
-            draft_tables = draft_tables.filter(q_filter)
-            published_tables = published_tables.filter(q_filter)
-
-        return draft_tables, published_tables
+    A direct load renders the whole page; an htmx request gets only the
+    results region, carrying the canonical address of what it shows in
+    ``HX-Push-Url`` (defaults left out, the page clamped), so the address bar
+    always names the state on screen. A history restore is a full page,
+    because htmx swaps it into the body.
+    """
 
     @method_decorator(never_cache)
     def get(self, request, user_id):
         user = self.profile_user
-        search_query = request.GET.get("search", "").strip()
-        has_search_param = "search" in request.GET
-
-        draft_tables, published_tables = self._get_filtered_tables(user, search_query)
-
-        # Paginate tables
-        published_paginator = Paginator(published_tables, ITEMS_PER_PAGE)
-        draft_paginator = Paginator(draft_tables, ITEMS_PER_PAGE)
-
-        published_page = request.GET.get("published_page", 1)
-        published_page_obj = published_paginator.get_page(published_page)
-
-        draft_page = request.GET.get("draft_page", 1)
-        draft_page_obj = draft_paginator.get_page(draft_page)
-
-        context = {
-            "profile_user": user,
-            "draft_tables_page": draft_page_obj,
-            "published_tables_page": published_page_obj,
-            "topics": [t.name for t in Topic.objects.all()],
-            "draft_page": draft_page,
-            "published_page": published_page,
-            "search_query": search_query,
-        }
-
-        if is_htmx(request) and not has_search_param:
-            return render(
-                request,
-                "login/partials/tables_sections.html",
-                context,
-            )
+        page = TABLES.page(
+            accessible_tables(user), request.GET, request.path, rows=table_rows(user)
+        )
+        context = {"profile_user": user, "page": page}
+        if is_htmx(request) and "HX-History-Restore-Request" not in request.headers:
+            response = render(request, "login/partials/tables_region.html", context)
+            response["HX-Push-Url"] = page.url
         else:
-            return render(request, "login/user_tables.html", context)
+            response = render(request, "login/user_tables.html", context)
+        patch_vary_headers(response, ["HX-Request"])
+        return response
 
 
 ##############################################################################

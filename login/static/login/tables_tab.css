@@ -1,0 +1,222 @@
+/*
+ * SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
+ * The profile dashboard's tables tab (spec #2551). Plain CSS beside the
+ * page rather than in the theme build, so the tab can change without a
+ * rebuild of bootstrap.min.css. The column collapse by the list's own width
+ * (#2555) lands here, as container queries on `.dash`.
+ */
+
+.dash {
+  --dash-muted: #6c757d;
+  --dash-primary: #2972a6;
+  --dash-secondary: #1f567d;
+  container-type: inline-size;
+}
+
+/* identity strip: one line above the profile tabs */
+.dash-identity {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.4rem;
+  color: #495057;
+}
+
+.dash-identity__img {
+  display: inline-flex;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  overflow: hidden;
+  border-radius: 50%;
+}
+
+.dash-identity__img img,
+.dash-identity__img svg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dash-identity__name {
+  font-weight: 600;
+}
+
+.dash-identity__fullname {
+  color: #6c757d;
+}
+
+/* filter bar */
+.dash-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+  margin-bottom: 0.6rem;
+}
+
+.dash-search {
+  flex: 1 1 14rem;
+  max-width: 28rem;
+}
+
+/* results region */
+.dash-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.dash-seg--zero:not(.active) {
+  opacity: 0.55;
+}
+
+.dash-seg__count {
+  opacity: 0.75;
+}
+
+.dash-summary {
+  margin-left: auto;
+  color: var(--dash-muted);
+  font-size: 0.875rem;
+}
+
+.dash-table-wrap {
+  overflow-x: auto;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+}
+
+.dash-table {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.dash-table th {
+  white-space: nowrap;
+  font-weight: 600;
+  color: #495057;
+  background: #f8f9fa;
+  vertical-align: middle;
+}
+
+.dash-table td {
+  vertical-align: middle;
+}
+
+.dash-sort {
+  color: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.dash-sort:hover,
+.dash-sort--active {
+  color: var(--dash-primary);
+}
+
+.c-table {
+  min-width: 13rem;
+}
+
+.dash-title {
+  font-weight: 600;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+/* technical names are unbreakable snake_case; letting them break anywhere
+   is what keeps the Table column from holding the row wide */
+.dash-tname {
+  font: 0.75rem ui-monospace, Consolas, monospace;
+  color: var(--dash-muted);
+  overflow-wrap: anywhere;
+}
+
+.dash-badge--draft {
+  background: #e9ecef;
+  color: #495057;
+}
+
+.dash-badge--published {
+  background: #d1e7dd;
+  color: #0f5132;
+}
+
+.dash-badge--embargoed {
+  background: #fff3cd;
+  color: #664d03;
+}
+
+.dash-until {
+  display: block;
+  font-size: 0.6875rem;
+  color: #664d03;
+  white-space: nowrap;
+}
+
+.dash-achip {
+  display: inline-block;
+  margin: 1px 2px 1px 0;
+  padding: 0 0.45rem;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  color: var(--dash-secondary);
+  background: #f5f9fc;
+  border: 1px solid #c5d6e3;
+  border-radius: 1rem;
+}
+
+.dash-achip--you {
+  color: #fff;
+  background: var(--dash-secondary);
+  border-color: var(--dash-secondary);
+}
+
+.dash-role {
+  display: block;
+  font-size: 0.6875rem;
+  color: #664d03;
+}
+
+.dash-pager {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.dash-pager .btn {
+  min-width: 2.2rem;
+}
+
+.dash-pager__gap {
+  padding: 0 0.25rem;
+  color: var(--dash-muted);
+}
+
+.dash-pager__range {
+  margin-left: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--dash-muted);
+}
+
+.dash-empty {
+  padding: 3rem 1rem;
+  text-align: center;
+}
+
+.dash-empty--nomatch {
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+}
+
+.dash-empty__title {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
