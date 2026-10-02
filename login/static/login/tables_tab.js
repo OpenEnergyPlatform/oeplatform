@@ -20,7 +20,16 @@
 //   sends its ticked values comma-joined. After a swap every control follows
 //   the region's `data-filters` (what the URL holds) unless the user is in
 //   it, so a chip removed or a Reset inside the region shows in the bar, and
-//   "More filters (n)" follows `data-more`.
+//   "More filters (n)" follows `data-more` and "Filters (n)" `data-folded`.
+// - "Sort by": a list too narrow for its column headers (its rows stack, by
+//   CSS container queries) sorts with a select inside the region. Its
+//   request is rewritten like a filter's, so it keeps every filter and
+//   returns to page 1, as a click on a header does.
+// - "Filters (n)": on a list too narrow for the bar on one line everything
+//   but Search folds behind one toggle. The module only flips its
+//   `aria-expanded`; the CSS reads that to show the panel, and on a wider
+//   list shows it regardless, so a toggle left open by a narrow window
+//   cannot hide anything on a wide one.
 //
 // Newer requests replace older ones through `hx-sync` on the tab, so a
 // stale response never overwrites a newer state. The cells' popovers are
@@ -35,6 +44,8 @@ export const SEARCH_ID = "tables-search";
 export const FILTERS_ID = "tables-filters";
 export const MORE_ID = "tables-more";
 export const MORE_COUNT_ID = "tables-more-count";
+export const FOLD_ID = "tables-fold";
+export const FOLD_COUNT_ID = "tables-fold-count";
 
 /**
  * The query a changed filter sends: every other parameter of the current
@@ -166,10 +177,15 @@ export function syncFilters(doc, region) {
       control.value = value;
     }
   }
-  const count = doc.getElementById(MORE_COUNT_ID);
-  if (count) {
-    const more = Number(region.dataset.more || 0);
-    count.textContent = more ? ` (${more})` : "";
+  for (const [id, n] of [
+    [MORE_COUNT_ID, region.dataset.more],
+    [FOLD_COUNT_ID, region.dataset.folded],
+  ]) {
+    const count = doc.getElementById(id);
+    if (count) {
+      const applied = Number(n || 0);
+      count.textContent = applied ? ` (${applied})` : "";
+    }
   }
 }
 
@@ -190,6 +206,17 @@ export function toggleMore(doc, button) {
 }
 
 /**
+ * Open or close "Filters (n)". Only `aria-expanded` changes: the CSS shows
+ * the panel from it on a narrow list and always on a wide one.
+ *
+ * @param {Element} button the "Filters (n)" button.
+ */
+export function toggleFold(button) {
+  const open = button.getAttribute("aria-expanded") !== "true";
+  button.setAttribute("aria-expanded", String(open));
+}
+
+/**
  * Wire the tab to htmx's events on `doc`.
  *
  * @param {Document} doc the document.
@@ -204,7 +231,11 @@ export function bindTablesTab(doc, { announceDelay = 60 } = {}) {
   const onConfigRequest = (event) => {
     const elt = event.detail.elt;
     const bar = doc.getElementById(FILTERS_ID);
-    if (!elt || !elt.name || !bar || !bar.contains(elt)) {
+    if (!elt || !elt.name) {
+      return;
+    }
+    const isSort = elt.hasAttribute("data-list-sort");
+    if (!isSort && !(bar && bar.contains(elt))) {
       return;
     }
     const parameters = event.detail.parameters;
@@ -221,9 +252,16 @@ export function bindTablesTab(doc, { announceDelay = 60 } = {}) {
   };
 
   const onClick = (event) => {
-    const button = event.target.closest && event.target.closest(`#${MORE_ID}`);
-    if (button) {
-      toggleMore(doc, button);
+    if (!event.target.closest) {
+      return;
+    }
+    const more = event.target.closest(`#${MORE_ID}`);
+    if (more) {
+      toggleMore(doc, more);
+    }
+    const fold = event.target.closest(`#${FOLD_ID}`);
+    if (fold) {
+      toggleFold(fold);
     }
   };
 
