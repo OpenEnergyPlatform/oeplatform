@@ -179,6 +179,16 @@ SPDX-License-Identifier: CC0-1.0
 - Restrict profile pages to their owner and check organization permissions
   before saving
   [(#2547)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2547)
+- A table's permission page follows the same rules as the dashboard's access
+  drawer: adding a person or organization takes a role in the same step, "None"
+  is no longer offered, organizations go up to Data maintainer and can be added
+  only by their members, a table always keeps one person with Admin, and losing
+  your own Admin asks once. A refused change is shown as a message on the page
+  and writes nothing; before, an unknown user name was a server error, any
+  number was stored as a level, and the last Admin could remove themself. Each
+  change writes one log line (`via=table-page`). Error messages across the site
+  are now shown in red
+  [(#2567)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2567)
 
 ## Documentation updates
 

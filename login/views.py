@@ -422,16 +422,7 @@ def _access_message(change, listed, hidden) -> str:
     """What a change of access says: what was done, and whether the Table
     left the user's dashboard or is hidden by the current filter."""
     title = _title(change.table)
-    if change.action == table_roles.ADD and change.kind == table_roles.USER:
-        message = f"Gave {change.name} {change.role} on {title}."
-    elif change.action == table_roles.ADD:
-        message = f"Shared {title} with {change.name} as {change.role}."
-    elif change.action == table_roles.CHANGE:
-        message = f"{change.name} is now {change.role} on {title}."
-    elif change.action == table_roles.LEAVE:
-        message = f"You left {title}."
-    else:
-        message = f"Removed {change.name} from {title}."
+    message = change.message
     if not listed and change.action == table_roles.LEAVE:
         message = f"You left {title} and no longer have access to it."
     elif not listed:

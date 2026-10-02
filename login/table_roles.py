@@ -273,6 +273,8 @@ class Access:
 
 
 def _everywhere_admin(user) -> bool:
+    if not user.is_authenticated:
+        return False
     return bool(user.is_admin) or (
         Organization.objects.filter(is_admin=True, memberships__user=user).exists()
     )
@@ -308,9 +310,13 @@ def _image(user) -> str:
 
 def table_access(viewer, table) -> Access:
     """``table``'s Holders as ``viewer`` sees them. Users first, then
-    Organizations, each by role (highest first) and name. Five queries."""
-    own_groups = set(
-        Membership.objects.filter(user=viewer).values_list("group_id", flat=True)
+    Organizations, each by role (highest first) and name. Five queries.
+    An anonymous viewer (the Table's permission page is public) sees the
+    same Holders, none of them their own, and may change nothing."""
+    own_groups = (
+        set(Membership.objects.filter(user=viewer).values_list("group_id", flat=True))
+        if viewer.is_authenticated
+        else set()
     )
     users = [
         Holder(
@@ -379,6 +385,20 @@ class Change:
     @property
     def role(self) -> str:
         return role_label(self.after)
+
+    @property
+    def message(self) -> str:
+        """What was done, in one sentence, the same wherever it was done."""
+        title = _title(self.table)
+        if self.action == ADD and self.kind == USER:
+            return f"Gave {self.name} {self.role} on {title}."
+        if self.action == ADD:
+            return f"Shared {title} with {self.name} as {self.role}."
+        if self.action == CHANGE:
+            return f"{self.name} is now {self.role} on {title}."
+        if self.action == LEAVE:
+            return f"You left {title}."
+        return f"Removed {self.name} from {title}."
 
 
 def _level(raw, roles) -> int:
