@@ -44,6 +44,13 @@ SPDX-License-Identifier: CC0-1.0
   all", and a value from an old link that no longer applies shows as a muted
   chip instead of emptying the list
   [(#2556)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2556)
+- Whether a Table passes the publish check is now stored with it and recomputed
+  on every metadata write, so the tables tab filters by "Publishable" and sorts
+  by it (not publishable first). Publishing itself still checks the metadata at
+  that moment. Deploy: run `python manage.py migrate`, then
+  `python manage.py recompute_publish_gate --apply` once; until it has run, the
+  Publishable filter matches no existing Table
+  [(#2560)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2560)
 
 ## Bugs
 

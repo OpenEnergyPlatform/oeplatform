@@ -527,10 +527,11 @@ class FilterQueryCountTests(FilterTestCase):
     """Filters keep a page's cost independent of the account size. A filter
     the request names costs the one query that tells its known values from
     stale ones and labels its chips (Access two: whether a direct grant
-    exists, and the Organizations); Review's options are fixed and cost
-    none."""
+    exists, and the Organizations); Publishable's and Review's options are
+    fixed and cost none."""
 
     ALL_FILTERS = {
+        "publishable": "no",
         "review": "not_reviewed",
         "topics": "a",
         "tags": "t1",
@@ -539,7 +540,9 @@ class FilterQueryCountTests(FilterTestCase):
 
     def fill(self, count, organization):
         tables = Table.objects.bulk_create(
-            Table(name=f"q_{index:04d}", is_publish=index % 3 == 0)
+            # without metadata none passes the gate, and storing that lets
+            # the Publishable filter in ALL_FILTERS leave rows on the page
+            Table(name=f"q_{index:04d}", is_publish=index % 3 == 0, publishable=False)
             for index in range(count)
         )
         UserPermission.objects.bulk_create(
@@ -579,13 +582,16 @@ class FilterQueryCountTests(FilterTestCase):
             self.fill(size, organization)
             counts[size] = [
                 self.queries({}),
-                self.queries({"review": "not_reviewed", "search": "q_"}),
+                self.queries(
+                    {"publishable": "no", "review": "not_reviewed", "search": "q_"}
+                ),
                 self.queries(everything),
                 self.queries({}, htmx=False),
             ]
         sizes = list(counts)
-        # 7 unfiltered (pinned in QueryCountTests); 7 with Review; 7 + 2
-        # (Access) + 1 (Topics) + 1 (Tags) + 1 (Dataset) with all of them.
+        # 7 unfiltered (pinned in QueryCountTests); 7 with Publishable and
+        # Review; 7 + 2 (Access) + 1 (Topics) + 1 (Tags) + 1 (Dataset) with
+        # all of them.
         self.assertEqual(counts[sizes[0]][:3], [7, 7, 12])
         for size in sizes[1:]:
             self.assertEqual(counts[size], counts[sizes[0]], size)

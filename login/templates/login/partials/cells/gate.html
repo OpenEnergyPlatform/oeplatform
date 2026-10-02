@@ -5,7 +5,9 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 Cell type "gate check with popover": the Publish gate's result, ✓ or ✗
 naming the failed check, and on click the reasons, one line per check, with
 the license list and the metadata editor. Shown on published Tables too,
-since metadata can be edited after publishing.
+since metadata can be edited after publishing. The filter and the sort read
+the stored verdict; this cell runs the checks live, so where the two
+disagree it shows the live result (see ``TableRow.publishable``).
 {% endcomment %}
 <button type="button"
         id="pub-{{ row.table.pk }}"

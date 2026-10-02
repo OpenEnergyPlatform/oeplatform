@@ -47,7 +47,7 @@ outside can follow a change made in here (a chip removed, a Reset).
             <tr>
               {% include "login/partials/list_sort_header.html" with link=page.sort_links.table cell="c-table" %}
               {% include "login/partials/list_sort_header.html" with link=page.sort_links.status cell="c-status" %}
-              <th class="c-pub" scope="col">Publishable</th>
+              {% include "login/partials/list_sort_header.html" with link=page.sort_links.publishable cell="c-pub" %}
               {% include "login/partials/list_sort_header.html" with link=page.sort_links.review cell="c-review" %}
               <th class="c-access" scope="col">Access</th>
               {% include "login/partials/list_sort_header.html" with link=page.sort_links.datasets cell="c-ds" %}

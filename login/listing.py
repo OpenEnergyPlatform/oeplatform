@@ -259,14 +259,23 @@ class Segment:
 
 @dataclass(frozen=True)
 class Sort:
-    """A sortable column: its URL key, and the expression it orders by."""
+    """A sortable column: its URL key, and the expression it orders by.
+
+    ``nulls_last`` puts rows whose value is unknown (NULL) at the end in both
+    directions, rather than wherever the database's default puts them, which
+    flips with the direction.
+    """
 
     key: str
     label: str
     expression: Any
+    nulls_last: bool = False
 
     def order(self, descending: bool) -> list:
-        return [self.expression.desc() if descending else self.expression.asc()]
+        nulls = {"nulls_last": True} if self.nulls_last else {}
+        if descending:
+            return [self.expression.desc(**nulls)]
+        return [self.expression.asc(**nulls)]
 
 
 @dataclass(frozen=True)

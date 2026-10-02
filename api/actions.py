@@ -83,6 +83,7 @@ from api.utils import (
     table_or_404_from_dict,
 )
 from dataedit.models import BulkLoadEvent, Embargo, PeerReview, Table
+from dataedit.publish_gate import is_publishable
 from login.models import myuser as User
 from login.permissions import DELETE_PERM, WRITE_PERM
 from oedb.connection import (
@@ -1495,6 +1496,9 @@ def update_meta_search(table: str) -> None:
 def set_table_metadata(table: str, metadata):
     """saves metadata as json string on table comment.
 
+    The one metadata write path: it also recomputes the stored Publish gate
+    verdict (``Table.publishable``) in the same save.
+
     Args:
         table(str): name of table
         metadata: OEPMetadata or metadata object (dict) or metadata str
@@ -1521,6 +1525,8 @@ def set_table_metadata(table: str, metadata):
 
     django_table_obj = Table.objects.get(name=table)
     django_table_obj.oemetadata = metadata_obj  # type: ignore
+    # the Publish gate's verdict on the metadata just written, saved with it
+    django_table_obj.publishable = is_publishable(django_table_obj)
     django_table_obj.save()
 
     # ---------------------------------------

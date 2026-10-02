@@ -50,15 +50,6 @@ sidebar on 2026-10-02, so the column collapse (#2555) works with that width.
                    value="{{ page.state.raw.search|default:'' }}"
                    hx-get="{{ request.path }}"
                    hx-trigger="input changed delay:300ms, search" />
-            {% comment %}A placeholder until the Publish gate result is stored (#2560): filtering on the live gate would run it for every Table.{% endcomment %}
-            <label class="visually-hidden"
-                   for="f-publishable">Publishable, not available yet</label>
-            <select id="f-publishable"
-                    class="form-select form-select-sm dash-select"
-                    disabled
-                    title="Not available yet">
-              <option>Publishable: any</option>
-            </select>
             {% for control in controls %}
               {% if not control.more %}
                 {% include "login/partials/list_filter_control.html" with path=request.path %}
