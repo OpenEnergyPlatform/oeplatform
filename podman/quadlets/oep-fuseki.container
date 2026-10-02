@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+[Unit]
+Description=OEPlatform Apache Jena Fuseki triple store
+After=network-online.target
+
+[Container]
+Image=docker.io/stain/jena-fuseki:5.1.0
+ContainerName=fuseki
+EnvironmentFile=%h/.config/oeplatform/oep.env
+Volume=fuseki-databases.volume:/home/fuseki/databases
+PublishPort=3030:3030
+Network=oep.network
+
+[Service]
+Restart=always
+TimeoutStartSec=300
+
+[Install]
+WantedBy=default.target

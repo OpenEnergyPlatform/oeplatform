@@ -247,6 +247,11 @@ main.main .content .content__container.content__container--profile {
         }
     }
 
+    &__image {
+        width: 200px;
+        margin-left: auto;
+    }
+
     &__btns {
         @extend .d-flex;
         @extend .flex-row;
@@ -334,7 +339,7 @@ main.main .content .content__container.content__container--profile {
     }
 }
 
-.group-management {
+.organization-management {
     @extend .mb-4;
 
     @include cards-layout {
@@ -343,7 +348,7 @@ main.main .content .content__container.content__container--profile {
         }
     }
 
-    .group-card {
+    .organization-card {
         @include card-container {
             &__header-top {
                 @extend .align-items-center;

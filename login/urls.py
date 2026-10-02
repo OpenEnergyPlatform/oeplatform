@@ -18,22 +18,28 @@ from django.contrib.auth.views import (
 )
 from django.urls import path, re_path
 
-from base.views import handler404
 from login.views import (
+    DatasetsView,
     EditUserView,
-    GroupManagementView,
-    GroupsView,
-    PartialGroupEditFormView,
-    PartialGroupInviteView,
-    PartialGroupMemberManagementView,
-    PartialGroupsView,
+    OrganizationListView,
+    OrganizationManagementView,
+    OrganizationMembersView,
+    OrganizationsView,
     ReviewsView,
     SettingsView,
     TablesView,
+    account_delete_view,
+    dataset_assign_view,
+    dataset_card_view,
+    dataset_delete_view,
+    dataset_edit_view,
+    dataset_manage_view,
+    dataset_table_search_view,
+    dataset_unassign_view,
     delete_peer_review_simple_view,
-    group_leave_view,
-    group_member_count_view,
     metadata_review_badge_indicator_icon_file_view,
+    organization_delete_view,
+    organization_leave_view,
     token_reset_view,
     user_redirect_view,
 )
@@ -71,9 +77,50 @@ urlpatterns = [
         name="password_reset_complete",
     ),
     re_path(
+        # dataset-first dashboard: the profile opens on the datasets view
         r"^profile/(?P<user_id>[\d]+)$",
-        TablesView.as_view(),
+        DatasetsView.as_view(),
         name="profile",
+    ),
+    re_path(
+        r"^profile/(?P<user_id>[\d]+)/datasets$",
+        DatasetsView.as_view(),
+        name="datasets",
+    ),
+    re_path(
+        r"^profile/(?P<user_id>[\d]+)/datasets/(?P<dataset_name>[\w-]+)/card$",
+        dataset_card_view,
+        name="dataset-card",
+    ),
+    re_path(
+        r"^profile/(?P<user_id>[\d]+)/datasets/(?P<dataset_name>[\w-]+)/edit$",
+        dataset_edit_view,
+        name="dataset-edit",
+    ),
+    re_path(
+        r"^profile/(?P<user_id>[\d]+)/datasets/(?P<dataset_name>[\w-]+)/delete$",
+        dataset_delete_view,
+        name="dataset-delete",
+    ),
+    re_path(
+        r"^profile/(?P<user_id>[\d]+)/datasets/(?P<dataset_name>[\w-]+)/manage$",
+        dataset_manage_view,
+        name="dataset-manage",
+    ),
+    re_path(
+        r"^profile/(?P<user_id>[\d]+)/datasets/(?P<dataset_name>[\w-]+)/table-search$",  # noqa: E501
+        dataset_table_search_view,
+        name="dataset-table-search",
+    ),
+    re_path(
+        r"^profile/(?P<user_id>[\d]+)/datasets/(?P<dataset_name>[\w-]+)/assign$",
+        dataset_assign_view,
+        name="dataset-assign",
+    ),
+    re_path(
+        r"^profile/(?P<user_id>[\d]+)/datasets/(?P<dataset_name>[\w-]+)/unassign$",
+        dataset_unassign_view,
+        name="dataset-unassign",
     ),
     re_path(
         r"^profile/(?P<user_id>[\d]+)/tables$",
@@ -91,9 +138,9 @@ urlpatterns = [
         name="reviews",
     ),
     re_path(
-        r"^profile/(?P<user_id>[\d]+)/groups$",
-        GroupsView.as_view(),
-        name="groups",
+        r"^profile/(?P<user_id>[\d]+)/organizations$",
+        OrganizationsView.as_view(),
+        name="organizations",
     ),
     re_path(
         r"^profile/(?P<user_id>[\d]+)/settings$",
@@ -103,50 +150,39 @@ urlpatterns = [
     # TODO: implement tests before we allow user deletion
     re_path(
         r"^profile/(?P<user_id>[\d]+)/delete_acc$",
-        # AccountDeleteView.as_view(),
-        handler404,
+        account_delete_view,
         name="account-delete",
     ),
     re_path(
-        r"^profile/(?P<user_id>[\d]+)/partial_groups$",
-        PartialGroupsView.as_view(),
-        name="partial-groups",
+        r"^profile/(?P<user_id>[\d]+)/partial_organizations$",
+        OrganizationListView.as_view(),
+        name="partial-organizations",
     ),
     re_path(
-        r"^groups/new/$",
-        GroupManagementView.as_view(),
-        name="group-create",
+        r"^organizations/new/$",
+        OrganizationManagementView.as_view(),
+        name="organization-create",
     ),
     re_path(r"^profile/(?P<user_id>[\d]+)/edit$", EditUserView.as_view(), name="edit"),
     re_path(
-        r"^profile/groups/(?P<group_id>[\w\d_\s]+)/edit$",
-        GroupManagementView.as_view(),
-        name="group-edit",
+        r"^profile/organizations/(?P<organization_id>[\w\d_\s]+)/edit$",
+        OrganizationManagementView.as_view(),
+        name="organization-edit",
     ),
     re_path(
-        r"^groups/(?P<group_id>[\w\d_\s]+)/members$",
-        PartialGroupMemberManagementView.as_view(),
-        name="partial-group-membership",
+        r"^organizations/(?P<organization_id>[\w\d_\s]+)/members$",
+        OrganizationMembersView.as_view(),
+        name="partial-organization-membership",
     ),
     re_path(
-        r"^groups/(?P<group_id>[\w\d_\s]+)/member/invite$",
-        PartialGroupInviteView.as_view(),
-        name="partial-group-invite",
+        r"^organizations/(?P<organization_id>[\w\d_\s]+)/leave$",
+        organization_leave_view,
+        name="organization-leave",
     ),
     re_path(
-        r"^groups/(?P<group_id>[\w\d_\s]+)/partial/edit_form$",
-        PartialGroupEditFormView.as_view(),
-        name="group-partial-edit-form",
-    ),
-    re_path(
-        r"^groups/(?P<group_id>[\w\d_\s]+)/members/count$",
-        group_member_count_view,
-        name="count-group-memberships",
-    ),
-    re_path(
-        r"^groups/(?P<group_id>[\w\d_\s]+)/leave$",
-        group_leave_view,
-        name="group-leave",
+        r"^organizations/(?P<organization_id>[\w\d_\s]+)/delete$",
+        organization_delete_view,
+        name="organization-delete",
     ),
     re_path(r"^reset/token$", token_reset_view, name="reset-token"),
     path("~redirect/", view=user_redirect_view, name="redirect"),

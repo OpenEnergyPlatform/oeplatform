@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The ontology, mapping and JDBC driver are baked into the image — no host
+# files or bind mounts are required. The database connection is configured
+# through oep.env (ONTOP_DB_URL / ONTOP_DB_USER / ONTOP_DB_PASSWORD).
+
+[Unit]
+Description=OEPlatform Ontop SPARQL endpoint
+After=oep-postgres.service
+
+[Container]
+Image=ghcr.io/openenergyplatform/oeplatform-ontop:latest
+ContainerName=ontop
+# DB connection (ONTOP_DB_URL / ONTOP_DB_USER / ONTOP_DB_PASSWORD) comes from
+# the shared env file, like the web app.
+EnvironmentFile=%h/.config/oeplatform/oep.env
+# Wait for the database to accept connections before starting the endpoint.
+Environment=ONTOP_WAIT_FOR=postgres:5432
+PublishPort=8081:8080
+Network=oep.network
+
+[Service]
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

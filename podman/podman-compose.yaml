@@ -1,0 +1,99 @@
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+# Podman Compose production stack.
+# Run from the repository root:
+#   podman-compose -f podman/podman-compose.yaml up -d
+
+networks:
+  oep:
+    external: true
+
+volumes:
+  pgdata:
+  fuseki_databases:
+  oeplatform_ontologies:
+  oeplatform_media:
+  lookup_index:
+
+services:
+  postgres:
+    image: ghcr.io/openenergyplatform/oeplatform-postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "${OEP_PORT_POSTGRES:-5432}:5432"
+    networks:
+      - oep
+
+  # TODO: load oeo_ext.owl into Fuseki as a named graph so it is queryable via
+  # SPARQL alongside the base OEO. See GitHub issue #<TBD>.
+  fuseki:
+    image: docker.io/stain/jena-fuseki:5.1.0
+    container_name: fuseki
+    environment:
+      ADMIN_PASSWORD: ${FUSEKI_ADMIN_PASSWORD}
+      FUSEKI_DATASET_1: ${FUSEKI_DATASET_1}
+    volumes:
+      - fuseki_databases:/home/fuseki/databases
+    restart: unless-stopped
+    ports:
+      - "${OEP_PORT_FUSEKI:-3030}:3030"
+    networks:
+      - oep
+
+  oeplatform:
+    image: ghcr.io/openenergyplatform/oeplatform-production:latest
+    container_name: oeplatform
+    ports:
+      - "${OEP_PORT_WEB:-8080}:80"
+    environment:
+      OEP_DJANGO_USER: ${OEP_DJANGO_USER}
+      OEP_DB_PW: ${OEP_DB_PW}
+      OEP_DJANGO_HOST: ${OEP_DJANGO_HOST}
+      OEP_DJANGO_NAME: ${OEP_DJANGO_NAME}
+      LOCAL_DB_USER: ${LOCAL_DB_USER}
+      LOCAL_DB_PASSWORD: ${LOCAL_DB_PASSWORD}
+      LOCAL_DB_NAME: ${LOCAL_DB_NAME}
+      LOCAL_DB_HOST: ${LOCAL_DB_HOST}
+    volumes:
+      - oeplatform_ontologies:/app/ontologies
+      - oeplatform_media:/app/media
+    depends_on:
+      - postgres
+    networks:
+      - oep
+
+  ontop:
+    image: ghcr.io/openenergyplatform/oeplatform-ontop:latest
+    container_name: ontop
+    ports:
+      - "${OEP_PORT_ONTOP:-8081}:8080"
+    # Ontology, mapping and JDBC driver are baked into the image; only the DB
+    # connection is configured here (reusing the postgres credentials).
+    environment:
+      ONTOP_DB_URL: ${ONTOP_DB_URL:-jdbc:postgresql://postgres:5432/oedb}
+      ONTOP_DB_USER: ${POSTGRES_USER}
+      ONTOP_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      ONTOP_WAIT_FOR: postgres:5432
+    depends_on:
+      - postgres
+    networks:
+      - oep
+
+  lookup:
+    restart: unless-stopped
+    image: docker.io/dbpedia/lookup:dev
+    container_name: loep_lookup
+    ports:
+      - "${OEP_PORT_LOOKUP:-3004}:8082"
+    volumes:
+      - lookup_index:/index
+      - ./serviceConfigs/lookup/config.yaml:/resources/config.yml
+    networks:
+      - oep

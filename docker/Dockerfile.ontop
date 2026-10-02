@@ -1,8 +1,38 @@
-# Use the official Ontop image as the base
-FROM ontop/ontop:latest
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
-# Copy the PostgreSQL JDBC driver into Ontop's lib directory
-COPY serviceConfigs/ontop/postgresql.jar /opt/ontop/lib/postgresql.jar
+# ── Stage 1: fetch the PostgreSQL JDBC driver ────────────────────────────────
+# Downloaded at build time from Maven Central, so no jar needs to live in the
+# build context (nothing to download or commit manually). Override the version
+# with --build-arg JDBC_VERSION=x.y.z.
+FROM docker.io/curlimages/curl:latest AS jdbc
+ARG JDBC_VERSION=42.7.3
+RUN curl -fsSL \
+      "https://repo1.maven.org/maven2/org/postgresql/postgresql/${JDBC_VERSION}/postgresql-${JDBC_VERSION}.jar" \
+      -o /tmp/postgresql.jar
 
-# Ensure it's world-readable (optional but safe)
-# RUN chmod 644 /opt/ontop/lib/postgresql.jar
+# ── Stage 2: Ontop, fully self-provisioned ───────────────────────────────────
+FROM docker.io/ontop/ontop:latest
+
+# JDBC driver on Ontop's classpath (/opt/ontop/jdbc is searched by /opt/ontop/ontop).
+COPY --from=jdbc /tmp/postgresql.jar /opt/ontop/jdbc/postgresql.jar
+
+# Bake the ontology and an EMPTY default mapping into the image so the service
+# starts with zero host files and works regardless of database state — an empty
+# mapping references no tables, so the endpoint comes up cleanly even before the
+# OEDB data tables exist. Provide the real mapping at runtime by bind-mounting a
+# file over /opt/ontop-config/mapping.obda (see docker/serviceConfigs/ontop/
+# mapping.obda) or by pointing ONTOP_MAPPING_FILE elsewhere.
+COPY serviceConfigs/ontop/ontology.owl /opt/ontop-config/ontology.owl
+COPY serviceConfigs/ontop/mapping.default.obda /opt/ontop-config/mapping.obda
+
+# Non-secret configuration baked as defaults. The DB connection is supplied at
+# runtime via environment variables (ONTOP_DB_URL / ONTOP_DB_USER /
+# ONTOP_DB_PASSWORD) from oep.env / .env — Ontop reads them natively, so no
+# ontop.properties file is needed. ONTOP_LAZY_INIT lets the endpoint start even
+# before the mapped tables exist in the database.
+ENV ONTOP_MAPPING_FILE=/opt/ontop-config/mapping.obda \
+    ONTOP_ONTOLOGY_FILE=/opt/ontop-config/ontology.owl \
+    ONTOP_DB_DRIVER=org.postgresql.Driver \
+    ONTOP_LAZY_INIT=true

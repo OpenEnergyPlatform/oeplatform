@@ -17,15 +17,15 @@
       <h1 class="login__heading">{% trans "Sign Up" %}</h1>
       {% element h2 %}
       {% trans "You are nearly done! Just one last step...." %}
-    {% endelement %}
-    {% element p %}
-    {% blocktrans with provider_name=account.get_provider.name site_name=site.name %}
+{% endelement %}
+{% element p %}
+{% blocktrans with provider_name=account.get_provider.name site_name=site.name %}
           You are about to use your {{ provider_name }} account to login to
           {{ site_name }}.
         {% endblocktrans %}
-  {% endelement %}
-  {% element p %}
-  {% blocktrans with provider_name=account.get_provider.name site_name=site.name %}
+{% endelement %}
+{% element p %}
+{% blocktrans with provider_name=account.get_provider.name site_name=site.name %}
           Please complete the following form, as we did not get this information
           from your provider:
         {% endblocktrans %}

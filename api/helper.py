@@ -33,10 +33,12 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpRequest, JsonResponse, StreamingHttpResponse
 from django.http.response import Http404
 from django.utils import timezone
+from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from sqlalchemy.exc import TimeoutError as PoolTimeout
 
 import login.permissions
 from api import parser, sessions
@@ -44,13 +46,19 @@ from api.actions import (
     assert_permission,
     close_cursor,
     close_raw_connection,
+    commit_raw_connection,
     describe_columns,
     describe_constraints,
     load_cursor_from_context,
-    load_session_from_context,
     open_cursor,
-    open_raw_connection,
+    open_request_connection,
     translate_fetched_cell,
+)
+from api.api_description import (
+    ADVANCED_SESSION_NOTE,
+    AdvancedRequestSerializer,
+    AdvancedResponseSerializer,
+    responses,
 )
 from api.encode import GeneratorJSONEncoder
 from api.error import APIError
@@ -118,7 +126,7 @@ def load_cursor(named=False):
                 if not artificial_connection:
                     context["connection_id"] = args[1].data["connection_id"]
                 else:
-                    context.update(open_raw_connection({}, context))
+                    context.update(open_request_connection(context))
                     args[1].data["connection_id"] = context["connection_id"]
                 if "cursor_id" in args[1].data:
                     context["cursor_id"] = args[1].data["cursor_id"]
@@ -129,8 +137,6 @@ def load_cursor(named=False):
                 result = f(*args, **kwargs)
                 if fetch_all:
                     cursor = load_cursor_from_context(context)
-                    session = load_session_from_context(context)
-                    connection = session.connection
 
                     if not result:
                         result = {}
@@ -143,12 +149,36 @@ def load_cursor(named=False):
 
                     # Set of triggers after all the data was fetched.
                     # The cursor must not be closed earlier!
+                    #
+                    # Two properties of this list are load-bearing, and issue
+                    # #2491 is what happened when neither held:
+                    #
+                    # 1. The commit runs BEFORE the connection goes back to the
+                    #    pool, because afterwards another request may hold it.
+                    # 2. Every trigger resolves the connection through `context`
+                    #    at the moment it fires, never here. A reference taken
+                    #    here outlives the checkout: the session's connection is
+                    #    a SQLAlchemy `_ConnectionFairy` with no `commit` of its
+                    #    own, so `connection.commit` used to capture a bound
+                    #    method of the raw psycopg2 connection, which stays
+                    #    callable after the fairy has given it back.
+                    #
+                    # 2 is the correctness condition and 1 rests on it, so do
+                    # not trade one for the other.
+                    #
+                    # The commit is kept rather than dropped, which was the
+                    # other candidate fix: the pool rolls a returned connection
+                    # back anyway and a `SELECT` has nothing to commit -- but
+                    # this decorator also serves a caller-supplied connection
+                    # (how `oedialect` works), and there it is what commits the
+                    # client's open transaction. All of it is measured in
+                    # api/tests/test_regression/test_issue_2491_commit_after_release.py
                     triggers = [
                         close_cursor,
+                        commit_raw_connection,
                         close_raw_connection,
-                        connection.commit,
                     ]
-                    trigger_args = [({}, context), ({}, context), tuple()]
+                    trigger_args = [({}, context), ({}, context), ({}, context)]
                     first = None
                     if not named or cursor.statusmessage:
                         try:
@@ -185,7 +215,10 @@ def load_cursor(named=False):
                             result["rowcount"] = cursor.rowcount
                             triggered_close = True
                     if not triggered_close and artificial_connection:
-                        connection.commit()
+                        # Same rule off the streaming path: resolve the
+                        # connection through the context, never hold a
+                        # reference to it across the close below.
+                        commit_raw_connection({}, context)
             finally:
                 if not triggered_close:
                     if fetch_all and not artificial_connection:
@@ -214,6 +247,27 @@ def cors(allow):
     return doublewrapper
 
 
+def _request_path(args) -> str:
+    """The path of whichever argument is the request, for the log line.
+
+    The decorator sits on bound view methods and on plain functions, and
+    `create_ajax_handler` calls one of them as `(request, request)`, so the
+    request is not reliably at a fixed position. Never raises: this runs while
+    something has already gone wrong.
+    """
+    for arg in args:
+        path = getattr(arg, "path", None)
+        if isinstance(path, str):
+            return path
+    return "<unknown path>"
+
+
+#: Seconds a client is asked to wait after a pool timeout. An estimate, not a
+#: promise: the pool frees a connection whenever any request ends, so a short
+#: wait is usually enough and the client's own retry policy decides the rest.
+POOL_TIMEOUT_RETRY_AFTER = 5
+
+
 def api_exception(
     f: Callable[..., JsonLikeResponse],
 ) -> Callable[..., JsonLikeResponse]:
@@ -231,10 +285,33 @@ def api_exception(
             return JsonResponse({"reason": e.message}, status=e.status)
         except (Table.DoesNotExist, Http404):
             return JsonResponse({"reason": "table does not exist"}, status=404)
+        except PoolTimeout:
+            # The pool had no connection to give within its timeout. That says
+            # nothing about the request, which a retry may well serve -- so it
+            # is not the generic 400 below, which tells a client not to retry
+            # (issue #2492).
+            logger.warning(
+                "pool timeout on %s: no database connection became free",
+                _request_path(args),
+            )
+            response = JsonResponse(
+                {
+                    "reason": "The server is busy: no database connection became "
+                    "free in time. Please try again shortly."
+                },
+                status=503,
+            )
+            response["Retry-After"] = str(POOL_TIMEOUT_RETRY_AFTER)
+            return response
         except Exception as exc:
             # All other Errors: dont accidently return sensitive data from error
             # but return generic error message
-            logger.error(str(exc))
+            logger.exception(
+                "unhandled %s on %s: %s",
+                type(exc).__name__,
+                _request_path(args),
+                exc,
+            )
             return JsonResponse({"reason": "Invalid request"}, status=400)
 
     return wrapper
@@ -290,21 +367,49 @@ def date_handler(obj):
         return str(obj)
 
 
-def create_ajax_handler(func, allow_cors=False, requires_cursor=False):
+def create_ajax_handler(func, allow_cors=False, requires_cursor=False, refusals=None):
     """
     Implements a mapper from api pages to the corresponding functions in
     api/actions.py
     :param func: The name of the callable function
+    :param refusals: The refusals beyond 400/403 this action can give, for the
+      description -- `USES_POOL` or `OPENS_SESSION` from `api.api_description`,
+      or none for an action that touches neither the pool nor a session
     :return: A JSON-Response that contains a dictionary with
       the corresponding response stored in *content*
     """
 
     class AJAX_View(APIView):
+        @extend_schema(exclude=True)
         @cors(allow_cors)
         @api_exception
         def options(self, request: HttpRequest, *args, **kwargs) -> JsonLikeResponse:
             return JsonResponse({})
 
+        # Annotated here rather than at each of the thirty-odd routes this
+        # factory serves: the envelope is the factory's, and writing it per
+        # endpoint would be writing it thirty times. What differs per endpoint
+        # is the shape of `query`, which only the action knows -- so the
+        # description names the action and the rest is shared.
+        @extend_schema(
+            request=AdvancedRequestSerializer,
+            responses=responses(
+                {
+                    200: OpenApiResponse(
+                        response=AdvancedResponseSerializer,
+                        description=(
+                            f"The result of `{func.__name__}`, under `content`."
+                        ),
+                    )
+                },
+                400,
+                403,
+                also=refusals,
+            ),
+            description=(
+                f"Runs `{func.__name__}` against the OEDB.\n\n" + ADVANCED_SESSION_NOTE
+            ),
+        )
         @cors(allow_cors)
         @api_exception
         def post(self, request: HttpRequest) -> JsonLikeResponse:

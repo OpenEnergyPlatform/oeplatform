@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+
 # Install and setup the OpenEnergyPlatform Application
 
 Below we describe the manual installation of the oeplatform code and
@@ -231,6 +237,10 @@ system like GitHub.
 - copy the file `securitysettings.py.default` and rename it to
   `securitysettings.py`
 
+!!! danger
+
+    You must remove or fill placeholder in SOCIALACCOUNT_PROVIDERS in order to avoid an error due to empty provider ID when trying to login.
+
 ??? note "How to configure securitysettings.py"
 
     The security settings provide information to django to connect to your databases, relevant for step 5, below. You can provide the access credentials directly in the script or import them using environment variables. For detailed instructions see section [3. of the manual database setup guide](./manual-db-setup.md#3-connect-database-to-the-django-project).
@@ -240,6 +250,22 @@ then run:
 
     python manage.py collectstatic
     python manage.py compress
+
+Then fetch the two artifacts the OEKG API validates scenario bundles against:
+
+    python manage.py fetch_oekg_shapes
+
+This downloads the canonical SHACL shape from a **pinned** revision of the
+[oekg repository](https://github.com/OpenEnergyPlatform/oekg) and generates the
+small `rdfs:label` subset the validator needs out of the OEO release you
+unpacked in step 3 — the ontology itself is not downloaded again. Both files
+land in a `shapes/` directory alongside `ontologies/`. The command is safe to
+re-run and tells you whether either file changed.
+
+The revision is pinned in `oeplatform/settings.py`
+(`OEKG_SHAPES_PINNED_COMMIT`); a branch or a moving name such as `latest` is
+refused on purpose, because an unpinned fetch would change the validator without
+a deploy.
 
 ## 5 Databases setup
 

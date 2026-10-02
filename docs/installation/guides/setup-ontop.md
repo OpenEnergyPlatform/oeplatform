@@ -1,21 +1,27 @@
+<!--
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+
+SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+
 # Setup ontop service
 
-The ontop service is mainly use as enabling technology for the quantitative
-scenario comparison as it enables SPARQL queries on SQL databases using semantic
-mappings ontop on the "normal" sql like table definition.
+!!! info "This page has moved"
 
-## Installation
+    The Ontop service is now documented canonically on the
+    **[Ontop page of the Production deployment (Podman) guide](../production-podman/ontop.md)**.
+    That page covers the whole lifecycle in one place.
 
-We offer the pre-configured ontop service as part of the OEP-docker setup for
-development. It comes with a empty semantic mapping template which can be
-extended based on the user needs. You still need to download the JDBC database
-driver to enable connection to the postgresql database OEDB.
+The ontop service enables **SPARQL queries over the SQL database** using a
+semantic mapping — the enabling technology for quantitative scenario comparison.
 
-Once you downloaded the driver make sure it is available in the ontop config
-directory and only then build the ontop service using docker.
+The image is **self-provisioning**: the PostgreSQL JDBC driver, the ontology and
+an empty default mapping are all baked in at build time, and the database
+connection comes from environment variables (`ONTOP_DB_URL` / `ONTOP_DB_USER` /
+`ONTOP_DB_PASSWORD`). **Nothing needs to be downloaded or placed manually.** Pin
+a different JDBC version at build time with `--build-arg JDBC_VERSION=x.y.z`
+(default `42.7.3`).
 
-Download the database JDBC driver for ontop:
-
-- <https://jdbc.postgresql.org/>
-
-Add the file postgresql.jar to this directory.
+➡️ **Full documentation — self-provisioning, the `JDBC_VERSION` build-arg, and
+the repeatable procedure for applying a real mapping — is on the
+[canonical Ontop page](../production-podman/ontop.md).**

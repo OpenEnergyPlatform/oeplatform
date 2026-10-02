@@ -29,13 +29,15 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.core.paginator import Paginator
-from django.db.models import Count, F
+from django.db import transaction
+from django.db.models import Count, F, Q
 from django.db.utils import IntegrityError
 from django.http import (
     Http404,
     HttpRequest,
     HttpResponse,
     HttpResponseBadRequest,
+    HttpResponseForbidden,
     JsonResponse,
 )
 from django.shortcuts import get_object_or_404, redirect, render
@@ -54,6 +56,7 @@ from api.actions import (
     assert_add_tag_permission,
     data_insert,
     describe_columns,
+    list_table_sizes,
     remove_queued_column,
     remove_queued_constraint,
     table_get_row_count,
@@ -69,6 +72,7 @@ from dataedit.helper import (
     delete_tag,
     edit_tag,
     find_tables,
+    get_all_tags_with_usage,
     get_cancle_state,
     get_page,
     process_review_data,
@@ -76,7 +80,7 @@ from dataedit.helper import (
 )
 from dataedit.metadata import has_valid_filled_metadata, load_metadata_from_db
 from dataedit.metadata.widget import MetaDataWidget
-from dataedit.models import Embargo
+from dataedit.models import Dataset, Embargo
 from dataedit.models import Filter as DBFilter
 from dataedit.models import PeerReview, PeerReviewManager, Table, Tag, Topic
 from dataedit.models import View as DBView
@@ -125,48 +129,54 @@ class StandaloneMetaEditView(View):
         )
 
 
+def _review_queued_change(request: HttpRequest, deny, apply) -> HttpResponse:
+    """Apply or deny one change from the table change queue.
+
+    Admin-only, and the id must be a number (#2490). These views carried
+    nothing but `@require_POST`, so an anonymous POST reached the statements
+    that alter a table and mark a change reviewed, and the posted `id` was
+    interpolated into them. CSRF does not stop a scripted request: any page
+    hands an anonymous visitor a token. Admin-only is the interim rule while
+    #2490 decides whether the queue is deleted or repaired; the table owner,
+    whose review the queue was meant to be, is refused too until then.
+    """
+    if not getattr(request.user, "is_admin", False):
+        return HttpResponseForbidden("Only admins may review queued changes.")
+
+    action = request.POST.get("action")
+    try:
+        change_id = int(request.POST.get("id", ""))
+    except ValueError:
+        return HttpResponseBadRequest("The change id must be a number.")
+
+    table_obj = table_or_404_from_dict(request.POST)
+
+    if action == "deny":
+        deny(change_id)
+    elif action == "apply":
+        apply(change_id)
+    else:
+        return HttpResponseBadRequest("The action must be 'apply' or 'deny'.")
+
+    return redirect("dataedit:view", table=table_obj.name)
+
+
 @require_POST
+@login_required
 def admin_constraints_view(request: HttpRequest) -> HttpResponse:
-    """
-    Way to apply changes
-    :param request:
-    :return:
-    """
-    action = request.POST.get("action")
-    id = request.POST.get("id")
-
-    table_obj = table_or_404_from_dict(request.POST)
-
-    if action == "deny":
-        remove_queued_constraint(id)
-    elif action == "apply":
-        apply_queued_constraint(id)
-    else:
-        raise NotImplementedError(action)
-
-    return redirect("dataedit:view", table=table_obj.name)
+    """Apply or deny a queued constraint change."""
+    return _review_queued_change(
+        request, deny=remove_queued_constraint, apply=apply_queued_constraint
+    )
 
 
 @require_POST
+@login_required
 def admin_column_view(request: HttpRequest) -> HttpResponse:
-    """
-    Way to apply changes
-    :param request:
-    :return:
-    """
-
-    action = request.POST.get("action")
-    id = request.POST.get("id")
-    table_obj = table_or_404_from_dict(request.POST)
-
-    if action == "deny":
-        remove_queued_column(id)
-    elif action == "apply":
-        apply_queued_column(id)
-    else:
-        raise NotImplementedError(action)
-
-    return redirect("dataedit:view", table=table_obj.name)
+    """Apply or deny a queued column change."""
+    return _review_queued_change(
+        request, deny=remove_queued_column, apply=apply_queued_column
+    )
 
 
 @never_cache
@@ -246,70 +256,169 @@ def topic_view(request: HttpRequest) -> HttpResponse:
     )
 
 
+def _is_htmx(request: HttpRequest) -> bool:
+    return "HX-Request" in request.headers
+
+
+def tag_usage(tag: Tag) -> dict:
+    """How many objects would lose this tag if it were deleted.
+
+    Both sides, because `Tag` is ONE vocabulary with two consumers. This page
+    used to ask `tag.tables` alone, so a tag carrying 200 factsheets and no
+    table reported itself unused and offered a Delete button underneath.
+    """
+    tables = tag.tables.count()
+    factsheets = tag.factsheets.count()
+    return {
+        "tables": tables,
+        "factsheets": factsheets,
+        "total": tables + factsheets,
+    }
+
+
+def tag_editor_context(
+    tag: Tag | None = None, name: str = "", color_hex: str = "#000000", error: str = ""
+) -> dict:
+    """What the editor form needs, as one `editing` object.
+
+    One function because the three render paths used to disagree: the
+    standalone page offered a Delete button gated on an `is_admin` variable no
+    view ever passed, and the failed-save path rendered nothing at all -- it
+    redirected to the overview and dropped what the user had typed.
+    """
+    if tag is not None:
+        return {
+            "pk": tag.pk,
+            "name": name or tag.name,
+            "color_hex": color_hex if error else tag.color_hex,
+            "usage": tag_usage(tag),
+            "error": error,
+        }
+    return {
+        "pk": None,
+        "name": name,
+        "color_hex": color_hex,
+        "usage": None,
+        "error": error,
+    }
+
+
+def render_tag_manager(request, editing=None, saved: str = "") -> HttpResponse:
+    """The list and the editor panel, as one fragment.
+
+    Every htmx path answers with exactly this -- the piece it replaces, never
+    a redirect and never a whole page. A redirect is followed transparently by
+    htmx, so answering a save with one put an entire rendered site inside the
+    editor panel. Same shape as `dataset_edit_view` in the login app.
+    """
+    return render(
+        request,
+        "dataedit/partials/tag_manager.html",
+        {
+            "tags": get_all_tags_with_usage(),
+            "editing": editing,
+            "saved": saved,
+        },
+    )
+
+
 @login_required
 @never_cache
 def tag_overview_view(request: HttpRequest) -> HttpResponse:
-    # if rename or adding of tag fails: display error message
-    context = {
-        "errorMsg": (
-            "Tag name is not valid" if request.GET.get("status") == "invalid" else ""
-        )
-    }
-
+    # Cancel comes back here through htmx to close the panel, so the bare
+    # overview has to be answerable as a fragment too.
+    if _is_htmx(request):
+        return render_tag_manager(request)
     return render(
-        request=request, template_name="dataedit/tag_overview.html", context=context
+        request=request,
+        template_name="dataedit/tag_overview.html",
+        context={"tags": get_all_tags_with_usage()},
     )
 
 
 @login_required
 @never_cache
 def tag_editor_view(request: HttpRequest, tag_pk: str | None = None) -> HttpResponse:
-    tag = Tag.get_or_none(tag_pk or "")
-    if tag:
-        assigned = tag.tables.count() > 0
-        return render(
-            request=request,
-            template_name="dataedit/tag_editor.html",
-            context={
-                "name": tag.name,
-                "pk": tag.pk,
-                "color_hex": tag.color_hex,
-                "assigned": assigned,
-            },
-        )
-    else:
-        return render(
-            request=request,
-            template_name="dataedit/tag_editor.html",
-            context={"name": "", "color_hex": "#000000", "assigned": False},
-        )
+    """The create/edit form: the overview's panel, or a page of its own.
+
+    The panel is the common path and the page is the fallback for a bookmark
+    or a browser without javascript. Both render the same form partial, so
+    neither can drift from the other.
+    """
+    editing = tag_editor_context(Tag.get_or_none(tag_pk or ""))
+    if _is_htmx(request):
+        return render_tag_manager(request, editing=editing)
+    return render(
+        request=request,
+        template_name="dataedit/tag_editor.html",
+        context={"editing": editing},
+    )
 
 
 @require_POST
 @login_required
 def tag_update_view(request: HttpRequest) -> HttpResponse:
-    status = ""  # error status if operation fails
+    htmx = _is_htmx(request)
+    tag_id = request.POST.get("tag_id") or None
 
-    if "submit_save" in request.POST:
-        try:
-            if "tag_id" in request.POST:
-                id = request.POST["tag_id"]
-                name = request.POST["tag_text"]
-                color = request.POST["tag_color"]
-                edit_tag(id, name, color)
+    if "submit_delete" in request.POST:
+        # Admin-only, checked HERE and not only on the button. The button was
+        # gated on a context variable no view passed, so it rendered for
+        # nobody; the view behind it was gated on nothing but a login, so any
+        # account could delete any tag with a crafted POST -- and a tag is
+        # shared platform-wide, so that strips it from every table and
+        # factsheet carrying it, with no record anywhere.
+        if not getattr(request.user, "is_admin", False):
+            return HttpResponseForbidden("Only admins may delete tags.")
+        tag = Tag.get_or_none(tag_id or "")
+        done = ""
+        if tag:
+            removed = tag_usage(tag)
+            delete_tag(tag.pk)
+            done = "Deleted the tag and removed it from %d object(s)." % (
+                removed["total"],
+            )
+        if htmx:
+            return render_tag_manager(request, saved=done)
+        if done:
+            messages.success(request, done)
+        return redirect(reverse("dataedit:tags"))
+
+    name = request.POST.get("tag_text", "")
+    color = request.POST.get("tag_color", "#000000")
+    try:
+        # The savepoint keeps a rejected insert from poisoning the surrounding
+        # transaction, so the error path below can still read the database.
+        with transaction.atomic():
+            if tag_id:
+                edit_tag(tag_id, name, color)
             else:
-                name = request.POST["tag_text"]
-                color = request.POST["tag_color"]
                 add_tag(name, color)
-        except IntegrityError:
-            # requested changes are not valid because of name conflicts
-            status = "invalid"
+    except IntegrityError:
+        # A name conflict, or a name that normalises to nothing. Come back
+        # with what was typed: the redirect this used to do sent the user to
+        # the overview and discarded it.
+        editing = tag_editor_context(
+            Tag.get_or_none(tag_id or ""),
+            name=name,
+            color_hex=color,
+            error="That tag name is not valid, or a tag by that name exists.",
+        )
+        if htmx:
+            return render_tag_manager(request, editing=editing)
+        return render(
+            request=request,
+            template_name="dataedit/tag_editor.html",
+            context={"editing": editing},
+        )
 
-    elif "submit_delete" in request.POST:
-        id = request.POST["tag_id"]
-        delete_tag(id)
-
-    return redirect(reverse("dataedit:tags") + f"?status={status}")
+    if htmx:
+        # The panel closes and the list re-renders with the result in it,
+        # which is the confirmation. A Django message would be queued into the
+        # session and surface on some later full page load instead.
+        return render_tag_manager(request, saved="Saved the tag.")
+    messages.success(request, "Saved the tag.")
+    return redirect(reverse("dataedit:tags"))
 
 
 @require_POST
@@ -434,6 +543,111 @@ def tables_view(request: HttpRequest, topic: str) -> HttpResponse:
             "doc_oem_builder_link": DOCUMENTATION_LINKS["oemetabuilder"],
         },
     )
+
+
+@never_cache
+def datasets_view(request: HttpRequest, topic: str) -> HttpResponse:
+    """Public, paginated card list of the datasets in one topic: name,
+    description, resource count and combined size of the member tables.
+    Datasets never list under the draft pseudo-topic — it stays
+    tables-only (dataset drafts become private with the publish PR)."""
+    is_draft_topic = topic == PSEUDO_TOPIC_DRAFT
+    if not is_draft_topic:
+        get_object_or_404(Topic, name=topic)
+
+    searched_query_string = request.GET.get("query")
+    searched_tag_ids = request.GET.getlist("tags")
+
+    # all query params without "page", so pagination keeps the filter state
+    params_wo_page = request.GET.copy()
+    params_wo_page.pop("page", None)
+    params_wo_page = params_wo_page.urlencode()
+
+    Tag.increment_usage_count_many(searched_tag_ids)
+
+    datasets = Dataset.objects.filter(topics__name=topic)
+    if searched_query_string:
+        datasets = datasets.filter(
+            Q(name__icontains=searched_query_string)
+            | Q(metadata__title__icontains=searched_query_string)
+            | Q(metadata__description__icontains=searched_query_string)
+        )
+    # a dataset carries a tag when any member table does; several selected
+    # tags AND together, mirroring the table filter's semantics
+    for tag_id in searched_tag_ids:
+        datasets = datasets.filter(tables__tags__pk=tag_id)
+
+    datasets = (
+        datasets.distinct().order_by("-created_at").prefetch_related("tables", "topics")
+    )
+
+    paginator = Paginator(datasets, ITEMS_PER_PAGE)
+    datasets_paginated = paginator.get_page(get_page(request))
+
+    # one query for all table sizes; tables missing from the data schema
+    # (e.g. drafts) count as zero
+    sizes = {row["table_name"]: row["total_bytes"] for row in list_table_sizes()}
+    for dataset in datasets_paginated:
+        dataset.total_size_bytes = sum(
+            sizes.get(table.name, 0) for table in dataset.tables.all()
+        )
+
+    return render(
+        request,
+        "dataedit/dataedit_datasetlist.html",
+        {
+            "datasets_paginated": datasets_paginated,
+            "topic": topic,
+            "is_draft_topic": is_draft_topic,
+            "query": searched_query_string,
+            "tags": searched_tag_ids,
+            "params_wo_page": params_wo_page,
+        },
+    )
+
+
+def dataset_detail_view(request: HttpRequest, dataset_name: str) -> HttpResponse:
+    """Public read view for one dataset. Deliberately not topic-bound
+    (datasets carry several topics); linked from the cards and the
+    dashboard, opening in a new tab."""
+    dataset = get_object_or_404(
+        Dataset.objects.prefetch_related("tables__topics", "topics"),
+        name=dataset_name,
+    )
+    resources = dataset.tables.all().order_by("name")
+
+    sizes = {row["table_name"]: row["total_bytes"] for row in list_table_sizes()}
+    total_size_bytes = sum(sizes.get(table.name, 0) for table in resources)
+
+    is_creator = (
+        request.user.is_authenticated
+        and dataset.creator is not None
+        and dataset.creator == request.user
+    )
+
+    return render(
+        request,
+        "dataedit/dataedit_dataset_detail.html",
+        {
+            "dataset": dataset,
+            "resources": resources,
+            "total_size_bytes": total_size_bytes,
+            "is_creator": is_creator,
+            "metadata_url": reverse(
+                "dataedit:dataset-metadata", kwargs={"dataset_name": dataset.name}
+            ),
+        },
+    )
+
+
+def dataset_metadata_json_view(request: HttpRequest, dataset_name: str) -> JsonResponse:
+    """The dataset's oemetadata document with live resources, as plain
+    JSON: feeds the metadata viewer on the detail page and doubles as
+    the raw-JSON download."""
+    dataset = get_object_or_404(Dataset, name=dataset_name)
+    metadata = dict(dataset.metadata)
+    metadata["resources"] = dataset.resource_entries()
+    return JsonResponse(metadata)
 
 
 @require_POST
@@ -929,7 +1143,7 @@ class TablePermissionView(View):
             # Return an HTTP 400 Bad Request response
             return HttpResponseBadRequest("Group name is required.")
 
-        group = get_object_or_404(login_models.UserGroup, name=group_name)
+        group = get_object_or_404(login_models.Group, name=group_name)
 
         p, _ = login_models.GroupPermission.objects.get_or_create(
             holder=group, table=table_obj
@@ -943,7 +1157,7 @@ class TablePermissionView(View):
             # Return an HTTP 400 Bad Request response
             return HttpResponseBadRequest("Group id is required.")
 
-        group = get_object_or_404(login_models.UserGroup, id=group_id)
+        group = get_object_or_404(login_models.Group, id=group_id)
 
         p = get_object_or_404(
             login_models.GroupPermission, holder=group, table=table_obj
@@ -958,7 +1172,7 @@ class TablePermissionView(View):
             # Return an HTTP 400 Bad Request response
             return HttpResponseBadRequest("Group id is required.")
 
-        group = get_object_or_404(login_models.UserGroup, id=group_id)
+        group = get_object_or_404(login_models.Group, id=group_id)
 
         p = get_object_or_404(
             login_models.GroupPermission, holder=group, table=table_obj
@@ -1246,7 +1460,7 @@ class TablePeerReviewView(LoginRequiredMixin, View):
         # The delete path is handled directly (unified into ReviewService in a
         # later step); everything else is orchestrated by the service.
         if review_data.get("reviewType") == "delete":
-            return delete_peer_review(review_id)
+            return delete_peer_review(review_id, request.user)
 
         service = ReviewService(table_name=table_obj.name, actor=request.user)
         try:

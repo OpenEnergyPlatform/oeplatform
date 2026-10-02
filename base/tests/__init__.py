@@ -13,7 +13,7 @@ from django.test import TestCase
 from django.urls import URLPattern, URLResolver, get_resolver, reverse
 from django.urls.resolvers import RegexPattern, RoutePattern
 
-from login.models import GroupMembership, UserGroup
+from login.models import Membership, Organization
 from login.models import myuser as User
 from oeplatform.settings import IS_TEST
 
@@ -78,14 +78,63 @@ class TestViewsTestCase(TestCase):
         cls.user = User.objects.create_user(  # type: ignore
             name="test", email="test@test.test", affiliation="test"
         )
-        cls.group = UserGroup.objects.create()
-        GroupMembership.objects.create(user=cls.user, group=cls.group)
+        cls.organization = Organization.objects.create()
+        Membership.objects.create(user=cls.user, group=cls.organization)
 
     @classmethod
     def tearDownClass(cls):
         cls.user.delete()
-        cls.group.delete()
+        cls.organization.delete()
         super(TestViewsTestCase, cls).tearDownClass()
+
+    def _url(
+        self,
+        view_name: str,
+        args: list | None = None,
+        kwargs: dict | None = None,
+        query: dict | None = None,
+    ) -> str:
+        """Reverse `view_name` and append `query`."""
+        url = reverse(view_name, args=args, kwargs=kwargs)
+        if query:
+            url += f"?{urlencode(query)}"
+        return url
+
+    def _authenticate(self, logged_in: bool) -> None:
+        """Log the test client in as `self.user`, or out."""
+        if logged_in:
+            self.client.force_login(self.user)
+        else:
+            self.client.logout()
+
+    def _request(
+        self,
+        method: str,
+        view_name: str,
+        args: list | None = None,
+        kwargs: dict | None = None,
+        query: dict | None = None,
+        logged_in: bool = False,
+        expect_status: int | None = None,
+        **client_kwargs,
+    ) -> HttpResponse:
+        """Send one request through the test client and assert its status.
+
+        `expect_status=None` means "any success", which is what `get()` has
+        always asserted. Pass an explicit status to assert a refusal -- a 403
+        from a permission check, or a redirect to login.
+        """
+        self._authenticate(logged_in)
+        resp = getattr(self.client, method)(
+            self._url(view_name, args, kwargs, query), **client_kwargs
+        )
+        if expect_status is None:
+            self.assertTrue(resp.status_code < 400, msg=f"{view_name}: {resp}")
+        else:
+            self.assertEqual(
+                resp.status_code, expect_status, msg=f"{view_name}: {resp}"
+            )
+        return resp
 
     def get(
         self,
@@ -94,18 +143,55 @@ class TestViewsTestCase(TestCase):
         kwargs: dict | None = None,
         query: dict | None = None,
         logged_in: bool = False,
+        expect_status: int | None = None,
     ) -> HttpResponse:
+        return self._request(
+            "get", view_name, args, kwargs, query, logged_in, expect_status
+        )
 
-        # construct url
-        url = reverse(view_name, args=args, kwargs=kwargs)
-        if query:
-            url += f"?{urlencode(query)}"
+    def post(
+        self,
+        view_name: str,
+        data: dict | None = None,
+        args: list | None = None,
+        kwargs: dict | None = None,
+        query: dict | None = None,
+        logged_in: bool = False,
+        expect_status: int | None = None,
+    ) -> HttpResponse:
+        """POST `data` to `view_name`.
 
-        if logged_in:
-            self.client.force_login(self.user)
-        else:
-            self.client.logout()
+        `data` goes to Django's test client unchanged, so a list value is sent
+        as a repeated field -- which is what a multi-value form field such as
+        a factsheet's `tags` needs. Whether the view then *receives* those
+        values is a property of the view, not of this helper.
+        """
+        return self._request(
+            "post",
+            view_name,
+            args,
+            kwargs,
+            query,
+            logged_in,
+            expect_status,
+            data=data or {},
+        )
 
-        resp = self.client.get(url)
-        self.assertTrue(resp.status_code < 400, msg=f"{view_name}: {resp}")
-        return resp
+    def delete(
+        self,
+        view_name: str,
+        args: list | None = None,
+        kwargs: dict | None = None,
+        query: dict | None = None,
+        logged_in: bool = False,
+        expect_status: int | None = None,
+    ) -> HttpResponse:
+        """Send a real DELETE to `view_name`.
+
+        Real, because that is what an `hx-delete` button sends -- and what
+        `curl -X DELETE` sends -- so hiding a button in a template is never
+        evidence that the operation is refused.
+        """
+        return self._request(
+            "delete", view_name, args, kwargs, query, logged_in, expect_status
+        )
