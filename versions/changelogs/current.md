@@ -156,6 +156,18 @@ SPDX-License-Identifier: CC0-1.0
   hold a draft. At most 1,000 tables are published or unpublished at once, and a
   batch is done whole or not at all
   [(#2564)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2564)
+- The selection bar of the tables tab can also delete the selected tables and
+  add them to, or remove them from, one of your own datasets. Bulk delete lists
+  every table, marks the published ones and counts what deleting breaks: how
+  many are published, reviewed or under embargo, which datasets lose how many of
+  them (other people's with their owner), and the links from scenario bundles
+  that stop resolving. A batch holding a published table or more than ten is
+  confirmed by typing the number of tables, at most 50 at once, and every table
+  whose database table could not be removed is named in a warning that stays on
+  screen. Choosing the dataset re-checks the selection on the spot and names the
+  tables already in it (add) or not in it (remove); at most 2,500 tables are
+  added or removed at once, all or none
+  [(#2565)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2565)
 
 ## Bugs
 

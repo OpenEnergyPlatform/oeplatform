@@ -17,6 +17,9 @@ take:
   delete ceiling `CEILINGS["delete"]` in `api/services/table_actions.py`.
 - **`publish_cost.py`**: what publishing and unpublishing one Table cost
   (#2564), which sets `CEILINGS["publish"]` and `CEILINGS["unpublish"]`.
+- **`dataset_cost.py`**: what adding a Table to a Dataset and removing it cost
+  (#2565), which sets `CEILINGS["dataset_add"]` and
+  `CEILINGS["dataset_remove"]`.
 
 Both use accounts shaped like production (`seed.py`, a port of the WF-06
 prototype's generator, sized from WF-01's census): `p90` (130 Tables), `max`
@@ -137,3 +140,35 @@ decoding the metadata is what it pays for. Both writes save the whole row, which
 is why they grow with the metadata. At the worst 34 ms, 1,000 Tables take 34 s
 against production's 300 s timeout: the ceiling is 1,000 for both, a safety
 factor of about 9. The reasoning is beside the constant.
+
+## Dataset add and remove cost
+
+Same throwaway database; Dataset membership lives in Django only, so no OEDB
+table is created.
+
+```bash
+python -m benchmarks.tables_tab.dataset_cost
+python -m benchmarks.tables_tab.dataset_cost --tables 100,400,1000 --metadata-kb 6,60,500
+```
+
+For each metadata size and batch size it creates Tables (half drafts, half
+published) with a Data editor grant and two Topics each, and one Dataset of the
+user's own, then times the preflight with that Dataset chosen, adding every
+Table and removing them again, through `table_actions`. Results append to
+`benchmarks/results/tables_tab_dataset.csv`.
+
+Measured 2026-10-03, local Postgres 14, batches of 100, 400 and 1,000, three
+rounds, per Table:
+
+| metadata per Table | preflight  | add        | remove     |
+| ------------------ | ---------- | ---------- | ---------- |
+| 6 KB               | 0.1-0.3 ms | 2.5-3.0 ms | 0.8-1.2 ms |
+| 60 KB              | 0.4-0.7 ms | 2.7-3.3 ms | 1.1-1.4 ms |
+| 500 KB             | 3.0-3.5 ms | 5.0-6.8 ms | 3.3-3.9 ms |
+
+Adding writes the membership and seeds the Table's Topics into the Dataset;
+neither write saves the Table, so the metadata costs only its decoding in the
+preflight. At the worst 6.8 ms, 2,500 Tables take about 17 s against
+production's 300 s timeout: the ceiling is 2,500 for both, a safety factor of
+about 17, set so that "select all" on the largest account (2,068 Tables) is one
+request. The reasoning is beside the constant.
