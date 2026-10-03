@@ -2,11 +2,23 @@
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
 
-The Dataset branch of the action dialog (table_action_dialog.html): which of
-the user's own Datasets to add the eligible Tables to, or remove them from.
-``check.datasets`` holds only Datasets the action can change, so a row's
-choice is never wrong; the only one is chosen already. Without any, the
-dialog says why and offers no confirmation.
+The Dataset choice of the action dialog (table_action_dialog.html), above
+its preview: which of the user's own Datasets to add the eligible Tables to,
+or remove them from. ``check.datasets`` holds only Datasets the action can
+change, so a row's choice is never wrong; the only one is chosen already.
+Without any, the dialog says why and offers no confirmation.
+
+In a batch, which Tables are already in the chosen Dataset (add) or not in
+it (remove) depends on the choice, so choosing asks the bulk preflight
+again (#table-action-chooser, which the select's ``change`` bubbles up to),
+with the whole selection (``selection``), and swaps only the preview and the
+footer, plus the status line below the select: never the select itself,
+which keeps focus. ``change`` fires on every arrow key in a closed select,
+so the request waits until the choice has rested (``delay``) and a newer one
+replaces an older one in flight (``hx-sync``). A row's choice needs no
+re-check: its Datasets are those the action can change for that one Table. Confirm is disabled
+while a re-check is on its way (the form's ``hx-disabled-elt``); one sent
+before it would be refused whole by the server and the dialog re-run.
 {% endcomment %}
 {% if check.datasets %}
   <p>
@@ -28,24 +40,39 @@ dialog says why and offers no confirmation.
       The table itself stays as it is.
     {% endif %}
   </p>
-  <div class="mb-2">
-    <label class="form-label" for="action-dataset">Dataset</label>
-    <select id="action-dataset"
-            name="dataset"
-            class="form-select{% if errors.dataset %} is-invalid{% endif %}"
-            required
-            {% if errors.dataset %}aria-describedby="action-dataset-error" aria-invalid="true"{% endif %}>
-      {% if check.datasets|length > 1 %}<option value="">Choose a dataset</option>{% endif %}
-      {% for dataset in check.datasets %}
-        <option value="{{ dataset.name }}"
-                {% if check.dataset.name == dataset.name or values.dataset == dataset.name %}selected{% endif %}>
-          {{ dataset.metadata.title|default:dataset.name }}
-        </option>
-      {% endfor %}
-    </select>
-    {% if errors.dataset %}<div id="action-dataset-error"
-     class="invalid-feedback">{{ errors.dataset }}</div>{% endif %}
-  </div>
+  {% if check.total > 1 %}
+    {% comment %}A change of the select bubbles up to here.{% endcomment %}
+    <div id="table-action-chooser"
+         class="mb-2"
+         hx-post="{% url 'login:table-action-check' user_id=profile_user.pk action=check.action %}"
+         hx-trigger="change delay:400ms"
+         hx-sync="this:replace"
+         hx-target="#table-action-preview"
+         hx-select="#table-action-preview"
+         hx-swap="outerHTML"
+         hx-select-oob="#table-action-footer,#table-action-recheck:innerHTML">
+      <input type="hidden"
+             id="table-action-selection"
+             name="selection"
+             value="{{ check.requested|join:',' }}" />
+      {% include "login/partials/table_action_dataset_select.html" %}
+      <p id="table-action-recheck" class="form-text mb-0" role="status">
+        {% if check.dataset %}
+          {{ check.eligible|length }} of {{ check.total }} tables will be
+          {% if check.action == "dataset_add" %}
+            added to
+          {% else %}
+            removed from
+          {% endif %}
+          “{{ check.dataset.metadata.title|default:check.dataset.name }}”.
+        {% endif %}
+      </p>
+    </div>
+  {% else %}
+    <div class="mb-2">
+      {% include "login/partials/table_action_dataset_select.html" %}
+    </div>
+  {% endif %}
 {% elif check.action == "dataset_add" %}
   <p id="table-action-no-dataset">
     None of your datasets is left to add

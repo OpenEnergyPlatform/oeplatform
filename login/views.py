@@ -90,11 +90,14 @@ ITEMS_PER_PAGE = 8
 REGION_ID = "tables-results"
 
 # The bulk bar's actions, in the order it shows them, with their labels: an
-# ellipsis where the dialog asks for more than a confirmation. Bulk delete
-# and the Dataset actions join in #2565, the Organization actions in #2568.
+# ellipsis where the dialog asks for more than a confirmation. Delete is red
+# and stays last; the Organization actions (#2568) go before it.
 BULK_ACTIONS = (
     (table_actions.PUBLISH, "Publish…"),
     (table_actions.UNPUBLISH, "Unpublish"),
+    (table_actions.DATASET_ADD, "Add to dataset…"),
+    (table_actions.DATASET_REMOVE, "Remove from dataset…"),
+    (table_actions.DELETE, "Delete…"),
 )
 
 
@@ -160,7 +163,10 @@ class TableActionView(ProfileOwnerRequiredMixin, View):
     which the message lists under "Show tables"; a delete carries ``gone``,
     the names that left the dashboard, so the bulk selection drops them.
     The bulk bar's preflight is ``TableActionCheckView``, because a
-    selection does not fit in a GET address.
+    selection does not fit in a GET address. A bulk Dataset dialog asks it
+    again when the user chooses a Dataset, sending the whole selection as
+    ``selection`` beside the eligible ``tables``, so the re-check still
+    names every Table it leaves out (``_preflight``).
 
     The Tables come as repeated ``table`` parameters or as one
     comma-joined ``tables`` (``_names``). The parameters are ``topic`` and
@@ -182,8 +188,7 @@ class TableActionView(ProfileOwnerRequiredMixin, View):
         request with more than ``DATA_UPLOAD_MAX_NUMBER_FIELDS`` (1,000)
         parameters, while the largest dashboard holds 2,068 Tables and a
         ceiling is 1,000; a Table's name holds no comma."""
-        joined = data.get("tables", "").split(",")
-        return data.getlist("table") + [name.strip() for name in joined if name.strip()]
+        return data.getlist("table") + _joined(data, "tables")
 
     def _params(self, data):
         return {key: data.get(key, "") for key in self.PARAMS}
@@ -208,11 +213,14 @@ class TableActionView(ProfileOwnerRequiredMixin, View):
         return action
 
     def _preflight(self, request, action, data):
+        """The dialog for what ``data`` names. A re-check from the open
+        dialog carries the names it was opened with as ``selection``, a
+        superset of the eligible ``tables`` its form posts, and is run on
+        those, so a Table left out before is still named as left out."""
         action = self._action(action)
         params = self._params(data)
-        check = table_actions.preflight(
-            self.profile_user, action, self._names(data), params
-        )
+        names = _joined(data, "selection") or self._names(data)
+        check = table_actions.preflight(self.profile_user, action, names, params)
         return self._dialog(request, check, values=params)
 
     @method_decorator(never_cache)
@@ -416,6 +424,11 @@ class TableAccessView(ProfileOwnerRequiredMixin, View):
             detail["gone"] = [table.name]
         response["HX-Trigger"] = json.dumps({"tables-changed": detail})
         return response
+
+
+def _joined(data, key) -> list:
+    """The names in one comma-joined parameter."""
+    return [name.strip() for name in data.get(key, "").split(",") if name.strip()]
 
 
 def _access_message(change, listed, hidden) -> str:

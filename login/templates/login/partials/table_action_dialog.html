@@ -2,19 +2,25 @@
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
 
-The one action dialog, for a row (a batch of one) and, later, the bulk bar:
-the contents of #table-action-body. It shows the preflight: which Tables are
+The one action dialog, for a row (a batch of one) and the bulk bar: the
+contents of #table-action-body. It shows the preflight: which Tables are
 left out and why, what the action needs (publish: Topic and embargo), and
 the consequences it has to state (unpublish: other people's Datasets that
 will hold a draft member; delete: the Datasets left, Review state, an active
-embargo and knowledge-graph links). The Dataset actions choose one of the
-user's own Datasets (table_action_dataset.html). Delete may ask for a typed
-confirmation (``preflight.confirmation``: the Table's name or the number of
-Tables; table_action_delete.html). Over the action's ceiling nothing can be
-confirmed. The form posts the eligible names only, so what runs is what was
-shown (as one comma-joined ``tables`` field). A refused request comes back here with ``notice`` ("Nothing was
-changed: …") and the preflight run again; an unusable parameter comes back
-with ``errors`` beside its field.
+embargo and knowledge-graph links, counted for a batch). The Dataset actions
+choose one of the user's own Datasets first (table_action_dataset.html).
+Delete may ask for a typed confirmation (``preflight.confirmation``: the
+Table's name or the number of Tables; table_action_delete.html). Over the
+action's ceiling nothing can be confirmed. The form posts the eligible names
+only, so what runs is what was shown (as one comma-joined ``tables`` field).
+A refused request comes back here with ``notice`` ("Nothing was changed: …")
+and the preflight run again; an unusable parameter comes back with
+``errors`` beside its field.
+
+Everything that depends on the chosen Dataset is in #table-action-preview
+(the left-out groups, the list, the names the form posts) and
+#table-action-footer (whether it can be confirmed), so a bulk Dataset
+dialog's re-check swaps those two and never the select the user is on.
 {% endcomment %}
 {% with check=preflight %}
   <div class="modal-header">
@@ -42,8 +48,6 @@ with ``errors`` beside its field.
         hx-swap="innerHTML"
         hx-disabled-elt="#table-action-confirm">
     {% csrf_token %}
-    {% comment %}One field, comma-joined: a batch of up to the ceiling's 1,000 names as repeated fields would pass Django's limit on parameters.{% endcomment %}
-    <input type="hidden" name="tables" value="{{ check.names|join:',' }}" />
     <div class="modal-body">
       {% if notice %}
         <div id="table-action-notice"
@@ -59,122 +63,136 @@ with ``errors`` beside its field.
         <p id="table-action-ceiling"
            class="alert alert-warning">{{ check.ceiling_message }}</p>
       {% endif %}
-      {% if check.left_out %}
-        <div id="table-action-left-out" class="dash-leftout">
-          {% if check.eligible %}
-            <p class="mb-1">Left out:</p>
-          {% endif %}
-          <ul class="mb-2">
-            {% for group in check.left_out %}
-              <li>
-                <strong>{{ group.reason }}</strong>
-                {% if check.total > 1 %}
-                  : {% for name in group.names %}<code>{{ name }}</code>{% if not forloop.last %}, {% endif %}{% endfor %}
-                {% endif %}
-              </li>
-            {% endfor %}
-          </ul>
-        </div>
-      {% endif %}
-      {% if check.eligible and not check.over_ceiling %}
-        {% if check.total > 1 %}
-          <p class="mb-1">
-            {% if check.action == "publish" %}
-              Will be published:
-            {% elif check.action == "unpublish" %}
-              Will be unpublished:
-            {% elif check.action == "delete" %}
-              Will be deleted:
-            {% elif check.action == "dataset_add" %}
-              Will be added:
-            {% else %}
-              Will be removed:
-            {% endif %}
-          </p>
-          <ul class="dash-action-list">
-            {% for table in check.eligible %}
-              <li>{{ table.human_readable_name|default:table.name }}</li>
-            {% endfor %}
-          </ul>
-        {% endif %}
-        {% if check.action == "publish" %}
-          <p>Publishing lists the data under the topic you choose, where everyone can find it.</p>
-          <div class="mb-3">
-            <label class="form-label" for="action-topic">Topic</label>
-            <select id="action-topic"
-                    name="topic"
-                    class="form-select{% if errors.topic %} is-invalid{% endif %}"
-                    required
-                    {% if errors.topic %}aria-describedby="action-topic-error" aria-invalid="true"{% endif %}>
-              <option value="">Choose a topic</option>
-              {% for topic in topics %}
-                <option value="{{ topic.name }}"
-                        {% if values.topic == topic.name %}selected{% endif %}>{{ topic.name|capfirst }}</option>
-              {% endfor %}
-            </select>
-            {% if errors.topic %}<div id="action-topic-error"
-     class="invalid-feedback">{{ errors.topic }}</div>{% endif %}
-          </div>
-          <fieldset class="mb-2">
-            <legend class="form-label fs-6">Embargo</legend>
-            {% for value, label in embargo_periods %}
-              <div class="form-check form-check-inline">
-                <input class="form-check-input"
-                       type="radio"
-                       name="embargo"
-                       id="action-embargo-{{ value }}"
-                       value="{{ value }}"
-                       {% if values.embargo == value or not values.embargo and forloop.first %}checked{% endif %} />
-                <label class="form-check-label"
-                       for="action-embargo-{{ value }}">{{ label }}</label>
-              </div>
-            {% endfor %}
-            {% if errors.embargo %}<div class="text-danger small">{{ errors.embargo }}</div>{% endif %}
-            <div class="form-text">During an embargo the table is listed, but its data stays closed.</div>
-          </fieldset>
-        {% elif check.action == "delete" %}
-          {% include "login/partials/table_action_delete.html" %}
-        {% elif check.action == "unpublish" %}
-          <p>
-            {% if check.total == 1 %}
-              It
-            {% else %}
-              They
-            {% endif %}
-            will no longer be listed under {{ check.total|pluralize:"its,their" }} topics. The data, the
-            metadata and the topics stay, and you can publish again at any time.
-          </p>
-          {% if check.consequences.others_datasets %}
-            <div id="table-action-datasets">
-              <p class="mb-1">These datasets of other people will hold a draft member:</p>
-              <ul>
-                {% for owner, name in check.consequences.others_datasets %}
-                  <li>{{ name }} <span class="dash-muted">({{ owner }})</span></li>
-                {% endfor %}
-              </ul>
-            </div>
-          {% endif %}
-        {% else %}
+      {% if check.action == "dataset_add" or check.action == "dataset_remove" %}
+        {% if check.datasets or check.eligible %}
           {% include "login/partials/table_action_dataset.html" %}
         {% endif %}
-      {% elif not check.over_ceiling %}
-        <p id="table-action-nothing">
-          Nothing to
-          {% if check.action == "publish" %}
-            publish.
-          {% elif check.action == "unpublish" %}
-            unpublish.
-          {% elif check.action == "delete" %}
-            delete.
-          {% elif check.action == "dataset_add" %}
-            add.
-          {% else %}
-            remove.
-          {% endif %}
-        </p>
       {% endif %}
+      <div id="table-action-preview">
+        {% comment %}One field, comma-joined: a batch of up to the ceiling's 1,000 names as repeated fields would pass Django's limit on parameters.{% endcomment %}
+        <input type="hidden" name="tables" value="{{ check.names|join:',' }}" />
+        {% if check.left_out %}
+          <div id="table-action-left-out" class="dash-leftout">
+            {% if check.eligible %}
+              <p class="mb-1">Left out:</p>
+            {% endif %}
+            <ul class="mb-2">
+              {% for group in check.left_out %}
+                <li>
+                  <strong>{{ group.reason }}</strong>
+                  {% if check.total > 1 %}
+                    : {% for name in group.names %}<code>{{ name }}</code>{% if not forloop.last %}, {% endif %}{% endfor %}
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+        {% if check.eligible and not check.over_ceiling %}
+          {% if check.total > 1 %}
+            <p class="mb-1" id="table-action-list-label">
+              {% if check.action == "publish" %}
+                Will be published:
+              {% elif check.action == "unpublish" %}
+                Will be unpublished:
+              {% elif check.action == "delete" %}
+                Will be deleted ({{ check.eligible|length }}):
+              {% elif check.action == "dataset_add" %}
+                Will be added:
+              {% else %}
+                Will be removed:
+              {% endif %}
+            </p>
+            {% comment %}Scrollable, so focusable: a keyboard reaches every name of a long batch.{% endcomment %}
+            <ul id="table-action-list"
+                class="dash-action-list"
+                tabindex="0"
+                aria-labelledby="table-action-list-label">
+              {% for table in check.eligible %}
+                <li>
+                  {{ table.human_readable_name|default:table.name }}
+                  {% if check.action == "delete" and table.is_publish %}<span class="badge text-bg-warning">published</span>{% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+          {% if check.action == "publish" %}
+            <p>Publishing lists the data under the topic you choose, where everyone can find it.</p>
+            <div class="mb-3">
+              <label class="form-label" for="action-topic">Topic</label>
+              <select id="action-topic"
+                      name="topic"
+                      class="form-select{% if errors.topic %} is-invalid{% endif %}"
+                      required
+                      {% if errors.topic %}aria-describedby="action-topic-error" aria-invalid="true"{% endif %}>
+                <option value="">Choose a topic</option>
+                {% for topic in topics %}
+                  <option value="{{ topic.name }}"
+                          {% if values.topic == topic.name %}selected{% endif %}>{{ topic.name|capfirst }}</option>
+                {% endfor %}
+              </select>
+              {% if errors.topic %}<div id="action-topic-error"
+     class="invalid-feedback">{{ errors.topic }}</div>{% endif %}
+            </div>
+            <fieldset class="mb-2">
+              <legend class="form-label fs-6">Embargo</legend>
+              {% for value, label in embargo_periods %}
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input"
+                         type="radio"
+                         name="embargo"
+                         id="action-embargo-{{ value }}"
+                         value="{{ value }}"
+                         {% if values.embargo == value or not values.embargo and forloop.first %}checked{% endif %} />
+                  <label class="form-check-label"
+                         for="action-embargo-{{ value }}">{{ label }}</label>
+                </div>
+              {% endfor %}
+              {% if errors.embargo %}<div class="text-danger small">{{ errors.embargo }}</div>{% endif %}
+              <div class="form-text">During an embargo the table is listed, but its data stays closed.</div>
+            </fieldset>
+          {% elif check.action == "delete" %}
+            {% include "login/partials/table_action_delete.html" %}
+          {% elif check.action == "unpublish" %}
+            <p>
+              {% if check.total == 1 %}
+                It
+              {% else %}
+                They
+              {% endif %}
+              will no longer be listed under {{ check.total|pluralize:"its,their" }} topics. The data, the
+              metadata and the topics stay, and you can publish again at any time.
+            </p>
+            {% if check.consequences.others_datasets %}
+              <div id="table-action-datasets">
+                <p class="mb-1">These datasets of other people will hold a draft member:</p>
+                <ul>
+                  {% for owner, name in check.consequences.others_datasets %}
+                    <li>{{ name }} <span class="dash-muted">({{ owner }})</span></li>
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
+          {% endif %}
+        {% elif not check.over_ceiling %}
+          <p id="table-action-nothing">
+            Nothing to
+            {% if check.action == "publish" %}
+              publish.
+            {% elif check.action == "unpublish" %}
+              unpublish.
+            {% elif check.action == "delete" %}
+              delete.
+            {% elif check.action == "dataset_add" %}
+              add{% if check.dataset %} to “{{ check.dataset.metadata.title|default:check.dataset.name }}”{% endif %}.
+            {% else %}
+              remove{% if check.dataset %} from “{{ check.dataset.metadata.title|default:check.dataset.name }}”{% endif %}.
+            {% endif %}
+          </p>
+        {% endif %}
+      </div>
     </div>
-    <div class="modal-footer">
+    <div class="modal-footer" id="table-action-footer">
       <button type="button"
               class="btn btn-outline-secondary"
               data-bs-dismiss="modal">Cancel</button>
