@@ -271,6 +271,17 @@ class Preflight:
     def ceiling_message(self) -> str:
         return _ceiling_message(self.action, self.ceiling, self.total)
 
+    @property
+    def ceiling_rule(self) -> str:
+        """The ceiling as the dialog states it before anything exceeds it,
+        "" where the action has none."""
+        return _ceiling_rule(self.action, self.ceiling) if self.ceiling else ""
+
+    @property
+    def dataset_title(self) -> str:
+        """What the chosen Dataset is called, "" while none is chosen."""
+        return dataset_title(self.dataset) if self.dataset else ""
+
 
 @dataclass(frozen=True)
 class Outcome:
@@ -351,11 +362,12 @@ ACTION_NAMES = {
 }
 
 
+def _ceiling_rule(action, ceiling) -> str:
+    return f"{ACTION_NAMES[action]} takes at most {ceiling:,} tables at a time."
+
+
 def _ceiling_message(action, ceiling, total) -> str:
-    return (
-        f"{ACTION_NAMES[action]} takes at most {ceiling:,} tables at a time; "
-        f"you selected {total:,}."
-    )
+    return f"{_ceiling_rule(action, ceiling)[:-1]}; you selected {total:,}."
 
 
 def _confirmation(action, eligible) -> str:

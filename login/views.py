@@ -89,6 +89,13 @@ ITEMS_PER_PAGE = 8
 # the request is its re-fetch after an action.
 REGION_ID = "tables-results"
 
+# What the dialog says when it was confirmed before the check for the
+# Dataset just chosen had come back.
+RECHECKED = (
+    "Nothing was changed: the check for this dataset had not come back yet."
+    " Look it over and confirm again."
+)
+
 # The bulk bar's actions, in the order it shows them, with their labels: an
 # ellipsis where the dialog asks for more than a confirmation. Delete is red
 # and stays last; the Organization actions (#2568) go before it.
@@ -155,6 +162,10 @@ class TableActionView(ProfileOwnerRequiredMixin, View):
       Dataset that is not the user's own, a typed confirmation that does not
       match, more Tables than the ceiling): 400, the dialog with the error
       beside its field, and no toast.
+    - POST, from a bulk Dataset dialog whose preview was checked against
+      another Dataset than the one sent (``previewed``; confirmed before the
+      re-check came back): 200, nothing written, the dialog checked against
+      the Dataset sent, with a notice.
     - POST, a delete whose OEDB table could not be dropped afterwards: 204
       as above, but the message says so and carries ``warning``, so it
       stays until dismissed instead of reading as a success.
@@ -232,19 +243,31 @@ class TableActionView(ProfileOwnerRequiredMixin, View):
         user = self.profile_user
         names = self._names(request.POST)
         params = self._params(request.POST)
+        # a dialog re-run after a refusal is checked against everything it
+        # was opened with, so what was left out before is still named
+        again = _joined(request.POST, "selection") or names
+        previewed = request.POST.get("previewed")
+        if previewed is not None and previewed != params["dataset"]:
+            # confirmed in the moment between choosing a Dataset and its
+            # re-check coming back: the names were checked against another
+            # choice, so nothing runs and the dialog shows the check for this
+            # one
+            check = table_actions.preflight(user, action, again, params)
+            return self._dialog(request, check, values=params, notice=RECHECKED)
         try:
             outcome = table_actions.execute(
                 user, action, names, params, via="dashboard"
             )
         except table_actions.InvalidParameters as error:
-            check = table_actions.preflight(user, action, names)
+            check = table_actions.preflight(user, action, again, params)
             return self._dialog(
                 request, check, status=400, errors=error.errors, values=params
             )
         except table_actions.ActionRefused as refusal:
-            response = self._dialog(
-                request, refusal.preflight, status=409, notice=refusal.message
-            )
+            check = refusal.preflight
+            if again != names:
+                check = table_actions.preflight(user, action, again, params)
+            response = self._dialog(request, check, status=409, notice=refusal.message)
             response["HX-Trigger"] = json.dumps(
                 {"tables-refused": {"message": refusal.message}}
             )

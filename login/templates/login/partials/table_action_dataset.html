@@ -16,9 +16,12 @@ footer, plus the status line below the select: never the select itself,
 which keeps focus. ``change`` fires on every arrow key in a closed select,
 so the request waits until the choice has rested (``delay``) and a newer one
 replaces an older one in flight (``hx-sync``). A row's choice needs no
-re-check: its Datasets are those the action can change for that one Table. Confirm is disabled
-while a re-check is on its way (the form's ``hx-disabled-elt``); one sent
-before it would be refused whole by the server and the dialog re-run.
+re-check: its Datasets are those the action can change for that one Table.
+Confirm is disabled while a re-check is on its way (the form's
+``hx-disabled-elt``), but not during the delay before it is sent: the
+preview therefore carries the Dataset it was checked against
+(``previewed``), and a confirmation naming another one is checked again by
+the server instead of run.
 {% endcomment %}
 {% if check.datasets %}
   <p>
@@ -64,7 +67,7 @@ before it would be refused whole by the server and the dialog re-run.
           {% else %}
             removed from
           {% endif %}
-          “{{ check.dataset.metadata.title|default:check.dataset.name }}”.
+          “{{ check.dataset_title }}”.
         {% endif %}
       </p>
     </div>

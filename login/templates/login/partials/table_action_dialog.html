@@ -62,6 +62,9 @@ dialog's re-check swaps those two and never the select the user is on.
       {% if check.over_ceiling %}
         <p id="table-action-ceiling"
            class="alert alert-warning">{{ check.ceiling_message }}</p>
+      {% elif check.total > 1 and check.ceiling_rule %}
+        <p id="table-action-ceiling-rule"
+           class="form-text mt-0">{{ check.ceiling_rule }}</p>
       {% endif %}
       {% if check.action == "dataset_add" or check.action == "dataset_remove" %}
         {% if check.datasets or check.eligible %}
@@ -71,6 +74,12 @@ dialog's re-check swaps those two and never the select the user is on.
       <div id="table-action-preview">
         {% comment %}One field, comma-joined: a batch of up to the ceiling's 1,000 names as repeated fields would pass Django's limit on parameters.{% endcomment %}
         <input type="hidden" name="tables" value="{{ check.names|join:',' }}" />
+        {% if check.datasets and check.total > 1 %}
+          {% comment %}The Dataset these names were checked against: a confirmation sent before the re-check of another choice came back is checked again instead of run.{% endcomment %}
+          <input type="hidden"
+                 name="previewed"
+                 value="{{ check.dataset.name|default:'' }}" />
+        {% endif %}
         {% if check.left_out %}
           <div id="table-action-left-out" class="dash-leftout">
             {% if check.eligible %}
@@ -184,9 +193,9 @@ dialog's re-check swaps those two and never the select the user is on.
             {% elif check.action == "delete" %}
               delete.
             {% elif check.action == "dataset_add" %}
-              add{% if check.dataset %} to “{{ check.dataset.metadata.title|default:check.dataset.name }}”{% endif %}.
+              add{% if check.dataset %} to “{{ check.dataset_title }}”{% endif %}.
             {% else %}
-              remove{% if check.dataset %} from “{{ check.dataset.metadata.title|default:check.dataset.name }}”{% endif %}.
+              remove{% if check.dataset %} from “{{ check.dataset_title }}”{% endif %}.
             {% endif %}
           </p>
         {% endif %}

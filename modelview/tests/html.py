@@ -66,8 +66,11 @@ class _Element(HTMLParser):
         if self.depth and not self.done:
             self.parts.append(data)
 
-    handle_entityref = lambda self, name: self.handle_data(f"&{name};")  # noqa
-    handle_charref = lambda self, name: self.handle_data(f"&#{name};")  # noqa
+    def handle_entityref(self, name):
+        self.handle_data(f"&{name};")
+
+    def handle_charref(self, name):
+        self.handle_data(f"&#{name};")
 
 
 def element_markup(html: str, element_id: str) -> str:
@@ -77,6 +80,12 @@ def element_markup(html: str, element_id: str) -> str:
     parser = _Element(element_id)
     parser.feed(html)
     return "".join(parser.parts)
+
+
+def text(markup: str) -> str:
+    """What `markup` reads as: its text without tags, whitespace collapsed,
+    so an assertion on a sentence does not depend on how djlint wrapped it."""
+    return " ".join(re.sub(r"<[^>]*>", "", markup).split())
 
 
 def checkboxes(html: str, css_class: str) -> list[tuple[str, bool]]:

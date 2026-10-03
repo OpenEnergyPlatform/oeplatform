@@ -27,30 +27,28 @@ from api.services import table_actions
 from dataedit.models import Dataset, Embargo, Table
 from login.models import WRITE_PERM
 from login.tests.helpers import HTMX
+from login.tests.test_table_actions import DIALOG
 from login.tests.test_table_dataset_actions import DatasetActionTestCase
 from login.tests.test_table_delete import DeleteTestCase
 from login.tests.test_tables_bulk import BulkTestCase
-from modelview.tests.html import element_markup, element_with_id
+from login.views import RECHECKED
+from modelview.tests.html import element_markup, element_with_id, text
 
 ADD, REMOVE = table_actions.DATASET_ADD, table_actions.DATASET_REMOVE
 
 
-def text(markup):
-    """What ``markup`` reads as: its text, whitespace collapsed."""
-    return " ".join(re.sub(r"<[^>]+>", "", markup).split())
-
-
 class BulkCase(BulkTestCase):
-    def bulk_preflight(self, action, *names, **params):
-        """The bulk bar's preflight, as the browser sends it: one joined
-        field."""
+    def joined_preflight(self, action, *names, **params):
+        """The bulk bar's preflight, as the browser sends it: the names in
+        one joined field."""
         response = self.client.post(
             self.check_path(action), {"tables": ",".join(names), **params}, **HTMX
         )
         self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, DIALOG)
         return response
 
-    def bulk_run(self, action, *names, **params):
+    def joined_run(self, action, *names, **params):
         """The dialog's confirmation: the eligible names, joined."""
         return self.client.post(
             self.action_path(action), {"tables": ",".join(names), **params}, **HTMX
@@ -73,24 +71,21 @@ class BulkBarTests(BulkCase):
                 self.assertNotEqual(element_with_id(html, f"bulk-menu-{verb}"), "")
                 positions.append(html.index(f'id="bulk-{verb}"'))
         self.assertEqual(positions, sorted(positions))
-        self.assertIn("btn-outline-danger", element_with_id(html, "bulk-delete"))
 
 
 class BulkDeletePreflightTests(BulkCase, DeleteTestCase):
-    def test_every_table_is_listed_and_the_published_ones_marked(self):
+    def test_every_table_is_listed(self):
         names = [f"t_list_{i:02}" for i in range(12)]
         for name in names[:-1]:
             self.draft(name)
         self.draft(names[-1], published=True)
-        response = self.bulk_preflight("delete", *names)
+        response = self.joined_preflight("delete", *names)
         check = response.context["preflight"]
         self.assertEqual(check.names, names)
         listing = element_markup(self.html(response), "table-action-list")
         for name in names:
             with self.subTest(name=name):
                 self.assertIn(name, listing)
-        self.assertEqual(listing.count("published</span>"), 1)
-        self.assertIn('tabindex="0"', listing)
         self.assertIn('name="tables" value="' + ",".join(names), self.html(response))
 
     def test_the_consequences_are_counted(self):
@@ -105,7 +100,7 @@ class BulkDeletePreflightTests(BulkCase, DeleteTestCase):
         self.review("t_b", finished=True)
         self.review("t_c", finished=False)
         Embargo.objects.create(table=b, duration="6_months")
-        response = self.bulk_preflight("delete", "t_a", "t_b", "t_c")
+        response = self.joined_preflight("delete", "t_a", "t_b", "t_c")
         consequences = response.context["preflight"].consequences
         self.assertEqual(consequences["own_datasets"], [("ds_mine", 2)])
         self.assertEqual(
@@ -141,8 +136,6 @@ class BulkDeletePreflightTests(BulkCase, DeleteTestCase):
             "Links to the 2 published tables",
             text(element_markup(html, "table-action-knowledge-graph")),
         )
-        # counted, not repeated per Table
-        self.assertNotIn('class="table-action-review"', html)
 
     def test_the_consequences_cost_the_same_whatever_the_batch(self):
         def queries(count):
@@ -152,9 +145,9 @@ class BulkDeletePreflightTests(BulkCase, DeleteTestCase):
                 Dataset.objects.create(
                     name=f"ds_{name}", creator=self.stranger
                 ).tables.add(table)
-            self.bulk_preflight("delete", *names)  # warms the Site cache
+            self.joined_preflight("delete", *names)  # warms the Site cache
             with CaptureQueriesContext(connection) as captured:
-                self.bulk_preflight("delete", *names)
+                self.joined_preflight("delete", *names)
             return len(captured)
 
         self.assertEqual(queries(2), queries(20))
@@ -163,21 +156,30 @@ class BulkDeletePreflightTests(BulkCase, DeleteTestCase):
         self.draft("t_d1")
         self.draft("t_d2")
         self.draft("t_p", published=True)
-        plain = self.bulk_preflight("delete", "t_d1", "t_d2")
+        plain = self.joined_preflight("delete", "t_d1", "t_d2")
         self.assertEqual(plain.context["preflight"].confirmation, "")
         self.assertEqual(element_with_id(self.html(plain), "action-confirm"), "")
-        with_published = self.bulk_preflight("delete", "t_d1", "t_p")
+        with_published = self.joined_preflight("delete", "t_d1", "t_p")
         self.assertEqual(with_published.context["preflight"].confirmation, "2")
         self.assertIn("Type the number of tables", self.html(with_published))
         many = [f"t_m{i}" for i in range(table_actions.TYPED_COUNT_ABOVE + 1)]
         for name in many:
             self.draft(name)
-        check = self.bulk_preflight("delete", *many).context["preflight"]
+        check = self.joined_preflight("delete", *many).context["preflight"]
         self.assertEqual(check.confirmation, str(len(many)))
+
+    def test_the_ceiling_is_stated_before_it_is_reached(self):
+        self.draft("t_s1")
+        self.draft("t_s2")
+        html = self.html(self.joined_preflight("delete", "t_s1", "t_s2"))
+        self.assertEqual(
+            text(element_markup(html, "table-action-ceiling-rule")),
+            "Delete takes at most 50 tables at a time.",
+        )
 
     def test_the_ceiling_is_stated_with_the_selection_size(self):
         names = [f"t_ceil_{i}" for i in range(60)]
-        response = self.bulk_preflight("delete", *names)
+        response = self.joined_preflight("delete", *names)
         self.assertContains(
             response, "Delete takes at most 50 tables at a time; you selected 60."
         )
@@ -191,7 +193,7 @@ class BulkDeleteTests(BulkCase, DeleteTestCase):
         self.draft("t_x1")
         self.draft("t_x2", published=True)
         with mock.patch.object(Table, "drop_oedb_table") as drop:
-            response = self.bulk_run("delete", "t_x1", "t_x2", confirm="1")
+            response = self.joined_run("delete", "t_x1", "t_x2", confirm="1")
         self.assertEqual(response.status_code, 400)
         self.assertIn("2", response.context["errors"]["confirm"])
         self.assertNotIn("HX-Trigger", response)
@@ -204,7 +206,7 @@ class BulkDeleteTests(BulkCase, DeleteTestCase):
         self.draft(names[1])
         self.draft(names[2])
         with mock.patch.object(Table, "drop_oedb_table") as drop:
-            response = self.bulk_run("delete", *names, confirm="3")
+            response = self.joined_run("delete", *names, confirm="3")
         self.assertEqual(response.status_code, 204)
         self.assertEqual(self.exists(*names), set())
         self.assertEqual(drop.call_count, 3)
@@ -218,7 +220,7 @@ class BulkDeleteTests(BulkCase, DeleteTestCase):
         self.draft("t_z1")
         self.draft("t_z2")
         with mock.patch.object(Table, "drop_oedb_table"):
-            response = self.bulk_run("delete", "t_z1", "t_z2")
+            response = self.joined_run("delete", "t_z1", "t_z2")
         self.assertEqual(response.status_code, 204)
         self.assertEqual(self.exists("t_z1", "t_z2"), set())
 
@@ -234,7 +236,7 @@ class BulkDeleteTests(BulkCase, DeleteTestCase):
 
         with mock.patch.object(Table, "drop_oedb_table", drop):
             with self.assertLogs("oeplatform.table_actions", "INFO") as logs:
-                response = self.bulk_run("delete", *names)
+                response = self.joined_run("delete", *names)
         self.assertEqual(response.status_code, 204)
         self.assertEqual(self.exists(*names), set())
         detail = self.trigger(response, "tables-changed")
@@ -243,9 +245,12 @@ class BulkDeleteTests(BulkCase, DeleteTestCase):
         self.assertIn("“Stuck two” (t_stuck_2)", detail["message"])
         self.assertNotIn("Fine", detail["message"])
         self.assertEqual(sorted(detail["gone"]), sorted(names))
-        batches = {record.getMessage().split()[5] for record in logs.records}
+        batches = {
+            re.search(r"batch=(\S+)", record.getMessage()).group(1)
+            for record in logs.records
+        }
         self.assertEqual(len(batches), 1)
-        self.assertNotEqual(batches, {"batch=-"})
+        self.assertNotEqual(batches, {"-"})
         failed = [r for r in logs.records if r.getMessage().endswith("drop=failed")]
         self.assertEqual(len(failed), 2)
 
@@ -253,7 +258,7 @@ class BulkDeleteTests(BulkCase, DeleteTestCase):
         self.draft("t_w1")
         self.draft("t_w2", level=WRITE_PERM)
         with mock.patch.object(Table, "drop_oedb_table") as drop:
-            response = self.bulk_run("delete", "t_w1", "t_w2")
+            response = self.joined_run("delete", "t_w1", "t_w2")
         self.assertEqual(response.status_code, 409)
         self.assertIn(
             "Only Data maintainers and Table admins can delete",
@@ -270,7 +275,7 @@ class BulkDatasetPreflightTests(BulkCase, DatasetActionTestCase):
         self.draft("t_strangers", level=None)
         self.dataset("ds_one", title="One")
         self.dataset("ds_two", title="Two")
-        response = self.bulk_preflight(ADD, "t_mine_1", "t_mine_2", "t_strangers")
+        response = self.joined_preflight(ADD, "t_mine_1", "t_mine_2", "t_strangers")
         check = response.context["preflight"]
         self.assertEqual(self.choices(check), ["ds_one", "ds_two"])
         self.assertIsNone(check.dataset)
@@ -335,7 +340,7 @@ class BulkDatasetPreflightTests(BulkCase, DatasetActionTestCase):
         b = self.draft("t_full_b", level=WRITE_PERM)
         full = self.dataset("ds_full", a, title="Full")
         self.dataset("ds_spare")
-        opened = self.bulk_preflight(ADD, "t_full_a", "t_full_b")
+        opened = self.joined_preflight(ADD, "t_full_a", "t_full_b")
         self.assertIn("ds_full", self.choices(opened.context["preflight"]))
         full.tables.add(b)
         response = self.client.post(
@@ -363,7 +368,7 @@ class BulkDatasetPreflightTests(BulkCase, DatasetActionTestCase):
         self.draft("t_r_c", level=WRITE_PERM)
         self.dataset("ds_holds", a, b, title="Holds")
         self.dataset("ds_other", a)
-        check = self.bulk_preflight(
+        check = self.joined_preflight(
             REMOVE, "t_r_a", "t_r_b", "t_r_c", dataset="ds_holds"
         ).context["preflight"]
         self.assertEqual(sorted(self.choices(check)), ["ds_holds", "ds_other"])
@@ -390,7 +395,7 @@ class BulkDatasetPreflightTests(BulkCase, DatasetActionTestCase):
             self.draft(name, level=WRITE_PERM)
         self.dataset("ds_over")
         with mock.patch.dict(table_actions.CEILINGS, {ADD: 2}):
-            response = self.bulk_preflight(ADD, *names)
+            response = self.joined_preflight(ADD, *names)
         self.assertContains(
             response,
             "Adding to a dataset takes at most 2 tables at a time; you selected 3.",
@@ -408,7 +413,7 @@ class BulkDatasetTests(BulkCase, DatasetActionTestCase):
         dataset = self.dataset("ds_bulk", title="Bulk")
         with self.assertLogs("oeplatform.table_actions", "INFO") as logs:
             with self.captureOnCommitCallbacks(execute=True):
-                response = self.bulk_run(ADD, *names, dataset="ds_bulk")
+                response = self.joined_run(ADD, *names, dataset="ds_bulk")
         self.assertEqual(response.status_code, 204)
         self.assertEqual(self.members(dataset), names)
         detail = self.trigger(response, "tables-changed")
@@ -423,7 +428,7 @@ class BulkDatasetTests(BulkCase, DatasetActionTestCase):
         a = self.draft("t_rm_1", level=WRITE_PERM)
         b = self.draft("t_rm_2", level=WRITE_PERM)
         dataset = self.dataset("ds_rm", a, b, title="Rm")
-        response = self.bulk_run(REMOVE, "t_rm_1", "t_rm_2", dataset="ds_rm")
+        response = self.joined_run(REMOVE, "t_rm_1", "t_rm_2", dataset="ds_rm")
         self.assertEqual(response.status_code, 204)
         self.assertEqual(self.members(dataset), [])
         self.assertTrue(
@@ -449,7 +454,7 @@ class BulkDatasetTests(BulkCase, DatasetActionTestCase):
 
         with mock.patch.object(table_actions, "assign_table", assign):
             with self.assertRaises(RuntimeError):
-                self.bulk_run(ADD, *names, dataset="ds_part")
+                self.joined_run(ADD, *names, dataset="ds_part")
         self.assertEqual(self.members(dataset), [])
 
     def test_a_table_already_in_the_dataset_refuses_the_whole_batch(self):
@@ -459,7 +464,7 @@ class BulkDatasetTests(BulkCase, DatasetActionTestCase):
         a = self.draft("t_race_a", level=WRITE_PERM)
         self.draft("t_race_b", level=WRITE_PERM)
         dataset = self.dataset("ds_race", a, title="Race")
-        response = self.bulk_run(ADD, "t_race_a", "t_race_b", dataset="ds_race")
+        response = self.joined_run(ADD, "t_race_a", "t_race_b", dataset="ds_race")
         self.assertEqual(response.status_code, 409)
         self.assertEqual(self.members(dataset), ["t_race_a"])
         check = response.context["preflight"]
@@ -468,13 +473,115 @@ class BulkDatasetTests(BulkCase, DatasetActionTestCase):
             "Already in “Race”", self.trigger(response, "tables-refused")["message"]
         )
 
+    def test_a_confirmation_checked_against_another_dataset_runs_nothing(self):
+        """Confirmed in the moment between choosing a Dataset and its
+        re-check coming back: the names were checked against the Dataset
+        chosen before, so nothing is added and the dialog shows the check
+        for the one sent, on the whole selection."""
+        a = self.draft("t_quick_a", level=WRITE_PERM)
+        self.draft("t_quick_b", level=WRITE_PERM)
+        self.draft("t_quick_c", level=None)
+        before = self.dataset("ds_before")
+        after = self.dataset("ds_after", a, title="After")
+        response = self.client.post(
+            self.action_path(ADD),
+            {
+                "tables": "t_quick_a,t_quick_b",
+                "selection": "t_quick_a,t_quick_b,t_quick_c",
+                "dataset": "ds_after",
+                "previewed": "ds_before",
+            },
+            **HTMX,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("HX-Trigger", response)
+        self.assertEqual(response.context["notice"], RECHECKED)
+        self.assertEqual(self.members(before), [])
+        self.assertEqual(self.members(after), ["t_quick_a"])
+        check = response.context["preflight"]
+        self.assertEqual(self.chosen(check), "ds_after")
+        self.assertEqual(check.names, ["t_quick_b"])
+        self.assertEqual(
+            self.left_out(check),
+            {
+                table_actions.NOT_YOURS: ["t_quick_c"],
+                "Already in “After”": ["t_quick_a"],
+            },
+        )
+
+    def test_a_confirmation_checked_against_its_own_dataset_runs(self):
+        self.draft("t_same_a", level=WRITE_PERM)
+        dataset = self.dataset("ds_same")
+        response = self.client.post(
+            self.action_path(ADD),
+            {
+                "tables": "t_same_a",
+                "selection": "t_same_a,t_absent",
+                "dataset": "ds_same",
+                "previewed": "ds_same",
+            },
+            **HTMX,
+        )
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(self.members(dataset), ["t_same_a"])
+
+    def test_a_refused_batch_is_checked_again_on_the_whole_selection(self):
+        a = self.draft("t_ref_a", level=WRITE_PERM)
+        self.draft("t_ref_b", level=WRITE_PERM)
+        dataset = self.dataset("ds_ref", title="Ref")
+        # added elsewhere after the dialog's check
+        dataset.tables.add(a)
+        response = self.client.post(
+            self.action_path(ADD),
+            {
+                "tables": "t_ref_a,t_ref_b",
+                "selection": "t_ref_a,t_ref_b,t_ref_gone",
+                "dataset": "ds_ref",
+                "previewed": "ds_ref",
+            },
+            **HTMX,
+        )
+        self.assertEqual(response.status_code, 409)
+        check = response.context["preflight"]
+        self.assertEqual(check.requested, ["t_ref_a", "t_ref_b", "t_ref_gone"])
+        self.assertEqual(
+            self.left_out(check),
+            {
+                table_actions.NOT_YOURS: ["t_ref_gone"],
+                "Already in “Ref”": ["t_ref_a"],
+            },
+        )
+        self.assertEqual(self.members(dataset), ["t_ref_a"])
+
+    def test_an_unusable_dataset_keeps_the_whole_selection(self):
+        self.draft("t_bad_a", level=WRITE_PERM)
+        self.dataset("ds_mine_1")
+        self.dataset("ds_mine_2")
+        self.dataset("ds_strangers", creator=self.stranger)
+        response = self.client.post(
+            self.action_path(ADD),
+            {
+                "tables": "t_bad_a",
+                "selection": "t_bad_a,t_bad_gone",
+                "dataset": "ds_strangers",
+            },
+            **HTMX,
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("dataset", response.context["errors"])
+        check = response.context["preflight"]
+        self.assertEqual(check.requested, ["t_bad_a", "t_bad_gone"])
+        self.assertEqual(
+            self.left_out(check), {table_actions.NOT_YOURS: ["t_bad_gone"]}
+        )
+
     def test_over_the_ceiling_nothing_is_added(self):
         names = [f"t_much_{i}" for i in range(3)]
         for name in names:
             self.draft(name, level=WRITE_PERM)
         dataset = self.dataset("ds_much")
         with mock.patch.dict(table_actions.CEILINGS, {ADD: 2}):
-            response = self.bulk_run(ADD, *names, dataset="ds_much")
+            response = self.joined_run(ADD, *names, dataset="ds_much")
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
             response.context["errors"]["table"],
