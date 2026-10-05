@@ -233,9 +233,14 @@ NOT_PUBLISHED = "Not published"
 # a draft or embargoed Table the user holds no grant on. Only a platform
 # admin gets that far, and the rule gives them no exemption.
 MAY_NOT_ASSIGN = "Drafts and embargoed tables need Data editor on the table"
-# A removal whose dashboard losses grew after the dialog named them: the user
-# confirmed losing fewer Tables than the removal would take.
+# A removal whose losses grew after the dialog named them: the user confirmed
+# losing access to, or Admin on, fewer Tables than the removal would take.
 LOSE_ACCESS_UNSAID = "You would also lose access to these, which the dialog did not say"
+
+
+def _role_refusals() -> set:
+    """The left-out reasons that mean "you lack the role"."""
+    return {gate.refusal for gate in ROLE_GATES.values()} | {NOT_YOURS}
 
 
 class ActionError(Exception):
@@ -265,6 +270,13 @@ class ActionRefused(ActionError):
     def message(self) -> str:
         parts = [f"{group.reason} ({_quoted(group.names)})" for group in self.refused]
         return "Nothing was changed: " + "; ".join(parts) + "."
+
+    @property
+    def for_role(self) -> bool:
+        """Whether a Table was refused because the user lacks the role the
+        action needs there (or holds none at all), rather than because the
+        Tables changed."""
+        return any(group.reason in _role_refusals() for group in self.refused)
 
 
 @dataclass(frozen=True)
@@ -313,7 +325,7 @@ class Preflight:
     # ``consequences["lose_access"]`` are the Tables it takes off the user's
     # dashboard.
     organizations: list = field(default_factory=list)
-    organization: object = None
+    organization: Organization = None
     level: int = None
     members: int = 0
     unchanged: list = field(default_factory=list)
@@ -701,7 +713,9 @@ def preflight(user, action, names, params=None) -> Preflight:
     while none is named). A share leaves the Tables where it holds that role
     or more ``unchanged``; a removal leaves out the Tables it holds no role on
     and those whose only Admin is its old Admin grant, and names in
-    ``consequences["lose_access"]`` the Tables the user would lose.
+    ``consequences["lose_access"]`` the Tables the user would lose and in
+    ``consequences["lose_admin"]`` those they would keep but no longer be a
+    Table admin on.
     """
     if action not in ACTIONS:
         raise ValueError(f"unknown table action: {action}")
@@ -762,7 +776,7 @@ def preflight(user, action, names, params=None) -> Preflight:
             left_out += by_membership
 
     organizations, organization, level, members, unchanged = [], None, None, 0, []
-    lose_access = []
+    lose_access, lose_admin = [], []
     if action in ORGANIZATION_ACTIONS:
         organizations = _organization_choices(user, action, eligible)
         organization = _chosen_organization(params.get("organization"), organizations)
@@ -774,7 +788,7 @@ def preflight(user, action, names, params=None) -> Preflight:
             )
             left_out += by_organization
             members = plan.members
-            lose_access = plan.lose_access
+            lose_access, lose_admin = plan.lose_access, plan.lose_admin
 
     consequences = {}
     if action == UNPUBLISH and eligible:
@@ -783,6 +797,7 @@ def preflight(user, action, names, params=None) -> Preflight:
         consequences = _delete_consequences(user, eligible)
     elif action == ORGANIZATION_REMOVE and eligible:
         consequences["lose_access"] = lose_access
+        consequences["lose_admin"] = lose_admin
     return Preflight(
         action=action,
         total=len(names),
@@ -851,27 +866,25 @@ def _organization_params(user, action, params) -> dict:
     names, comma-joined when sent)."""
     errors, checked = {}, {}
     value = params.get("organization")
-    pk = getattr(value, "pk", value)
+    try:
+        if action == ORGANIZATION_SHARE:
+            checked["organization"] = table_roles.own_organization(user, value)
+        else:
+            checked["organization"] = table_roles.any_organization(value)
+    except table_roles.InvalidRequest as error:
+        errors["organization"] = error.message
     if action == ORGANIZATION_SHARE:
         try:
             checked["level"] = table_roles.organization_level(params.get("level"))
         except table_roles.InvalidRequest as error:
             errors["level"] = error.message
-        candidates = table_roles.own_organizations(user)
-        missing = "Choose one of your organizations."
     else:
         lose = params.get("lose_access") or ()
         if isinstance(lose, str):
             lose = [name.strip() for name in lose.split(",")]
         checked["lose_access"] = frozenset(name for name in lose if name)
-        candidates = Organization.objects.all()
-        missing = "Choose an organization."
-    organization = candidates.filter(pk=pk).first() if str(pk or "").isdigit() else None
-    if organization is None:
-        errors["organization"] = missing
     if errors:
         raise InvalidParameters(errors)
-    checked["organization"] = organization
     return checked
 
 
@@ -991,6 +1004,12 @@ def execute(user, action, names, params=None, via="dashboard") -> Outcome:
     A delete's transaction is durable (it refuses to run nested in another
     one), so once it is left the rows are committed and the OEDB tables are
     dropped, one at a time. A failed drop is in ``Outcome.drop_failed``.
+
+    Sharing with an Organization and removing one do not go through
+    ``_write`` and ``_log``: inside the same transaction and lock they call
+    the permission service's bulk writes (``_organization_write``), which
+    write and log ``table_permission_write`` per Table. The Tables a removal
+    took off the user's dashboard are in ``Outcome.lost``.
     """
     params = _checked_params(user, action, params or {})
     ceiling = CEILINGS.get(action)

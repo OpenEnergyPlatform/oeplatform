@@ -215,9 +215,14 @@ on.
                 {% endif %}
               {% endif %}
             </p>
-            {% if check.consequences.lose_access %}
+            {% if check.consequences.lose_access or check.consequences.lose_admin %}
               {% comment %}What the user agrees to lose by confirming: the server refuses a removal that would take more.{% endcomment %}
-              <input type="hidden" id="table-action-lose-access-names" name="lose_access" value="{% for table in check.consequences.lose_access %}{{ table.name }}{% if not forloop.last %},{% endif %}{% endfor %}" />
+              <input type="hidden"
+                     id="table-action-lose-access-names"
+                     name="lose_access"
+                     value="{% for table in check.consequences.lose_access %}{{ table.name }},{% endfor %}{% for table in check.consequences.lose_admin %}{{ table.name }},{% endfor %}" />
+            {% endif %}
+            {% if check.consequences.lose_access %}
               <div id="table-action-lose-access" class="alert alert-warning">
                 <p class="mb-1">
                   You will lose access to
@@ -230,6 +235,23 @@ on.
                 </p>
                 <ul class="mb-0">
                   {% for table in check.consequences.lose_access %}
+                    <li>{{ table.human_readable_name|default:table.name }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
+            {% if check.consequences.lose_admin %}
+              <div id="table-action-lose-admin" class="alert alert-warning">
+                <p class="mb-1">
+                  You will no longer be able to manage access to
+                  {% if check.consequences.lose_admin|length == 1 %}
+                    this table:
+                  {% else %}
+                    these {{ check.consequences.lose_admin|length }} tables:
+                  {% endif %}
+                </p>
+                <ul class="mb-0">
+                  {% for table in check.consequences.lose_admin %}
                     <li>{{ table.human_readable_name|default:table.name }}</li>
                   {% endfor %}
                 </ul>

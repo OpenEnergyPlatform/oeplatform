@@ -110,14 +110,6 @@ BULK_ACTIONS = (
     (table_actions.DELETE, "Delete…"),
 )
 
-# The refusals that mean "you lack the role", not "the Tables changed".
-# The Organization actions answer them 403, as the permission service's
-# ``NotAllowed`` does in the access drawer and the API (WF-08 decision 13);
-# the other actions keep answering every refusal 409.
-ROLE_REFUSALS = {gate.refusal for gate in table_actions.ROLE_GATES.values()} | {
-    table_actions.NOT_YOURS
-}
-
 
 class TablesView(ProfileOwnerRequiredMixin, View):
     """The tables tab: one list of every Table the user may write.
@@ -293,8 +285,12 @@ class TableActionView(ProfileOwnerRequiredMixin, View):
             check = refusal.preflight
             if again != names:
                 check = table_actions.preflight(user, action, again, params)
-            forbidden = action in table_actions.ORGANIZATION_ACTIONS and any(
-                group.reason in ROLE_REFUSALS for group in refusal.refused
+            # A refusal for the role answers the Organization actions 403,
+            # as the permission service's ``NotAllowed`` does in the access
+            # drawer and the API (WF-08 decision 13); the other actions keep
+            # answering every refusal 409.
+            forbidden = (
+                action in table_actions.ORGANIZATION_ACTIONS and refusal.for_role
             )
             response = self._dialog(
                 request,

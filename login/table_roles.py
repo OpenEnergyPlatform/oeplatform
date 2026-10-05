@@ -415,7 +415,7 @@ def _level(raw, roles) -> int:
     return level
 
 
-def _organization_level(raw, roles=ORGANIZATION_ROLES) -> int:
+def organization_level(raw, roles=ORGANIZATION_ROLES) -> int:
     """``raw`` as a role an Organization may be given. A known role above
     the ceiling gets its own reason rather than the list of roles."""
     try:
@@ -449,7 +449,9 @@ def _guard(access, kind, pk, after):
 
 
 def _title(table) -> str:
-    return f"\u201c{table.human_readable_name or table.name}\u201d"
+    """A Table's title, or an Organization's name, in quotation marks."""
+    name = getattr(table, "human_readable_name", None) or table.name
+    return f"\u201c{name}\u201d"
 
 
 def _confirm(access, kind, pk, after, confirmed, action):
@@ -556,7 +558,7 @@ def add(viewer, table, kind, who, level, via="dashboard"):
                 )
             pk, name = holder.pk, holder.name
         elif kind == ORGANIZATION:
-            level = _organization_level(level)
+            level = organization_level(level)
             organization = (
                 Organization.objects.filter(pk=who, memberships__user=viewer).first()
                 if str(who or "").isdigit()
@@ -591,7 +593,7 @@ def change(viewer, table, key, level, via="dashboard", confirmed=False):
         if holder is None:
             raise InvalidRequest("They no longer hold a role on this table.", "holder")
         if kind == ORGANIZATION:
-            level = _organization_level(level, holder.roles)
+            level = organization_level(level, holder.roles)
         else:
             level = _level(level, holder.roles)
         if level == holder.level:
@@ -674,10 +676,12 @@ def leave(viewer, table, via="dashboard", confirmed=False):
 #   decision 15 asks for it here, where a batch would otherwise strip the last
 #   Admin from Tables nobody looked at one by one.
 # - Removing an Organization the viewer belongs to can take Tables off their
-#   dashboard. That is one confirmation for the batch, naming those Tables
-#   (``ConfirmationNeeded``); ``confirmed`` is the names the viewer was shown,
-#   or True for all, so a Table that joins that list after the viewer
-#   confirmed is asked about again rather than lost unseen.
+#   dashboard, or take their Admin on Tables they keep. That is one
+#   confirmation for the batch, naming those Tables (``ConfirmationNeeded``),
+#   as losing one's own Admin or access is for one Table; ``confirmed`` is
+#   the names the viewer was shown, or True for all, so a Table that joins
+#   that list after the viewer confirmed is asked about again rather than
+#   lost unseen.
 # --------------------------------------------------------------------------
 
 ONLY_ADMIN_THERE = (
@@ -697,8 +701,10 @@ class OrganizationPlan:
     already), ``not_held`` (removing: there is nothing to remove) and
     ``guarded`` (removing: the Organization's old Admin grant is the only
     Admin). ``lose_access`` are the Tables of ``changes`` a removal would take
-    off the viewer's dashboard. ``members`` is the Organization's member
-    count: every one of them gains, or loses, what it holds."""
+    off the viewer's dashboard, ``lose_admin`` those it keeps there but on
+    which the viewer would no longer be a Table admin. ``members`` is the
+    Organization's member count: every one of them gains, or loses, what it
+    holds."""
 
     organization: Organization
     level: int = None
@@ -709,6 +715,7 @@ class OrganizationPlan:
     not_held: list = field(default_factory=list)
     guarded: list = field(default_factory=list)
     lose_access: list = field(default_factory=list)
+    lose_admin: list = field(default_factory=list)
 
     @property
     def tables(self) -> list:
@@ -735,10 +742,32 @@ def organizations_on(tables):
     return _with_members(Organization.objects.filter(pk__in=ids)).order_by("name")
 
 
-def organization_level(raw) -> int:
-    """``raw`` as a role an Organization may be given, or ``InvalidRequest``
-    (field ``level``)."""
-    return _organization_level(raw)
+def _organization_in(organizations, value):
+    """The Organization ``value`` names (an Organization or its id) among
+    ``organizations``, or None."""
+    pk = getattr(value, "pk", value)
+    return organizations.filter(pk=pk).first() if str(pk or "").isdigit() else None
+
+
+def own_organization(viewer, value):
+    """The Organization ``value`` names, if ``viewer`` is a member of it, or
+    ``InvalidRequest`` (field ``organization``)."""
+    organization = _organization_in(own_organizations(viewer), value)
+    if organization is None:
+        raise InvalidRequest(
+            "You can share a table only with organizations you are a member of.",
+            "organization",
+        )
+    return organization
+
+
+def any_organization(value):
+    """The Organization ``value`` names, or ``InvalidRequest``: removing one
+    needs no membership."""
+    organization = _organization_in(Organization.objects.all(), value)
+    if organization is None:
+        raise InvalidRequest("Choose an organization.", "organization")
+    return organization
 
 
 def plan_organization(viewer, tables, organization, level=None) -> OrganizationPlan:
@@ -772,23 +801,26 @@ def plan_organization(viewer, tables, organization, level=None) -> OrganizationP
         member = Membership.objects.filter(
             user=viewer, group_id=organization.pk
         ).exists()
-        # what still lists a Table on the viewer's dashboard once the
-        # Organization is gone: their own grant, or another Organization's
-        kept = set()
+        # the viewer's role on each Table once the Organization is gone:
+        # their own grant, or another of their Organizations'
+        kept = {}
         if member:
-            kept = set(
+            grants_kept = list(
                 UserPermission.objects.filter(
-                    holder=viewer, table_id__in=ids, level__gte=WRITE_PERM
-                ).values_list("table_id", flat=True)
-            ) | set(
+                    holder=viewer, table_id__in=ids
+                ).values_list("table_id", "level")
+            )
+            grants_kept += (
                 GroupPermission.objects.filter(
-                    holder__memberships__user=viewer,
-                    table_id__in=ids,
-                    level__gte=WRITE_PERM,
+                    holder__memberships__user=viewer, table_id__in=ids
                 )
                 .exclude(holder_id=organization.pk)
-                .values_list("table_id", flat=True)
+                .values_list("table_id", "level")
             )
+            for table_id, held in grants_kept:
+                kept[table_id] = max(kept.get(table_id, NO_PERM), held)
+        # a platform admin keeps Table admin everywhere, but not the listing
+        everywhere = member and _everywhere_admin(viewer)
     for table in tables:
         before = grants.get(table.pk)
         if levels[table.pk] < ADMIN_PERM:
@@ -804,8 +836,13 @@ def plan_organization(viewer, tables, organization, level=None) -> OrganizationP
             plan.guarded.append(table)
         else:
             plan.changes.append((table, before))
-            if member and before >= WRITE_PERM and table.pk not in kept:
+            after = kept.get(table.pk, NO_PERM)
+            if not member:
+                continue
+            if before >= WRITE_PERM and after < WRITE_PERM:
                 plan.lose_access.append(table)
+            elif before >= ADMIN_PERM and after < ADMIN_PERM and not everywhere:
+                plan.lose_admin.append(table)
     return plan
 
 
@@ -862,17 +899,7 @@ def share_with_organization(viewer, tables, organization, level, via="dashboard"
     written, an ``add`` or a ``change``; the Tables where it holds that role
     or more already are left as they are (``plan_organization``)."""
     level = organization_level(level)
-    pk = getattr(organization, "pk", organization)
-    organization = (
-        own_organizations(viewer).filter(pk=pk).first()
-        if str(pk or "").isdigit()
-        else None
-    )
-    if organization is None:
-        raise InvalidRequest(
-            "You can share a table only with organizations you are a member of.",
-            "organization",
-        )
+    organization = own_organization(viewer, organization)
     with transaction.atomic():
         _lock_tables(tables)
         plan = plan_organization(viewer, tables, organization, level)
@@ -887,36 +914,29 @@ def remove_organization(
     holds one, in one transaction. Refused whole (``LastAdmin``) when its old
     Admin grant is the only Admin of one of them, and asks first
     (``ConfirmationNeeded``) when the viewer would lose a Table from their
-    dashboard that ``confirmed`` (names, or True for all) does not hold.
+    dashboard, or their Admin on one, that ``confirmed`` (names, or True for
+    all) does not hold.
     Returns one ``Change`` per Table written."""
     with transaction.atomic():
         _lock_tables(tables)
         plan = plan_organization(viewer, tables, organization)
         _refuse_not_admin(plan)
-        name = _title_of(organization)
+        name = _title(organization)
         if plan.guarded:
             raise LastAdmin(
                 ONLY_ADMIN_THERE.format(organization=name)
                 + f": {_quoted(plan.guarded)}.",
                 plan.guarded,
             )
-        unasked = [
-            table
-            for table in plan.lose_access
-            if confirmed is not True and table.name not in set(confirmed)
-        ]
-        if unasked:
-            raise ConfirmationNeeded(
-                f"You will lose access to {_quoted(unasked)}. "
-                + (
-                    "It will disappear from your dashboard."
-                    if len(unasked) == 1
-                    else "They will disappear from your dashboard."
-                ),
-                unasked,
-            )
+        if confirmed is not True:
+            unasked = [
+                table
+                for table in plan.lose_access + plan.lose_admin
+                if table.name not in set(confirmed)
+            ]
+            if unasked:
+                raise ConfirmationNeeded(
+                    f"You will lose access to, or Admin on, {_quoted(unasked)}.",
+                    unasked,
+                )
         return _write_all(viewer, plan, via)
-
-
-def _title_of(organization) -> str:
-    return f"“{organization.name}”"

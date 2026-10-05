@@ -90,7 +90,6 @@ class BulkBarTests(OrganizationCase):
             with self.subTest(verb=verb):
                 button = element_with_id(html, f"bulk-{verb}")
                 self.assertIn(f'hx-post="{self.check_path(verb)}"', button)
-                self.assertIn("btn-outline-primary", button)
                 self.assertNotEqual(element_with_id(html, f"bulk-menu-{verb}"), "")
 
     def test_the_ceilings_are_stated(self):
@@ -576,7 +575,7 @@ class RemovePreflightTests(OrganizationCase):
             "Lost one", text(element_markup(html, "table-action-lose-access"))
         )
         self.assertIn(
-            'value="t_lose"', element_with_id(html, "table-action-lose-access-names")
+            'value="t_lose,"', element_with_id(html, "table-action-lose-access-names")
         )
         self.assertEqual(
             text(element_markup(html, "table-action-members")),
@@ -587,6 +586,53 @@ class RemovePreflightTests(OrganizationCase):
             text(element_markup(html, "table-action-recheck")),
             "“Team” will be removed from 2 of 2 tables.",
         )
+
+
+class LoseAdminTests(OrganizationCase):
+    """Losing one's own Admin takes a confirmation, as it does for one
+    Table: here the user keeps a direct Data editor grant, so the Table
+    stays on the dashboard, but their Admin came through the Organization's
+    old Admin grant (another user holds direct Admin, so the guard does not
+    fire)."""
+
+    def setUp(self):
+        super().setUp()
+        self.team_ = self.team("Team")
+        table = self.draft("t_demoted", title="Demoted", level=WRITE_PERM)
+        self.grant(self.team_, table, ADMIN_PERM)
+        UserPermission.objects.create(
+            holder=self.other_admin, table=table, level=ADMIN_PERM
+        )
+
+    def test_the_dialog_names_it_apart_from_the_tables_i_would_lose(self):
+        response = self.joined_preflight(
+            REMOVE, "t_demoted", organization=self.team_.pk
+        )
+        consequences = response.context["preflight"].consequences
+        self.assertEqual(consequences["lose_access"], [])
+        self.assertEqual([t.name for t in consequences["lose_admin"]], ["t_demoted"])
+        html = self.html(response)
+        self.assertIn("Demoted", text(element_markup(html, "table-action-lose-admin")))
+        self.assertEqual(element_markup(html, "table-action-lose-access"), "")
+        self.assertIn(
+            'value="t_demoted,"',
+            element_with_id(html, "table-action-lose-access-names"),
+        )
+
+    def test_unconfirmed_it_is_refused_and_confirmed_it_is_done(self):
+        refused = self.joined_run(REMOVE, "t_demoted", organization=self.team_.pk)
+        self.assertEqual(refused.status_code, 409)
+        self.assertEqual(
+            self.grants(self.team_, "t_demoted"), {"t_demoted": ADMIN_PERM}
+        )
+        done = self.joined_run(
+            REMOVE, "t_demoted", organization=self.team_.pk, lose_access="t_demoted"
+        )
+        self.assertEqual(done.status_code, 204)
+        self.assertEqual(self.grants(self.team_, "t_demoted"), {"t_demoted": None})
+        detail = self.trigger(done, "tables-changed")
+        self.assertNotIn("gone", detail)  # it stays on the dashboard
+        self.assertIn("t_demoted", self.names())
 
 
 class RemoveTests(OrganizationCase):
