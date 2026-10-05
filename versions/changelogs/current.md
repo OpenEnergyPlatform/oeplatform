@@ -168,6 +168,17 @@ SPDX-License-Identifier: CC0-1.0
   tables already in it (add) or not in it (remove); at most 2,500 tables are
   added or removed at once, all or none
   [(#2565)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2565)
+- Tables tab: the bulk bar can share the selected tables with one of your
+  organizations as Data editor or Data maintainer, or remove an organization
+  from them. A share only ever raises a role: tables where the organization
+  holds that role or more already stay unchanged and are named. A removal leaves
+  out the tables where the organization's old Admin grant is the only Admin
+  ("give someone Admin there first") and names the tables you would lose access
+  to before you confirm. Both dialogs state the organization's member count,
+  re-check the selection as you choose, leave out tables you are not a Table
+  admin on, and write all tables or none, at most 2,500 at once, with one log
+  line per table changed
+  [(#2568)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2568)
 
 ## Bugs
 

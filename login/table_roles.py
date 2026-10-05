@@ -135,11 +135,13 @@ def role_label(level) -> str:
 
 class AccessError(Exception):
     """Base of the ways a write can decline. ``message`` is what the user is
-    told; nothing was written."""
+    told; nothing was written. A bulk write names the Tables it declined
+    for in ``tables``."""
 
-    def __init__(self, message):
+    def __init__(self, message, tables=()):
         super().__init__(message)
         self.message = message
+        self.tables = list(tables)
 
 
 class InvalidRequest(AccessError):
@@ -156,10 +158,10 @@ class NotAllowed(AccessError):
 
 class LastAdmin(AccessError):
     """The change would leave the Table without a user holding direct
-    Admin."""
+    Admin (in a bulk removal: without any Admin at all)."""
 
-    def __init__(self):
-        super().__init__(LAST_ADMIN)
+    def __init__(self, message=LAST_ADMIN, tables=()):
+        super().__init__(message, tables)
 
 
 class ConfirmationNeeded(AccessError):
@@ -649,3 +651,272 @@ def leave(viewer, table, via="dashboard", confirmed=False):
         return _write(
             viewer, table, LEAVE, USER, own.pk, own.name, own.level, None, via, access
         )
+
+
+# --------------------------------------------------------------------------
+# Bulk: one Organization across many Tables (#2568, WF-08 decisions 11-15).
+#
+# Organizations only: a bulk grant to a user would mostly be a bulk Admin
+# grant, around "Admin is given by name". Both writes are all or nothing in
+# one transaction holding a row lock on every Table, with the checks in the
+# single-Table order: parameters, Table admin on EVERY Table (``NotAllowed``,
+# naming the Tables, nothing written), the guard, the confirmation. One log
+# line per Table written; a Table left as it is writes nothing and logs
+# nothing.
+#
+# - Sharing only ever raises: where the Organization holds the role or more
+#   already (an old Admin grant included) the Table stays unchanged, because
+#   "set exactly this role" would quietly take a delete right away. Lowering
+#   stays a per-Table change in the drawer.
+# - Removing leaves out a Table whose only Admin is that Organization's old
+#   Admin grant (``LastAdmin``). This is stricter than ``remove`` for one
+#   Table, whose guard counts users only and so lets that grant go; WF-08
+#   decision 15 asks for it here, where a batch would otherwise strip the last
+#   Admin from Tables nobody looked at one by one.
+# - Removing an Organization the viewer belongs to can take Tables off their
+#   dashboard. That is one confirmation for the batch, naming those Tables
+#   (``ConfirmationNeeded``); ``confirmed`` is the names the viewer was shown,
+#   or True for all, so a Table that joins that list after the viewer
+#   confirmed is asked about again rather than lost unseen.
+# --------------------------------------------------------------------------
+
+ONLY_ADMIN_THERE = (
+    "{organization}'s Admin is the only Admin there. Give someone Admin there first"
+)
+NOT_HELD = "{organization} holds no role on it"
+
+
+@dataclass
+class OrganizationPlan:
+    """What sharing Tables with ``organization`` at ``level`` (removing it
+    from them: ``level`` None) would do for ``viewer``, Table by Table.
+
+    ``changes`` are the writes, ``(table, level before or None)``. The rest
+    say why a Table would not be written: ``not_admin`` (the viewer is not a
+    Table admin there), ``unchanged`` (sharing: the role or more is held
+    already), ``not_held`` (removing: there is nothing to remove) and
+    ``guarded`` (removing: the Organization's old Admin grant is the only
+    Admin). ``lose_access`` are the Tables of ``changes`` a removal would take
+    off the viewer's dashboard. ``members`` is the Organization's member
+    count: every one of them gains, or loses, what it holds."""
+
+    organization: Organization
+    level: int = None
+    members: int = 0
+    changes: list = field(default_factory=list)
+    not_admin: list = field(default_factory=list)
+    unchanged: list = field(default_factory=list)
+    not_held: list = field(default_factory=list)
+    guarded: list = field(default_factory=list)
+    lose_access: list = field(default_factory=list)
+
+    @property
+    def tables(self) -> list:
+        return [table for table, _ in self.changes]
+
+
+def _with_members(organizations):
+    return organizations.annotate(members=Count("memberships", distinct=True))
+
+
+def own_organizations(viewer):
+    """The Organizations ``viewer`` is a member of, at any membership
+    level: the ones they may share a Table with. By name, each with its
+    member count (``members``)."""
+    ids = Membership.objects.filter(user=viewer).values("group_id")
+    return _with_members(Organization.objects.filter(pk__in=ids)).order_by("name")
+
+
+def organizations_on(tables):
+    """The Organizations holding a role on at least one of ``tables``: the
+    ones that can be removed from them. Membership is not needed for that,
+    as for one Table. By name, each with its member count."""
+    ids = GroupPermission.objects.filter(table__in=tables).values("holder_id")
+    return _with_members(Organization.objects.filter(pk__in=ids)).order_by("name")
+
+
+def organization_level(raw) -> int:
+    """``raw`` as a role an Organization may be given, or ``InvalidRequest``
+    (field ``level``)."""
+    return _organization_level(raw)
+
+
+def plan_organization(viewer, tables, organization, level=None) -> OrganizationPlan:
+    """What sharing ``tables`` with ``organization`` at ``level``, or
+    removing it from them (``level`` None), would do. Writes nothing, and
+    takes the parameters as they are: ``level`` is checked by the writes.
+    A constant number of queries whatever the number of Tables."""
+    ids = [table.pk for table in tables]
+    levels = table_levels(viewer, tables)
+    grants = dict(
+        GroupPermission.objects.filter(
+            holder_id=organization.pk, table_id__in=ids
+        ).values_list("table_id", "level")
+    )
+    plan = OrganizationPlan(
+        organization=organization,
+        level=level,
+        members=Membership.objects.filter(group_id=organization.pk).count(),
+    )
+    sharing = level is not None
+    if not sharing:
+        admins = set(
+            UserPermission.objects.filter(
+                table_id__in=ids, level__gte=ADMIN_PERM
+            ).values_list("table_id", flat=True)
+        ) | set(
+            GroupPermission.objects.filter(table_id__in=ids, level__gte=ADMIN_PERM)
+            .exclude(holder_id=organization.pk)
+            .values_list("table_id", flat=True)
+        )
+        member = Membership.objects.filter(
+            user=viewer, group_id=organization.pk
+        ).exists()
+        # what still lists a Table on the viewer's dashboard once the
+        # Organization is gone: their own grant, or another Organization's
+        kept = set()
+        if member:
+            kept = set(
+                UserPermission.objects.filter(
+                    holder=viewer, table_id__in=ids, level__gte=WRITE_PERM
+                ).values_list("table_id", flat=True)
+            ) | set(
+                GroupPermission.objects.filter(
+                    holder__memberships__user=viewer,
+                    table_id__in=ids,
+                    level__gte=WRITE_PERM,
+                )
+                .exclude(holder_id=organization.pk)
+                .values_list("table_id", flat=True)
+            )
+    for table in tables:
+        before = grants.get(table.pk)
+        if levels[table.pk] < ADMIN_PERM:
+            plan.not_admin.append(table)
+        elif sharing:
+            if before is not None and before >= level:
+                plan.unchanged.append(table)
+            else:
+                plan.changes.append((table, before))
+        elif before is None:
+            plan.not_held.append(table)
+        elif before >= ADMIN_PERM and table.pk not in admins:
+            plan.guarded.append(table)
+        else:
+            plan.changes.append((table, before))
+            if member and before >= WRITE_PERM and table.pk not in kept:
+                plan.lose_access.append(table)
+    return plan
+
+
+def _quoted(tables) -> str:
+    return ", ".join(_title(table) for table in tables)
+
+
+def _lock_tables(tables):
+    """Lock ``tables`` for this transaction, in one order, so two bulk
+    writes over overlapping selections wait for each other instead of
+    deadlocking."""
+    if tables:
+        model = type(tables[0])
+        list(
+            model.objects.select_for_update()
+            .filter(pk__in=[table.pk for table in tables])
+            .order_by("pk")
+            .values_list("pk", flat=True)
+        )
+
+
+def _refuse_not_admin(plan):
+    if plan.not_admin:
+        raise NotAllowed(
+            f"{ONLY_ADMINS} You are not a Table admin on "
+            f"{_quoted(plan.not_admin)}.",
+            plan.not_admin,
+        )
+
+
+def _write_all(viewer, plan, via) -> list:
+    organization = plan.organization
+    return [
+        _write(
+            viewer,
+            table,
+            REMOVE if plan.level is None else ADD if before is None else CHANGE,
+            ORGANIZATION,
+            organization.pk,
+            organization.name,
+            before,
+            plan.level,
+            via,
+            None,
+        )
+        for table, before in plan.changes
+    ]
+
+
+def share_with_organization(viewer, tables, organization, level, via="dashboard"):
+    """Give ``organization`` the role ``level`` on every one of ``tables``
+    where it holds less, in one transaction. ``organization`` is one of the
+    viewer's own (an Organization or its id). Returns one ``Change`` per Table
+    written, an ``add`` or a ``change``; the Tables where it holds that role
+    or more already are left as they are (``plan_organization``)."""
+    level = organization_level(level)
+    pk = getattr(organization, "pk", organization)
+    organization = (
+        own_organizations(viewer).filter(pk=pk).first()
+        if str(pk or "").isdigit()
+        else None
+    )
+    if organization is None:
+        raise InvalidRequest(
+            "You can share a table only with organizations you are a member of.",
+            "organization",
+        )
+    with transaction.atomic():
+        _lock_tables(tables)
+        plan = plan_organization(viewer, tables, organization, level)
+        _refuse_not_admin(plan)
+        return _write_all(viewer, plan, via)
+
+
+def remove_organization(
+    viewer, tables, organization, via="dashboard", confirmed=()
+) -> list:
+    """Take ``organization``'s role away on every one of ``tables`` where it
+    holds one, in one transaction. Refused whole (``LastAdmin``) when its old
+    Admin grant is the only Admin of one of them, and asks first
+    (``ConfirmationNeeded``) when the viewer would lose a Table from their
+    dashboard that ``confirmed`` (names, or True for all) does not hold.
+    Returns one ``Change`` per Table written."""
+    with transaction.atomic():
+        _lock_tables(tables)
+        plan = plan_organization(viewer, tables, organization)
+        _refuse_not_admin(plan)
+        name = _title_of(organization)
+        if plan.guarded:
+            raise LastAdmin(
+                ONLY_ADMIN_THERE.format(organization=name)
+                + f": {_quoted(plan.guarded)}.",
+                plan.guarded,
+            )
+        unasked = [
+            table
+            for table in plan.lose_access
+            if confirmed is not True and table.name not in set(confirmed)
+        ]
+        if unasked:
+            raise ConfirmationNeeded(
+                f"You will lose access to {_quoted(unasked)}. "
+                + (
+                    "It will disappear from your dashboard."
+                    if len(unasked) == 1
+                    else "They will disappear from your dashboard."
+                ),
+                unasked,
+            )
+        return _write_all(viewer, plan, via)
+
+
+def _title_of(organization) -> str:
+    return f"“{organization.name}”"
