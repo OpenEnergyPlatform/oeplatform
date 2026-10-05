@@ -33,30 +33,6 @@ METADATA_HIDDEN_FIELDS = [
 ]
 
 
-def save_metadata_to_db(table: str, updated_metadata):
-    """
-    Save updated metadata for a specific table in the OEP database.
-
-    Args:
-        table (str): The name of the table in the OEP.
-        updated_metadata (dict): The updated metadata dictionary.
-
-    Note:
-        This function loads the table object from the database,
-        updates its metadata field, and then saves the updated
-        table object back to the database.
-    """
-
-    # Load the table object
-    table_obj = Table.load(name=table)
-
-    # Update the oemetadata field
-    table_obj.oemetadata = updated_metadata
-
-    # Save the updated table object
-    table_obj.save()
-
-
 def load_metadata_from_db(table: str) -> dict:
     """
     Load metadata for a specific table from the OEP database.

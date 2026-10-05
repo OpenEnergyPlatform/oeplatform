@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING, Literal, Mapping, Union
 
 from django.contrib.postgres.search import SearchVectorField
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 from django.db.models import (
     BooleanField,
     CharField,
@@ -41,7 +41,7 @@ from django.urls import reverse
 from django.utils import timezone
 from omi.license import LicenseError, validate_oemetadata_licenses
 
-from api.error import APIError
+from api.error import APIError, reflectable_cause
 from api.parser import parse_table_parts
 from dataedit.utils import get_badge_icon_path, validate_badge_name_match
 from login.permissions import ADMIN_PERM, NO_PERM
@@ -190,6 +190,31 @@ class Table(Tagable):
     # For now, we only set it on creation
     date_updated = DateTimeField(auto_now_add=True, null=True)
 
+    # The Publish gate's verdict (dataedit.publish_gate), stored so a list can
+    # filter and sort on it. Recomputed on every write through
+    # api.actions.set_table_metadata and by the recompute_publish_gate
+    # command; NULL until that command first ran. Publishing never reads it.
+    publishable = BooleanField(null=True)
+
+    # When the Table's content last changed, in two halves: its rows or
+    # structure, and its metadata. Each is stamped explicitly by the write
+    # that changes it, never by auto_now, which would fire on every save
+    # (publishing included) and miss every data write, since none saves the
+    # Table. The data half through ``stamp_data_modified``, the metadata half
+    # by api.actions.set_table_metadata in the save it does anyway. Publish,
+    # unpublish, embargo and role changes stamp neither. NULL: no change
+    # recorded since the fields were added.
+    data_modified = DateTimeField(null=True)
+    metadata_modified = DateTimeField(null=True)
+
+    # When the Table was created. ``date_updated`` holds that only for Tables
+    # created after migration 0044 (2025-10-30), which filled it for every
+    # older one from dates declared in its metadata; for those the creation
+    # time was never recorded anywhere, so this is NULL ("before Nov 2025").
+    # Migration 0057 drew the line. ``date_updated`` stays as it is, because
+    # the public topic list reads it.
+    created = DateTimeField(auto_now_add=True, null=True)
+
     embargos: QuerySet["Embargo"]  # related_name, for static type checking
     userpermission_set: QuerySet[
         "UserPermission"  # TODO: import
@@ -202,11 +227,39 @@ class Table(Tagable):
         unique_together = (("name",),)
 
     def delete(self, *args, **kwargs):
-        super().delete(*args, **kwargs)
+        self.delete_record(*args, **kwargs)
+        self.drop_oedb_table()
+
+    def delete_record(self, *args, **kwargs):
+        """Delete the Django rows only (this Table, everything that cascades
+        from it, and its peer reviews), leaving the OEDB table in place. For
+        a caller that drops it once its own transaction has committed, as
+        the table action service does: the two databases share no
+        transaction.
+
+        A peer review names its Table by ``PeerReview.table``, a name rather
+        than a foreign key, so nothing cascades to it: left behind, it would
+        pass to the next Table created under that name, review state and
+        badge included. Deleting the reviews deletes their
+        ``PeerReviewManager`` and ``ReviewRound`` rows with them (both
+        ``on_delete=CASCADE``, which Django's collector follows for a
+        queryset delete too)."""
+        with transaction.atomic():
+            PeerReview.objects.filter(table=self.name).delete()
+            return super().delete(*args, **kwargs)
+
+    def drop_oedb_table(self, lock_timeout=None):
+        """Drop the OEDB table and its meta tables, if they exist. Needs
+        only the name and the schema, so it works once the Django row is
+        gone. With ``lock_timeout`` (a Postgres duration) it gives up on a
+        lock held elsewhere after that long and raises, and the tables after
+        the one it gave up on are not tried; without, it waits as long as it
+        takes. A request bounds it (``table_actions.DROP_LOCK_TIMEOUT``); a
+        management command such as ``clear_sandbox`` does not."""
         # ensure oedb tables are deleted, so we use ADMIN_PERM
         self._get_oeb_table_proxy_w_permission(
             permission_level=ADMIN_PERM
-        ).drop_if_exists()
+        ).drop_if_exists(lock_timeout=lock_timeout)
 
     def save(self, *args, **kwargs):
         # validate name on first save, never change name again
@@ -218,6 +271,22 @@ class Table(Tagable):
             if not is_valid_name(self.name):
                 raise ValidationError(f"Invalid name: {self.name}")
         super().save(*args, **kwargs)
+
+    def stamp_data_modified(self):
+        """Record that this Table's rows or structure changed just now.
+
+        One UPDATE of the one field, not ``save()``: it skips save's name
+        check and leaves every other field as the database holds it. Called
+        by every data write: Apply of the Edit Journal, a Bulk Upload that
+        succeeded, and column and constraint DDL. The stamp commits on its
+        own, so a row write inside a client's transaction that is later
+        rolled back still leaves one: "someone wrote here at T".
+
+        The time is the application's clock, the one the metadata half is
+        stamped with, so the two halves can be compared. The database's
+        ``now()`` would be the start of the surrounding transaction.
+        """
+        Table.objects.filter(pk=self.pk).update(data_modified=timezone.now())
 
     def get_absolute_url(self):
         return reverse("dataedit:view", kwargs={"pk": self.pk})
@@ -278,7 +347,13 @@ class Table(Tagable):
                 # delete django object which will also automatically clean up
                 # left over oedb tables
                 table_obj.delete()
-            raise APIError(f"Could not create table {name}")
+            # the full exception stays in the log either way; the client only
+            # gets the cause when it is safe to disclose
+            cause = reflectable_cause(exc)
+            message = f"Could not create table {name}"
+            if cause:
+                message = f"{message}: {cause}"
+            raise APIError(message)
 
         return table_obj
 
@@ -487,10 +562,12 @@ class Dataset(models.Model):
         The list is never persisted on the dataset: tables own their
         resource metadata and every read assembles the current state, so
         dataset reads can not go stale after table metadata edits.
+
+        Ordered by table name, matching the dataset detail page.
         """
         return [
             table.oemetadata["resources"][0]
-            for table in self.tables.all()
+            for table in self.tables.order_by("name")
             if table.oemetadata and table.oemetadata.get("resources")
         ]
 
@@ -547,8 +624,38 @@ class View(models.Model):
 
     filter: QuerySet["Filter"]  # related_name, for static type checking
 
+    class Meta:
+        unique_together = [("table", "type", "name")]
+
     def __str__(self):
         return '{}--"{}"({})'.format(self.table, self.name, self.type.upper())
+
+    @classmethod
+    def get_or_create_default(cls, table: str) -> "View":
+        """The table page's default view, created on first use.
+
+        The page asks for this on every visit, so the steady state must be one
+        SELECT: before #2217 it inserted a fresh view each time. Only a table
+        view qualifies - the graph form can mark a graph default, and that must
+        not take over the page's Table tab.
+        """
+        view = (
+            cls.objects.filter(table=table, type="table", is_default=True)
+            .order_by("pk")
+            .last()
+        )
+        if view is not None:
+            return view
+        # get_or_create rather than create: two first visits at the same time
+        # would otherwise both insert and the second hit the unique constraint.
+        view, created = cls.objects.get_or_create(
+            table=table, type="table", name="default", defaults={"is_default": True}
+        )
+        if not created and not view.is_default:
+            # a view named "default" that is not marked as such: mark it, once
+            view.is_default = True
+            view.save(update_fields=["is_default"])
+        return view
 
 
 class Filter(models.Model):
@@ -595,6 +702,18 @@ class PeerReview(models.Model):
 
     review_id: QuerySet["PeerReviewManager"]  # related_name, for static type checking
     rounds: QuerySet["ReviewRound"]  # related_name, for static type checking
+
+    def deletable_by(self, user) -> bool:
+        """Whether `user` may delete this peer review.
+
+        Its reviewer and platform admins may, whether or not the review is
+        finished; nobody else.
+        """
+        if not getattr(user, "is_authenticated", False):
+            return False
+        if getattr(user, "is_admin", False):
+            return True
+        return self.reviewer_id is not None and self.reviewer_id == user.pk
 
     # laden
     @classmethod
@@ -1085,3 +1204,49 @@ class ReviewRound(models.Model):
 
     def __str__(self) -> str:
         return f"ReviewRound(opr={self.opr_id}, seq={self.sequence}, {self.role})"
+
+
+class BulkLoadEvent(models.Model):
+    """Audit record of one bulk upload attempt (issue #2362).
+
+    Bulk uploads bypass the per-row edit journal; this event - including the
+    id range the loaded rows landed in - is their only provenance, and the
+    id range is what makes a poisoned or mistaken upload deletable as a
+    block. Failed attempts are recorded too, so retry storms and abuse are
+    visible without log-grepping.
+    """
+
+    STATUS_SUCCESS = "success"
+    STATUS_VALIDATION_ERROR = "validation-error"
+    STATUS_COPY_ERROR = "copy-error"
+    STATUS_EMBARGO = "embargo"
+    STATUS_SIZE_CAP = "size-cap"
+    STATUS_STALL = "stall"
+    STATUS_ERROR = "error"
+    STATUS_CHOICES = [
+        (STATUS_SUCCESS, "Success"),
+        (STATUS_VALIDATION_ERROR, "Validation error"),
+        (STATUS_COPY_ERROR, "Copy error"),
+        (STATUS_EMBARGO, "Embargo"),
+        (STATUS_SIZE_CAP, "Size cap exceeded"),
+        (STATUS_STALL, "Stalled transfer"),
+        (STATUS_ERROR, "Error"),
+    ]
+
+    table_name = CharField(max_length=1000, null=False)
+    user = ForeignKey(
+        "login.myuser",
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="bulk_load_events",
+    )
+    created = DateTimeField(auto_now_add=True)
+    status = CharField(max_length=32, choices=STATUS_CHOICES)
+    error_message = models.TextField(null=True, blank=True)
+    bytes_received = models.BigIntegerField(default=0)
+    row_count = models.BigIntegerField(null=True, blank=True)
+    id_min = models.BigIntegerField(null=True, blank=True)
+    id_max = models.BigIntegerField(null=True, blank=True)
+
+    def __str__(self) -> str:
+        return f"BulkLoadEvent({self.table_name}, {self.status}, {self.created})"

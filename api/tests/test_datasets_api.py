@@ -4,6 +4,7 @@
 
 from copy import deepcopy
 from datetime import timedelta
+from unittest import mock
 
 from django.utils import timezone
 from oemetadata.latest.template import OEMETADATA_LATEST_TEMPLATE
@@ -11,7 +12,14 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from dataedit.models import Dataset, Embargo, Table, Topic
-from login.models import WRITE_PERM, UserPermission, myuser
+from login.models import (
+    WRITE_PERM,
+    GroupPermission,
+    Membership,
+    Organization,
+    UserPermission,
+    myuser,
+)
 
 
 class DatasetOwnershipTests(APITestCase):
@@ -296,6 +304,85 @@ class DatasetCurationRulesTests(APITestCase):
         response = self.assign("t_own_embargoed")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(self.dataset.tables.count(), 1)
+
+    def test_a_data_editor_through_an_organization_may_assign_a_draft(self):
+        """The widened rule (#2563): write through an Organization counts,
+        as it does in the dashboard that lists the Table."""
+        organization = Organization.objects.create(name="Curator's team")
+        Membership.objects.create(user=self.curator, group=organization)
+        table = self.make_table("t_group_draft", published=False)
+        GroupPermission.objects.create(
+            holder=organization, table=table, level=WRITE_PERM
+        )
+
+        response = self.assign("t_group_draft")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(self.dataset.tables.count(), 1)
+
+    def test_an_organization_the_user_left_gives_nothing(self):
+        organization = Organization.objects.create(name="Former team")
+        table = self.make_table("t_former_group_draft", published=False)
+        GroupPermission.objects.create(
+            holder=organization, table=table, level=WRITE_PERM
+        )
+
+        response = self.assign("t_former_group_draft")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_a_platform_admin_has_no_exemption_for_a_draft(self):
+        self.curator.is_admin = True
+        self.curator.save()
+        self.make_table("t_admins_draft", published=False, owner=self.table_owner)
+
+        response = self.assign("t_admins_draft")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(self.dataset.tables.count(), 0)
+
+    def test_assign_is_all_or_nothing(self):
+        from api import views
+
+        self.make_table("t_first")
+        self.make_table("t_second")
+        real = views.assign_table
+
+        def fail_on_second(dataset, table):
+            if table.name == "t_second":
+                raise RuntimeError("the database went away")
+            real(dataset, table)
+
+        self.client.raise_request_exception = False
+        with self.assertLogs("django.request", "ERROR"):
+            with mock.patch.object(views, "assign_table", fail_on_second):
+                response = self.client.post(
+                    "/api/v0/datasets/curated_dataset/assign-tables/",
+                    {"tables": [{"name": "t_first"}, {"name": "t_second"}]},
+                    format="json",
+                )
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(self.dataset.tables.count(), 0)
+
+    def test_unassign_is_all_or_nothing(self):
+        first = self.make_table("t_member_a")
+        second = self.make_table("t_member_b")
+        self.dataset.tables.add(first, second)
+        manager = type(self.dataset.tables)
+        real = manager.remove
+
+        def fail_on_second(related, *tables, **kwargs):
+            if any(table.name == "t_member_b" for table in tables):
+                raise RuntimeError("the database went away")
+            return real(related, *tables, **kwargs)
+
+        self.client.raise_request_exception = False
+        with self.assertLogs("django.request", "ERROR"):
+            with mock.patch.object(manager, "remove", fail_on_second):
+                response = self.client.post(
+                    "/api/v0/datasets/curated_dataset/unassign-tables/",
+                    {"tables": [{"name": "t_member_a"}, {"name": "t_member_b"}]},
+                    format="json",
+                )
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(self.dataset.tables.count(), 2)
 
     def test_assign_mix_of_known_and_unknown_tables(self):
         self.make_table("t_known", published=True)

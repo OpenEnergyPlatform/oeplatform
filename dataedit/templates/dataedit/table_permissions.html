@@ -38,85 +38,123 @@
 {% endblock %}
 {% block data_content %}
   {% load dataedit.taghandler %}
+  {% url 'dataedit:table-permission' table=table as permission_url %}
   <h3>Manage permissions on {{ table }}</h3>
-  <div class="card ">
+  {% if confirm %}
+    <div id="permission-confirm-box" class="alert alert-warning" role="alert">
+      <p id="permission-confirm-text">{{ confirm }}</p>
+      <form action="{{ permission_url }}" method="post">
+        {% csrf_token %}
+        {% for key, value in pending.items %}
+          {% if value %}
+            <input type="hidden" name="{{ key }}" value="{{ value }}" />
+          {% endif %}
+        {% endfor %}
+        <input type="hidden" name="confirm" value="yes" />
+        <input type="submit"
+               id="permission-confirm"
+               class="btn btn-warning"
+               value="Confirm" />
+        <a id="permission-cancel"
+           class="btn btn-outline-secondary"
+           href="{{ permission_url }}">Cancel</a>
+      </form>
+    </div>
+  {% endif %}
+  <div class="card">
     <div class="card-header">
       {% if is_admin %}
         <div style="position:relative;">
-          <form id="addGroupForm"
-                style="position:absolute;
-                       right: 0%"
-                action="{% url 'dataedit:table-permission' table=table %}"
-                method="post">
-            {% csrf_token %}
-            <input type="hidden" name="mode" value="add_group" />
-            <input name="name" type="text" placeholder="Add a group" id="group_field" />
-            <input type="submit" value="Add" />
-          </form>
+          {% if access.shareable %}
+            <form id="addGroupForm"
+                  style="position:absolute;
+                         right: 0%"
+                  action="{{ permission_url }}"
+                  method="post">
+              {% csrf_token %}
+              <input type="hidden" name="mode" value="add_group" />
+              <select name="organization"
+                      id="group_field"
+                      aria-label="Organization to add">
+                {% for organization in access.shareable %}
+                  <option value="{{ organization.pk }}">{{ organization.name }}</option>
+                {% endfor %}
+              </select>
+              <select name="level" id="group_level_new" aria-label="Role">
+                {% for role in organization_roles %}<option value="{{ role.level }}">{{ role.label }}</option>{% endfor %}
+              </select>
+              <input type="submit" value="Add" />
+            </form>
+          {% else %}
+            <span style="position:absolute;
+                         right: 0%"
+                  class="text-muted">None of your organizations is left to share with.</span>
+          {% endif %}
         </div>
       {% endif %}
       <div>
         <h4>Group Permissions</h4>
       </div>
     </div>
-    {% if not group_perms %}No permissions for groups set, yet.{% endif %}
-    {% for perm in group_perms %}
+    {% if not access.organizations %}No permissions for groups set, yet.{% endif %}
+    {% for holder in access.organizations %}
       <div class="card-body">
         <div>
           {% if is_admin %}
-            <label class="form-label" for="group_level">{{ perm.holder.name }}</label>
+            <label class="form-label"
+                   for="group_level_{{ holder.pk }}">{{ holder.name }}</label>
             <form class="form-inline"
-                  action="{% url 'dataedit:table-permission' table=table %}"
+                  action="{{ permission_url }}"
                   method="post"
                   style="display:inline-block">
               {% csrf_token %}
               <input type="hidden" name="mode" value="alter_group" />
-              <input type="hidden" name="group_id" value="{{ perm.holder.id }}" />
+              <input type="hidden" name="group_id" value="{{ holder.pk }}" />
               <select class="form-control"
-                      id="group_level"
+                      id="group_level_{{ holder.pk }}"
                       name="level"
                       onchange="this.form.submit()">
-                {% for value, choice in choices %}
-                  <option value="{{ value }}"
-                          {% if perm.level == value %}selected="selected"{% endif %}>
-                    {{ choice }}
-                  </option>
-                {% endfor %}
+                {% include "dataedit/partials/permission_role_options.html" %}
               </select>
             </form>
-            <form action="{% url 'dataedit:table-permission' table=table %}"
+            <form action="{{ permission_url }}"
                   method="post"
                   style="display:inline-block;
                          float:right"
-                  onsubmit="return confirm('Are you sure you want to remove {{ perm.holder.name }} from {{ table }} and retract all permissions?')">
+                  {% if not holder.you %}onsubmit="return confirm('Are you sure you want to remove {{ holder.name|escapejs }} from {{ table|escapejs }} and retract all permissions?')"{% endif %}>
               {% csrf_token %}
               <input type="hidden" name="mode" value="remove_group" />
-              <input type="hidden" name="group_id" value="{{ perm.holder.id }}" />
-              <input type="submit" class="btn btn-danger" value="Remove group" />
+              <input type="hidden" name="group_id" value="{{ holder.pk }}" />
+              <input type="submit"
+                     class="btn btn-danger"
+                     value="Remove group" />
             </form>
           {% else %}
-            {{ perm.holder.name }}:
-            {% for value, choice in choices %}
-              {% if perm.level == value %}{{ choice }}{% endif %}
-            {% endfor %}
+            {{ holder.name }}: {{ holder.role }}
           {% endif %}
         </div>
       </div>
     {% endfor %}
   </div>
   <br />
-  <div class="card ">
+  <div class="card">
     <div class="card-header">
       {% if is_admin %}
         <div style="position:relative;">
           <form id="addUserForm"
                 style="position:absolute;
                        right: 0%"
-                action="{% url 'dataedit:table-permission' table=table %}"
+                action="{{ permission_url }}"
                 method="post">
             {% csrf_token %}
             <input type="hidden" name="mode" value="add_user" />
-            <input name="name" type="text" placeholder="Add an user" id="user_field" />
+            <input name="name"
+                   type="text"
+                   placeholder="Add an user"
+                   id="user_field" />
+            <select name="level" id="user_level_new" aria-label="Role">
+              {% for role in roles %}<option value="{{ role.level }}">{{ role.label }}</option>{% endfor %}
+            </select>
             <input type="submit" value="Add" />
           </form>
         </div>
@@ -125,48 +163,39 @@
         <h4>User Permissions</h4>
       </div>
     </div>
-    {% if not user_perms %}No permissions for users set, yet.{% endif %}
-    {% for perm in user_perms %}
+    {% if not access.users %}No permissions for users set, yet.{% endif %}
+    {% for holder in access.users %}
       <div class="card-body">
         <div>
           {% if is_admin %}
-            <label class="form-label" for="level">{{ perm.holder.name }}</label>
+            <label class="form-label"
+                   for="user_level_{{ holder.pk }}">{{ holder.name }}</label>
             <form class="form-inline"
-                  action="{% url 'dataedit:table-permission' table=table %}"
+                  action="{{ permission_url }}"
                   method="post"
                   style="display:inline-block">
               {% csrf_token %}
               <input type="hidden" name="mode" value="alter_user" />
-              <input type="hidden" name="user_id" value="{{ perm.holder.id }}" />
+              <input type="hidden" name="user_id" value="{{ holder.pk }}" />
               <select class="form-control"
-                      id="level"
+                      id="user_level_{{ holder.pk }}"
                       name="level"
                       onchange="this.form.submit()">
-                {% for value, choice in choices %}
-                  {% if own_level >= value %}
-                    <option value="{{ value }}"
-                            {% if perm.level == value %}selected="selected"{% endif %}>
-                      {{ choice }}
-                    </option>
-                  {% endif %}
-                {% endfor %}
+                {% include "dataedit/partials/permission_role_options.html" %}
               </select>
             </form>
-            <form action="{% url 'dataedit:table-permission' table=table %}"
+            <form action="{{ permission_url }}"
                   method="post"
                   style="display:inline-block;
                          float:right"
-                  onsubmit="return confirm('Are you sure you want to remove {{ perm.holder.name }} from {{ table }} and retract all permissions?')">
+                  {% if not holder.you %}onsubmit="return confirm('Are you sure you want to remove {{ holder.name|escapejs }} from {{ table|escapejs }} and retract all permissions?')"{% endif %}>
               {% csrf_token %}
               <input type="hidden" name="mode" value="remove_user" />
-              <input type="hidden" name="user_id" value="{{ perm.holder.id }}" />
+              <input type="hidden" name="user_id" value="{{ holder.pk }}" />
               <input type="submit" class="btn btn-danger" value="Remove user" />
             </form>
           {% else %}
-            {{ perm.holder.name }}:
-            {% for value, choice in choices %}
-              {% if perm.level == value %}{{ choice }}{% endif %}
-            {% endfor %}
+            {{ holder.name }}: {{ holder.role }}
           {% endif %}
         </div>
       </div>
@@ -176,41 +205,6 @@
 {% block after-body-bottom-js %}
   {% if is_admin %}
     <script>
-      /*
-       * Handle group autocomplete and add client side form validation.
-       */
-      $(function () {
-        let validSelection = false;
-        let autocompleteSource = []; // This will be filled with your autocomplete data
-
-        $("#group_field").autocomplete({
-          source: function (request, response) {
-            $.ajax({
-              url: "{% url 'api:usrprop' %}",
-              dataType: "json",
-              data: { name: request.term },
-              success: function (data) {
-                autocompleteSource = data; // Assuming 'data' is an array of strings
-                response(data);
-              },
-            });
-          },
-          select: function (event, ui) {
-            validSelection = true;
-          },
-        });
-
-        $("#addGroupForm").on("submit", function (e) {
-          var inputValue = $("#group_field").val();
-          if (!validSelection || !autocompleteSource.includes(inputValue)) {
-            e.preventDefault(); // Prevent form submission
-            alert(
-              "Please select a valid group name from the list that appears after you start typing."
-            );
-          }
-        });
-      });
-
       /*
        * Handle user autocomplete and add client side form validation.
        */

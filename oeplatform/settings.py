@@ -33,11 +33,16 @@ SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
+import os
 import sys
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 from pathlib import Path
 
+# Data only, and imported here for that reason: the reference's tag list has to
+# be in the settings the generator reads, and nothing that touches Django can
+# be imported at this point.
+from api.api_tags import TAGS as API_REFERENCE_TAGS
 from oeplatform.securitysettings import (
     ALLOWED_HOSTS,
     ANON_CONNECTION_LIMIT,
@@ -121,6 +126,36 @@ __all__ = [  # mark imports as "used"
 ]
 
 
+# ── Reverse proxy / HTTPS ─────────────────────────────────────────────────────
+# When the platform runs behind a TLS-terminating reverse proxy (e.g. nginx on
+# the production server), the proxy speaks HTTPS to the client and plain HTTP to
+# the container. These settings let Django recognise the original HTTPS request.
+# Enable by setting OEP_BEHIND_TLS_PROXY=True on the server.
+if os.environ.get("OEP_BEHIND_TLS_PROXY", "False").strip().lower() in (
+    "true",
+    "1",
+    "yes",
+):
+    # The proxy must send this header
+    # (nginx: proxy_set_header X-Forwarded-Proto $scheme;)
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+# Comma-separated list of trusted origins for CSRF checks under HTTPS, e.g.
+# OEP_CSRF_TRUSTED_ORIGINS="https://openenergyplatform.org,www.openenergyplatform.org".
+# Required by Django for unsafe (POST/PUT/…) requests served over HTTPS. Django
+# 4+ requires each origin to include a scheme, so a bare host (e.g. "example.org")
+# is normalised to "https://example.org".
+_csrf_trusted_origins = os.environ.get("OEP_CSRF_TRUSTED_ORIGINS", "").strip()
+if _csrf_trusted_origins:
+    CSRF_TRUSTED_ORIGINS = [
+        origin if "://" in origin else f"https://{origin}"
+        for origin in (o.strip() for o in _csrf_trusted_origins.split(","))
+        if origin
+    ]
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
@@ -165,6 +200,7 @@ INSTALLED_APPS = (
     "owlready2",
     "compressor",
     "oekg",
+    "drf_spectacular",
 )
 
 MIDDLEWARE = (
@@ -185,6 +221,7 @@ MIDDLEWARE = (
 ROOT_URLCONF = "oeplatform.urls"
 
 EXTERNAL_URLS = {
+    "oekg_chat": "https://oekg-chat.openenergyplatform.org/",
     "academy_courses_introduction": "https://openenergyplatform.github.io/academy/courses/01_introduction/",  # noqa E501
     "academy_course_upload": "https://openenergyplatform.github.io/academy/courses/04_upload/",  # noqa E501
     "academy_course_scenario_bundle": "https://openenergyplatform.github.io/academy/courses/10_scenario_bundle/",  # noqa E501
@@ -198,7 +235,7 @@ EXTERNAL_URLS = {
     "tutorials_create_database_conform_data": "https://openenergyplatform.github.io/academy/tutorials/99_other/database_data/",  # noqa E501
     "tutorials_oemetadata": "https://openenergyplatform.github.io/academy/tutorials/99_other/getting_started_with_OEMetadata/",  # noqa E501
     "tutorials_oemetabuilder": "https://openenergyplatform.github.io/academy/tutorials/99_other/oemetadata/",  # noqa E501
-    "readthedocs": "https://openenergyplatform.github.io/oeplatform/oeplatform-code/web-api/oedb-rest-api/",  # noqa E501
+    "rest_api_docs": "https://openenergyplatform.github.io/oeplatform/oeplatform-code/web-api/",  # noqa E501
     "mkdocs": "https://openenergyplatform.github.io/oeplatform/",
     "compendium": "https://openenergyplatform.github.io/organisation/",
     "tib_terminology_service": "https://terminology.tib.eu/ts/collections",
@@ -212,27 +249,6 @@ EXTERNAL_URLS = {
     "ORKG": "https://academy.orkg.org/index.html",
     "open_plan": "https://open-plan-tool.org/",
     "open_egon": "https://rego-n.org/",
-    "open_mastr": "https://open-mastr.readthedocs.io/en/latest/",
-    "tutorials_index": "https://openenergyplatform.github.io/academy/",
-    "tutorials_faq": "https://openenergyplatform.github.io/academy/questions/",
-    "tutorials_api1": "https://openenergyplatform.github.io/academy/tutorials/01_api/01_api_download/",  # noqa E501
-    "tutorials_api_upload": "https://openenergyplatform.github.io/academy/tutorials/01_api/02_api_upload/",  # noqa E501
-    "tutorials_licenses": "https://openenergyplatform.github.io/academy/tutorials/metadata/tutorial_open-data-licenses/",  # noqa E501
-    "tutorials_wizard": "https://openenergyplatform.github.io/academy/tutorials/99_other/wizard/",  # noqa E501
-    "tutorials_create_database_conform_data": "https://openenergyplatform.github.io/academy/tutorials/99_other/database_data/",  # noqa E501
-    "tutorials_oemetadata": "https://openenergyplatform.github.io/academy/tutorials/99_other/getting_started_with_OEMetadata/",  # noqa E501
-    "tutorials_oemetabuilder": "https://openenergyplatform.github.io/academy/tutorials/99_other/oemetadata/",  # noqa E501
-    "readthedocs": "https://openenergyplatform.github.io/oeplatform/oeplatform-code/web-api/oedb-rest-api/",  # noqa E501
-    "mkdocs": "https://openenergyplatform.github.io/oeplatform/",
-    "compendium": "https://openenergyplatform.github.io/organisation/",
-    "tib_terminology_service": "https://terminology.tib.eu/ts/collections",
-    "tib_ts_oeo": "https://terminology.tib.eu/ts/ontologies/oeo",
-    "spdx_licenses": "https://spdx.github.io/license-list-data/",
-    "oemetadata_key_description": "https://github.com/OpenEnergyPlatform/oemetadata/blob/develop/oemetadata/latest/metadata_key_description.md",  # noqa E501
-    "oeo_extended_github": "https://github.com/OpenEnergyPlatform/oeo-extended",  # noqa E501
-    "oedatamodel": "https://github.com/OpenEnergyPlatform/oedatamodel",
-    "ORKG": "https://academy.orkg.org/index.html",
-    "open_plan": "https://open-plan-tool.org/",
     "open_mastr": "https://open-mastr.readthedocs.io/en/latest/",
     "creativecommons_licenses_by_3_0_de": "http://creativecommons.org/licenses/by/3.0/de/",  # noqa:E501
     "iks_cs_ovgu_iks": "http://iks.cs.ovgu.de/IKS.html",
@@ -325,6 +341,12 @@ TEMPLATES = [
     }
 ]
 
+# base/messages.html renders a message as a Bootstrap alert of its level's
+# tag; Bootstrap calls the error level "danger". 40 is
+# django.contrib.messages.ERROR, written as its number because nothing that
+# touches Django is imported here.
+MESSAGE_TAGS = {40: "danger"}
+
 CORS_ORIGIN_WHITELIST = ["http://localhost:3000", "http://127.0.0.1:3000"]
 
 GRAPHENE = {"SCHEMA": "factsheet.schema.schema"}
@@ -339,6 +361,29 @@ OEO_EXT_PATH = Path(MEDIA_ROOT) / "oeo_ext"
 OEO_EXT_NAME = "oeox"
 OEO_EXT_OWL_NAME = "oeo_ext.owl"
 OEO_EXT_OWL_PATH = OEO_EXT_PATH / OEO_EXT_OWL_NAME
+
+# The canonical SHACL shape for OEKG scenario bundles, and the small rdfs:label
+# subset validation needs, are build-time artifacts. They are fetched/generated
+# by exactly one seam -- "python manage.py fetch_oekg_shapes" -- and land in a
+# gitignored directory, the way the OEO release does. Nothing else in the
+# platform obtains either file.
+#
+# The source revision is PINNED on purpose: an unpinned fetch would change the
+# validator without a deploy. The command refuses a branch or a "latest" ref.
+OEKG_SHAPES_FOLDER = "shapes"
+OEKG_SHAPES_ROOT = Path(BASE_DIR, OEKG_SHAPES_FOLDER)
+OEKG_SHAPES_PATH = OEKG_SHAPES_ROOT / "oekg_shapes.ttl"
+OEKG_SHAPE_LABELS_PATH = OEKG_SHAPES_ROOT / "oeo_labels.ttl"
+OEKG_SHAPES_SOURCE_REPO = "OpenEnergyPlatform/oekg"
+OEKG_SHAPES_SOURCE_FILE = "oekg/shapes/oekg_shapes.ttl"
+# The oekg repo carries no version tags yet (one unrelated tag), so the interim
+# pin is a commit sha. Bump this line to move the validator.
+OEKG_SHAPES_PINNED_COMMIT = "b4604e02060624b381bdbe2f872df94cfd0f5630"
+
+# The named graph the OEKG API reads and writes. None is the default graph,
+# which is where the platform's bundles live today; a test overrides it to work
+# in isolation.
+OEKG_GRAPH = None
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
@@ -368,7 +413,30 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.BasicAuthentication",
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.TokenAuthentication",
-    )
+    ),
+    # The OEKG bundle API reads publicly, so it carries its own ceiling rather
+    # than relying on there being one somewhere else.
+    "DEFAULT_THROTTLE_RATES": {
+        "oekg_bundles_anon": "60/minute",
+        "oekg_bundles_user": "600/minute",
+    },
+    # Use drf-spectacular's AutoSchema for generating OpenAPI schema
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Open Energy Platform API",
+    "DESCRIPTION": "OpenAPI schema for the Open Energy Platform REST API.",
+    "VERSION": "v0",
+    # The reference's groups, named and ordered rather than derived from the
+    # first path segment. `api.api_tags` imports nothing, which is what makes
+    # it safe to read here: this runs before the app registry exists.
+    "TAGS": API_REFERENCE_TAGS,
+    "POSTPROCESSING_HOOKS": [
+        "drf_spectacular.hooks.postprocess_schema_enums",
+        # The legacy schema-qualified table addresses cannot be repaired at
+        # the route, because one view serves both spellings. See the hook.
+        "api.api_description.name_the_legacy_table_routes",
+    ],
 }
 
 AUTHENTICATION_BACKENDS = [
@@ -439,6 +507,30 @@ AXES_ONLY_USER_FAILURES = True  # Only track failures per user
 
 CAPTCHA_IMAGE_SIZE = (300, 80)  # width, height in pixels
 CAPTCHA_FONT_SIZE = 52
+
+# Maximum DECOMPRESSED bytes accepted per bulk upload request (default 10 GiB).
+# A backstop against gzip bombs and runaway streams, not flow control -
+# clients are expected to split large datasets into several uploads.
+BULK_UPLOAD_MAX_BYTES = int(os.environ.get("BULK_UPLOAD_MAX_BYTES", 10 * 1024**3))
+
+# Bulk upload guards (ADR: synchronous WSGI protected by guards, not infra).
+# Concurrency: at most one running upload per user plus this global cap.
+BULK_UPLOAD_MAX_CONCURRENT = int(os.environ.get("BULK_UPLOAD_MAX_CONCURRENT", 2))
+# Stall guard: abort uploads averaging less than this rate (bytes/second)
+# after the grace period - a trickling client must not pin a worker.
+BULK_UPLOAD_MIN_BYTES_PER_SECOND = int(
+    os.environ.get("BULK_UPLOAD_MIN_BYTES_PER_SECOND", 10 * 1024)
+)
+BULK_UPLOAD_STALL_GRACE_SECONDS = int(
+    os.environ.get("BULK_UPLOAD_STALL_GRACE_SECONDS", 30)
+)
+# Database session timeouts for the upload's transaction (milliseconds).
+BULK_UPLOAD_STATEMENT_TIMEOUT_MS = int(
+    os.environ.get("BULK_UPLOAD_STATEMENT_TIMEOUT_MS", 60 * 60 * 1000)
+)
+BULK_UPLOAD_IDLE_TX_TIMEOUT_MS = int(
+    os.environ.get("BULK_UPLOAD_IDLE_TX_TIMEOUT_MS", 60 * 1000)
+)
 
 # dynamic variable to check if code is run in test or not
 IS_TEST = "test" in sys.argv

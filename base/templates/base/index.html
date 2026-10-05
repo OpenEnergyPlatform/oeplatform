@@ -2,12 +2,10 @@
 {% load django_bootstrap5 %}
 {% load static %}
 {% load compress %}
-{% block title %}&ndash; Open and FAIR Energy Data Platform{% endblock %}
+{% block title %}– Open and FAIR Energy Data Platform{% endblock %}
 {% block after-head %}
   {% compress css %}
-    <link rel="stylesheet"
-          type="text/css"
-          href="{% static 'css/index-style.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/index-style.css' %}" />
   {% endcompress %}
 {% endblock %}
 {% block footer %}
@@ -41,7 +39,7 @@
             <h3 class="index-footer-column-title">Resources</h3>
             <ul class="index-footer-link-list">
               <li><a href="{{ EXTERNAL_URLS.tutorials_index }}">Academy</a></li>
-              <li><a href="{{ EXTERNAL_URLS.readthedocs }}">API Docs</a></li>
+              <li><a href="{{ EXTERNAL_URLS.rest_api_docs }}">API Docs</a></li>
               <li><a href="{{ EXTERNAL_URLS.github_openenergyplatform_oeplatform }}">GitHub</a></li>
               <li><a href="{{ EXTERNAL_URLS.tutorials_wizard }}">Tutorial</a></li>
             </ul>
@@ -63,13 +61,13 @@
 {% endblock footer %}
 {% block main %}
   <main id="main-content" class="index-home">
-    {% include 'base/messages.html' %}
-    {% include 'homepage/hero.html' %}
-    {% include 'homepage/features.html' %}
-    {% include 'homepage/capabilities.html' %}
-    {% include 'homepage/integrated_workflows.html' %}
-    {% include 'homepage/academy.html' %}
-    {% include 'homepage/resources.html' %}
+    {% include "base/messages.html" %}
+    {% include "homepage/hero.html" %}
+    {% include "homepage/features.html" %}
+    {% include "homepage/capabilities.html" %}
+    {% include "homepage/integrated_workflows.html" %}
+    {% include "homepage/academy.html" %}
+    {% include "homepage/resources.html" %}
   </main>
 {% endblock %}
 {% block after-body-bottom-js %}

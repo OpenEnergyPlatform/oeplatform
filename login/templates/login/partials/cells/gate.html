@@ -1,0 +1,54 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+Cell type "gate check with popover": the Publish gate's result, ✓ or ✗
+naming the failed check, and on click the reasons, one line per check, with
+the license list and the metadata editor. Shown on published Tables too,
+since metadata can be edited after publishing. The filter and the sort read
+the stored verdict; this cell runs the checks live, so where the two
+disagree it shows the live result (see ``TableRow.publishable``).
+{% endcomment %}
+<button type="button"
+        id="pub-{{ row.table.pk }}"
+        class="dash-gate {% if row.publishable %}dash-gate--ok{% else %}dash-gate--bad{% endif %}"
+        aria-expanded="false"
+        aria-controls="pub-{{ row.table.pk }}-pop"
+        data-dash-popover>
+  {% if row.publishable %}
+    <span aria-hidden="true">✓</span><span class="visually-hidden">Publishable. Show the publish checks</span>
+  {% else %}
+    <span class="visually-hidden">Not publishable:</span>
+    <span aria-hidden="true">✗</span> {{ row.failed_label }}<span class="visually-hidden">. Show the publish checks</span>
+  {% endif %}
+</button>
+<div id="pub-{{ row.table.pk }}-pop"
+     class="dash-pop"
+     role="dialog"
+     aria-label="Publish checks for {{ row.title }}"
+     tabindex="-1"
+     hidden>
+  <div class="dash-pop__title">Publish gate</div>
+  <ul class="dash-pop__list">
+    {% for check in row.checks %}
+      <li>
+        {% if check.passed %}
+          <span class="dash-gate--ok"
+                aria-hidden="true">✓</span> {{ check.label }}: passed
+        {% else %}
+          <span class="dash-gate--bad"
+                aria-hidden="true">✗</span> {{ check.label }}: {{ check.reason }}
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+  <div class="dash-pop__links">
+    <a href="{{ EXTERNAL_URLS.spdx_licenses }}"
+       target="_blank"
+       rel="noopener"
+       hx-boost="false">SPDX license list</a>
+    ·
+    <a href="{% url 'dataedit:meta_edit' table=row.table.name %}"
+       hx-boost="false">Edit metadata</a>
+  </div>
+</div>

@@ -1,164 +1,209 @@
 {% extends "base/base-profile.html" %}
+{% comment %}
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+The tables tab. Only the results region (#tables-results) is swapped; the
+filter bar and the live count sit outside it, so focus and half-typed input
+survive a swap and the live region is announced reliably. The primary row is
+Search, Publishable, Review, Access and Dataset; "More filters (n)" holds the
+rest. The chips and Reset are inside the region. Where the list is too
+narrow for the bar on one line (960 px, measured), everything but Search
+folds behind "Filters (n)": the fold panel is ``display: contents`` on a
+wider list, so the controls sit in the row as if it were not there
+(``tables_tab.css``).
+
+The tab keeps the profile sidebar, like every other profile tab. The spec
+decided on a slim identity strip instead, to give the list the width
+(measured on the prototype: 928 px of list at 1440 px with the sidebar,
+against about 1,340 px for all nine columns); the maintainer chose the
+sidebar on 2026-10-02, so the column collapse (#2555) works with that width.
+{% endcomment %}
 {% load compress %}
-{% load django_bootstrap5 %}
 {% load static %}
-{% block main-content-body %}
-  {% if profile_user == request.user %}
-    {% include "login/user_nav.html" %}
-    <!-- ====== search field ====== -->
-    <div class="profile-category_search"
-         style="margin-bottom: 0;
-                max-width: 300px">
-      <input type="text"
-             id="table-search"
-             name="search"
-             class="form-control"
-             placeholder="Search your tables..."
-             value="{{ search_query }}"
-             hx-get="{% url 'login:tables' user_id=profile_user.id %}"
-             hx-trigger="keyup changed delay:300ms"
-             hx-target="#tables-container"
-             hx-select="#tables-container"
-             hx-include="this"
-             hx-push-url="true"
-             hx-swap="outerHTML" />
-    </div>
-    <div id="tables-container">
-      {% include "login/partials/tables_sections.html" %}
-    </div>
-  {% endif %}
-  <div id="topics" style="display: none;">{{ topics|json_script:"topics" }}</div>
-  <!-- Modal for publishing functionality (after pressing publish button) -->
-  {% include "login/modals/table_publish.html" %}
-{% endblock %}
+{% block after-head %}
+  <link rel="stylesheet" href="{% static 'login/tables_tab.css' %}" />
+{% endblock after-head %}
 {% block main-right-sidebar-content %}
   {% include "login/sidebar_user.html" %}
 {% endblock main-right-sidebar-content %}
+{% block main-content-body %}
+  {% include "login/user_nav.html" %}
+  <div id="tables-tab"
+       class="dash"
+       data-login-url="{% url 'account_login' %}"
+       hx-boost="true"
+       hx-target="#tables-results"
+       hx-swap="outerHTML"
+       hx-sync="this:replace">
+    {% if page.has_any %}
+      {% with controls=page.controls %}
+        <div id="tables-filters"
+             class="dash-filters"
+             role="search"
+             aria-label="Filter your tables">
+          <div class="dash-filters__row">
+            <label class="visually-hidden"
+                   for="tables-search">Search title or technical name</label>
+            <input type="search"
+                   id="tables-search"
+                   name="search"
+                   class="form-control form-control-sm dash-search"
+                   placeholder="Search title or name"
+                   autocomplete="off"
+                   value="{{ page.state.raw.search|default:'' }}"
+                   hx-get="{{ request.path }}"
+                   hx-trigger="input changed delay:300ms, search" />
+            <button type="button"
+                    id="tables-fold"
+                    class="btn btn-outline-secondary btn-sm dash-fold-toggle"
+                    aria-expanded="false"
+                    aria-controls="tables-fold-panel">
+              Filters<span id="tables-fold-count">{% if page.folded_count %} ({{ page.folded_count }}){% endif %}</span>
+            </button>
+            <div id="tables-fold-panel" class="dash-fold">
+              {% for control in controls %}
+                {% if not control.more %}
+                  {% include "login/partials/list_filter_control.html" with path=request.path %}
+                {% endif %}
+              {% endfor %}
+              <button type="button"
+                      id="tables-more"
+                      class="btn btn-outline-secondary btn-sm"
+                      aria-expanded="false"
+                      aria-controls="tables-more-panel">
+                More filters<span id="tables-more-count">{% if page.more_count %} ({{ page.more_count }}){% endif %}</span>
+              </button>
+              <div id="tables-more-panel" class="dash-more" hidden>
+                {% for control in controls %}
+                  {% if control.more %}
+                    {% include "login/partials/list_filter_control.html" with path=request.path %}
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endwith %}
+      {% comment %}
+      The bulk bar (#2564), sticky at the top of the list and outside the
+      region, so a swap neither moves it nor takes focus out of it. Its slot
+      is reserved while nothing is selected: a muted line, hidden from screen
+      readers and not focusable, turns into the bar on the first tick, so the
+      list does not jump under the pointer. tables_tab.js holds the selection
+      and sends it, comma-joined, as the ``tables`` parameter of an action's
+      preflight, POSTed (TableActionCheckView), since a selection does not
+      fit in an address. Every action is enabled while anything is selected: the
+      preflight says what it would leave out. Delete is red and last. Where the rows stack, the
+      actions fold into "Actions ▾". Its requests are synced only with
+      themselves, never with the list's.
+      {% endcomment %}
+      <div id="tables-bulk"
+           class="dash-bulk"
+           hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+        <p id="tables-bulk-idle"
+           class="dash-bulk__idle"
+           aria-hidden="true">Tick tables to act on several at once.</p>
+        <p id="tables-bulk-note" class="dash-bulk__note" role="status"></p>
+        <div id="tables-bulk-bar"
+             class="dash-bulk__bar"
+             role="group"
+             aria-label="Selected tables"
+             hidden>
+          <span id="tables-bulk-count" class="dash-bulk__count"></span>
+          <button type="button"
+                  id="tables-bulk-clear"
+                  class="btn btn-link btn-sm dash-bulk__clear">Clear</button>
+          <div class="dash-bulk__actions">
+            {% for verb, label in bulk_actions %}
+              <button type="button"
+                      id="bulk-{{ verb }}"
+                      class="btn {% if verb == "delete" %}btn-outline-danger{% else %}btn-outline-primary{% endif %} btn-sm"
+                      hx-post="{% url 'login:table-action-check' user_id=profile_user.pk action=verb %}"
+                      hx-target="#table-action-body"
+                      hx-swap="innerHTML"
+                      hx-sync="this:replace"
+                      data-bulk-action
+                      data-action-origin="bulk-{{ verb }}">{{ label }}</button>
+            {% endfor %}
+          </div>
+          <div class="dropdown dash-bulk__menu">
+            <button type="button"
+                    id="bulk-menu"
+                    class="btn btn-outline-primary btn-sm dropdown-toggle"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false">Actions</button>
+            <ul class="dropdown-menu" aria-labelledby="bulk-menu">
+              {% for verb, label in bulk_actions %}
+                <li>
+                  <button type="button"
+                          id="bulk-menu-{{ verb }}"
+                          class="dropdown-item{% if verb == "delete" %} text-danger{% endif %}"
+                          hx-post="{% url 'login:table-action-check' user_id=profile_user.pk action=verb %}"
+                          hx-target="#table-action-body"
+                          hx-swap="innerHTML"
+                          hx-sync="this:replace"
+                          data-bulk-action
+                          data-action-origin="bulk-menu">{{ label }}</button>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+    <div id="tables-live"
+         class="visually-hidden"
+         aria-live="polite"
+         aria-atomic="true"></div>
+    {% include "login/partials/tables_region.html" %}
+  </div>
+  {% comment %}
+  The one action dialog, outside the tab so its requests are not synced
+  with (and cannot cancel) the list's. Its contents come from the action's
+  preflight endpoint; tables_tab.js opens it once they are in.
+  {% endcomment %}
+  <div id="table-action"
+       class="modal fade"
+       tabindex="-1"
+       aria-labelledby="table-action-title"
+       aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+      <div id="table-action-body" class="modal-content"></div>
+    </div>
+  </div>
+  {% comment %}
+  The access drawer, outside the tab for the same reason as the dialog. Its
+  contents come from the drawer endpoint (login:table-access) and every
+  write in it replaces them, so it stays open; tables_tab.js opens it once
+  an Access cell or "Manage access" has filled it.
+  {% endcomment %}
+  <div id="table-access"
+       class="offcanvas offcanvas-end dash-access-offcanvas"
+       tabindex="-1"
+       aria-labelledby="table-access-title">
+    <div id="table-access-body" class="dash-access-body"></div>
+  </div>
+  {% comment %}
+  Messages after an action. Two persistent live regions, so a message is
+  announced when it is added: success politely (and it dismisses itself),
+  refusals and failures assertively (and they stay until dismissed).
+  {% endcomment %}
+  <div class="toast-container position-fixed bottom-0 end-0 p-3 dash-toasts">
+    <div id="tables-toasts-polite" aria-live="polite" aria-atomic="false"></div>
+    <div id="tables-toasts-assertive"
+         aria-live="assertive"
+         aria-atomic="false"></div>
+  </div>
+{% endblock main-content-body %}
 {% block after-body-bottom-js %}
   {% compress js %}
     <script src="{% static 'ontology/htmx.js' %}"></script>
   {% endcompress %}
-  <script type="text/javascript">
-    $(function () {
-      $('[data-bs-toggle="tooltip"]').tooltip();
-    });
+  <script type="module">
+    import { bindTablesTab } from "{% static 'login/tables_tab.js' %}";
 
-    function getCookie(name) {
-      let cookieValue = null;
-      if (document.cookie && document.cookie !== "") {
-        const cookies = document.cookie.split(";");
-        for (let i = 0; i < cookies.length; i++) {
-          const cookie = cookies[i].trim();
-          if (cookie.startsWith(name + "=")) {
-            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-            break;
-          }
-        }
-      }
-      return cookieValue;
-    }
-
-    function publishTable(tableName, topic, embargoPeriod) {
-      const data = embargoPeriod
-        ? { embargo: { duration: embargoPeriod } }
-        : {};
-
-      /* dynamically reverse url */
-      return window
-        .reverseUrl("api:move_publish", {
-          table: tableName,
-          topic: topic,
-        })
-        .then((apiUrl) => {
-          return fetch(apiUrl, {
-            method: "POST",
-            headers: {
-              "X-CSRFToken": getCookie("csrftoken"),
-              "Content-Type": "application/json",
-              Accept: "application/json",
-            },
-            body: JSON.stringify(data),
-          });
-        })
-        .then((response) => {
-          if (response.ok) {
-            alert("Table moved successfully.");
-            window.location.reload();
-          } else {
-            response.text().then((text) => {
-              alert(`Error moving table: ${text}`);
-            });
-          }
-        });
-    }
-
-    document.body.addEventListener("htmx:configRequest", function (event) {
-      event.detail.headers["X-CSRFToken"] = getCookie("csrftoken");
-    });
-
-    // Refresh the page after any htmx request ... keep until partials are
-    // implemented for the draft & published tables
-    document.addEventListener("htmx:afterRequest", function (event) {
-      if (event.detail.successful && event.detail.elt.id !== 'table-search') {
-          window.location.reload();
-      }
-    });
-
-    document.addEventListener("DOMContentLoaded", function () {
-      let topics = [];
-      let relatedButton;
-      let publishModalInstance; // Declare publishModalInstance in a higher scope
-
-      const topicsDiv = document.querySelector("#topics");
-      if (topicsDiv) {
-        topics = JSON.parse(topicsDiv.textContent);
-      }
-
-      // Event listener for modal show event
-      var publishModal = new bootstrap.Modal(
-        document.getElementById("publishModal")
-      );
-      publishModalInstance = bootstrap.Modal.getInstance(publishModal._element);
-
-      publishModalInstance._element.addEventListener(
-        "show.bs.modal",
-        function (event) {
-          relatedButton = event.relatedTarget;
-          const dropdown = this.querySelector(".topic-dropdown");
-          dropdown.innerHTML = "";
-          topics.forEach((topic) => {
-            dropdown.innerHTML += `<option value="${topic}">${topic}</option>`;
-          });
-        }
-      );
-
-      // Event listener for Confirm button click inside the modal
-      document
-        .querySelector(".confirm-publish")
-        .addEventListener("click", function () {
-          const topic_dropdown = document.querySelector(".topic-dropdown");
-          const embargo_dropdown = document.querySelector(".embargo-dropdown");
-          if (relatedButton) {
-            const tableName = relatedButton.getAttribute("data-tableName");
-            const topic = topic_dropdown.value;
-            const embargoPeriod = embargo_dropdown.value;
-
-            publishTable(tableName, topic, embargoPeriod);
-          } else {
-            console.error("relatedButton is not defined.");
-          }
-        });
-    });
-
-    var tooltipTriggerList = [].slice.call(
-      document.querySelectorAll('[data-bs-toggle="tooltip"]')
-    );
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-      return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-
-    function open_wizzard() {
-      location.href = "{% url 'dataedit:wizard_create' %}";
-    }
+    bindTablesTab(document);
   </script>
 {% endblock after-body-bottom-js %}

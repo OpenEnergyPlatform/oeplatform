@@ -41,9 +41,13 @@
             <div class="btn-group" style="display: inline-flex">
               <form action="{% url 'dataedit:admin-columns' %}" method="post">
                 {% csrf_token %}
-                <input type="hidden" name="id" value="{{ value.new|get_item:'id' }}" />
+                <input type="hidden"
+                       name="id"
+                       value="{{ value.new|get_item:'id' }}" />
                 <input type="hidden" name="action" value="apply" />
-                <input type="hidden" name="table" value="{{ value.new|get_item:'c_table' }}" />
+                <input type="hidden"
+                       name="table"
+                       value="{{ value.new|get_item:'c_table' }}" />
                 <button type="submit"
                         value="apply"
                         class="btn btn-success"
@@ -51,10 +55,16 @@
               </form>
               <form action="{% url 'dataedit:admin-columns' %}" method="post">
                 {% csrf_token %}
-                <input type="hidden" name="id" value="{{ value.new|get_item:'id' }}" />
+                <input type="hidden"
+                       name="id"
+                       value="{{ value.new|get_item:'id' }}" />
                 <input type="hidden" name="action" value="deny" />
-                <input type="hidden" name="table" value="{{ value.new|get_item:'c_table' }}" />
-                <button type="submit" value="deny" class="btn btn-danger">Deny</button>
+                <input type="hidden"
+                       name="table"
+                       value="{{ value.new|get_item:'c_table' }}" />
+                <button type="submit"
+                        value="deny"
+                        class="btn btn-danger">Deny</button>
               </form>
             </div>
           </div>
@@ -87,7 +97,8 @@
           </table>
           <div class="text-center">
             <div class="btn-group" style="display: inline-flex">
-              <form action="{% url 'dataedit:admin-contraints' %}" method="post">
+              <form action="{% url 'dataedit:admin-contraints' %}"
+                    method="post">
                 {% csrf_token %}
                 <input type="hidden" name="id" value="{{ value.id }}" />
                 <input type="hidden" name="action" value="apply" />
@@ -97,12 +108,15 @@
                         class="btn btn-success"
                         style="margin-right: 20px">Apply</button>
               </form>
-              <form action="{% url 'dataedit:admin-contraints' %}" method="post">
+              <form action="{% url 'dataedit:admin-contraints' %}"
+                    method="post">
                 {% csrf_token %}
                 <input type="hidden" name="id" value="{{ value.id }}" />
                 <input type="hidden" name="action" value="deny" />
                 <input type="hidden" name="table" value="{{ value.c_table }}" />
-                <button type="submit" value="deny" class="btn btn-danger">Deny</button>
+                <button type="submit"
+                        value="deny"
+                        class="btn btn-danger">Deny</button>
               </form>
             </div>
           </div>

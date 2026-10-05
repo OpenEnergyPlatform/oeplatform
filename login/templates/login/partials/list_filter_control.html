@@ -1,0 +1,73 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+One control of a list's filter bar, which sits outside the swapped region.
+A ``FilterControl``: a single-valued filter is a select, its options grouped;
+a multi-valued one a group of checkboxes. A ``RangeControl``: two date
+inputs, one per end, each its own URL parameter; they apply on change, after
+a pause, so typing a year digit by digit sends one request rather than four.
+Each control requests ``path``; the page's module rewrites the request from
+the address bar, so the rest of the state is kept and the page returns to 1.
+{% endcomment %}
+{% if control.kind == "range" %}
+  <fieldset class="dash-range" id="f-{{ control.param }}">
+    <legend class="dash-multi__legend">{{ control.label }}</legend>
+    {% for end in control.ends %}
+      <label class="dash-range__end" for="f-{{ end.param }}">
+        {{ end.label }}
+        <input type="date"
+               id="f-{{ end.param }}"
+               name="{{ end.param }}"
+               value="{{ end.value }}"
+               class="form-control form-control-sm dash-date-input"
+               hx-get="{{ path }}"
+               hx-trigger="change delay:600ms" />
+      </label>
+    {% endfor %}
+  </fieldset>
+{% elif control.multiple %}
+  <fieldset class="dash-multi" id="f-{{ control.param }}">
+    <legend class="dash-multi__legend">
+      {{ control.label }}
+      {% if control.hint %}<span class="dash-muted">· {{ control.hint }}</span>{% endif %}
+    </legend>
+    <div class="dash-multi__list">
+      {% for option in control.options %}
+        <div class="form-check">
+          <input class="form-check-input"
+                 type="checkbox"
+                 id="f-{{ control.param }}-{{ forloop.counter }}"
+                 name="{{ control.param }}"
+                 value="{{ option.value }}"
+                 {% if option.selected %}checked{% endif %}
+                 hx-get="{{ path }}"
+                 hx-trigger="change" />
+          <label class="form-check-label"
+                 for="f-{{ control.param }}-{{ forloop.counter }}">{{ option.label }}</label>
+        </div>
+      {% empty %}
+        <p class="dash-muted">None on your tables</p>
+      {% endfor %}
+    </div>
+  </fieldset>
+{% else %}
+  <label class="visually-hidden"
+         for="f-{{ control.param }}">{{ control.label }}</label>
+  <select id="f-{{ control.param }}"
+          name="{{ control.param }}"
+          class="form-select form-select-sm dash-select"
+          hx-get="{{ path }}"
+          hx-trigger="change">
+    <option value="">{{ control.blank }}</option>
+    {% regroup control.options by group as groups %}
+    {% for group in groups %}
+      {% if group.grouper %}<optgroup label="{{ group.grouper }}">{% endif %}
+      {% for option in group.list %}
+        <option value="{{ option.value }}"
+                {% if option.selected %}selected{% endif %}>{{ option.label }}</option>
+      {% endfor %}
+      {% if group.grouper %}</optgroup>{% endif %}
+    {% endfor %}
+  </select>
+{% endif %}

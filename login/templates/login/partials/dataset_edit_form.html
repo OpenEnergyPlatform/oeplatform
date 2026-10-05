@@ -1,6 +1,6 @@
 <div class="card mb-3" id="dataset-card-{{ dataset.name }}">
   <div class="card-header">
-    Edit dataset &mdash; <strong>{{ dataset.name }}</strong>
+    Edit dataset — <strong>{{ dataset.name }}</strong>
   </div>
   <div class="card-body">
     <p class="card-text text-muted">The name is permanent; title and description can change.</p>
@@ -8,7 +8,8 @@
           hx-target="#dataset-card-{{ dataset.name }}"
           hx-swap="outerHTML">
       <div class="mb-2">
-        <label class="form-label" for="edit-title-{{ dataset.name }}">Title</label>
+        <label class="form-label"
+               for="edit-title-{{ dataset.name }}">Title</label>
         <input type="text"
                id="edit-title-{{ dataset.name }}"
                name="title"
@@ -20,7 +21,8 @@
         {% endif %}
       </div>
       <div class="mb-3">
-        <label class="form-label" for="edit-description-{{ dataset.name }}">Description</label>
+        <label class="form-label"
+               for="edit-description-{{ dataset.name }}">Description</label>
         <textarea id="edit-description-{{ dataset.name }}"
                   name="description"
                   class="form-control {% if form_errors.description %}is-invalid{% endif %}"

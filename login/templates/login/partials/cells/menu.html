@@ -1,0 +1,80 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+Cell type "actions slot": the row's ⋯ menu. Edit metadata and Upload data
+link to the existing pages; every action on the Table itself opens the one
+action dialog (#table-action) with this Table as a batch of one. "Manage
+access" opens the access drawer (#table-access), for every role: below
+Admin the drawer is read-only. "Remove from dataset…" is offered only when
+one of the user's own Datasets holds the Table, so its choice is never
+empty. Delete comes last, set apart and in red.
+
+An action above the user's role stays in the menu, marked
+aria-disabled="true" with the reason as visible text, and tables_tab.js
+guards its click. Not Bootstrap's .disabled: the dropdown's keyboard
+navigation skips those, so the reason would be unreachable by keyboard.
+
+The menu is positioned fixed so the table's horizontal scroll container
+does not clip it. The toggle's id, menu-<pk>, is where focus returns after
+an action on this row.
+{% endcomment %}
+{% with pk=row.table.pk %}
+  <div class="dropdown dash-menu">
+    <button type="button"
+            id="menu-{{ pk }}"
+            class="btn btn-sm dash-menu__toggle"
+            data-bs-toggle="dropdown"
+            data-bs-popper-config='{"strategy":"fixed"}'
+            aria-expanded="false"
+            aria-label="Actions for {{ row.title }}">
+      <span aria-hidden="true">⋯</span>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end dash-menu__list"
+        aria-labelledby="menu-{{ pk }}">
+      <li>
+        <a class="dropdown-item"
+           id="menu-{{ pk }}-edit"
+           href="{% url 'dataedit:meta_edit' table=row.table.name %}"
+           hx-boost="false">Edit metadata</a>
+      </li>
+      <li>
+        <a class="dropdown-item"
+           id="menu-{{ pk }}-upload"
+           href="{% url 'dataedit:wizard_upload' table=row.table.name %}"
+           hx-boost="false">Upload data</a>
+      </li>
+      <li>
+        <button type="button"
+                class="dropdown-item"
+                id="menu-{{ pk }}-access"
+                hx-get="{% url 'login:table-access' user_id=profile_user.pk table_name=row.table.name %}"
+                hx-target="#table-access-body"
+                hx-swap="innerHTML"
+                hx-sync="this:replace"
+                data-access-origin="menu-{{ pk }}">Manage access</button>
+      </li>
+      <li>
+        {% if row.status == "draft" %}
+          {% include "login/partials/cells/menu_action.html" with verb="publish" label="Publish…" gate=gates.publish %}
+        {% else %}
+          {% include "login/partials/cells/menu_action.html" with verb="unpublish" label="Unpublish" gate=gates.unpublish %}
+        {% endif %}
+      </li>
+      <li>
+        {% include "login/partials/cells/menu_action.html" with verb="dataset_add" label="Add to dataset…" gate=gates.dataset_add %}
+      </li>
+      {% if row.in_own_dataset %}
+        <li>
+          {% include "login/partials/cells/menu_action.html" with verb="dataset_remove" label="Remove from dataset…" gate=gates.dataset_remove %}
+        </li>
+      {% endif %}
+      <li>
+        <hr class="dropdown-divider" />
+      </li>
+      <li>
+        {% include "login/partials/cells/menu_action.html" with verb="delete" label="Delete…" gate=gates.delete tone="dash-menu__danger" %}
+      </li>
+    </ul>
+  </div>
+{% endwith %}

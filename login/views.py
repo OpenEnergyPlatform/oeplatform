@@ -18,29 +18,35 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 import json
 from functools import wraps
 from itertools import groupby
+from urllib.parse import urlsplit
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
-from django.db.models import F, Q
+from django.db import transaction
+from django.db.models import Q
 from django.http import (
+    Http404,
     HttpResponse,
     HttpResponseForbidden,
     HttpResponseNotAllowed,
     JsonResponse,
+    QueryDict,
 )
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
+from django.utils.cache import patch_vary_headers
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
-from django.views.generic import RedirectView, View
+from django.views.generic import RedirectView, TemplateView, View
 from django.views.generic.edit import DeleteView
 from rest_framework.authtoken.models import Token
 
-import login.permissions
 from api.serializers import DatasetCreateSerializer, DatasetUpdateSerializer
+from api.services import table_actions
 from api.services.dataset_creation import (
     DatasetNameTaken,
     assign_table,
@@ -53,11 +59,19 @@ from api.services.dataset_creation import (
 )
 from dataedit.helper import delete_peer_review
 from dataedit.models import Dataset, PeerReviewManager, Table, Topic
-from login.forms import EditUserForm, GroupForm
-from login.models import GroupMembership, UserGroup
+from login import table_roles
+from login.access import (
+    ProfileOwnerRequiredMixin,
+    is_htmx,
+    membership_or_404,
+    profile_owner_required,
+)
+from login.forms import EditUserForm, OrganizationForm
+from login.models import Membership
 from login.models import myuser as OepUser
 from login.permissions import ADMIN_PERM, DELETE_PERM, WRITE_PERM
-from login.utils import get_tables_if_group_assigned
+from login.tables_tab import accessible_tables, table_rows, tables_listing
+from login.utils import get_tables_for_organization
 from oeplatform.settings import PSEUDO_TOPIC_DRAFT
 
 # Pagination
@@ -71,65 +85,528 @@ ITEMS_PER_PAGE = 8
 ###########################################################################
 
 
-class TablesView(View):
+# The results region's id: when it is the element that triggered a request,
+# the request is its re-fetch after an action.
+REGION_ID = "tables-results"
 
-    def _get_filtered_tables(self, user, search_query=""):
-        """Return filtered querysets for draft and published tables."""
-        tables_set = user.get_tables_queryset(min_permission_level=WRITE_PERM)
+# What the dialog says when it was confirmed before the check for what was
+# just chosen in it (a Dataset, an Organization, a role) had come back.
+RECHECKED = (
+    "Nothing was changed: the check for your choice had not come back yet."
+    " Look it over and confirm again."
+)
 
-        draft_tables = tables_set.filter(is_publish=False).order_by(
-            F("date_updated").desc(nulls_last=True), "human_readable_name"
-        )
-        published_tables = tables_set.filter(is_publish=True).order_by(
-            F("date_updated").desc(nulls_last=True), "human_readable_name"
-        )
+# The bulk bar's actions, in the order it shows them, with their labels: an
+# ellipsis where the dialog asks for more than a confirmation. Delete is red
+# and stays last. The Organization actions are here only: one Table's
+# Holders are the access drawer's.
+BULK_ACTIONS = (
+    (table_actions.PUBLISH, "Publish…"),
+    (table_actions.UNPUBLISH, "Unpublish"),
+    (table_actions.DATASET_ADD, "Add to dataset…"),
+    (table_actions.DATASET_REMOVE, "Remove from dataset…"),
+    (table_actions.ORGANIZATION_SHARE, "Share with organization…"),
+    (table_actions.ORGANIZATION_REMOVE, "Remove organization…"),
+    (table_actions.DELETE, "Delete…"),
+)
 
-        if search_query:
 
-            q_filter = Q(name__icontains=search_query) | Q(
-                human_readable_name__icontains=search_query
-            )
-            draft_tables = draft_tables.filter(q_filter)
-            published_tables = published_tables.filter(q_filter)
+class TablesView(ProfileOwnerRequiredMixin, View):
+    """The tables tab: one list of every Table the user may write.
 
-        return draft_tables, published_tables
+    A direct load renders the whole page; an htmx request gets only the
+    results region, carrying the canonical address of what it shows in
+    ``HX-Push-Url`` (defaults left out, the page clamped), so the address bar
+    always names the state on screen; the region's own re-fetch after an
+    action (``tables-changed``) gets ``HX-Replace-Url`` instead. A history
+    restore is a full page, because htmx swaps it into the body.
+    """
 
     @method_decorator(never_cache)
     def get(self, request, user_id):
-        user = get_object_or_404(OepUser, pk=user_id)
-        search_query = request.GET.get("search", "").strip()
-        has_search_param = "search" in request.GET
-
-        draft_tables, published_tables = self._get_filtered_tables(user, search_query)
-
-        # Paginate tables
-        published_paginator = Paginator(published_tables, ITEMS_PER_PAGE)
-        draft_paginator = Paginator(draft_tables, ITEMS_PER_PAGE)
-
-        published_page = request.GET.get("published_page", 1)
-        published_page_obj = published_paginator.get_page(published_page)
-
-        draft_page = request.GET.get("draft_page", 1)
-        draft_page_obj = draft_paginator.get_page(draft_page)
-
+        user = self.profile_user
+        page = tables_listing(user).page(
+            accessible_tables(user), request.GET, request.path, rows=table_rows(user)
+        )
         context = {
             "profile_user": user,
-            "draft_tables_page": draft_page_obj,
-            "published_tables_page": published_page_obj,
-            "topics": [t.name for t in Topic.objects.all()],
-            "draft_page": draft_page,
-            "published_page": published_page,
-            "search_query": search_query,
+            "page": page,
+            "gates": table_actions.ROLE_GATES,
+            "bulk_actions": BULK_ACTIONS,
         }
-
-        if "HX-Request" in request.headers and not has_search_param:
-            return render(
-                request,
-                "login/partials/tables_sections.html",
-                context,
-            )
+        if is_htmx(request) and "HX-History-Restore-Request" not in request.headers:
+            response = render(request, "login/partials/tables_region.html", context)
+            # The region re-fetching itself after an action changes nothing
+            # the user navigated to, so it replaces the history entry rather
+            # than adding one per action.
+            if request.headers.get("HX-Trigger") == REGION_ID:
+                response["HX-Replace-Url"] = page.url
+            else:
+                response["HX-Push-Url"] = page.url
         else:
-            return render(request, "login/user_tables.html", context)
+            response = render(request, "login/user_tables.html", context)
+        patch_vary_headers(response, ["HX-Request"])
+        return response
+
+
+class TableActionView(ProfileOwnerRequiredMixin, View):
+    """One action on Tables from the dashboard, for a row (one name) or a
+    batch: GET is the preflight, POST the execution. Both take the Tables as
+    repeated ``table`` parameters and answer HTML for the action dialog.
+
+    - GET: the dialog, from ``table_actions.preflight``.
+    - POST, done: 204 with ``HX-Trigger: tables-changed``, carrying the
+      message and, for one Table, the id of the row's menu to focus. The
+      results region re-fetches itself on that event.
+    - POST, refused (a named Table is no longer allowed): 409, the dialog
+      re-run with "Nothing was changed: …", and ``HX-Trigger:
+      tables-refused`` for the persistent message. Sharing with or removing
+      an Organization answers 403 instead when a Table is refused because
+      the user is not a Table admin there.
+    - POST, unusable parameters (no Topic, the draft pseudo-topic, a
+      Dataset that is not the user's own, a typed confirmation that does not
+      match, more Tables than the ceiling): 400, the dialog with the error
+      beside its field, and no toast.
+    - POST, from a bulk dialog whose preview was checked against another
+      choice than the one sent (``previewed``, ``table_actions.choice``: a
+      Dataset, an Organization and its role; confirmed before the re-check
+      came back): 200, nothing written, the dialog checked against the
+      choice sent, with a notice.
+    - POST, a delete whose OEDB table could not be dropped afterwards: 204
+      as above, but the message says so and carries ``warning``, so it
+      stays until dismissed instead of reading as a success.
+
+    A done batch of several Tables also carries ``tables``, their titles,
+    which the message lists under "Show tables"; a delete carries ``gone``,
+    the names that left the dashboard, so the bulk selection drops them.
+    The bulk bar's preflight is ``TableActionCheckView``, because a
+    selection does not fit in a GET address. A bulk Dataset dialog asks it
+    again when the user chooses a Dataset, sending the whole selection as
+    ``selection`` beside the eligible ``tables``, so the re-check still
+    names every Table it leaves out (``_preflight``).
+
+    The Tables come as repeated ``table`` parameters or as one
+    comma-joined ``tables`` (``_names``). The parameters are ``topic`` and
+    ``embargo`` (publish), ``dataset`` (the Dataset actions),
+    ``organization`` and ``level`` (sharing with an Organization),
+    ``organization`` and ``lose_access`` (removing one: the Tables the dialog
+    said the user would lose, comma-joined) and ``confirm`` (delete's typed
+    confirmation); the preflight reads ``dataset``, ``organization`` and
+    ``level`` too, to leave out what they decide. A removal that takes Tables
+    off the dashboard carries them in ``gone``.
+
+    Whether a changed Table is still shown is read off ``HX-Current-URL``,
+    the address the request was sent from, through the list's own filters.
+    """
+
+    PARAMS = (
+        "topic",
+        "embargo",
+        "dataset",
+        "organization",
+        "level",
+        "lose_access",
+        "confirm",
+    )
+
+    def _names(self, data):
+        """The Tables a request names: repeated ``table`` parameters (a
+        row's menu) and one comma-joined ``tables`` (the bulk bar and the
+        dialog's form). A selection goes joined because Django refuses a
+        request with more than ``DATA_UPLOAD_MAX_NUMBER_FIELDS`` (1,000)
+        parameters, while the largest dashboard holds 2,068 Tables and a
+        ceiling is 1,000; a Table's name holds no comma."""
+        return data.getlist("table") + _joined(data, "tables")
+
+    def _params(self, data):
+        return {key: data.get(key, "") for key in self.PARAMS}
+
+    def _dialog(self, request, check, status=200, **extra):
+        context = {
+            "profile_user": self.profile_user,
+            "preflight": check,
+            "topics": table_actions.publish_topics(),
+            "embargo_periods": table_actions.EMBARGO_PERIODS,
+            "organization_roles": table_roles.ORGANIZATION_ROLES,
+            "errors": {},
+            "values": {},
+            **extra,
+        }
+        return render(
+            request, "login/partials/table_action_dialog.html", context, status=status
+        )
+
+    def _action(self, action):
+        if action not in table_actions.ACTIONS:
+            raise Http404
+        return action
+
+    def _preflight(self, request, action, data):
+        """The dialog for what ``data`` names. A re-check from the open
+        dialog carries the names it was opened with as ``selection``, a
+        superset of the eligible ``tables`` its form posts, and is run on
+        those, so a Table left out before is still named as left out."""
+        action = self._action(action)
+        params = self._params(data)
+        names = _joined(data, "selection") or self._names(data)
+        check = table_actions.preflight(self.profile_user, action, names, params)
+        return self._dialog(request, check, values=params)
+
+    @method_decorator(never_cache)
+    def get(self, request, user_id, action):
+        return self._preflight(request, action, request.GET)
+
+    def post(self, request, user_id, action):
+        action = self._action(action)
+        user = self.profile_user
+        names = self._names(request.POST)
+        params = self._params(request.POST)
+        # a dialog re-run after a refusal is checked against everything it
+        # was opened with, so what was left out before is still named
+        again = _joined(request.POST, "selection") or names
+        previewed = request.POST.get("previewed")
+        if previewed is not None and previewed != table_actions.choice(action, params):
+            # confirmed in the moment between choosing (a Dataset, an
+            # Organization, a role) and its re-check coming back: the names
+            # were checked against another choice, so nothing runs and the
+            # dialog shows the check for this one
+            check = table_actions.preflight(user, action, again, params)
+            return self._dialog(request, check, values=params, notice=RECHECKED)
+        try:
+            outcome = table_actions.execute(
+                user, action, names, params, via="dashboard"
+            )
+        except table_actions.InvalidParameters as error:
+            check = table_actions.preflight(user, action, again, params)
+            return self._dialog(
+                request, check, status=400, errors=error.errors, values=params
+            )
+        except table_actions.ActionRefused as refusal:
+            check = refusal.preflight
+            if again != names:
+                check = table_actions.preflight(user, action, again, params)
+            # A refusal for the role answers the Organization actions 403,
+            # as the permission service's ``NotAllowed`` does in the access
+            # drawer and the API (WF-08 decision 13); the other actions keep
+            # answering every refusal 409.
+            forbidden = (
+                action in table_actions.ORGANIZATION_ACTIONS and refusal.for_role
+            )
+            response = self._dialog(
+                request,
+                check,
+                status=403 if forbidden else 409,
+                notice=refusal.message,
+            )
+            response["HX-Trigger"] = json.dumps(
+                {"tables-refused": {"message": refusal.message}}
+            )
+            return response
+
+        if outcome.action == table_actions.DELETE:
+            # the rows are gone: nothing to name as hidden, no ⋯ to focus,
+            # and the selection lets go of them
+            detail = {
+                "message": _deleted_message(outcome),
+                "gone": [table.name for table in outcome.tables],
+            }
+            if outcome.drop_failed:
+                detail["warning"] = True
+        else:
+            lost = {table.pk for table in outcome.lost}
+            kept = [table for table in outcome.tables if table.pk not in lost]
+            hidden = _not_shown(request, user, kept)
+            detail = {"message": _done_message(outcome, hidden)}
+            if outcome.lost:
+                # an Organization removed: those rows left the dashboard
+                detail["gone"] = [table.name for table in outcome.lost]
+            elif len(outcome.tables) == 1:
+                detail["focus"] = f"menu-{outcome.tables[0].pk}"
+        if len(outcome.tables) > 1:
+            # a bulk success: the summary line, and "Show tables" lists them
+            detail["tables"] = [_title(table) for table in outcome.tables]
+        response = HttpResponse(status=204)
+        response["HX-Trigger"] = json.dumps({"tables-changed": detail})
+        return response
+
+
+class TableActionCheckView(TableActionView):
+    """The preflight of a bulk action, sent as a POST: the bulk bar sends
+    the whole selection, which may be every Table on the dashboard (2,068
+    names on the largest account, about 58 KB), more than any GET address
+    can carry. It answers exactly what ``TableActionView``'s GET answers,
+    the dialog, and writes nothing."""
+
+    http_method_names = ["post"]
+
+    def post(self, request, user_id, action):
+        return self._preflight(request, action, request.POST)
+
+
+class TableNamesView(ProfileOwnerRequiredMixin, View):
+    """The names of every Table the list's filters select, across all
+    pages: what "Select all N matching tables" puts in the selection.
+
+    The query is the list's own, parsed by the same declarations
+    (``Listing.matching``), so the names and the list cannot disagree; a
+    sort or a page in it is ignored. JSON: ``{"names": [...], "total": n}``,
+    by name.
+    """
+
+    @method_decorator(never_cache)
+    def get(self, request, user_id):
+        user = self.profile_user
+        names = list(
+            tables_listing(user)
+            .matching(accessible_tables(user), request.GET)
+            .order_by("name")
+            .values_list("name", flat=True)
+        )
+        return JsonResponse({"names": names, "total": len(names)})
+
+
+class TableAccessView(ProfileOwnerRequiredMixin, View):
+    """The access drawer for one Table: who holds which role on it. GET
+    renders the drawer; POST makes one change through the permission service
+    (``login.table_roles``) and renders the drawer again in place, so it
+    stays open for the next change.
+
+    POST takes ``op``: ``add`` (``kind`` user with ``name``, or org with
+    ``organization``, and ``level``), ``change`` (``holder`` as ``user:<pk>``
+    or ``org:<pk>``, and ``level``), ``remove`` (``holder``) or ``leave``;
+    ``confirm=yes`` once the user has confirmed losing their own Admin or
+    the Table from their dashboard.
+
+    - done: 200 with ``HX-Trigger: tables-changed``, carrying the message
+      and ``stay`` (the drawer stays open and keeps focus); the results
+      region re-fetches itself on that event. When the Table has left the
+      user's dashboard the drawer says so instead of listing its Holders.
+    - needs confirmation: 200, the drawer asking, nothing written, no event.
+    - unusable request: 400, the drawer with the error beside its field.
+    - not a Table admin: 403, the drawer with the reason.
+    - the last user with direct Admin would lose it: 409, the drawer with
+      "Give someone else Admin first". This is checked before any
+      confirmation is asked for.
+
+    A Table that is not on the user's dashboard (a name that is not a Table,
+    or a Table they hold no role on) answers 404, the same for both.
+    """
+
+    def _table(self, table_name):
+        table = accessible_tables(self.profile_user).filter(name=table_name).first()
+        if table is None:
+            raise Http404
+        return table
+
+    def _drawer(self, request, table, status=200, **extra):
+        context = {
+            "profile_user": self.profile_user,
+            "table": table,
+            "title": table.human_readable_name or table.name,
+            "roles": table_roles.ROLES,
+            "organization_roles": table_roles.ORGANIZATION_ROLES,
+            "errors": {},
+            "values": {},
+            **extra,
+        }
+        if not context.get("gone"):
+            context["access"] = table_roles.table_access(self.profile_user, table)
+        return render(
+            request,
+            "login/partials/table_access_drawer.html",
+            context,
+            status=status,
+        )
+
+    @method_decorator(never_cache)
+    def get(self, request, user_id, table_name):
+        return self._drawer(request, self._table(table_name))
+
+    def _write(self, table, data):
+        user = self.profile_user
+        op = data.get("op", "")
+        confirmed = data.get("confirm") == "yes"
+        if op == table_roles.ADD:
+            kind = data.get("kind")
+            who = data.get(
+                "organization" if kind == table_roles.ORGANIZATION else "name"
+            )
+            return table_roles.add(user, table, kind, who, data.get("level"))
+        if op == table_roles.CHANGE:
+            return table_roles.change(
+                user, table, data.get("holder"), data.get("level"), confirmed=confirmed
+            )
+        if op == table_roles.REMOVE:
+            return table_roles.remove(
+                user, table, data.get("holder"), confirmed=confirmed
+            )
+        if op == table_roles.LEAVE:
+            return table_roles.leave(user, table, confirmed=confirmed)
+        raise table_roles.InvalidRequest("Choose a change to make.", "op")
+
+    def post(self, request, user_id, table_name):
+        user = self.profile_user
+        table = self._table(table_name)
+        values = {
+            key: request.POST.get(key, "")
+            for key in ("op", "kind", "name", "organization", "holder", "level")
+        }
+        try:
+            change = self._write(table, request.POST)
+        except table_roles.ConfirmationNeeded as question:
+            return self._drawer(
+                request, table, confirm=question.message, pending=values
+            )
+        except table_roles.InvalidRequest as error:
+            return self._drawer(
+                request,
+                table,
+                status=400,
+                errors={error.field: error.message},
+                values=values,
+            )
+        except table_roles.NotAllowed as refusal:
+            return self._drawer(request, table, status=403, notice=refusal.message)
+        except table_roles.LastAdmin as refusal:
+            return self._drawer(request, table, status=409, notice=refusal.message)
+
+        if change is None:
+            # the Holder already holds that role: nothing to do
+            return self._drawer(request, table)
+        listed = accessible_tables(user).filter(pk=table.pk).exists()
+        hidden = _not_shown(request, user, [table]) if listed else []
+        response = self._drawer(request, table, gone=not listed)
+        detail = {"message": _access_message(change, listed, hidden), "stay": True}
+        if not listed:
+            # the bulk selection lets go of a Table that left the dashboard
+            detail["gone"] = [table.name]
+        response["HX-Trigger"] = json.dumps({"tables-changed": detail})
+        return response
+
+
+def _joined(data, key) -> list:
+    """The names in one comma-joined parameter."""
+    return [name.strip() for name in data.get(key, "").split(",") if name.strip()]
+
+
+def _access_message(change, listed, hidden) -> str:
+    """What a change of access says: what was done, and whether the Table
+    left the user's dashboard or is hidden by the current filter."""
+    title = _title(change.table)
+    message = change.message
+    if not listed and change.action == table_roles.LEAVE:
+        message = f"You left {title} and no longer have access to it."
+    elif not listed:
+        message += f" You no longer have access to {title}."
+    elif hidden:
+        message += " It is not shown under the current filter."
+    return message
+
+
+def _not_shown(request, user, tables) -> list:
+    """Which of ``tables`` the list the request came from no longer shows
+    under its filters. Empty when the request does not say where it came
+    from."""
+    current = request.headers.get("HX-Current-URL")
+    if not current:
+        return []
+    query = QueryDict(urlsplit(current).query)
+    shown = set(
+        tables_listing(user)
+        .matching(accessible_tables(user), query)
+        .filter(pk__in=[table.pk for table in tables])
+        .values_list("pk", flat=True)
+    )
+    return [table for table in tables if table.pk not in shown]
+
+
+def _title(table) -> str:
+    return f"\u201c{table.human_readable_name or table.name}\u201d"
+
+
+def _done_message(outcome, hidden) -> str:
+    """The success message: what was done, and which changed Tables the
+    current filter no longer shows, so they do not seem to vanish."""
+    tables = outcome.tables
+    count = len(tables)
+    what = _title(tables[0]) if count == 1 else f"{count} tables"
+    if outcome.action == table_actions.PUBLISH:
+        message = f"Published {what} under {outcome.params['topic']}"
+        # ``KEEP_EMBARGO`` is not one of the periods; nothing to say then
+        embargo = dict(table_actions.EMBARGO_PERIODS).get(outcome.params["embargo"])
+        if embargo and outcome.params["embargo"] != "none":
+            message += f", embargoed for {embargo}"
+        message += "."
+    elif outcome.action == table_actions.UNPUBLISH:
+        their = "its" if count == 1 else "their"
+        message = f"Unpublished {what}. No longer listed under {their} topics."
+    elif outcome.action in table_actions.ORGANIZATION_ACTIONS:
+        return _organization_message(outcome, what, hidden)
+    else:
+        dataset = (
+            f"\u201c{table_actions.dataset_title(outcome.params['dataset'])}\u201d"
+        )
+        if outcome.action == table_actions.DATASET_ADD:
+            message = f"Added {what} to {dataset}."
+        else:
+            message = f"Removed {what} from {dataset}."
+    if hidden and count == 1:
+        message += " It is not shown under the current filter."
+    elif len(hidden) == count:
+        message += " They are not shown under the current filter."
+    elif hidden:
+        # counted, not named: a bulk action may move hundreds out of view,
+        # and "Show tables" lists what it changed
+        message += f" {len(hidden)} of them are not shown under the current filter."
+    return message
+
+
+def _organization_message(outcome, what, hidden) -> str:
+    """The message after sharing with an Organization or removing one: what
+    was done, the Tables that left the user's dashboard (counted for a
+    batch) and, of the others, those the current filter no longer shows."""
+    organization = f"\u201c{outcome.params['organization'].name}\u201d"
+    if outcome.action == table_actions.ORGANIZATION_SHARE:
+        role = table_roles.role_label(outcome.params["level"])
+        message = f"Shared {what} with {organization} as {role}."
+    else:
+        message = f"Removed {organization} from {what}."
+    count, lost = len(outcome.tables), len(outcome.lost)
+    if lost and count == 1:
+        message += f" You no longer have access to {_title(outcome.lost[0])}."
+    elif lost == count:
+        message += " You no longer have access to them."
+    elif lost:
+        message += f" You no longer have access to {lost} of them."
+    if hidden and count == 1:
+        message += " It is not shown under the current filter."
+    elif hidden and len(hidden) == count - lost:
+        message += " They are not shown under the current filter."
+    elif hidden:
+        message += f" {len(hidden)} of them are not shown under the current filter."
+    return message
+
+
+def _deleted_message(outcome) -> str:
+    """The message after a delete. When an OEDB table could not be dropped
+    it names that Table: its record is gone, its data is still in the
+    database, and only an administrator can remove it now."""
+    tables = outcome.tables
+    count = len(tables)
+    message = f"Deleted {_title(tables[0]) if count == 1 else f'{count} tables'}."
+    failed = outcome.drop_failed
+    if failed:
+        names = ", ".join(f"{_title(table)} ({table.name})" for table in failed)
+        message += (
+            f" The database table of {names} could not be removed, so its data"
+            " is still stored. This was logged; an administrator has to remove"
+            " it."
+            if len(failed) == 1
+            else f" The database tables of {names} could not be removed, so"
+            " their data is still stored. This was logged; an administrator"
+            " has to remove them."
+        )
+    return message
 
 
 ##############################################################################
@@ -179,41 +656,39 @@ def _serializer_errors(serializer):
 
 
 def dataset_creator_required(view_func):
-    """Resolve profile user and dataset for the dataset partial views and
-    enforce that only the dataset's creator may act (403 otherwise)."""
+    """Resolve the dataset for the dataset partial views and enforce that
+    only the dataset's creator may act (403 otherwise).
+
+    Stacks under ``profile_owner_required``, which has already settled that
+    ``profile_user`` is the caller."""
 
     @wraps(view_func)
-    def wrapper(request, user_id, dataset_name, *args, **kwargs):
+    def wrapper(request, profile_user, dataset_name, *args, **kwargs):
         dataset = get_object_or_404(Dataset, name=dataset_name)
         if dataset.creator is None or dataset.creator != request.user:
             return HttpResponseForbidden(
                 "Only the dataset creator may manage this dataset."
             )
-        profile_user = get_object_or_404(OepUser, pk=user_id)
         return view_func(request, profile_user, dataset, *args, **kwargs)
 
     return wrapper
 
 
-class DatasetsView(LoginRequiredMixin, View):
+class DatasetsView(ProfileOwnerRequiredMixin, View):
     """Dataset-first dashboard view: list the user's datasets and create
     new ones via HTMX without page reloads. The name is immutable after
     creation; title and description stay editable."""
 
     @method_decorator(never_cache)
     def get(self, request, user_id):
-        user = get_object_or_404(OepUser, pk=user_id)
+        user = self.profile_user
         context = _datasets_context(request, user)
-        if "HX-Request" in request.headers:
+        if is_htmx(request):
             return render(request, "login/partials/datasets_sections.html", context)
         return render(request, "login/user_datasets.html", context)
 
     def post(self, request, user_id):
-        user = get_object_or_404(OepUser, pk=user_id)
-        if user != request.user:
-            return HttpResponseForbidden(
-                "Datasets can only be created on your own dashboard."
-            )
+        user = self.profile_user
 
         # the permanent URL name is derived from the title, so users can
         # style the title freely without thinking in slugs
@@ -245,7 +720,7 @@ class DatasetsView(LoginRequiredMixin, View):
         return render(request, "login/partials/datasets_sections.html", context)
 
 
-@login_required
+@profile_owner_required
 @dataset_creator_required
 def dataset_edit_view(request, profile_user, dataset):
     """Inline edit of a dataset card: title, description and topics; the
@@ -288,7 +763,7 @@ def dataset_edit_view(request, profile_user, dataset):
     )
 
 
-@login_required
+@profile_owner_required
 @dataset_creator_required
 def dataset_card_view(request, profile_user, dataset):
     """A single dataset card, used to close an open edit or manage panel
@@ -301,7 +776,7 @@ def dataset_card_view(request, profile_user, dataset):
     )
 
 
-@login_required
+@profile_owner_required
 @require_POST
 @dataset_creator_required
 def dataset_delete_view(request, profile_user, dataset):
@@ -338,7 +813,7 @@ def _render_dataset_manage(request, profile_user, dataset, search=""):
     return render(request, "login/partials/dataset_manage.html", context)
 
 
-@login_required
+@profile_owner_required
 @dataset_creator_required
 def dataset_manage_view(request, profile_user, dataset):
     """Manage panel for a dataset's resources: current tables with draft
@@ -346,7 +821,7 @@ def dataset_manage_view(request, profile_user, dataset):
     return _render_dataset_manage(request, profile_user, dataset)
 
 
-@login_required
+@profile_owner_required
 @dataset_creator_required
 def dataset_table_search_view(request, profile_user, dataset):
     """Picker search: only tables the user may assign under the curation
@@ -360,20 +835,21 @@ def dataset_table_search_view(request, profile_user, dataset):
     return render(request, "login/partials/dataset_table_search_results.html", context)
 
 
-@login_required
+@profile_owner_required
 @require_POST
 @dataset_creator_required
 def dataset_assign_view(request, profile_user, dataset):
     table = get_object_or_404(Table, name=request.POST.get("table", ""))
     if not user_may_assign_table(request.user, table):
         return HttpResponseForbidden(
-            "Draft or embargoed tables require write permission on the table."
+            "Draft or embargoed tables require Data editor on the table, "
+            "directly or through an organization."
         )
     assign_table(dataset, table)
     return _render_dataset_manage(request, profile_user, dataset)
 
 
-@login_required
+@profile_owner_required
 @require_POST
 @dataset_creator_required
 def dataset_unassign_view(request, profile_user, dataset):
@@ -388,7 +864,7 @@ def dataset_unassign_view(request, profile_user, dataset):
 ##############################################################################
 
 
-class ReviewsView(View):
+class ReviewsView(ProfileOwnerRequiredMixin, View):
     @method_decorator(never_cache)
     def get(self, request, user_id):
         """
@@ -398,7 +874,7 @@ class ReviewsView(View):
         :param user_id: An user id
         :return: Profile renderer
         """
-        user = get_object_or_404(OepUser, pk=user_id)
+        user = self.profile_user
 
         ##################################################################
         # get reviewer pov reviews
@@ -475,7 +951,7 @@ class ReviewsView(View):
         # Sort the reviews by table name
         sorted_reviews = sorted(peer_review_reviews, key=lambda x: x.table)
         # Group the reviews by table name
-        grouped_reviews = {
+        organizationed_reviews = {
             k: list(v) for k, v in groupby(sorted_reviews, key=lambda x: x.table)
         }
 
@@ -550,7 +1026,7 @@ class ReviewsView(View):
         # Sort the reviews by table name
         sorted_contributions = sorted(peer_review_contributions, key=lambda x: x.table)
         # Group the reviews by table name
-        grouped_contributions = {
+        organizationed_contributions = {
             k: list(v) for k, v in groupby(sorted_contributions, key=lambda x: x.table)
         }
         latest_review_id = latest_review.pk if latest_review is not None else None
@@ -561,9 +1037,9 @@ class ReviewsView(View):
             {
                 "profile_user": user,
                 "reviewer_reviewed": reviewed_context,
-                "reviewer_reviewed_grouped": grouped_reviews,
+                "reviewer_reviewed_organizationed": organizationed_reviews,
                 "contributor_reviewed": reviewed_contributions_context,
-                "contributor_reviewed_grouped": grouped_contributions,
+                "contributor_reviewed_organizationed": organizationed_contributions,
                 "latest_review_id": latest_review_id,
             },
         )
@@ -578,10 +1054,10 @@ def delete_peer_review_simple_view(request):
     """
     data = json.loads(request.body)
     review_id = data.get("review_id")
-    return delete_peer_review(review_id)
+    return delete_peer_review(review_id, request.user)
 
 
-class SettingsView(View):
+class SettingsView(ProfileOwnerRequiredMixin, View):
     @method_decorator(never_cache)
     def get(self, request, user_id):
         """
@@ -592,34 +1068,29 @@ class SettingsView(View):
         :return: Profile renderer
         """
 
-        from rest_framework.authtoken.models import Token
-
         for user in OepUser.objects.all():
             Token.objects.get_or_create(user=user)
-        user = get_object_or_404(OepUser, pk=user_id)
-        token = None
-        user_groups = None
-        if request.user.is_authenticated:
-            token = Token.objects.get(user=request.user)
-            user_groups = request.user.memberships
+        user = self.profile_user
+        token = Token.objects.get(user=request.user)
+        user_organizations = request.user.memberships
         return render(
             request,
             "login/user_settings.html",
-            {"profile_user": user, "token": token, "groups": user_groups},
+            {"profile_user": user, "token": token, "organizations": user_organizations},
         )
 
 
 ###########################################################################
-#            User Group related views & partial views for htmx            #
+#            Organization related views & partial views for htmx          #
 ###########################################################################
 
 
-class GroupsView(View):
+class OrganizationsView(ProfileOwnerRequiredMixin, View):
     @method_decorator(never_cache)
     def get(self, request, user_id: int):
         """
-        Get all groups where the current user is listed as member. Also
-        indicate weather the user is the group Admin or Member.
+        Get all organizations where the current user is listed as member. Also
+        indicate weather the user is the organization Admin or Member.
         Additionally provide context information like member count or
         Group description.
 
@@ -628,72 +1099,69 @@ class GroupsView(View):
         :return: Profile renderer
         """
 
-        # Retrieve the profile owner after a htmx redirect:
-        # In case a new Group is created or deleted,
-        # check lookup query parameters for user id.
-        if request.GET.get("profile_user"):
-            user_id = request.GET.get("profile_user")
-
-        user = get_object_or_404(OepUser, pk=user_id)
+        user = self.profile_user
 
         return render(
             request,
-            "login/user_groups.html",
+            "login/organizations.html",
             {"profile_user": user},
         )
 
 
-@never_cache
-def group_member_count_view(request, group_id: int):
-    """
-    Return the member count for the current group.
-
-    :param request: A HTTP-request object sent by the Django framework.
-    :params group_id: Group id
-
-    :returns: Django HttpResponse with member count
-    """
-    group = get_object_or_404(UserGroup, id=group_id)
-    mem = group.memberships.all()
-    member_count = len(mem)
-
-    return HttpResponse(f"{member_count} member")
-
-
 # TODO: should be require_POST?
 @login_required
-def group_leave_view(request, group_id: int):
+def organization_leave_view(request, organization_id: int):
     """ """
     user: OepUser = request.user
     user_id: int = request.user.id
-    group = get_object_or_404(UserGroup, id=group_id)
-    membership = get_object_or_404(GroupMembership, group=group, user=request.user)
+    organization, membership = membership_or_404(request.user, organization_id)
 
-    errors: dict = {}
-    members = GroupMembership.objects.filter(group=group).exclude(user=user.pk).count()
+    members = (
+        Membership.objects.filter(group=organization).exclude(user=user.pk).count()
+    )
     if members == 0:
-        errors["err_leave"] = (
-            "Please delete the group instead (you are the only member)."
+        return HttpResponse(
+            "Please delete the organization instead (you are the only member)."
         )
-        return JsonResponse(errors, status=400)
 
     if membership.level >= ADMIN_PERM:
         admins = (
-            GroupMembership.objects.filter(group=group, level=ADMIN_PERM)
+            Membership.objects.filter(group=organization, level=ADMIN_PERM)
             .exclude(user=user.pk)
             .count()
         )
         if admins == 0:
-            errors["err_leave"] = "A group needs at least one admin!"
-            return JsonResponse(errors, status=400)
+            return HttpResponse("An organization needs at least one admin!")
 
     membership.delete()
     response = HttpResponse()
-    response["HX-Redirect"] = f"/user/profile/1/groups?profile_user={user_id}"
+    response["HX-Redirect"] = reverse(
+        "login:organizations", kwargs={"user_id": user_id}
+    )
     return response
 
 
-class PartialGroupsView(View):
+@login_required
+def organization_delete_view(request, organization_id: int):
+    """View to delete an organization."""
+    organization, _ = membership_or_404(
+        request.user, organization_id, min_level=ADMIN_PERM
+    )
+    organization.delete()
+    messages.add_message(
+        request,
+        level=messages.INFO,
+        message="Organization deleted!",
+        extra_tags="primary",
+    )
+    response = HttpResponse()
+    response["HX-Redirect"] = reverse(
+        "login:organizations", kwargs={"user_id": request.user.id}
+    )
+    return response
+
+
+class OrganizationListView(ProfileOwnerRequiredMixin, View):
     @method_decorator(never_cache)
     def get(self, request, user_id: int):
         """
@@ -702,43 +1170,40 @@ class PartialGroupsView(View):
         :param user_id: An user id
         :return: Profile renderer
         """
-        user = get_object_or_404(OepUser, pk=user_id)
-        user_groups = None
-        if request.user.is_authenticated:
-            user_groups = request.user.memberships
+        user = self.profile_user
 
         return render(
             request,
-            "login/partials/groups.html",
-            {"profile_user": user, "groups": user_groups},
+            "login/partials/organizations.html",
+            {"profile_user": user},
         )
 
 
-class GroupManagementView(View, LoginRequiredMixin):
-    form_is_valid = False
+class OrganizationManagementView(LoginRequiredMixin, View):
+    """Create an organization, or edit one the caller administers.
+
+    The login mixin comes first in the bases, see ProfileOwnerRequiredMixin.
+    """
 
     @method_decorator(never_cache)
-    def get(self, request, group_id=None):
+    def get(self, request, organization_id=None):
         """
-        Load the chosen action(create or edit) for a group.
+        Load the chosen action(create or edit) for an organization.
         :param request: A HTTP-request object sent by the Django framework.
         :param user_id: An user id
-        :param user_id: An group id
+        :param organization_id: An organization id
         :return: Profile renderer
         """
         is_admin = False
         can_delete = False
         can_edit = False
-        group = None
-        if group_id:
-            group = UserGroup.objects.get(id=group_id)
-            membership = get_object_or_404(
-                GroupMembership, group=group, user=request.user
-            )
+        organization = None
+        if organization_id:
+            organization, membership = membership_or_404(request.user, organization_id)
 
-            # In case the group is down to one member make sure
+            # In case the organization is down to one member make sure
             # the remaining user gets admin permissions
-            if len(group.memberships.all()) == 1:
+            if len(organization.memberships.all()) == 1:
                 membership.level = ADMIN_PERM
                 membership.save()
 
@@ -751,118 +1216,117 @@ class GroupManagementView(View, LoginRequiredMixin):
             elif membership.level == WRITE_PERM:
                 can_edit = WRITE_PERM
 
-            form = GroupForm(instance=group)
+            form = OrganizationForm(instance=organization)
         else:
-            form = GroupForm()
+            form = OrganizationForm()
 
-        group_tables = None
-        if group:
-            group_tables = get_tables_if_group_assigned(group=group)
+        organization_tables = None
+        if organization:
+            organization_tables = get_tables_for_organization(organization=organization)
 
         # Redirect if the request is not triggered using htmx methods
-        if "HX-Request" not in request.headers:
-            return redirect("login:groups", user_id=request.user.id)
+        if not is_htmx(request):
+            return redirect("login:organizations", user_id=request.user.id)
 
         return render(
             request,
-            "login/partials/group_management.html",
+            "login/partials/organization_management.html",
             {
                 "form": form,
-                "group": group,
-                "choices": GroupMembership.choices,
-                "group_tables": group_tables,
+                "organization": organization,
+                "choices": Membership.choices,
+                "organization_tables": organization_tables,
                 "is_admin": is_admin,
                 "can_delete": can_delete,
                 "can_edit": can_edit,
             },
         )
 
-    def post(self, request, group_id=None):
+    def post(self, request, organization_id=None):
         """
-        Performs selected action(save or delete) for a group.
-        If a groupname already exists, then a error will be output.
-        The selected users become members of this group. The groupadmin is already set.
+        Performs selected action(save or delete) for an organization.
+        If an organization name already exists, then a error will be output.
+        The selected users become members of this organization.
+        The organization admin is already set.
         :param request: A HTTP-request object sent by the Django framework.
         :param user_id: An user id
-        :param user_id: An group id
+        :param organization_id: An organization id
         :return: Profile renderer
         """
-        self.form_is_valid = False
-        user = request.user.id
-        group = UserGroup.objects.get(id=group_id) if group_id else None
-        form = GroupForm(request.POST, instance=group)
-        status = None
-        if form.is_valid():
-            self.form_is_valid = True
+        organization = None
+        if organization_id:
+            # who may edit is settled before the form touches the instance
+            organization, _ = membership_or_404(
+                request.user, organization_id, min_level=ADMIN_PERM
+            )
 
-        if not self.form_is_valid:
+        form = OrganizationForm(request.POST, instance=organization)
+        if not form.is_valid():
             return render(
                 request,
-                "login/partials/group_component_form_edit.html",
+                "login/partials/organization_form.html",
                 {"form": form},
             )
 
-        if self.form_is_valid:
-            # status = 201
-            if group_id:
-                group = form.save()
-                membership = get_object_or_404(
-                    GroupMembership, group=group, user=request.user
-                )
-                if membership.level < ADMIN_PERM:
-                    raise PermissionDenied
-                return render(
-                    request,
-                    "login/partials/group_component_form_edit.html",
-                    {"form": form, "group": group},
-                    status=status,
-                )
-            else:
-                group = form.save()
-                membership = GroupMembership.objects.create(
-                    user=request.user, group=group, level=ADMIN_PERM
-                )
-                membership.save()
-                response = HttpResponse()
-                # response["profile_user"] = user
-                response["HX-Redirect"] = (
-                    f"/user/profile/1/groups?create_msg=True&profile_user={user}"
-                )
-                return response
+        if organization_id:
+            organization = form.save()
+            return render(
+                request,
+                "login/partials/organization_form.html",
+                {"form": form, "organization": organization},
+            )
 
-
-class PartialGroupMemberManagementView(View, LoginRequiredMixin):
-    @method_decorator(never_cache)
-    def get(self, request, group_id: int):
-        """
-        Renders the group detail page component for user invites and
-        permissions.
-
-        :param request: A HTTP-request object sent by the Django framework.
-        :param user_id: An user id
-        :param user_id: An group id
-        :return: Profile renderer
-        """
-        group = get_object_or_404(UserGroup, pk=group_id)
-        is_admin = False
-        membership = GroupMembership.objects.filter(
-            group=group, user=request.user
-        ).first()
-        if membership:
-            is_admin = membership.level >= ADMIN_PERM
-        return render(
+        # a new organization and its first admin are one write, so an
+        # organization never exists without an owner
+        with transaction.atomic():
+            organization = form.save()
+            Membership.objects.create(
+                user=request.user, group=organization, level=ADMIN_PERM
+            )
+        messages.add_message(
             request,
-            "login/partials/group_component_membership.html",
-            {"group": group, "choices": GroupMembership.choices, "is_admin": is_admin},
+            level=messages.INFO,
+            message="Organization created! Edit the organization to invite members.",
+            extra_tags="primary",
         )
+        response = HttpResponse()
+        response["HX-Redirect"] = reverse(
+            "login:organizations", kwargs={"user_id": request.user.pk}
+        )
+        return response
 
-    def post(self, request, group_id: int):
+
+class OrganizationMembersView(LoginRequiredMixin, TemplateView):
+    """The member list of an organization, for its members only, and the
+    member changes their level allows.
+
+    The login mixin comes first in the bases, see ProfileOwnerRequiredMixin.
+    """
+
+    template_name = "login/partials/organization_members.html"
+
+    def get_context_data(self, **kwargs):
+        """Render context."""
+        context = super(OrganizationMembersView, self).get_context_data(**kwargs)
+
+        organization, membership = membership_or_404(
+            self.request.user, self.kwargs["organization_id"]
+        )
+        is_admin = membership.level >= ADMIN_PERM
+
+        context["organization"] = organization
+        context["choices"] = Membership.choices
+        context["is_admin"] = is_admin
+        return context
+
+    def post(self, request, organization_id: int):
         """
-        Performs selected action(save or delete) for a group.
-        If a groupname already exists, then a error will be output.
-        The selected users become members of this group. The groupadmin is already set.
+        Performs selected action(save or delete) for an organization.
+        If a organization name already exists, then a error will be output.
+        The selected users become members of this organization.
+        The organization admin is already set.
         :param request: A HTTP-request object sent by the Django framework.
-        :param group_id: An group id
+        :param organization_id: An organization id
         :return: get-request -> Profile renderer, post-request ->
         """
         mode = request.POST["mode"]
@@ -871,189 +1335,66 @@ class PartialGroupMemberManagementView(View, LoginRequiredMixin):
                 "Post request required field 'mode' not specified!"
             )
 
-        group = get_object_or_404(UserGroup, id=group_id)
-        membership = get_object_or_404(GroupMembership, group=group, user=request.user)
+        organization, membership = membership_or_404(request.user, organization_id)
 
-        errors = {}
-        if mode == "remove_user":
-            if membership.level < login.permissions.DELETE_PERM:
+        error_message = None
+        if mode == "add_user":
+            if membership.level < WRITE_PERM:
+                raise PermissionDenied
+            try:
+                user = OepUser.objects.get(name=request.POST["name"])
+                membership, _ = Membership.objects.get_or_create(
+                    group=organization, user=user
+                )
+                membership.save()
+            except OepUser.DoesNotExist:
+                error_message = "User does not exist"
+
+        elif mode == "remove_user":
+            if membership.level < DELETE_PERM:
                 raise PermissionDenied
 
             user_to_remove: OepUser = OepUser.objects.get(id=request.POST["user_id"])
-            target_membership = GroupMembership.objects.get(
-                group=group, user=user_to_remove
+            target_membership = Membership.objects.get(
+                group=organization.group_ptr, user=user_to_remove
             )
 
             if request.user.id == user_to_remove.pk:
-                errors["name"] = "Please leave the group to remove your own membership."
-                return JsonResponse(errors, status=400)
-
+                error_message = (
+                    "Please leave the organization to remove your own membership."
+                )
+            elif membership.level < target_membership.level:
+                error_message = (
+                    "You cant remove memberships with higher permission level."
+                )
             elif target_membership.level >= ADMIN_PERM:
                 admins = (
-                    GroupMembership.objects.filter(group=group, level=ADMIN_PERM)
+                    Membership.objects.filter(group=organization, level=ADMIN_PERM)
                     .exclude(user=user_to_remove)
                     .count()
                 )
                 if admins == 0:
-                    errors["name"] = "A group needs at least one admin"
-                    return JsonResponse(errors, status=405)
-            elif membership.level < target_membership.level:
-                errors["name"] = (
-                    "You cant remove memberships with higher permission level."
-                )
-                return JsonResponse(errors, status=400)
+                    error_message = "A organization needs at least one admin"
 
-            target_membership.delete()
-            response = HttpResponse(status=204)
-            return response
+            # a refusal above is a refusal: nothing is removed
+            if error_message is None:
+                target_membership.delete()
 
         elif mode == "alter_user":
-            if membership.level < login.permissions.ADMIN_PERM:
+            if membership.level < ADMIN_PERM:
                 raise PermissionDenied
             user = OepUser.objects.get(id=request.POST["user_id"])
             if user == request.user:
-                errors["name"] = "You can not change your own permissions"
-                # errors['HX-Trigger'] = 'own-permissions-error'
-                return JsonResponse(errors, status=405)
+                error_message = "You can not change your own permissions"
             else:
-                membership = GroupMembership.objects.get(group=group, user=user)
+                membership = Membership.objects.get(group=organization, user=user)
                 membership.level = request.POST["selected_value"]
                 membership.save()
-
-        elif mode == "delete_group":
-            if membership.level < login.permissions.ADMIN_PERM:
-                raise PermissionDenied
-            group.delete()
-            response = HttpResponse()
-            user_id = request.user.id
-            response["profile_user"] = user_id
-            response["HX-Redirect"] = (
-                f"/user/profile/1/groups?delete_msg=True&profile_user={user_id}"
-            )
-            return response
         else:
             raise PermissionDenied
-        return JsonResponse({"success": True})
-
-    # def __add_user(self, request, group):
-    #     user = OepUser.objects.filter(id=request.POST["user_id"]).first()
-    #     g = user.groups.add(group)
-    #     g.save()
-    #     return self.get(request)
-
-
-# TODO: Post should not return render ... Get might never be used
-class PartialGroupEditFormView(View, LoginRequiredMixin):
-    @method_decorator(never_cache)
-    def get(self, request, group_id):
-        """
-        Returns a edit form component for a group.
-
-        :param request: A HTTP-request object sent by the Django framework.
-        :param group_id: An group id
-        :return: Profile renderer
-        """
-        group = get_object_or_404(UserGroup, pk=group_id)
-        is_admin = False
-        membership = GroupMembership.objects.filter(
-            group=group, user=request.user
-        ).first()
-        if membership:
-            is_admin = membership.level >= ADMIN_PERM
-        return render(
-            request,
-            "login/partials/group_component_form_edit.html",
-            {"group": group, "choices": GroupMembership.choices, "is_admin": is_admin},
-        )
-
-    def post(self, request, group_id):
-        """
-        Returns a validated edit form component the current group.
-
-        NOTE: This breaks some htmx usage suggestions but currently
-        it seems to be very convenient and helps to make the implementation
-        quite efficient.
-
-        :param request: A HTTP-request object sent by the Django framework.
-        :param group_id: An group id
-        :return: Profile renderer
-        """
-
-        group = UserGroup.objects.get(id=group_id) if group_id else None
-        form = GroupForm(request.POST, instance=group)
-        if form.is_valid():
-            if group_id:
-                group = form.save()
-                membership = get_object_or_404(
-                    GroupMembership, group=group, user=request.user
-                )
-                if membership.level < WRITE_PERM:
-                    raise PermissionDenied
-                return render(
-                    request,
-                    "login/partials/group_component_form_edit.html",
-                    {"form": form, "group": group},
-                    status=201,
-                )
-
-
-class PartialGroupInviteView(View, LoginRequiredMixin):
-    @method_decorator(never_cache)
-    def get(self, request, group_id):
-        group = get_object_or_404(UserGroup, pk=group_id)
-        is_admin = False
-        membership = GroupMembership.objects.filter(
-            group=group, user=request.user
-        ).first()
-        if membership:
-            is_admin = membership.level >= ADMIN_PERM
-
-        return render(
-            request,
-            "login/partials/group_component_invite_user.html",
-            {
-                "is_admin": is_admin,
-                "group": group,
-                "membership": membership,
-            },
-        )
-
-    def post(self, request, group_id):
-        """
-        Performs selected action(save or delete) for a group.
-        If a groupname already exists, then a error will be output.
-        The selected users become members of this group.
-
-        :param request: A HTTP-request object sent by the Django framework.
-        :param user_id: An group id
-        :return: Profile renderer
-        """
-        mode = request.POST.get("mode")
-        if mode is None:
-            return HttpResponseNotAllowed("Mode not specified")
-
-        group = get_object_or_404(UserGroup, id=group_id)
-        # group_member_count = group.memberships.all
-        membership = get_object_or_404(GroupMembership, group=group, user=request.user)
-
-        context = {}
-        if mode == "add_user":
-            if membership.level < login.permissions.WRITE_PERM:
-                raise PermissionDenied
-            try:
-                user = OepUser.objects.get(name=request.POST["name"])
-                membership, _ = GroupMembership.objects.get_or_create(
-                    group=group, user=user
-                )
-                membership.save()
-                context["added_user"] = user.pk
-                return JsonResponse(context, status=201)
-            except OepUser.DoesNotExist:
-                context["error"] = "User does not exist"
-                return JsonResponse(context, status=404)
-        else:
-            raise PermissionDenied
-        # return HttpResponse(context, status=201)
+        context = self.get_context_data()
+        context["error_message"] = error_message
+        return self.render_to_response(context)
 
 
 ##############################################################################
@@ -1061,17 +1402,13 @@ class PartialGroupInviteView(View, LoginRequiredMixin):
 ##############################################################################
 
 
-class EditUserView(View):
+class EditUserView(ProfileOwnerRequiredMixin, View):
     @method_decorator(never_cache)
     def get(self, request, user_id):
-        if not request.user.id == int(user_id):
-            raise PermissionDenied
         form = EditUserForm(instance=request.user)
         return render(request, "login/oepuser_edit_form.html", {"form": form})
 
     def post(self, request, user_id):
-        if not request.user.id == int(user_id):
-            raise PermissionDenied
         form = EditUserForm(
             instance=request.user,
             files=request.FILES or None,
@@ -1109,6 +1446,15 @@ class AccountDeleteView_TODO_UNUSED(LoginRequiredMixin, DeleteView):
         return render(request, "login/delete_account.html", {"profile_user": user})
 
 
+@profile_owner_required
+def account_delete_view(request, profile_user):
+    """Account deletion is not offered yet (see AccountDeleteView_TODO_UNUSED).
+
+    The route exists so its link resolves; it answers 404, to its owner too.
+    """
+    raise Http404
+
+
 # TODO: should be require_POST?
 def token_reset_view(request):
     if request.user.is_authenticated:
@@ -1124,8 +1470,9 @@ def token_reset_view(request):
         return HttpResponseForbidden("You are not authorized to reset the token.")
 
 
+@profile_owner_required
 @never_cache
-def metadata_review_badge_indicator_icon_file_view(request, user_id, table_name):
+def metadata_review_badge_indicator_icon_file_view(request, profile_user, table_name):
     # is_badge : bool , msg : string -> either error msg or badge name
     table = get_object_or_404(Table, name=table_name)
     context = table.get_review_badge_from_table_metadata()

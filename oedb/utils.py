@@ -4,12 +4,14 @@ SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> Â© Ã
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
+import hashlib
 import logging
 import re
 from typing import Iterable
 
 from sqlalchemy import MetaData
 from sqlalchemy import Table as SATable
+from sqlalchemy import text
 
 from login.permissions import ADMIN_PERM, DELETE_PERM, NO_PERM
 from oedb.connection import _SA_METADATA, _get_engine, _get_inspector
@@ -103,13 +105,31 @@ class _OedbTable:
     def _validated_schema_name(self) -> str:
         return self._schema._validated_schema_name
 
-    def drop_if_exists(self) -> None:
+    def drop_if_exists(self, lock_timeout: str | None = None) -> None:
+        """Drop this table if it exists.
+
+        ``lock_timeout`` (a Postgres duration, e.g. ``"1s"``) bounds how long
+        the drop waits for another session's lock on the table; when it runs
+        out the drop raises (``LockNotAvailable``) and drops nothing. It is
+        set for the drop's own transaction only, so the pooled session goes
+        back with the server's default. None waits as long as it takes."""
         # IMPORTANT: this should be the only place where we delete
         # tables in oedb
         # we coud also do self._sa_table.drop(checkfirst=True),
         # but i don't think it does CASCADE
         sql = f"DROP TABLE IF EXISTS {self._quoted_name} CASCADE;"
-        return self._execute(sql, requires_permission=DELETE_PERM)
+        if lock_timeout is None:
+            return self._execute(sql, requires_permission=DELETE_PERM)
+        if self._permission_level < DELETE_PERM:
+            raise PermissionError()
+        with self._engine.begin() as connection:
+            # SET LOCAL takes no bind parameter; set_config(..., true) is
+            # the same thing with one
+            connection.execute(
+                text("SELECT set_config('lock_timeout', :timeout, true)"),
+                timeout=lock_timeout,
+            )
+            connection.execute(sql)
 
     def exists(self) -> bool:
         return bool(
@@ -167,6 +187,24 @@ class _OedbMainTable(_OedbTable):
         return sa_table
 
 
+def unapplied_index_name(meta_table_name: str) -> str:
+    """Name of the partial index on a meta table's unapplied rows (#2362).
+
+    Postgres cuts identifiers at 63 bytes. Cutting "<meta table>_unapplied_idx"
+    there could yield the meta table's own name (a meta table name can itself be
+    63 long), and CREATE INDEX IF NOT EXISTS would then silently create nothing.
+    A long name therefore keeps a prefix plus a hash of the full name.
+
+    Must stay identical to `_index_name` in the oedb migration
+    e3b1f6c2d9a4_index_unapplied_meta_rows.py (a test compares the two).
+    """
+    name = f"{meta_table_name}_unapplied_idx"
+    if len(name) <= 63:
+        return name
+    digest = hashlib.sha1(meta_table_name.encode()).hexdigest()[:8]
+    return f"{meta_table_name[:46]}_{digest}_uidx"
+
+
 class _OedbMetaTable(_OedbTable):
     def __init__(
         self,
@@ -190,6 +228,12 @@ class _OedbMetaTable(_OedbTable):
         )
 
     def _create_if_missing(self, include_indexes: bool = True) -> None:
+        # Short-circuit when the table exists: the DDL below must only run at
+        # actual creation time. Running it on every access can deadlock, e.g.
+        # the CREATE INDEX waits behind an uncommitted insert into the meta
+        # table held by the very transaction that triggered this call.
+        if self.exists():
+            return None
         query = (
             f'CREATE TABLE IF NOT EXISTS "{self.schema_name}"."{self.name}" (LIKE '
             f'"{self.main_table.schema_name}"."{self.main_table.name}"'
@@ -197,7 +241,17 @@ class _OedbMetaTable(_OedbTable):
         if include_indexes:
             query += "INCLUDING ALL EXCLUDING INDEXES, PRIMARY KEY (_id) "
         query += f") INHERITS ({EditBase.__tablename__});"
+        # Partial index so that finding/marking unapplied changes doesn't
+        # sequentially scan the meta table as it grows (issue #2362).
+        query += (
+            f' CREATE INDEX IF NOT EXISTS "{self.unapplied_index_name}" ON '
+            f'"{self.schema_name}"."{self.name}" (_id) WHERE _applied = FALSE;'
+        )
         return self._execute(query, requires_permission=ADMIN_PERM)
+
+    @property
+    def unapplied_index_name(self) -> str:
+        return unapplied_index_name(self.name)
 
     def get_sa_table(self) -> SATable:
         # create on demand
@@ -263,11 +317,18 @@ class OedbTableProxy:
         # only check main table
         return self._main_table.exists()
 
-    def drop_if_exists(self) -> None:
-        self._main_table.drop_if_exists()
-        self._edit_table.drop_if_exists()
-        self._insert_table.drop_if_exists()
-        self._delete_table.drop_if_exists()
+    def drop_if_exists(self, lock_timeout: str | None = None) -> None:
+        """Drop the main table and its three meta tables, each in a
+        transaction of its own and each bounded by ``lock_timeout`` (see
+        ``_OedbTable.drop_if_exists``). The first that fails raises, and
+        the ones after it are not tried."""
+        for table in (
+            self._main_table,
+            self._edit_table,
+            self._insert_table,
+            self._delete_table,
+        ):
+            table.drop_if_exists(lock_timeout=lock_timeout)
 
     def create(
         self, column_definitions: list, constraints_definitions: list

@@ -27,7 +27,7 @@
     "@react-hook/mouse-position": "^4.1.3",
     "@ts4nfdi/terminology-service-suite": "^6.9.1",
     "apollo-boost": "^0.4.9",
-    "axios": "^1.16.0",
+    "axios": "^1.20.0",
     "chart.js": "^4.4.3",
     "chartjs-plugin-datalabels": "^2.2.0",
     "date-fns": "^2.30.0",
@@ -41,7 +41,7 @@
     "jsonld": "^9.0.0",
     "lodash": "^4.18.1",
     "mkdirp": "^3.0.1",
-    "moment": "^2.30.1",
+    "moment": "^2.31.0",
     "patch-package": "^8.0.1",
     "react": "18.3",
     "react-beautiful-dnd": "^13.1.1",
@@ -57,7 +57,7 @@
     "react-force-graph-vr": "^1.14.8",
     "react-kapsule": "^2.4.0",
     "react-query": "^3.39.2",
-    "react-router-dom": "^6.30.4",
+    "react-router-dom": "^6.30.6",
     "react-uuid": "^2.0.0",
     "semantic-ui-css": "^2.5.0",
     "semantic-ui-react": "^2.1.4",
@@ -87,9 +87,10 @@
     "eslint-plugin-prettier": "^5.1.3",
     "eslint-plugin-react": "^7.37.3",
     "eslint-plugin-react-hooks": "^5.1.0",
+    "happy-dom": "^20.13.2",
     "prettier": "^3.3.2",
-    "vitest": "^3.2.4",
-    "vite": "^8.0.16",
-    "vite-plugin-eslint": "^1.8.1"
+    "vite": "8.0.13",
+    "vite-plugin-eslint": "^1.8.1",
+    "vitest": "^5.0.0"
   }
 }

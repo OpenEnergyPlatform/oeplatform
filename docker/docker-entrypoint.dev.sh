@@ -5,14 +5,26 @@ set -euo pipefail
 sleep 5
 
 # ----------------------------------------------------------------
-# Ownership target for bind-mounted dirs.
-# We reference the *numeric* uid:gid of the current process rather than
-# the `appuser:appgroup` names: on macOS the host GID (e.g. 20) already
-# exists in the base image, so no group literally named `appgroup` is
-# created and `chown appuser:appgroup` fails with "invalid group".
-# The container also runs as this (non-root) user via compose's `user:`,
-# so any chown is at most a no-op — guard each call with `|| true`.
+# Ownership of bind-mounted paths.
+# We use the *numeric* uid:gid of the current process rather than the
+# `appuser:appgroup` names: on macOS the host GID (e.g. 20) already exists in
+# the base image, so no group literally named `appgroup` is created and
+# `chown appuser:appgroup` fails with "invalid group".
 OWNER="$(id -u):$(id -g)"
+
+# own MODE PATH... - give PATH to the container user and set MODE on it.
+# The container runs as a non-root user (compose's `user:`), so chown only
+# succeeds where it is a no-op and chmod only on files we already own. Neither
+# is fatal: files created on the host may refuse both, and the container can
+# usually still read them. A path we could not fix is reported, then the boot
+# goes on.
+own() {
+  local mode="$1"
+  shift
+  chown -R "$OWNER" "$@" 2>/dev/null || true
+  chmod -R "$mode" "$@" 2>/dev/null \
+    || echo "WARNING: could not set permissions on $*; continuing" >&2
+}
 
 # ----------------------------------------------------------------
 # Bootstrap permissions on bind-mounted dirs so appuser can write
@@ -23,12 +35,9 @@ for d in ontologies media/oeo_ext static; do
   # ensure the directory exists
   mkdir -p "$TARGET"
 
-  # make appuser own it (no-op when already owned; non-root can't chown)
-  chown -R "$OWNER" "$TARGET" || true
-
   # owner & group: read/write + conditional-exec (dirs executable,
   # files only if already marked) ; others: read + conditional-exec
-  chmod -R u+rwX,g+rwX,o+rX "$TARGET"
+  own u+rwX,g+rwX,o+rX "$TARGET"
 done
 
 # ————————————————————
@@ -45,8 +54,7 @@ if [ ! -d "$ONT_DIR/oeo" ]; then
   unzip -q /tmp/ont.zip -d "$ONT_DIR"
   rm /tmp/ont.zip
 
-  chown -R "$OWNER" "$ONT_DIR" || true
-  chmod -R u+rwX,g+rwX,o+rX "$ONT_DIR"
+  own u+rwX,g+rwX,o+rX "$ONT_DIR"
 fi
 
 MEDIA_DIR=/home/appuser/app/media/oeo_ext
@@ -57,8 +65,7 @@ if [ ! -f "${MEDIA_DIR}/oeo_ext.owl" ]; then
      "$MEDIA_DIR/oeo_ext.owl"
 
   # fix perms on the new file
-  chown "$OWNER" "$MEDIA_DIR/oeo_ext.owl" || true
-  chmod u+rw,g+rw,o+rX "$MEDIA_DIR"
+  own u+rwX,g+rwX,o+rX "$MEDIA_DIR"
 fi
 
 # ————————————————————
@@ -69,12 +76,28 @@ SEC_DEF=/home/appuser/app/oeplatform/securitysettings.py.default
 if [ ! -f "$SEC" ]; then
   echo "Copying default securitysettings…"
   cp "$SEC_DEF" "$SEC"
-  chown "$OWNER" "$SEC" || true
-  chmod u+rw,g+rw,o+rX "$SEC"
+  own u+rwX,g+rwX,o+rX "$SEC"
 fi
 
 # ————————————————————
-# 3) Migrations
+# 3) OEKG shape artifacts
+# ————————————————————
+# The SHACL shape and the OEO label subset the OEKG API validates against.
+# Needs the ontology from step 1 (the label subset is generated from it) and
+# securitysettings from step 2 (manage.py will not import without it). Guarded
+# like the ontology so a dev boot does not depend on GitHub every time; after
+# bumping OEKG_SHAPES_PINNED_COMMIT in settings.py, re-run
+# "python manage.py fetch_oekg_shapes" by hand or delete this directory.
+SHAPES_DIR=/home/appuser/app/shapes
+if [ ! -f "$SHAPES_DIR/oekg_shapes.ttl" ]; then
+  echo "Fetching OEKG shape artifacts…"
+  python manage.py fetch_oekg_shapes
+
+  own u+rwX,g+rwX,o+rX "$SHAPES_DIR"
+fi
+
+# ————————————————————
+# 4) Migrations
 # ————————————————————
 echo "Applying Django migrations…"
 python manage.py migrate --no-input
@@ -83,7 +106,7 @@ echo "Applying Alembic migrations…"
 python manage.py alembic upgrade head
 
 # ————————————————————
-# 4) Static & compress
+# 5) Static & compress
 # ————————————————————
 echo "Collecting static files…"
 python manage.py collectstatic --no-input
@@ -92,7 +115,7 @@ echo "Compressing assets…"
 python manage.py compress --force
 
 # ————————————————————
-# 5) Create dev user
+# 6) Create dev user
 # ————————————————————
 DEV_USER=test
 DEV_PW=pass
@@ -101,13 +124,13 @@ python manage.py create_dev_user "$DEV_USER" "$DEV_USER@mail.com" --password "$D
 echo "✅  Dev user '$DEV_USER' password is: $DEV_PW"
 
 # ————————————————————
-# 6) Create a example table
+# 7) Create a example table
 # ————————————————————
 echo "Seeding DataEdit tables…"
 python manage.py create_example_tables
 
 # ————————————————————
-# 7) Launch dev server
+# 8) Launch dev server
 # ————————————————————
 echo "Starting Django dev server…"
 exec "$@"

@@ -71,14 +71,20 @@ urlpatterns_view_schema = [
         name="table-view-save",
     ),
     re_path(
-        r"^(?P<table>{qual})/view/set-default".format(qual=pgsql_qualifier),
+        # TODO: not used yet
+        r"^(?P<table>{qual})/view/(?P<view_id>[0-9]+)/set-default$".format(
+            qual=pgsql_qualifier
+        ),
         table_view_set_default_view,
-        name="table-view-set-default",  # TODO: should be POST, but is GET?
+        name="table-view-set-default",
     ),
     re_path(
-        r"^(?P<table>{qual})/view/delete".format(qual=pgsql_qualifier),
+        # TODO: not used yet
+        r"^(?P<table>{qual})/view/(?P<view_id>[0-9]+)/delete$".format(
+            qual=pgsql_qualifier
+        ),
         table_view_delete_view,
-        name="table-view-delete-default",  # TODO: should be POST, but is GET?
+        name="table-view-delete-default",
     ),
     re_path(
         r"^(?P<table>{qual})/graph/new".format(qual=pgsql_qualifier),
@@ -116,7 +122,13 @@ urlpatterns_view_schema = [
 urlpatterns_tag = [
     re_path(r"^$", tag_overview_view, name="tags"),
     re_path(r"^new/?$", tag_editor_view, name="tags-new"),
-    re_path(r"^edit/(?P<tag_pk>[a-z0-9_]+)/?$", tag_editor_view, name="tags-edit"),
+    # `[^/]+`, not `[a-z0-9_]+`: a tag's primary key is a CharField(40) and
+    # nothing renormalises it on the way in -- `migrate_tags2` copies
+    # `name_normalized` verbatim out of the OEDB. A single legacy pk carrying
+    # anything else took the whole overview down with a NoReverseMatch, because
+    # that page reverses this route once per tag. `edit/` keeps it clear of the
+    # sibling routes.
+    re_path(r"^edit/(?P<tag_pk>[^/]+?)/?$", tag_editor_view, name="tags-edit"),
     re_path(r"^add/?$", tag_table_add_view, name="tags-add"),
     re_path(r"^set/?$", tag_update_view, name="tags-set"),
 ]

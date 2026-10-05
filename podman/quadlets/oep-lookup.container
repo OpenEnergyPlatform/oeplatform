@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The lookup config is mounted from your repo checkout. install.sh substitutes
+# the @@OEP_REPO@@ placeholder below with the actual checkout path when it copies
+# this unit into place — no manual symlink or path editing needed.
+
+[Unit]
+Description=OEPlatform DBpedia Lookup service
+After=network-online.target
+
+[Container]
+Image=docker.io/dbpedia/lookup:dev
+ContainerName=lookup
+Volume=lookup-index.volume:/index
+Volume=@@OEP_REPO@@/podman/serviceConfigs/lookup/config.yaml:/resources/config.yml:ro
+PublishPort=3004:8082
+Network=oep.network
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,41 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+A list's compact pager, ``‹ 1 2 … 7 [8] 9 … 83 ›  176–200 of 2,068``.
+Hidden when everything fits on one page.
+{% endcomment %}
+{% if page.num_pages > 1 %}
+  <nav class="dash-pager" aria-label="Pages">
+    {% if page.previous_url %}
+      <a id="pg-prev"
+         class="btn btn-sm btn-outline-secondary"
+         href="{{ page.previous_url }}"
+         aria-label="Previous page">‹</a>
+    {% else %}
+      <span class="btn btn-sm btn-outline-secondary disabled"
+            aria-hidden="true">‹</span>
+    {% endif %}
+    {% for item in page.pager %}
+      {% if item.number is None %}
+        <span class="dash-pager__gap" aria-hidden="true">…</span>
+      {% else %}
+        <a id="pg-{{ item.number }}"
+           class="btn btn-sm {% if item.current %}btn-primary{% else %}btn-outline-secondary{% endif %}"
+           href="{{ item.url }}"
+           aria-label="Page {{ item.number }}"
+           {% if item.current %}aria-current="page"{% endif %}>{{ item.number }}</a>
+      {% endif %}
+    {% endfor %}
+    {% if page.next_url %}
+      <a id="pg-next"
+         class="btn btn-sm btn-outline-secondary"
+         href="{{ page.next_url }}"
+         aria-label="Next page">›</a>
+    {% else %}
+      <span class="btn btn-sm btn-outline-secondary disabled"
+            aria-hidden="true">›</span>
+    {% endif %}
+    <span class="dash-pager__range">{{ page.range_text }}</span>
+  </nav>
+{% endif %}

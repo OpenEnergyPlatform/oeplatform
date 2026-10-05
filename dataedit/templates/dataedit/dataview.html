@@ -90,7 +90,8 @@
         </li>
       </ul>
       <div id="toggleContentSideContainer">
-        <button class="btn btn-link" id="toggleContentSideBtn">Hide options</button>
+        <button class="btn btn-link"
+                id="toggleContentSideBtn">Hide options</button>
       </div>
     </div>
   </div>
@@ -150,7 +151,8 @@
               <div class="dropdown-menu">
                 {% for view in views %}
                   {% if view.type == "graph" %}
-                    <a class="dropdown-item" href="?view={{ view.id }}">{{ view.name }}</a>
+                    <a class="dropdown-item"
+                       href="?view={{ view.id }}">{{ view.name }}</a>
                   {% endif %}
                 {% endfor %}
                 <div class="dropdown-divider"></div>
@@ -179,7 +181,8 @@
               <div class="dropdown-menu">
                 {% for view in views %}
                   {% if view.type == "map" %}
-                    <a class="dropdown-item" href="?view={{ view.id }}">{{ view.name }}</a>
+                    <a class="dropdown-item"
+                       href="?view={{ view.id }}">{{ view.name }}</a>
                   {% endif %}
                 {% endfor %}
                 <div class="dropdown-divider"></div>
@@ -202,15 +205,16 @@
               <div class="panel panel-default">
                 <div class="panel-heading">
                   <p class="panel-title">
-                    <a data-bs-toggle="collapse" href="#collapseBuilder">Filter dataset</a>
+                    <a data-bs-toggle="collapse"
+                       href="#collapseBuilder">Filter dataset</a>
                   </p>
                 </div>
                 <div id="collapseBuilder" class="panel-collapse collapse">
                   <div class="panel-body">
                     <div id="builder" style="width: 100%"></div>
-                    <button id="btn-set" class="btn btn-success set-json" bs-target="basic">
-                      Set rules
-                    </button>
+                    <button id="btn-set"
+                            class="btn btn-success set-json"
+                            bs-target="basic">Set rules</button>
                     <button id="btn-download-view"
                             class="btn btn-success set-json"
                             data-bs-target="basic">Download View</button>
@@ -491,7 +495,7 @@
       <h2 class="table-sidebar__heading">Tags</h2>
       {% load dataedit.taghandler %}
       {% get_tags table=table as table_tags %}
-      {% include 'dataedit/taggable_setting.html' with table=table selected=table_tags %}
+      {% include "dataedit/taggable_setting.html" with table=table selected=table_tags %}
     </div>
     {% if is_in_scenario %}
       <div class="table-sidebar__section">
@@ -702,12 +706,10 @@ for row in result.json():
           Do you want to delete the table (including data and metadata)?
         </div>
         <div class="modal-body">
-          <button class="btn btn-sm btn-dark me-2" id="dataview-confirm-delete-delete">
-            delete
-          </button>
-          <button class="btn btn-sm btn-light" id="dataview-confirm-delete-cancel">
-            cancel
-          </button>
+          <button class="btn btn-sm btn-dark me-2"
+                  id="dataview-confirm-delete-delete">delete</button>
+          <button class="btn btn-sm btn-light"
+                  id="dataview-confirm-delete-cancel">cancel</button>
         </div>
       </div>
     </div>

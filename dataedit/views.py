@@ -22,13 +22,13 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 import csv
 import json
 from io import TextIOWrapper
-from itertools import chain
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import Count, F, Q
 from django.db.utils import IntegrityError
 from django.http import (
@@ -36,6 +36,7 @@ from django.http import (
     HttpRequest,
     HttpResponse,
     HttpResponseBadRequest,
+    HttpResponseForbidden,
     JsonResponse,
 )
 from django.shortcuts import get_object_or_404, redirect, render
@@ -70,6 +71,7 @@ from dataedit.helper import (
     delete_tag,
     edit_tag,
     find_tables,
+    get_all_tags_with_usage,
     get_cancle_state,
     get_page,
     process_review_data,
@@ -79,7 +81,7 @@ from dataedit.metadata import has_valid_filled_metadata, load_metadata_from_db
 from dataedit.metadata.widget import MetaDataWidget
 from dataedit.models import Dataset, Embargo
 from dataedit.models import Filter as DBFilter
-from dataedit.models import PeerReview, PeerReviewManager, Table, Tag, Topic
+from dataedit.models import PeerReview, PeerReviewManager, Tag, Topic
 from dataedit.models import View as DBView
 from dataedit.models import View as DataViewModel
 from dataedit.peer_review.metadata_serializer import (
@@ -89,11 +91,13 @@ from dataedit.peer_review.metadata_serializer import (
 from dataedit.peer_review.projection import field_history
 from dataedit.peer_review.service import (
     ContributorNotFoundError,
+    MetadataRefusedError,
     NotYourTurnError,
     ReviewFinishedError,
     ReviewService,
 )
 from login import models as login_models
+from login import table_roles
 from oeplatform.settings import (
     DOCUMENTATION_LINKS,
     EXTERNAL_URLS,
@@ -126,48 +130,54 @@ class StandaloneMetaEditView(View):
         )
 
 
+def _review_queued_change(request: HttpRequest, deny, apply) -> HttpResponse:
+    """Apply or deny one change from the table change queue.
+
+    Admin-only, and the id must be a number (#2490). These views carried
+    nothing but `@require_POST`, so an anonymous POST reached the statements
+    that alter a table and mark a change reviewed, and the posted `id` was
+    interpolated into them. CSRF does not stop a scripted request: any page
+    hands an anonymous visitor a token. Admin-only is the interim rule while
+    #2490 decides whether the queue is deleted or repaired; the table owner,
+    whose review the queue was meant to be, is refused too until then.
+    """
+    if not getattr(request.user, "is_admin", False):
+        return HttpResponseForbidden("Only admins may review queued changes.")
+
+    action = request.POST.get("action")
+    try:
+        change_id = int(request.POST.get("id", ""))
+    except ValueError:
+        return HttpResponseBadRequest("The change id must be a number.")
+
+    table_obj = table_or_404_from_dict(request.POST)
+
+    if action == "deny":
+        deny(change_id)
+    elif action == "apply":
+        apply(change_id)
+    else:
+        return HttpResponseBadRequest("The action must be 'apply' or 'deny'.")
+
+    return redirect("dataedit:view", table=table_obj.name)
+
+
 @require_POST
+@login_required
 def admin_constraints_view(request: HttpRequest) -> HttpResponse:
-    """
-    Way to apply changes
-    :param request:
-    :return:
-    """
-    action = request.POST.get("action")
-    id = request.POST.get("id")
-
-    table_obj = table_or_404_from_dict(request.POST)
-
-    if action == "deny":
-        remove_queued_constraint(id)
-    elif action == "apply":
-        apply_queued_constraint(id)
-    else:
-        raise NotImplementedError(action)
-
-    return redirect("dataedit:view", table=table_obj.name)
+    """Apply or deny a queued constraint change."""
+    return _review_queued_change(
+        request, deny=remove_queued_constraint, apply=apply_queued_constraint
+    )
 
 
 @require_POST
+@login_required
 def admin_column_view(request: HttpRequest) -> HttpResponse:
-    """
-    Way to apply changes
-    :param request:
-    :return:
-    """
-
-    action = request.POST.get("action")
-    id = request.POST.get("id")
-    table_obj = table_or_404_from_dict(request.POST)
-
-    if action == "deny":
-        remove_queued_column(id)
-    elif action == "apply":
-        apply_queued_column(id)
-    else:
-        raise NotImplementedError(action)
-
-    return redirect("dataedit:view", table=table_obj.name)
+    """Apply or deny a queued column change."""
+    return _review_queued_change(
+        request, deny=remove_queued_column, apply=apply_queued_column
+    )
 
 
 @never_cache
@@ -247,70 +257,169 @@ def topic_view(request: HttpRequest) -> HttpResponse:
     )
 
 
+def _is_htmx(request: HttpRequest) -> bool:
+    return "HX-Request" in request.headers
+
+
+def tag_usage(tag: Tag) -> dict:
+    """How many objects would lose this tag if it were deleted.
+
+    Both sides, because `Tag` is ONE vocabulary with two consumers. This page
+    used to ask `tag.tables` alone, so a tag carrying 200 factsheets and no
+    table reported itself unused and offered a Delete button underneath.
+    """
+    tables = tag.tables.count()
+    factsheets = tag.factsheets.count()
+    return {
+        "tables": tables,
+        "factsheets": factsheets,
+        "total": tables + factsheets,
+    }
+
+
+def tag_editor_context(
+    tag: Tag | None = None, name: str = "", color_hex: str = "#000000", error: str = ""
+) -> dict:
+    """What the editor form needs, as one `editing` object.
+
+    One function because the three render paths used to disagree: the
+    standalone page offered a Delete button gated on an `is_admin` variable no
+    view ever passed, and the failed-save path rendered nothing at all -- it
+    redirected to the overview and dropped what the user had typed.
+    """
+    if tag is not None:
+        return {
+            "pk": tag.pk,
+            "name": name or tag.name,
+            "color_hex": color_hex if error else tag.color_hex,
+            "usage": tag_usage(tag),
+            "error": error,
+        }
+    return {
+        "pk": None,
+        "name": name,
+        "color_hex": color_hex,
+        "usage": None,
+        "error": error,
+    }
+
+
+def render_tag_manager(request, editing=None, saved: str = "") -> HttpResponse:
+    """The list and the editor panel, as one fragment.
+
+    Every htmx path answers with exactly this -- the piece it replaces, never
+    a redirect and never a whole page. A redirect is followed transparently by
+    htmx, so answering a save with one put an entire rendered site inside the
+    editor panel. Same shape as `dataset_edit_view` in the login app.
+    """
+    return render(
+        request,
+        "dataedit/partials/tag_manager.html",
+        {
+            "tags": get_all_tags_with_usage(),
+            "editing": editing,
+            "saved": saved,
+        },
+    )
+
+
 @login_required
 @never_cache
 def tag_overview_view(request: HttpRequest) -> HttpResponse:
-    # if rename or adding of tag fails: display error message
-    context = {
-        "errorMsg": (
-            "Tag name is not valid" if request.GET.get("status") == "invalid" else ""
-        )
-    }
-
+    # Cancel comes back here through htmx to close the panel, so the bare
+    # overview has to be answerable as a fragment too.
+    if _is_htmx(request):
+        return render_tag_manager(request)
     return render(
-        request=request, template_name="dataedit/tag_overview.html", context=context
+        request=request,
+        template_name="dataedit/tag_overview.html",
+        context={"tags": get_all_tags_with_usage()},
     )
 
 
 @login_required
 @never_cache
 def tag_editor_view(request: HttpRequest, tag_pk: str | None = None) -> HttpResponse:
-    tag = Tag.get_or_none(tag_pk or "")
-    if tag:
-        assigned = tag.tables.count() > 0
-        return render(
-            request=request,
-            template_name="dataedit/tag_editor.html",
-            context={
-                "name": tag.name,
-                "pk": tag.pk,
-                "color_hex": tag.color_hex,
-                "assigned": assigned,
-            },
-        )
-    else:
-        return render(
-            request=request,
-            template_name="dataedit/tag_editor.html",
-            context={"name": "", "color_hex": "#000000", "assigned": False},
-        )
+    """The create/edit form: the overview's panel, or a page of its own.
+
+    The panel is the common path and the page is the fallback for a bookmark
+    or a browser without javascript. Both render the same form partial, so
+    neither can drift from the other.
+    """
+    editing = tag_editor_context(Tag.get_or_none(tag_pk or ""))
+    if _is_htmx(request):
+        return render_tag_manager(request, editing=editing)
+    return render(
+        request=request,
+        template_name="dataedit/tag_editor.html",
+        context={"editing": editing},
+    )
 
 
 @require_POST
 @login_required
 def tag_update_view(request: HttpRequest) -> HttpResponse:
-    status = ""  # error status if operation fails
+    htmx = _is_htmx(request)
+    tag_id = request.POST.get("tag_id") or None
 
-    if "submit_save" in request.POST:
-        try:
-            if "tag_id" in request.POST:
-                id = request.POST["tag_id"]
-                name = request.POST["tag_text"]
-                color = request.POST["tag_color"]
-                edit_tag(id, name, color)
+    if "submit_delete" in request.POST:
+        # Admin-only, checked HERE and not only on the button. The button was
+        # gated on a context variable no view passed, so it rendered for
+        # nobody; the view behind it was gated on nothing but a login, so any
+        # account could delete any tag with a crafted POST -- and a tag is
+        # shared platform-wide, so that strips it from every table and
+        # factsheet carrying it, with no record anywhere.
+        if not getattr(request.user, "is_admin", False):
+            return HttpResponseForbidden("Only admins may delete tags.")
+        tag = Tag.get_or_none(tag_id or "")
+        done = ""
+        if tag:
+            removed = tag_usage(tag)
+            delete_tag(tag.pk)
+            done = "Deleted the tag and removed it from %d object(s)." % (
+                removed["total"],
+            )
+        if htmx:
+            return render_tag_manager(request, saved=done)
+        if done:
+            messages.success(request, done)
+        return redirect(reverse("dataedit:tags"))
+
+    name = request.POST.get("tag_text", "")
+    color = request.POST.get("tag_color", "#000000")
+    try:
+        # The savepoint keeps a rejected insert from poisoning the surrounding
+        # transaction, so the error path below can still read the database.
+        with transaction.atomic():
+            if tag_id:
+                edit_tag(tag_id, name, color)
             else:
-                name = request.POST["tag_text"]
-                color = request.POST["tag_color"]
                 add_tag(name, color)
-        except IntegrityError:
-            # requested changes are not valid because of name conflicts
-            status = "invalid"
+    except IntegrityError:
+        # A name conflict, or a name that normalises to nothing. Come back
+        # with what was typed: the redirect this used to do sent the user to
+        # the overview and discarded it.
+        editing = tag_editor_context(
+            Tag.get_or_none(tag_id or ""),
+            name=name,
+            color_hex=color,
+            error="That tag name is not valid, or a tag by that name exists.",
+        )
+        if htmx:
+            return render_tag_manager(request, editing=editing)
+        return render(
+            request=request,
+            template_name="dataedit/tag_editor.html",
+            context={"editing": editing},
+        )
 
-    elif "submit_delete" in request.POST:
-        id = request.POST["tag_id"]
-        delete_tag(id)
-
-    return redirect(reverse("dataedit:tags") + f"?status={status}")
+    if htmx:
+        # The panel closes and the list re-renders with the result in it,
+        # which is the confirmation. A Django message would be queued into the
+        # session and surface on some later full page load instead.
+        return render_tag_manager(request, saved="Saved the tag.")
+    messages.success(request, "Saved the tag.")
+    return redirect(reverse("dataedit:tags"))
 
 
 @require_POST
@@ -542,6 +651,24 @@ def dataset_metadata_json_view(request: HttpRequest, dataset_name: str) -> JsonR
     return JsonResponse(metadata)
 
 
+def view_name_taken(
+    request: HttpRequest, table: str, view_type: str, name: str
+) -> HttpResponse:
+    """Refuse a view name the table already uses for that type of view.
+
+    Names are unique per (table, type) since #2217. Shows the existing view, so
+    the user sees what holds the name.
+    """
+    messages.error(
+        request,
+        f'This table already has a {view_type} view named "{name}". '
+        "Please choose another name.",
+    )
+    existing = DBView.objects.filter(table=table, type=view_type, name=name).first()
+    url = reverse("dataedit:view", kwargs={"table": table})
+    return redirect(f"{url}?view={existing.pk}" if existing else url)
+
+
 @require_POST
 def table_view_save_view(request: HttpRequest, table: str) -> HttpResponse:
     table_obj = table_or_404(table=table)
@@ -588,7 +715,13 @@ def table_view_save_view(request: HttpRequest, table: str) -> HttpResponse:
             name=post_name, type=post_type, options=post_options, table=table_obj.name
         )
 
-    update_view.save()
+    try:
+        with transaction.atomic():
+            update_view.save()
+    except IntegrityError:
+        return view_name_taken(
+            request, table_obj.name, update_view.type, update_view.name
+        )
 
     # create and update filters
     post_filter_json = request.POST.get("filter")
@@ -633,28 +766,29 @@ def table_view_save_view(request: HttpRequest, table: str) -> HttpResponse:
     )
 
 
-def table_view_set_default_view(request: HttpRequest, table: str) -> HttpResponse:
+@require_POST
+def table_view_set_default_view(
+    request: HttpRequest, table: str, view_id: str
+) -> HttpResponse:
     table_obj = table_or_404(table=table)
+    # re_path passes the id as a string; compare as a number, explicitly
+    view = get_object_or_404(DBView, pk=int(view_id), table=table_obj.name)
 
-    # TODO: shouldnt this be POST only?
-    post_id = request.GET.get("id")
-
-    for view in DBView.objects.filter(table=table_obj.name):
-        if str(view.pk) == post_id:
-            view.is_default = True
-        else:
-            view.is_default = False
-        view.save()
+    with transaction.atomic():
+        DBView.objects.filter(table=table_obj.name).exclude(pk=view.pk).update(
+            is_default=False
+        )
+        DBView.objects.filter(pk=view.pk).update(is_default=True)
     return redirect("dataedit:view", table=table_obj.name)
 
 
-def table_view_delete_view(request: HttpRequest, table: str) -> HttpResponse:
+@require_POST
+def table_view_delete_view(
+    request: HttpRequest, table: str, view_id: str
+) -> HttpResponse:
     table_obj = table_or_404(table=table)
 
-    # TODO: shouldnt this be POST only?
-    post_id = request.GET.get("id")
-
-    view = DBView.objects.get(id=post_id, table=table_obj.name)
+    view = get_object_or_404(DBView, pk=int(view_id), table=table_obj.name)
     view.delete()
 
     return redirect("dataedit:view", table=table_obj.name)
@@ -677,14 +811,18 @@ class TableCreateGraphView(View):
         # save an instance of View, look at GraphViewForm fields in forms.py
         # for information to the options
         opt = dict(x=request.POST.get("column_x"), y=request.POST.get("column_y"))
-        gview = DataViewModel.objects.create(
-            name=request.POST.get("name"),
-            table=table_obj.name,
-            type="graph",
-            options=opt,
-            is_default=request.POST.get("is_default", False),
-        )
-        gview.save()
+        name = request.POST.get("name")
+        try:
+            with transaction.atomic():
+                gview = DataViewModel.objects.create(
+                    name=name,
+                    table=table_obj.name,
+                    type="graph",
+                    options=opt,
+                    is_default=request.POST.get("is_default", False),
+                )
+        except IntegrityError:
+            return view_name_taken(request, table_obj.name, "graph", name)
 
         return redirect(
             reverse("dataedit:view", kwargs={"table": table_obj.name})
@@ -723,7 +861,11 @@ class TableCreateMapView(View):
         form.table = table
         form.options = options
         if form.is_valid():
-            view_id = form.save(commit=True)
+            try:
+                with transaction.atomic():
+                    view_id = form.save(commit=True)
+            except IntegrityError:
+                return view_name_taken(request, table, "map", request.POST.get("name"))
             return redirect(
                 reverse("dataedit:view", kwargs={"table": table}) + f"?view={view_id}"
             )
@@ -788,7 +930,7 @@ class TableDataView(View):
         table_label = table_obj.human_readable_name
 
         table_views = DBView.objects.filter(table=table)
-        default = DBView(name="default", type="table", table=table)
+        default_view = DBView.get_or_create_default(table=table)
         view_id = request.GET.get("view")
 
         embargo = Embargo.objects.filter(table=table_obj).first()
@@ -801,18 +943,14 @@ class TableDataView(View):
         else:
             embargo_time_left = "No embargo data available"
 
-        if view_id == "default":
-            current_view = default
-            current_view.save()
-        else:
-            try:
-                # at first, try to use the view, that is passed as get argument
-                current_view = table_views.get(id=view_id)
-            except ObjectDoesNotExist:
-                current_view = default
-                current_view.save()
+        try:
+            # at first, try to use the view, that is passed as get argument
+            current_view = table_views.get(id=view_id)
+        except (ObjectDoesNotExist, ValueError):
+            # no ?view=, an unknown one, or one that is not an id at all
+            current_view = default_view
 
-        table_views = list(chain((default,), table_views))
+        table_views = [default_view, *table_views.exclude(pk=default_view.pk)]
 
         #########################################################
         #   Get open peer review process related metadata       #
@@ -927,150 +1065,106 @@ class TableDataView(View):
 
 
 class TablePermissionView(View):
-    """This method handles the GET requests for the main page of data edit.
-    Initialises the session data (if necessary)
+    """The Table's own permission page: who holds which Table role on it.
+    Anyone may read it; a Table admin changes it here. Every change goes
+    through the permission service (``login.table_roles``), the same as the
+    dashboard's access drawer and the REST API, so the rules are the same
+    everywhere: a role is chosen when adding, Organizations stop at Data
+    maintainer and are shared only by their members, the last user with
+    direct Admin cannot lose it, and losing your own Admin is confirmed.
+
+    POST takes ``mode``: ``add_user`` (``name``, ``level``), ``add_group``
+    (``organization``, the id of one of the user's own Organizations, and
+    ``level``), ``alter_user`` / ``remove_user`` (``user_id``, and ``level``
+    to alter), ``alter_group`` / ``remove_group`` (``group_id``, likewise);
+    ``confirm=yes`` once the user has confirmed.
+
+    - done: a redirect back here, the change named in a message;
+    - nothing to change (the Holder already holds that role): a redirect
+      back here, saying so;
+    - needs confirmation: 200, the page asking, nothing written;
+    - unusable request: 400, not a Table admin: 403, the last user with
+      direct Admin would lose it: 409; each the page with the reason as a
+      message and nothing written. An anonymous POST is a 403.
     """
 
-    @method_decorator(never_cache)
-    def get(self, request: HttpRequest, table: str) -> HttpResponse:
-        table_obj = table_or_404(table=table)
+    VIA = "table-page"
+    MODES = {
+        "add_user": (table_roles.ADD, table_roles.USER),
+        "alter_user": (table_roles.CHANGE, table_roles.USER),
+        "remove_user": (table_roles.REMOVE, table_roles.USER),
+        "add_group": (table_roles.ADD, table_roles.ORGANIZATION),
+        "alter_group": (table_roles.CHANGE, table_roles.ORGANIZATION),
+        "remove_group": (table_roles.REMOVE, table_roles.ORGANIZATION),
+    }
+    FIELDS = ("mode", "name", "organization", "user_id", "group_id", "level")
 
-        user_perms = login_models.UserPermission.objects.filter(table=table_obj)
-        group_perms = login_models.GroupPermission.objects.filter(table=table_obj)
-        is_admin = False
-        can_add = False
-        can_remove = False
-        level = login.permissions.NO_PERM
-        user: login_models.myuser = request.user  # type: ignore
-        if not user.is_anonymous:
-            level = user.get_table_permission_level(table_obj)
-            is_admin = level >= login.permissions.ADMIN_PERM
-            can_add = level >= login.permissions.WRITE_PERM
-            can_remove = level >= login.permissions.DELETE_PERM
+    def _page(self, request, table_obj, status=200, **extra):
+        access = table_roles.table_access(request.user, table_obj)
         return render(
             request,
             "dataedit/table_permissions.html",
             {
-                "table": table,
-                "user_perms": user_perms,
-                "group_perms": group_perms,
-                "choices": login_models.TablePermission.choices,
-                "can_add": can_add,
-                "can_remove": can_remove,
-                "is_admin": is_admin,
-                "own_level": level,
+                "table": table_obj.name,
+                "access": access,
+                "is_admin": access.can_manage,
+                "roles": table_roles.ROLES,
+                "organization_roles": table_roles.ORGANIZATION_ROLES,
+                **extra,
             },
+            status=status,
+        )
+
+    @method_decorator(never_cache)
+    def get(self, request: HttpRequest, table: str) -> HttpResponse:
+        return self._page(request, table_or_404(table=table))
+
+    def _write(self, user, table_obj, data):
+        try:
+            op, kind = self.MODES[data.get("mode", "")]
+        except KeyError:
+            raise table_roles.InvalidRequest("Choose a change to make.", "mode")
+        user_kind = kind == table_roles.USER
+        level = data.get("level")
+        confirmed = data.get("confirm") == "yes"
+        if op == table_roles.ADD:
+            who = data.get("name" if user_kind else "organization")
+            return table_roles.add(user, table_obj, kind, who, level, via=self.VIA)
+        key = f"{kind}:{data.get('user_id' if user_kind else 'group_id', '')}"
+        if op == table_roles.CHANGE:
+            return table_roles.change(
+                user, table_obj, key, level, via=self.VIA, confirmed=confirmed
+            )
+        return table_roles.remove(
+            user, table_obj, key, via=self.VIA, confirmed=confirmed
         )
 
     def post(self, request: HttpRequest, table: str) -> HttpResponse:
         table_obj = table_or_404(table=table)
-
         user: login_models.myuser = request.user  # type: ignore
-        if (
-            user.is_anonymous
-            or user.get_table_permission_level(table_obj) < login.permissions.ADMIN_PERM
-        ):
+        if user.is_anonymous:
             raise PermissionDenied
-        if request.POST["mode"] == "add_user":
-            return self.__add_user(request, table_obj)
-        if request.POST["mode"] == "alter_user":
-            return self.__change_user(request, table_obj)
-        if request.POST["mode"] == "remove_user":
-            return self.__remove_user(request, table_obj)
-        if request.POST["mode"] == "add_group":
-            return self.__add_group(request, table_obj)
-        if request.POST["mode"] == "alter_group":
-            return self.__change_group(request, table_obj)
-        if request.POST["mode"] == "remove_group":
-            return self.__remove_group(request, table_obj)
+        try:
+            change = self._write(user, table_obj, request.POST)
+        except table_roles.ConfirmationNeeded as question:
+            pending = {key: request.POST.get(key, "") for key in self.FIELDS}
+            return self._page(
+                request, table_obj, confirm=question.message, pending=pending
+            )
+        except table_roles.InvalidRequest as error:
+            messages.error(request, error.message)
+            return self._page(request, table_obj, status=400)
+        except table_roles.NotAllowed as refusal:
+            messages.error(request, refusal.message)
+            return self._page(request, table_obj, status=403)
+        except table_roles.LastAdmin as refusal:
+            messages.error(request, refusal.message)
+            return self._page(request, table_obj, status=409)
+        if change is None:
+            messages.info(request, "Nothing changed: they already hold that role.")
         else:
-            raise NotImplementedError()
-
-    def __add_user(self, request: HttpRequest, table_obj: Table):
-        user_name = request.POST.get("name")
-        # Check if the user name is empty
-        if not user_name:
-            # Return an HTTP 400 Bad Request response
-            return HttpResponseBadRequest("User name is required.")
-
-        user = login_models.myuser.objects.filter(name=user_name).first()
-
-        p, _ = login_models.UserPermission.objects.get_or_create(
-            holder=user, table=table_obj
-        )
-        p.save()
-        return self.get(request, table=table_obj.name)
-
-    def __change_user(self, request: HttpRequest, table_obj: Table):
-        user_id = request.POST.get("user_id")
-        # Check if the user id is empty
-        if not user_id:
-            # Return an HTTP 400 Bad Request response
-            return HttpResponseBadRequest("User id is required.")
-
-        user = login_models.myuser.objects.filter(id=user_id).first()
-
-        p = get_object_or_404(login_models.UserPermission, holder=user, table=table_obj)
-        p.level = int(request.POST["level"])
-        p.save()
-        return self.get(request, table=table_obj.name)
-
-    def __remove_user(self, request: HttpRequest, table_obj: Table):
-        user_id = request.POST.get("user_id")
-        # Check if the user id is empty
-        if not user_id:
-            # Return an HTTP 400 Bad Request response
-            return HttpResponseBadRequest("User id is required.")
-
-        user = get_object_or_404(login_models.myuser, id=user_id)
-
-        p = get_object_or_404(login_models.UserPermission, holder=user, table=table_obj)
-        p.delete()
-        return self.get(request, table=table_obj.name)
-
-    def __add_group(self, request: HttpRequest, table_obj: Table):
-        group_name = request.POST.get("name")
-        # Check if the group name is empty
-        if not group_name:
-            # Return an HTTP 400 Bad Request response
-            return HttpResponseBadRequest("Group name is required.")
-
-        group = get_object_or_404(login_models.UserGroup, name=group_name)
-
-        p, _ = login_models.GroupPermission.objects.get_or_create(
-            holder=group, table=table_obj
-        )
-        p.save()
-        return self.get(request, table=table_obj.name)
-
-    def __change_group(self, request: HttpRequest, table_obj: Table):
-        group_id = request.POST.get("group_id")
-        if not group_id:
-            # Return an HTTP 400 Bad Request response
-            return HttpResponseBadRequest("Group id is required.")
-
-        group = get_object_or_404(login_models.UserGroup, id=group_id)
-
-        p = get_object_or_404(
-            login_models.GroupPermission, holder=group, table=table_obj
-        )
-        p.level = int(request.POST["level"])
-        p.save()
-        return self.get(request, table=table_obj.name)
-
-    def __remove_group(self, request: HttpRequest, table_obj: Table):
-        group_id = request.POST.get("group_id")
-        if not group_id:
-            # Return an HTTP 400 Bad Request response
-            return HttpResponseBadRequest("Group id is required.")
-
-        group = get_object_or_404(login_models.UserGroup, id=group_id)
-
-        p = get_object_or_404(
-            login_models.GroupPermission, holder=group, table=table_obj
-        )
-        p.delete()
-        return self.get(request, table=table_obj.name)
+            messages.success(request, change.message)
+        return redirect("dataedit:table-permission", table=table_obj.name)
 
 
 class TableWizardView(LoginRequiredMixin, View):
@@ -1352,12 +1446,12 @@ class TablePeerReviewView(LoginRequiredMixin, View):
         # The delete path is handled directly (unified into ReviewService in a
         # later step); everything else is orchestrated by the service.
         if review_data.get("reviewType") == "delete":
-            return delete_peer_review(review_id)
+            return delete_peer_review(review_id, request.user)
 
         service = ReviewService(table_name=table_obj.name, actor=request.user)
         try:
             service.submit_reviewer_review(review_data, review_id=review_id)
-        except ContributorNotFoundError as exc:
+        except (ContributorNotFoundError, MetadataRefusedError) as exc:
             return JsonResponse({"error": str(exc)}, status=400)
         except (ReviewFinishedError, NotYourTurnError) as exc:
             return JsonResponse({"error": str(exc)}, status=409)
@@ -1467,6 +1561,8 @@ class TablePeerReviewContributorView(TablePeerReviewView):
         service = ReviewService(table_name=table, actor=request.user)
         try:
             service.submit_contributor_review(review_data, review_id=review_id)
+        except MetadataRefusedError as exc:
+            return JsonResponse({"error": str(exc)}, status=400)
         except (ReviewFinishedError, NotYourTurnError) as exc:
             return JsonResponse({"error": str(exc)}, status=409)
         return JsonResponse({"status": "success"}, status=200)

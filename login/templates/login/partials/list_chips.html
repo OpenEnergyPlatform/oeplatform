@@ -1,0 +1,29 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+A list's active filters: ``page.chips`` from ``ListPage.chips``, each a link
+to the same state without it, then "Reset all". A stale value (one that no
+longer applies) is a muted chip; removing it changes nothing but the address.
+The slot is rendered empty too, so the region does not change shape.
+{% endcomment %}
+{% spaceless %}
+  <div id="{{ id }}"
+       class="dash-chips"
+       {% if page.chips %}role="group" aria-label="Active filters"{% endif %}>
+    {% for chip in page.chips %}
+      <span class="dash-chip{% if chip.stale %} dash-chip--stale{% endif %}">
+        {{ chip.text }}
+        <a id="{{ chip.id }}"
+           class="dash-chip__x"
+           href="{{ chip.url }}"
+           aria-label="{% if chip.stale %}Dismiss{% else %}Remove{% endif %}: {{ chip.text }}">×</a>
+      </span>
+    {% endfor %}
+    {% if page.chips %}
+      <a id="chips-reset"
+         class="dash-chips__reset"
+         href="{{ page.reset_url }}">Reset all</a>
+    {% endif %}
+  </div>
+{% endspaceless %}
