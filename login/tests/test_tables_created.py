@@ -18,7 +18,7 @@ from datetime import date, datetime, time
 from django.utils import timezone
 
 from dataedit.models import Table
-from login.tables_tab import CREATED_UNKNOWN, CREATED_UNKNOWN_NOTE
+from login.tables_tab import CREATED_UNKNOWN_NOTE
 from login.tests.test_tables_tab import TablesTabTestCase
 
 
@@ -55,8 +55,12 @@ class CreatedColumnTests(CreatedTestCase):
         self.created("t_old")
         row = self.row("t_old")
         self.assertIsNone(row.created)
-        self.assertEqual(row.created_unknown, "before Nov 2025")
-        self.assertEqual(row.created_note, CREATED_UNKNOWN_NOTE)
+        self.assertEqual(
+            row.created_note,
+            "Created before the platform began recording creation dates, "
+            "on 30 Oct 2025.",
+        )
+        self.assertContains(self.get(), "before Nov 2025")
 
     def test_it_never_shows_the_date_updated_of_an_old_table(self):
         """For an old Table ``date_updated`` holds a date its metadata
@@ -65,7 +69,7 @@ class CreatedColumnTests(CreatedTestCase):
         Table.objects.filter(pk=table.pk).update(date_updated=at(date(2019, 5, 1)))
         response = self.get()
         self.assertIsNone(self.row("t_old").created)
-        self.assertContains(response, CREATED_UNKNOWN)
+        self.assertContains(response, CREATED_UNKNOWN_NOTE)
         self.assertNotContains(response, "1 May 2019")
 
     def test_screen_readers_get_the_note_as_text(self):
@@ -168,7 +172,8 @@ class CreatedRangeFilterTests(CreatedTestCase):
                 self.assertIn("t_unknown", self.names({"created_to": last}))
 
     def test_an_unknown_does_not_match_a_range_ending_before_the_rollout(self):
-        """Created before 30 Oct 2025 is not certainly before 29 Oct."""
+        """Created by 30 Oct 2025 (recording began that afternoon) is not
+        certainly by 29 Oct."""
         self.assertEqual(self.names({"created_to": "2025-10-29"}), [])
 
     def test_an_unknown_does_not_match_a_range_with_a_lower_end(self):

@@ -75,6 +75,8 @@ from dataedit.models import Dataset, Embargo, PeerReview, Table, Tag
 from dataedit.peer_review.badges import badge_label, normalize_badge
 from dataedit.publish_gate import passes, publish_checks
 from login.listing import (
+    NULLS_LAST,
+    NULLS_LOWEST,
     Choice,
     ChoiceFilter,
     Filter,
@@ -130,9 +132,10 @@ UNKNOWN_NOTE = f"No change recorded since {MODIFIED_RECORDED_SINCE}."
 CREATED_RECORDED_SINCE = datetime(
     2025, 10, 30, 15, 14, 38, 109145, tzinfo=dt_timezone.utc
 )
-CREATED_UNKNOWN = "before Nov 2025"
+_RECORDING_BEGAN = timezone.localtime(CREATED_RECORDED_SINCE)
 CREATED_UNKNOWN_NOTE = (
-    "Created before 30 Oct 2025, when the platform began recording creation dates."
+    "Created before the platform began recording creation dates, on "
+    f"{_RECORDING_BEGAN.day} {_RECORDING_BEGAN:%b %Y}."
 )
 
 # A peer review names its Table by name, not by key.
@@ -473,7 +476,7 @@ def tables_listing(user) -> Listing:
                 F("publishable"),
                 "not publishable first",
                 "publishable first",
-                nulls_last=True,
+                nulls=NULLS_LAST,
             ),
             Sort(
                 "review",
@@ -495,7 +498,7 @@ def tables_listing(user) -> Listing:
                 MODIFIED,
                 "oldest first",
                 "newest first",
-                nulls_last=True,
+                nulls=NULLS_LAST,
             ),
             Sort(
                 "created",
@@ -503,7 +506,7 @@ def tables_listing(user) -> Listing:
                 F("created"),
                 "oldest first",
                 "newest first",
-                nulls_lowest=True,
+                nulls=NULLS_LOWEST,
             ),
         ),
         default_sort="-modified",
@@ -615,12 +618,6 @@ class TableRow:
     def created(self):
         """When the Table was created, None when that was never recorded."""
         return self.table.created
-
-    @property
-    def created_unknown(self) -> str:
-        """What the Created cell shows when the creation time was never
-        recorded."""
-        return CREATED_UNKNOWN
 
     @property
     def created_note(self) -> str:

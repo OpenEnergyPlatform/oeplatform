@@ -320,6 +320,10 @@ def days_within(name: str, days) -> Q:
     return Q(**bounds) if bounds else Q(**{f"{name}__isnull": False})
 
 
+# Where a ``Sort`` puts unknown values.
+NULLS_LAST, NULLS_LOWEST = "last", "lowest"
+
+
 @dataclass(frozen=True)
 class ControlOption:
     value: str
@@ -409,11 +413,12 @@ class Sort:
     the "Sort by" select a narrow list shows in place of its column headers
     ("Status: drafts first").
 
-    ``nulls_last`` puts rows whose value is unknown (NULL) at the end in both
-    directions, rather than wherever the database's default puts them, which
-    flips with the direction. ``nulls_lowest`` instead counts an unknown as
-    lower than every value: first ascending, last descending (the reverse of
-    Postgres's default), for an unknown that is known to lie below them all.
+    ``nulls`` says where rows whose value is unknown (NULL) go. ``NULLS_LAST``
+    puts them at the end in both directions, rather than wherever the
+    database's default puts them, which flips with the direction.
+    ``NULLS_LOWEST`` counts an unknown as lower than every value: first
+    ascending, last descending (the reverse of Postgres's default), for an
+    unknown known to lie below them all. Unset, the database decides.
     """
 
     key: str
@@ -421,13 +426,12 @@ class Sort:
     expression: Any
     ascending: str = "ascending"
     descending: str = "descending"
-    nulls_last: bool = False
-    nulls_lowest: bool = False
+    nulls: str = ""
 
     def order(self, descending: bool) -> list:
-        if self.nulls_last:
+        if self.nulls == NULLS_LAST:
             nulls = {"nulls_last": True}
-        elif self.nulls_lowest:
+        elif self.nulls == NULLS_LOWEST:
             nulls = {"nulls_last": True} if descending else {"nulls_first": True}
         else:
             nulls = {}
