@@ -21,6 +21,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 import csv
 import json
+from functools import wraps
 from io import TextIOWrapper
 
 from django.contrib import messages
@@ -669,7 +670,29 @@ def view_name_taken(
     return redirect(f"{url}?view={existing.pk}" if existing else url)
 
 
+def require_table_write(view):
+    """Login, then write permission on the table the URL names.
+
+    For the views that create or change a table's saved views (graph and map
+    views, the default view). Those are shown to every visitor of the table, so
+    changing them is changing the table's page: an anonymous caller is sent to
+    log in, and a logged-in caller without write permission gets a 403.
+    """
+
+    @login_required
+    @wraps(view)
+    def guarded(request: HttpRequest, *args, table: str, **kwargs):
+        table_obj = table_or_404(table=table)
+        user: login_models.myuser = request.user  # type: ignore
+        if user.get_table_permission_level(table_obj) < login.permissions.WRITE_PERM:
+            raise PermissionDenied
+        return view(request, *args, table=table, **kwargs)
+
+    return guarded
+
+
 @require_POST
+@require_table_write
 def table_view_save_view(request: HttpRequest, table: str) -> HttpResponse:
     table_obj = table_or_404(table=table)
 
@@ -706,7 +729,8 @@ def table_view_save_view(request: HttpRequest, table: str) -> HttpResponse:
 
     # update or create corresponding view
     if post_id:
-        update_view = DBView.objects.filter(id=post_id).get()
+        # only a view of this table: the id alone would reach any table's view
+        update_view = get_object_or_404(DBView, id=post_id, table=table_obj.name)
         if post_name:
             update_view.name = post_name
         update_view.options = post_options
@@ -767,6 +791,7 @@ def table_view_save_view(request: HttpRequest, table: str) -> HttpResponse:
 
 
 @require_POST
+@require_table_write
 def table_view_set_default_view(
     request: HttpRequest, table: str, view_id: str
 ) -> HttpResponse:
@@ -783,6 +808,7 @@ def table_view_set_default_view(
 
 
 @require_POST
+@require_table_write
 def table_view_delete_view(
     request: HttpRequest, table: str, view_id: str
 ) -> HttpResponse:
@@ -794,6 +820,7 @@ def table_view_delete_view(
     return redirect("dataedit:view", table=table_obj.name)
 
 
+@method_decorator(require_table_write, name="dispatch")
 class TableCreateGraphView(View):
     @method_decorator(never_cache)
     def get(self, request: HttpRequest, table: str) -> HttpResponse:
@@ -830,6 +857,7 @@ class TableCreateGraphView(View):
         )
 
 
+@method_decorator(require_table_write, name="dispatch")
 class TableCreateMapView(View):
     @method_decorator(never_cache)
     def get(self, request: HttpRequest, table: str, maptype: str) -> HttpResponse:
