@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING, Literal, Mapping, Union
 
 from django.contrib.postgres.search import SearchVectorField
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 from django.db.models import (
     BooleanField,
     CharField,
@@ -231,20 +231,35 @@ class Table(Tagable):
         self.drop_oedb_table()
 
     def delete_record(self, *args, **kwargs):
-        """Delete the Django rows only (this Table and everything that
-        cascades from it), leaving the OEDB table in place. For a caller
-        that drops it once its own transaction has committed, as the table
-        action service does: the two databases share no transaction."""
-        return super().delete(*args, **kwargs)
+        """Delete the Django rows only (this Table, everything that cascades
+        from it, and its peer reviews), leaving the OEDB table in place. For
+        a caller that drops it once its own transaction has committed, as
+        the table action service does: the two databases share no
+        transaction.
 
-    def drop_oedb_table(self):
+        A peer review names its Table by ``PeerReview.table``, a name rather
+        than a foreign key, so nothing cascades to it: left behind, it would
+        pass to the next Table created under that name, review state and
+        badge included. Deleting the reviews deletes their
+        ``PeerReviewManager`` and ``ReviewRound`` rows with them (both
+        ``on_delete=CASCADE``, which Django's collector follows for a
+        queryset delete too)."""
+        with transaction.atomic():
+            PeerReview.objects.filter(table=self.name).delete()
+            return super().delete(*args, **kwargs)
+
+    def drop_oedb_table(self, lock_timeout=None):
         """Drop the OEDB table and its meta tables, if they exist. Needs
         only the name and the schema, so it works once the Django row is
-        gone."""
+        gone. With ``lock_timeout`` (a Postgres duration) it gives up on a
+        lock held elsewhere after that long and raises, and the tables after
+        the one it gave up on are not tried; without, it waits as long as it
+        takes. A request bounds it (``table_actions.DROP_LOCK_TIMEOUT``); a
+        management command such as ``clear_sandbox`` does not."""
         # ensure oedb tables are deleted, so we use ADMIN_PERM
         self._get_oeb_table_proxy_w_permission(
             permission_level=ADMIN_PERM
-        ).drop_if_exists()
+        ).drop_if_exists(lock_timeout=lock_timeout)
 
     def save(self, *args, **kwargs):
         # validate name on first save, never change name again

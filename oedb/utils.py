@@ -11,6 +11,7 @@ from typing import Iterable
 
 from sqlalchemy import MetaData
 from sqlalchemy import Table as SATable
+from sqlalchemy import text
 
 from login.permissions import ADMIN_PERM, DELETE_PERM, NO_PERM
 from oedb.connection import _SA_METADATA, _get_engine, _get_inspector
@@ -104,13 +105,31 @@ class _OedbTable:
     def _validated_schema_name(self) -> str:
         return self._schema._validated_schema_name
 
-    def drop_if_exists(self) -> None:
+    def drop_if_exists(self, lock_timeout: str | None = None) -> None:
+        """Drop this table if it exists.
+
+        ``lock_timeout`` (a Postgres duration, e.g. ``"1s"``) bounds how long
+        the drop waits for another session's lock on the table; when it runs
+        out the drop raises (``LockNotAvailable``) and drops nothing. It is
+        set for the drop's own transaction only, so the pooled session goes
+        back with the server's default. None waits as long as it takes."""
         # IMPORTANT: this should be the only place where we delete
         # tables in oedb
         # we coud also do self._sa_table.drop(checkfirst=True),
         # but i don't think it does CASCADE
         sql = f"DROP TABLE IF EXISTS {self._quoted_name} CASCADE;"
-        return self._execute(sql, requires_permission=DELETE_PERM)
+        if lock_timeout is None:
+            return self._execute(sql, requires_permission=DELETE_PERM)
+        if self._permission_level < DELETE_PERM:
+            raise PermissionError()
+        with self._engine.begin() as connection:
+            # SET LOCAL takes no bind parameter; set_config(..., true) is
+            # the same thing with one
+            connection.execute(
+                text("SELECT set_config('lock_timeout', :timeout, true)"),
+                timeout=lock_timeout,
+            )
+            connection.execute(sql)
 
     def exists(self) -> bool:
         return bool(
@@ -298,11 +317,18 @@ class OedbTableProxy:
         # only check main table
         return self._main_table.exists()
 
-    def drop_if_exists(self) -> None:
-        self._main_table.drop_if_exists()
-        self._edit_table.drop_if_exists()
-        self._insert_table.drop_if_exists()
-        self._delete_table.drop_if_exists()
+    def drop_if_exists(self, lock_timeout: str | None = None) -> None:
+        """Drop the main table and its three meta tables, each in a
+        transaction of its own and each bounded by ``lock_timeout`` (see
+        ``_OedbTable.drop_if_exists``). The first that fails raises, and
+        the ones after it are not tried."""
+        for table in (
+            self._main_table,
+            self._edit_table,
+            self._insert_table,
+            self._delete_table,
+        ):
+            table.drop_if_exists(lock_timeout=lock_timeout)
 
     def create(
         self, column_definitions: list, constraints_definitions: list
