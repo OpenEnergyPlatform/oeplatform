@@ -226,6 +226,18 @@ SPDX-License-Identifier: CC0-1.0
   view" links are shown only to them. Saving a view now finds it only within its
   own table
   [(#2601)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2601)
+- Running the test suite no longer deletes your own tables. The tests used the
+  data database configured for the platform, and one of them clears its whole
+  sandbox schema, which took the dev container's example table with it while its
+  record stayed behind (the metadata editor then showed it without columns). A
+  test run now uses a data database of its own, `test_<name>` or
+  `LOCAL_TEST_DB_NAME`, which the test runner creates and migrates. And
+  `create_example_tables` now leaves a complete example table however often it
+  runs: it repairs a record whose table is gone, seeds the schema the table is
+  really in (it never had its 4 rows before), and no longer fails to create its
+  fallback user
+  [(#2602)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2602)
+
 - Deleting a table removes its peer reviews with it. A review names its table
   only by name, so a table created later under the same name used to inherit the
   old review state and badge. Dropping a deleted table's database tables now
