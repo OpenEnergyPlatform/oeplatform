@@ -32,7 +32,7 @@
             </li>
             <li>
               {% include "base/index-checkmark.html" %}
-              <span>Collaborative and standardized metadata management</span>
+              <span>Standardized metadata management</span>
             </li>
             <li>
               {% include "base/index-checkmark.html" %}
@@ -98,7 +98,7 @@
             </li>
             <li>
               {% include "base/index-checkmark.html" %}
-              <span>Integration with modeling frameworks</span>
+              <span>Integration with modeling workflows and Knowledge Graph structures</span>
             </li>
           </ul>
         </div>
@@ -127,8 +127,7 @@
         <div class="index-capability-card-heading">
           <h3 class="index-capability-card-title">Factsheets</h3>
           <p class="index-capability-card-description">
-            Collaborative documentation and analysis of energy
-            technologies and topics
+            Insights into energy system models and frameworks
           </p>
         </div>
       </div>
@@ -150,12 +149,16 @@
         <div class="index-capability-column">
           <h4 class="index-capability-column-title">Additional Resources:</h4>
           <div class="index-capability-resource-list">
-            <span class="index-resource-link index-resource-link-disabled"
-                  aria-disabled="true"
-                  title="Coming soon">
+            <a class="index-resource-link"
+               href="{% url 'modelview:modellist' 'model' %}">
               {% include "base/index-arrow.html" %}
-              <span>Factsheet Templates — Coming soon</span>
-            </span>
+              <span>Model Factsheets</span>
+            </a>
+            <a class="index-resource-link"
+               href="{% url 'modelview:modellist' 'framework' %}">
+              {% include "base/index-arrow.html" %}
+              <span>Framework Factsheets</span>
+            </a>
             <span class="index-resource-link index-resource-link-disabled"
                   aria-disabled="true"
                   title="Coming soon">
@@ -180,8 +183,7 @@
         <div class="index-capability-card-heading">
           <h3 class="index-capability-card-title">Ontology</h3>
           <p class="index-capability-card-description">
-            Advanced analytical tools and specialized platform
-            capabilities
+            Shared terms and relationships for annotating energy system data
           </p>
         </div>
       </div>
@@ -210,12 +212,12 @@
             <a class="index-resource-link"
                href="{{ EXTERNAL_URLS.github_openenergyplatform_ontology }}">
               {% include "base/index-arrow.html" %}
-              <span>Tool Documentation</span>
+              <span>OEO on GitHub</span>
             </a>
             <a class="index-resource-link"
                href="{{ EXTERNAL_URLS.github_openenergyplatform_ontology_wiki_welcome__how_to_participate }}">
               {% include "base/index-arrow.html" %}
-              <span>Best Practice Guide</span>
+              <span>How to contribute</span>
             </a>
           </div>
         </div>
