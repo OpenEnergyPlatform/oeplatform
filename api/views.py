@@ -77,7 +77,6 @@ from rest_framework.views import APIView
 import login.models as login_models
 from api import bulk_upload_guard, sessions
 from api.actions import (
-    apply_changes,
     bulk_upload_csv,
     close_cursor,
     close_raw_connection,
@@ -1418,7 +1417,6 @@ class TableRowsAPIView(APIView):
                 status_code = status.HTTP_201_CREATED
             else:
                 response = self.__update_rows(request, table_obj, payload_query, None)
-        apply_changes(table_obj)
         return stream(response, status_code=status_code)
 
     @extend_schema(
@@ -1492,11 +1490,9 @@ class TableRowsAPIView(APIView):
         exists = table_has_row_with_id(table_obj, id=row_id) if row_id else False
         if exists:
             response = self.__update_rows(request, table_obj, payload_query, row_id)
-            apply_changes(table_obj)
             return JsonResponse(response)
         else:
             result = self.__insert_row(request, table_obj, payload_query, row_id)
-            apply_changes(table_obj)
             return JsonResponse(result, status=status.HTTP_201_CREATED)
 
     @extend_schema(
@@ -1536,7 +1532,6 @@ class TableRowsAPIView(APIView):
             )
 
         result = self.__delete_rows(request, table_obj, row_id)
-        apply_changes(table_obj)
         return JsonResponse(result)
 
     @load_cursor()

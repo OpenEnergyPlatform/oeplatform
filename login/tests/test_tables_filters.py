@@ -540,6 +540,8 @@ class FilterQueryCountTests(FilterTestCase):
         "tags": "t1",
         "dataset": "any",
         "modified_from": "2000-01-01",
+        # created on insert, so the range leaves rows
+        "created_to": "2999-12-31",
     }
 
     def fill(self, count, organization):

@@ -17,7 +17,7 @@ sees there, how the list filters and sorts, and what each row says.
   in a row, read by both the Datasets cell and its sort, so the number shown
   and the order it sorts by cannot disagree.
 - the filters: Search, Publishable, Review, Access, Dataset, and behind
-  "More filters" Modified, Topic and Tags, each one declaration. Every clause is a
+  "More filters" Created, Modified, Topic and Tags, each one declaration. Every clause is a
   column test or a primary-key subquery, so no filter joins anything into
   the list that could multiply a row or a count. Each option source is scoped to the viewer's whole list and
   does not narrow as other filters change, and each costs one query (Access
@@ -40,11 +40,19 @@ Modified is the later of a Table's two stamps, ``data_modified`` and
 ``metadata_modified`` (``MODIFIED``), which the write paths set. It is the
 default sort, newest first, and like every date the list cannot know it sorts
 last in both directions and matches no Modified range.
+
+Created is ``Table.created``, a real creation time or NULL for a Table older
+than the rollout of migration 0044 (``CREATED_RECORDED_SINCE``), which no
+record holds a creation time for. Such a Table reads "before Nov 2025",
+counts as the oldest when sorting, and matches a Created range only when the
+range certainly holds it: no lower end, and an upper end on or after the day
+recording began.
 """  # noqa: 501
 
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime
+from datetime import timezone as dt_timezone
 from functools import cache
 
 from django.contrib.postgres.aggregates import ArrayAgg
@@ -61,11 +69,14 @@ from django.db.models import (
     When,
 )
 from django.db.models.functions import Coalesce, Greatest, Lower, Now, NullIf
+from django.utils import timezone
 
 from dataedit.models import Dataset, Embargo, PeerReview, Table, Tag
 from dataedit.peer_review.badges import badge_label, normalize_badge
 from dataedit.publish_gate import passes, publish_checks
 from login.listing import (
+    NULLS_LAST,
+    NULLS_LOWEST,
     Choice,
     ChoiceFilter,
     Filter,
@@ -75,6 +86,7 @@ from login.listing import (
     Segment,
     Sort,
     dates_within,
+    days_within,
 )
 from login.models import GroupPermission, UserPermission
 from login.permissions import ADMIN_PERM, WRITE_PERM
@@ -112,6 +124,19 @@ DATA_ONLY_NOTE = (
     f"Last data change. Metadata edits are recorded since {MODIFIED_RECORDED_SINCE}."
 )
 UNKNOWN_NOTE = f"No change recorded since {MODIFIED_RECORDED_SINCE}."
+
+# When creation times began to be recorded: the moment migration
+# dataedit.0044 was applied on production (measured 2026-10-05, see
+# dataedit.0057's ROLLOUT_LINE). Every Table whose ``created`` is NULL existed
+# by then.
+CREATED_RECORDED_SINCE = datetime(
+    2025, 10, 30, 15, 14, 38, 109145, tzinfo=dt_timezone.utc
+)
+_RECORDING_BEGAN = timezone.localtime(CREATED_RECORDED_SINCE)
+CREATED_UNKNOWN_NOTE = (
+    "Created before the platform began recording creation dates, on "
+    f"{_RECORDING_BEGAN.day} {_RECORDING_BEGAN:%b %Y}."
+)
 
 # A peer review names its Table by name, not by key.
 _REVIEWS = PeerReview.objects.filter(table=OuterRef("name"))
@@ -205,6 +230,18 @@ def _review(queryset, state):
     return queryset.alias(review_filter=REVIEW_RANK).filter(
         review_filter=REVIEW_RANK_OF[state]
     )
+
+
+def _created(queryset, days):
+    """The Tables created on a day of the range. One whose creation time was
+    never recorded is known only to predate ``CREATED_RECORDED_SINCE``, so
+    it matches only a range that certainly holds everything before that: no
+    lower end, and an upper end on or after the day recording began."""
+    first, last = days
+    inside = days_within("created", days)
+    if not first and last and last >= timezone.localdate(CREATED_RECORDED_SINCE):
+        inside |= Q(created__isnull=True)
+    return queryset.filter(inside)
 
 
 def _direct_grants(user):
@@ -385,6 +422,7 @@ def tables_listing(user) -> Listing:
                 _dataset(user),
                 blank="Dataset: any or none",
             ),
+            RangeFilter("created", "Created", _created, more=True),
             RangeFilter(
                 "modified",
                 "Modified",
@@ -438,7 +476,7 @@ def tables_listing(user) -> Listing:
                 F("publishable"),
                 "not publishable first",
                 "publishable first",
-                nulls_last=True,
+                nulls=NULLS_LAST,
             ),
             Sort(
                 "review",
@@ -460,7 +498,15 @@ def tables_listing(user) -> Listing:
                 MODIFIED,
                 "oldest first",
                 "newest first",
-                nulls_last=True,
+                nulls=NULLS_LAST,
+            ),
+            Sort(
+                "created",
+                "Created",
+                F("created"),
+                "oldest first",
+                "newest first",
+                nulls=NULLS_LOWEST,
             ),
         ),
         default_sort="-modified",
@@ -567,6 +613,17 @@ class TableRow:
         if self.modified is None:
             return UNKNOWN_NOTE
         return DATA_ONLY_NOTE if self.data_only else ""
+
+    @property
+    def created(self):
+        """When the Table was created, None when that was never recorded."""
+        return self.table.created
+
+    @property
+    def created_note(self) -> str:
+        """What the Created cell explains on hover and to a screen reader:
+        why there is no date."""
+        return "" if self.created else CREATED_UNKNOWN_NOTE
 
     @property
     def shown_topics(self) -> list:

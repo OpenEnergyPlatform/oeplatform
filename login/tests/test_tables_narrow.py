@@ -40,6 +40,8 @@ class SortSelectTests(FilterTestCase):
                 ("-datasets", "Datasets: most first"),
                 ("modified", "Modified: oldest first"),
                 ("-modified", "Modified: newest first"),
+                ("created", "Created: oldest first"),
+                ("-created", "Created: newest first"),
             ],
         )
 
