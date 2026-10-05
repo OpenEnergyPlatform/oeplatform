@@ -3,7 +3,8 @@ SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 
 The test runner (``TEST_RUNNER``): Django's, plus the data database (OEDB) the
-run uses (see ``oeplatform/oedb_for_tests.py``).
+run uses (see ``oeplatform/oedb_for_tests.py``), and plain static file names
+(see ``FindableStaticFilesStorage``).
 
 Before Django creates its test database, ``prepare_test_oedb`` makes sure the
 test OEDB exists, carries the extensions the migrations need, and is at
@@ -19,9 +20,14 @@ already, and so would silently break every test that uses ``assertLogs``.
 import os
 import subprocess
 import sys
+from urllib.parse import urlsplit
 
 import psycopg2
+from django.conf import settings as django_settings
+from django.contrib.staticfiles import finders
+from django.contrib.staticfiles.storage import StaticFilesStorage
 from django.core.exceptions import ImproperlyConfigured
+from django.test import override_settings
 from django.test.runner import DiscoverRunner
 from psycopg2 import sql
 
@@ -141,7 +147,41 @@ def prepare_test_oedb(name: str) -> None:
         )
 
 
+class FindableStaticFilesStorage(StaticFilesStorage):
+    """Plain static file names for the suite, which does not run
+    `collectstatic`, refusing what the configured storage refuses.
+
+    ``ManifestStaticFilesStorage`` raises ``ValueError`` for a name missing
+    from its manifest, and the manifest holds every file a finder has. So
+    this raises for a name no finder has, and every page a test renders
+    checks its {% static %} names, as production will.
+    """
+
+    def url(self, name):
+        path = urlsplit(name).path
+        found = None if path.startswith("/") else finders.find(path)
+        if not (found and os.path.isfile(found)):
+            raise ValueError(f"No static file is named {name!r}.")
+        return super().url(name)
+
+
 class OepTestRunner(DiscoverRunner):
+    def setup_test_environment(self, **kwargs):
+        super().setup_test_environment(**kwargs)
+        self._findable_static_names = override_settings(
+            STORAGES={
+                **django_settings.STORAGES,
+                "staticfiles": {
+                    "BACKEND": "oeplatform.runner.FindableStaticFilesStorage"
+                },
+            }
+        )
+        self._findable_static_names.enable()
+
+    def teardown_test_environment(self, **kwargs):
+        self._findable_static_names.disable()
+        super().teardown_test_environment(**kwargs)
+
     def setup_databases(self, **kwargs):
         prepare_test_oedb(settings.dbname)
         return super().setup_databases(**kwargs)

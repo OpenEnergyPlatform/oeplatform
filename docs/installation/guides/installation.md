@@ -251,6 +251,14 @@ then run:
     python manage.py collectstatic
     python manage.py compress
 
+Run them in this order, and run `compress` under the same `DEBUG` setting as the
+server that will serve the pages. With `DEBUG` off, static files are named after
+their content (`css/base-style.<hash>.css`), so a browser never keeps last
+release's copy after a deploy. `compress` keys its output on those names, so a
+`compress` run under `DEBUG = True` leaves a server running `DEBUG = False`
+unable to render any page. `collectstatic` also refuses a stylesheet whose
+`url()` points at a file that does not exist; the error names both.
+
 Then fetch the two artifacts the OEKG API validates scenario bundles against:
 
     python manage.py fetch_oekg_shapes

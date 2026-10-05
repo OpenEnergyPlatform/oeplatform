@@ -460,10 +460,28 @@ AUTHENTICATION_BACKENDS = [
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
-STATICFILES_FINDERS = {
+# A list, because the first finder that has a path serves it.
+STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
     "compressor.finders.CompressorFinder",
+]
+
+# Static files are named after their content (#2604), so a deploy changes the
+# address of every file it changes and no browser keeps last release's copy.
+# Two consequences for a deploy: `collectstatic` refuses a stylesheet whose
+# url() points at a file that does not exist, and `compress` must run after it
+# under the same DEBUG as the server. Under DEBUG, {% static %} returns plain
+# names, and the offline manifest is keyed on the rendered names. A
+# {% static %} naming no file fails the whole page. The suite does not run
+# `collectstatic`, so the test runner serves plain names but refuses the same
+# names (oeplatform/runner.py); base/tests/test_static_files.py runs the real
+# sequence.
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
+    },
 }
 
 

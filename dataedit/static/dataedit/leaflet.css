@@ -362,13 +362,15 @@
   background: #fff;
   border-radius: 5px;
 }
+/* images/layers.png and layers-2x.png were never added to this repository,
+   and collectstatic refuses a url() that points at nothing (#2604). */
 .leaflet-control-layers-toggle {
-  background-image: url(images/layers.png);
+  background-image: none;
   width: 36px;
   height: 36px;
 }
 .leaflet-retina .leaflet-control-layers-toggle {
-  background-image: url(images/layers-2x.png);
+  background-image: none;
   background-size: 26px 26px;
 }
 .leaflet-touch .leaflet-control-layers-toggle {

@@ -69,7 +69,7 @@
             <th>Logo</th>
             <td>
               {% if model.logo %}
-                <img src="{% static model.logo.url %}"
+                <img src="{{ model.logo.url }}"
                      alt="{{ model.logo.url }}"
                      style="max-width:30%;
                             max-height:500px" />

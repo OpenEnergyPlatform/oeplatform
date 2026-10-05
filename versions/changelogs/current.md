@@ -293,6 +293,16 @@ SPDX-License-Identifier: CC0-1.0
   change writes one log line (`via=table-page`). Error messages across the site
   are now shown in red
   [(#2567)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2567)
+- Browsers no longer keep last release's stylesheets and scripts after a deploy.
+  Static files are now named after their content (`css/base-style.<hash>.css`),
+  so a changed file gets a new address. For deploys: run `collectstatic` before
+  `compress`, and run `compress` under the same `DEBUG` as the server, or no
+  page renders. The Podman image now builds with `OEP_DEBUG=False` for that
+  step. `collectstatic` now refuses a stylesheet whose `url()` points at a
+  missing file. The 18 such references in the vendored jQuery UI and Leaflet
+  stylesheets are removed (they never loaded), and so is the unused
+  `filterform.css`
+  [(#2604)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2604)
 
 ## Documentation updates
 
