@@ -89,12 +89,22 @@ ITEMS_PER_PAGE = 8
 # the request is its re-fetch after an action.
 REGION_ID = "tables-results"
 
+# What the dialog says when it was confirmed before the check for the
+# Dataset just chosen had come back.
+RECHECKED = (
+    "Nothing was changed: the check for this dataset had not come back yet."
+    " Look it over and confirm again."
+)
+
 # The bulk bar's actions, in the order it shows them, with their labels: an
-# ellipsis where the dialog asks for more than a confirmation. Bulk delete
-# and the Dataset actions join in #2565, the Organization actions in #2568.
+# ellipsis where the dialog asks for more than a confirmation. Delete is red
+# and stays last; the Organization actions (#2568) go before it.
 BULK_ACTIONS = (
     (table_actions.PUBLISH, "Publish…"),
     (table_actions.UNPUBLISH, "Unpublish"),
+    (table_actions.DATASET_ADD, "Add to dataset…"),
+    (table_actions.DATASET_REMOVE, "Remove from dataset…"),
+    (table_actions.DELETE, "Delete…"),
 )
 
 
@@ -152,6 +162,10 @@ class TableActionView(ProfileOwnerRequiredMixin, View):
       Dataset that is not the user's own, a typed confirmation that does not
       match, more Tables than the ceiling): 400, the dialog with the error
       beside its field, and no toast.
+    - POST, from a bulk Dataset dialog whose preview was checked against
+      another Dataset than the one sent (``previewed``; confirmed before the
+      re-check came back): 200, nothing written, the dialog checked against
+      the Dataset sent, with a notice.
     - POST, a delete whose OEDB table could not be dropped afterwards: 204
       as above, but the message says so and carries ``warning``, so it
       stays until dismissed instead of reading as a success.
@@ -160,7 +174,10 @@ class TableActionView(ProfileOwnerRequiredMixin, View):
     which the message lists under "Show tables"; a delete carries ``gone``,
     the names that left the dashboard, so the bulk selection drops them.
     The bulk bar's preflight is ``TableActionCheckView``, because a
-    selection does not fit in a GET address.
+    selection does not fit in a GET address. A bulk Dataset dialog asks it
+    again when the user chooses a Dataset, sending the whole selection as
+    ``selection`` beside the eligible ``tables``, so the re-check still
+    names every Table it leaves out (``_preflight``).
 
     The Tables come as repeated ``table`` parameters or as one
     comma-joined ``tables`` (``_names``). The parameters are ``topic`` and
@@ -182,8 +199,7 @@ class TableActionView(ProfileOwnerRequiredMixin, View):
         request with more than ``DATA_UPLOAD_MAX_NUMBER_FIELDS`` (1,000)
         parameters, while the largest dashboard holds 2,068 Tables and a
         ceiling is 1,000; a Table's name holds no comma."""
-        joined = data.get("tables", "").split(",")
-        return data.getlist("table") + [name.strip() for name in joined if name.strip()]
+        return data.getlist("table") + _joined(data, "tables")
 
     def _params(self, data):
         return {key: data.get(key, "") for key in self.PARAMS}
@@ -208,11 +224,14 @@ class TableActionView(ProfileOwnerRequiredMixin, View):
         return action
 
     def _preflight(self, request, action, data):
+        """The dialog for what ``data`` names. A re-check from the open
+        dialog carries the names it was opened with as ``selection``, a
+        superset of the eligible ``tables`` its form posts, and is run on
+        those, so a Table left out before is still named as left out."""
         action = self._action(action)
         params = self._params(data)
-        check = table_actions.preflight(
-            self.profile_user, action, self._names(data), params
-        )
+        names = _joined(data, "selection") or self._names(data)
+        check = table_actions.preflight(self.profile_user, action, names, params)
         return self._dialog(request, check, values=params)
 
     @method_decorator(never_cache)
@@ -224,19 +243,31 @@ class TableActionView(ProfileOwnerRequiredMixin, View):
         user = self.profile_user
         names = self._names(request.POST)
         params = self._params(request.POST)
+        # a dialog re-run after a refusal is checked against everything it
+        # was opened with, so what was left out before is still named
+        again = _joined(request.POST, "selection") or names
+        previewed = request.POST.get("previewed")
+        if previewed is not None and previewed != params["dataset"]:
+            # confirmed in the moment between choosing a Dataset and its
+            # re-check coming back: the names were checked against another
+            # choice, so nothing runs and the dialog shows the check for this
+            # one
+            check = table_actions.preflight(user, action, again, params)
+            return self._dialog(request, check, values=params, notice=RECHECKED)
         try:
             outcome = table_actions.execute(
                 user, action, names, params, via="dashboard"
             )
         except table_actions.InvalidParameters as error:
-            check = table_actions.preflight(user, action, names)
+            check = table_actions.preflight(user, action, again, params)
             return self._dialog(
                 request, check, status=400, errors=error.errors, values=params
             )
         except table_actions.ActionRefused as refusal:
-            response = self._dialog(
-                request, refusal.preflight, status=409, notice=refusal.message
-            )
+            check = refusal.preflight
+            if again != names:
+                check = table_actions.preflight(user, action, again, params)
+            response = self._dialog(request, check, status=409, notice=refusal.message)
             response["HX-Trigger"] = json.dumps(
                 {"tables-refused": {"message": refusal.message}}
             )
@@ -416,6 +447,11 @@ class TableAccessView(ProfileOwnerRequiredMixin, View):
             detail["gone"] = [table.name]
         response["HX-Trigger"] = json.dumps({"tables-changed": detail})
         return response
+
+
+def _joined(data, key) -> list:
+    """The names in one comma-joined parameter."""
+    return [name.strip() for name in data.get(key, "").split(",") if name.strip()]
 
 
 def _access_message(change, listed, hidden) -> str:

@@ -108,8 +108,7 @@ ROLE_GATES = {
     DELETE: RoleGate(DELETE_PERM, "Only Data maintainers and Table admins can delete"),
 }
 
-# The most Tables one request may name, per action; an action not listed has
-# no ceiling yet (the Dataset actions get theirs in #2565). The dashboard is
+# The most Tables one request may name, per action. The dashboard is
 # synchronous by design (no task queue), so a request has to finish inside
 # the host's timeout; mass work stays possible through the API, one call per
 # Table. Over the ceiling the preflight reads nothing and nothing can be
@@ -144,9 +143,25 @@ ROLE_GATES = {
 # a safety factor of 5 against the 300 s, which covers production's OEDB
 # sitting on another host and its larger buffer pool. Typical: 1-2 s. Not
 # covered: a drop waiting for a lock another session holds on that Table.
+#
+# Adding to and removing from a Dataset: 2,500 each. The same host limit
+# (300 s). Measured locally with ``benchmarks/tables_tab/dataset_cost.py``
+# (Postgres 14, batches of 100, 400 and 1,000, three rounds), per Table,
+# against 6 / 60 / 500 KB of metadata: adding 2.5-3.0 / 2.7-3.3 / 5.0-6.8
+# ms, removing 0.8-1.2 / 1.1-1.4 / 3.3-3.9 ms; the preflight with a Dataset
+# chosen is 0.1-0.3 / 0.4-0.7 / 3.0-3.5 ms of that. Adding is the dearer: it
+# writes the membership and seeds the Table's Topics into the Dataset.
+# Neither saves the Table, so the metadata costs only its decoding in the
+# preflight. At the worst 6.8 ms, 2,500 Tables take about 17 s: a safety
+# factor of about 17 against the 300 s, more than publish's, because this
+# ceiling is set by what a curator needs rather than by time: "select all"
+# on the largest account (2,068 Tables), then "Add to dataset", is one
+# request.
 CEILINGS = {
     PUBLISH: 1000,
     UNPUBLISH: 1000,
+    DATASET_ADD: 2500,
+    DATASET_REMOVE: 2500,
     DELETE: 50,
 }
 
@@ -224,6 +239,10 @@ class Preflight:
     consequences: dict = field(default_factory=dict)
     subject: str = ""
     confirmation: str = ""
+    # every name sent, once each, in the order sent: what a bulk dialog
+    # re-checks when the user chooses a Dataset, so the left-out groups stay
+    # complete although the form posts only the eligible names
+    requested: list = field(default_factory=list)
     # The Dataset actions only: the user's own Datasets the action could
     # change for these Tables, and the one it is about (None until chosen).
     datasets: list = field(default_factory=list)
@@ -251,6 +270,17 @@ class Preflight:
     @property
     def ceiling_message(self) -> str:
         return _ceiling_message(self.action, self.ceiling, self.total)
+
+    @property
+    def ceiling_rule(self) -> str:
+        """The ceiling as the dialog states it before anything exceeds it,
+        "" where the action has none."""
+        return _ceiling_rule(self.action, self.ceiling) if self.ceiling else ""
+
+    @property
+    def dataset_title(self) -> str:
+        """What the chosen Dataset is called, "" while none is chosen."""
+        return dataset_title(self.dataset) if self.dataset else ""
 
 
 @dataclass(frozen=True)
@@ -321,11 +351,23 @@ def _gate_reason(table) -> str:
     return "Fails the Publish gate: " + ", ".join(failed)
 
 
+# What an action is called at the start of a sentence, as in the ceiling's
+# "Delete takes at most 50 tables at a time".
+ACTION_NAMES = {
+    PUBLISH: "Publish",
+    UNPUBLISH: "Unpublish",
+    DELETE: "Delete",
+    DATASET_ADD: "Adding to a dataset",
+    DATASET_REMOVE: "Removing from a dataset",
+}
+
+
+def _ceiling_rule(action, ceiling) -> str:
+    return f"{ACTION_NAMES[action]} takes at most {ceiling:,} tables at a time."
+
+
 def _ceiling_message(action, ceiling, total) -> str:
-    return (
-        f"{action.capitalize()} takes at most {ceiling:,} tables at a time; "
-        f"you selected {total:,}."
-    )
+    return f"{_ceiling_rule(action, ceiling)[:-1]}; you selected {total:,}."
 
 
 def _confirmation(action, eligible) -> str:
@@ -380,17 +422,25 @@ def _others_datasets(user, tables) -> list:
 def _delete_consequences(user, tables) -> dict:
     """What deleting ``tables`` breaks, for the dialog: the Datasets they
     leave (the user's own by name, other people's by owner and name, since
-    their membership goes silently), which are published, their Review
-    state, an active embargo, and whether knowledge-graph links may point at
-    them. Five queries whatever the number of Tables."""
+    their membership goes silently), each with how many of ``tables`` leave
+    it, which are published, their Review state, an active embargo, and
+    whether knowledge-graph links may point at them. A batch is shown
+    counted rather than listed per Table, so the review states are counted
+    here too. Three queries whatever the number of Tables."""
     names = [table.name for table in tables]
     published = [table for table in tables if table.is_publish]
     datasets = (
-        Dataset.objects.filter(tables__in=tables)
-        .filter(pk__in=visible_datasets(user).values("pk"))
-        .order_by("name")
-        .distinct()
+        Dataset.objects.filter(pk__in=visible_datasets(user).values("pk"))
+        .annotate(leaving=Count("tables", filter=Q(tables__in=tables)))
+        .filter(leaving__gt=0)
+        .values_list("creator_id", "creator__name", "name", "leaving")
     )
+    own, others = [], []
+    for creator, owner, name, leaving in datasets:
+        if creator == user.pk:
+            own.append((name, leaving))
+        else:
+            others.append((owner or "Unknown owner", name, leaving))
     reviews = {}
     for name, finished in PeerReview.objects.filter(table__in=names).values_list(
         "table", "is_finished"
@@ -402,16 +452,17 @@ def _delete_consequences(user, tables) -> dict:
         .values_list("table__name", "date_ended")
     )
     by_name = {table.name: table for table in tables}
+    finished = sum(1 for state in reviews.values() if state)
     return {
         "published": published,
-        "own_datasets": list(
-            datasets.filter(creator=user).values_list("name", flat=True)
-        ),
-        "others_datasets": _others_datasets(user, tables),
+        "own_datasets": sorted(own),
+        "others_datasets": sorted(others),
         "reviewed": [
-            (by_name[name], "Reviewed" if finished else "In review")
-            for name, finished in sorted(reviews.items())
+            (by_name[name], "Reviewed" if state else "In review")
+            for name, state in sorted(reviews.items())
         ],
+        "finished_reviews": finished,
+        "open_reviews": len(reviews) - finished,
         "embargoed": [
             (by_name[name], until) for name, until in sorted(embargoes.items())
         ],
@@ -502,6 +553,7 @@ def preflight(user, action, names, params=None) -> Preflight:
             left_out=[],
             ceiling=ceiling,
             subject=f"{len(names)} tables",
+            requested=names,
         )
     found = {table.name: table for table in Table.objects.filter(name__in=names)}
     levels = table_levels(user, found.values())
@@ -559,6 +611,7 @@ def preflight(user, action, names, params=None) -> Preflight:
         confirmation=_confirmation(action, eligible),
         datasets=datasets,
         dataset=dataset,
+        requested=names,
     )
 
 

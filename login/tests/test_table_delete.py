@@ -126,8 +126,8 @@ class DeletePreflightTests(DeleteTestCase):
         response = self.preflight("delete", "t_cited")
         c = response.context["preflight"].consequences
         self.assertEqual(c["published"], [table])
-        self.assertEqual(c["own_datasets"], ["ds_mine"])
-        self.assertEqual(c["others_datasets"], [(self.stranger.name, "ds_theirs")])
+        self.assertEqual(c["own_datasets"], [("ds_mine", 1)])
+        self.assertEqual(c["others_datasets"], [(self.stranger.name, "ds_theirs", 1)])
         self.assertEqual(c["reviewed"], [(table, "Reviewed")])
         self.assertEqual([t for t, _ in c["embargoed"]], [table])
         self.assertTrue(c["knowledge_graph"])

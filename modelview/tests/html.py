@@ -12,6 +12,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 import re
+from html.parser import HTMLParser
 
 #: One `<input ...>` element, whole, so nothing here depends on the order
 #: djlint happens to leave the attributes in.
@@ -29,6 +30,62 @@ def element_with_id(html: str, element_id: str) -> str:
     """
     found = re.search(r"<[a-zA-Z][^>]*\bid=\"%s\"[^>]*>" % re.escape(element_id), html)
     return found.group(0) if found else ""
+
+
+class _Element(HTMLParser):
+    """Collects the markup of the first element carrying one id, children
+    included, by counting how deep the parser is inside it."""
+
+    VOID = {"area", "br", "col", "hr", "img", "input", "link", "meta", "source"}
+
+    def __init__(self, element_id):
+        super().__init__(convert_charrefs=False)
+        self.element_id = element_id
+        self.depth = 0
+        self.done = False
+        self.parts = []
+
+    def handle_starttag(self, tag, attrs):
+        if self.done:
+            return
+        if self.depth == 0 and dict(attrs).get("id") != self.element_id:
+            return
+        self.parts.append(self.get_starttag_text())
+        if tag not in self.VOID:
+            self.depth += 1
+        elif self.depth == 0:
+            self.done = True
+
+    def handle_endtag(self, tag):
+        if self.depth and not self.done and tag not in self.VOID:
+            self.parts.append(f"</{tag}>")
+            self.depth -= 1
+            self.done = self.depth == 0
+
+    def handle_data(self, data):
+        if self.depth and not self.done:
+            self.parts.append(data)
+
+    def handle_entityref(self, name):
+        self.handle_data(f"&{name};")
+
+    def handle_charref(self, name):
+        self.handle_data(f"&#{name};")
+
+
+def element_markup(html: str, element_id: str) -> str:
+    """The element carrying `element_id` with everything inside it, or ""
+    when there is none: for asserting on what an element contains, where
+    `element_with_id` gives only its opening tag."""
+    parser = _Element(element_id)
+    parser.feed(html)
+    return "".join(parser.parts)
+
+
+def text(markup: str) -> str:
+    """What `markup` reads as: its text without tags, whitespace collapsed,
+    so an assertion on a sentence does not depend on how djlint wrapped it."""
+    return " ".join(re.sub(r"<[^>]*>", "", markup).split())
 
 
 def checkboxes(html: str, css_class: str) -> list[tuple[str, bool]]:

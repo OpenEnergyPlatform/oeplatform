@@ -95,7 +95,7 @@ sidebar on 2026-10-02, so the column collapse (#2555) works with that width.
       and sends it, comma-joined, as the ``tables`` parameter of an action's
       preflight, POSTed (TableActionCheckView), since a selection does not
       fit in an address. Every action is enabled while anything is selected: the
-      preflight says what it would leave out. Where the rows stack, the
+      preflight says what it would leave out. Delete is red and last. Where the rows stack, the
       actions fold into "Actions ▾". Its requests are synced only with
       themselves, never with the list's.
       {% endcomment %}
@@ -119,7 +119,7 @@ sidebar on 2026-10-02, so the column collapse (#2555) works with that width.
             {% for verb, label in bulk_actions %}
               <button type="button"
                       id="bulk-{{ verb }}"
-                      class="btn btn-outline-primary btn-sm"
+                      class="btn {% if verb == "delete" %}btn-outline-danger{% else %}btn-outline-primary{% endif %} btn-sm"
                       hx-post="{% url 'login:table-action-check' user_id=profile_user.pk action=verb %}"
                       hx-target="#table-action-body"
                       hx-swap="innerHTML"
@@ -139,7 +139,7 @@ sidebar on 2026-10-02, so the column collapse (#2555) works with that width.
                 <li>
                   <button type="button"
                           id="bulk-menu-{{ verb }}"
-                          class="dropdown-item"
+                          class="dropdown-item{% if verb == "delete" %} text-danger{% endif %}"
                           hx-post="{% url 'login:table-action-check' user_id=profile_user.pk action=verb %}"
                           hx-target="#table-action-body"
                           hx-swap="innerHTML"
