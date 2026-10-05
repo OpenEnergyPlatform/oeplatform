@@ -43,6 +43,11 @@ from pathlib import Path
 # be in the settings the generator reads, and nothing that touches Django can
 # be imported at this point.
 from api.api_tags import TAGS as API_REFERENCE_TAGS
+from oeplatform.oedb_for_tests import (
+    TEST_NAME_VARIABLE,
+    oedb_name_for_tests,
+    running_tests,
+)
 from oeplatform.securitysettings import (
     ALLOWED_HOSTS,
     ANON_CONNECTION_LIMIT,
@@ -124,6 +129,16 @@ __all__ = [  # mark imports as "used"
     "dbport",
     "dbuser",
 ]
+
+# A test run gets its own data database (OEDB), as Django gives it its own
+# Django database: never the one configured above, which on a developer's
+# machine holds their dev data. See oeplatform/oedb_for_tests.py; the test
+# runner creates and migrates it.
+OEDB_CONFIGURED_NAME = dbname
+OEDB_TEST_NAME = oedb_name_for_tests(dbname, os.environ.get(TEST_NAME_VARIABLE))
+if running_tests(sys.argv, os.environ):
+    dbname = OEDB_TEST_NAME
+TEST_RUNNER = "oeplatform.runner.OepTestRunner"
 
 
 # ── Reverse proxy / HTTPS ─────────────────────────────────────────────────────

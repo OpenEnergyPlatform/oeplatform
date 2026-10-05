@@ -96,6 +96,16 @@ available tests:
 
     python manage.py test
 
+A test run uses databases of its own, never yours: Django's test database, and a
+data database named after yours with `test_` in front (`test_oedb` by default;
+set `LOCAL_TEST_DB_NAME` to choose another, for example when two runs happen at
+the same time). The first run creates that data database, adds the extensions
+the migrations need (`postgis`, `postgis_topology`, `hstore`, `pg_trgm`) and
+migrates it; later runs reuse it and skip the migration when it is up to date.
+Drop it to start from scratch. This needs a database user that may create
+databases and extensions. Otherwise create the database yourself and name it in
+`LOCAL_TEST_DB_NAME`.
+
 Most of our current tests are available in the `api` app of the django project.
 Look for the `tests` directory in any of our apps.
 
