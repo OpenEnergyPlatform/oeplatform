@@ -93,13 +93,36 @@ address (`{"user": "<name>", "level": 4}` or
 `permissions/user:<id>/` or `permissions/org:<id>/` with `PATCH` or `DELETE`.
 The rules are the same as on the table's access drawer and permission page:
 Admin goes to users only, an organization stops at Data maintainer and is shared
-only by its members, and a table always keeps a user with direct Admin.
+only by its members, and a table always keeps a user with direct Admin (or,
+where it has none, its last Admin grant of any kind).
 
 A change that takes **your own** Admin, or all your access, away is answered
 `409` with `"code": "confirmation_needed"` and writes nothing. Send the same
 request again with `"confirm": true` in the `PATCH` body, or `?confirm=true` on
 the `DELETE`. A `409` with `"code": "last_admin"` cannot be confirmed: give
 someone else Admin first.
+
+### Many tables, one organization
+
+`POST /api/v0/organizations/<id>/table-permissions/share/` with
+`{"tables": ["<name>", ...], "level": 4}` shares every table named with one of
+your organizations, at Data editor (`4`) or Data maintainer (`8`).
+`POST /api/v0/organizations/<id>/table-permissions/remove/` with
+`{"tables": [...]}` takes the organization's role away again. You need Table
+admin on every table named; a table where you are not answers `403` with the
+tables in `tables`, and nothing is written. Each request is all or nothing,
+takes at most 2,500 tables, and answers with what it `changed` (before and
+after, per table) and what it left `unchanged`:
+
+- a share only ever raises a role: where the organization already holds that
+  role or more, the table stays as it is;
+- a removal leaves a table where the organization holds no role unchanged, so
+  sending it again succeeds;
+- a removal that would leave a table with no Admin at all, because the
+  organization's old Admin grant is its only one, answers `409` with
+  `"code": "last_admin"`; one that takes your own access or Admin away answers
+  `409` with `"code": "confirmation_needed"` naming them in `tables`; send those
+  names back as `"confirm"` (or `true` for any).
 
 ## Authentication
 

@@ -208,9 +208,26 @@ SPDX-License-Identifier: CC0-1.0
   selects and clears the visible page and offers "Select all N matching tables",
   as the header checkbox does on a wider one
   [(#2596)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2596)
+- REST API: share many tables with one of your organizations, or remove an
+  organization from many tables, in one request, under the same rules as the
+  dashboard's bulk bar: all tables or none, a share only raises a role, a
+  repeated removal succeeds, at most 2,500 tables at once
+  (`POST /api/v0/organizations/<id>/table-permissions/share/` and `…/remove/`).
+  And everywhere a table's access is managed (the access drawer, the table's
+  permission page, the API), removing or lowering an organization's old Admin
+  grant that is the table's only Admin is now refused instead of leaving the
+  table with no Admin at all
+  [(#2595)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2595)
 
 ## Bugs
 
+- Deleting a table removes its peer reviews with it. A review names its table
+  only by name, so a table created later under the same name used to inherit the
+  old review state and badge. Dropping a deleted table's database tables now
+  gives up after waiting 1 s for another session's lock instead of waiting until
+  the request times out; it is then reported as a table that could not be
+  removed, as any failed drop is
+  [(#2597)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2597)
 - The metadata editor no longer hangs on a table whose column carries a very
   long annotation list. A column with 4,525 value references never finished
   loading, because the form library's cost grows with the square of a list's

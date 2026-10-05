@@ -20,6 +20,7 @@ afterwards and the log line; never on markup details.
 from django.contrib.messages import get_messages
 from django.urls import reverse
 
+from dataedit.models import Table
 from login.models import ADMIN_PERM, DELETE_PERM, NO_PERM, WRITE_PERM
 from login.table_roles import LAST_ADMIN, ONLY_ADMINS
 from login.tests.test_table_access import LOGGER, AccessTestCase
@@ -401,6 +402,21 @@ class LastAdminAndConfirmationTests(PermissionPageTestCase):
             409,
             LAST_ADMIN,
         )
+
+    def test_an_organizations_only_admin_grant_cannot_be_removed(self):
+        """#2595: the Table would be left with no Admin at all."""
+        table = Table.objects.create(name="t_page_only_org")
+        organization = self.organization("PageOnlyOrg")
+        self.grant(table, organization, ADMIN_PERM)
+        for data in (
+            {"mode": "remove_group", "group_id": organization.pk},
+            {"mode": "alter_group", "group_id": organization.pk, "level": WRITE_PERM},
+        ):
+            with self.subTest(**data):
+                self.assertRefused(
+                    self.post("t_page_only_org", **data), 409, LAST_ADMIN
+                )
+        self.assertEqual(self.organizations_of(table), {"PageOnlyOrg": ADMIN_PERM})
 
     def test_losing_your_own_admin_takes_one_confirmation(self):
         table = self.table("t_page_confirm")

@@ -456,3 +456,19 @@ class LoggingTests(PermissionsAPITestCase):
             with self.captureOnCommitCallbacks(execute=True):
                 self.call("patch", f"user:{self.user.pk}", data={"level": 4}, code=409)
                 self.call("post", data={"user": "Nobody", "level": 4}, code=400)
+
+
+class OrganizationOnlyAdminTests(PermissionsAPITestCase):
+    def test_an_organizations_only_admin_grant_cannot_be_removed(self):
+        """#2595: on a Table no user holds Admin on, the last Admin grant of
+        any kind stays."""
+        self.table = Table.objects.create(name="t_api_only_org")
+        lab = self.organization("API Only Lab", self.user)
+        self.grant(lab, ADMIN_PERM)
+        body = self.call("delete", f"org:{lab.pk}", query="?confirm=true", code=409)
+        self.assertEqual(body["code"], "last_admin")
+        body = self.call(
+            "patch", f"org:{lab.pk}", data={"level": DELETE_PERM}, code=409
+        )
+        self.assertEqual(body["code"], "last_admin")
+        self.assertEqual(self.organizations(), {"API Only Lab": ADMIN_PERM})

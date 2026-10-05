@@ -16,7 +16,7 @@ from django.db import connection
 from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE
 
 from api.services import table_actions
-from dataedit.models import Embargo, Table, Topic
+from dataedit.models import Embargo, PeerReview, PeerReviewManager, Table, Topic
 from oeplatform.settings import PSEUDO_TOPIC_DRAFT, TOPIC_SCENARIO
 
 from . import APITestCaseWithTable
@@ -190,6 +190,26 @@ class DeleteThroughTheServiceTests(ActionAPITestCase):
         with mock.patch.object(table_actions, "execute", side_effect=execute):
             self.api_req("delete", exp_res={})
         self.assertEqual(seen, [])
+
+    def test_deleting_removes_the_reviews_and_a_new_table_has_none(self):
+        """``PeerReview.table`` is a name, so a review left behind would
+        pass to the next Table of that name (#2597)."""
+        review = PeerReview.objects.create(
+            table=self.test_table,
+            contributor=self.user,
+            reviewer=self.other_user,
+            is_finished=True,
+            review={"badge": "Gold"},
+        )
+        PeerReviewManager.objects.create(opr=review)
+        self.api_req("delete", exp_res={})
+        self.assertFalse(PeerReview.objects.filter(table=self.test_table).exists())
+        self.assertFalse(
+            PeerReviewManager.objects.filter(opr__table=self.test_table).exists()
+        )
+        self.create_table(self.test_structure)
+        self.assertIsNotNone(self.table())
+        self.assertIsNone(PeerReview.load(self.test_table))
 
     def test_the_permission_answers_are_unchanged(self):
         self.api_req("delete", auth=False, exp_code=401)

@@ -181,8 +181,10 @@ ROLE_GATES = {
 # of it; the worst single drop was 1.13 s (10M rows, 0.83 GB; one 1M-row drop
 # also took 1.02 s). At a worst case of 1.2 s per Table, 50 Tables take 60 s:
 # a safety factor of 5 against the 300 s, which covers production's OEDB
-# sitting on another host and its larger buffer pool. Typical: 1-2 s. Not
-# covered: a drop waiting for a lock another session holds on that Table.
+# sitting on another host and its larger buffer pool. Typical: 1-2 s. A
+# drop waiting for a lock another session holds on that Table gives up after
+# ``DROP_LOCK_TIMEOUT`` and counts as a failed drop; that value is chosen so a
+# batch of 50 blocked drops still fits (reasoning beside it).
 #
 # Adding to and removing from a Dataset: 2,500 each. The same host limit
 # (300 s). Measured locally with ``benchmarks/tables_tab/dataset_cost.py``
@@ -223,6 +225,32 @@ CEILINGS = {
 
 # A batch of more than this many Tables is confirmed by typing its count.
 TYPED_COUNT_ABOVE = 10
+
+# How long a delete's drop of a Table's OEDB tables waits for a lock another
+# session holds on one of them (a reader inside an open transaction, an Apply,
+# an advanced API session left idle in its transaction) before it gives up
+# (``_drop``). A drop that gives up raises and is reported as a failed drop
+# (``drop=failed``, a lasting warning naming the Table); the Django rows are
+# gone either way. Only a request is bounded: ``Table.drop_oedb_table`` waits
+# as long as it takes without one, as ``clear_sandbox`` wants.
+#
+# 1 s, set by delete's ceiling of 50 Tables per request (``CEILINGS`` above)
+# and the host's limit of 300 s (Apache ``Timeout 300``, mod_wsgi
+# ``socket-timeout=300``, no ``request-timeout``): the bulk has to finish even
+# if every drop in it is blocked. A Table is four OEDB tables, the main table
+# and its three meta tables, each dropped by a statement of its own, and
+# Postgres applies the timeout to each lock wait separately. In the case this
+# guards against, a lock on the main table, the first wait runs out and the
+# other three are not tried: 50 x (1 s + the worst drop measured, 1.2 s) = 110
+# s. In the worst case, four waits that each end just inside the timeout, a
+# Table costs 4 x 1 s + 1.2 s and the batch 260 s, still inside the 300 s; at
+# 2 s that would be 460 s. A drop that waits holds every later reader of the
+# Table in the queue behind it, so a short wait is also what keeps a delete
+# from stalling the Table's page while it waits. What 1 s still lets through
+# is a short read finishing; what it refuses would have held the request for
+# as long as the lock lasted, which no value short of the 300 s covers.
+# Uncontended, a drop waits for nothing and the timeout costs nothing.
+DROP_LOCK_TIMEOUT = "1s"
 
 # Left-out reasons that do not depend on the role. A gate failure is
 # "Fails the Publish gate: <check>" (``_gate_reason``).
@@ -983,7 +1011,7 @@ def _drop(table):
     when it worked. Whatever went wrong, the Django rows are gone already,
     so the failure is reported, not raised."""
     try:
-        table.drop_oedb_table()
+        table.drop_oedb_table(lock_timeout=DROP_LOCK_TIMEOUT)
     except Exception as error:
         return error
     return None
