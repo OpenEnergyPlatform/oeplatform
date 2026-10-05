@@ -305,7 +305,7 @@ class DeleteTests(DeleteTestCase):
         seen = []
         real = Table.drop_oedb_table
 
-        def observe(instance):
+        def observe(instance, lock_timeout=None):
             seen.append(
                 (
                     Table.objects.filter(name=instance.name).exists(),
@@ -326,7 +326,7 @@ class DeleteTests(DeleteTestCase):
         Table.objects.filter(pk=fine.pk).update(is_publish=True)
         real = Table.drop_oedb_table
 
-        def fail_on_stuck(instance):
+        def fail_on_stuck(instance, lock_timeout=None):
             if instance.name == stuck.name:
                 raise RuntimeError("the OEDB went away")
             real(instance)
@@ -394,7 +394,8 @@ class DeleteLogTests(DeleteTestCase):
 
 class BlockedDropTests(DeleteTestCase):
     """A drop queued behind another session's lock gives up after
-    ``DROP_LOCK_TIMEOUT`` and is reported as a failed drop (#2597)."""
+    ``table_actions.DROP_LOCK_TIMEOUT`` in a request and is reported as a
+    failed drop (#2597)."""
 
     def hold_lock(self, name):
         """Open a second OEDB session that holds a lock on ``name``'s main
@@ -414,9 +415,8 @@ class BlockedDropTests(DeleteTestCase):
     def test_a_blocked_drop_gives_up_with_a_lock_timeout(self):
         table = self.oedb_table()
         self.hold_lock(table.name)
-        with mock.patch("dataedit.models.DROP_LOCK_TIMEOUT", "100ms"):
-            with self.assertRaises(OperationalError) as raised:
-                table.drop_oedb_table()
+        with self.assertRaises(OperationalError) as raised:
+            table.drop_oedb_table(lock_timeout="100ms")
         self.assertEqual(raised.exception.orig.pgcode, LOCK_NOT_AVAILABLE)
         self.assertTrue(self.in_oedb(table.name))
 
@@ -424,7 +424,7 @@ class BlockedDropTests(DeleteTestCase):
         stuck = self.oedb_table(title="Stuck")
         fine = self.oedb_table(title="Fine")
         self.hold_lock(stuck.name)
-        with mock.patch("dataedit.models.DROP_LOCK_TIMEOUT", "100ms"):
+        with mock.patch.object(table_actions, "DROP_LOCK_TIMEOUT", "100ms"):
             with self.assertLogs("oeplatform.table_actions", "INFO") as logs:
                 response = self.run_action("delete", stuck.name, fine.name, confirm="2")
         self.assertEqual(response.status_code, 204)
@@ -441,6 +441,19 @@ class BlockedDropTests(DeleteTestCase):
         )
         self.assertTrue(by_table[f"table={fine.name}"].getMessage().endswith("drop=ok"))
 
+    def test_only_a_request_bounds_the_wait(self):
+        """A delete through the dashboard passes ``DROP_LOCK_TIMEOUT``;
+        ``Table.delete()``, which ``clear_sandbox`` calls outside any
+        request, waits as long as it takes."""
+        dashboard, command = self.oedb_table(), self.oedb_table()
+        with mock.patch.object(OedbTableProxy, "drop_if_exists") as drop:
+            self.assertEqual(self.run_action("delete", dashboard.name).status_code, 204)
+            command.delete()
+        self.assertEqual(
+            [call.kwargs["lock_timeout"] for call in drop.call_args_list],
+            [table_actions.DROP_LOCK_TIMEOUT, None],
+        )
+
     def test_the_lock_timeout_is_left_on_no_session(self):
         """``SET LOCAL``: it lasts for the drop's transaction only, so the
         pooled session goes back with the server's default."""
@@ -448,8 +461,7 @@ class BlockedDropTests(DeleteTestCase):
         with engine.connect() as probe:
             default = probe.execute("SHOW lock_timeout").scalar()
         table = self.oedb_table()
-        with mock.patch("dataedit.models.DROP_LOCK_TIMEOUT", "123ms"):
-            table.drop_oedb_table()
+        table.drop_oedb_table(lock_timeout="123ms")
         self.assertFalse(self.in_oedb(table.name))
         # every session the pool holds, not only the one handed out next
         sessions = [engine.connect() for _ in range(engine.pool.checkedin())]

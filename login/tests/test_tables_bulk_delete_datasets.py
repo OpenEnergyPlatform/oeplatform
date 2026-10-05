@@ -230,7 +230,7 @@ class BulkDeleteTests(BulkCase, DeleteTestCase):
         self.draft("t_stuck_1", title="Stuck one")
         self.draft("t_stuck_2", title="Stuck two")
 
-        def drop(instance):
+        def drop(instance, lock_timeout=None):
             if instance.name.startswith("t_stuck"):
                 raise RuntimeError("the OEDB went away")
 
