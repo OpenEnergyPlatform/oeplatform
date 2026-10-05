@@ -226,6 +226,12 @@ EXTERNAL_URLS = {
     "academy_course_upload": "https://openenergyplatform.github.io/academy/courses/04_upload/",  # noqa E501
     "academy_course_scenario_bundle": "https://openenergyplatform.github.io/academy/courses/10_scenario_bundle/",  # noqa E501
     "academy_course_enable_comparisons": "https://openenergyplatform.github.io/academy/courses/06_enable_comparisons/",  # noqa E501
+    # Tools linked from the homepage's Integrated Workflows section
+    "academy_course_peer_review": "https://openenergyplatform.github.io/academy/courses/09_peer_review/",  # noqa E501
+    "github_openenergyplatform_oedb_compliance_manager": "https://github.com/OpenEnergyPlatform/open-energy-database-compliance-manager",  # noqa E501
+    "github_openenergyplatform_oem2orm": "https://github.com/OpenEnergyPlatform/oem2orm",  # noqa E501
+    "github_openenergyplatform_omi": "https://github.com/OpenEnergyPlatform/omi",  # noqa E501
+    "github_jh_rli_oep_upload": "https://github.com/jh-RLI/oep-upload",  # noqa E501
     "tutorials_index": "https://openenergyplatform.github.io/academy/",
     "tutorials_faq": "https://openenergyplatform.github.io/academy/questions/",
     "tutorials_api1": "https://openenergyplatform.github.io/academy/tutorials/01_api/01_api_download/",  # noqa E501
