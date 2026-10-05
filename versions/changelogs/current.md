@@ -12,6 +12,16 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- Speed up the row upload API: index the unapplied rows of the edit-journal meta
+  tables (`_<table>_insert/_edit/_delete`, back-filled by an oedb migration),
+  mark applied rows with one set-based update instead of a per-row OR chain,
+  scan only the meta table relevant to the operation, and apply changes exactly
+  once per request instead of twice. Also fixes applying a journal that held
+  pending changes of more than one kind: the first change of each new kind was
+  dropped and the apply then failed. The oedb migration builds the index for
+  existing meta tables one at a time, so it neither write-locks all journals at
+  once nor overflows Postgres' lock table on a large platform.
+  [(#2362)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2362)
 - For API clients: `tables/<table>/move_publish/<topic>/`, `unpublish/` and
   deleting a table now take the same path as the tables tab, with the same
   request and response bodies (`{}`, or `{"reason": …}` on a refusal) and one
