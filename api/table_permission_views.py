@@ -6,6 +6,11 @@ read is ``login.table_roles.table_access`` and every write one of its
 functions, called with ``via="api"``, so each rule holds here exactly as it
 does there and the log line names this entry point.
 
+Beside them, sharing many Tables with one Organization and removing an
+Organization from many Tables (#2595, WF-08 decision 12), on the permission
+service's two bulk writes -- the same ones the dashboard's bulk bar uses
+(#2568) -- all or nothing in one transaction.
+
 What this module adds is the translation into this API's conventions:
 
 - a Holder is addressed by the service's own key, ``user:<pk>`` or
@@ -33,6 +38,8 @@ SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
+import json
+
 from django.http import HttpResponse, JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
@@ -45,8 +52,11 @@ from api.api_description import TABLE, describes, responses
 from api.api_tags import TABLE_PERMISSIONS
 from api.error import APIError
 from api.helper import JsonLikeResponse, api_exception
+from api.services import table_actions
 from api.utils import table_or_404
+from dataedit.models import Table
 from login import table_roles
+from login.models import Organization
 from login.table_roles import (
     ORGANIZATION,
     ROLES,
@@ -388,3 +398,255 @@ class TableHolderAPIView(APIView):
         except REFUSALS as error:
             return _refusal(error)
         return HttpResponse(status=status.HTTP_204_NO_CONTENT)
+
+
+# --------------------------------------------------------------------------
+# Many Tables, one Organization (#2595).
+# --------------------------------------------------------------------------
+
+
+class BulkShareSerializer(serializers.Serializer):
+    tables = serializers.ListField(
+        child=serializers.CharField(),
+        help_text="The Tables, by name. The caller must be a Table admin on every "
+        "one of them.",
+    )
+    level = serializers.IntegerField(
+        help_text="The role: Data editor or Data maintainer, as the levels under "
+        "`roles` of the Holder list give them. Admin is given to users only."
+    )
+
+
+class BulkRemoveSerializer(serializers.Serializer):
+    tables = serializers.ListField(
+        child=serializers.CharField(),
+        help_text="The Tables, by name. The caller must be a Table admin on every "
+        "one of them.",
+    )
+    confirm = serializers.BooleanField(
+        required=False,
+        help_text="`true` after a 409 with `code: confirmation_needed`.",
+    )
+
+
+class BulkChangeSerializer(serializers.Serializer):
+    table = serializers.CharField()
+    before = serializers.IntegerField(
+        allow_null=True, help_text="The level before; null for no grant."
+    )
+    after = serializers.IntegerField(
+        allow_null=True, help_text="The level now; null for no grant."
+    )
+
+
+class BulkResultSerializer(serializers.Serializer):
+    organization = serializers.DictField(help_text="`id`, `name` and `members`.")
+    changed = BulkChangeSerializer(
+        many=True, help_text="One entry per Table written, as it was logged."
+    )
+    unchanged = serializers.ListField(
+        child=serializers.CharField(),
+        help_text="The Tables left as they were: a share where the organization "
+        "holds that role or more already, a removal where it holds no role.",
+    )
+
+
+ORGANIZATION_ID = OpenApiParameter(
+    name="organization",
+    location=OpenApiParameter.PATH,
+    required=True,
+    type=int,
+    description="The organization, by id.",
+)
+
+BULK_REFUSED = describes(
+    "Nothing was written. `tables` was not a list of table names, named more "
+    "tables than one request takes (`reason` gives the limit), or `level` is "
+    "not a role an organization may be given; or, for a share, the caller is "
+    "not a member of the organization. `field` names the input."
+)
+
+BULK_NOT_ADMIN = describes(
+    "Not a Table admin on every Table named. `tables` lists those it is not; "
+    "nothing was written."
+)
+
+BULK_NO_SUCH = describes(
+    "No organization of that id, or a named Table does not exist (`tables` "
+    "lists them). Nothing was written."
+)
+
+BULK_CONFLICT = describes(
+    "Nothing was written, and `code` says why; `tables` names the Tables. "
+    "`last_admin`: the organization's old Admin grant is the only Admin there "
+    "-- give someone Admin first; confirming does not change this answer. "
+    "`confirmation_needed`: the removal would take the caller's own access to, "
+    "or Admin on, these Tables; send the same request again with `confirm`."
+)
+
+
+def _bulk_refusal(error) -> JsonResponse:
+    """A bulk write's refusal: the single-Table answer, plus the Tables."""
+    response = _refusal(error)
+    if error.tables:
+        body = json.loads(response.content)
+        body["tables"] = [table.name for table in error.tables]
+        response = JsonResponse(body, status=response.status_code)
+    return response
+
+
+class _BulkOrganizationView(APIView):
+    """What sharing and removing have in common: the caller, the
+    Organization in the URL, the Tables in the body, the ceiling, and the
+    answer."""
+
+    action = None  # the table action whose ceiling applies
+
+    def _tables(self, data):
+        names = data.get("tables")
+        if not isinstance(names, list) or not names:
+            raise InvalidRequest("Name the tables as a list of names.", "tables")
+        if not all(isinstance(name, str) and name for name in names):
+            raise InvalidRequest("Name the tables as a list of names.", "tables")
+        names = list(dict.fromkeys(names))
+        ceiling = table_actions.CEILINGS[self.action]
+        if len(names) > ceiling:
+            raise InvalidRequest(
+                f"One request takes at most {ceiling:,} tables; "
+                f"this one names {len(names):,}.",
+                "tables",
+            )
+        found = {table.name: table for table in Table.objects.filter(name__in=names)}
+        missing = [name for name in names if name not in found]
+        if missing:
+            raise _NoSuchTables(missing)
+        return [found[name] for name in names]
+
+    def _answer(self, organization, tables, changes) -> JsonResponse:
+        written = {change.table.pk for change in changes}
+        return JsonResponse(
+            {
+                "organization": {
+                    "id": organization.pk,
+                    "name": organization.name,
+                    "members": organization.memberships.count(),
+                },
+                "changed": [
+                    {
+                        "table": change.table.name,
+                        "before": change.before,
+                        "after": change.after,
+                    }
+                    for change in changes
+                ],
+                "unchanged": [t.name for t in tables if t.pk not in written],
+            }
+        )
+
+    def _run(self, request, organization, write) -> JsonLikeResponse:
+        user = _signed_in(request)
+        found = Organization.objects.filter(pk=organization).first()
+        if found is None:
+            return JsonResponse({"reason": "No such organization."}, status=404)
+        data = _body(request)
+        try:
+            tables = self._tables(data)
+            changes = write(user, tables, found, data)
+        except _NoSuchTables as error:
+            return JsonResponse(
+                {"reason": "No table of these names.", "tables": error.names},
+                status=404,
+            )
+        except REFUSALS as error:
+            return _bulk_refusal(error)
+        return self._answer(found, tables, changes)
+
+
+class _NoSuchTables(Exception):
+    def __init__(self, names):
+        super().__init__(", ".join(names))
+        self.names = names
+
+
+@extend_schema(tags=[TABLE_PERMISSIONS])
+class OrganizationShareAPIView(_BulkOrganizationView):
+    """Share Tables with an Organization."""
+
+    action = table_actions.ORGANIZATION_SHARE
+
+    @extend_schema(
+        operation_id="organizations_table_permissions_share",
+        summary="Share many tables with an organization",
+        description=(
+            "Gives the organization the role on every Table named, in one "
+            "transaction: all of them or none. A share only ever raises a "
+            "role: where the organization holds that role or more already "
+            "(an old Admin grant included), the Table is left as it is and "
+            "listed under `unchanged`. The caller must be a member of the "
+            "organization and a Table admin on every Table: Admin, directly or "
+            "through an organization, or platform admin. At most 2,500 Tables "
+            "per request."
+        ),
+        parameters=[ORGANIZATION_ID],
+        request=BulkShareSerializer,
+        responses=responses(
+            {200: OpenApiResponse(BulkResultSerializer, "What was written.")},
+            401,
+            also={400: BULK_REFUSED, 403: BULK_NOT_ADMIN, 404: BULK_NO_SUCH},
+        ),
+    )
+    @api_exception
+    def post(self, request: Request, organization: int) -> JsonLikeResponse:
+        def write(user, tables, found, data):
+            return table_roles.share_with_organization(
+                user, tables, found, data.get("level"), via=VIA
+            )
+
+        return self._run(request, organization, write)
+
+
+@extend_schema(tags=[TABLE_PERMISSIONS])
+class OrganizationRemoveAPIView(_BulkOrganizationView):
+    """Remove an Organization from Tables."""
+
+    action = table_actions.ORGANIZATION_REMOVE
+
+    @extend_schema(
+        operation_id="organizations_table_permissions_remove",
+        summary="Remove an organization from many tables",
+        description=(
+            "Takes the organization's role away on every Table named, in one "
+            "transaction: all of them or none. A Table where it holds no role "
+            "is listed under `unchanged`, so sending the same request again "
+            "succeeds. Refused when the organization's old Admin grant is a "
+            "Table's only Admin; asks for `confirm` first when the caller would "
+            "lose their own access to, or Admin on, a Table. Needs no "
+            "membership of the organization, but Table admin on every Table: "
+            "Admin, directly or through an organization, or platform admin. "
+            "At most 2,500 Tables per request."
+        ),
+        parameters=[ORGANIZATION_ID],
+        request=BulkRemoveSerializer,
+        responses=responses(
+            {200: OpenApiResponse(BulkResultSerializer, "What was written.")},
+            401,
+            also={
+                400: BULK_REFUSED,
+                403: BULK_NOT_ADMIN,
+                404: BULK_NO_SUCH,
+                409: BULK_CONFLICT,
+            },
+        ),
+    )
+    @api_exception
+    def post(self, request: Request, organization: int) -> JsonLikeResponse:
+        def write(user, tables, found, data):
+            return table_roles.remove_organization(
+                user,
+                tables,
+                found,
+                via=VIA,
+                confirmed=_confirmed(data.get("confirm")),
+            )
+
+        return self._run(request, organization, write)

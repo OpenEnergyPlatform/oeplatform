@@ -19,7 +19,12 @@ from drf_spectacular.views import (
     SpectacularSwaggerView,
 )
 
-from api.table_permission_views import TableHolderAPIView, TablePermissionsAPIView
+from api.table_permission_views import (
+    OrganizationRemoveAPIView,
+    OrganizationShareAPIView,
+    TableHolderAPIView,
+    TablePermissionsAPIView,
+)
 from api.views import (
     AdvancedCloseAllAPIView,
     AdvancedConnectionCloseAPIView,
@@ -308,6 +313,17 @@ urlpatterns_v0 = [
         r"^tables/(?P<table>[\w\d_\s]+)/permissions/(?P<holder>[^/]+)/$",
         TableHolderAPIView.as_view(),
         name="table-holder",
+    ),
+    # Many Tables, one Organization (#2595).
+    path(
+        "organizations/<int:organization>/table-permissions/share/",
+        OrganizationShareAPIView.as_view(),
+        name="organization-table-permissions-share",
+    ),
+    path(
+        "organizations/<int:organization>/table-permissions/remove/",
+        OrganizationRemoveAPIView.as_view(),
+        name="organization-table-permissions-remove",
     ),
     path("tables/", include(urlpatterns_v0_schema_table)),
     path("advanced/", include(urlpatterns_v0_advanced)),

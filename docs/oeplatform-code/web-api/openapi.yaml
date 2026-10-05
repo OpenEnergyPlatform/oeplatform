@@ -2444,6 +2444,172 @@ paths:
                 type: object
                 additionalProperties: {}
           description: The store's answer, in the format asked for.
+  /api/v0/organizations/{organization}/table-permissions/remove/:
+    post:
+      operationId: organizations_table_permissions_remove
+      description: 'Takes the organization''s role away on every Table named, in one
+        transaction: all of them or none. A Table where it holds no role is listed
+        under `unchanged`, so sending the same request again succeeds. Refused when
+        the organization''s old Admin grant is a Table''s only Admin; asks for `confirm`
+        first when the caller would lose their own access to, or Admin on, a Table.
+        Needs no membership of the organization, but Table admin on every Table: Admin,
+        directly or through an organization, or platform admin. At most 2,500 Tables
+        per request.'
+      summary: Remove an organization from many tables
+      parameters:
+      - in: path
+        name: organization
+        schema:
+          type: integer
+        description: The organization, by id.
+        required: true
+      tags:
+      - 'Tables: permissions'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkRemove'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BulkRemove'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BulkRemove'
+        required: true
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No credentials, or credentials this platform does not know.
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkResult'
+          description: What was written.
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Nothing was written. `tables` was not a list of table names,
+            named more tables than one request takes (`reason` gives the limit), or
+            `level` is not a role an organization may be given; or, for a share, the
+            caller is not a member of the organization. `field` names the input.
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Not a Table admin on every Table named. `tables` lists those
+            it is not; nothing was written.
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No organization of that id, or a named Table does not exist
+            (`tables` lists them). Nothing was written.
+        '409':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'Nothing was written, and `code` says why; `tables` names the
+            Tables. `last_admin`: the organization''s old Admin grant is the only
+            Admin there -- give someone Admin first; confirming does not change this
+            answer. `confirmation_needed`: the removal would take the caller''s own
+            access to, or Admin on, these Tables; send the same request again with
+            `confirm`.'
+  /api/v0/organizations/{organization}/table-permissions/share/:
+    post:
+      operationId: organizations_table_permissions_share
+      description: 'Gives the organization the role on every Table named, in one transaction:
+        all of them or none. A share only ever raises a role: where the organization
+        holds that role or more already (an old Admin grant included), the Table is
+        left as it is and listed under `unchanged`. The caller must be a member of
+        the organization and a Table admin on every Table: Admin, directly or through
+        an organization, or platform admin. At most 2,500 Tables per request.'
+      summary: Share many tables with an organization
+      parameters:
+      - in: path
+        name: organization
+        schema:
+          type: integer
+        description: The organization, by id.
+        required: true
+      tags:
+      - 'Tables: permissions'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkShare'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BulkShare'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BulkShare'
+        required: true
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No credentials, or credentials this platform does not know.
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkResult'
+          description: What was written.
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Nothing was written. `tables` was not a list of table names,
+            named more tables than one request takes (`reason` gives the limit), or
+            `level` is not a role an organization may be given; or, for a share, the
+            caller is not a member of the organization. `field` names the input.
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Not a Table admin on every Table named. `tables` lists those
+            it is not; nothing was written.
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No organization of that id, or a named Table does not exist
+            (`tables` lists them). Nothing was written.
   /api/v0/scenario-bundle/scenario/manage-datasets/:
     post:
       operationId: scenario_bundle_scenario_manage_datasets_create
@@ -9394,6 +9560,75 @@ components:
           type: string
       required:
       - content
+    BulkChange:
+      type: object
+      properties:
+        table:
+          type: string
+        before:
+          type: integer
+          nullable: true
+          description: The level before; null for no grant.
+        after:
+          type: integer
+          nullable: true
+          description: The level now; null for no grant.
+      required:
+      - after
+      - before
+      - table
+    BulkRemove:
+      type: object
+      properties:
+        tables:
+          type: array
+          items:
+            type: string
+          description: The Tables, by name. The caller must be a Table admin on every
+            one of them.
+        confirm:
+          type: boolean
+          description: '`true` after a 409 with `code: confirmation_needed`.'
+      required:
+      - tables
+    BulkResult:
+      type: object
+      properties:
+        organization:
+          type: object
+          additionalProperties: {}
+          description: '`id`, `name` and `members`.'
+        changed:
+          type: array
+          items:
+            $ref: '#/components/schemas/BulkChange'
+          description: One entry per Table written, as it was logged.
+        unchanged:
+          type: array
+          items:
+            type: string
+          description: 'The Tables left as they were: a share where the organization
+            holds that role or more already, a removal where it holds no role.'
+      required:
+      - changed
+      - organization
+      - unchanged
+    BulkShare:
+      type: object
+      properties:
+        tables:
+          type: array
+          items:
+            type: string
+          description: The Tables, by name. The caller must be a Table admin on every
+            one of them.
+        level:
+          type: integer
+          description: 'The role: Data editor or Data maintainer, as the levels under
+            `roles` of the Holder list give them. Admin is given to users only.'
+      required:
+      - level
+      - tables
     BundleHistoryEntry:
       type: object
       properties:

@@ -200,6 +200,16 @@ SPDX-License-Identifier: CC0-1.0
   admin on, and write all tables or none, at most 2,500 at once, with one log
   line per table changed
   [(#2568)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2568)
+- REST API: share many tables with one of your organizations, or remove an
+  organization from many tables, in one request, under the same rules as the
+  dashboard's bulk bar: all tables or none, a share only raises a role, a
+  repeated removal succeeds, at most 2,500 tables at once
+  (`POST /api/v0/organizations/<id>/table-permissions/share/` and `…/remove/`).
+  And everywhere a table's access is managed (the access drawer, the table's
+  permission page, the API), removing or lowering an organization's old Admin
+  grant that is the table's only Admin is now refused instead of leaving the
+  table with no Admin at all
+  [(#2595)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2595)
 
 ## Bugs
 
