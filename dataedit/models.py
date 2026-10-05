@@ -207,6 +207,14 @@ class Table(Tagable):
     data_modified = DateTimeField(null=True)
     metadata_modified = DateTimeField(null=True)
 
+    # When the Table was created. ``date_updated`` holds that only for Tables
+    # created after migration 0044 (2025-10-30), which filled it for every
+    # older one from dates declared in its metadata; for those the creation
+    # time was never recorded anywhere, so this is NULL ("before Nov 2025").
+    # Migration 0057 drew the line. ``date_updated`` stays as it is, because
+    # the public topic list reads it.
+    created = DateTimeField(auto_now_add=True, null=True)
+
     embargos: QuerySet["Embargo"]  # related_name, for static type checking
     userpermission_set: QuerySet[
         "UserPermission"  # TODO: import
