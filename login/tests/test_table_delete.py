@@ -17,23 +17,33 @@ import uuid
 from datetime import timedelta
 from unittest import mock
 
-from django.db import connection
+from django.db import connection, models
 from django.utils import timezone
+from psycopg2.errorcodes import LOCK_NOT_AVAILABLE
+from sqlalchemy.exc import OperationalError
 
 from api.services import table_actions
-from dataedit.models import Dataset, Embargo, PeerReview, Table
+from dataedit.models import (
+    Dataset,
+    Embargo,
+    PeerReview,
+    PeerReviewManager,
+    ReviewRound,
+    Table,
+)
 from login.models import DELETE_PERM, WRITE_PERM, UserPermission
 from login.tests.test_table_actions import DIALOG, ActionTestCase
 from modelview.tests.html import element_with_id
+from oedb.connection import _get_engine
 from oedb.utils import OedbTableProxy
 
 
 class DeleteTestCase(ActionTestCase):
-    def oedb_table(self, title=None):
+    def oedb_table(self, title=None, name=None):
         """A sandbox Table with a real OEDB table behind it, on a name no
         other session uses (the OEDB is shared even with an isolated test
         database). Dropped at the end whatever the test did."""
-        name = f"t_2562_{uuid.uuid4().hex[:10]}"
+        name = name or f"t_2562_{uuid.uuid4().hex[:10]}"
         table = Table.create_with_oedb_table(
             name=name,
             is_sandbox=True,
@@ -380,3 +390,138 @@ class DeleteLogTests(DeleteTestCase):
         with self.assertNoLogs("oeplatform.table_actions", "INFO"):
             self.run_action("delete", "t_log_refused", confirm="nope")
         self.assertEqual(self.exists("t_log_refused"), {"t_log_refused"})
+
+
+class BlockedDropTests(DeleteTestCase):
+    """A drop queued behind another session's lock gives up after
+    ``DROP_LOCK_TIMEOUT`` and is reported as a failed drop (#2597)."""
+
+    def hold_lock(self, name):
+        """Open a second OEDB session that holds a lock on ``name``'s main
+        table until the test ends: a reader inside an open transaction.
+
+        If the drop did not give up, the test would wait on its own lock
+        for ever; the session therefore ends itself once it has sat idle in
+        its transaction for a while, which lets the drop through and fails
+        the test on the table being gone instead of hanging it."""
+        holder = _get_engine().connect()
+        self.addCleanup(holder.invalidate)
+        holder.execute("SET idle_in_transaction_session_timeout = '30s'")
+        holder.execute("BEGIN")
+        schema = Table.get_oedb_schema(is_sandbox=True)
+        holder.execute(f'LOCK TABLE "{schema}"."{name}" IN ACCESS SHARE MODE')
+
+    def test_a_blocked_drop_gives_up_with_a_lock_timeout(self):
+        table = self.oedb_table()
+        self.hold_lock(table.name)
+        with mock.patch("dataedit.models.DROP_LOCK_TIMEOUT", "100ms"):
+            with self.assertRaises(OperationalError) as raised:
+                table.drop_oedb_table()
+        self.assertEqual(raised.exception.orig.pgcode, LOCK_NOT_AVAILABLE)
+        self.assertTrue(self.in_oedb(table.name))
+
+    def test_a_blocked_drop_is_a_lasting_warning_and_the_rows_are_gone(self):
+        stuck = self.oedb_table(title="Stuck")
+        fine = self.oedb_table(title="Fine")
+        self.hold_lock(stuck.name)
+        with mock.patch("dataedit.models.DROP_LOCK_TIMEOUT", "100ms"):
+            with self.assertLogs("oeplatform.table_actions", "INFO") as logs:
+                response = self.run_action("delete", stuck.name, fine.name, confirm="2")
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(self.exists(stuck.name, fine.name), set())
+        self.assertTrue(self.in_oedb(stuck.name))
+        self.assertFalse(self.in_oedb(fine.name))
+        detail = self.trigger(response, "tables-changed")
+        self.assertIs(detail["warning"], True)
+        self.assertIn(f"“Stuck” ({stuck.name}) could not be removed", detail["message"])
+        self.assertNotIn("Fine", detail["message"])
+        by_table = {record.getMessage().split()[1]: record for record in logs.records}
+        self.assertTrue(
+            by_table[f"table={stuck.name}"].getMessage().endswith("drop=failed")
+        )
+        self.assertTrue(by_table[f"table={fine.name}"].getMessage().endswith("drop=ok"))
+
+    def test_the_lock_timeout_is_left_on_no_session(self):
+        """``SET LOCAL``: it lasts for the drop's transaction only, so the
+        pooled session goes back with the server's default."""
+        engine = _get_engine()
+        with engine.connect() as probe:
+            default = probe.execute("SHOW lock_timeout").scalar()
+        table = self.oedb_table()
+        with mock.patch("dataedit.models.DROP_LOCK_TIMEOUT", "123ms"):
+            table.drop_oedb_table()
+        self.assertFalse(self.in_oedb(table.name))
+        # every session the pool holds, not only the one handed out next
+        sessions = [engine.connect() for _ in range(engine.pool.checkedin())]
+        try:
+            for session in sessions:
+                self.assertEqual(session.execute("SHOW lock_timeout").scalar(), default)
+        finally:
+            for session in sessions:
+                session.close()
+
+
+class DeleteReviewTests(DeleteTestCase):
+    """A Table's peer reviews go with it (#2597): ``PeerReview.table`` is a
+    name, so they would otherwise pass to the next Table of that name."""
+
+    def reviewed(self, name):
+        review = PeerReview.objects.create(
+            table=name,
+            contributor=self.user,
+            reviewer=self.stranger,
+            is_finished=True,
+            review={"badge": "Gold"},
+        )
+        PeerReviewManager.objects.create(opr=review)
+        ReviewRound.objects.create(
+            opr=review, sequence=1, role="reviewer", action="finished"
+        )
+        return review
+
+    def reviews(self, *names):
+        return (
+            PeerReview.objects.filter(table__in=names).count(),
+            PeerReviewManager.objects.filter(opr__table__in=names).count(),
+            ReviewRound.objects.filter(opr__table__in=names).count(),
+        )
+
+    def test_deleting_removes_the_reviews_and_a_new_table_has_none(self):
+        table = self.oedb_table()
+        self.reviewed(table.name)
+        self.reviewed(table.name)
+        self.draft("t_kept")
+        self.reviewed("t_kept")
+        response = self.run_action("delete", table.name)
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(self.reviews(table.name), (0, 0, 0))
+        self.assertEqual(self.reviews("t_kept"), (1, 1, 1))
+        again = self.oedb_table(name=table.name)
+        self.assertIsNone(PeerReview.load(again.name))
+
+    def test_a_batch_that_fails_keeps_every_review(self):
+        """The reviews go in the delete's transaction: a batch refused
+        half-way through leaves both Tables and all their reviews."""
+        self.draft("t_rev_a")
+        self.draft("t_rev_b")
+        self.reviewed("t_rev_a")
+        self.reviewed("t_rev_b")
+        real = models.Model.delete
+
+        def fail_on_b(instance, *args, **kwargs):
+            if isinstance(instance, Table) and instance.name == "t_rev_b":
+                raise RuntimeError("the database went away")
+            return real(instance, *args, **kwargs)
+
+        with mock.patch.object(models.Model, "delete", fail_on_b):
+            with self.assertRaises(RuntimeError):
+                self.run_action("delete", "t_rev_a", "t_rev_b", confirm="2")
+        self.assertEqual(self.exists("t_rev_a", "t_rev_b"), {"t_rev_a", "t_rev_b"})
+        self.assertEqual(self.reviews("t_rev_a", "t_rev_b"), (2, 2, 2))
+
+    def test_table_delete_removes_them_too(self):
+        table = self.oedb_table()
+        self.reviewed(table.name)
+        table.delete()
+        self.assertEqual(self.reviews(table.name), (0, 0, 0))
+        self.assertFalse(self.in_oedb(table.name))

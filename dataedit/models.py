@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING, Literal, Mapping, Union
 
 from django.contrib.postgres.search import SearchVectorField
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 from django.db.models import (
     BooleanField,
     CharField,
@@ -55,6 +55,33 @@ if TYPE_CHECKING:
     from modelview.models import BasicFactsheet
 
 logger = logging.getLogger("oeplatform")
+
+# How long dropping a Table's OEDB tables waits for a lock another session
+# holds on one of them (a reader inside an open transaction, an Apply, an
+# advanced API session left idle in its transaction) before it gives up. A
+# drop that gives up raises, and the table action service reports it as a
+# failed drop (``drop=failed``, a lasting warning naming the Table); the
+# Django rows are gone either way.
+#
+# 1 s, set by delete's ceiling of 50 Tables per request
+# (``api.services.table_actions.CEILINGS``) and the host's limit of 300 s
+# (Apache ``Timeout 300``, mod_wsgi ``socket-timeout=300``, no
+# ``request-timeout``): the bulk has to finish even if every drop in it is
+# blocked. A Table is four OEDB tables, the main table and its three meta
+# tables, each dropped by a statement of its own, and Postgres applies the
+# timeout to each lock wait separately. In the case this guards against, a
+# lock on the main table, the first wait runs out and the other three are
+# not tried: 50 x (1 s + the worst drop measured, 1.2 s) = 110 s. In the
+# worst case, four waits that each end just inside the timeout, a Table
+# costs 4 x 1 s + 1.2 s and the batch 260 s, still inside the 300 s; at 2 s
+# that would be 460 s. A drop that waits holds every later reader of the
+# Table in the queue behind it, so a short wait is also what keeps a delete
+# from stalling the Table's page while it waits. What 1 s still lets
+# through is an ordinary read (tens of milliseconds); what it refuses would
+# have held the request for as long as the lock lasted, which no value
+# short of the 300 s covers. Uncontended, a drop waits for nothing and the
+# timeout costs nothing.
+DROP_LOCK_TIMEOUT = "1s"
 
 
 class TableRevision(models.Model):
@@ -231,20 +258,33 @@ class Table(Tagable):
         self.drop_oedb_table()
 
     def delete_record(self, *args, **kwargs):
-        """Delete the Django rows only (this Table and everything that
-        cascades from it), leaving the OEDB table in place. For a caller
-        that drops it once its own transaction has committed, as the table
-        action service does: the two databases share no transaction."""
-        return super().delete(*args, **kwargs)
+        """Delete the Django rows only (this Table, everything that cascades
+        from it, and its peer reviews), leaving the OEDB table in place. For
+        a caller that drops it once its own transaction has committed, as
+        the table action service does: the two databases share no
+        transaction.
+
+        A peer review names its Table by ``PeerReview.table``, a name rather
+        than a foreign key, so nothing cascades to it: left behind, it would
+        pass to the next Table created under that name, review state and
+        badge included. Deleting the reviews deletes their
+        ``PeerReviewManager`` and ``ReviewRound`` rows with them (both
+        ``on_delete=CASCADE``, which Django's collector follows for a
+        queryset delete too)."""
+        with transaction.atomic():
+            PeerReview.objects.filter(table=self.name).delete()
+            return super().delete(*args, **kwargs)
 
     def drop_oedb_table(self):
         """Drop the OEDB table and its meta tables, if they exist. Needs
         only the name and the schema, so it works once the Django row is
-        gone."""
+        gone. Gives up on a lock held elsewhere after ``DROP_LOCK_TIMEOUT``
+        and raises; the tables after the one it gave up on are not
+        tried."""
         # ensure oedb tables are deleted, so we use ADMIN_PERM
         self._get_oeb_table_proxy_w_permission(
             permission_level=ADMIN_PERM
-        ).drop_if_exists()
+        ).drop_if_exists(lock_timeout=DROP_LOCK_TIMEOUT)
 
     def save(self, *args, **kwargs):
         # validate name on first save, never change name again

@@ -181,8 +181,11 @@ ROLE_GATES = {
 # of it; the worst single drop was 1.13 s (10M rows, 0.83 GB; one 1M-row drop
 # also took 1.02 s). At a worst case of 1.2 s per Table, 50 Tables take 60 s:
 # a safety factor of 5 against the 300 s, which covers production's OEDB
-# sitting on another host and its larger buffer pool. Typical: 1-2 s. Not
-# covered: a drop waiting for a lock another session holds on that Table.
+# sitting on another host and its larger buffer pool. Typical: 1-2 s. A
+# drop waiting for a lock another session holds on that Table gives up after
+# ``dataedit.models.DROP_LOCK_TIMEOUT`` and counts as a failed drop; that
+# value is chosen so a batch of 50 blocked drops still fits (reasoning
+# beside it).
 #
 # Adding to and removing from a Dataset: 2,500 each. The same host limit
 # (300 s). Measured locally with ``benchmarks/tables_tab/dataset_cost.py``
