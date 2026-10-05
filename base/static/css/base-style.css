@@ -197,15 +197,80 @@ i.default-user-icon {
   cursor: pointer;
 }
 
+/* The navbar is sized against the reader's default font size, never against
+   the page's root.
+   Every shell shares it with whatever renders below it, and the React apps
+   bring their own root rules: Elastic UI (the ontology browser and the OEO
+   viewer) sets `html { font-size: 0.875rem }`, which shrank everything the
+   navbar sizes in rem to 14/16 of its size, and MUI's baseline sets the body
+   font to Roboto with its own letter spacing and smoothing. `--navbar-rem`
+   stands in for rem inside the navbar. It is 1em of `font-size: medium` (the
+   browser's default, which no stylesheet's root rule can change), and it is
+   registered as a length, so it is computed here and inherited as pixels
+   rather than re-read as 1em by every child. On a page that leaves the root
+   alone it equals 1rem, so nothing changes there. */
+@property --navbar-rem {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 16px;
+}
+
+.index-navbar {
+  --navbar-rem: 1em;
+  font-family: var(--bs-body-font-family);
+  font-size: medium;
+  line-height: var(--bs-body-line-height);
+  letter-spacing: calc(0.02 * var(--navbar-rem));
+  font-kerning: auto;
+  -webkit-font-smoothing: auto;
+
+  /* Bootstrap's rem-based navbar variables, restated in --navbar-rem */
+  --bs-navbar-padding-y: calc(0.5 * var(--navbar-rem));
+  --bs-navbar-brand-padding-y: calc(0.3125 * var(--navbar-rem));
+  --bs-navbar-brand-margin-end: var(--navbar-rem);
+  --bs-navbar-brand-font-size: calc(1.25 * var(--navbar-rem));
+  --bs-navbar-nav-link-padding-x: calc(0.5 * var(--navbar-rem));
+  --bs-navbar-toggler-padding-y: calc(0.25 * var(--navbar-rem));
+  --bs-navbar-toggler-padding-x: calc(0.75 * var(--navbar-rem));
+  --bs-navbar-toggler-font-size: calc(1.25 * var(--navbar-rem));
+  --bs-navbar-toggler-border-radius: calc(0.5 * var(--navbar-rem));
+  --bs-navbar-toggler-focus-width: calc(0.25 * var(--navbar-rem));
+}
+
+.index-navbar .navbar-nav {
+  --bs-nav-link-padding-y: calc(0.5 * var(--navbar-rem));
+}
+
+.index-navbar .btn {
+  --bs-btn-font-size: var(--navbar-rem);
+  letter-spacing: calc(0.03 * var(--navbar-rem));
+}
+
+.index-navbar .btn-sm {
+  --bs-btn-padding-x: calc(0.5 * var(--navbar-rem));
+  --bs-btn-font-size: calc(0.875 * var(--navbar-rem));
+  --bs-btn-border-radius: calc(0.4 * var(--navbar-rem));
+}
+
+.index-navbar .m-1 {
+  margin: calc(0.25 * var(--navbar-rem)) !important;
+}
+
+/* Bootstrap's reboot centres images; a later page reset (Elastic UI's) puts
+   them back on the baseline, which made the navbar 4px taller there */
+.index-navbar .navbar-brand img {
+  vertical-align: middle;
+}
+
 .index-navbar .container-fluid {
-  padding-left: 2rem;
-  padding-right: 2rem;
+  padding-left: calc(2 * var(--navbar-rem));
+  padding-right: calc(2 * var(--navbar-rem));
 }
 
 .index-navbar .nav-link {
   position: relative;
   color: var(--white);
-  font-size: 0.875rem;
+  font-size: calc(0.875 * var(--navbar-rem));
   -webkit-user-select: none;
   user-select: none;
 }
@@ -249,16 +314,17 @@ i.default-user-icon {
 }
 
 .index-navbar .dropdown-menu {
-  margin-top: 0.5rem;
-  padding: 0.5rem;
+  --bs-dropdown-min-width: calc(10 * var(--navbar-rem));
+  margin-top: calc(0.5 * var(--navbar-rem));
+  padding: calc(0.5 * var(--navbar-rem));
   border: 1px solid #e9f0f5;
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(41, 114, 166, 0.15);
-  font-size: 0.875rem;
+  font-size: calc(0.875 * var(--navbar-rem));
 }
 
 .index-navbar .dropdown-item {
-  padding: 0.625rem 0.75rem;
+  padding: calc(0.625 * var(--navbar-rem)) calc(0.75 * var(--navbar-rem));
   border-radius: 4px;
   color: #294456;
 }
