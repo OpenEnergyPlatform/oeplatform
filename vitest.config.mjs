@@ -13,6 +13,7 @@ export default defineConfig({
   test: {
     include: [
       "dataedit/static/dataedit/**/*.test.js",
+      "dataedit/static/metaedit/**/*.test.js",
       "dataedit/static/peer_review/**/*.test.js",
       "login/static/login/**/*.test.js",
       "modelview/static/modelview/**/*.test.js",

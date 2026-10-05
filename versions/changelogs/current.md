@@ -192,6 +192,14 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
+- The metadata editor no longer hangs on a table whose column carries a very
+  long annotation list. A column with 4,525 value references never finished
+  loading, because the form library's cost grows with the square of a list's
+  length. Lists over 200 entries are now kept out of the form with a notice
+  saying so, and are saved and downloaded unchanged, together with any entries
+  added in the form
+  [(#2593)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2593)
+
 - Finishing a peer review now writes the merged metadata the way every other
   metadata write does: it is validated, and the table's displayed title and its
   search entry follow the accepted values. Before, a review that accepted a new
