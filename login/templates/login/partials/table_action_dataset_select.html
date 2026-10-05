@@ -15,7 +15,7 @@ The Dataset select of the action dialog's Dataset choice
   {% for dataset in check.datasets %}
     <option value="{{ dataset.name }}"
             {% if check.dataset.name == dataset.name or values.dataset == dataset.name %}selected{% endif %}>
-      {{ dataset.metadata.title|default:dataset.name }}
+      {{ dataset.title }}
     </option>
   {% endfor %}
 </select>

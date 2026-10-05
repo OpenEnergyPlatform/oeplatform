@@ -182,6 +182,21 @@
   white-space: nowrap;
 }
 
+/* "Select this page": the header's page box where the rows stack and the
+   header row is hidden (see the container queries) */
+.dash-selectpage {
+  display: none;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.dash-selectpage__label {
+  margin: 0;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
 .dash-summary {
   margin-left: auto;
   color: var(--dash-muted);
@@ -916,9 +931,10 @@
 /* A row stacks into two lines: ☐, title and ⋯, then Status, Publishable
    and Modified. Every other cell is hidden, so a column added later has to
    say here where it goes. The headers go with the columns, so "Sort by"
-   takes their place. */
+   and "Select this page" take their place. */
 @container (width < 850px) {
-  .dash-sortby {
+  .dash-sortby,
+  .dash-selectpage {
     display: flex;
   }
 

@@ -16,10 +16,10 @@ always asks the bulk preflight again. It is the Dataset dialog's re-check
 (table_action_dataset.html): #table-action-chooser receives the selects'
 ``change``, waits until the choice has rested and lets a newer request
 replace an older one, sends the whole selection as ``selection``, and swaps
-only the preview, the footer and the status line, never a select, which
-keeps focus. The preview carries what it was checked against
-(``previewed``), so a confirmation sent during the delay is checked again
-instead of run.
+only the preview, the footer, the status line and the dialog's title (its
+count follows the choice), never a select, which keeps focus. The preview
+carries what it was checked against (``previewed``), so a confirmation sent
+during the delay is checked again instead of run.
 {% endcomment %}
 {% if check.organizations %}
   <p>
@@ -45,7 +45,7 @@ instead of run.
        hx-target="#table-action-preview"
        hx-select="#table-action-preview"
        hx-swap="outerHTML"
-       hx-select-oob="#table-action-footer,#table-action-recheck:innerHTML">
+       hx-select-oob="#table-action-footer,#table-action-recheck:innerHTML,#table-action-title:innerHTML">
     <input type="hidden"
            id="table-action-selection"
            name="selection"

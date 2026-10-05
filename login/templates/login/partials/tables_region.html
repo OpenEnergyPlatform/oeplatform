@@ -19,8 +19,10 @@ select in place of the column headers. Every cell therefore carries its
 column's class.
 
 Selecting (#2564): a checkbox per row, labelled with the Table's title, and a
-tri-state one in the header for the page. The selection itself is the
-browser's (tables_tab.js), a list of names in page memory; the region only
+tri-state one in the header for the page. Where the rows stack and the
+header row is hidden, "Select this page" in the bar above is that same
+tri-state box (#2596). The selection itself is the browser's
+(tables_tab.js), a list of names in page memory; the region only
 says which scope it shows (``data-scope``, its filters without sort and
 page: another scope clears the selection) and where the names of every
 matching Table come from (the banner's ``data-names-url``). The banner offers
@@ -62,6 +64,15 @@ adds no history entry.
     <div class="dash-bar">
       {% include "login/partials/list_segment.html" with links=page.segment_links label="Status" %}
       {% if page.total %}
+        {% comment %}Where the rows stack, the header row and #select-page with it are hidden, so this takes its place (CSS shows it only then). It is the same control: tables_tab.js reads every data-select-page box alike.{% endcomment %}
+        <div class="dash-selectpage">
+          <input type="checkbox"
+                 class="form-check-input dash-check"
+                 id="select-page-stacked"
+                 data-select-page />
+          <label class="dash-selectpage__label"
+                 for="select-page-stacked">Select this page</label>
+        </div>
         {% include "login/partials/list_sort_select.html" %}
       {% endif %}
       <div class="dash-summary">{{ page.summary }}</div>

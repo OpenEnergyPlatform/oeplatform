@@ -200,6 +200,14 @@ SPDX-License-Identifier: CC0-1.0
   admin on, and write all tables or none, at most 2,500 at once, with one log
   line per table changed
   [(#2568)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2568)
+- Tables tab: a bulk dialog's title counts what its list counts, the tables the
+  action acts on, and says out of how many were selected ("Delete 14 of 16
+  tables", "Will be deleted (14)", "Left out (2)"). The dialogs name datasets by
+  their title, and unpublish says how many of the tables each of other people's
+  datasets holds. Where the rows stack on a narrow screen, "Select this page"
+  selects and clears the visible page and offers "Select all N matching tables",
+  as the header checkbox does on a wider one
+  [(#2596)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2596)
 - REST API: share many tables with one of your organizations, or remove an
   organization from many tables, in one request, under the same rules as the
   dashboard's bulk bar: all tables or none, a share only raises a role, a

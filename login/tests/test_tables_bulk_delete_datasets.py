@@ -92,9 +92,13 @@ class BulkDeletePreflightTests(BulkCase, DeleteTestCase):
         a = self.draft("t_a", published=True)
         b = self.draft("t_b", published=True)
         self.draft("t_c")
-        mine = Dataset.objects.create(name="ds_mine", creator=self.user)
+        mine = Dataset.objects.create(
+            name="ds_mine", creator=self.user, metadata={"title": "Wind atlas"}
+        )
         mine.tables.add(a, b)
-        theirs = Dataset.objects.create(name="ds_theirs", creator=self.stranger)
+        theirs = Dataset.objects.create(
+            name="ds_theirs", creator=self.stranger, metadata={"title": "Grid study"}
+        )
         theirs.tables.add(a)
         self.review("t_a", finished=True)
         self.review("t_b", finished=True)
@@ -102,9 +106,10 @@ class BulkDeletePreflightTests(BulkCase, DeleteTestCase):
         Embargo.objects.create(table=b, duration="6_months")
         response = self.joined_preflight("delete", "t_a", "t_b", "t_c")
         consequences = response.context["preflight"].consequences
-        self.assertEqual(consequences["own_datasets"], [("ds_mine", 2)])
+        # by title, as the Dataset chooser and the Datasets column name them
+        self.assertEqual(consequences["own_datasets"], [("Wind atlas", 2)])
         self.assertEqual(
-            consequences["others_datasets"], [(self.stranger.name, "ds_theirs", 1)]
+            consequences["others_datasets"], [(self.stranger.name, "Grid study", 1)]
         )
         self.assertEqual(len(consequences["published"]), 2)
         self.assertEqual(consequences["finished_reviews"], 2)
@@ -125,13 +130,16 @@ class BulkDeletePreflightTests(BulkCase, DeleteTestCase):
             text(element_markup(html, "table-action-embargoes")),
         )
         self.assertIn(
-            "ds_mine (2 tables)",
+            "Wind atlas (2 tables)",
             text(element_markup(html, "table-action-own-datasets")),
         )
         self.assertIn(
-            f"ds_theirs ({self.stranger.name}): 1 table",
+            f"Grid study ({self.stranger.name}): 1 table",
             text(element_markup(html, "table-action-datasets")),
         )
+        consequences_text = text(element_markup(html, "table-action-consequences"))
+        self.assertNotIn("ds_mine", consequences_text)
+        self.assertNotIn("ds_theirs", consequences_text)
         self.assertIn(
             "Links to the 2 published tables",
             text(element_markup(html, "table-action-knowledge-graph")),
@@ -329,6 +337,16 @@ class BulkDatasetPreflightTests(BulkCase, DatasetActionTestCase):
         self.assertEqual(
             text(element_markup(html, "table-action-recheck")),
             "1 of 3 tables will be added to “Target”.",
+        )
+        # the title counts what the list counts, so it follows the choice
+        # and the re-check swaps it with the preview (#2596)
+        self.assertEqual(
+            text(element_markup(html, "table-action-title")),
+            "Add 1 of 3 tables to a dataset",
+        )
+        self.assertIn(
+            "#table-action-title",
+            element_with_id(html, "table-action-chooser"),
         )
         self.assertNotEqual(element_with_id(html, "table-action-confirm"), "")
 

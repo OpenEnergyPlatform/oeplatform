@@ -12,9 +12,10 @@ In a batch, which Tables are already in the chosen Dataset (add) or not in
 it (remove) depends on the choice, so choosing asks the bulk preflight
 again (#table-action-chooser, which the select's ``change`` bubbles up to),
 with the whole selection (``selection``), and swaps only the preview and the
-footer, plus the status line below the select: never the select itself,
-which keeps focus. ``change`` fires on every arrow key in a closed select,
-so the request waits until the choice has rested (``delay``) and a newer one
+footer, plus the status line below the select and the dialog's title, whose
+count follows the choice: never the select itself, which keeps focus.
+``change`` fires on every arrow key in a closed select, so the request
+waits until the choice has rested (``delay``) and a newer one
 replaces an older one in flight (``hx-sync``). A row's choice needs no
 re-check: its Datasets are those the action can change for that one Table.
 Confirm is disabled while a re-check is on its way (the form's
@@ -53,7 +54,7 @@ the server instead of run.
          hx-target="#table-action-preview"
          hx-select="#table-action-preview"
          hx-swap="outerHTML"
-         hx-select-oob="#table-action-footer,#table-action-recheck:innerHTML">
+         hx-select-oob="#table-action-footer,#table-action-recheck:innerHTML,#table-action-title:innerHTML">
       <input type="hidden"
              id="table-action-selection"
              name="selection"
