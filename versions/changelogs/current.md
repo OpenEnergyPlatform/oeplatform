@@ -221,6 +221,11 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
+- Saved table views (graph and map views, the default view) can only be created,
+  changed or deleted by someone with write permission on the table; the "Add …
+  view" links are shown only to them. Saving a view now finds it only within its
+  own table
+  [(#2601)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2601)
 - Running the test suite no longer deletes your own tables. The tests used the
   data database configured for the platform, and one of them clears its whole
   sandbox schema, which took the dev container's example table with it while its

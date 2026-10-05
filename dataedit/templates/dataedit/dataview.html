@@ -155,9 +155,11 @@
                        href="?view={{ view.id }}">{{ view.name }}</a>
                   {% endif %}
                 {% endfor %}
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item"
-                   href="{% url 'dataedit:table-graph' table=table %}">Add Graph View</a>
+                {% if can_add %}
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item"
+                     href="{% url 'dataedit:table-graph' table=table %}">Add Graph View</a>
+                {% endif %}
               </div>
             </li>
             <li class="nav-item dropdown data-view__tab">
@@ -185,11 +187,13 @@
                        href="?view={{ view.id }}">{{ view.name }}</a>
                   {% endif %}
                 {% endfor %}
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item"
-                   href="{% url 'dataedit:table-map' table=table maptype='geom' %}">Add gis view</a>
-                <a class="dropdown-item"
-                   href="{% url 'dataedit:table-map' table=table maptype='latlon' %}">Add lat/lon view</a>
+                {% if can_add %}
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item"
+                     href="{% url 'dataedit:table-map' table=table maptype='geom' %}">Add gis view</a>
+                  <a class="dropdown-item"
+                     href="{% url 'dataedit:table-map' table=table maptype='latlon' %}">Add lat/lon view</a>
+                {% endif %}
               </div>
             </li>
           </ul>
