@@ -8,7 +8,10 @@ left out and why, what the action needs (publish: Topic and embargo), and
 the consequences it has to state (unpublish: other people's Datasets that
 will hold a draft member; delete: the Datasets left, Review state, an active
 embargo and knowledge-graph links, counted for a batch). The Dataset actions
-choose one of the user's own Datasets first (table_action_dataset.html).
+choose one of the user's own Datasets first (table_action_dataset.html), the
+Organization actions an Organization and, for a share, a role
+(table_action_organization.html); a share names the Tables that stay
+unchanged, a removal those the user would lose.
 Delete may ask for a typed confirmation (``preflight.confirmation``: the
 Table's name or the number of Tables; table_action_delete.html). Over the
 action's ceiling nothing can be confirmed. The form posts the eligible names
@@ -17,10 +20,11 @@ A refused request comes back here with ``notice`` ("Nothing was changed: …")
 and the preflight run again; an unusable parameter comes back with
 ``errors`` beside its field.
 
-Everything that depends on the chosen Dataset is in #table-action-preview
-(the left-out groups, the list, the names the form posts) and
-#table-action-footer (whether it can be confirmed), so a bulk Dataset
-dialog's re-check swaps those two and never the select the user is on.
+Everything that depends on the choice made in the dialog (a Dataset, an
+Organization, a role) is in #table-action-preview (the left-out groups, the
+list, the names the form posts) and #table-action-footer (whether it can be
+confirmed), so a re-check swaps those two and never the control the user is
+on.
 {% endcomment %}
 {% with check=preflight %}
   <div class="modal-header">
@@ -33,8 +37,12 @@ dialog's re-check swaps those two and never the select the user is on.
         Delete {{ check.subject }}
       {% elif check.action == "dataset_add" %}
         Add {{ check.subject }} to a dataset
-      {% else %}
+      {% elif check.action == "dataset_remove" %}
         Remove {{ check.subject }} from a dataset
+      {% elif check.action == "organization_share" %}
+        Share {{ check.subject }} with an organization
+      {% else %}
+        Remove an organization from {{ check.subject }}
       {% endif %}
     </h2>
     <button type="button"
@@ -70,15 +78,17 @@ dialog's re-check swaps those two and never the select the user is on.
         {% if check.datasets or check.eligible %}
           {% include "login/partials/table_action_dataset.html" %}
         {% endif %}
+      {% elif check.action == "organization_share" or check.action == "organization_remove" %}
+        {% if check.organizations or check.eligible %}
+          {% include "login/partials/table_action_organization.html" %}
+        {% endif %}
       {% endif %}
       <div id="table-action-preview">
         {% comment %}One field, comma-joined: a batch of up to the ceiling's 1,000 names as repeated fields would pass Django's limit on parameters.{% endcomment %}
         <input type="hidden" name="tables" value="{{ check.names|join:',' }}" />
-        {% if check.datasets and check.total > 1 %}
-          {% comment %}The Dataset these names were checked against: a confirmation sent before the re-check of another choice came back is checked again instead of run.{% endcomment %}
-          <input type="hidden"
-                 name="previewed"
-                 value="{{ check.dataset.name|default:'' }}" />
+        {% if check.rechecks %}
+          {% comment %}The choice these names were checked against: a confirmation sent before the re-check of another choice came back is checked again instead of run.{% endcomment %}
+          <input type="hidden" name="previewed" value="{{ check.previewed }}" />
         {% endif %}
         {% if check.left_out %}
           <div id="table-action-left-out" class="dash-leftout">
@@ -97,6 +107,20 @@ dialog's re-check swaps those two and never the select the user is on.
             </ul>
           </div>
         {% endif %}
+        {% if check.unchanged %}
+          {% comment %}A share only ever raises a role; these are not left out, so they never refuse the request.{% endcomment %}
+          <div id="table-action-unchanged">
+            <p class="mb-1">
+              Unchanged, “{{ check.organization.name }}” holds {{ check.role }} or more there already
+              ({{ check.unchanged|length }}):
+            </p>
+            <ul class="mb-2">
+              {% for table in check.unchanged %}
+                <li>{{ table.human_readable_name|default:table.name }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
         {% if check.eligible and not check.over_ceiling %}
           {% if check.total > 1 %}
             <p class="mb-1" id="table-action-list-label">
@@ -108,8 +132,14 @@ dialog's re-check swaps those two and never the select the user is on.
                 Will be deleted ({{ check.eligible|length }}):
               {% elif check.action == "dataset_add" %}
                 Will be added:
-              {% else %}
+              {% elif check.action == "dataset_remove" %}
                 Will be removed:
+              {% elif check.action == "organization_share" %}
+                Will be shared:
+              {% elif check.organization %}
+                “{{ check.organization.name }}” will be removed from:
+              {% else %}
+                Selected:
               {% endif %}
             </p>
             {% comment %}Scrollable, so focusable: a keyboard reaches every name of a long batch.{% endcomment %}
@@ -162,6 +192,71 @@ dialog's re-check swaps those two and never the select the user is on.
             </fieldset>
           {% elif check.action == "delete" %}
             {% include "login/partials/table_action_delete.html" %}
+          {% elif check.organization %}
+            <p id="table-action-members">
+              “{{ check.organization.name }}” has {{ check.members }} member{{ check.members|pluralize }}.
+              {% if check.members %}
+                {% if check.members == 1 %}
+                  That member
+                {% else %}
+                  Each of them
+                {% endif %}
+                {% if check.action == "organization_share" %}
+                  gets {{ check.role }} on
+                {% elif check.members == 1 %}
+                  loses the access it gives to
+                {% else %}
+                  loses the access it gives them to
+                {% endif %}
+                {% if check.eligible|length == 1 %}
+                  this table.
+                {% else %}
+                  these tables.
+                {% endif %}
+              {% endif %}
+            </p>
+            {% if check.consequences.lose_access or check.consequences.lose_admin %}
+              {% comment %}What the user agrees to lose by confirming: the server refuses a removal that would take more.{% endcomment %}
+              <input type="hidden"
+                     id="table-action-lose-access-names"
+                     name="lose_access"
+                     value="{% for table in check.consequences.lose_access %}{{ table.name }},{% endfor %}{% for table in check.consequences.lose_admin %}{{ table.name }},{% endfor %}" />
+            {% endif %}
+            {% if check.consequences.lose_access %}
+              <div id="table-action-lose-access" class="alert alert-warning">
+                <p class="mb-1">
+                  You will lose access to
+                  {% if check.consequences.lose_access|length == 1 %}
+                    this table, and it will disappear
+                  {% else %}
+                    these {{ check.consequences.lose_access|length }} tables, and they will disappear
+                  {% endif %}
+                  from your dashboard:
+                </p>
+                <ul class="mb-0">
+                  {% for table in check.consequences.lose_access %}
+                    <li>{{ table.human_readable_name|default:table.name }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
+            {% if check.consequences.lose_admin %}
+              <div id="table-action-lose-admin" class="alert alert-warning">
+                <p class="mb-1">
+                  You will no longer be able to manage access to
+                  {% if check.consequences.lose_admin|length == 1 %}
+                    this table:
+                  {% else %}
+                    these {{ check.consequences.lose_admin|length }} tables:
+                  {% endif %}
+                </p>
+                <ul class="mb-0">
+                  {% for table in check.consequences.lose_admin %}
+                    <li>{{ table.human_readable_name|default:table.name }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
           {% elif check.action == "unpublish" %}
             <p>
               {% if check.total == 1 %}
@@ -194,8 +289,12 @@ dialog's re-check swaps those two and never the select the user is on.
               delete.
             {% elif check.action == "dataset_add" %}
               add{% if check.dataset %} to “{{ check.dataset_title }}”{% endif %}.
-            {% else %}
+            {% elif check.action == "dataset_remove" %}
               remove{% if check.dataset %} from “{{ check.dataset_title }}”{% endif %}.
+            {% elif check.action == "organization_share" %}
+              share{% if check.organization %} with “{{ check.organization.name }}”{% endif %}.
+            {% else %}
+              remove{% if check.organization %} “{{ check.organization.name }}” from{% endif %}.
             {% endif %}
           </p>
         {% endif %}
@@ -217,8 +316,12 @@ dialog's re-check swaps those two and never the select the user is on.
             Delete
           {% elif check.action == "dataset_add" %}
             Add
-          {% else %}
+          {% elif check.action == "dataset_remove" %}
             Remove
+          {% elif check.action == "organization_share" %}
+            Share
+          {% else %}
+            Remove organization
           {% endif %}
         </button>
       {% endif %}

@@ -31,8 +31,9 @@
 //   list shows it regardless, so a toggle left open by a narrow window
 //   cannot hide anything on a wide one.
 // - actions (#2561): a row's ⋯ entry loads the action's preflight into the
-//   one dialog, which opens once it is filled. A refusal (409) or an
-//   unusable parameter (400) is swapped into the still-open dialog rather
+//   one dialog, which opens once it is filled. A refusal (409, or 403 for
+//   an Organization action) or an unusable parameter (400) is swapped into
+//   the still-open dialog rather
 //   than treated as an error. A success answers `HX-Trigger:
 //   tables-changed`: the dialog closes, a polite toast says what happened
 //   and goes after a few seconds, the region re-fetches itself (declared in
@@ -120,8 +121,10 @@ export const SELECTION_CLEARED =
 export const TOAST_TIMEOUT = 5000;
 
 // Statuses an action answers with the dialog itself: a refused request
-// (409, the check run again) and an unusable parameter (400).
-const DIALOG_STATUSES = [400, 409];
+// (409, the check run again; 403 when sharing with or removing an
+// Organization was refused because the user is not a Table admin on one of
+// the Tables) and an unusable parameter (400).
+const DIALOG_STATUSES = [400, 403, 409];
 // Statuses a write in the access drawer answers with the drawer itself:
 // an unusable request (400), a viewer who is not a Table admin (403) and
 // the last-admin guard (409).

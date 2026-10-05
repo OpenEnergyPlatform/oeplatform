@@ -20,6 +20,9 @@ take:
 - **`dataset_cost.py`**: what adding a Table to a Dataset and removing it cost
   (#2565), which sets `CEILINGS["dataset_add"]` and
   `CEILINGS["dataset_remove"]`.
+- **`organization_cost.py`**: what sharing Tables with an Organization and
+  removing it cost (#2568), which sets `CEILINGS["organization_share"]` and
+  `CEILINGS["organization_remove"]`.
 
 Both use accounts shaped like production (`seed.py`, a port of the WF-06
 prototype's generator, sized from WF-01's census): `p90` (130 Tables), `max`
@@ -172,3 +175,28 @@ preflight. At the worst 6.8 ms, 2,500 Tables take about 17 s against
 production's 300 s timeout: the ceiling is 2,500 for both, a safety factor of
 about 17, set so that "select all" on the largest account (2,068 Tables) is one
 request. The reasoning is beside the constant.
+
+## Organization share and remove cost
+
+Same throwaway database; who holds a role lives in Django only, so no OEDB table
+is created.
+
+```bash
+python -m benchmarks.tables_tab.organization_cost
+python -m benchmarks.tables_tab.organization_cost --tables 100,400,1000 --metadata-kb 6,60,500
+```
+
+For each metadata size and batch size it creates Tables with an Admin grant of
+the user's own, and an Organization of the user's with ten members holding Data
+editor on half of them, then times the preflight with the Organization and Data
+maintainer chosen, sharing every Table at Data maintainer (an add or a change
+each) and removing the Organization again, through `table_actions`. Results
+append to `benchmarks/results/tables_tab_organization.csv`.
+
+Measured 2026-10-05, local Postgres 14, batches of 100, 400 and 1,000, three
+rounds, per Table, at 6 / 60 / 500 KB of metadata: sharing 0.7-1.1 / 1.0-1.6 /
+3.6-4.9 ms, removing 0.8-1.4 / 1.1-1.5 / 3.4-5.2 ms, the preflight 0.1-0.7 /
+0.4-0.6 / 3.1-4.5 ms of that. At the worst 5.2 ms, 2,500 Tables take about 13 s
+against production's 300 s: the ceiling is 2,500 for both, chosen so that
+"select all" on the largest account (2,068 Tables) is one request, a safety
+factor of about 23. The reasoning is beside the constant.

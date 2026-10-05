@@ -30,6 +30,18 @@ or removing it from one of the user's own Datasets (``dataset_add``,
 curation rule of ``api.services.dataset_creation.assignable_tables``, the
 same rule the dataset assign API and the Dataset tab's picker read.
 
+Two more change who holds a role (#2568): sharing the Tables with one of the
+user's Organizations (``organization_share``, with ``organization`` and
+``level``) and removing an Organization from them (``organization_remove``,
+with ``organization``). They are the bulk bar's only, and every rule about
+them is the permission service's (``login.table_roles``: its plan decides
+what is unchanged, left out and lost, and its two bulk writes write and log).
+This module gives them what every action gets: the preflight with its
+left-out groups and ceiling, the role gate, the row lock and the whole-request
+refusal. Their log lines are the permission service's
+``table_permission_write``, one per Table written, not ``table_action``: a
+change of access has one record, whichever way it was made.
+
 The role an action needs is read off ``table_levels`` (``login.table_roles``,
 the permission service), which states the platform's permission rule
 set-based, as ``myuser.get_table_permission_level``
@@ -63,6 +75,8 @@ from api.error import APIError
 from api.services.dataset_creation import assign_table, assignable_tables
 from dataedit.models import Dataset, Embargo, PeerReview, Table, Topic
 from dataedit.publish_gate import publish_checks
+from login import table_roles
+from login.models import Organization
 from login.permissions import ADMIN_PERM, DELETE_PERM, NO_PERM, WRITE_PERM
 from login.table_roles import table_levels
 from login.tables_tab import visible_datasets
@@ -72,8 +86,30 @@ logger = logging.getLogger("oeplatform.table_actions")
 
 PUBLISH, UNPUBLISH, DELETE = "publish", "unpublish", "delete"
 DATASET_ADD, DATASET_REMOVE = "dataset_add", "dataset_remove"
-ACTIONS = (PUBLISH, UNPUBLISH, DELETE, DATASET_ADD, DATASET_REMOVE)
+ORGANIZATION_SHARE, ORGANIZATION_REMOVE = "organization_share", "organization_remove"
+ACTIONS = (
+    PUBLISH,
+    UNPUBLISH,
+    DELETE,
+    DATASET_ADD,
+    DATASET_REMOVE,
+    ORGANIZATION_SHARE,
+    ORGANIZATION_REMOVE,
+)
 DATASET_ACTIONS = (DATASET_ADD, DATASET_REMOVE)
+ORGANIZATION_ACTIONS = (ORGANIZATION_SHARE, ORGANIZATION_REMOVE)
+
+# The parameters a bulk dialog chooses inside the dialog, which what it
+# leaves out depends on. Its re-check sends them, and the preview carries the
+# ones it was checked against as ``previewed`` (``choice``), so a
+# confirmation sent before the re-check of a newer choice came back is
+# checked again instead of run.
+CHOICES = {
+    DATASET_ADD: ("dataset",),
+    DATASET_REMOVE: ("dataset",),
+    ORGANIZATION_SHARE: ("organization", "level"),
+    ORGANIZATION_REMOVE: ("organization",),
+}
 
 # What an embargo may be when publishing, in the order the dialog offers
 # them; the values are the ones ``api.actions.move_publish`` reads.
@@ -106,6 +142,10 @@ ROLE_GATES = {
     DATASET_ADD: RoleGate(WRITE_PERM, "Only Data editors can add to a dataset"),
     DATASET_REMOVE: RoleGate(WRITE_PERM, "Only Data editors can remove from a dataset"),
     DELETE: RoleGate(DELETE_PERM, "Only Data maintainers and Table admins can delete"),
+    ORGANIZATION_SHARE: RoleGate(ADMIN_PERM, "Only Table admins can share a table"),
+    ORGANIZATION_REMOVE: RoleGate(
+        ADMIN_PERM, "Only Table admins can remove an organization"
+    ),
 }
 
 # The most Tables one request may name, per action. The dashboard is
@@ -157,11 +197,27 @@ ROLE_GATES = {
 # ceiling is set by what a curator needs rather than by time: "select all"
 # on the largest account (2,068 Tables), then "Add to dataset", is one
 # request.
+#
+# Sharing with an Organization and removing one: 2,500 each, for the same
+# reason as the Dataset actions: "select all" on the largest account, then
+# "Share with organization…", is one request. The same host limit (300 s).
+# Measured locally with ``benchmarks/tables_tab/organization_cost.py``
+# (Postgres 14, batches of 100, 400 and 1,000, three rounds, an Organization
+# of ten members holding Data editor on half the Tables, shared at Data
+# maintainer so that both an add and a change are measured), per Table,
+# against 6 / 60 / 500 KB of metadata: sharing 0.7-1.1 / 1.0-1.6 / 3.6-4.9
+# ms, removing 0.8-1.4 / 1.1-1.5 / 3.4-5.2 ms; the preflight with both chosen
+# is 0.1-0.7 / 0.4-0.6 / 3.1-4.5 ms of that, so loading the Tables, metadata
+# and all, is most of it; the permission service's plan is a handful of
+# queries whatever the batch. Neither saves the Table. At the
+# worst 5.2 ms, 2,500 Tables take about 13 s: a safety factor of about 23.
 CEILINGS = {
     PUBLISH: 1000,
     UNPUBLISH: 1000,
     DATASET_ADD: 2500,
     DATASET_REMOVE: 2500,
+    ORGANIZATION_SHARE: 2500,
+    ORGANIZATION_REMOVE: 2500,
     DELETE: 50,
 }
 
@@ -177,6 +233,14 @@ NOT_PUBLISHED = "Not published"
 # a draft or embargoed Table the user holds no grant on. Only a platform
 # admin gets that far, and the rule gives them no exemption.
 MAY_NOT_ASSIGN = "Drafts and embargoed tables need Data editor on the table"
+# A removal whose losses grew after the dialog named them: the user confirmed
+# losing access to, or Admin on, fewer Tables than the removal would take.
+LOSE_ACCESS_UNSAID = "You would also lose access to these, which the dialog did not say"
+
+
+def _role_refusals() -> set:
+    """The left-out reasons that mean "you lack the role"."""
+    return {gate.refusal for gate in ROLE_GATES.values()} | {NOT_YOURS}
 
 
 class ActionError(Exception):
@@ -206,6 +270,13 @@ class ActionRefused(ActionError):
     def message(self) -> str:
         parts = [f"{group.reason} ({_quoted(group.names)})" for group in self.refused]
         return "Nothing was changed: " + "; ".join(parts) + "."
+
+    @property
+    def for_role(self) -> bool:
+        """Whether a Table was refused because the user lacks the role the
+        action needs there (or holds none at all), rather than because the
+        Tables changed."""
+        return any(group.reason in _role_refusals() for group in self.refused)
 
 
 @dataclass(frozen=True)
@@ -247,10 +318,46 @@ class Preflight:
     # change for these Tables, and the one it is about (None until chosen).
     datasets: list = field(default_factory=list)
     dataset: Dataset = None
+    # The Organization actions only: the Organizations the user can choose
+    # (each with ``members``), the one chosen (None until chosen), the role
+    # a share gives, and the Tables a share leaves as they are because the
+    # Organization holds that role or more there already. A removal's
+    # ``consequences["lose_access"]`` are the Tables it takes off the user's
+    # dashboard.
+    organizations: list = field(default_factory=list)
+    organization: Organization = None
+    level: int = None
+    members: int = 0
+    unchanged: list = field(default_factory=list)
 
     @property
     def names(self) -> list:
         return [table.name for table in self.eligible]
+
+    @property
+    def role(self) -> str:
+        """The name of the role a share gives, "" without one."""
+        return table_roles.role_label(self.level) if self.level else ""
+
+    @property
+    def rechecks(self) -> bool:
+        """Whether the dialog asks the preflight again when the user chooses
+        in it: a batch's Dataset, and an Organization (and role) always,
+        because what is unchanged or left out depends on it even for one
+        Table."""
+        if self.action in ORGANIZATION_ACTIONS:
+            return bool(self.organizations)
+        return self.action in DATASET_ACTIONS and bool(self.datasets) and self.total > 1
+
+    @property
+    def previewed(self) -> str:
+        """The choice this preview was checked against (``choice``)."""
+        chosen = {
+            "dataset": self.dataset.name if self.dataset else "",
+            "organization": self.organization.pk if self.organization else "",
+            "level": self.level or "",
+        }
+        return choice(self.action, chosen)
 
     @property
     def confirmable(self) -> bool:
@@ -260,6 +367,10 @@ class Preflight:
         if self.over_ceiling:
             return False
         if self.action in DATASET_ACTIONS and not self.datasets:
+            return False
+        if self.action in ORGANIZATION_ACTIONS and self.organization is None:
+            return False
+        if self.action == ORGANIZATION_SHARE and self.level is None:
             return False
         return bool(self.eligible)
 
@@ -293,6 +404,8 @@ class Outcome:
     tables: list
     params: dict
     drop_failed: list = field(default_factory=list)
+    # an Organization removed: the Tables that left the user's dashboard
+    lost: list = field(default_factory=list)
 
 
 def own_datasets(user):
@@ -359,7 +472,16 @@ ACTION_NAMES = {
     DELETE: "Delete",
     DATASET_ADD: "Adding to a dataset",
     DATASET_REMOVE: "Removing from a dataset",
+    ORGANIZATION_SHARE: "Sharing with an organization",
+    ORGANIZATION_REMOVE: "Removing an organization",
 }
+
+
+def choice(action, params) -> str:
+    """The dialog's choice in ``params`` (``CHOICES``) as one string: what
+    the preview carries as ``previewed``, and what a confirmation's own
+    parameters are compared with."""
+    return ",".join(str(params.get(key) or "") for key in CHOICES.get(action, ()))
 
 
 def _ceiling_rule(action, ceiling) -> str:
@@ -522,6 +644,55 @@ def _by_membership(action, dataset, tables):
     return kept, ([LeftOut(reason, left)] if left else [])
 
 
+def _organization_choices(user, action, tables) -> list:
+    """The Organizations ``action`` can be about for ``tables``: the user's
+    own for a share, those holding a role on one of them for a removal."""
+    if action == ORGANIZATION_SHARE:
+        return list(table_roles.own_organizations(user))
+    return list(table_roles.organizations_on(tables)) if tables else []
+
+
+def _chosen_organization(value, choices):
+    """The Organization a request is about: a checked one as it is, an id
+    among ``choices``, or the only choice when nothing is named."""
+    if hasattr(value, "pk"):
+        return value
+    for organization in choices:
+        if str(organization.pk) == str(value):
+            return organization
+    return choices[0] if not value and len(choices) == 1 else None
+
+
+def _share_level(value):
+    """The role a share's preview is checked against: the one named, the
+    lowest one while none is (the dialog shows it chosen), None for a value
+    no Organization may be given."""
+    if value in (None, ""):
+        return table_roles.ORGANIZATION_ROLES[0].level
+    try:
+        return table_roles.organization_level(value)
+    except table_roles.InvalidRequest:
+        return None
+
+
+def _by_organization(user, action, tables, organization, level):
+    """Split ``tables`` by what ``action`` does to them with
+    ``organization`` (``table_roles.plan_organization``): the Tables written,
+    the left-out groups, the Tables a share leaves unchanged and the plan."""
+    plan = table_roles.plan_organization(user, tables, organization, level)
+    title = _quoted([organization.name])
+    left_out = [
+        LeftOut(reason, [table.name for table in group])
+        for reason, group in (
+            (ROLE_GATES[action].refusal, plan.not_admin),
+            (table_roles.NOT_HELD.format(organization=title), plan.not_held),
+            (table_roles.ONLY_ADMIN_THERE.format(organization=title), plan.guarded),
+        )
+        if group
+    ]
+    return plan.tables, left_out, plan.unchanged, plan
+
+
 def preflight(user, action, names, params=None) -> Preflight:
     """What ``action`` would do with the Tables ``names``. Writes nothing.
 
@@ -536,6 +707,15 @@ def preflight(user, action, names, params=None) -> Preflight:
     ``_chosen_dataset``); the Tables already in it (add) or not in it
     (remove) are left out. Without one, nothing is left out for that
     reason, and ``datasets`` lists what the user can choose.
+
+    For the Organization actions, ``params["organization"]`` names the
+    Organization and, for a share, ``params["level"]`` the role (the lowest
+    while none is named). A share leaves the Tables where it holds that role
+    or more ``unchanged``; a removal leaves out the Tables it holds no role on
+    and those whose only Admin is its old Admin grant, and names in
+    ``consequences["lose_access"]`` the Tables the user would lose and in
+    ``consequences["lose_admin"]`` those they would keep but no longer be a
+    Table admin on.
     """
     if action not in ACTIONS:
         raise ValueError(f"unknown table action: {action}")
@@ -595,11 +775,29 @@ def preflight(user, action, names, params=None) -> Preflight:
             eligible, by_membership = _by_membership(action, dataset, eligible)
             left_out += by_membership
 
+    organizations, organization, level, members, unchanged = [], None, None, 0, []
+    lose_access, lose_admin = [], []
+    if action in ORGANIZATION_ACTIONS:
+        organizations = _organization_choices(user, action, eligible)
+        organization = _chosen_organization(params.get("organization"), organizations)
+        if action == ORGANIZATION_SHARE:
+            level = _share_level(params.get("level"))
+        if organization is not None and (level or action == ORGANIZATION_REMOVE):
+            eligible, by_organization, unchanged, plan = _by_organization(
+                user, action, eligible, organization, level
+            )
+            left_out += by_organization
+            members = plan.members
+            lose_access, lose_admin = plan.lose_access, plan.lose_admin
+
     consequences = {}
     if action == UNPUBLISH and eligible:
         consequences["others_datasets"] = _others_datasets(user, eligible)
     elif action == DELETE and eligible:
         consequences = _delete_consequences(user, eligible)
+    elif action == ORGANIZATION_REMOVE and eligible:
+        consequences["lose_access"] = lose_access
+        consequences["lose_admin"] = lose_admin
     return Preflight(
         action=action,
         total=len(names),
@@ -612,6 +810,11 @@ def preflight(user, action, names, params=None) -> Preflight:
         datasets=datasets,
         dataset=dataset,
         requested=names,
+        organizations=organizations,
+        organization=organization,
+        level=level,
+        members=members,
+        unchanged=unchanged,
     )
 
 
@@ -656,11 +859,42 @@ def _dataset_params(user, params) -> dict:
     return {"dataset": dataset}
 
 
+def _organization_params(user, action, params) -> dict:
+    """The Organization parameters, checked: one of the user's own
+    Organizations and a role it may be given (a share); an Organization, and
+    the Tables the dialog said the user would lose (a removal, as a set of
+    names, comma-joined when sent)."""
+    errors, checked = {}, {}
+    value = params.get("organization")
+    try:
+        if action == ORGANIZATION_SHARE:
+            checked["organization"] = table_roles.own_organization(user, value)
+        else:
+            checked["organization"] = table_roles.any_organization(value)
+    except table_roles.InvalidRequest as error:
+        errors["organization"] = error.message
+    if action == ORGANIZATION_SHARE:
+        try:
+            checked["level"] = table_roles.organization_level(params.get("level"))
+        except table_roles.InvalidRequest as error:
+            errors["level"] = error.message
+    else:
+        lose = params.get("lose_access") or ()
+        if isinstance(lose, str):
+            lose = [name.strip() for name in lose.split(",")]
+        checked["lose_access"] = frozenset(name for name in lose if name)
+    if errors:
+        raise InvalidParameters(errors)
+    return checked
+
+
 def _checked_params(user, action, params) -> dict:
     if action == PUBLISH:
         return _publish_params(params)
     if action in DATASET_ACTIONS:
         return _dataset_params(user, params)
+    if action in ORGANIZATION_ACTIONS:
+        return _organization_params(user, action, params)
     if action == DELETE:
         # checked against what the preflight asks for inside ``execute``,
         # because that depends on the Tables as they are then
@@ -770,6 +1004,12 @@ def execute(user, action, names, params=None, via="dashboard") -> Outcome:
     A delete's transaction is durable (it refuses to run nested in another
     one), so once it is left the rows are committed and the OEDB tables are
     dropped, one at a time. A failed drop is in ``Outcome.drop_failed``.
+
+    Sharing with an Organization and removing one do not go through
+    ``_write`` and ``_log``: inside the same transaction and lock they call
+    the permission service's bulk writes (``_organization_write``), which
+    write and log ``table_permission_write`` per Table. The Tables a removal
+    took off the user's dashboard are in ``Outcome.lost``.
     """
     params = _checked_params(user, action, params or {})
     ceiling = CEILINGS.get(action)
@@ -793,6 +1033,9 @@ def execute(user, action, names, params=None, via="dashboard") -> Outcome:
             if check.confirmation and params["confirm"] != check.confirmation:
                 raise InvalidParameters({"confirm": _confirm_error(check)})
             tables = check.eligible
+            if action in ORGANIZATION_ACTIONS:
+                lost = _organization_write(user, action, check, params, via)
+                return Outcome(action, tables, params, lost=lost)
             if action == DELETE:
                 deleted = _deleted(tables)
             for table in tables:
@@ -815,6 +1058,39 @@ def execute(user, action, names, params=None, via="dashboard") -> Outcome:
     _log(user, action, tables, params, via, deleted=deleted, dropped=dropped)
     failed = [table for table, error in zip(tables, dropped) if error]
     return Outcome(action, tables, params, drop_failed=failed)
+
+
+def _organization_write(user, action, check, params, via) -> list:
+    """Share ``check``'s Tables with the chosen Organization, or remove it
+    from them, through the permission service's bulk writes, which log one
+    line per Table. Returns the Tables the user lost. The checks have run on
+    the Tables as they are now, so only the dashboard losses can still
+    disagree with the dialog: losing a Table it did not name refuses the
+    request, which then names it."""
+    organization = params["organization"]
+    try:
+        if action == ORGANIZATION_SHARE:
+            table_roles.share_with_organization(
+                user, check.eligible, organization, params["level"], via=via
+            )
+            return []
+        table_roles.remove_organization(
+            user,
+            check.eligible,
+            organization,
+            via=via,
+            confirmed=params["lose_access"],
+        )
+    except table_roles.ConfirmationNeeded as question:
+        names = [table.name for table in question.tables]
+        raise ActionRefused(check, [LeftOut(LOSE_ACCESS_UNSAID, names)])
+    except table_roles.AccessError as error:
+        # the service's own checks; the preflight under the same lock has
+        # left out every Table they would decline for, so this is a rule
+        # the two state differently
+        names = [table.name for table in error.tables]
+        raise ActionRefused(check, [LeftOut(error.message, names)])
+    return check.consequences.get("lose_access", [])
 
 
 class _WriteRefused(Exception):

@@ -643,7 +643,8 @@ describe("bindTablesTab, actions", () => {
   it("swaps a refusal or a field error into the open dialog", () => {
     const form = document.createElement("form");
     document.getElementById("table-action-body").append(form);
-    for (const status of [409, 400]) {
+    // 403: an Organization action refused for a Table without Table admin
+    for (const status of [409, 403, 400]) {
       const detail = swapDialog(form, status);
       expect(detail.shouldSwap).toBe(true);
       expect(detail.isError).toBe(false);

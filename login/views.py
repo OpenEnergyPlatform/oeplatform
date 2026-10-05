@@ -89,21 +89,24 @@ ITEMS_PER_PAGE = 8
 # the request is its re-fetch after an action.
 REGION_ID = "tables-results"
 
-# What the dialog says when it was confirmed before the check for the
-# Dataset just chosen had come back.
+# What the dialog says when it was confirmed before the check for what was
+# just chosen in it (a Dataset, an Organization, a role) had come back.
 RECHECKED = (
-    "Nothing was changed: the check for this dataset had not come back yet."
+    "Nothing was changed: the check for your choice had not come back yet."
     " Look it over and confirm again."
 )
 
 # The bulk bar's actions, in the order it shows them, with their labels: an
 # ellipsis where the dialog asks for more than a confirmation. Delete is red
-# and stays last; the Organization actions (#2568) go before it.
+# and stays last. The Organization actions are here only: one Table's
+# Holders are the access drawer's.
 BULK_ACTIONS = (
     (table_actions.PUBLISH, "Publish…"),
     (table_actions.UNPUBLISH, "Unpublish"),
     (table_actions.DATASET_ADD, "Add to dataset…"),
     (table_actions.DATASET_REMOVE, "Remove from dataset…"),
+    (table_actions.ORGANIZATION_SHARE, "Share with organization…"),
+    (table_actions.ORGANIZATION_REMOVE, "Remove organization…"),
     (table_actions.DELETE, "Delete…"),
 )
 
@@ -157,15 +160,18 @@ class TableActionView(ProfileOwnerRequiredMixin, View):
       results region re-fetches itself on that event.
     - POST, refused (a named Table is no longer allowed): 409, the dialog
       re-run with "Nothing was changed: …", and ``HX-Trigger:
-      tables-refused`` for the persistent message.
+      tables-refused`` for the persistent message. Sharing with or removing
+      an Organization answers 403 instead when a Table is refused because
+      the user is not a Table admin there.
     - POST, unusable parameters (no Topic, the draft pseudo-topic, a
       Dataset that is not the user's own, a typed confirmation that does not
       match, more Tables than the ceiling): 400, the dialog with the error
       beside its field, and no toast.
-    - POST, from a bulk Dataset dialog whose preview was checked against
-      another Dataset than the one sent (``previewed``; confirmed before the
-      re-check came back): 200, nothing written, the dialog checked against
-      the Dataset sent, with a notice.
+    - POST, from a bulk dialog whose preview was checked against another
+      choice than the one sent (``previewed``, ``table_actions.choice``: a
+      Dataset, an Organization and its role; confirmed before the re-check
+      came back): 200, nothing written, the dialog checked against the
+      choice sent, with a notice.
     - POST, a delete whose OEDB table could not be dropped afterwards: 204
       as above, but the message says so and carries ``warning``, so it
       stays until dismissed instead of reading as a success.
@@ -181,16 +187,27 @@ class TableActionView(ProfileOwnerRequiredMixin, View):
 
     The Tables come as repeated ``table`` parameters or as one
     comma-joined ``tables`` (``_names``). The parameters are ``topic`` and
-    ``embargo`` (publish), ``dataset``
-    (the Dataset actions) and ``confirm`` (delete's typed confirmation); the
-    preflight reads ``dataset`` too, to leave out the Tables already in it
-    or not in it.
+    ``embargo`` (publish), ``dataset`` (the Dataset actions),
+    ``organization`` and ``level`` (sharing with an Organization),
+    ``organization`` and ``lose_access`` (removing one: the Tables the dialog
+    said the user would lose, comma-joined) and ``confirm`` (delete's typed
+    confirmation); the preflight reads ``dataset``, ``organization`` and
+    ``level`` too, to leave out what they decide. A removal that takes Tables
+    off the dashboard carries them in ``gone``.
 
     Whether a changed Table is still shown is read off ``HX-Current-URL``,
     the address the request was sent from, through the list's own filters.
     """
 
-    PARAMS = ("topic", "embargo", "dataset", "confirm")
+    PARAMS = (
+        "topic",
+        "embargo",
+        "dataset",
+        "organization",
+        "level",
+        "lose_access",
+        "confirm",
+    )
 
     def _names(self, data):
         """The Tables a request names: repeated ``table`` parameters (a
@@ -210,6 +227,7 @@ class TableActionView(ProfileOwnerRequiredMixin, View):
             "preflight": check,
             "topics": table_actions.publish_topics(),
             "embargo_periods": table_actions.EMBARGO_PERIODS,
+            "organization_roles": table_roles.ORGANIZATION_ROLES,
             "errors": {},
             "values": {},
             **extra,
@@ -247,11 +265,11 @@ class TableActionView(ProfileOwnerRequiredMixin, View):
         # was opened with, so what was left out before is still named
         again = _joined(request.POST, "selection") or names
         previewed = request.POST.get("previewed")
-        if previewed is not None and previewed != params["dataset"]:
-            # confirmed in the moment between choosing a Dataset and its
-            # re-check coming back: the names were checked against another
-            # choice, so nothing runs and the dialog shows the check for this
-            # one
+        if previewed is not None and previewed != table_actions.choice(action, params):
+            # confirmed in the moment between choosing (a Dataset, an
+            # Organization, a role) and its re-check coming back: the names
+            # were checked against another choice, so nothing runs and the
+            # dialog shows the check for this one
             check = table_actions.preflight(user, action, again, params)
             return self._dialog(request, check, values=params, notice=RECHECKED)
         try:
@@ -267,7 +285,19 @@ class TableActionView(ProfileOwnerRequiredMixin, View):
             check = refusal.preflight
             if again != names:
                 check = table_actions.preflight(user, action, again, params)
-            response = self._dialog(request, check, status=409, notice=refusal.message)
+            # A refusal for the role answers the Organization actions 403,
+            # as the permission service's ``NotAllowed`` does in the access
+            # drawer and the API (WF-08 decision 13); the other actions keep
+            # answering every refusal 409.
+            forbidden = (
+                action in table_actions.ORGANIZATION_ACTIONS and refusal.for_role
+            )
+            response = self._dialog(
+                request,
+                check,
+                status=403 if forbidden else 409,
+                notice=refusal.message,
+            )
             response["HX-Trigger"] = json.dumps(
                 {"tables-refused": {"message": refusal.message}}
             )
@@ -283,9 +313,14 @@ class TableActionView(ProfileOwnerRequiredMixin, View):
             if outcome.drop_failed:
                 detail["warning"] = True
         else:
-            hidden = _not_shown(request, user, outcome.tables)
+            lost = {table.pk for table in outcome.lost}
+            kept = [table for table in outcome.tables if table.pk not in lost]
+            hidden = _not_shown(request, user, kept)
             detail = {"message": _done_message(outcome, hidden)}
-            if len(outcome.tables) == 1:
+            if outcome.lost:
+                # an Organization removed: those rows left the dashboard
+                detail["gone"] = [table.name for table in outcome.lost]
+            elif len(outcome.tables) == 1:
                 detail["focus"] = f"menu-{outcome.tables[0].pk}"
         if len(outcome.tables) > 1:
             # a bulk success: the summary line, and "Show tables" lists them
@@ -505,6 +540,8 @@ def _done_message(outcome, hidden) -> str:
     elif outcome.action == table_actions.UNPUBLISH:
         their = "its" if count == 1 else "their"
         message = f"Unpublished {what}. No longer listed under {their} topics."
+    elif outcome.action in table_actions.ORGANIZATION_ACTIONS:
+        return _organization_message(outcome, what, hidden)
     else:
         dataset = (
             f"\u201c{table_actions.dataset_title(outcome.params['dataset'])}\u201d"
@@ -520,6 +557,32 @@ def _done_message(outcome, hidden) -> str:
     elif hidden:
         # counted, not named: a bulk action may move hundreds out of view,
         # and "Show tables" lists what it changed
+        message += f" {len(hidden)} of them are not shown under the current filter."
+    return message
+
+
+def _organization_message(outcome, what, hidden) -> str:
+    """The message after sharing with an Organization or removing one: what
+    was done, the Tables that left the user's dashboard (counted for a
+    batch) and, of the others, those the current filter no longer shows."""
+    organization = f"\u201c{outcome.params['organization'].name}\u201d"
+    if outcome.action == table_actions.ORGANIZATION_SHARE:
+        role = table_roles.role_label(outcome.params["level"])
+        message = f"Shared {what} with {organization} as {role}."
+    else:
+        message = f"Removed {organization} from {what}."
+    count, lost = len(outcome.tables), len(outcome.lost)
+    if lost and count == 1:
+        message += f" You no longer have access to {_title(outcome.lost[0])}."
+    elif lost == count:
+        message += " You no longer have access to them."
+    elif lost:
+        message += f" You no longer have access to {lost} of them."
+    if hidden and count == 1:
+        message += " It is not shown under the current filter."
+    elif hidden and len(hidden) == count - lost:
+        message += " They are not shown under the current filter."
+    elif hidden:
         message += f" {len(hidden)} of them are not shown under the current filter."
     return message
 

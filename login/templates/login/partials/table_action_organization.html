@@ -1,0 +1,124 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+The Organization choice of the action dialog (table_action_dialog.html),
+above its preview, for the bulk bar's "Share with organization…" and
+"Remove organization…". A share offers the user's own Organizations and the
+roles an Organization may be given (Data editor, Data maintainer); a removal
+offers the Organizations holding a role on one of the Tables. Each is shown
+with its member count, because every member gains or loses what it holds.
+
+Which Tables stay unchanged (a share: the role or more is held already) or
+are left out (a removal: it holds no role there, or its old Admin grant is
+the only Admin) depends on the choice, even for one Table, so choosing
+always asks the bulk preflight again. It is the Dataset dialog's re-check
+(table_action_dataset.html): #table-action-chooser receives the selects'
+``change``, waits until the choice has rested and lets a newer request
+replace an older one, sends the whole selection as ``selection``, and swaps
+only the preview, the footer and the status line, never a select, which
+keeps focus. The preview carries what it was checked against
+(``previewed``), so a confirmation sent during the delay is checked again
+instead of run.
+{% endcomment %}
+{% if check.organizations %}
+  <p>
+    {% if check.action == "organization_share" %}
+      Every member of the organization gets the role on
+      {% if check.total == 1 %}
+        it.
+      {% else %}
+        them.
+      {% endif %}
+      Sharing only ever raises a role: where the organization holds that role or more already, nothing changes.
+    {% else %}
+      Every member of the organization loses the access it gives them. Roles held directly or through
+      another organization stay.
+    {% endif %}
+  </p>
+  {% comment %}A change of either select bubbles up to here.{% endcomment %}
+  <div id="table-action-chooser"
+       class="mb-2"
+       hx-post="{% url 'login:table-action-check' user_id=profile_user.pk action=check.action %}"
+       hx-trigger="change delay:400ms"
+       hx-sync="this:replace"
+       hx-target="#table-action-preview"
+       hx-select="#table-action-preview"
+       hx-swap="outerHTML"
+       hx-select-oob="#table-action-footer,#table-action-recheck:innerHTML">
+    <input type="hidden"
+           id="table-action-selection"
+           name="selection"
+           value="{{ check.requested|join:',' }}" />
+    <div class="mb-2">
+      <label class="form-label" for="action-organization">Organization</label>
+      <select id="action-organization"
+              name="organization"
+              class="form-select{% if errors.organization %} is-invalid{% endif %}"
+              required
+              {% if errors.organization %}aria-describedby="action-organization-error" aria-invalid="true"{% endif %}>
+        {% if check.organizations|length > 1 %}<option value="">Choose an organization</option>{% endif %}
+        {% for organization in check.organizations %}
+          <option value="{{ organization.pk }}"
+                  {% if check.organization.pk == organization.pk %}selected{% endif %}>
+            {{ organization.name }} ({{ organization.members }} member{{ organization.members|pluralize }})
+          </option>
+        {% endfor %}
+      </select>
+      {% if errors.organization %}
+        <div id="action-organization-error"
+             class="invalid-feedback">{{ errors.organization }}</div>
+      {% endif %}
+    </div>
+    {% if check.action == "organization_share" %}
+      <fieldset class="mb-2">
+        <legend class="form-label fs-6">Role</legend>
+        {% for role in organization_roles %}
+          <div class="form-check">
+            <input class="form-check-input"
+                   type="radio"
+                   name="level"
+                   id="action-level-{{ role.level }}"
+                   value="{{ role.level }}"
+                   {% if check.level == role.level %}checked{% endif %}
+                   aria-describedby="action-level-{{ role.level }}-text" />
+            <label class="form-check-label"
+                   for="action-level-{{ role.level }}">{{ role.label }}</label>
+            <div id="action-level-{{ role.level }}-text"
+                 class="form-text mt-0">{{ role.description }}</div>
+          </div>
+        {% endfor %}
+        {% if errors.level %}<div class="text-danger small">{{ errors.level }}</div>{% endif %}
+        <div class="form-text">Admin is given to people only, by name, in a table's access drawer.</div>
+      </fieldset>
+    {% endif %}
+    <p id="table-action-recheck" class="form-text mb-0" role="status">
+      {% if check.organization %}
+        {% if check.action == "organization_share" %}
+          {{ check.eligible|length }} of {{ check.total }} tables will be shared with “{{ check.organization.name }}”{% if check.role %} as {{ check.role }}{% endif %}.
+        {% else %}
+          “{{ check.organization.name }}” will be removed from {{ check.eligible|length }} of {{ check.total }} tables.
+        {% endif %}
+      {% endif %}
+    </p>
+  </div>
+{% elif check.action == "organization_share" %}
+  <p id="table-action-no-organization">
+    You are not a member of any organization, so there is nobody to share
+    {% if check.total == 1 %}
+      it
+    {% else %}
+      them
+    {% endif %}
+    with. Your organizations are on the <a href="{% url 'login:organizations' user_id=profile_user.pk %}">Organizations tab</a>.
+  </p>
+{% else %}
+  <p id="table-action-no-organization">
+    No organization holds a role on
+    {% if check.total == 1 %}
+      it.
+    {% else %}
+      them.
+    {% endif %}
+  </p>
+{% endif %}
