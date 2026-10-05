@@ -11,6 +11,12 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 "use strict";
 
+import {
+  describeSetAside,
+  restoreLongLists,
+  setAsideLongLists,
+} from "./long_lists.js";
+
 window.MetaEdit = function (config) {
   /*
     TODO: consolidate functions (same as in wizard and other places)
@@ -307,10 +313,71 @@ window.MetaEdit = function (config) {
     }
   }
 
+  /* What the editor holds, with the annotation lists that were too long for
+  the form put back (long_lists.js). Every save and download starts here. */
+  function editorValue() {
+    return restoreLongLists(config.editor.getValue(), config.setAside);
+  }
+
+  function element(tag, className, text) {
+    var node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text) node.textContent = text;
+    return node;
+  }
+
+  /* Says which annotation lists were kept out of the form: once above the
+  form, and once where each list would have been. */
+  function showSetAside() {
+    if (!config.setAside.length) return;
+    var summary = element(
+      "div",
+      "alert alert-info",
+      "Some annotation lists are too long to show in this form. They are " +
+        "kept unchanged when you save or download the metadata, and entries " +
+        "you add to them here are added after them. The raw JSON view does " +
+        "not show them either."
+    );
+    summary.id = "metaedit-long-lists";
+    var list = element("ul", "mb-0 mt-2");
+    config.setAside.forEach(function (entry) {
+      list.appendChild(element("li", "", describeSetAside(entry)));
+    });
+    summary.appendChild(list);
+    config.form[0].parentNode.insertBefore(summary, config.form[0]);
+
+    config.setAside.forEach(function (entry) {
+      var fields = config.initialData.resources[entry.resource].schema.fields;
+      var index = fields.findIndex(function (f) {
+        return f.name === entry.field;
+      });
+      var editor = config.editor.getEditor(
+        "root.resources." +
+          entry.resource +
+          ".schema.fields." +
+          index +
+          "." +
+          entry.list
+      );
+      if (!editor || !editor.container) return;
+      editor.container.insertBefore(
+        element(
+          "div",
+          "alert alert-info py-2 small metaedit-long-list",
+          describeSetAside(entry) +
+            " are not shown here, because the form cannot display this " +
+            "many. They are kept when you save; entries you add below are " +
+            "added after them."
+        ),
+        editor.container.firstChild
+      );
+    });
+  }
+
   function bindButtons() {
     // download
     $("#metaedit-download").bind("click", function downloadMetadata() {
-      var json = config.editor.getValue();
+      var json = editorValue();
       // create data url
       convertEmptyStringsToNull(json);
       json = JSON.stringify(json, null, 1);
@@ -334,7 +401,7 @@ window.MetaEdit = function (config) {
     $("#metaedit-submit").bind("click", function sumbmitMetadata() {
       $("#metaedit-submitting").removeClass("d-none");
       // config.editor.remove_empty_properties = true;
-      var json = config.editor.getValue();
+      var json = editorValue();
       convertEmptyStringsToNull(json);
       json = fixData(json);
       json = JSON.stringify(json);
@@ -359,6 +426,9 @@ window.MetaEdit = function (config) {
     $("#metaedit-loading").removeClass("d-none");
 
     config.form = $("#metaedit-form");
+    // annotation lists kept out of the form (long_lists.js); none in
+    // standalone mode, which starts empty
+    config.setAside = [];
 
     /* check if the editor should be initialized with metadata from table
     or as standalone without any initial data*/
@@ -368,7 +438,11 @@ window.MetaEdit = function (config) {
         $.getJSON("/static/metaedit/schema.json")
       ).done(function (data, schema) {
         config.schema = fixSchema(schema[0]);
-        config.initialData = fixData(data[0]);
+        // Lists too long for the form are set aside after fixData, so
+        // they are taken from the fields the form will show.
+        var kept = setAsideLongLists(fixData(data[0]));
+        config.initialData = kept.metadata;
+        config.setAside = kept.setAside;
 
         /* https://github.com/json-editor/json-editor */
         const options = {
@@ -396,6 +470,7 @@ window.MetaEdit = function (config) {
         };
 
         config.editor = new JSONEditor(config.form[0], options);
+        config.editor.on("ready", showSetAside);
 
         /* patch labels */
         var mainEditBox = config.form.find(".je-object__controls").first();
