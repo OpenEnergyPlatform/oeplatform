@@ -190,6 +190,23 @@ class Table(Tagable):
     # For now, we only set it on creation
     date_updated = DateTimeField(auto_now_add=True, null=True)
 
+    # The Publish gate's verdict (dataedit.publish_gate), stored so a list can
+    # filter and sort on it. Recomputed on every write through
+    # api.actions.set_table_metadata and by the recompute_publish_gate
+    # command; NULL until that command first ran. Publishing never reads it.
+    publishable = BooleanField(null=True)
+
+    # When the Table's content last changed, in two halves: its rows or
+    # structure, and its metadata. Each is stamped explicitly by the write
+    # that changes it, never by auto_now, which would fire on every save
+    # (publishing included) and miss every data write, since none saves the
+    # Table. The data half through ``stamp_data_modified``, the metadata half
+    # by api.actions.set_table_metadata in the save it does anyway. Publish,
+    # unpublish, embargo and role changes stamp neither. NULL: no change
+    # recorded since the fields were added.
+    data_modified = DateTimeField(null=True)
+    metadata_modified = DateTimeField(null=True)
+
     embargos: QuerySet["Embargo"]  # related_name, for static type checking
     userpermission_set: QuerySet[
         "UserPermission"  # TODO: import
@@ -202,7 +219,20 @@ class Table(Tagable):
         unique_together = (("name",),)
 
     def delete(self, *args, **kwargs):
-        super().delete(*args, **kwargs)
+        self.delete_record(*args, **kwargs)
+        self.drop_oedb_table()
+
+    def delete_record(self, *args, **kwargs):
+        """Delete the Django rows only (this Table and everything that
+        cascades from it), leaving the OEDB table in place. For a caller
+        that drops it once its own transaction has committed, as the table
+        action service does: the two databases share no transaction."""
+        return super().delete(*args, **kwargs)
+
+    def drop_oedb_table(self):
+        """Drop the OEDB table and its meta tables, if they exist. Needs
+        only the name and the schema, so it works once the Django row is
+        gone."""
         # ensure oedb tables are deleted, so we use ADMIN_PERM
         self._get_oeb_table_proxy_w_permission(
             permission_level=ADMIN_PERM
@@ -218,6 +248,22 @@ class Table(Tagable):
             if not is_valid_name(self.name):
                 raise ValidationError(f"Invalid name: {self.name}")
         super().save(*args, **kwargs)
+
+    def stamp_data_modified(self):
+        """Record that this Table's rows or structure changed just now.
+
+        One UPDATE of the one field, not ``save()``: it skips save's name
+        check and leaves every other field as the database holds it. Called
+        by every data write: Apply of the Edit Journal, a Bulk Upload that
+        succeeded, and column and constraint DDL. The stamp commits on its
+        own, so a row write inside a client's transaction that is later
+        rolled back still leaves one: "someone wrote here at T".
+
+        The time is the application's clock, the one the metadata half is
+        stamped with, so the two halves can be compared. The database's
+        ``now()`` would be the start of the surrounding transaction.
+        """
+        Table.objects.filter(pk=self.pk).update(data_modified=timezone.now())
 
     def get_absolute_url(self):
         return reverse("dataedit:view", kwargs={"pk": self.pk})

@@ -323,12 +323,16 @@ class TopicsColumnTests(ColumnTestCase):
 
 
 class AccessCellTests(ColumnTestCase):
-    def test_the_access_cell_manages_access_on_the_table_page(self):
+    def test_the_access_cell_opens_the_access_drawer(self):
         self.table("t_shared", level=WRITE_PERM)
         response = self.get()
         self.assertContains(
             response,
-            reverse("dataedit:table-permission", kwargs={"table": "t_shared"}),
+            'hx-get="%s"'
+            % reverse(
+                "login:table-access",
+                kwargs={"user_id": self.user.pk, "table_name": "t_shared"},
+            ),
         )
         self.assertContains(
             response, "Access: You, your role Data editor. Manage access"

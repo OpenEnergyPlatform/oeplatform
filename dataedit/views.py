@@ -81,7 +81,7 @@ from dataedit.metadata import has_valid_filled_metadata, load_metadata_from_db
 from dataedit.metadata.widget import MetaDataWidget
 from dataedit.models import Dataset, Embargo
 from dataedit.models import Filter as DBFilter
-from dataedit.models import PeerReview, PeerReviewManager, Table, Tag, Topic
+from dataedit.models import PeerReview, PeerReviewManager, Tag, Topic
 from dataedit.models import View as DBView
 from dataedit.models import View as DataViewModel
 from dataedit.peer_review.metadata_serializer import (
@@ -97,6 +97,7 @@ from dataedit.peer_review.service import (
     ReviewService,
 )
 from login import models as login_models
+from login import table_roles
 from oeplatform.settings import (
     DOCUMENTATION_LINKS,
     EXTERNAL_URLS,
@@ -1064,150 +1065,106 @@ class TableDataView(View):
 
 
 class TablePermissionView(View):
-    """This method handles the GET requests for the main page of data edit.
-    Initialises the session data (if necessary)
+    """The Table's own permission page: who holds which Table role on it.
+    Anyone may read it; a Table admin changes it here. Every change goes
+    through the permission service (``login.table_roles``), the same as the
+    dashboard's access drawer and the REST API, so the rules are the same
+    everywhere: a role is chosen when adding, Organizations stop at Data
+    maintainer and are shared only by their members, the last user with
+    direct Admin cannot lose it, and losing your own Admin is confirmed.
+
+    POST takes ``mode``: ``add_user`` (``name``, ``level``), ``add_group``
+    (``organization``, the id of one of the user's own Organizations, and
+    ``level``), ``alter_user`` / ``remove_user`` (``user_id``, and ``level``
+    to alter), ``alter_group`` / ``remove_group`` (``group_id``, likewise);
+    ``confirm=yes`` once the user has confirmed.
+
+    - done: a redirect back here, the change named in a message;
+    - nothing to change (the Holder already holds that role): a redirect
+      back here, saying so;
+    - needs confirmation: 200, the page asking, nothing written;
+    - unusable request: 400, not a Table admin: 403, the last user with
+      direct Admin would lose it: 409; each the page with the reason as a
+      message and nothing written. An anonymous POST is a 403.
     """
 
-    @method_decorator(never_cache)
-    def get(self, request: HttpRequest, table: str) -> HttpResponse:
-        table_obj = table_or_404(table=table)
+    VIA = "table-page"
+    MODES = {
+        "add_user": (table_roles.ADD, table_roles.USER),
+        "alter_user": (table_roles.CHANGE, table_roles.USER),
+        "remove_user": (table_roles.REMOVE, table_roles.USER),
+        "add_group": (table_roles.ADD, table_roles.ORGANIZATION),
+        "alter_group": (table_roles.CHANGE, table_roles.ORGANIZATION),
+        "remove_group": (table_roles.REMOVE, table_roles.ORGANIZATION),
+    }
+    FIELDS = ("mode", "name", "organization", "user_id", "group_id", "level")
 
-        user_perms = login_models.UserPermission.objects.filter(table=table_obj)
-        group_perms = login_models.GroupPermission.objects.filter(table=table_obj)
-        is_admin = False
-        can_add = False
-        can_remove = False
-        level = login.permissions.NO_PERM
-        user: login_models.myuser = request.user  # type: ignore
-        if not user.is_anonymous:
-            level = user.get_table_permission_level(table_obj)
-            is_admin = level >= login.permissions.ADMIN_PERM
-            can_add = level >= login.permissions.WRITE_PERM
-            can_remove = level >= login.permissions.DELETE_PERM
+    def _page(self, request, table_obj, status=200, **extra):
+        access = table_roles.table_access(request.user, table_obj)
         return render(
             request,
             "dataedit/table_permissions.html",
             {
-                "table": table,
-                "user_perms": user_perms,
-                "group_perms": group_perms,
-                "choices": login_models.TablePermission.choices,
-                "can_add": can_add,
-                "can_remove": can_remove,
-                "is_admin": is_admin,
-                "own_level": level,
+                "table": table_obj.name,
+                "access": access,
+                "is_admin": access.can_manage,
+                "roles": table_roles.ROLES,
+                "organization_roles": table_roles.ORGANIZATION_ROLES,
+                **extra,
             },
+            status=status,
+        )
+
+    @method_decorator(never_cache)
+    def get(self, request: HttpRequest, table: str) -> HttpResponse:
+        return self._page(request, table_or_404(table=table))
+
+    def _write(self, user, table_obj, data):
+        try:
+            op, kind = self.MODES[data.get("mode", "")]
+        except KeyError:
+            raise table_roles.InvalidRequest("Choose a change to make.", "mode")
+        user_kind = kind == table_roles.USER
+        level = data.get("level")
+        confirmed = data.get("confirm") == "yes"
+        if op == table_roles.ADD:
+            who = data.get("name" if user_kind else "organization")
+            return table_roles.add(user, table_obj, kind, who, level, via=self.VIA)
+        key = f"{kind}:{data.get('user_id' if user_kind else 'group_id', '')}"
+        if op == table_roles.CHANGE:
+            return table_roles.change(
+                user, table_obj, key, level, via=self.VIA, confirmed=confirmed
+            )
+        return table_roles.remove(
+            user, table_obj, key, via=self.VIA, confirmed=confirmed
         )
 
     def post(self, request: HttpRequest, table: str) -> HttpResponse:
         table_obj = table_or_404(table=table)
-
         user: login_models.myuser = request.user  # type: ignore
-        if (
-            user.is_anonymous
-            or user.get_table_permission_level(table_obj) < login.permissions.ADMIN_PERM
-        ):
+        if user.is_anonymous:
             raise PermissionDenied
-        if request.POST["mode"] == "add_user":
-            return self.__add_user(request, table_obj)
-        if request.POST["mode"] == "alter_user":
-            return self.__change_user(request, table_obj)
-        if request.POST["mode"] == "remove_user":
-            return self.__remove_user(request, table_obj)
-        if request.POST["mode"] == "add_group":
-            return self.__add_group(request, table_obj)
-        if request.POST["mode"] == "alter_group":
-            return self.__change_group(request, table_obj)
-        if request.POST["mode"] == "remove_group":
-            return self.__remove_group(request, table_obj)
+        try:
+            change = self._write(user, table_obj, request.POST)
+        except table_roles.ConfirmationNeeded as question:
+            pending = {key: request.POST.get(key, "") for key in self.FIELDS}
+            return self._page(
+                request, table_obj, confirm=question.message, pending=pending
+            )
+        except table_roles.InvalidRequest as error:
+            messages.error(request, error.message)
+            return self._page(request, table_obj, status=400)
+        except table_roles.NotAllowed as refusal:
+            messages.error(request, refusal.message)
+            return self._page(request, table_obj, status=403)
+        except table_roles.LastAdmin as refusal:
+            messages.error(request, refusal.message)
+            return self._page(request, table_obj, status=409)
+        if change is None:
+            messages.info(request, "Nothing changed: they already hold that role.")
         else:
-            raise NotImplementedError()
-
-    def __add_user(self, request: HttpRequest, table_obj: Table):
-        user_name = request.POST.get("name")
-        # Check if the user name is empty
-        if not user_name:
-            # Return an HTTP 400 Bad Request response
-            return HttpResponseBadRequest("User name is required.")
-
-        user = login_models.myuser.objects.filter(name=user_name).first()
-
-        p, _ = login_models.UserPermission.objects.get_or_create(
-            holder=user, table=table_obj
-        )
-        p.save()
-        return self.get(request, table=table_obj.name)
-
-    def __change_user(self, request: HttpRequest, table_obj: Table):
-        user_id = request.POST.get("user_id")
-        # Check if the user id is empty
-        if not user_id:
-            # Return an HTTP 400 Bad Request response
-            return HttpResponseBadRequest("User id is required.")
-
-        user = login_models.myuser.objects.filter(id=user_id).first()
-
-        p = get_object_or_404(login_models.UserPermission, holder=user, table=table_obj)
-        p.level = int(request.POST["level"])
-        p.save()
-        return self.get(request, table=table_obj.name)
-
-    def __remove_user(self, request: HttpRequest, table_obj: Table):
-        user_id = request.POST.get("user_id")
-        # Check if the user id is empty
-        if not user_id:
-            # Return an HTTP 400 Bad Request response
-            return HttpResponseBadRequest("User id is required.")
-
-        user = get_object_or_404(login_models.myuser, id=user_id)
-
-        p = get_object_or_404(login_models.UserPermission, holder=user, table=table_obj)
-        p.delete()
-        return self.get(request, table=table_obj.name)
-
-    def __add_group(self, request: HttpRequest, table_obj: Table):
-        group_name = request.POST.get("name")
-        # Check if the group name is empty
-        if not group_name:
-            # Return an HTTP 400 Bad Request response
-            return HttpResponseBadRequest("Group name is required.")
-
-        group = get_object_or_404(login_models.Group, name=group_name)
-
-        p, _ = login_models.GroupPermission.objects.get_or_create(
-            holder=group, table=table_obj
-        )
-        p.save()
-        return self.get(request, table=table_obj.name)
-
-    def __change_group(self, request: HttpRequest, table_obj: Table):
-        group_id = request.POST.get("group_id")
-        if not group_id:
-            # Return an HTTP 400 Bad Request response
-            return HttpResponseBadRequest("Group id is required.")
-
-        group = get_object_or_404(login_models.Group, id=group_id)
-
-        p = get_object_or_404(
-            login_models.GroupPermission, holder=group, table=table_obj
-        )
-        p.level = int(request.POST["level"])
-        p.save()
-        return self.get(request, table=table_obj.name)
-
-    def __remove_group(self, request: HttpRequest, table_obj: Table):
-        group_id = request.POST.get("group_id")
-        if not group_id:
-            # Return an HTTP 400 Bad Request response
-            return HttpResponseBadRequest("Group id is required.")
-
-        group = get_object_or_404(login_models.Group, id=group_id)
-
-        p = get_object_or_404(
-            login_models.GroupPermission, holder=group, table=table_obj
-        )
-        p.delete()
-        return self.get(request, table=table_obj.name)
+            messages.success(request, change.message)
+        return redirect("dataedit:table-permission", table=table_obj.name)
 
 
 class TableWizardView(LoginRequiredMixin, View):

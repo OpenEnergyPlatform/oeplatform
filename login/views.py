@@ -18,6 +18,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 import json
 from functools import wraps
 from itertools import groupby
+from urllib.parse import urlsplit
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -31,6 +32,8 @@ from django.http import (
     HttpResponse,
     HttpResponseForbidden,
     HttpResponseNotAllowed,
+    JsonResponse,
+    QueryDict,
 )
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
@@ -43,6 +46,7 @@ from django.views.generic.edit import DeleteView
 from rest_framework.authtoken.models import Token
 
 from api.serializers import DatasetCreateSerializer, DatasetUpdateSerializer
+from api.services import table_actions
 from api.services.dataset_creation import (
     DatasetNameTaken,
     assign_table,
@@ -55,6 +59,7 @@ from api.services.dataset_creation import (
 )
 from dataedit.helper import delete_peer_review
 from dataedit.models import Dataset, PeerReviewManager, Table, Topic
+from login import table_roles
 from login.access import (
     ProfileOwnerRequiredMixin,
     is_htmx,
@@ -80,14 +85,38 @@ ITEMS_PER_PAGE = 8
 ###########################################################################
 
 
+# The results region's id: when it is the element that triggered a request,
+# the request is its re-fetch after an action.
+REGION_ID = "tables-results"
+
+# What the dialog says when it was confirmed before the check for the
+# Dataset just chosen had come back.
+RECHECKED = (
+    "Nothing was changed: the check for this dataset had not come back yet."
+    " Look it over and confirm again."
+)
+
+# The bulk bar's actions, in the order it shows them, with their labels: an
+# ellipsis where the dialog asks for more than a confirmation. Delete is red
+# and stays last; the Organization actions (#2568) go before it.
+BULK_ACTIONS = (
+    (table_actions.PUBLISH, "Publish…"),
+    (table_actions.UNPUBLISH, "Unpublish"),
+    (table_actions.DATASET_ADD, "Add to dataset…"),
+    (table_actions.DATASET_REMOVE, "Remove from dataset…"),
+    (table_actions.DELETE, "Delete…"),
+)
+
+
 class TablesView(ProfileOwnerRequiredMixin, View):
     """The tables tab: one list of every Table the user may write.
 
     A direct load renders the whole page; an htmx request gets only the
     results region, carrying the canonical address of what it shows in
     ``HX-Push-Url`` (defaults left out, the page clamped), so the address bar
-    always names the state on screen. A history restore is a full page,
-    because htmx swaps it into the body.
+    always names the state on screen; the region's own re-fetch after an
+    action (``tables-changed``) gets ``HX-Replace-Url`` instead. A history
+    restore is a full page, because htmx swaps it into the body.
     """
 
     @method_decorator(never_cache)
@@ -96,14 +125,425 @@ class TablesView(ProfileOwnerRequiredMixin, View):
         page = tables_listing(user).page(
             accessible_tables(user), request.GET, request.path, rows=table_rows(user)
         )
-        context = {"profile_user": user, "page": page}
+        context = {
+            "profile_user": user,
+            "page": page,
+            "gates": table_actions.ROLE_GATES,
+            "bulk_actions": BULK_ACTIONS,
+        }
         if is_htmx(request) and "HX-History-Restore-Request" not in request.headers:
             response = render(request, "login/partials/tables_region.html", context)
-            response["HX-Push-Url"] = page.url
+            # The region re-fetching itself after an action changes nothing
+            # the user navigated to, so it replaces the history entry rather
+            # than adding one per action.
+            if request.headers.get("HX-Trigger") == REGION_ID:
+                response["HX-Replace-Url"] = page.url
+            else:
+                response["HX-Push-Url"] = page.url
         else:
             response = render(request, "login/user_tables.html", context)
         patch_vary_headers(response, ["HX-Request"])
         return response
+
+
+class TableActionView(ProfileOwnerRequiredMixin, View):
+    """One action on Tables from the dashboard, for a row (one name) or a
+    batch: GET is the preflight, POST the execution. Both take the Tables as
+    repeated ``table`` parameters and answer HTML for the action dialog.
+
+    - GET: the dialog, from ``table_actions.preflight``.
+    - POST, done: 204 with ``HX-Trigger: tables-changed``, carrying the
+      message and, for one Table, the id of the row's menu to focus. The
+      results region re-fetches itself on that event.
+    - POST, refused (a named Table is no longer allowed): 409, the dialog
+      re-run with "Nothing was changed: …", and ``HX-Trigger:
+      tables-refused`` for the persistent message.
+    - POST, unusable parameters (no Topic, the draft pseudo-topic, a
+      Dataset that is not the user's own, a typed confirmation that does not
+      match, more Tables than the ceiling): 400, the dialog with the error
+      beside its field, and no toast.
+    - POST, from a bulk Dataset dialog whose preview was checked against
+      another Dataset than the one sent (``previewed``; confirmed before the
+      re-check came back): 200, nothing written, the dialog checked against
+      the Dataset sent, with a notice.
+    - POST, a delete whose OEDB table could not be dropped afterwards: 204
+      as above, but the message says so and carries ``warning``, so it
+      stays until dismissed instead of reading as a success.
+
+    A done batch of several Tables also carries ``tables``, their titles,
+    which the message lists under "Show tables"; a delete carries ``gone``,
+    the names that left the dashboard, so the bulk selection drops them.
+    The bulk bar's preflight is ``TableActionCheckView``, because a
+    selection does not fit in a GET address. A bulk Dataset dialog asks it
+    again when the user chooses a Dataset, sending the whole selection as
+    ``selection`` beside the eligible ``tables``, so the re-check still
+    names every Table it leaves out (``_preflight``).
+
+    The Tables come as repeated ``table`` parameters or as one
+    comma-joined ``tables`` (``_names``). The parameters are ``topic`` and
+    ``embargo`` (publish), ``dataset``
+    (the Dataset actions) and ``confirm`` (delete's typed confirmation); the
+    preflight reads ``dataset`` too, to leave out the Tables already in it
+    or not in it.
+
+    Whether a changed Table is still shown is read off ``HX-Current-URL``,
+    the address the request was sent from, through the list's own filters.
+    """
+
+    PARAMS = ("topic", "embargo", "dataset", "confirm")
+
+    def _names(self, data):
+        """The Tables a request names: repeated ``table`` parameters (a
+        row's menu) and one comma-joined ``tables`` (the bulk bar and the
+        dialog's form). A selection goes joined because Django refuses a
+        request with more than ``DATA_UPLOAD_MAX_NUMBER_FIELDS`` (1,000)
+        parameters, while the largest dashboard holds 2,068 Tables and a
+        ceiling is 1,000; a Table's name holds no comma."""
+        return data.getlist("table") + _joined(data, "tables")
+
+    def _params(self, data):
+        return {key: data.get(key, "") for key in self.PARAMS}
+
+    def _dialog(self, request, check, status=200, **extra):
+        context = {
+            "profile_user": self.profile_user,
+            "preflight": check,
+            "topics": table_actions.publish_topics(),
+            "embargo_periods": table_actions.EMBARGO_PERIODS,
+            "errors": {},
+            "values": {},
+            **extra,
+        }
+        return render(
+            request, "login/partials/table_action_dialog.html", context, status=status
+        )
+
+    def _action(self, action):
+        if action not in table_actions.ACTIONS:
+            raise Http404
+        return action
+
+    def _preflight(self, request, action, data):
+        """The dialog for what ``data`` names. A re-check from the open
+        dialog carries the names it was opened with as ``selection``, a
+        superset of the eligible ``tables`` its form posts, and is run on
+        those, so a Table left out before is still named as left out."""
+        action = self._action(action)
+        params = self._params(data)
+        names = _joined(data, "selection") or self._names(data)
+        check = table_actions.preflight(self.profile_user, action, names, params)
+        return self._dialog(request, check, values=params)
+
+    @method_decorator(never_cache)
+    def get(self, request, user_id, action):
+        return self._preflight(request, action, request.GET)
+
+    def post(self, request, user_id, action):
+        action = self._action(action)
+        user = self.profile_user
+        names = self._names(request.POST)
+        params = self._params(request.POST)
+        # a dialog re-run after a refusal is checked against everything it
+        # was opened with, so what was left out before is still named
+        again = _joined(request.POST, "selection") or names
+        previewed = request.POST.get("previewed")
+        if previewed is not None and previewed != params["dataset"]:
+            # confirmed in the moment between choosing a Dataset and its
+            # re-check coming back: the names were checked against another
+            # choice, so nothing runs and the dialog shows the check for this
+            # one
+            check = table_actions.preflight(user, action, again, params)
+            return self._dialog(request, check, values=params, notice=RECHECKED)
+        try:
+            outcome = table_actions.execute(
+                user, action, names, params, via="dashboard"
+            )
+        except table_actions.InvalidParameters as error:
+            check = table_actions.preflight(user, action, again, params)
+            return self._dialog(
+                request, check, status=400, errors=error.errors, values=params
+            )
+        except table_actions.ActionRefused as refusal:
+            check = refusal.preflight
+            if again != names:
+                check = table_actions.preflight(user, action, again, params)
+            response = self._dialog(request, check, status=409, notice=refusal.message)
+            response["HX-Trigger"] = json.dumps(
+                {"tables-refused": {"message": refusal.message}}
+            )
+            return response
+
+        if outcome.action == table_actions.DELETE:
+            # the rows are gone: nothing to name as hidden, no ⋯ to focus,
+            # and the selection lets go of them
+            detail = {
+                "message": _deleted_message(outcome),
+                "gone": [table.name for table in outcome.tables],
+            }
+            if outcome.drop_failed:
+                detail["warning"] = True
+        else:
+            hidden = _not_shown(request, user, outcome.tables)
+            detail = {"message": _done_message(outcome, hidden)}
+            if len(outcome.tables) == 1:
+                detail["focus"] = f"menu-{outcome.tables[0].pk}"
+        if len(outcome.tables) > 1:
+            # a bulk success: the summary line, and "Show tables" lists them
+            detail["tables"] = [_title(table) for table in outcome.tables]
+        response = HttpResponse(status=204)
+        response["HX-Trigger"] = json.dumps({"tables-changed": detail})
+        return response
+
+
+class TableActionCheckView(TableActionView):
+    """The preflight of a bulk action, sent as a POST: the bulk bar sends
+    the whole selection, which may be every Table on the dashboard (2,068
+    names on the largest account, about 58 KB), more than any GET address
+    can carry. It answers exactly what ``TableActionView``'s GET answers,
+    the dialog, and writes nothing."""
+
+    http_method_names = ["post"]
+
+    def post(self, request, user_id, action):
+        return self._preflight(request, action, request.POST)
+
+
+class TableNamesView(ProfileOwnerRequiredMixin, View):
+    """The names of every Table the list's filters select, across all
+    pages: what "Select all N matching tables" puts in the selection.
+
+    The query is the list's own, parsed by the same declarations
+    (``Listing.matching``), so the names and the list cannot disagree; a
+    sort or a page in it is ignored. JSON: ``{"names": [...], "total": n}``,
+    by name.
+    """
+
+    @method_decorator(never_cache)
+    def get(self, request, user_id):
+        user = self.profile_user
+        names = list(
+            tables_listing(user)
+            .matching(accessible_tables(user), request.GET)
+            .order_by("name")
+            .values_list("name", flat=True)
+        )
+        return JsonResponse({"names": names, "total": len(names)})
+
+
+class TableAccessView(ProfileOwnerRequiredMixin, View):
+    """The access drawer for one Table: who holds which role on it. GET
+    renders the drawer; POST makes one change through the permission service
+    (``login.table_roles``) and renders the drawer again in place, so it
+    stays open for the next change.
+
+    POST takes ``op``: ``add`` (``kind`` user with ``name``, or org with
+    ``organization``, and ``level``), ``change`` (``holder`` as ``user:<pk>``
+    or ``org:<pk>``, and ``level``), ``remove`` (``holder``) or ``leave``;
+    ``confirm=yes`` once the user has confirmed losing their own Admin or
+    the Table from their dashboard.
+
+    - done: 200 with ``HX-Trigger: tables-changed``, carrying the message
+      and ``stay`` (the drawer stays open and keeps focus); the results
+      region re-fetches itself on that event. When the Table has left the
+      user's dashboard the drawer says so instead of listing its Holders.
+    - needs confirmation: 200, the drawer asking, nothing written, no event.
+    - unusable request: 400, the drawer with the error beside its field.
+    - not a Table admin: 403, the drawer with the reason.
+    - the last user with direct Admin would lose it: 409, the drawer with
+      "Give someone else Admin first". This is checked before any
+      confirmation is asked for.
+
+    A Table that is not on the user's dashboard (a name that is not a Table,
+    or a Table they hold no role on) answers 404, the same for both.
+    """
+
+    def _table(self, table_name):
+        table = accessible_tables(self.profile_user).filter(name=table_name).first()
+        if table is None:
+            raise Http404
+        return table
+
+    def _drawer(self, request, table, status=200, **extra):
+        context = {
+            "profile_user": self.profile_user,
+            "table": table,
+            "title": table.human_readable_name or table.name,
+            "roles": table_roles.ROLES,
+            "organization_roles": table_roles.ORGANIZATION_ROLES,
+            "errors": {},
+            "values": {},
+            **extra,
+        }
+        if not context.get("gone"):
+            context["access"] = table_roles.table_access(self.profile_user, table)
+        return render(
+            request,
+            "login/partials/table_access_drawer.html",
+            context,
+            status=status,
+        )
+
+    @method_decorator(never_cache)
+    def get(self, request, user_id, table_name):
+        return self._drawer(request, self._table(table_name))
+
+    def _write(self, table, data):
+        user = self.profile_user
+        op = data.get("op", "")
+        confirmed = data.get("confirm") == "yes"
+        if op == table_roles.ADD:
+            kind = data.get("kind")
+            who = data.get(
+                "organization" if kind == table_roles.ORGANIZATION else "name"
+            )
+            return table_roles.add(user, table, kind, who, data.get("level"))
+        if op == table_roles.CHANGE:
+            return table_roles.change(
+                user, table, data.get("holder"), data.get("level"), confirmed=confirmed
+            )
+        if op == table_roles.REMOVE:
+            return table_roles.remove(
+                user, table, data.get("holder"), confirmed=confirmed
+            )
+        if op == table_roles.LEAVE:
+            return table_roles.leave(user, table, confirmed=confirmed)
+        raise table_roles.InvalidRequest("Choose a change to make.", "op")
+
+    def post(self, request, user_id, table_name):
+        user = self.profile_user
+        table = self._table(table_name)
+        values = {
+            key: request.POST.get(key, "")
+            for key in ("op", "kind", "name", "organization", "holder", "level")
+        }
+        try:
+            change = self._write(table, request.POST)
+        except table_roles.ConfirmationNeeded as question:
+            return self._drawer(
+                request, table, confirm=question.message, pending=values
+            )
+        except table_roles.InvalidRequest as error:
+            return self._drawer(
+                request,
+                table,
+                status=400,
+                errors={error.field: error.message},
+                values=values,
+            )
+        except table_roles.NotAllowed as refusal:
+            return self._drawer(request, table, status=403, notice=refusal.message)
+        except table_roles.LastAdmin as refusal:
+            return self._drawer(request, table, status=409, notice=refusal.message)
+
+        if change is None:
+            # the Holder already holds that role: nothing to do
+            return self._drawer(request, table)
+        listed = accessible_tables(user).filter(pk=table.pk).exists()
+        hidden = _not_shown(request, user, [table]) if listed else []
+        response = self._drawer(request, table, gone=not listed)
+        detail = {"message": _access_message(change, listed, hidden), "stay": True}
+        if not listed:
+            # the bulk selection lets go of a Table that left the dashboard
+            detail["gone"] = [table.name]
+        response["HX-Trigger"] = json.dumps({"tables-changed": detail})
+        return response
+
+
+def _joined(data, key) -> list:
+    """The names in one comma-joined parameter."""
+    return [name.strip() for name in data.get(key, "").split(",") if name.strip()]
+
+
+def _access_message(change, listed, hidden) -> str:
+    """What a change of access says: what was done, and whether the Table
+    left the user's dashboard or is hidden by the current filter."""
+    title = _title(change.table)
+    message = change.message
+    if not listed and change.action == table_roles.LEAVE:
+        message = f"You left {title} and no longer have access to it."
+    elif not listed:
+        message += f" You no longer have access to {title}."
+    elif hidden:
+        message += " It is not shown under the current filter."
+    return message
+
+
+def _not_shown(request, user, tables) -> list:
+    """Which of ``tables`` the list the request came from no longer shows
+    under its filters. Empty when the request does not say where it came
+    from."""
+    current = request.headers.get("HX-Current-URL")
+    if not current:
+        return []
+    query = QueryDict(urlsplit(current).query)
+    shown = set(
+        tables_listing(user)
+        .matching(accessible_tables(user), query)
+        .filter(pk__in=[table.pk for table in tables])
+        .values_list("pk", flat=True)
+    )
+    return [table for table in tables if table.pk not in shown]
+
+
+def _title(table) -> str:
+    return f"\u201c{table.human_readable_name or table.name}\u201d"
+
+
+def _done_message(outcome, hidden) -> str:
+    """The success message: what was done, and which changed Tables the
+    current filter no longer shows, so they do not seem to vanish."""
+    tables = outcome.tables
+    count = len(tables)
+    what = _title(tables[0]) if count == 1 else f"{count} tables"
+    if outcome.action == table_actions.PUBLISH:
+        message = f"Published {what} under {outcome.params['topic']}"
+        # ``KEEP_EMBARGO`` is not one of the periods; nothing to say then
+        embargo = dict(table_actions.EMBARGO_PERIODS).get(outcome.params["embargo"])
+        if embargo and outcome.params["embargo"] != "none":
+            message += f", embargoed for {embargo}"
+        message += "."
+    elif outcome.action == table_actions.UNPUBLISH:
+        their = "its" if count == 1 else "their"
+        message = f"Unpublished {what}. No longer listed under {their} topics."
+    else:
+        dataset = (
+            f"\u201c{table_actions.dataset_title(outcome.params['dataset'])}\u201d"
+        )
+        if outcome.action == table_actions.DATASET_ADD:
+            message = f"Added {what} to {dataset}."
+        else:
+            message = f"Removed {what} from {dataset}."
+    if hidden and count == 1:
+        message += " It is not shown under the current filter."
+    elif len(hidden) == count:
+        message += " They are not shown under the current filter."
+    elif hidden:
+        # counted, not named: a bulk action may move hundreds out of view,
+        # and "Show tables" lists what it changed
+        message += f" {len(hidden)} of them are not shown under the current filter."
+    return message
+
+
+def _deleted_message(outcome) -> str:
+    """The message after a delete. When an OEDB table could not be dropped
+    it names that Table: its record is gone, its data is still in the
+    database, and only an administrator can remove it now."""
+    tables = outcome.tables
+    count = len(tables)
+    message = f"Deleted {_title(tables[0]) if count == 1 else f'{count} tables'}."
+    failed = outcome.drop_failed
+    if failed:
+        names = ", ".join(f"{_title(table)} ({table.name})" for table in failed)
+        message += (
+            f" The database table of {names} could not be removed, so its data"
+            " is still stored. This was logged; an administrator has to remove"
+            " it."
+            if len(failed) == 1
+            else f" The database tables of {names} could not be removed, so"
+            " their data is still stored. This was logged; an administrator"
+            " has to remove them."
+        )
+    return message
 
 
 ##############################################################################
@@ -339,7 +779,8 @@ def dataset_assign_view(request, profile_user, dataset):
     table = get_object_or_404(Table, name=request.POST.get("table", ""))
     if not user_may_assign_table(request.user, table):
         return HttpResponseForbidden(
-            "Draft or embargoed tables require write permission on the table."
+            "Draft or embargoed tables require Data editor on the table, "
+            "directly or through an organization."
         )
     assign_table(dataset, table)
     return _render_dataset_manage(request, profile_user, dataset)

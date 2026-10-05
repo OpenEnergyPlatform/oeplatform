@@ -5,7 +5,7 @@
  * The profile dashboard's tables tab (spec #2551). Plain CSS beside the
  * page rather than in the theme build, so the tab can change without a
  * rebuild of bootstrap.min.css. The column collapse by the list's own width
- * (#2555) lands here, as container queries on `.dash`.
+ * (#2555) is the container queries at the end of this file.
  */
 
 .dash {
@@ -15,18 +15,140 @@
   container-type: inline-size;
 }
 
-/* filter bar */
+/* filter bar: one primary row, "More filters" below it */
 .dash-filters {
+  margin-bottom: 0.6rem;
+}
+
+.dash-filters__row {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
   align-items: center;
-  margin-bottom: 0.6rem;
 }
 
+/* With the profile sidebar the list is about 974 px wide at 1440 px. The
+   selects are capped (a long Dataset or Organization name would otherwise
+   set the width) and the search box gives way, so the primary row stays one
+   line there. */
 .dash-search {
-  flex: 1 1 14rem;
+  flex: 1 1 9rem;
+  min-width: 9rem;
   max-width: 28rem;
+}
+
+.dash-select {
+  flex: 0 1 auto;
+  width: auto;
+  max-width: 10.5rem;
+  text-overflow: ellipsis;
+}
+
+/* "Filters (n)": on a wide list the fold panel is not a box at all, so its
+   controls sit in the row; below 900 px it folds (see the container queries) */
+.dash-fold {
+  display: contents;
+}
+
+.dash-fold-toggle {
+  display: none;
+}
+
+.dash-more {
+  display: flex;
+  flex: 1 0 100%;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  margin-top: 0.1rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+}
+
+.dash-more[hidden] {
+  display: none;
+}
+
+.dash-multi {
+  min-width: 12rem;
+  margin: 0;
+}
+
+.dash-multi__legend {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.dash-multi__list {
+  max-height: 12rem;
+  overflow-y: auto;
+  font-size: 0.875rem;
+}
+
+/* a date range: two date inputs, from and to */
+.dash-range {
+  margin: 0;
+}
+
+/* the two ends one above the other, their inputs aligned */
+.dash-range__end {
+  display: grid;
+  grid-template-columns: 2.5rem auto;
+  align-items: center;
+  margin-bottom: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.dash-date-input {
+  width: 9.5rem;
+}
+
+/* active filters, inside the region */
+.dash-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.dash-chips:empty {
+  display: none;
+}
+
+.dash-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.05rem 0.2rem 0.05rem 0.6rem;
+  border-radius: 1rem;
+  background: #e7f0f7;
+  color: var(--dash-secondary);
+  font-size: 0.8125rem;
+}
+
+.dash-chip--stale {
+  background: #f1f1f1;
+  color: var(--dash-muted);
+  font-style: italic;
+}
+
+.dash-chip__x {
+  padding: 0 0.3rem;
+  color: inherit;
+  text-decoration: none;
+  line-height: 1;
+}
+
+.dash-chip__x:hover,
+.dash-chip__x:focus {
+  text-decoration: underline;
+}
+
+.dash-chips__reset {
+  margin-left: 0.25rem;
+  font-size: 0.8125rem;
 }
 
 /* results region */
@@ -44,6 +166,20 @@
 
 .dash-seg__count {
   opacity: 0.75;
+}
+
+/* "Sort by": shown only where the rows stack and lose their headers */
+.dash-sortby {
+  display: none;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.dash-sortby__label {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--dash-muted);
+  white-space: nowrap;
 }
 
 .dash-summary {
@@ -126,12 +262,19 @@
   white-space: nowrap;
 }
 
+/* An Organization's name may be 150 characters; capped, so that the Access
+   column is bounded and the thresholds below hold for any name. The full
+   name is in the chip's title, and every holder in the link's label. */
 .dash-achip {
   display: inline-block;
+  max-width: 11rem;
   margin: 1px 2px 1px 0;
   padding: 0 0.45rem;
+  overflow: hidden;
   font-size: 0.75rem;
   white-space: nowrap;
+  text-overflow: ellipsis;
+  vertical-align: middle;
   color: var(--dash-secondary);
   background: #f5f9fc;
   border: 1px solid #c5d6e3;
@@ -142,6 +285,19 @@
   color: #fff;
   background: var(--dash-secondary);
   border-color: var(--dash-secondary);
+}
+
+/* Modified: the date, unbroken, and beneath it "data" when only the data
+   half is known, the way Status puts "until" beneath an embargo */
+.dash-date {
+  white-space: nowrap;
+}
+
+.dash-half {
+  display: block;
+  font-size: 0.6875rem;
+  color: var(--dash-muted);
+  cursor: help;
 }
 
 .dash-role {
@@ -244,11 +400,16 @@
   background: #d7ecf3;
 }
 
-/* Access: the whole cell manages access */
+/* Access: the whole cell opens the access drawer */
 .dash-access {
   display: inline-block;
+  padding: 0;
   color: inherit;
+  text-align: left;
   text-decoration: none;
+  background: none;
+  border: 0;
+  border-radius: 4px;
 }
 
 /* Datasets and the Topics' "+n": a count that opens a popover */
@@ -314,6 +475,87 @@
   margin-top: 0.35rem;
 }
 
+/* the select column (#2564): a checkbox per row, the page's in the header */
+.c-select {
+  width: 2.25rem;
+  padding-right: 0;
+}
+
+.dash-check {
+  margin: 0;
+  cursor: pointer;
+}
+
+/* The bulk bar: sticky at the top of the list while it scrolls, outside
+   the region. Its slot keeps one height whether it holds the muted line,
+   the note or the bar, so the first tick moves nothing. */
+.dash-bulk {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  min-height: 2.5rem;
+  margin-bottom: 0.4rem;
+  padding: 0.2rem 0.5rem;
+  background: #fff;
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+.dash-bulk__idle,
+.dash-bulk__note {
+  margin: 0;
+  color: var(--dash-muted);
+}
+
+.dash-bulk:has(.dash-bulk__bar:not([hidden])) {
+  background: #eef4f9;
+}
+
+.dash-bulk__bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+  width: 100%;
+}
+
+.dash-bulk__count {
+  font-weight: 600;
+}
+
+.dash-bulk__clear {
+  padding: 0 0.25rem;
+}
+
+.dash-bulk__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-left: auto;
+}
+
+/* "Actions ▾": only where the rows stack (see the container queries) */
+.dash-bulk__menu {
+  display: none;
+  margin-left: auto;
+}
+
+/* "Select all N matching tables", once the page is ticked */
+.dash-selectall {
+  margin-bottom: 0.5rem;
+  padding: 0.35rem 0.6rem;
+  background: #eef4f9;
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
+
+.dash-selectall__button {
+  padding: 0 0.25rem;
+  vertical-align: baseline;
+}
+
 /* the row's ⋯ slot stays at the right edge while the list scrolls sideways */
 .c-menu {
   position: sticky;
@@ -324,4 +566,421 @@
 
 .dash-table thead .c-menu {
   background: #f8f9fa;
+}
+
+/* the row's ⋯ menu (#2561). A sticky cell is a stacking context of its
+   own, so the later rows' ⋯ cells would paint over an open menu: the cell
+   holding it is raised above them. */
+.c-menu:focus-within,
+.c-menu:has(.dropdown-menu.show) {
+  z-index: 2;
+}
+
+.dash-menu__toggle {
+  padding: 0 0.5rem;
+  font-size: 1.1rem;
+  line-height: 1.4;
+}
+
+.dash-menu__list {
+  font-size: 0.875rem;
+}
+
+/* an action above the user's role: still focusable, so the reason is
+   reachable by keyboard; aria-disabled, not Bootstrap's .disabled */
+/* Delete, last in the menu */
+.dash-menu__danger {
+  color: #b02a37;
+}
+
+.dash-menu__off,
+.dash-menu__off:hover,
+.dash-menu__off:focus {
+  color: var(--dash-muted);
+  cursor: not-allowed;
+  background: transparent;
+}
+
+.dash-menu__why {
+  display: block;
+  font-size: 0.75rem;
+}
+
+/* the action dialog */
+.dash-leftout {
+  font-size: 0.875rem;
+}
+
+.dash-action-list {
+  max-height: 12rem;
+  overflow-y: auto;
+}
+
+/* The access drawer (#2566). It sits outside .dash, so it states the
+   colours it uses itself. Its body is a wrapper the drawer's contents are
+   swapped into, so it carries the offcanvas' column layout on. */
+.dash-access-offcanvas {
+  --dash-muted: #6c757d;
+  --dash-secondary: #1f567d;
+}
+
+.dash-access-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+/* the list's .dash-muted keeps a cell on one line; prose here wraps */
+.dash-access-drawer .dash-muted {
+  font-size: 0.8125rem;
+  color: var(--dash-muted);
+  white-space: normal;
+}
+
+.dash-holders {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dash-holder {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+  padding: 0.35rem 0.4rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+/* the viewer's own entries */
+.dash-holder--you {
+  background: #f5f9fc;
+  box-shadow: inset 3px 0 0 var(--dash-secondary);
+}
+
+.dash-holder__name {
+  flex: 1 1 10rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.dash-holder__you,
+.dash-holder__members {
+  margin-left: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--dash-muted);
+}
+
+.dash-holder__you {
+  font-weight: 600;
+  color: var(--dash-secondary);
+}
+
+/* the role choice and Remove stay together, and wrap below the name as one */
+.dash-holder__controls {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+  margin-left: auto;
+}
+
+.dash-holder__role .form-select {
+  width: auto;
+}
+
+.dash-holder__rolename {
+  font-size: 0.875rem;
+}
+
+.dash-access-add__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.dash-access-add__row .form-control {
+  flex: 1 1 9rem;
+  width: auto;
+}
+
+.dash-access-add__row .form-select {
+  flex: 0 1 auto;
+  width: auto;
+}
+
+.dash-roles dt {
+  font-size: 0.875rem;
+}
+
+.dash-roles dd {
+  margin-bottom: 0.4rem;
+  font-size: 0.8125rem;
+  color: var(--dash-muted);
+}
+
+/* The Table's Admins for someone who cannot change access: small round
+   avatars, named on hover AND on focus, so the name also reaches keyboard
+   and touch users. The name is drawn below the avatar, inside the drawer,
+   so the drawer's own scrolling cannot clip it. */
+.dash-avatars {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding-bottom: 1.6rem;
+}
+
+.dash-avatar {
+  position: relative;
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+.dash-avatar img,
+.dash-avatar svg {
+  display: block;
+  width: 24px;
+  height: 24px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.dash-avatar:focus-visible {
+  outline: 2px solid var(--dash-secondary);
+  outline-offset: 2px;
+}
+
+.dash-avatar:hover::after,
+.dash-avatar:focus::after {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 1;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.75rem;
+  color: #fff;
+  white-space: nowrap;
+  content: attr(data-tip);
+  background: #212529;
+  border-radius: 4px;
+}
+
+/* messages after an action */
+.dash-toasts {
+  z-index: 1090;
+}
+
+.dash-toast {
+  margin-top: 0.5rem;
+  background: #fff;
+}
+
+.dash-toast--ok {
+  border-left: 4px solid #198754;
+}
+
+.dash-toast--error {
+  border-left: 4px solid #dc3545;
+}
+
+/* done, but not cleanly: a delete whose database table stayed behind */
+.dash-toast--warning {
+  border-left: 4px solid #ffc107;
+}
+
+.dash-toast .toast-body a {
+  font-weight: 600;
+}
+
+/* a bulk success: "Show tables" opens the list of what it changed */
+.dash-toast__more {
+  padding: 0;
+  vertical-align: baseline;
+}
+
+.dash-toast__list {
+  max-height: 10rem;
+  margin: 0.35rem 0 0;
+  padding-left: 1.1rem;
+  overflow-y: auto;
+}
+
+/* ------------------------------------------------------------------------
+ * Columns collapse by the list's own width (container queries on `.dash`),
+ * not the viewport's: the profile sidebar takes a different share of each
+ * screen. Drop order: Topics (and Created, once it exists), then Review and
+ * Datasets, then the rows stack. The filter bar folds by its own width.
+ *
+ * Measured 2026-10-02 (#2555) in headless Chrome 152: the narrowest list
+ * each set of columns fits without scrolling, worst of the first six pages
+ * of accounts with 130 and 2,068 Tables (benchmarks/tables_tab, which holds
+ * the measuring script). Taken in DejaVu Sans, the widest font the system
+ * stack falls back to. The thresholds sit about 2 % above the row.
+ *
+ * Re-measured 2026-10-02 (#2557) with the Modified column (111 px: its
+ * header, "Modified ↓", is wider than any date), on the default sort it
+ * brings, newest first. #2555's numbers for the row before it, in brackets.
+ *
+ *                          DejaVu        Segoe UI   threshold
+ *   every column           1,133 (1,030)   1,033    1,160 (1,050)
+ *   without Topics         1,024   (913)     933    1,045   (930)
+ *   also without Review,
+ *     Datasets               812   (701)     747      830   (720)
+ *   the filter bar on
+ *     one line               958   (958)     902      960   (960)
+ *
+ * With the sidebar the list is 1,392 px wide at a 1920 px screen (every
+ * column), 976 at 1440, 896 at 1280 (both without Topics, Review and
+ * Datasets) and 640 at 1024 (stacked); the bar folds at 1280 and below.
+ * So since Modified, a 1440 px screen loses Review and Datasets too: the
+ * row is 48 px too wide for it. Keeping them there needs those 48 px
+ * trimmed from the row (the Table column's 13rem minimum is the largest
+ * candidate), a design call this measurement does not make.
+ *
+ * Re-measured 2026-10-03 (#2564) with ☐ (30 px), the same way, on a
+ * worktree's throwaway database. #2557's numbers in brackets.
+ *
+ *                          DejaVu          threshold
+ *   every column           1,155 (1,133)   1,180 (1,160)
+ *   without Topics         1,046 (1,024)   1,070 (1,045)
+ *   also without Review,
+ *     Datasets               834   (812)     850   (830)
+ *   the filter bar on
+ *     one line               958   (958)     960   (960)
+ *
+ * The screens keep their column sets: every column at 1920, without Topics,
+ * Review and Datasets at 1440 and 1280, stacked at 1024 and below. In the
+ * stacked row ☐ takes only its own width, so 390 px fits without scrolling
+ * (360 px scrolls by 25 px).
+ *
+ * Still to come: Created (#2559, 129 px with a stand-in). With it the row
+ * needs 1,285 for every column. A slice that adds a column re-runs the
+ * measurement and moves these numbers.
+ * ---------------------------------------------------------------------- */
+
+@container (width < 1180px) {
+  .c-created,
+  .c-topics {
+    display: none;
+  }
+}
+
+@container (width < 1070px) {
+  .c-review,
+  .c-ds {
+    display: none;
+  }
+}
+
+/* Too narrow for the bar on one line: everything but Search folds behind
+   "Filters (n)", which shows it below as a block of its own. */
+@container (width < 960px) {
+  .dash-fold-toggle {
+    display: inline-block;
+  }
+
+  .dash-fold {
+    display: none;
+  }
+
+  .dash-fold-toggle[aria-expanded="true"] ~ .dash-fold {
+    display: flex;
+    flex: 1 0 100%;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+  }
+
+  .dash-search {
+    max-width: none;
+  }
+}
+
+/* A row stacks into two lines: ☐, title and ⋯, then Status, Publishable
+   and Modified. Every other cell is hidden, so a column added later has to
+   say here where it goes. The headers go with the columns, so "Sort by"
+   takes their place. */
+@container (width < 850px) {
+  .dash-sortby {
+    display: flex;
+  }
+
+  .dash-bulk__actions {
+    display: none;
+  }
+
+  .dash-bulk__menu {
+    display: block;
+  }
+
+  .dash-table,
+  .dash-table tbody {
+    display: block;
+  }
+
+  .dash-table thead {
+    display: none;
+  }
+
+  .dash-table tr {
+    display: grid;
+    grid-template-columns: auto auto auto 1fr auto;
+    align-items: center;
+    padding: 0.3rem 0;
+    border-bottom: 1px solid #dee2e6;
+  }
+
+  .dash-table tr:last-child {
+    border-bottom: 0;
+  }
+
+  .dash-table td {
+    display: none;
+    padding: 0.15rem 0.5rem;
+    border: 0;
+  }
+
+  .dash-table td.c-select {
+    display: block;
+    grid-row: 1 / span 2;
+    grid-column: 1;
+    width: auto;
+    padding-right: 0;
+    padding-left: 0.25rem;
+  }
+
+  .dash-table td.c-table {
+    display: block;
+    grid-row: 1;
+    grid-column: 2 / 5;
+    min-width: 0;
+  }
+
+  .dash-table td.c-menu {
+    display: block;
+    grid-row: 1;
+    grid-column: 5;
+    position: static;
+    width: auto;
+  }
+
+  .dash-table td.c-status {
+    display: block;
+    grid-row: 2;
+    grid-column: 2;
+  }
+
+  .dash-table td.c-pub {
+    display: block;
+    grid-row: 2;
+    grid-column: 3;
+  }
+
+  .dash-table td.c-modified {
+    display: block;
+    grid-row: 2;
+    grid-column: 4;
+  }
 }

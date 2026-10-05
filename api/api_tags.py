@@ -33,6 +33,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 TABLES = "Tables"
 TABLE_METADATA = "Tables: metadata"
+TABLE_PERMISSIONS = "Tables: permissions"
 DATASETS = "Datasets"
 SCENARIO_BUNDLES = "Scenario Bundles"
 ADVANCED = "Advanced"
@@ -72,6 +73,17 @@ TAGS = [
             "The OEMetadata document a table carries. Writing it never changes "
             "a row, and a table created without one is given a minimal "
             "document generated from its columns."
+        ),
+    },
+    {
+        "name": TABLE_PERMISSIONS,
+        "description": (
+            "Who holds which role on a table: users and organizations at Data "
+            "editor, Data maintainer or Admin. A Table admin adds, changes and "
+            "removes them under the same rules as the table's access drawer "
+            "and permission page -- Admin goes to users only, by name; an "
+            "organization stops at Data maintainer and is shared only by its "
+            "members; and a table always keeps a user with direct Admin."
         ),
     },
     {

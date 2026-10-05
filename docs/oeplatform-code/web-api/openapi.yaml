@@ -6435,6 +6435,292 @@ paths:
                 type: object
                 additionalProperties: {}
           description: Published. The body is empty.
+  /api/v0/tables/{table}/permissions/:
+    get:
+      operationId: tables_permissions_list
+      description: 'The users and organizations holding a role on the table, each
+        with its level and the levels it may be changed to, plus every role a Holder
+        can be given. Needs a login and no role: the table''s permission page shows
+        the same list to anyone. `can_manage` says whether the caller may write.'
+      summary: List a table's Holders
+      parameters:
+      - in: path
+        name: table
+        schema:
+          type: string
+        description: 'The table''s name on this platform. **Names are global**: a
+          table is addressed by name alone and no two tables share one, whichever
+          topic they are published under.'
+        required: true
+      tags:
+      - 'Tables: permissions'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No credentials, or credentials this platform does not know.
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No table of that name on this platform.
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HolderList'
+          description: The table's Holders.
+    post:
+      operationId: tables_permissions_create
+      description: 'Adds a Holder: a user by name, at any role, or an organization
+        the caller is a member of, at Data maintainer at most -- Admin is given to
+        users only. A Holder the table already has is refused; change its role instead.
+        Needs a login and Table admin on the table: Admin, directly or through an
+        organization, or platform admin. The same rules hold as in the table''s access
+        drawer and permission page.'
+      summary: Give a user or an organization a role on a table
+      parameters:
+      - in: path
+        name: table
+        schema:
+          type: string
+        description: 'The table''s name on this platform. **Names are global**: a
+          table is addressed by name alone and no two tables share one, whichever
+          topic they are published under.'
+        required: true
+      tags:
+      - 'Tables: permissions'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HolderAdd'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/HolderAdd'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/HolderAdd'
+        required: true
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No credentials, or credentials this platform does not know.
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No table of that name on this platform.
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Holder'
+          description: The new Holder.
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'The request cannot be carried out as sent: a level outside
+            the offered roles, Admin for an organization, an organization the caller
+            is not a member of, or a user that does not exist. `reason` says which
+            and `field` names the input. Nothing was written.'
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Not a Table admin on this table. Nothing was written.
+  /api/v0/tables/{table}/permissions/{holder}/:
+    patch:
+      operationId: tables_permissions_partial_update
+      description: 'Gives the Holder another of its `roles`. The role it already holds
+        changes nothing and answers 200. A change that would leave the table without
+        a user holding direct Admin is refused; one that takes the caller''s own Admin
+        away asks for `confirm` first. Needs a login and Table admin on the table:
+        Admin, directly or through an organization, or platform admin. The same rules
+        hold as in the table''s access drawer and permission page.'
+      summary: Change a Holder's role on a table
+      parameters:
+      - in: path
+        name: holder
+        schema:
+          type: string
+        description: 'The Holder''s key as the list gives it: `user:<id>` or `org:<id>`.'
+        required: true
+      - in: path
+        name: table
+        schema:
+          type: string
+        description: 'The table''s name on this platform. **Names are global**: a
+          table is addressed by name alone and no two tables share one, whichever
+          topic they are published under.'
+        required: true
+      tags:
+      - 'Tables: permissions'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedHolderChange'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedHolderChange'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedHolderChange'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No credentials, or credentials this platform does not know.
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Holder'
+          description: The Holder as it now stands.
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'The request cannot be carried out as sent: a level outside
+            the offered roles, Admin for an organization, an organization the caller
+            is not a member of, or a user that does not exist. `reason` says which
+            and `field` names the input. Nothing was written.'
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Not a Table admin on this table. Nothing was written.
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No table of that name, or the table has no such Holder -- which
+            a repeated delete also meets.
+        '409':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'Nothing was written, and `code` says why. `last_admin`: the
+            table must keep a user with direct Admin -- give someone else Admin first;
+            confirming does not change this answer. `confirmation_needed`: the change
+            would take the caller''s own Admin, or all their access, away. `reason`
+            says which; send the same request again with `confirm` to make it.'
+    delete:
+      operationId: tables_permissions_destroy
+      description: 'Takes the Holder''s role away; removal is the only way to no access.
+        The last user holding direct Admin cannot be removed. Removing the caller''s
+        own Admin, or all their access, asks for `confirm` first -- as a query parameter
+        here, because a client cannot rely on a DELETE''s body being sent. Needs a
+        login and Table admin on the table: Admin, directly or through an organization,
+        or platform admin. The same rules hold as in the table''s access drawer and
+        permission page.'
+      summary: Remove a Holder from a table
+      parameters:
+      - in: query
+        name: confirm
+        schema:
+          type: boolean
+        description: '`true` after a 409 with `code: confirmation_needed`.'
+      - in: path
+        name: holder
+        schema:
+          type: string
+        description: 'The Holder''s key as the list gives it: `user:<id>` or `org:<id>`.'
+        required: true
+      - in: path
+        name: table
+        schema:
+          type: string
+        description: 'The table''s name on this platform. **Names are global**: a
+          table is addressed by name alone and no two tables share one, whichever
+          topic they are published under.'
+        required: true
+      tags:
+      - 'Tables: permissions'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No credentials, or credentials this platform does not know.
+        '204':
+          description: Removed. No body.
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Not a Table admin on this table. Nothing was written.
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No table of that name, or the table has no such Holder -- which
+            a repeated delete also meets.
+        '409':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'Nothing was written, and `code` says why. `last_admin`: the
+            table must keep a user with direct Admin -- give someone else Admin first;
+            confirming does not change this answer. `confirmation_needed`: the change
+            would take the caller''s own Admin, or all their access, away. `reason`
+            says which; send the same request again with `confirm` to make it.'
   /api/v0/tables/{table}/rows/{row_id}:
     get:
       operationId: tables_rows_retrieve
@@ -9762,6 +10048,84 @@ components:
       - field
       - predicate
       - removed
+    Holder:
+      type: object
+      properties:
+        holder:
+          type: string
+          description: 'The Holder''s key, `user:<id>` or `org:<id>`: its address
+            below `permissions/`.'
+        kind:
+          $ref: '#/components/schemas/KindEnum'
+        id:
+          type: integer
+        name:
+          type: string
+        level:
+          type: integer
+        role:
+          type: string
+          description: The level's name.
+        roles:
+          type: array
+          items:
+            type: integer
+          description: The levels this Holder may be changed to. An organization stops
+            at Data maintainer; one holding Admin from before that rule keeps it in
+            this list, and can only be lowered.
+        you:
+          type: boolean
+          description: Whether this is the caller, or an organization they belong
+            to.
+        members:
+          type: integer
+          description: An organization's member count.
+      required:
+      - holder
+      - id
+      - kind
+      - level
+      - name
+      - role
+      - roles
+      - you
+    HolderAdd:
+      type: object
+      properties:
+        user:
+          type: string
+          description: A user, by name. Give this or `organization`.
+        organization:
+          type: integer
+          description: An organization the caller is a member of, by id.
+        level:
+          type: integer
+          description: One of the levels under `roles`.
+      required:
+      - level
+    HolderList:
+      type: object
+      properties:
+        table:
+          type: string
+        can_manage:
+          type: boolean
+          description: Whether the caller is a Table admin here and may write.
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Role'
+          description: Every role a Holder can be given.
+        holders:
+          type: array
+          items:
+            $ref: '#/components/schemas/Holder'
+          description: Users first, then organizations.
+      required:
+      - can_manage
+      - holders
+      - roles
+      - table
     IdentifiedDatasetLink:
       type: object
       description: A dataset link that may name the one it already is.
@@ -9841,6 +10205,14 @@ components:
       - authors
       - label
       - publication_date
+    KindEnum:
+      enum:
+      - user
+      - org
+      type: string
+      description: |-
+        * `user` - user
+        * `org` - org
     LicenseEnum:
       enum:
       - Academic Free License v3.0
@@ -10036,6 +10408,15 @@ components:
           nullable: true
       required:
       - label
+    PatchedHolderChange:
+      type: object
+      properties:
+        level:
+          type: integer
+          description: 'Required: one of the Holder''s `roles`.'
+        confirm:
+          type: boolean
+          description: '`true` after a 409 with `code: confirmation_needed`.'
     PatchedScenario:
       type: object
       description: |-
@@ -10263,6 +10644,20 @@ components:
       required:
       - type
       - uid
+    Role:
+      type: object
+      properties:
+        level:
+          type: integer
+          description: The stored level, as sent in writes.
+        label:
+          type: string
+        description:
+          type: string
+      required:
+      - description
+      - label
+      - level
     Row:
       type: object
       description: |-
@@ -11015,6 +11410,12 @@ tags:
   description: The OEMetadata document a table carries. Writing it never changes a
     row, and a table created without one is given a minimal document generated from
     its columns.
+- name: 'Tables: permissions'
+  description: 'Who holds which role on a table: users and organizations at Data editor,
+    Data maintainer or Admin. A Table admin adds, changes and removes them under the
+    same rules as the table''s access drawer and permission page -- Admin goes to
+    users only, by name; an organization stops at Data maintainer and is shared only
+    by its members; and a table always keeps a user with direct Admin.'
 - name: Datasets
   description: The catalogue entries that group tables. A dataset's `resources` are
     assembled from its member tables when it is read rather than stored, so a dataset
