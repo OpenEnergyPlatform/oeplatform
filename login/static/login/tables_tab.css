@@ -810,7 +810,7 @@
 /* ------------------------------------------------------------------------
  * Columns collapse by the list's own width (container queries on `.dash`),
  * not the viewport's: the profile sidebar takes a different share of each
- * screen. Drop order: Topics (and Created, once it exists), then Review and
+ * screen. Drop order: Topics and Created, then Review and
  * Datasets, then the rows stack. The filter bar folds by its own width.
  *
  * Measured 2026-10-02 (#2555) in headless Chrome 152: the narrowest list
@@ -855,12 +855,27 @@
  * stacked row ☐ takes only its own width, so 390 px fits without scrolling
  * (360 px scrolls by 25 px).
  *
- * Still to come: Created (#2559, 129 px with a stand-in). With it the row
- * needs 1,285 for every column. A slice that adds a column re-runs the
- * measurement and moves these numbers.
+ * Re-measured 2026-10-05 (#2559) with Created (129 px: "before Nov 2025",
+ * muted, is wider than a date and than its header), the same way, with
+ * Created seeded as production holds it. #2564's numbers in brackets.
+ *
+ *                          DejaVu          threshold
+ *   every column           1,285 (1,155)   1,310 (1,180)
+ *   without Topics and
+ *     Created              1,046 (1,046)   1,070 (1,070)
+ *   also without Review,
+ *     Datasets               834   (834)     850   (850)
+ *   the filter bar on
+ *     one line               958   (958)     960   (960)
+ *
+ * Created drops with Topics, so only the first threshold moves, and the
+ * screens keep their column sets: every column at 1920 (the list is 1,392),
+ * without Topics, Created, Review and Datasets at 1440 and 1280, stacked at
+ * 1024 and below. Every column the spec names is now in the row; a slice
+ * that adds one re-runs the measurement and moves these numbers.
  * ---------------------------------------------------------------------- */
 
-@container (width < 1180px) {
+@container (width < 1310px) {
   .c-created,
   .c-topics {
     display: none;

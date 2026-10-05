@@ -18,7 +18,10 @@ Tables. Deterministic for a given account key.
 Modified is seeded as it will look once #2558 has backfilled the data half:
 about 15 % unknown, 45 % data only (marked "data"), 40 % both halves. The
 stamps come from their own random stream, so the rest of an account is
-seeded as before. Created is not seeded yet.
+seeded as before. Created is seeded as production holds it after
+dataedit.0057 (measured 2026-10-05: 4,567 of 5,114 Tables lie at or below the
+rollout line): about 89 % unknown ("before Nov 2025"), the rest created since
+November 2025, again from a stream of its own.
 
 Every Table carries ``metadata_kb`` of oemetadata, because the page query
 decodes each row's whole document for the live Publish gate; real documents
@@ -380,6 +383,16 @@ def seed_account(
         )
 
     tables = Table.objects.bulk_create([plan["table"] for plan in plans])
+    # after the insert, because auto_now_add overrides a value given to it
+    births = random.Random(f"{key}-{account.n}-created")
+    unknown, known = [], []
+    for table in tables:
+        (unknown if births.random() < 0.89 else known).append(table.pk)
+    Table.objects.filter(pk__in=unknown).update(created=None)
+    for pk in known:
+        Table.objects.filter(pk=pk).update(
+            created=now - timedelta(days=births.randint(0, 330))
+        )
     UserPermission.objects.bulk_create(
         UserPermission(holder=owner, table=table, level=level)
         for plan, table in zip(plans, tables)

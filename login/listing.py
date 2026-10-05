@@ -299,17 +299,25 @@ def dates_within(expression, name: str) -> Callable[[QuerySet, Any], QuerySet]:
     the expression is filtered under, unique per filter."""
 
     def apply(queryset, days):
-        first, last = days
-        bounds = {}
-        if first and first > date.min:
-            bounds[f"{name}__gte"] = _start_of(first)
-        if last and last < date.max:
-            bounds[f"{name}__lt"] = _start_of(last + timedelta(days=1))
-        # a range open at both ends of the calendar still asks for a date
-        bounds = bounds or {f"{name}__isnull": False}
-        return queryset.alias(**{name: expression}).filter(**bounds)
+        return queryset.alias(**{name: expression}).filter(days_within(name, days))
 
     return apply
+
+
+def days_within(name: str, days) -> Q:
+    """The condition that the datetime field or alias ``name`` falls on a day
+    of ``days``, a ``RangeFilter``'s ``(first, last)``, as the current time
+    zone counts days. Never true of NULL, an open range included. For an
+    ``apply`` that has more to say about unknown values than
+    ``dates_within`` does."""
+    first, last = days
+    bounds = {}
+    if first and first > date.min:
+        bounds[f"{name}__gte"] = _start_of(first)
+    if last and last < date.max:
+        bounds[f"{name}__lt"] = _start_of(last + timedelta(days=1))
+    # a range open at both ends of the calendar still asks for a date
+    return Q(**bounds) if bounds else Q(**{f"{name}__isnull": False})
 
 
 @dataclass(frozen=True)
@@ -403,7 +411,9 @@ class Sort:
 
     ``nulls_last`` puts rows whose value is unknown (NULL) at the end in both
     directions, rather than wherever the database's default puts them, which
-    flips with the direction.
+    flips with the direction. ``nulls_lowest`` instead counts an unknown as
+    lower than every value: first ascending, last descending (the reverse of
+    Postgres's default), for an unknown that is known to lie below them all.
     """
 
     key: str
@@ -412,9 +422,15 @@ class Sort:
     ascending: str = "ascending"
     descending: str = "descending"
     nulls_last: bool = False
+    nulls_lowest: bool = False
 
     def order(self, descending: bool) -> list:
-        nulls = {"nulls_last": True} if self.nulls_last else {}
+        if self.nulls_last:
+            nulls = {"nulls_last": True}
+        elif self.nulls_lowest:
+            nulls = {"nulls_last": True} if descending else {"nulls_first": True}
+        else:
+            nulls = {}
         if descending:
             return [self.expression.desc(**nulls)]
         return [self.expression.asc(**nulls)]

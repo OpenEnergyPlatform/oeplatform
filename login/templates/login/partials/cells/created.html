@@ -1,0 +1,18 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+Cell type "created date": the date, its exact time on hover, or a muted
+"before Nov 2025" for a Table whose creation time was never recorded, which
+says why on hover and gives a screen reader the same sentence as text.
+{% endcomment %}
+{% if row.created %}
+  <time class="dash-date"
+        datetime="{{ row.created|date:'c' }}"
+        title="{{ row.created|date:'j M Y, H:i:s T' }}">{{ row.created|date:"j M Y" }}</time>
+{% else %}
+  <span class="dash-muted"
+        title="{{ row.created_note }}"
+        aria-hidden="true">{{ row.created_unknown }}</span>
+  <span class="visually-hidden">{{ row.created_note }}</span>
+{% endif %}

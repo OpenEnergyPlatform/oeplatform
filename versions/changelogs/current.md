@@ -104,6 +104,17 @@ SPDX-License-Identifier: CC0-1.0
   existing tables show "–" until they next change. Deploy: run
   `python manage.py migrate` (`dataedit.0056`, two empty columns)
   [(#2557)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2557)
+- A Table now records when it was created, and the tables tab shows it in a new
+  Created column, sortable (unknowns count as the oldest) and filterable by a
+  Created date range under "More filters". Tables created before November 2025
+  read "before Nov 2025": the field they used to be dated by (`date_updated`)
+  holds a date their metadata declared, not when they were created, and no
+  record of that exists. Such a table matches a Created range only with no start
+  and an end on or after 30 Oct 2025, the only ranges that certainly hold it.
+  `date_updated` itself is unchanged. Deploy: run `python manage.py migrate`
+  (`dataedit.0057`, one column, filled from `date_updated` for tables above id
+  69915 only, measured on production)
+  [(#2559)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2559)
 - Existing tables get the data half of their Modified date where one can be
   recovered: the latest applied change in their edit journal or their latest
   successful bulk upload, whichever is later. The new command
