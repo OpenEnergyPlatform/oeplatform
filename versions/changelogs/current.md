@@ -230,7 +230,8 @@ SPDX-License-Identifier: CC0-1.0
   `create_example_tables` now leaves a complete example table however often it
   runs: it repairs a record whose table is gone, seeds the schema the table is
   really in (it never had its 4 rows before), and no longer fails to create its
-  fallback user [(#PR)](https://github.com/OpenEnergyPlatform/oeplatform/pulls)
+  fallback user
+  [(#2602)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2602)
 
 - Deleting a table removes its peer reviews with it. A review names its table
   only by name, so a table created later under the same name used to inherit the
