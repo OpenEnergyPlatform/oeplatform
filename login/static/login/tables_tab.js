@@ -62,7 +62,10 @@
 // - the selection (#2564): an explicit list of Table names in page memory,
 //   never in the URL, so a bulk action sends exactly the names its dialog
 //   showed. A row's checkbox adds or removes its name, Shift+click a range
-//   from the last row clicked, the header checkbox the page (tri-state). Once
+//   from the last row clicked, the page's checkbox the page (tri-state). The
+//   page's checkbox is the header's, and where the rows stack and the header
+//   row is hidden it is "Select this page" above the list (#2596): every
+//   `data-select-page` box is one control, read and set alike. Once
 //   the page is ticked, the region's banner offers "Select all N matching
 //   tables", which fetches the names once. The selection survives paging,
 //   sorting and actions, because the region's `data-scope` (its filters,
@@ -108,6 +111,7 @@ export const BULK_BAR_ID = "tables-bulk-bar";
 export const BULK_COUNT_ID = "tables-bulk-count";
 export const BULK_CLEAR_ID = "tables-bulk-clear";
 export const SELECT_PAGE_ID = "select-page";
+export const SELECT_PAGE_STACKED_ID = "select-page-stacked";
 export const SELECT_ALL_ID = "tables-select-all";
 export const SELECT_MATCHING_ID = "tables-select-matching";
 export const SELECT_NONE_ID = "tables-select-none";
@@ -521,6 +525,32 @@ export function rowBoxes(region) {
 }
 
 /**
+ * The page's checkboxes: the header's and "Select this page", which takes
+ * its place where the rows stack. The CSS shows one of them at a time.
+ *
+ * @param {Document} doc the document.
+ * @return {HTMLInputElement[]} every `data-select-page` box.
+ */
+export function pageBoxes(doc) {
+  return [...doc.querySelectorAll("input[data-select-page]")];
+}
+
+/**
+ * The page's checkbox the user can see, where focus goes after the selection
+ * is cleared: the first one shown, else the header's.
+ *
+ * @param {Document} doc the document.
+ * @return {HTMLInputElement|null} the box, or null on a page without one.
+ */
+export function visiblePageBox(doc) {
+  const boxes = pageBoxes(doc);
+  const shown = boxes.find(
+    (box) => !box.checkVisibility || box.checkVisibility(),
+  );
+  return shown || doc.getElementById(SELECT_PAGE_ID) || boxes[0] || null;
+}
+
+/**
  * The names from one row to another, both included, in page order: what a
  * Shift+click ticks or unticks. Just `to` when `from` is not on this page.
  *
@@ -540,7 +570,7 @@ export function rangeOf(boxes, from, to) {
 }
 
 /**
- * Show the selection: tick the page's boxes from it, set the header box
+ * Show the selection: tick the page's boxes from it, set the page's boxes
  * (checked, indeterminate or neither), offer the banner's "Select all N
  * matching tables" once the page is ticked or say that all of them are, and
  * turn the bulk bar's slot into the bar while anything is selected.
@@ -562,8 +592,7 @@ export function renderSelection(
   }
   const ticked = boxes.filter((box) => box.checked).length;
   const pageFull = boxes.length > 0 && ticked === boxes.length;
-  const header = doc.getElementById(SELECT_PAGE_ID);
-  if (header) {
+  for (const header of pageBoxes(doc)) {
     header.checked = pageFull;
     header.indeterminate = ticked > 0 && !pageFull;
   }
@@ -690,6 +719,11 @@ export function bindTablesTab(
     }
     render();
   };
+  // after a clear: the page's box the user can see, whichever layout
+  const focusPageBox = () => {
+    const shown = visiblePageBox(doc);
+    focusAfterAction(doc, shown ? shown.id : SELECT_PAGE_ID);
+  };
   const forget = (names) => {
     for (const name of names || []) {
       selection.delete(name);
@@ -786,7 +820,7 @@ export function bindTablesTab(
       anchor = row.value;
       return true;
     }
-    if (target.closest(`#${SELECT_PAGE_ID}`)) {
+    if (target.closest("input[data-select-page]")) {
       const boxes = rowBoxes(doc.getElementById(REGION_ID));
       select(
         boxes.map((box) => box.value),
@@ -801,12 +835,12 @@ export function bindTablesTab(
     }
     if (target.closest(`#${SELECT_NONE_ID}`)) {
       clearSelection();
-      focusAfterAction(doc, SELECT_PAGE_ID);
+      focusPageBox();
       return true;
     }
     if (target.closest(`#${BULK_CLEAR_ID}`)) {
       clearSelection();
-      focusAfterAction(doc, SELECT_PAGE_ID);
+      focusPageBox();
       return true;
     }
     return false;

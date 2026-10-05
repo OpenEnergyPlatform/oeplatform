@@ -298,8 +298,10 @@ class Preflight:
     set; ``over_ceiling`` says the names sent exceed it, and then nothing
     can be confirmed. ``consequences`` holds what the dialog has to state
     for this action, and ``subject`` is what the request is about: the one
-    Table's title, or "n tables". ``confirmation`` is what the user has to
-    type to confirm, "" for a plain confirmation (``_confirmation``).
+    Table's title, or for a batch the Tables it acts on (``_batch_subject``:
+    "n tables", or "e of n tables" when some are not acted on).
+    ``confirmation`` is what the user has to type to confirm, "" for a plain
+    confirmation (``_confirmation``).
     """
 
     action: str
@@ -373,6 +375,11 @@ class Preflight:
         if self.action == ORGANIZATION_SHARE and self.level is None:
             return False
         return bool(self.eligible)
+
+    @property
+    def left_out_count(self) -> int:
+        """How many of the names sent are left out, over every reason."""
+        return sum(len(group.names) for group in self.left_out)
 
     @property
     def over_ceiling(self) -> bool:
@@ -484,6 +491,16 @@ def choice(action, params) -> str:
     return ",".join(str(params.get(key) or "") for key in CHOICES.get(action, ()))
 
 
+def _batch_subject(acted_on, total) -> str:
+    """What a batch's dialog is about, counting what its list counts: the
+    Tables the action would act on, out of the names sent when that is
+    fewer ("14 of 16 tables"), so the title and the list agree and the
+    left-out difference shows in the title."""
+    if acted_on == total:
+        return f"{total:,} tables"
+    return f"{acted_on:,} of {total:,} tables"
+
+
 def _ceiling_rule(action, ceiling) -> str:
     return f"{ACTION_NAMES[action]} takes at most {ceiling:,} tables at a time."
 
@@ -526,43 +543,52 @@ def _check(user, action, table, level, assignable=frozenset(), republish=False) 
     return ""
 
 
-def _others_datasets(user, tables) -> list:
-    """``(owner's name, Dataset name)`` for every other user's Dataset that
-    contains one of ``tables``: after an unpublish they hold a draft member.
-    Only Datasets the user may see are named (``visible_datasets``)."""
-    rows = (
-        Dataset.objects.filter(tables__in=tables)
-        .filter(pk__in=visible_datasets(user).values("pk"))
-        .exclude(creator=user)
-        .order_by("creator__name", "name")
-        .values_list("creator__name", "name")
-        .distinct()
+def _datasets_holding(user, tables):
+    """The Datasets the user may see (``visible_datasets``) that hold one of
+    ``tables``, each with how many of them it holds, named by title
+    (``dataset_title``), as the Dataset chooser and the Datasets column name
+    them. Returns the user's own as ``(title, count)`` and other people's as
+    ``(owner's name, title, count)``, sorted by owner and title. One
+    query."""
+    datasets = (
+        Dataset.objects.filter(pk__in=visible_datasets(user).values("pk"))
+        .annotate(held=Count("tables", filter=Q(tables__in=tables)))
+        .filter(held__gt=0)
+        .select_related("creator")
     )
-    return [(owner or "Unknown owner", name) for owner, name in rows]
+    own, others = [], []
+    for dataset in datasets:
+        title = dataset_title(dataset)
+        if dataset.creator_id == user.pk:
+            own.append((title, dataset.held))
+        else:
+            owner = dataset.creator.name if dataset.creator else ""
+            others.append((owner or "Unknown owner", title, dataset.held))
+    own.sort(key=lambda row: (row[0].lower(), row[0]))
+    others.sort(key=lambda row: (row[0].lower(), row[1].lower(), row[1]))
+    return own, others
+
+
+def _others_datasets(user, tables) -> list:
+    """``(owner's name, Dataset title, count)`` for every other user's
+    Dataset that holds one of ``tables``, the count being how many of them:
+    after an unpublish those are its draft members. Only Datasets the user
+    may see are named (``visible_datasets``)."""
+    return _datasets_holding(user, tables)[1]
 
 
 def _delete_consequences(user, tables) -> dict:
     """What deleting ``tables`` breaks, for the dialog: the Datasets they
-    leave (the user's own by name, other people's by owner and name, since
-    their membership goes silently), each with how many of ``tables`` leave
-    it, which are published, their Review state, an active embargo, and
-    whether knowledge-graph links may point at them. A batch is shown
-    counted rather than listed per Table, so the review states are counted
-    here too. Three queries whatever the number of Tables."""
+    leave (``_datasets_holding``: the user's own by title, other people's by
+    owner and title, since their membership goes silently), each with how
+    many of ``tables`` leave it, which are published, their Review state,
+    an active embargo, and whether knowledge-graph links may point at them.
+    A batch is shown counted rather than listed per Table, so the review
+    states are counted here too. Three queries whatever the number of
+    Tables."""
     names = [table.name for table in tables]
     published = [table for table in tables if table.is_publish]
-    datasets = (
-        Dataset.objects.filter(pk__in=visible_datasets(user).values("pk"))
-        .annotate(leaving=Count("tables", filter=Q(tables__in=tables)))
-        .filter(leaving__gt=0)
-        .values_list("creator_id", "creator__name", "name", "leaving")
-    )
-    own, others = [], []
-    for creator, owner, name, leaving in datasets:
-        if creator == user.pk:
-            own.append((name, leaving))
-        else:
-            others.append((owner or "Unknown owner", name, leaving))
+    own, others = _datasets_holding(user, tables)
     reviews = {}
     for name, finished in PeerReview.objects.filter(table__in=names).values_list(
         "table", "is_finished"
@@ -577,8 +603,8 @@ def _delete_consequences(user, tables) -> dict:
     finished = sum(1 for state in reviews.values() if state)
     return {
         "published": published,
-        "own_datasets": sorted(own),
-        "others_datasets": sorted(others),
+        "own_datasets": own,
+        "others_datasets": others,
         "reviewed": [
             (by_name[name], "Reviewed" if state else "In review")
             for name, state in sorted(reviews.items())
@@ -597,7 +623,8 @@ def _delete_consequences(user, tables) -> dict:
 def _dataset_choices(user, action, tables) -> list:
     """The user's own Datasets ``action`` could change for ``tables``: for
     adding, those still missing at least one of them; for removing, those
-    holding at least one. By title. One query."""
+    holding at least one. By title (``dataset_title``, which each carries
+    as ``title``). One query."""
     if not tables:
         return []
     ids = [table.pk for table in tables]
@@ -608,7 +635,11 @@ def _dataset_choices(user, action, tables) -> list:
         datasets = datasets.filter(held__lt=len(ids))
     else:
         datasets = datasets.filter(held__gt=0)
-    return sorted(datasets, key=lambda d: (dataset_title(d).lower(), d.name))
+    datasets = list(datasets)
+    for dataset in datasets:
+        # what the select shows, so the dialog names a Dataset one way
+        dataset.title = dataset_title(dataset)
+    return sorted(datasets, key=lambda d: (d.title.lower(), d.name))
 
 
 def _chosen_dataset(user, value, choices):
@@ -732,7 +763,7 @@ def preflight(user, action, names, params=None) -> Preflight:
             eligible=[],
             left_out=[],
             ceiling=ceiling,
-            subject=f"{len(names)} tables",
+            subject=_batch_subject(len(names), len(names)),
             requested=names,
         )
     found = {table.name: table for table in Table.objects.filter(name__in=names)}
@@ -748,7 +779,7 @@ def preflight(user, action, names, params=None) -> Preflight:
     republish = action == PUBLISH and bool(params.get("republish"))
 
     eligible, reasons = [], {}
-    subject = f"{len(names)} tables"
+    subject = ""
     for name in names:
         table = found.get(name)
         if table is None or levels[table.pk] <= NO_PERM:
@@ -790,6 +821,9 @@ def preflight(user, action, names, params=None) -> Preflight:
             members = plan.members
             lose_access, lose_admin = plan.lose_access, plan.lose_admin
 
+    if len(names) != 1:
+        # counted once every split is made, so it counts what the list does
+        subject = _batch_subject(len(eligible), len(names))
     consequences = {}
     if action == UNPUBLISH and eligible:
         consequences["others_datasets"] = _others_datasets(user, eligible)

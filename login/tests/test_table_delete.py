@@ -117,17 +117,19 @@ class DeletePreflightTests(DeleteTestCase):
 
     def test_a_published_table_states_what_deleting_breaks(self):
         table = self.draft("t_cited", title="Cited", published=True)
-        Dataset.objects.create(name="ds_mine", creator=self.user).tables.add(table)
-        Dataset.objects.create(name="ds_theirs", creator=self.stranger).tables.add(
-            table
-        )
+        Dataset.objects.create(
+            name="ds_mine", creator=self.user, metadata={"title": "Wind atlas"}
+        ).tables.add(table)
+        Dataset.objects.create(
+            name="ds_theirs", creator=self.stranger, metadata={"title": "Grid study"}
+        ).tables.add(table)
         self.review("t_cited", finished=True)
         Embargo.objects.create(table=table, duration="6_months")
         response = self.preflight("delete", "t_cited")
         c = response.context["preflight"].consequences
         self.assertEqual(c["published"], [table])
-        self.assertEqual(c["own_datasets"], [("ds_mine", 1)])
-        self.assertEqual(c["others_datasets"], [(self.stranger.name, "ds_theirs", 1)])
+        self.assertEqual(c["own_datasets"], [("Wind atlas", 1)])
+        self.assertEqual(c["others_datasets"], [(self.stranger.name, "Grid study", 1)])
         self.assertEqual(c["reviewed"], [(table, "Reviewed")])
         self.assertEqual([t for t, _ in c["embargoed"]], [table])
         self.assertTrue(c["knowledge_graph"])

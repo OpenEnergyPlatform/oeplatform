@@ -34,7 +34,7 @@ from login.models import (
 from login.tests.helpers import HTMX
 from login.tests.test_table_actions import DIALOG, ActionTestCase
 from login.tests.test_tables_columns import NO_LICENSE
-from modelview.tests.html import element_with_id
+from modelview.tests.html import element_markup, element_with_id, text
 
 GATE_FAILED = "Fails the Publish gate: License"
 
@@ -97,6 +97,19 @@ class SelectColumnTests(BulkTestCase):
             'aria-label="Select all 5 tables on this page"',
             element_with_id(last, "select-page"),
         )
+
+    def test_a_stacked_list_selects_the_page_with_a_box_of_its_own(self):
+        """Where the rows stack the header row is hidden (CSS), and with it
+        #select-page; "Select this page" is the same control there
+        (``data-select-page``, which tables_tab.js reads alike, #2596)."""
+        self.draft("t_stack")
+        html = self.get(htmx=True).content.decode()
+        stacked = element_with_id(html, "select-page-stacked")
+        self.assertIn("data-select-page", stacked)
+        self.assertIn("data-select-page", element_with_id(html, "select-page"))
+        self.assertIn('for="select-page-stacked"', html)
+        none = self.get({"search": "nothing-matches"}, htmx=True).content.decode()
+        self.assertEqual(element_with_id(none, "select-page-stacked"), "")
 
     def test_the_banner_offers_every_matching_table(self):
         for i in range(30):
@@ -324,18 +337,29 @@ class BulkPreflightTests(BulkTestCase):
 
     def test_bulk_unpublish_names_other_peoples_datasets(self):
         table = self.draft("t_cited", published=True)
-        self.draft("t_plain", published=True)
+        plain = self.draft("t_plain", published=True)
+        self.draft("t_also", published=True)
         self.draft("t_draft_already")
-        theirs = Dataset.objects.create(name="ds_theirs", creator=self.stranger)
-        theirs.tables.add(table)
-        check = self.bulk_check("unpublish", "t_cited", "t_plain", "t_draft_already")
-        self.assertEqual(check.names, ["t_cited", "t_plain"])
+        theirs = Dataset.objects.create(
+            name="ds_theirs", creator=self.stranger, metadata={"title": "Grid study"}
+        )
+        theirs.tables.add(table, plain)
+        response = self.bulk_preflight(
+            "unpublish", "t_cited", "t_plain", "t_also", "t_draft_already"
+        )
+        check = response.context["preflight"]
+        self.assertEqual(check.names, ["t_cited", "t_plain", "t_also"])
         self.assertEqual(self.left_out(check), {"Not published": ["t_draft_already"]})
+        # by title, with how many of these Tables each holds
         self.assertEqual(
             check.consequences["others_datasets"],
-            [(self.stranger.name, "ds_theirs")],
+            [(self.stranger.name, "Grid study", 2)],
         )
         self.assertEqual(check.confirmation, "")
+        self.assertIn(
+            f"Grid study ({self.stranger.name}): 2 tables",
+            text(element_markup(response.content.decode(), "table-action-datasets")),
+        )
 
     def test_a_preflight_writes_nothing(self):
         self.draft("t_untouched")
@@ -353,6 +377,77 @@ class BulkPreflightTests(BulkTestCase):
     def test_an_unknown_action_is_404(self):
         response = self.client.post(self.check_path("rename"), {}, **HTMX)
         self.assertEqual(response.status_code, 404)
+
+
+class BulkCountTests(BulkTestCase):
+    """A bulk dialog's title and its list count the same thing, the Tables
+    the action acts on, and the title says out of how many were sent when
+    some are left out (#2596). One Table keeps its title."""
+
+    def title(self, response):
+        return text(element_markup(response.content.decode(), "table-action-title"))
+
+    def test_title_and_list_count_the_tables_acted_on(self):
+        for action, verb, published in (
+            ("publish", "published", False),
+            ("delete", "deleted", False),
+            ("unpublish", "unpublished", True),
+        ):
+            with self.subTest(action=action):
+                names = [f"t_{action}_{i}" for i in range(3)]
+                for name in names:
+                    self.draft(name, published=published)
+                # one each the action leaves out: the user is a Data editor
+                self.draft(f"t_{action}_editor", level=WRITE_PERM, published=published)
+                response = self.bulk_preflight(action, *names, f"t_{action}_editor")
+                check = response.context["preflight"]
+                self.assertEqual(check.subject, "3 of 4 tables")
+                self.assertEqual(check.left_out_count, 1)
+                self.assertEqual(
+                    self.title(response), f"{action.capitalize()} 3 of 4 tables"
+                )
+                html = response.content.decode()
+                self.assertEqual(
+                    text(element_markup(html, "table-action-list-label")),
+                    f"Will be {verb} (3):",
+                )
+                self.assertTrue(
+                    text(element_markup(html, "table-action-left-out")).startswith(
+                        "Left out (1):"
+                    )
+                )
+
+    def test_with_nothing_left_out_the_title_counts_every_name(self):
+        self.draft("t_all_a")
+        self.draft("t_all_b")
+        response = self.bulk_preflight("publish", "t_all_a", "t_all_b")
+        self.assertEqual(self.title(response), "Publish 2 tables")
+        self.assertEqual(
+            text(element_markup(response.content.decode(), "table-action-list-label")),
+            "Will be published (2):",
+        )
+
+    def test_with_nothing_eligible_the_title_says_none_of_them(self):
+        self.draft("t_none_a")
+        self.draft("t_none_b")
+        response = self.bulk_preflight("unpublish", "t_none_a", "t_none_b")
+        self.assertEqual(self.title(response), "Unpublish 0 of 2 tables")
+        self.assertNotEqual(
+            element_with_id(response.content.decode(), "table-action-nothing"), ""
+        )
+
+    def test_one_table_is_named_by_its_title_even_when_left_out(self):
+        self.draft("t_one", title="Wind farms", published=True)
+        response = self.bulk_preflight("publish", "t_one")
+        self.assertEqual(self.title(response), "Publish “Wind farms”")
+
+    def test_over_the_ceiling_the_title_counts_the_names_sent(self):
+        names = [f"t_over_{i}" for i in range(4)]
+        for name in names:
+            self.draft(name)
+        with mock.patch.dict(table_actions.CEILINGS, {"publish": 3}):
+            response = self.bulk_preflight("publish", *names)
+        self.assertEqual(self.title(response), "Publish 4 tables")
 
 
 class CeilingTests(BulkTestCase):

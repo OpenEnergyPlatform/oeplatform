@@ -30,7 +30,7 @@ from login.models import (
 from login.tests.helpers import HTMX
 from login.tests.test_tables_columns import NO_LICENSE, OPEN_LICENSE
 from login.tests.test_tables_tab import TablesTabTestCase
-from modelview.tests.html import element_with_id
+from modelview.tests.html import element_markup, element_with_id, text
 from oeplatform.settings import PSEUDO_TOPIC_DRAFT
 
 DIALOG = "login/partials/table_action_dialog.html"
@@ -223,15 +223,26 @@ class PreflightTests(ActionTestCase):
     def test_unpublish_names_other_peoples_datasets(self):
         table = self.draft("t_cited", published=True)
         Dataset.objects.create(name="ds_mine", creator=self.user).tables.add(table)
-        Dataset.objects.create(name="ds_theirs", creator=self.stranger).tables.add(
+        Dataset.objects.create(
+            name="ds_theirs", creator=self.stranger, metadata={"title": "Grid study"}
+        ).tables.add(table)
+        Dataset.objects.create(name="ds_untitled", creator=self.stranger).tables.add(
             table
         )
         response = self.preflight("unpublish", "t_cited")
+        # by title, falling back to the name, each with how many it holds
         self.assertEqual(
             response.context["preflight"].consequences["others_datasets"],
-            [(self.stranger.name, "ds_theirs")],
+            [
+                (self.stranger.name, "ds_untitled", 1),
+                (self.stranger.name, "Grid study", 1),
+            ],
         )
         self.assertContains(response, "no longer be listed under its topics")
+        html = response.content.decode()
+        listed = text(element_markup(html, "table-action-datasets"))
+        self.assertIn(f"Grid study ({self.stranger.name})", listed)
+        self.assertNotIn("ds_theirs", listed)
 
     def test_nothing_eligible_offers_no_confirmation(self):
         self.draft("t_noconfirm", level=WRITE_PERM)

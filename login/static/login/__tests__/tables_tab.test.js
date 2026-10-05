@@ -22,6 +22,7 @@ import {
   focusAfterAction,
   isUnavailable,
   loginLink,
+  pageBoxes,
   rangeOf,
   renderSelection,
   restoreDrawerFocus,
@@ -29,6 +30,7 @@ import {
   rowBoxes,
   showToast,
   syncFilters,
+  visiblePageBox,
 } from "../tables_tab.js";
 
 /** The region, its `data-filters` written the way Django escapes it. */
@@ -980,10 +982,22 @@ describe("bindTablesTab, access drawer", () => {
 // shows (`data-scope`) and how many Tables match (the banner's
 // `data-total`); everything else is page memory.
 
-/** A region of `names` rows, under `scope`, out of `total` matching. */
-const SELECT_REGION = (names, { scope = "", total = names.length } = {}) => `
+/**
+ * A region of `names` rows, under `scope`, out of `total` matching. Both of
+ * the page's boxes are there, as the server renders them; `stacked` hides
+ * the header row and shows "Select this page", as the CSS does where the
+ * rows stack, and otherwise the other way round.
+ */
+const SELECT_REGION = (
+  names,
+  { scope = "", total = names.length, stacked = false } = {},
+) => `
   <div id="tables-results" data-announce="x" data-filters="{}"
        data-more="0" data-folded="0" data-scope="${scope}">
+    <div class="dash-selectpage"${stacked ? "" : ' style="display: none"'}>
+      <input type="checkbox" id="select-page-stacked" data-select-page />
+      <label for="select-page-stacked">Select this page</label>
+    </div>
     <h2 id="tables-heading" tabindex="-1">Your tables</h2>
     <div id="tables-select-all" data-total="${total}"
          data-names-url="/names${scope}" hidden>
@@ -994,7 +1008,7 @@ const SELECT_REGION = (names, { scope = "", total = names.length } = {}) => `
       <button type="button" id="tables-select-none"
               data-when="all">Clear selection</button>
     </div>
-    <table><thead><tr><th>
+    <table><thead${stacked ? ' style="display: none"' : ""}><tr><th>
       <input type="checkbox" id="select-page" data-select-page />
     </th></tr></thead><tbody>
     ${names
@@ -1111,6 +1125,29 @@ describe("renderSelection", () => {
       document.getElementById("tables-select-matching").hidden,
     ).toBe(false);
     expect(document.getElementById("tables-select-none").hidden).toBe(true);
+  });
+
+  it("keeps both of the page's boxes in step", () => {
+    const boxes = pageBoxes(document);
+    expect(boxes.map((b) => b.id)).toEqual(["select-page-stacked", "select-page"]);
+    renderSelection(document, new Set(["a"]));
+    for (const b of boxes) {
+      expect([b.checked, b.indeterminate]).toEqual([false, true]);
+    }
+    renderSelection(document, new Set(["a", "b"]));
+    for (const b of boxes) {
+      expect([b.checked, b.indeterminate]).toEqual([true, false]);
+    }
+    renderSelection(document, new Set());
+    for (const b of boxes) {
+      expect([b.checked, b.indeterminate]).toEqual([false, false]);
+    }
+  });
+
+  it("finds the page's box the layout shows", () => {
+    expect(visiblePageBox(document).id).toBe("select-page");
+    renderSelectPage(SELECT_REGION(["a", "b"], { stacked: true }));
+    expect(visiblePageBox(document).id).toBe("select-page-stacked");
   });
 
   it("offers nothing more when the page holds every matching table", () => {
@@ -1342,6 +1379,91 @@ describe("bindTablesTab, selection", () => {
       "“B”",
     ]);
     expect(more.getAttribute("aria-expanded")).toBe("true");
+  });
+});
+
+describe("bindTablesTab, selection where the rows stack (#2596)", () => {
+  let unbind;
+  let fetchNames;
+
+  beforeEach(() => {
+    renderSelectPage(
+      SELECT_REGION(["a", "b", "c", "d"], {
+        scope: "?status=draft",
+        total: 6,
+        stacked: true,
+      }),
+    );
+    fetchNames = vi.fn(async () => ["a", "b", "c", "d", "e", "f"]);
+    unbind = bindTablesTab(document, {
+      announceDelay: 0,
+      dialog: fakeDialog(),
+      schedule: () => {},
+      fetchNames,
+    });
+  });
+
+  afterEach(() => unbind());
+
+  const stacked = () => document.getElementById("select-page-stacked");
+
+  it("selects the page in one step, then clears it in one", () => {
+    tick(stacked());
+    expect(ticked()).toEqual(["a", "b", "c", "d"]);
+    expect(document.getElementById("tables-bulk-count").textContent).toBe(
+      "4 selected",
+    );
+    tick(stacked());
+    expect(ticked()).toEqual([]);
+    expect(document.getElementById("tables-bulk-bar").hidden).toBe(true);
+  });
+
+  it("is tri-state like the header box", () => {
+    tick(box("b"));
+    expect([stacked().checked, stacked().indeterminate]).toEqual([false, true]);
+    // a part-ticked page is ticked whole, as the header box does
+    tick(stacked());
+    expect(ticked()).toEqual(["a", "b", "c", "d"]);
+    expect([stacked().checked, stacked().indeterminate]).toEqual([true, false]);
+  });
+
+  it("brings up Select all N matching, which then selects every one", async () => {
+    const banner = document.getElementById("tables-select-all");
+    expect(banner.hidden).toBe(true);
+    tick(stacked());
+    expect(banner.hidden).toBe(false);
+    expect(document.getElementById("tables-select-matching").hidden).toBe(false);
+    tick(document.getElementById("tables-select-matching"));
+    await nextTick();
+    expect(fetchNames).toHaveBeenCalledWith("/names?status=draft");
+    expect(document.getElementById("tables-bulk-count").textContent).toBe(
+      "6 selected",
+    );
+  });
+
+  it("gets focus back after a clear, the header box being hidden", async () => {
+    tick(stacked());
+    tick(document.getElementById("tables-select-matching"));
+    await nextTick();
+    tick(document.getElementById("tables-select-none"));
+    expect(document.getElementById("tables-bulk-bar").hidden).toBe(true);
+    expect(document.activeElement.id).toBe("select-page-stacked");
+    tick(box("a"));
+    tick(document.getElementById("tables-bulk-clear"));
+    expect(document.activeElement.id).toBe("select-page-stacked");
+  });
+
+  it("keeps its state across a swap of the same scope", () => {
+    tick(stacked());
+    swapRegion(
+      SELECT_REGION(["a", "b", "c", "d"], {
+        scope: "?status=draft",
+        total: 6,
+        stacked: true,
+      }),
+    );
+    expect(stacked().checked).toBe(true);
+    expect(ticked()).toEqual(["a", "b", "c", "d"]);
   });
 });
 

@@ -11,7 +11,12 @@ embargo and knowledge-graph links, counted for a batch). The Dataset actions
 choose one of the user's own Datasets first (table_action_dataset.html), the
 Organization actions an Organization and, for a share, a role
 (table_action_organization.html); a share names the Tables that stay
-unchanged, a removal those the user would lose.
+unchanged, a removal those the user would lose. Unpublish counts, per other
+person's Dataset, how many of the Tables it holds.
+A batch's title and its list count the same thing, the Tables the action
+acts on; the title adds how many were sent when that is more ("Delete 14 of
+16 tables", ``preflight.subject``), and "Left out (n)" says how many are not.
+Every Dataset is named by its title (``table_actions.dataset_title``).
 Delete may ask for a typed confirmation (``preflight.confirmation``: the
 Table's name or the number of Tables; table_action_delete.html). Over the
 action's ceiling nothing can be confirmed. The form posts the eligible names
@@ -22,9 +27,9 @@ and the preflight run again; an unusable parameter comes back with
 
 Everything that depends on the choice made in the dialog (a Dataset, an
 Organization, a role) is in #table-action-preview (the left-out groups, the
-list, the names the form posts) and #table-action-footer (whether it can be
-confirmed), so a re-check swaps those two and never the control the user is
-on.
+list, the names the form posts), #table-action-footer (whether it can be
+confirmed) and #table-action-title (the count), so a re-check swaps those
+three and never the control the user is on.
 {% endcomment %}
 {% with check=preflight %}
   <div class="modal-header">
@@ -93,7 +98,9 @@ on.
         {% if check.left_out %}
           <div id="table-action-left-out" class="dash-leftout">
             {% if check.eligible %}
-              <p class="mb-1">Left out:</p>
+              <p class="mb-1">
+                Left out{% if check.total > 1 %} ({{ check.left_out_count }}){% endif %}:
+              </p>
             {% endif %}
             <ul class="mb-2">
               {% for group in check.left_out %}
@@ -124,23 +131,25 @@ on.
         {% if check.eligible and not check.over_ceiling %}
           {% if check.total > 1 %}
             <p class="mb-1" id="table-action-list-label">
+              {% comment %}Counts what the title counts (preflight.subject).{% endcomment %}
               {% if check.action == "publish" %}
-                Will be published:
+                Will be published
               {% elif check.action == "unpublish" %}
-                Will be unpublished:
+                Will be unpublished
               {% elif check.action == "delete" %}
-                Will be deleted ({{ check.eligible|length }}):
+                Will be deleted
               {% elif check.action == "dataset_add" %}
-                Will be added:
+                Will be added
               {% elif check.action == "dataset_remove" %}
-                Will be removed:
+                Will be removed
               {% elif check.action == "organization_share" %}
-                Will be shared:
+                Will be shared
               {% elif check.organization %}
-                “{{ check.organization.name }}” will be removed from:
+                Will lose “{{ check.organization.name }}”
               {% else %}
-                Selected:
+                Selected
               {% endif %}
+              ({{ check.eligible|length }}):
             </p>
             {% comment %}Scrollable, so focusable: a keyboard reaches every name of a long batch.{% endcomment %}
             <ul id="table-action-list"
@@ -258,25 +267,36 @@ on.
               </div>
             {% endif %}
           {% elif check.action == "unpublish" %}
-            <p>
-              {% if check.total == 1 %}
-                It
-              {% else %}
-                They
+            {% with n=check.eligible|length %}
+              <p>
+                {% if n == 1 %}
+                  It
+                {% else %}
+                  They
+                {% endif %}
+                will no longer be listed under {{ n|pluralize:"its,their" }} topics. The data, the
+                metadata and the topics stay, and you can publish again at any time.
+              </p>
+              {% if check.consequences.others_datasets %}
+                <div id="table-action-datasets">
+                  <p class="mb-1">
+                    These datasets of other people will hold
+                    {% if n == 1 %}
+                      it as a draft member:
+                    {% else %}
+                      draft members:
+                    {% endif %}
+                  </p>
+                  <ul>
+                    {% for owner, title, held in check.consequences.others_datasets %}
+                      <li>
+                        {{ title }} <span class="dash-muted">({{ owner }})</span>{% if n > 1 %}: {{ held }} {{ held|pluralize:"table,tables" }}{% endif %}
+                      </li>
+                    {% endfor %}
+                  </ul>
+                </div>
               {% endif %}
-              will no longer be listed under {{ check.total|pluralize:"its,their" }} topics. The data, the
-              metadata and the topics stay, and you can publish again at any time.
-            </p>
-            {% if check.consequences.others_datasets %}
-              <div id="table-action-datasets">
-                <p class="mb-1">These datasets of other people will hold a draft member:</p>
-                <ul>
-                  {% for owner, name in check.consequences.others_datasets %}
-                    <li>{{ name }} <span class="dash-muted">({{ owner }})</span></li>
-                  {% endfor %}
-                </ul>
-              </div>
-            {% endif %}
+            {% endwith %}
           {% endif %}
         {% elif not check.over_ceiling %}
           <p id="table-action-nothing">

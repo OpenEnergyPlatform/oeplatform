@@ -11,8 +11,8 @@ holding a published Table or more than ten). A mismatch comes back as
 One Table is described by itself. A batch is counted: the dialog's list
 above names every Table and marks the published ones, so this block says how
 many are published, reviewed, in review or under embargo, and which Datasets
-lose how many of them (other people's by owner, since their membership goes
-silently).
+lose how many of them, by title (other people's by owner, since their
+membership goes silently).
 {% endcomment %}
 {% with c=check.consequences n=check.eligible|length %}
   <p>
@@ -39,8 +39,8 @@ silently).
         {% if c.own_datasets %}
           <li id="table-action-own-datasets">
             Removed from your {{ c.own_datasets|length|pluralize:"dataset,datasets" }}:
-            {% for name, leaving in c.own_datasets %}
-              {{ name }}{% if n > 1 %} ({{ leaving }} {{ leaving|pluralize:"table,tables" }}){% endif %}{% if not forloop.last %},{% endif %}
+            {% for title, leaving in c.own_datasets %}
+              {{ title }}{% if n > 1 %} ({{ leaving }} {{ leaving|pluralize:"table,tables" }}){% endif %}{% if not forloop.last %},{% endif %}
             {% endfor %}
           </li>
         {% endif %}
@@ -48,9 +48,9 @@ silently).
           <li id="table-action-datasets">
             Removed from {{ c.others_datasets|length|pluralize:"another person's dataset,other people's datasets" }}, without telling {{ c.others_datasets|length|pluralize:"its owner,their owners" }}:
             <ul>
-              {% for owner, name, leaving in c.others_datasets %}
+              {% for owner, title, leaving in c.others_datasets %}
                 <li>
-                  {{ name }} <span class="dash-muted">({{ owner }})</span>{% if n > 1 %}: {{ leaving }} {{ leaving|pluralize:"table,tables" }}{% endif %}
+                  {{ title }} <span class="dash-muted">({{ owner }})</span>{% if n > 1 %}: {{ leaving }} {{ leaving|pluralize:"table,tables" }}{% endif %}
                 </li>
               {% endfor %}
             </ul>
