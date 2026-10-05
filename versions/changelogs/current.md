@@ -224,7 +224,8 @@ SPDX-License-Identifier: CC0-1.0
 - Saved table views (graph and map views, the default view) can only be created,
   changed or deleted by someone with write permission on the table; the "Add …
   view" links are shown only to them. Saving a view now finds it only within its
-  own table [(#PR)](https://github.com/OpenEnergyPlatform/oeplatform/pull/PR)
+  own table
+  [(#2601)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2601)
 - Deleting a table removes its peer reviews with it. A review names its table
   only by name, so a table created later under the same name used to inherit the
   old review state and badge. Dropping a deleted table's database tables now
