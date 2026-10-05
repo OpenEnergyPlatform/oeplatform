@@ -38,8 +38,6 @@ SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
-import json
-
 from django.http import HttpResponse, JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
@@ -176,7 +174,8 @@ NO_HOLDER = describes(
 
 CONFLICT = describes(
     "Nothing was written, and `code` says why. `last_admin`: the table must "
-    "keep a user with direct Admin -- give someone else Admin first; "
+    "keep a user with direct Admin, or, where it has none, its last Admin "
+    "grant of any kind -- give someone else Admin first; "
     "confirming does not change this answer. `confirmation_needed`: the "
     "change would take the caller's own Admin, or all their access, away. "
     "`reason` says which; send the same request again with `confirm` to make "
@@ -189,17 +188,20 @@ CONFLICT = describes(
 # --------------------------------------------------------------------------
 
 
-def _refusal(error) -> JsonResponse:
-    """The service's refusal as this API's answer."""
+def _refusal(error, **extra) -> JsonResponse:
+    """The service's refusal as this API's answer; ``extra`` joins the
+    body (a bulk refusal's ``tables``) where it holds something."""
+    extra = {key: value for key, value in extra.items() if value}
     if isinstance(error, InvalidRequest):
         status_code = 404 if error.field == "holder" else 400
         return JsonResponse(
-            {"reason": error.message, "field": error.field}, status=status_code
+            {"reason": error.message, "field": error.field, **extra},
+            status=status_code,
         )
     if isinstance(error, NotAllowed):
-        return JsonResponse({"reason": error.message}, status=403)
+        return JsonResponse({"reason": error.message, **extra}, status=403)
     code = LAST_ADMIN if isinstance(error, LastAdmin) else CONFIRMATION_NEEDED
-    return JsonResponse({"reason": error.message, "code": code}, status=409)
+    return JsonResponse({"reason": error.message, "code": code, **extra}, status=409)
 
 
 REFUSALS = (InvalidRequest, NotAllowed, LastAdmin, ConfirmationNeeded)
@@ -336,7 +338,8 @@ class TableHolderAPIView(APIView):
         description=(
             "Gives the Holder another of its `roles`. The role it already "
             "holds changes nothing and answers 200. A change that would leave "
-            "the table without a user holding direct Admin is refused; one "
+            "the table without a user holding direct Admin, or without any "
+            "Admin at all, is refused; one "
             "that takes the caller's own Admin away asks for `confirm` first. "
             + ADMIN_ONLY
         ),
@@ -370,7 +373,8 @@ class TableHolderAPIView(APIView):
         summary="Remove a Holder from a table",
         description=(
             "Takes the Holder's role away; removal is the only way to no "
-            "access. The last user holding direct Admin cannot be removed. "
+            "access. The last user holding direct Admin cannot be removed, nor "
+            "the last Admin grant of a table no user holds Admin on. "
             "Removing the caller's own Admin, or all their access, asks for "
             "`confirm` first -- as a query parameter here, because a client "
             "cannot rely on a DELETE's body being sent. " + ADMIN_ONLY
@@ -423,9 +427,19 @@ class BulkRemoveSerializer(serializers.Serializer):
         help_text="The Tables, by name. The caller must be a Table admin on every "
         "one of them.",
     )
-    confirm = serializers.BooleanField(
+    confirm = serializers.JSONField(
         required=False,
-        help_text="`true` after a 409 with `code: confirmation_needed`.",
+        help_text="After a 409 with `code: confirmation_needed`: the `tables` it "
+        "named, to confirm exactly those (a Table added to that list since is "
+        "asked about again), or `true` for any.",
+    )
+
+
+class BulkOrganizationSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    members = serializers.IntegerField(
+        help_text="How many members it has: each gains or loses what it holds."
     )
 
 
@@ -440,7 +454,7 @@ class BulkChangeSerializer(serializers.Serializer):
 
 
 class BulkResultSerializer(serializers.Serializer):
-    organization = serializers.DictField(help_text="`id`, `name` and `members`.")
+    organization = BulkOrganizationSerializer()
     changed = BulkChangeSerializer(
         many=True, help_text="One entry per Table written, as it was logged."
     )
@@ -481,32 +495,46 @@ BULK_CONFLICT = describes(
     "`last_admin`: the organization's old Admin grant is the only Admin there "
     "-- give someone Admin first; confirming does not change this answer. "
     "`confirmation_needed`: the removal would take the caller's own access to, "
-    "or Admin on, these Tables; send the same request again with `confirm`."
+    "or Admin on, these Tables; send the same request again with `confirm` "
+    "holding those `tables`."
 )
 
 
-def _bulk_refusal(error) -> JsonResponse:
-    """A bulk write's refusal: the single-Table answer, plus the Tables."""
-    response = _refusal(error)
-    if error.tables:
-        body = json.loads(response.content)
-        body["tables"] = [table.name for table in error.tables]
-        response = JsonResponse(body, status=response.status_code)
-    return response
+class _NoSuchTables(Exception):
+    """Named Tables that do not exist; ``names`` are they."""
+
+    def __init__(self, names):
+        super().__init__(", ".join(names))
+        self.names = names
+
+
+def _confirmation(value):
+    """What a removal's ``confirm`` agrees to: the Table names it lists, or
+    every Table for an explicit yes, or nothing."""
+    if isinstance(value, list):
+        return {name for name in value if isinstance(name, str)}
+    return _confirmed(value)
 
 
 class _BulkOrganizationView(APIView):
-    """What sharing and removing have in common: the caller, the
-    Organization in the URL, the Tables in the body, the ceiling, and the
-    answer."""
+    """What sharing and removing have in common: the caller, the Tables in
+    the body and the ceiling (checked before anything is read), the
+    Organization in the URL, the refusals with the Tables they name, and the
+    answer. A subclass names the table action whose ceiling applies and
+    makes its write."""
 
-    action = None  # the table action whose ceiling applies
+    action = None
 
-    def _tables(self, data):
+    def write(self, user, tables, organization, data) -> list:
+        raise NotImplementedError
+
+    def _names(self, data) -> list:
         names = data.get("tables")
-        if not isinstance(names, list) or not names:
-            raise InvalidRequest("Name the tables as a list of names.", "tables")
-        if not all(isinstance(name, str) and name for name in names):
+        if (
+            not isinstance(names, list)
+            or not names
+            or not all(isinstance(name, str) and name for name in names)
+        ):
             raise InvalidRequest("Name the tables as a list of names.", "tables")
         names = list(dict.fromkeys(names))
         ceiling = table_actions.CEILINGS[self.action]
@@ -516,11 +544,14 @@ class _BulkOrganizationView(APIView):
                 f"this one names {len(names):,}.",
                 "tables",
             )
-        found = {table.name: table for table in Table.objects.filter(name__in=names)}
-        missing = [name for name in names if name not in found]
+        return names
+
+    def _tables(self, names) -> list:
+        by_name = {t.name: t for t in Table.objects.filter(name__in=names)}
+        missing = [name for name in names if name not in by_name]
         if missing:
             raise _NoSuchTables(missing)
-        return [found[name] for name in names]
+        return [by_name[name] for name in names]
 
     def _answer(self, organization, tables, changes) -> JsonResponse:
         written = {change.table.pk for change in changes}
@@ -543,29 +574,24 @@ class _BulkOrganizationView(APIView):
             }
         )
 
-    def _run(self, request, organization, write) -> JsonLikeResponse:
+    def _run(self, request, organization_id) -> JsonLikeResponse:
         user = _signed_in(request)
-        found = Organization.objects.filter(pk=organization).first()
-        if found is None:
-            return JsonResponse({"reason": "No such organization."}, status=404)
         data = _body(request)
         try:
-            tables = self._tables(data)
-            changes = write(user, tables, found, data)
+            names = self._names(data)
+            organization = Organization.objects.filter(pk=organization_id).first()
+            if organization is None:
+                return JsonResponse({"reason": "No such organization."}, status=404)
+            tables = self._tables(names)
+            changes = self.write(user, tables, organization, data)
         except _NoSuchTables as error:
             return JsonResponse(
                 {"reason": "No table of these names.", "tables": error.names},
                 status=404,
             )
         except REFUSALS as error:
-            return _bulk_refusal(error)
-        return self._answer(found, tables, changes)
-
-
-class _NoSuchTables(Exception):
-    def __init__(self, names):
-        super().__init__(", ".join(names))
-        self.names = names
+            return _refusal(error, tables=[table.name for table in error.tables])
+        return self._answer(organization, tables, changes)
 
 
 @extend_schema(tags=[TABLE_PERMISSIONS])
@@ -573,6 +599,11 @@ class OrganizationShareAPIView(_BulkOrganizationView):
     """Share Tables with an Organization."""
 
     action = table_actions.ORGANIZATION_SHARE
+
+    def write(self, user, tables, organization, data):
+        return table_roles.share_with_organization(
+            user, tables, organization, data.get("level"), via=VIA
+        )
 
     @extend_schema(
         operation_id="organizations_table_permissions_share",
@@ -597,12 +628,7 @@ class OrganizationShareAPIView(_BulkOrganizationView):
     )
     @api_exception
     def post(self, request: Request, organization: int) -> JsonLikeResponse:
-        def write(user, tables, found, data):
-            return table_roles.share_with_organization(
-                user, tables, found, data.get("level"), via=VIA
-            )
-
-        return self._run(request, organization, write)
+        return self._run(request, organization)
 
 
 @extend_schema(tags=[TABLE_PERMISSIONS])
@@ -610,6 +636,15 @@ class OrganizationRemoveAPIView(_BulkOrganizationView):
     """Remove an Organization from Tables."""
 
     action = table_actions.ORGANIZATION_REMOVE
+
+    def write(self, user, tables, organization, data):
+        return table_roles.remove_organization(
+            user,
+            tables,
+            organization,
+            via=VIA,
+            confirmed=_confirmation(data.get("confirm")),
+        )
 
     @extend_schema(
         operation_id="organizations_table_permissions_remove",
@@ -640,13 +675,4 @@ class OrganizationRemoveAPIView(_BulkOrganizationView):
     )
     @api_exception
     def post(self, request: Request, organization: int) -> JsonLikeResponse:
-        def write(user, tables, found, data):
-            return table_roles.remove_organization(
-                user,
-                tables,
-                found,
-                via=VIA,
-                confirmed=_confirmed(data.get("confirm")),
-            )
-
-        return self._run(request, organization, write)
+        return self._run(request, organization)

@@ -2533,7 +2533,7 @@ paths:
             Admin there -- give someone Admin first; confirming does not change this
             answer. `confirmation_needed`: the removal would take the caller''s own
             access to, or Admin on, these Tables; send the same request again with
-            `confirm`.'
+            `confirm` holding those `tables`.'
   /api/v0/organizations/{organization}/table-permissions/share/:
     post:
       operationId: organizations_table_permissions_share
@@ -6726,10 +6726,11 @@ paths:
       operationId: tables_permissions_partial_update
       description: 'Gives the Holder another of its `roles`. The role it already holds
         changes nothing and answers 200. A change that would leave the table without
-        a user holding direct Admin is refused; one that takes the caller''s own Admin
-        away asks for `confirm` first. Needs a login and Table admin on the table:
-        Admin, directly or through an organization, or platform admin. The same rules
-        hold as in the table''s access drawer and permission page.'
+        a user holding direct Admin, or without any Admin at all, is refused; one
+        that takes the caller''s own Admin away asks for `confirm` first. Needs a
+        login and Table admin on the table: Admin, directly or through an organization,
+        or platform admin. The same rules hold as in the table''s access drawer and
+        permission page.'
       summary: Change a Holder's role on a table
       parameters:
       - in: path
@@ -6810,19 +6811,21 @@ paths:
                 type: object
                 additionalProperties: {}
           description: 'Nothing was written, and `code` says why. `last_admin`: the
-            table must keep a user with direct Admin -- give someone else Admin first;
-            confirming does not change this answer. `confirmation_needed`: the change
-            would take the caller''s own Admin, or all their access, away. `reason`
-            says which; send the same request again with `confirm` to make it.'
+            table must keep a user with direct Admin, or, where it has none, its last
+            Admin grant of any kind -- give someone else Admin first; confirming does
+            not change this answer. `confirmation_needed`: the change would take the
+            caller''s own Admin, or all their access, away. `reason` says which; send
+            the same request again with `confirm` to make it.'
     delete:
       operationId: tables_permissions_destroy
       description: 'Takes the Holder''s role away; removal is the only way to no access.
-        The last user holding direct Admin cannot be removed. Removing the caller''s
-        own Admin, or all their access, asks for `confirm` first -- as a query parameter
-        here, because a client cannot rely on a DELETE''s body being sent. Needs a
-        login and Table admin on the table: Admin, directly or through an organization,
-        or platform admin. The same rules hold as in the table''s access drawer and
-        permission page.'
+        The last user holding direct Admin cannot be removed, nor the last Admin grant
+        of a table no user holds Admin on. Removing the caller''s own Admin, or all
+        their access, asks for `confirm` first -- as a query parameter here, because
+        a client cannot rely on a DELETE''s body being sent. Needs a login and Table
+        admin on the table: Admin, directly or through an organization, or platform
+        admin. The same rules hold as in the table''s access drawer and permission
+        page.'
       summary: Remove a Holder from a table
       parameters:
       - in: query
@@ -6883,10 +6886,11 @@ paths:
                 type: object
                 additionalProperties: {}
           description: 'Nothing was written, and `code` says why. `last_admin`: the
-            table must keep a user with direct Admin -- give someone else Admin first;
-            confirming does not change this answer. `confirmation_needed`: the change
-            would take the caller''s own Admin, or all their access, away. `reason`
-            says which; send the same request again with `confirm` to make it.'
+            table must keep a user with direct Admin, or, where it has none, its last
+            Admin grant of any kind -- give someone else Admin first; confirming does
+            not change this answer. `confirmation_needed`: the change would take the
+            caller''s own Admin, or all their access, away. `reason` says which; send
+            the same request again with `confirm` to make it.'
   /api/v0/tables/{table}/rows/{row_id}:
     get:
       operationId: tables_rows_retrieve
@@ -9577,6 +9581,20 @@ components:
       - after
       - before
       - table
+    BulkOrganization:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        members:
+          type: integer
+          description: 'How many members it has: each gains or loses what it holds.'
+      required:
+      - id
+      - members
+      - name
     BulkRemove:
       type: object
       properties:
@@ -9587,17 +9605,16 @@ components:
           description: The Tables, by name. The caller must be a Table admin on every
             one of them.
         confirm:
-          type: boolean
-          description: '`true` after a 409 with `code: confirmation_needed`.'
+          description: 'After a 409 with `code: confirmation_needed`: the `tables`
+            it named, to confirm exactly those (a Table added to that list since is
+            asked about again), or `true` for any.'
       required:
       - tables
     BulkResult:
       type: object
       properties:
         organization:
-          type: object
-          additionalProperties: {}
-          description: '`id`, `name` and `members`.'
+          $ref: '#/components/schemas/BulkOrganization'
         changed:
           type: array
           items:

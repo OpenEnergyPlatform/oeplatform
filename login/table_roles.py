@@ -26,7 +26,7 @@ about a rule.
   - ``NotAllowed`` (the viewer is not a Table admin, or "leaves" a Table on
     which they hold no direct grant);
   - ``LastAdmin`` (the change would leave the Table without a user holding
-    direct Admin);
+    direct Admin, or, where it has none, without any Admin at all);
   - ``ConfirmationNeeded`` (the viewer would lose their own Admin, or all
     access, and has not confirmed).
 
@@ -160,7 +160,8 @@ class NotAllowed(AccessError):
 
 class LastAdmin(AccessError):
     """The change would leave the Table without a user holding direct
-    Admin (in a bulk removal: without any Admin at all)."""
+    Admin, or, on a Table no user holds Admin on, without any Admin at
+    all."""
 
     def __init__(self, message=LAST_ADMIN, tables=()):
         super().__init__(message, tables)
@@ -443,8 +444,8 @@ def _parse_key(raw):
 def _guard(access, kind, pk, after):
     """The last-admin guard: refuse a change that takes direct Admin from
     the last user holding it, or, on a Table no user holds Admin on, takes
-    away the last Admin grant of any kind (an Organization's old one).
-    ``plan_organization`` states the second half for a batch."""
+    away the last Admin grant of any kind (an Organization's old one,
+    ``_last_admin_grant``)."""
     if after is not None and after >= ADMIN_PERM:
         return
     users = access.admins
@@ -453,11 +454,22 @@ def _guard(access, kind, pk, after):
             raise LastAdmin()
         return
     holder = access.holder(f"{kind}:{pk}")
-    if users or holder is None or holder.level < ADMIN_PERM:
-        return
     others = [h for h in access.organizations if h.level >= ADMIN_PERM and h.pk != pk]
-    if not others:
+    if holder is not None and _last_admin_grant(holder.level, users, others):
         raise LastAdmin()
+
+
+def _last_admin_grant(level, user_admins, other_organization_admins) -> bool:
+    """Whether an Organization's grant at ``level`` is its Table's last
+    Admin: no user holds Admin there, and no other Organization does. The
+    one statement of that half of the guard, for one Table (``_guard``) and
+    for a batch (``plan_organization``)."""
+    return (
+        level is not None
+        and level >= ADMIN_PERM
+        and not user_admins
+        and not other_organization_admins
+    )
 
 
 def _title(table) -> str:
@@ -799,11 +811,12 @@ def plan_organization(viewer, tables, organization, level=None) -> OrganizationP
     )
     sharing = level is not None
     if not sharing:
-        admins = set(
+        user_admins = set(
             UserPermission.objects.filter(
                 table_id__in=ids, level__gte=ADMIN_PERM
             ).values_list("table_id", flat=True)
-        ) | set(
+        )
+        other_admins = set(
             GroupPermission.objects.filter(table_id__in=ids, level__gte=ADMIN_PERM)
             .exclude(holder_id=organization.pk)
             .values_list("table_id", flat=True)
@@ -842,7 +855,9 @@ def plan_organization(viewer, tables, organization, level=None) -> OrganizationP
                 plan.changes.append((table, before))
         elif before is None:
             plan.not_held.append(table)
-        elif before >= ADMIN_PERM and table.pk not in admins:
+        elif _last_admin_grant(
+            before, table.pk in user_admins, table.pk in other_admins
+        ):
             plan.guarded.append(table)
         else:
             plan.changes.append((table, before))

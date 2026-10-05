@@ -573,6 +573,15 @@ class LastAdminGuardTests(AccessTestCase):
             self.organizations_of(table), {"Access Only Admin": ADMIN_PERM}
         )
 
+    def test_with_a_user_holding_admin_it_can_go(self):
+        table = self.table("t_org_admin_beside_user")  # the user: direct Admin
+        old = self.organization("Access Beside User", member=False)
+        self.grant(table, old, ADMIN_PERM)
+        self.changed(
+            self.send("t_org_admin_beside_user", op="remove", holder=f"org:{old.pk}")
+        )
+        self.assertEqual(self.organizations_of(table), {})
+
     def test_with_another_admin_grant_it_can_go(self):
         table = Table.objects.create(name="t_two_org_admins")
         old = self.organization("Access Old One")

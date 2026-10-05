@@ -121,7 +121,8 @@ after, per table) and what it left `unchanged`:
 - a removal that would leave a table with no Admin at all, because the
   organization's old Admin grant is its only one, answers `409` with
   `"code": "last_admin"`; one that takes your own access or Admin away answers
-  `409` with `"code": "confirmation_needed"` until you send `"confirm": true`.
+  `409` with `"code": "confirmation_needed"` naming them in `tables`; send those
+  names back as `"confirm"` (or `true` for any).
 
 ## Authentication
 

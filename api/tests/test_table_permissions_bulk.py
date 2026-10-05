@@ -17,6 +17,9 @@ Django rows only: no OEDB table is created.
 
 from unittest import mock
 
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
+
 from api.services import table_actions
 from dataedit.models import Table
 from login.models import ADMIN_PERM, DELETE_PERM, WRITE_PERM, UserPermission
@@ -126,11 +129,15 @@ class ShareTests(BulkTestCase):
 
     def test_more_tables_than_the_ceiling_is_refused_before_anything_is_read(self):
         with mock.patch.dict(table_actions.CEILINGS, {"organization_share": 1}):
-            body = self.bulk(
-                "share",
-                {"tables": ["t_bulk_a", "t_bulk_b"], "level": WRITE_PERM},
-                code=400,
-            )
+            with CaptureQueriesContext(connection) as queries:
+                body = self.bulk(
+                    "share",
+                    {"tables": ["t_bulk_a", "t_bulk_b"], "level": WRITE_PERM},
+                    code=400,
+                )
+        read = " ".join(query["sql"] for query in queries.captured_queries)
+        self.assertNotIn("dataedit_table", read)
+        self.assertNotIn("permission", read)
         self.assertEqual(body["field"], "tables")
         self.assertIn("at most 1 tables", body["reason"])
 
@@ -151,7 +158,12 @@ class RemoveTests(BulkTestCase):
             [{"table": "t_bulk_a", "before": WRITE_PERM, "after": None}],
         )
         self.assertEqual(body["unchanged"], ["t_bulk_b"])
-        self.assertIn("action=remove", logs.records[0].getMessage())
+        self.assertEqual(len(logs.records), 1)
+        self.assertRegex(
+            logs.records[0].getMessage(),
+            rf"table=t_bulk_a holder=org:{self.lab.pk} action=remove "
+            rf"before={WRITE_PERM} after=- by={self.user.pk} via=api$",
+        )
         again = self.bulk("remove", {"tables": ["t_bulk_a", "t_bulk_b"]})
         self.assertEqual(again["changed"], [])
         self.assertEqual(again["unchanged"], ["t_bulk_a", "t_bulk_b"])
@@ -185,6 +197,32 @@ class RemoveTests(BulkTestCase):
         body = self.bulk("remove", {"tables": ["t_bulk_mine"], "confirm": True})
         self.assertEqual([c["table"] for c in body["changed"]], ["t_bulk_mine"])
         self.assertEqual(self.held(mine), {"t_bulk_mine": None})
+
+    def test_confirming_by_name_covers_exactly_those_tables(self):
+        """The 409's ``tables`` sent back as ``confirm``: a Table that
+        would be lost but is not among them is asked about again."""
+        tables = []
+        for name in ("t_bulk_x", "t_bulk_y"):
+            table = Table.objects.create(name=name)
+            self.grant(self.lab, ADMIN_PERM, table)
+            UserPermission.objects.create(
+                holder=self.other_user, table=table, level=ADMIN_PERM
+            )
+            tables.append(table)
+        body = self.bulk(
+            "remove",
+            {"tables": ["t_bulk_x", "t_bulk_y"], "confirm": ["t_bulk_x"]},
+            code=409,
+        )
+        self.assertEqual(body["tables"], ["t_bulk_y"])
+        self.assertEqual(
+            self.held(*tables), {"t_bulk_x": ADMIN_PERM, "t_bulk_y": ADMIN_PERM}
+        )
+        body = self.bulk(
+            "remove",
+            {"tables": ["t_bulk_x", "t_bulk_y"], "confirm": ["t_bulk_x", "t_bulk_y"]},
+        )
+        self.assertEqual(len(body["changed"]), 2)
 
     def test_no_membership_is_needed_but_table_admin_is(self):
         outside = self.organization("Bulk Outside", self.other_user)
