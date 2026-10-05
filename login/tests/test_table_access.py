@@ -555,6 +555,53 @@ class LastAdminGuardTests(AccessTestCase):
         )
         self.assertEqual(self.users_of(table), {"AccessAlice": ADMIN_PERM})
 
+    def test_an_organizations_admin_grant_that_is_the_only_admin_stays(self):
+        """#2595: on a Table no user holds Admin on, removing or lowering
+        the last Admin grant of any kind would leave it with no Admin at
+        all, so it is refused like the last user's, before any question."""
+        table = Table.objects.create(name="t_only_org_admin")
+        old = self.organization("Access Only Admin")
+        self.grant(table, old, ADMIN_PERM)
+        for data in (
+            {"op": "remove", "holder": f"org:{old.pk}"},
+            {"op": "remove", "holder": f"org:{old.pk}", "confirm": "yes"},
+            {"op": "change", "holder": f"org:{old.pk}", "level": DELETE_PERM},
+        ):
+            with self.subTest(**data):
+                self.assertGuarded(self.send("t_only_org_admin", **data))
+        self.assertEqual(
+            self.organizations_of(table), {"Access Only Admin": ADMIN_PERM}
+        )
+
+    def test_with_a_user_holding_admin_it_can_go(self):
+        table = self.table("t_org_admin_beside_user")  # the user: direct Admin
+        old = self.organization("Access Beside User", member=False)
+        self.grant(table, old, ADMIN_PERM)
+        self.changed(
+            self.send("t_org_admin_beside_user", op="remove", holder=f"org:{old.pk}")
+        )
+        self.assertEqual(self.organizations_of(table), {})
+
+    def test_with_another_admin_grant_it_can_go(self):
+        table = Table.objects.create(name="t_two_org_admins")
+        old = self.organization("Access Old One")
+        other = self.organization("Access Old Two", member=False)
+        self.grant(table, old, ADMIN_PERM)
+        self.grant(table, other, ADMIN_PERM)
+        self.changed(
+            self.send(
+                "t_two_org_admins",
+                op="change",
+                holder=f"org:{old.pk}",
+                level=DELETE_PERM,
+                confirm="yes",
+            )
+        )
+        self.assertEqual(
+            self.organizations_of(table),
+            {"Access Old One": DELETE_PERM, "Access Old Two": ADMIN_PERM},
+        )
+
     def test_a_table_without_a_direct_admin_is_not_made_worse(self):
         """Its only Admin is an old Organization grant: adding someone, or
         changing an ordinary holder, takes nobody's direct Admin away."""

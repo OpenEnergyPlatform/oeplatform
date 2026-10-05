@@ -26,7 +26,7 @@ about a rule.
   - ``NotAllowed`` (the viewer is not a Table admin, or "leaves" a Table on
     which they hold no direct grant);
   - ``LastAdmin`` (the change would leave the Table without a user holding
-    direct Admin);
+    direct Admin, or, where it has none, without any Admin at all);
   - ``ConfirmationNeeded`` (the viewer would lose their own Admin, or all
     access, and has not confirmed).
 
@@ -45,8 +45,10 @@ The rules:
   A change that would take the last one away is refused, and that is
   checked BEFORE the self-demotion confirmation, so nobody confirms a change
   that is then refused. A Table that has no such user already (its only
-  Admin is an old Organization grant) is not made worse by any change, so
-  the guard does not fire there.
+  Admin is an old Organization grant) keeps that grant: lowering or removing
+  the last Admin grant of any kind is refused the same way, since it would
+  leave the Table with no Admin at all (#2595). Every other change there
+  leaves it no worse, so it goes through.
 - **Self-demotion:** a change that takes the viewer's own Admin, or all of
   their access, away needs one confirmation (``confirmed=True``). Leaving a
   Table always does.
@@ -158,7 +160,8 @@ class NotAllowed(AccessError):
 
 class LastAdmin(AccessError):
     """The change would leave the Table without a user holding direct
-    Admin (in a bulk removal: without any Admin at all)."""
+    Admin, or, on a Table no user holds Admin on, without any Admin at
+    all."""
 
     def __init__(self, message=LAST_ADMIN, tables=()):
         super().__init__(message, tables)
@@ -440,12 +443,33 @@ def _parse_key(raw):
 
 def _guard(access, kind, pk, after):
     """The last-admin guard: refuse a change that takes direct Admin from
-    the last user holding it."""
-    if kind != USER or (after is not None and after >= ADMIN_PERM):
+    the last user holding it, or, on a Table no user holds Admin on, takes
+    away the last Admin grant of any kind (an Organization's old one,
+    ``_last_admin_grant``)."""
+    if after is not None and after >= ADMIN_PERM:
         return
-    admins = access.admins
-    if [h.pk for h in admins] == [pk]:
+    users = access.admins
+    if kind == USER:
+        if [h.pk for h in users] == [pk]:
+            raise LastAdmin()
+        return
+    holder = access.holder(f"{kind}:{pk}")
+    others = [h for h in access.organizations if h.level >= ADMIN_PERM and h.pk != pk]
+    if holder is not None and _last_admin_grant(holder.level, users, others):
         raise LastAdmin()
+
+
+def _last_admin_grant(level, user_admins, other_organization_admins) -> bool:
+    """Whether an Organization's grant at ``level`` is its Table's last
+    Admin: no user holds Admin there, and no other Organization does. The
+    one statement of that half of the guard, for one Table (``_guard``) and
+    for a batch (``plan_organization``)."""
+    return (
+        level is not None
+        and level >= ADMIN_PERM
+        and not user_admins
+        and not other_organization_admins
+    )
 
 
 def _title(table) -> str:
@@ -671,10 +695,8 @@ def leave(viewer, table, via="dashboard", confirmed=False):
 #   "set exactly this role" would quietly take a delete right away. Lowering
 #   stays a per-Table change in the drawer.
 # - Removing leaves out a Table whose only Admin is that Organization's old
-#   Admin grant (``LastAdmin``). This is stricter than ``remove`` for one
-#   Table, whose guard counts users only and so lets that grant go; WF-08
-#   decision 15 asks for it here, where a batch would otherwise strip the last
-#   Admin from Tables nobody looked at one by one.
+#   Admin grant (``LastAdmin``): the rule ``_guard`` applies to one Table
+#   (WF-08 decision 15, #2595).
 # - Removing an Organization the viewer belongs to can take Tables off their
 #   dashboard, or take their Admin on Tables they keep. That is one
 #   confirmation for the batch, naming those Tables (``ConfirmationNeeded``),
@@ -789,11 +811,12 @@ def plan_organization(viewer, tables, organization, level=None) -> OrganizationP
     )
     sharing = level is not None
     if not sharing:
-        admins = set(
+        user_admins = set(
             UserPermission.objects.filter(
                 table_id__in=ids, level__gte=ADMIN_PERM
             ).values_list("table_id", flat=True)
-        ) | set(
+        )
+        other_admins = set(
             GroupPermission.objects.filter(table_id__in=ids, level__gte=ADMIN_PERM)
             .exclude(holder_id=organization.pk)
             .values_list("table_id", flat=True)
@@ -832,7 +855,9 @@ def plan_organization(viewer, tables, organization, level=None) -> OrganizationP
                 plan.changes.append((table, before))
         elif before is None:
             plan.not_held.append(table)
-        elif before >= ADMIN_PERM and table.pk not in admins:
+        elif _last_admin_grant(
+            before, table.pk in user_admins, table.pk in other_admins
+        ):
             plan.guarded.append(table)
         else:
             plan.changes.append((table, before))
@@ -915,7 +940,7 @@ def remove_organization(
     Admin grant is the only Admin of one of them, and asks first
     (``ConfirmationNeeded``) when the viewer would lose a Table from their
     dashboard, or their Admin on one, that ``confirmed`` (names, or True for
-    all) does not hold.
+    all, False for none) does not hold.
     Returns one ``Change`` per Table written."""
     with transaction.atomic():
         _lock_tables(tables)
@@ -929,10 +954,12 @@ def remove_organization(
                 plan.guarded,
             )
         if confirmed is not True:
+            # False and no names both confirm nothing
+            said = set(confirmed or ())
             unasked = [
                 table
                 for table in plan.lose_access + plan.lose_admin
-                if table.name not in set(confirmed)
+                if table.name not in said
             ]
             if unasked:
                 raise ConfirmationNeeded(
