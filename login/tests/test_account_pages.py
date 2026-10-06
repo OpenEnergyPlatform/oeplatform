@@ -5,11 +5,13 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 from pathlib import Path
 
+from allauth.account.forms import SignupForm
 from allauth.account.models import EmailAddress
 from django.template.loader import get_template
 from django.test import TestCase
 from django.urls import NoReverseMatch, reverse
 
+from login.forms import CreateUserForm
 from login.models import myuser as User
 
 PASSWORD = "a-long-test-password"
@@ -165,3 +167,28 @@ class TheSecondPasswordResetIsGoneTest(TestCase):
         self.assertEqual(
             self.client.get(reverse("account_reset_password")).status_code, 200
         )
+
+
+class SignupRequiresAnEmailTest(TestCase):
+    """ACCOUNT_SIGNUP_FIELDS keeps the fields ACCOUNT_EMAIL_REQUIRED used to require."""
+
+    def test_the_signup_form_requires_email_username_and_both_passwords(self):
+        form = CreateUserForm()
+
+        self.assertTrue(issubclass(CreateUserForm, SignupForm))
+        for name in ("email", "username", "password1", "password2"):
+            with self.subTest(field=name):
+                self.assertIn(name, form.fields)
+                self.assertTrue(form.fields[name].required)
+
+    def test_a_signup_without_an_email_is_refused(self):
+        form = CreateUserForm(
+            data={
+                "username": "newcomer",
+                "password1": PASSWORD,
+                "password2": PASSWORD,
+            }
+        )
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("email", form.errors)
