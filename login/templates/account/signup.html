@@ -24,7 +24,7 @@
         {% csrf_token %}
         <!-- Username field -->
         <div class="login__field">
-          <label for="{{ form.email.id_for_label }}">{{ form.username.label }}</label>
+          <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
           {{ form.username }}
           {% if form.username.errors %}
             <div class="login__alert login__alert--danger login__alert--100">
