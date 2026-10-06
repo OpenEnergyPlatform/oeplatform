@@ -467,16 +467,10 @@ STATICFILES_FINDERS = [
     "compressor.finders.CompressorFinder",
 ]
 
-# Static files are named after their content (#2604), so a deploy changes the
-# address of every file it changes and no browser keeps last release's copy.
-# Two consequences for a deploy: `collectstatic` refuses a stylesheet whose
-# url() points at a file that does not exist, and `compress` must run after it
-# under the same DEBUG as the server. Under DEBUG, {% static %} returns plain
-# names, and the offline manifest is keyed on the rendered names. A
-# {% static %} naming no file fails the whole page. The suite does not run
-# `collectstatic`, so the test runner serves plain names but refuses the same
-# names (oeplatform/runner.py); base/tests/test_static_files.py runs the real
-# sequence.
+# Static files are named after their content (#2604). A deploy runs
+# `collectstatic`, then `compress` under the server's DEBUG; see "Loading and
+# compressing static assets" in docs/installation/guides/installation.md. The
+# test runner serves plain names, refusing the same ones (oeplatform/runner.py).
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {

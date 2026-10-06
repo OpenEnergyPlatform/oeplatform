@@ -115,9 +115,7 @@ class DeploySequenceTest(SimpleTestCase):
         # has found its keys, which is why compress must run under the
         # server's DEBUG: under DEBUG, {% static %} returns plain names.
         self.assertSucceeded(self.page)
-        self.assertRegex(
-            self.page.stdout, r'href="/static/CACHE/css/output\.[0-9a-f]{12}\.css"'
-        )
+        self.assertRegex(self.page.stdout, rf'href="/static/CACHE/css/output{HASHED}"')
 
 
 class TestRunStorageTest(SimpleTestCase):
@@ -126,14 +124,6 @@ class TestRunStorageTest(SimpleTestCase):
     ``ManifestStaticFilesStorage``, but refuses the names the configured
     storage refuses (``oeplatform.runner.FindableStaticFilesStorage``).
     ``DeploySequenceTest`` checks the real storage."""
-
-    def test_the_configured_storage_names_files_by_content(self):
-        from oeplatform import settings as configured
-
-        self.assertEqual(
-            configured.STORAGES["staticfiles"]["BACKEND"],
-            "django.contrib.staticfiles.storage.ManifestStaticFilesStorage",
-        )
 
     def test_a_test_run_uses_plain_names(self):
         self.assertEqual(static("css/base-style.css"), "/static/css/base-style.css")
