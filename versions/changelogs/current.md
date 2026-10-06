@@ -232,6 +232,12 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
+- Errors on the sign-up, set-password and reset-password forms are shown as
+  errors (red) instead of green "success" alerts, and the reset-password form
+  shows its errors at all: it looked for them on a field it does not have.
+  `securitysettings.py.default` no longer lists a login provider with an empty
+  `provider_id`, which made the sign-in and sign-up pages fail on a fresh setup
+  [(#2608)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2608)
 - Saved table views (graph and map views, the default view) can only be created,
   changed or deleted by someone with write permission on the table; the "Add …
   view" links are shown only to them. Saving a view now finds it only within its
