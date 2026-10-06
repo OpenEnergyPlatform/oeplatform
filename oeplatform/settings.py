@@ -499,6 +499,15 @@ ACCOUNT_FORMS = {"signup": "login.forms.CreateUserForm"}
 # ACCOUNT_SIGNUP_FORM_CLASS = {"login.forms.CreateUserForm"}
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 ACCOUNT_LOGOUT_ON_PASSWORD_CHANGE = True
+# The address an account signs in and resets its password with is managed at
+# /accounts/email/. Changing it asks for the password again (as changing the
+# password already does), the previous address is told, and an account keeps one
+# address: a new one replaces it once confirmed. allauth asks no password of an
+# account that signs in only through a provider, because it has none; for those
+# the mail to the previous address is what remains.
+ACCOUNT_REAUTHENTICATION_REQUIRED = True
+ACCOUNT_EMAIL_NOTIFICATIONS = True
+ACCOUNT_CHANGE_EMAIL = True
 
 
 # https://django-allauth.readthedocs.io/en/latest/configuration.html
