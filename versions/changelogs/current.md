@@ -12,6 +12,12 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- The term search in the metadata editor and the oeo_ext unit picker no longer
+  always asks openenergyplatform.org: an instance with its own lookup service
+  searches itself, one without uses the public endpoint, and `OEO_SEARCH_URL`
+  overrides both (`EXTERNAL_URLS["oeo_search"]`). Search terms are now
+  URL-encoded
+  [(#2607)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2607)
 - Speed up the row upload API: index the unapplied rows of the edit-journal meta
   tables (`_<table>_insert/_edit/_delete`, back-filled by an oedb migration),
   mark applied rows with one set-based update instead of a per-row OR chain,

@@ -48,6 +48,7 @@ from oeplatform.oedb_for_tests import (
     oedb_name_for_tests,
     running_tests,
 )
+from oeplatform.oeo_search import oeo_search_url
 from oeplatform.securitysettings import (
     ALLOWED_HOSTS,
     ANON_CONNECTION_LIMIT,
@@ -569,6 +570,11 @@ SCHEMA_DEFAULT = SCHEMA_DEFAULT_TEST_SANDBOX if IS_SANDBOX else SCHEMA_DATA
 
 USE_ONTOP = bool(ONTOP_SPARQL_ENDPOINT_URL)
 USE_LOEP = bool(DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL)
+
+# Term search of the metadata editor and the oeo_ext unit picker (#2292):
+# this instance's own search if it has one, else the public endpoint;
+# OEO_SEARCH_URL in the environment overrides both.
+EXTERNAL_URLS["oeo_search"] = oeo_search_url(USE_LOEP, os.environ)
 
 
 # when running approximate (fast) row count: if number is below this
