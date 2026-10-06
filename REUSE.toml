@@ -1591,16 +1591,6 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "base/static/css/filterform.css"
-precedence = "override"
-SPDX-License-Identifier = "AGPL-3.0-or-later"
-SPDX-FileCopyrightText = [
-  "2017 Marco Finkendei <https://github.com/MFinkendei>",
-  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
-  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
-]
-
-[[annotations]]
 path = "base/static/css/index-style.css"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"

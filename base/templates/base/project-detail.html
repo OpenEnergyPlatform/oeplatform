@@ -9,7 +9,7 @@
       <!-- logo -->
       {% if project.logo %}
         <img class="flex-item"
-             src="{% static 'logos/project/' %}{{ project.logo }}"
+             src="{% static 'logos/project/'|add:project.logo %}"
              alt="{{ project.fullTitle }}"
              width="200"
              border="0" />
@@ -33,7 +33,7 @@
         <div class="d-flex flex-md-wrap">
           <!-- <li>{{ partner.name }}</li> -->
           {% if partner.logo %}
-            <img src="{% static 'logos/partner/' %}{{ partner.logo }}"
+            <img src="{% static 'logos/partner/'|add:partner.logo %}"
                  alt="{{ partner.name }}"
                  width="200"
                  border="0" />

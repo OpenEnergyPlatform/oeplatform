@@ -35,3 +35,18 @@ class TestViewsModelview(TestViewsTestCase):
             "modelview:show-factsheet",
             kwargs={"sheettype": "model", "pk": self.factsheet.pk},
         )
+
+
+class TestModelLogo(TestViewsTestCase):
+    def test_an_uploaded_logo_is_linked_where_it_was_uploaded(self):
+        # The logo is an upload, served from MEDIA_URL. Passed through
+        # {% static %} it pointed under /static/, where no file is, and with
+        # static files named after their content it fails the whole page.
+        factsheet = Energymodel.objects.create(
+            contact_email=[self.user.email], logo="logos/a-model-logo.png"
+        )
+        response = self.get(
+            "modelview:show-factsheet",
+            kwargs={"sheettype": "model", "pk": factsheet.pk},
+        )
+        self.assertContains(response, 'src="/media/logos/a-model-logo.png"')

@@ -460,10 +460,22 @@ AUTHENTICATION_BACKENDS = [
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
-STATICFILES_FINDERS = {
+# A list, because the first finder that has a path serves it.
+STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
     "compressor.finders.CompressorFinder",
+]
+
+# Static files are named after their content (#2604). A deploy runs
+# `collectstatic`, then `compress` under the server's DEBUG; see "Loading and
+# compressing static assets" in docs/installation/guides/installation.md. The
+# test runner serves plain names, refusing the same ones (oeplatform/runner.py).
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
+    },
 }
 
 
