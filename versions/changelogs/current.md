@@ -51,6 +51,11 @@ SPDX-License-Identifier: CC0-1.0
 - Refactor user groups into organizations; add fields to the organization model;
   refactor HTMX for organization management pages
   [(#2261)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2261)
+- Changing an account's email address at `/accounts/email/` now asks for the
+  password again, as a password change already does. The previous address gets a
+  mail when the address changes, and an account keeps one address: a new one
+  replaces it once it is confirmed
+  [(#2609)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2609)
 
 ## Features
 
