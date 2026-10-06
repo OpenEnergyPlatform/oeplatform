@@ -139,6 +139,7 @@
 
     var createUrl = '{% url "oeo_ext:oeo-ext-plugin-ui-create" %}';
     var config = JSON.parse("{{ config|escapejs }}");
+    config.oeo_search_url = "{{ EXTERNAL_URLS.oeo_search|escapejs }}";
     window.MetaEdit(config);
 
     $(function () {
