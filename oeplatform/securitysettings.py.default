@@ -126,16 +126,20 @@ SOCIALACCOUNT_PROVIDERS = {
     "openid_connect": {
         # For each OAuth based provider, either add a ``SocialApp``
         # (``socialaccount`` app) containing the required client
-        # credentials, or list them here:
-        "APPS": [{
-            "provider_id": "",
-            "name": "",
-            "client_id": "",
-            "secret": "",
-            "VERIFIED_EMAIL": True,
-            "EMAIL_AUTHENTICATION": True,
-            "settings": {"server_url": ""},
-        }]
+        # credentials, or list them here. Leave the list empty when there is
+        # none: an entry with an empty "provider_id" makes the sign-in and
+        # sign-up pages fail, because no login URL can be built for it.
+        # Example:
+        # {
+        #     "provider_id": "RegApp",
+        #     "name": "NFDI-RegApp AAI",
+        #     "client_id": "<client id>",
+        #     "secret": "<secret>",
+        #     "VERIFIED_EMAIL": True,
+        #     "EMAIL_AUTHENTICATION": True,
+        #     "settings": {"server_url": "<issuer>/.well-known/openid-configuration"},
+        # },
+        "APPS": [],
     }
 }
 
