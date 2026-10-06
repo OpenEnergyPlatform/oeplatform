@@ -26,9 +26,27 @@
         </td>
       </tr>
       <tr>
+        <th>Email address</th>
+        <td>
+          {{ request.user.email }}
+          <br />
+          <a href="{% url 'account_email' %}">Change your email address</a>
+        </td>
+      </tr>
+      <tr>
         <th>Password</th>
         <td>
-          <a href="{% url 'account_change_password' %}">Change your password</a>
+          {% if request.user.has_usable_password %}
+            <a href="{% url 'account_change_password' %}">Change your password</a>
+          {% else %}
+            <a href="{% url 'account_set_password' %}">Set a password</a>
+          {% endif %}
+        </td>
+      </tr>
+      <tr>
+        <th>Connected accounts</th>
+        <td>
+          <a href="{% url 'socialaccount_connections' %}">Manage sign-in with other services, such as your institution</a>
         </td>
       </tr>
       {% comment %}

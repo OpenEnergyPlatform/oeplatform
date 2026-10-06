@@ -10,12 +10,6 @@ SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> ©
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
-from django.contrib.auth.views import (
-    PasswordResetCompleteView,
-    PasswordResetConfirmView,
-    PasswordResetDoneView,
-    PasswordResetView,
-)
 from django.urls import path, re_path
 
 from login.views import (
@@ -50,36 +44,6 @@ from login.views import (
 
 app_name = "login"
 urlpatterns = [
-    re_path(
-        "password_reset/",
-        PasswordResetView.as_view(
-            html_email_template_name="account/password_reset_email.html",
-            email_template_name="account/password_reset_email.txt",
-            template_name="account/custom_password_reset_form.html",
-        ),
-        name="password_reset",
-    ),
-    re_path(
-        "password_reset/done/",
-        PasswordResetDoneView.as_view(
-            template_name="account/custom_password_reset_done.html"
-        ),
-        name="password_reset_done",
-    ),
-    re_path(
-        "reset/<uidb64>/<token>/",
-        PasswordResetConfirmView.as_view(
-            template_name="account/custom_password_reset_confirm.html"
-        ),
-        name="password_reset_confirm",
-    ),
-    re_path(
-        "reset/done/",
-        PasswordResetCompleteView.as_view(
-            template_name="account/custom_password_reset_complete.html"
-        ),
-        name="password_reset_complete",
-    ),
     re_path(
         # dataset-first dashboard: the profile opens on the datasets view
         r"^profile/(?P<user_id>[\d]+)$",

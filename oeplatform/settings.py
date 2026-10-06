@@ -495,8 +495,6 @@ ACCOUNT_EMAIL_REQUIRED = True
 # ACCOUNT_USERNAME_REQUIRED = False
 # ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_ALLOW_REGISTRATION = True
-ACCOUNT_FORMS = {"signup": "login.forms.CreateUserForm"}
-# ACCOUNT_SIGNUP_FORM_CLASS = {"login.forms.CreateUserForm"}
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 ACCOUNT_LOGOUT_ON_PASSWORD_CHANGE = True
 # The address an account signs in and resets its password with is managed at

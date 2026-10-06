@@ -14,7 +14,6 @@ class TestViewsLogin(TestViewsTestCase):
         We only test method GET
         """
 
-        # "login:password_reset_confirm",
         # "login:account-delete",
         # "login:group-partial-edit-form",
         # "login:delete_peer_review_simple",
@@ -39,9 +38,6 @@ class TestViewsLogin(TestViewsTestCase):
         self.get(
             "login:partial-organizations", kwargs={"user_id": user_id}, logged_in=True
         )
-        self.get("login:password_reset")
-        self.get("login:password_reset_complete")
-        self.get("login:password_reset_done")
         self.get("login:profile", kwargs={"user_id": user_id}, logged_in=True)
         self.get("login:redirect")
         self.get("login:reset-token", logged_in=True)
