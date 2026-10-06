@@ -486,17 +486,15 @@ COMPRESS_FILTERS = {
 ACCOUNT_USER_MODEL_USERNAME_FIELD = "name"
 ACCOUNT_USER_MODEL_EMAIL_FIELD = "email"
 # https://django-allauth.readthedocs.io/en/latest/configuration.html
-ACCOUNT_EMAIL_VERIFICATION = "mandatory"  # requires ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"  # requires "email*" in ACCOUNT_SIGNUP_FIELDS
 # https://django-allauth.readthedocs.io/en/latest/configuration.html
 ACCOUNT_ADAPTER = "login.adapters.AccountAdapter"
 # https://django-allauth.readthedocs.io/en/latest/forms.html
 ACCOUNT_FORMS = {"signup": "login.forms.CreateUserForm"}
-ACCOUNT_EMAIL_REQUIRED = True
-# ACCOUNT_USERNAME_REQUIRED = False
-# ACCOUNT_AUTHENTICATION_METHOD = 'email'
+# "*" marks a required field. This is what ACCOUNT_EMAIL_REQUIRED = True meant
+# before allauth 65.4 deprecated it.
+ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
 ACCOUNT_ALLOW_REGISTRATION = True
-ACCOUNT_FORMS = {"signup": "login.forms.CreateUserForm"}
-# ACCOUNT_SIGNUP_FORM_CLASS = {"login.forms.CreateUserForm"}
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 ACCOUNT_LOGOUT_ON_PASSWORD_CHANGE = True
 # The address an account signs in and resets its password with is managed at
