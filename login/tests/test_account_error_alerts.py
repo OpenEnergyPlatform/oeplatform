@@ -15,6 +15,16 @@ from django.urls import reverse
 from login.models import myuser as User
 
 
+class AccountPagesRenderTest(TestCase):
+    """CI runs with securitysettings.py.default, which configures no login
+    provider. An empty provider entry there made both pages fail."""
+
+    def test_sign_up_and_sign_in_pages_render(self):
+        for name in ("account_signup", "account_login"):
+            with self.subTest(page=name):
+                self.assertEqual(self.client.get(reverse(name)).status_code, 200)
+
+
 class AccountErrorAlertTest(TestCase):
     def assert_error_shown_as_error(self, response):
         html = response.content.decode()
