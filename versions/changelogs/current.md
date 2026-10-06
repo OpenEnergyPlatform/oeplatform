@@ -56,6 +56,12 @@ SPDX-License-Identifier: CC0-1.0
   mail when the address changes, and an account keeps one address: a new one
   replaces it once it is confirmed
   [(#2609)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2609)
+- The account pages under `/accounts/` (email address, password prompt,
+  connected accounts, inactive account, cancelled sign-in) use the OEP layout,
+  and the settings page links them. An account that signs in through RegApp can
+  set a password there and then disconnect RegApp. The unused second password
+  reset under `/user/password_reset/` is removed
+  [(#2610)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2610)
 
 ## Features
 
