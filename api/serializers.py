@@ -169,11 +169,52 @@ class ScenarioBundleScenarioDatasetSerializer(serializers.Serializer):
 
 
 class DatasetReadSerializer(serializers.ModelSerializer):
+    """A Dataset as every read of the API sends it. Every field is read-only:
+    no write accepts one of them back."""
+
     metadata = serializers.SerializerMethodField()
+    creator = serializers.SlugRelatedField(
+        slug_field="name",
+        read_only=True,
+        allow_null=True,
+        help_text=(
+            "The username of the account that created the dataset, the one "
+            "who may change it; null for a dataset older than ownership."
+        ),
+    )
+    topics = serializers.SerializerMethodField(
+        help_text="The names of the dataset's own topics, sorted."
+    )
 
     class Meta:
         model = Dataset
-        fields = ["uuid", "name", "metadata", "created_at"]
+        fields = [
+            "uuid",
+            "name",
+            "metadata",
+            "created_at",
+            "modified_at",
+            "published_at",
+            "creator",
+            "topics",
+        ]
+        read_only_fields = fields
+        extra_kwargs = {
+            "modified_at": {
+                "help_text": (
+                    "The last Modification of the dataset itself: a change to "
+                    "its title, description, topics or member tables. Never "
+                    "moved by publishing or unpublishing, nor by changes inside "
+                    "a member table; null for a dataset older than the field."
+                )
+            },
+            "published_at": {
+                "help_text": (
+                    "When the dataset was last published; null for a draft. A "
+                    "republish overwrites it."
+                )
+            },
+        }
 
     def get_metadata(self, obj) -> dict:
         # resources are never stored on the dataset: assemble them live
@@ -181,6 +222,15 @@ class DatasetReadSerializer(serializers.ModelSerializer):
         metadata = dict(obj.metadata)
         metadata["resources"] = obj.resource_entries()
         return metadata
+
+    def get_topics(self, obj) -> list[str]:
+        return sorted(topic.name for topic in obj.topics.all())
+
+
+TOPICS_HELP = (
+    "Names of existing topics, the dataset's own set. An unknown name, or the "
+    "draft pseudo-topic, is refused naming it."
+)
 
 
 class DatasetCreateSerializer(serializers.Serializer):
@@ -195,6 +245,38 @@ class DatasetCreateSerializer(serializers.Serializer):
         required=False,
         help_text="Optional: persistent identifier or URL for the dataset",
     )
+    topics = serializers.ListField(
+        child=serializers.CharField(),
+        required=False,
+        help_text=TOPICS_HELP + " Optional: a new dataset has none without it.",
+    )
+
+
+# What a `name` in an update is told: the name is fixed, even sent unchanged.
+NAME_IS_FIXED = "The dataset name is fixed at creation and can not change."
+
+
+class DatasetPatchSerializer(serializers.Serializer):
+    """`PATCH /datasets/<name>/`: every key optional, and a key left out is
+    left as it is. `name` is refused even when equal, so a client learns the
+    name is fixed instead of seeing it ignored."""
+
+    title = serializers.CharField(required=False)
+    description = serializers.CharField(required=False)
+    at_id = serializers.URLField(
+        required=False,
+        help_text="Left out, the stored identifier is kept.",
+    )
+    topics = serializers.ListField(
+        child=serializers.CharField(),
+        required=False,
+        help_text=TOPICS_HELP + " Replaces the whole set; `[]` empties it.",
+    )
+
+    def validate(self, attrs):
+        if "name" in self.initial_data:
+            raise serializers.ValidationError({"name": [NAME_IS_FIXED]})
+        return attrs
 
 
 class DatasetUpdateSerializer(serializers.Serializer):
@@ -218,8 +300,10 @@ class DatasetAssignTablesSerializer(serializers.Serializer):
 
 
 class DatasetResourceSerializer(serializers.ModelSerializer):
-    schema = serializers.StringRelatedField()
+    # There is no ``schema``: it named the Table's old schema relation, which
+    # Topics replaced, and DRF silently skipped it on every read since, while
+    # the description went on promising it.
 
     class Meta:
         model = Table
-        fields = ["id", "schema", "name", "oemetadata", "human_readable_name"]
+        fields = ["id", "name", "oemetadata", "human_readable_name"]

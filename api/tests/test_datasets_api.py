@@ -62,12 +62,8 @@ class DatasetOwnershipTests(APITestCase):
 
     def test_anonymous_cannot_update_dataset(self):
         self.create_owned_dataset()
-        payload = {
-            "name": "owned_dataset",
-            "title": "Changed",
-            "description": "Changed",
-        }
-        response = self.client.put(
+        payload = {"title": "Changed", "description": "Changed"}
+        response = self.client.patch(
             "/api/v0/datasets/owned_dataset/", payload, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -102,12 +98,8 @@ class DatasetOwnershipTests(APITestCase):
     def test_non_creator_cannot_update_dataset(self):
         self.create_owned_dataset()
         self.client.force_authenticate(user=self.other_user)
-        payload = {
-            "name": "owned_dataset",
-            "title": "Hijacked",
-            "description": "Should be rejected",
-        }
-        response = self.client.put(
+        payload = {"title": "Hijacked", "description": "Should be rejected"}
+        response = self.client.patch(
             "/api/v0/datasets/owned_dataset/", payload, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -470,12 +462,8 @@ class DatasetDerivedResourcesTests(APITestCase):
         self.assertEqual(resources[0]["title"], "Corrected")
 
     def test_dataset_update_does_not_change_resources(self):
-        payload = {
-            "name": "derived_dataset",
-            "title": "New Title",
-            "description": "New description",
-        }
-        response = self.client.put(
+        payload = {"title": "New Title", "description": "New description"}
+        response = self.client.patch(
             "/api/v0/datasets/derived_dataset/", payload, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -490,10 +478,11 @@ class DatasetDerivedResourcesTests(APITestCase):
             "title": "New Title",
             "description": "New description",
         }
-        response = self.client.put(
+        response = self.client.patch(
             "/api/v0/datasets/derived_dataset/", payload, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("name", response.json())
         self.assertTrue(Dataset.objects.filter(name="derived_dataset").exists())
         self.assertFalse(Dataset.objects.filter(name="renamed_dataset").exists())
 
@@ -685,13 +674,12 @@ class DatasetManagerAPITests(APITestCase):
 
     def test_update_dataset(self):
         updated_data = {
-            "name": "test_dataset",  # must match existing name
             "title": "Updated Title",
             "description": "Updated Description",
             "at_id": "https://example.org/dataset/test_dataset",
         }
 
-        response = self.client.put(self.detail_url, updated_data, format="json")
+        response = self.client.patch(self.detail_url, updated_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.dataset.refresh_from_db()
         self.assertEqual(self.dataset.metadata["title"], "Updated Title")
@@ -709,16 +697,24 @@ class DatasetManagerAPITests(APITestCase):
         response = self.client.get("/api/v0/datasets/nonexistent_dataset/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_put_nonexistent_dataset(self):
-        payload = {
-            "name": "nonexistent_dataset",
-            "title": "Does Not Exist",
-            "description": "Should return 404",
-        }
-        response = self.client.put(
+    def test_patch_nonexistent_dataset(self):
+        payload = {"title": "Does Not Exist", "description": "Should return 404"}
+        response = self.client.patch(
             "/api/v0/datasets/nonexistent_dataset/", payload, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_put_is_not_offered(self):
+        payload = {
+            "name": "test_dataset",
+            "title": "Replaced",
+            "description": "Replaced",
+        }
+        response = self.client.put(self.detail_url, payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertIn("detail", response.json())
+        self.dataset.refresh_from_db()
+        self.assertEqual(self.dataset.metadata["title"], "Test Title")
 
     def test_delete_nonexistent_dataset(self):
         response = self.client.delete("/api/v0/datasets/nonexistent_dataset/")
