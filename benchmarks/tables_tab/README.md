@@ -108,9 +108,9 @@ ACCOUNTS='{"six":[<id>,"<sessionid>"],"sixty":[<id>,"<sessionid>"]}' \
 node benchmarks/tables_tab/widths.mjs
 ```
 
-`BAR_QUERY` ticks two values in each of Topic and Tag, because their dropdown
-buttons name what is ticked, which is what makes the bar widest. The numbers and
-thresholds are beside the container queries in `datasets_tab.css`.
+`BAR_QUERY` applies a Created range and ticks two values in each of Topic and
+Tag, so every count on the bar shows. The numbers and thresholds are beside the
+container queries in `datasets_tab.css`.
 
 ## Delete cost
 

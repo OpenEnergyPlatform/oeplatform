@@ -67,12 +67,8 @@ from login.listing import (
     Sort,
     dates_within,
 )
+from login.tables_tab import DRAFT, PUBLISHED, TOPICS_SHOWN, table_status
 from oeplatform.settings import PSEUDO_TOPIC_DRAFT
-
-DRAFT, PUBLISHED, EMBARGOED = "draft", "published", "embargoed"
-
-# How many Topics a row shows as chips before "+n".
-TOPICS_SHOWN = 2
 
 # How many members the Tables popover names before "and n more". The tables
 # tab's bulk "Add to dataset…" adds up to 2,500 Tables at once, so the cap is
@@ -86,10 +82,10 @@ DISPLAYED_TITLE = Lower(
     Coalesce(NullIf(KeyTextTransform("title", "metadata"), Value("")), F("name"))
 )
 
-# What the Modified cell says when no change was recorded: every Dataset
-# older than the field reads it until its next change.
+# What the Modified cell says when no change was recorded: a Dataset older
+# than the field (dataedit.0058) reads it until its next change.
 MODIFIED_UNKNOWN_NOTE = (
-    "No change recorded since changes to datasets began to be recorded."
+    "Not changed since the platform began recording changes to datasets."
 )
 
 
@@ -408,14 +404,8 @@ def member_titles(dataset_ids) -> dict:
     )
     members = {}
     for dataset_id, name, human_name, published, embargoed in rows:
-        if not published:
-            status = DRAFT
-        elif embargoed:
-            status = EMBARGOED
-        else:
-            status = PUBLISHED
         members.setdefault(dataset_id, []).append(
-            Member(name, human_name or name, status)
+            Member(name, human_name or name, table_status(published, embargoed))
         )
     return members
 

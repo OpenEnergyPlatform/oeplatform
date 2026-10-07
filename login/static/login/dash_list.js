@@ -26,7 +26,7 @@
 //   it, so a chip removed or a Reset inside the region shows in the bar, and
 //   "More filters (n)" follows `data-more` and "Filters (n)" `data-folded`.
 //   A multi-valued filter in the primary row is a dropdown of checkboxes,
-//   whose button names what is ticked; it follows every change.
+//   whose button counts what is ticked; it follows every change.
 // - "Sort by": a list too narrow for its column headers (its rows stack, by
 //   CSS container queries) sorts with a select inside the region. Its
 //   request is rewritten like a filter's, so it keeps every filter and
@@ -283,22 +283,16 @@ export function restoreFocus(doc, config, id) {
 
 /**
  * What a dropdown of a multi-valued filter says on its button: the blank
- * text, up to two ticked labels, or how many are ticked. The server says the
- * same on render (`FilterControl.summary`).
+ * text, or how many are ticked, "Topic (2)", the way "More filters (n)"
+ * counts. The server says the same on render (`FilterControl.summary`).
  *
  * @param {string} label the filter's label, "Topic".
  * @param {string} blank what it says with nothing ticked, "Topic: any".
- * @param {string[]} ticked the labels of the ticked options.
+ * @param {number} ticked how many options are ticked.
  * @return {string} the button's text.
  */
 export function multiSummary(label, blank, ticked) {
-  if (!ticked.length) {
-    return blank;
-  }
-  if (ticked.length <= 2) {
-    return `${label}: ${ticked.join(", ")}`;
-  }
-  return `${label}: ${ticked.length} ticked`;
+  return ticked ? `${label} (${ticked})` : blank;
 }
 
 /**
@@ -309,17 +303,11 @@ export function multiSummary(label, blank, ticked) {
  * @param {Element} bar the filter bar.
  */
 export function summarizeMulti(bar) {
-  const doc = bar.ownerDocument;
   for (const button of bar.querySelectorAll("[data-multi-summary]")) {
     const name = button.dataset.multiSummary;
     const ticked = [
       ...bar.querySelectorAll(`input[type="checkbox"][name="${name}"]`),
-    ]
-      .filter((box) => box.checked)
-      .map((box) => {
-        const label = doc.querySelector(`label[for="${box.id}"]`);
-        return label ? label.textContent.trim() : box.value;
-      });
+    ].filter((box) => box.checked).length;
     button.textContent = multiSummary(
       button.dataset.label || name,
       button.dataset.blank || "",

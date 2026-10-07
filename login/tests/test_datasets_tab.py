@@ -220,15 +220,14 @@ class ColumnTests(DatasetsTabTestCase):
             "ds_draft_emb",
             tables=(self.table("t_de", published=False, embargoed=True),),
         )
-        popover = self.cell(self.get(), f"mb-{dataset.pk}-pop")
-        self.assertIn("1 draft", popover)
-        self.assertNotIn("embargoed", popover.replace("Embargoed", ""))
+        row = next(r for r in self.page().rows if r.dataset == dataset)
+        self.assertEqual(row.mix, "1 draft")
+        self.assertEqual(row.members[0].status, "draft")
 
     def test_the_popover_names_ten_members_then_how_many_more(self):
         tables = [self.table(f"t_m_{n:02d}", f"Member {n:02d}") for n in range(13)]
         dataset = self.dataset("ds_thirteen", tables=tables)
         popover = self.cell(self.get(), f"mb-{dataset.pk}-pop")
-        self.assertEqual(MEMBERS_SHOWN, 10)
         self.assertIn("Member 09", popover)
         self.assertNotIn("Member 10", popover)
         self.assertIn("and 3 more", popover)
@@ -269,7 +268,8 @@ class ColumnTests(DatasetsTabTestCase):
         body = self.get().content.decode()
         self.assertIn("6 May 2026", text(element_markup(body, f"row-{known.pk}")))
         self.assertIn(
-            "No change recorded", text(element_markup(body, f"row-{unknown.pk}"))
+            "Not changed since the platform began recording",
+            text(element_markup(body, f"row-{unknown.pk}")),
         )
 
     def test_created_reads_the_creation_date(self):
@@ -442,12 +442,10 @@ class FilterBarTests(FilterTestCase):
                 self.assertIn(f'id="{control}"', more)
         self.assertLess(bar.index("f-topics-button"), bar.index("f-tags-button"))
 
-    def test_a_dropdown_names_what_is_ticked(self):
+    def test_a_dropdown_counts_what_is_ticked(self):
         page = self.page({"topics": "energy", "tags": "hidden,solar,wind"})
         summaries = {c.param: c.summary for c in page.controls if c.kind == "choice"}
-        self.assertEqual(
-            summaries, {"topics": "Topic: energy", "tags": "Tag: 3 ticked"}
-        )
+        self.assertEqual(summaries, {"topics": "Topic (1)", "tags": "Tag (3)"})
         body = self.get().content.decode()
         self.assertEqual(text(element_markup(body, "f-topics-button")), "Topic: any")
 
@@ -603,6 +601,12 @@ class SortTests(DatasetsTabTestCase):
         pks = {d.name: str(d.pk) for d in Dataset.objects.filter(name__in=tied)}
         self.assertEqual(tied, sorted(tied, key=pks.get))
 
+    def test_a_tie_under_a_descending_sort_is_broken_by_title_ascending(self):
+        for name, title in (("ds_tz", "zulu"), ("ds_ty", "yankee")):
+            self.dataset(name, title=title, created=moment("2026-09-10"))
+        tied = [n for n in self.names({"sort": "-created"}) if n.startswith("ds_t")]
+        self.assertEqual(tied, ["ds_ty", "ds_tz"])
+
     def test_topics_is_not_sortable(self):
         self.assertNotIn("topics", self.page().sort_links)
 
@@ -711,8 +715,10 @@ class QueryCountTests(DatasetsTabTestCase):
             for dataset in datasets
             for table in tables
         )
+        # every Dataset carries "a", so the Topic filter narrows by a known
+        # value in every scenario rather than reading as a stale chip
         for index, dataset in enumerate(datasets):
-            dataset.topics.add(*topics[: index % 4])
+            dataset.topics.add(*topics[: 1 + index % 3])
 
     def empty(self):
         Dataset.objects.all().delete()

@@ -63,7 +63,7 @@
  * Columns collapse by the list's own width (container queries on `.dash`),
  * not the viewport's: the profile sidebar takes a different share of each
  * screen. Drop order: Created, then Topics, then the rows stack. The filter
- * bar folds behind "Filters (n)" by its own width.
+ * bar folds behind "Filters (n)" only where the rows already stack.
  *
  * Every rule here is scoped to the datasets tab (`#datasets-tab`, which is
  * the `.dash` container itself), because the queries hide columns by their
@@ -84,19 +84,20 @@
  *   every column                  879     880 (920)
  *   without Created               771     780 (810)
  *   without Topics too            621     630 (660)   below: rows stack
- *   the filter bar on one line    693     700 (630)   below: bar folds
+ *   the filter bar on one line    508     510 (630)   below: bar folds
  *
- * The bar is the outlier: with a Created range applied ("More filters (1)")
- * and two values ticked in each of Topic and Tag, whose dropdown buttons
- * name them, it needs 693 px (the bare bar 500). So it folds above the
- * stacking line rather than below it, as on the tables tab.
+ * The bar is measured with a Created range applied ("More filters (1)") and
+ * two values ticked in each of Topic and Tag (the bare bar is 500). Their
+ * dropdown buttons count what is ticked, "Topic (2)", rather than naming it:
+ * named, the bar measured 693 and would have had to fold above the
+ * stacking line. So it folds only where the rows already stack.
  *
  * With the sidebar the list is 1,392 px wide at a 1920 px screen, 976 at
  * 1440 and 1366, 896 at 1280 (all four: every column), 640 at 1024 (without
- * Created and Topics, bar folded), 416 at 800 and 342 at 390 (stacked, bar
- * folded). Nothing in the list scrolls sideways at any of them; at 1024 the
- * page does, by the site header's user name and Sign Out, on every profile
- * tab alike.
+ * Created and Topics), 416 at 800 and 342 at 390 (stacked, bar folded).
+ * Nothing in the list scrolls sideways at any of them; at 1024 the page
+ * does, by the site header's user name and Sign Out, on every profile tab
+ * alike.
  * ---------------------------------------------------------------------- */
 
 @container (width < 880px) {
@@ -113,7 +114,7 @@
 
 /* Too narrow for the bar on one line: everything but Search folds behind
    "Filters (n)", which shows it below as a block of its own. */
-@container (width < 700px) {
+@container (width < 510px) {
   #datasets-tab .dash-fold-toggle {
     display: inline-block;
   }

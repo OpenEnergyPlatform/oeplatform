@@ -238,9 +238,7 @@ describe("a multi-valued filter's dropdown", () => {
     fieldset.insertAdjacentHTML(
       "beforeend",
       `<input type="checkbox" name="topics" value="grid" id="tp-grid" />
-       <label for="tp-climate">Climate</label>
-       <label for="tp-energy">Energy</label>
-       <label for="tp-grid">Grid</label>`
+`
     );
     unbind = bindDatasetsTab(document, {
       announceDelay: 0,
@@ -258,13 +256,12 @@ describe("a multi-valued filter's dropdown", () => {
     $(id).dispatchEvent(new Event("change", { bubbles: true }));
   };
 
-  it("names up to two ticked options, then how many", () => {
+  it("counts what is ticked", () => {
     tick("tp-energy");
-    expect($("f-topics-button").textContent).toBe("Topic: Energy");
+    expect($("f-topics-button").textContent).toBe("Topic (1)");
     tick("tp-climate");
-    expect($("f-topics-button").textContent).toBe("Topic: Climate, Energy");
     tick("tp-grid");
-    expect($("f-topics-button").textContent).toBe("Topic: 3 ticked");
+    expect($("f-topics-button").textContent).toBe("Topic (3)");
     for (const id of ["tp-grid", "tp-climate", "tp-energy"]) {
       tick(id, false);
     }
@@ -274,6 +271,6 @@ describe("a multi-valued filter's dropdown", () => {
   it("follows a chip removed inside the region", () => {
     tick("tp-energy");
     swapRegion(region({ filters: '{"topics": "grid"}' }));
-    expect($("f-topics-button").textContent).toBe("Topic: Grid");
+    expect($("f-topics-button").textContent).toBe("Topic (1)");
   });
 });

@@ -102,6 +102,16 @@ ROLE_LABELS = {role.level: role.label for role in ROLES}
 
 DRAFT, PUBLISHED, EMBARGOED = "draft", "published", "embargoed"
 
+
+def table_status(published: bool, embargoed: bool) -> str:
+    """A Table's status: a draft is a draft whatever its embargo; a published
+    Table under a running embargo is embargoed. Shared with the datasets tab's
+    member popover."""
+    if not published:
+        return DRAFT
+    return EMBARGOED if embargoed else PUBLISHED
+
+
 REVIEWED, IN_REVIEW, NOT_REVIEWED = "reviewed", "in_review", "not_reviewed"
 
 # How many Topics a row shows as chips before "+n".
@@ -707,12 +717,7 @@ def table_rows(user):
         for table in tables:
             direct_level = direct.get(table.pk, 0)
             organizations = through.get(table.pk, [])
-            if not table.is_publish:
-                status = DRAFT
-            elif table.embargo_until:
-                status = EMBARGOED
-            else:
-                status = PUBLISHED
+            status = table_status(table.is_publish, bool(table.embargo_until))
             reviewed = table.review_rank == 2
             checks = publish_checks(table)
             live = passes(checks)
