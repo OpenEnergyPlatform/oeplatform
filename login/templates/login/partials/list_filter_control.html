@@ -10,7 +10,10 @@ a pause, so typing a year digit by digit sends one request rather than four.
 Each control requests ``path``; the page's module rewrites the request from
 the address bar, so the rest of the state is kept and the page returns to 1.
 An empty multi-valued control says "None on your ‹noun›", ``noun`` being
-the listing's plural.
+the listing's plural. A multi-valued control in the primary row (not behind
+"More filters") is a dropdown holding the same checkboxes, so a long option
+list does not widen the bar; its button counts what is ticked, "Topic (2)"
+(``data-multi-summary``), and the page's module keeps that in step.
 {% endcomment %}
 {% if control.kind == "range" %}
   <fieldset class="dash-range" id="f-{{ control.param }}">
@@ -28,30 +31,33 @@ the listing's plural.
       </label>
     {% endfor %}
   </fieldset>
+{% elif control.multiple and not control.more %}
+  <div class="dropdown dash-multi-drop">
+    <button type="button"
+            id="f-{{ control.param }}-button"
+            class="form-select form-select-sm dash-multi-drop__button"
+            data-bs-toggle="dropdown"
+            data-bs-auto-close="outside"
+            aria-expanded="false"
+            data-multi-summary="{{ control.param }}"
+            data-label="{{ control.label }}"
+            data-blank="{{ control.blank }}">{{ control.summary }}</button>
+    <fieldset class="dropdown-menu dash-multi dash-multi-drop__menu"
+              id="f-{{ control.param }}">
+      <legend class="dash-multi__legend">
+        {{ control.label }}
+        {% if control.hint %}<span class="dash-muted">· {{ control.hint }}</span>{% endif %}
+      </legend>
+      {% include "login/partials/list_filter_options.html" %}
+    </fieldset>
+  </div>
 {% elif control.multiple %}
   <fieldset class="dash-multi" id="f-{{ control.param }}">
     <legend class="dash-multi__legend">
       {{ control.label }}
       {% if control.hint %}<span class="dash-muted">· {{ control.hint }}</span>{% endif %}
     </legend>
-    <div class="dash-multi__list">
-      {% for option in control.options %}
-        <div class="form-check">
-          <input class="form-check-input"
-                 type="checkbox"
-                 id="f-{{ control.param }}-{{ forloop.counter }}"
-                 name="{{ control.param }}"
-                 value="{{ option.value }}"
-                 {% if option.selected %}checked{% endif %}
-                 hx-get="{{ path }}"
-                 hx-trigger="change" />
-          <label class="form-check-label"
-                 for="f-{{ control.param }}-{{ forloop.counter }}">{{ option.label }}</label>
-        </div>
-      {% empty %}
-        <p class="dash-muted">None on your {{ noun }}</p>
-      {% endfor %}
-    </div>
+    {% include "login/partials/list_filter_options.html" %}
   </fieldset>
 {% else %}
   <label class="visually-hidden"

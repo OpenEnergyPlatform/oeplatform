@@ -25,6 +25,8 @@
 //   the region's `data-filters` (what the URL holds) unless the user is in
 //   it, so a chip removed or a Reset inside the region shows in the bar, and
 //   "More filters (n)" follows `data-more` and "Filters (n)" `data-folded`.
+//   A multi-valued filter in the primary row is a dropdown of checkboxes,
+//   whose button counts what is ticked; it follows every change.
 // - "Sort by": a list too narrow for its column headers (its rows stack, by
 //   CSS container queries) sorts with a select inside the region. Its
 //   request is rewritten like a filter's, so it keeps every filter and
@@ -280,6 +282,41 @@ export function restoreFocus(doc, config, id) {
 }
 
 /**
+ * What a dropdown of a multi-valued filter says on its button: the blank
+ * text, or how many are ticked, "Topic (2)", the way "More filters (n)"
+ * counts. The server says the same on render (`FilterControl.summary`).
+ *
+ * @param {string} label the filter's label, "Topic".
+ * @param {string} blank what it says with nothing ticked, "Topic: any".
+ * @param {number} ticked how many options are ticked.
+ * @return {string} the button's text.
+ */
+export function multiSummary(label, blank, ticked) {
+  return ticked ? `${label} (${ticked})` : blank;
+}
+
+/**
+ * Bring every dropdown button of a multi-valued filter in the bar
+ * (`data-multi-summary`, naming the filter's parameter) in step with its
+ * checkboxes.
+ *
+ * @param {Element} bar the filter bar.
+ */
+export function summarizeMulti(bar) {
+  for (const button of bar.querySelectorAll("[data-multi-summary]")) {
+    const name = button.dataset.multiSummary;
+    const ticked = [
+      ...bar.querySelectorAll(`input[type="checkbox"][name="${name}"]`),
+    ].filter((box) => box.checked).length;
+    button.textContent = multiSummary(
+      button.dataset.label || name,
+      button.dataset.blank || "",
+      ticked
+    );
+  }
+}
+
+/**
  * Make every bar control hold what the region says the URL holds, except the
  * one the user is in. A select whose value is not among its options (a value
  * that no longer applies) shows its blank option.
@@ -323,6 +360,7 @@ export function syncFilters(doc, config, region) {
       count.textContent = applied ? ` (${applied})` : "";
     }
   }
+  summarizeMulti(bar);
 }
 
 /**
@@ -928,6 +966,15 @@ export function bindList(
     }
   };
 
+  // a ticked or unticked option renames its dropdown's button at once,
+  // before the list comes back
+  const onChange = (event) => {
+    const bar = doc.getElementById(ids.filters);
+    if (bar && event.target && bar.contains(event.target)) {
+      summarizeMulti(bar);
+    }
+  };
+
   const onGuard = (event) => {
     if (isUnavailable(event.target)) {
       event.preventDefault();
@@ -1077,6 +1124,7 @@ export function bindList(
     [config.changedEvent, onChanged],
     [config.refusedEvent, onRefused],
     ["click", onClick],
+    ["change", onChange],
   ];
   for (const [name, listener] of listeners) {
     doc.body.addEventListener(name, listener);

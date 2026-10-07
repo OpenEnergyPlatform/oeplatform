@@ -4,7 +4,8 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 Cell type "chip list with +n": the row's Topics, the first two as chips
 and the rest behind "+n". Reads ``row.key``, ``row.title``, ``row.topics``,
-``row.shown_topics`` and ``row.more_topics``.
+``row.shown_topics`` and ``row.more_topics``. With ``needed`` (a draft whose
+Publish gate asks for a Topic), an empty cell reads "– needed to publish".
 {% endcomment %}
 {% if row.topics %}
   {% for topic in row.shown_topics %}<span class="dash-tchip">{{ topic }}</span>{% endfor %}
@@ -27,6 +28,8 @@ and the rest behind "+n". Reads ``row.key``, ``row.title``, ``row.topics``,
       </div>
     {% endwith %}
   {% endif %}
+{% elif needed %}
+  {% include "login/partials/cells/needed.html" with what="topics" %}
 {% else %}
   <span class="dash-muted"
         aria-hidden="true">–</span><span class="visually-hidden">No topics</span>

@@ -12,6 +12,21 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- The profile's datasets tab is one dense list of your own Datasets, replacing
+  the cards: Dataset (title linked to its page, the name beneath), Status
+  (Draft, or Published since a date), Tables (a count whose popover names the
+  draft and embargoed members and the first ten by title), Topics, Modified and
+  Created. An empty Tables or Topics cell on a draft reads "– needed to
+  publish". It filters by search, status (with counts), Topic, Tag (a Dataset
+  carries a tag when one of its members does) and, under "More filters", the
+  Created and Modified dates; it sorts by every column but Topics, newest change
+  first by default, 25 per page, with the state in the address. The columns
+  collapse by the list's own width, measured in a browser (880 / 780 px, the
+  rows stack below 630 px). The card routes are gone, and with them creating,
+  editing, deleting and managing a Dataset from the dashboard until the row
+  actions land; the API still does all of it. A multi-valued filter in a list's
+  primary row is now a dropdown of checkboxes
+  [(#2662)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2662)
 - The profile dashboard's tables tab now runs on a generic list module, with no
   change in what it does: `login/static/login/dash_list.js` holds the behaviour
   (filter bar, selection, bulk bar, dialog, drawer, toasts) driven by a config

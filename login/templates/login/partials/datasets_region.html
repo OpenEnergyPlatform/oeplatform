@@ -1,0 +1,48 @@
+{% extends "login/partials/list_region.html" %}
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+The datasets tab's results region (list_region.html): its empty state and its
+columns, Dataset · Status · Tables · Topics · Modified · Created, between the
+selection slot and the ⋯ slot, both empty until the tab offers actions. Each
+cell type is its own partial under ``cells/``; the container queries that
+collapse the columns are in ``datasets_tab.css``.
+{% endcomment %}
+{% block empty %}
+  <div class="dash-empty">
+    <h3 class="dash-empty__title">You have no datasets yet</h3>
+    <p>
+      A dataset is a collection of tables, yours or other people's, under one
+      title. It stays a private draft until you publish it.
+    </p>
+  </div>
+{% endblock empty %}
+{% block head_cells %}
+  {% include "login/partials/list_sort_header.html" with link=page.sort_links.dataset cell="c-dataset" %}
+  {% include "login/partials/list_sort_header.html" with link=page.sort_links.status cell="c-status" %}
+  {% include "login/partials/list_sort_header.html" with link=page.sort_links.tables cell="c-members" %}
+  <th class="c-topics" scope="col">Topics</th>
+  {% include "login/partials/list_sort_header.html" with link=page.sort_links.modified cell="c-modified" %}
+  {% include "login/partials/list_sort_header.html" with link=page.sort_links.created cell="c-created" %}
+  <td class="c-menu"></td>
+{% endblock head_cells %}
+{% block row_cells %}
+  <td class="c-dataset">
+    <a id="title-{{ row.key }}"
+       class="dash-title"
+       href="{% url 'dataedit:dataset-detail' dataset_name=row.name %}"
+       hx-boost="false">{{ row.title }}</a>
+    {% if row.has_title %}<div class="dash-tname">{{ row.name }}</div>{% endif %}
+  </td>
+  <td class="c-status">
+    {% include "login/partials/cells/status.html" with status=row.status since=row.published_at %}
+  </td>
+  <td class="c-members">{% include "login/partials/cells/members.html" %}</td>
+  <td class="c-topics">
+    {% include "login/partials/cells/chips.html" with needed=row.is_draft %}
+  </td>
+  <td class="c-modified">{% include "login/partials/cells/modified.html" %}</td>
+  <td class="c-created">{% include "login/partials/cells/created.html" %}</td>
+  <td class="c-menu"></td>
+{% endblock row_cells %}

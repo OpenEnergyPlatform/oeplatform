@@ -101,66 +101,69 @@ queries that collapse them, loaded after the generic dash_list.css).
       an address. Every action is enabled while anything is selected: the
       preflight says what it would leave out. Delete is red and last. Where
       the rows stack, the actions fold into "Actions ▾". Its requests are
-      synced only with themselves, never with the list's.
+      synced only with themselves, never with the list's. A tab with no bulk
+      actions has no bar and offers no selection.
       {% endcomment %}
-      <div id="{{ frame.items }}-bulk"
-           class="dash-bulk"
-           hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
-        <p id="{{ frame.items }}-bulk-idle"
-           class="dash-bulk__idle"
-           aria-hidden="true">Tick {{ page.listing.plural }} to act on several at once.</p>
-        <p id="{{ frame.items }}-bulk-note"
-           class="dash-bulk__note"
-           role="status"></p>
-        <div id="{{ frame.items }}-bulk-bar"
-             class="dash-bulk__bar"
-             role="group"
-             aria-label="Selected {{ page.listing.plural }}"
-             hidden>
-          <span id="{{ frame.items }}-bulk-count"
-                class="dash-bulk__count"></span>
-          <button type="button"
-                  id="{{ frame.items }}-bulk-clear"
-                  class="btn btn-link btn-sm dash-bulk__clear">Clear</button>
-          <div class="dash-bulk__actions">
-            {% for verb, label in bulk_actions %}
-              {% url frame.check_url user_id=profile_user.pk action=verb as check_url %}
-              <button type="button"
-                      id="bulk-{{ verb }}"
-                      class="btn {% if verb == "delete" %}btn-outline-danger{% else %}btn-outline-primary{% endif %} btn-sm"
-                      hx-post="{{ check_url }}"
-                      hx-target="#{{ frame.dialog }}-body"
-                      hx-swap="innerHTML"
-                      hx-sync="this:replace"
-                      data-bulk-action
-                      data-action-origin="bulk-{{ verb }}">{{ label }}</button>
-            {% endfor %}
-          </div>
-          <div class="dropdown dash-bulk__menu">
+      {% if bulk_actions %}
+        <div id="{{ frame.items }}-bulk"
+             class="dash-bulk"
+             hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+          <p id="{{ frame.items }}-bulk-idle"
+             class="dash-bulk__idle"
+             aria-hidden="true">Tick {{ page.listing.plural }} to act on several at once.</p>
+          <p id="{{ frame.items }}-bulk-note"
+             class="dash-bulk__note"
+             role="status"></p>
+          <div id="{{ frame.items }}-bulk-bar"
+               class="dash-bulk__bar"
+               role="group"
+               aria-label="Selected {{ page.listing.plural }}"
+               hidden>
+            <span id="{{ frame.items }}-bulk-count"
+                  class="dash-bulk__count"></span>
             <button type="button"
-                    id="bulk-menu"
-                    class="btn btn-outline-primary btn-sm dropdown-toggle"
-                    data-bs-toggle="dropdown"
-                    aria-expanded="false">Actions</button>
-            <ul class="dropdown-menu" aria-labelledby="bulk-menu">
+                    id="{{ frame.items }}-bulk-clear"
+                    class="btn btn-link btn-sm dash-bulk__clear">Clear</button>
+            <div class="dash-bulk__actions">
               {% for verb, label in bulk_actions %}
                 {% url frame.check_url user_id=profile_user.pk action=verb as check_url %}
-                <li>
-                  <button type="button"
-                          id="bulk-menu-{{ verb }}"
-                          class="dropdown-item{% if verb == "delete" %} text-danger{% endif %}"
-                          hx-post="{{ check_url }}"
-                          hx-target="#{{ frame.dialog }}-body"
-                          hx-swap="innerHTML"
-                          hx-sync="this:replace"
-                          data-bulk-action
-                          data-action-origin="bulk-menu">{{ label }}</button>
-                </li>
+                <button type="button"
+                        id="bulk-{{ verb }}"
+                        class="btn {% if verb == "delete" %}btn-outline-danger{% else %}btn-outline-primary{% endif %} btn-sm"
+                        hx-post="{{ check_url }}"
+                        hx-target="#{{ frame.dialog }}-body"
+                        hx-swap="innerHTML"
+                        hx-sync="this:replace"
+                        data-bulk-action
+                        data-action-origin="bulk-{{ verb }}">{{ label }}</button>
               {% endfor %}
-            </ul>
+            </div>
+            <div class="dropdown dash-bulk__menu">
+              <button type="button"
+                      id="bulk-menu"
+                      class="btn btn-outline-primary btn-sm dropdown-toggle"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false">Actions</button>
+              <ul class="dropdown-menu" aria-labelledby="bulk-menu">
+                {% for verb, label in bulk_actions %}
+                  {% url frame.check_url user_id=profile_user.pk action=verb as check_url %}
+                  <li>
+                    <button type="button"
+                            id="bulk-menu-{{ verb }}"
+                            class="dropdown-item{% if verb == "delete" %} text-danger{% endif %}"
+                            hx-post="{{ check_url }}"
+                            hx-target="#{{ frame.dialog }}-body"
+                            hx-swap="innerHTML"
+                            hx-sync="this:replace"
+                            data-bulk-action
+                            data-action-origin="bulk-menu">{{ label }}</button>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
           </div>
         </div>
-      </div>
+      {% endif %}
     {% endif %}
     <div id="{{ frame.items }}-live"
          class="visually-hidden"

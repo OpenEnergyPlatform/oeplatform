@@ -264,14 +264,9 @@ class ProfileRoutesTests(OwnerRuleFixture):
 
     def routes(self):
         """(name, extra kwargs, status for the owner) for every GET route."""
-        dataset = {"dataset_name": self.dataset_name}
         return [
             ("login:profile", {}, 200),
             ("login:datasets", {}, 200),
-            ("login:dataset-card", dataset, 200),
-            ("login:dataset-edit", dataset, 200),
-            ("login:dataset-manage", dataset, 200),
-            ("login:dataset-table-search", dataset, 200),
             ("login:tables", {}, 200),
             ("login:table-names", {}, 200),
             (
@@ -291,13 +286,7 @@ class ProfileRoutesTests(OwnerRuleFixture):
 
     def post_routes(self):
         """(name, extra kwargs) for every route that takes a POST."""
-        dataset = {"dataset_name": self.dataset_name}
         return [
-            ("login:datasets", {}),
-            ("login:dataset-edit", dataset),
-            ("login:dataset-delete", dataset),
-            ("login:dataset-assign", dataset),
-            ("login:dataset-unassign", dataset),
             ("login:table-action-check", {"action": "publish"}),
             ("login:edit", {}),
         ]

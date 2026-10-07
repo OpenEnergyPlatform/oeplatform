@@ -345,6 +345,16 @@ class FilterControl:
     options: list
     kind: str = "choice"
 
+    @property
+    def summary(self) -> str:
+        """What a dropdown of this control's checkboxes says on its button:
+        the blank text, or how many are ticked, "Topic (2)", the way "More
+        filters (n)" counts; the chips name them. A count keeps the button's
+        width fixed, which the filter bar's fold width depends on.
+        ``multiSummary`` in dash_list.js says the same after a change."""
+        ticked = sum(1 for option in self.options if option.selected)
+        return f"{self.label} ({ticked})" if ticked else self.blank
+
 
 @dataclass(frozen=True)
 class RangeEnd:

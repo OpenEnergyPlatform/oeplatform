@@ -1,0 +1,230 @@
+/*
+ * SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
+ * The profile dashboard's datasets tab (spec #2613): its columns and Dataset
+ * cells, and the column collapse by the list's own width, the container
+ * queries at the end of this file. Everything a list has whatever it lists is
+ * in dash_list.css, which the page loads first. What the tables tab keeps on
+ * its side (the select and ⋯ columns, the technical name, the collapse) is
+ * restated here for this tab's own columns.
+ */
+
+.c-dataset {
+  min-width: 13rem;
+}
+
+/* a Dataset's name is a slug that may run long without a break */
+.dash-tname {
+  font: 0.75rem ui-monospace, Consolas, monospace;
+  color: var(--dash-muted);
+  overflow-wrap: anywhere;
+}
+
+/* the select column: an empty slot until the tab offers bulk actions */
+.c-select {
+  width: 2.25rem;
+  padding-right: 0;
+}
+
+/* the row's ⋯ slot stays at the right edge while the list scrolls sideways */
+.c-menu {
+  position: sticky;
+  right: 0;
+  width: 3rem;
+  background: #fff;
+}
+
+.dash-table thead .c-menu {
+  background: #f8f9fa;
+}
+
+.c-menu:focus-within,
+.c-menu:has(.dropdown-menu.show) {
+  z-index: 2;
+}
+
+/* The Tables count, and its popover */
+.c-members .dash-count {
+  white-space: nowrap;
+}
+
+.dash-pop__mix {
+  margin-bottom: 0.25rem;
+  color: var(--dash-muted);
+}
+
+.dash-pop__more {
+  margin: 0.25rem 0 0;
+  color: var(--dash-muted);
+}
+
+/* ------------------------------------------------------------------------
+ * Columns collapse by the list's own width (container queries on `.dash`),
+ * not the viewport's: the profile sidebar takes a different share of each
+ * screen. Drop order: Created, then Topics, then the rows stack. The filter
+ * bar folds behind "Filters (n)" only where the rows already stack.
+ *
+ * Every rule here is scoped to the datasets tab (`#datasets-tab`, which is
+ * the `.dash` container itself), because the queries hide columns by their
+ * class and the widths are this tab's: the tables tab has a `c-topics` and a
+ * `c-created` too. A structural test holds the scope
+ * (login/tests/test_list_styles.py).
+ *
+ * Measured 2026-10-07 (#2622) in headless Chrome 152 with
+ * benchmarks/tables_tab/widths.mjs: the narrowest list each set of columns
+ * fits without scrolling, worst page of the accounts `six` (one Dataset per
+ * case, a 2,500-member one among them) and `sixty` (generated, three pages),
+ * seeded by benchmarks/tables_tab/seed_datasets.py. Taken in DejaVu Sans,
+ * the widest font the system stack falls back to. Each threshold is the row
+ * rounded up to the next 10 px, the rule the prototype's numbers came from;
+ * the prototype's, in brackets, were measured on a stand-in row.
+ *
+ *                              DejaVu   threshold
+ *   every column                  879     880 (920)
+ *   without Created               771     780 (810)
+ *   without Topics too            621     630 (660)   below: rows stack
+ *   the filter bar on one line    508     510 (630)   below: bar folds
+ *
+ * The bar is measured with a Created range applied ("More filters (1)") and
+ * two values ticked in each of Topic and Tag (the bare bar is 500). Their
+ * dropdown buttons count what is ticked, "Topic (2)", rather than naming it:
+ * named, the bar measured 693 and would have had to fold above the
+ * stacking line. So it folds only where the rows already stack.
+ *
+ * With the sidebar the list is 1,392 px wide at a 1920 px screen, 976 at
+ * 1440 and 1366, 896 at 1280 (all four: every column), 640 at 1024 (without
+ * Created and Topics), 416 at 800 and 342 at 390 (stacked, bar folded).
+ * Nothing in the list scrolls sideways at any of them; at 1024 the page
+ * does, by the site header's user name and Sign Out, on every profile tab
+ * alike.
+ * ---------------------------------------------------------------------- */
+
+@container (width < 880px) {
+  #datasets-tab .c-created {
+    display: none;
+  }
+}
+
+@container (width < 780px) {
+  #datasets-tab .c-topics {
+    display: none;
+  }
+}
+
+/* Too narrow for the bar on one line: everything but Search folds behind
+   "Filters (n)", which shows it below as a block of its own. */
+@container (width < 510px) {
+  #datasets-tab .dash-fold-toggle {
+    display: inline-block;
+  }
+
+  #datasets-tab .dash-fold {
+    display: none;
+  }
+
+  #datasets-tab .dash-fold-toggle[aria-expanded="true"] ~ .dash-fold {
+    display: flex;
+    flex: 1 0 100%;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+  }
+
+  #datasets-tab .dash-search {
+    max-width: none;
+  }
+}
+
+/* A row stacks into two lines: ☐, title and ⋯, then Status, Tables and
+   Modified. Every other cell is hidden (a draft's missing-Topic hint with
+   it: the Tables hint stays), so a column added later has to say here
+   where it goes. The headers go with the columns, so "Sort by" and "Select
+   this page" take their place. */
+@container (width < 630px) {
+  #datasets-tab .dash-sortby,
+  #datasets-tab .dash-selectpage {
+    display: flex;
+  }
+
+  #datasets-tab .dash-bulk__actions {
+    display: none;
+  }
+
+  #datasets-tab .dash-bulk__menu {
+    display: block;
+  }
+
+  #datasets-tab .dash-table,
+  #datasets-tab .dash-table tbody {
+    display: block;
+  }
+
+  #datasets-tab .dash-table thead {
+    display: none;
+  }
+
+  #datasets-tab .dash-table tr {
+    display: grid;
+    grid-template-columns: auto auto auto 1fr auto;
+    align-items: center;
+    padding: 0.3rem 0;
+    border-bottom: 1px solid #dee2e6;
+  }
+
+  #datasets-tab .dash-table tr:last-child {
+    border-bottom: 0;
+  }
+
+  #datasets-tab .dash-table td {
+    display: none;
+    padding: 0.15rem 0.5rem;
+    border: 0;
+  }
+
+  #datasets-tab .dash-table td.c-select {
+    display: block;
+    grid-row: 1 / span 2;
+    grid-column: 1;
+    width: auto;
+    padding-right: 0;
+    padding-left: 0.25rem;
+  }
+
+  #datasets-tab .dash-table td.c-dataset {
+    display: block;
+    grid-row: 1;
+    grid-column: 2 / 5;
+    min-width: 0;
+  }
+
+  #datasets-tab .dash-table td.c-menu {
+    display: block;
+    grid-row: 1;
+    grid-column: 5;
+    position: static;
+    width: auto;
+  }
+
+  #datasets-tab .dash-table td.c-status {
+    display: block;
+    grid-row: 2;
+    grid-column: 2;
+  }
+
+  #datasets-tab .dash-table td.c-members {
+    display: block;
+    grid-row: 2;
+    grid-column: 3;
+  }
+
+  #datasets-tab .dash-table td.c-modified {
+    display: block;
+    grid-row: 2;
+    grid-column: 4;
+  }
+
+  #datasets-tab .dash-until {
+    white-space: normal;
+  }
+}

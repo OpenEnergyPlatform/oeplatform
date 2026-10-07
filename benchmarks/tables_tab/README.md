@@ -82,6 +82,36 @@ slice that adds a column re-runs it and moves the thresholds; with `STAND_INS=1`
 it also measures the complete row, standing in only for the columns that are
 still missing.
 
+### The datasets tab (#2622)
+
+The same script measures the datasets tab, on accounts seeded by
+`seed_datasets.py` (a port of the datasets-tab prototype's fake data, every case
+the list shows): `empty`, `six` (one Dataset per case, a 2,500-member one among
+them) and `sixty` (generated, three pages).
+
+```python
+from django.test import Client
+from benchmarks.tables_tab.seed_datasets import seed_datasets
+
+for key in ("empty", "six", "sixty"):
+    owner = seed_datasets(key)
+    client = Client()
+    client.force_login(owner)
+    print(key, owner.pk, client.cookies["sessionid"].value)
+```
+
+```bash
+TAB=datasets IDS_PREFIX=datasets PAGES=3 \
+SETS='{"every":[],"withoutCreated":[".c-created"],"withoutTopics":[".c-created",".c-topics"]}' \
+BAR_QUERY='?created_from=2026-01-01&topics=climate,openstreetmap&tags=electricity,timeseries' \
+ACCOUNTS='{"six":[<id>,"<sessionid>"],"sixty":[<id>,"<sessionid>"]}' \
+node benchmarks/tables_tab/widths.mjs
+```
+
+`BAR_QUERY` applies a Created range and ticks two values in each of Topic and
+Tag, so every count on the bar shows. The numbers and thresholds are beside the
+container queries in `datasets_tab.css`.
+
 ## Delete cost
 
 Same throwaway database as the row cost; the OEDB tables go into the sandbox

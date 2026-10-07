@@ -30,7 +30,8 @@
 //   prototype's cells, so a threshold can be set for the complete row.
 // - PAGES: how many pages of each account (default 6).
 //
-// Which list it measures, all defaulting to the tables tab:
+// Which list it measures, all defaulting to the tables tab (the datasets
+// tab's run, #2622, is in README.md):
 //
 // - TAB: the tab's address below /user/profile/<id>/ (default "tables").
 // - SETS: the column sets, as JSON mapping a name to the cells that set
@@ -57,7 +58,7 @@ const { default: puppeteer } = await import(process.env.PUPPETEER);
 const BASE = process.env.BASE || "http://127.0.0.1:8655";
 const ACCOUNTS = JSON.parse(process.env.ACCOUNTS);
 const PAGES = Number(process.env.PAGES || 6);
-const SCREENS = [1920, 1440, 1280, 1024, 800, 390];
+const SCREENS = [1920, 1440, 1366, 1280, 1024, 800, 390];
 const TAB = process.env.TAB || "tables";
 const SETS = process.env.SETS
   ? JSON.parse(process.env.SETS)
@@ -170,7 +171,9 @@ function barWidth(prefix) {
   search.style.flex = "0 0 auto";
   search.style.width = getComputedStyle(search).minWidth;
   const items = [
-    ...row.querySelectorAll(":scope > input, :scope > .dash-fold > select, :scope > .dash-fold > button"),
+    ...row.querySelectorAll(
+      ":scope > input, :scope > .dash-fold > select, :scope > .dash-fold > button, :scope > .dash-fold > .dropdown",
+    ),
   ];
   const gap = parseFloat(getComputedStyle(row).columnGap);
   return Math.ceil(
