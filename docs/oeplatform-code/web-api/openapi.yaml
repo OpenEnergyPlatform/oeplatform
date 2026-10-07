@@ -2082,7 +2082,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Refusal'
-          description: A `page` past the last one, or not a number.
+          description: 'No such page: `page` is past the last one, or not a number.'
         '200':
           content:
             application/json:
@@ -2496,7 +2496,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/Refusal'
           description: 'No dataset of that name, or another user''s draft: the two
-            answer alike, word for word. Or a `page` past the last one, or not a number.'
+            answer alike, word for word. No such page: `page` is past the last one,
+            or not a number.'
         '200':
           content:
             application/json:
@@ -10579,7 +10580,8 @@ components:
           type: integer
           readOnly: true
           description: 'How many member tables the dataset holds: the `count` its
-            `resources/` pages through.'
+            `resources/` pages through. A member whose metadata describes no resource
+            counts here but has no entry in the dataset''s `metadata.resources`.'
       required:
       - created_at
       - creator

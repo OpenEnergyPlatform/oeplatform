@@ -239,7 +239,9 @@ class DatasetSummarySerializer(DatasetReadSerializer):
         read_only=True,
         help_text=(
             "How many member tables the dataset holds: the `count` its "
-            "`resources/` pages through."
+            "`resources/` pages through. A member whose metadata describes "
+            "no resource counts here but has no entry in the dataset's "
+            "`metadata.resources`."
         ),
     )
 
@@ -248,6 +250,7 @@ class DatasetSummarySerializer(DatasetReadSerializer):
         read_only_fields = fields
 
     def get_metadata(self, obj) -> dict:
+        # a row older than live assembly may still store the key
         return {key: value for key, value in obj.metadata.items() if key != "resources"}
 
 
@@ -275,6 +278,20 @@ class DatasetListFiltersSerializer(serializers.Serializer):
             "are only ever the caller's own, so none for an anonymous caller."
         ),
     )
+
+    @property
+    def only_mine(self) -> bool:
+        return self.validated_data.get("mine") == "true"
+
+    def narrowed(self, datasets, user):
+        """``datasets`` (what ``user`` may see) narrowed as asked. Validate
+        first; ``only_mine`` assumes a login, which the caller checks."""
+        if self.only_mine:
+            datasets = datasets.filter(creator=user)
+        if "published" in self.validated_data:
+            drafts = self.validated_data["published"] == "false"
+            datasets = datasets.filter(published_at__isnull=drafts)
+        return datasets
 
 
 TOPICS_HELP = (

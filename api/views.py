@@ -145,6 +145,8 @@ from api.api_description import (
     DATASET_ANY_ACCOUNT,
     DATASET_CREATOR,
     DATASET_LIST_PUBLIC,
+    DATASET_LIST_REFUSALS,
+    DATASET_PAGE_NOT_FOUND,
     DATASET_PUBLIC,
     DELIMITER,
     IS_SANDBOX,
@@ -440,9 +442,9 @@ DATASET_NAME = OpenApiParameter(
 
 class DatasetPagination(PageNumberPagination):
     """A ceiling, not a default: neither Dataset list has an unbounded mode.
-    `page` and `page_size`, as every collection of the OEKG API pages (WF-08).
-    A class of its own rather than one of theirs, so a change to how an OEKG
-    history pages can not move this API's documented default."""
+    `page` and `page_size`, as every collection of the OEKG API pages. A
+    class of its own rather than one of theirs, so a change to how an OEKG
+    collection pages can not move this API's documented default."""
 
     page_size = 20
     page_size_query_param = "page_size"
@@ -473,20 +475,7 @@ MINE_NEEDS_A_LOGIN = "`mine=true` lists the caller's own datasets and needs a lo
             400,
             401,
             404,
-            also={
-                400: describes(
-                    "A filter holds something other than `true` or `false`: "
-                    "DRF's map names the parameter."
-                ),
-                401: OpenApiResponse(
-                    response=RefusalSerializer,
-                    description="`mine=true`, asked without a login.",
-                ),
-                404: OpenApiResponse(
-                    response=RefusalSerializer,
-                    description="A `page` past the last one, or not a number.",
-                ),
-            },
+            also=DATASET_LIST_REFUSALS,
         ),
     ),
     post=extend_schema(
@@ -532,19 +521,12 @@ class DatasetsListCreate(generics.ListCreateAPIView):
         are: the count, the page, the Topics."""
         filters = DatasetListFiltersSerializer(data=self.request.query_params)
         filters.is_valid(raise_exception=True)
-        asked = filters.validated_data
         user = self.request.user
-        datasets = Dataset.objects.visible_to(user)
-        if asked.get("mine") == "true":
-            if not user.is_authenticated:
-                raise NotAuthenticated(MINE_NEEDS_A_LOGIN)
-            datasets = datasets.filter(creator=user)
-        if "published" in asked:
-            datasets = datasets.filter(
-                published_at__isnull=asked["published"] == "false"
-            )
+        if filters.only_mine and not user.is_authenticated:
+            raise NotAuthenticated(MINE_NEEDS_A_LOGIN)
         return (
-            datasets.select_related("creator")
+            filters.narrowed(Dataset.objects.visible_to(user), user)
+            .select_related("creator")
             .prefetch_related("topics")
             .annotate(resource_count=Count("tables"))
             .order_by("name")
@@ -580,16 +562,7 @@ class DatasetsListCreate(generics.ListCreateAPIView):
         responses=dataset_responses(
             {200: DatasetResourceSerializer(many=True)},
             404,
-            also={
-                404: OpenApiResponse(
-                    response=RefusalSerializer,
-                    description=(
-                        "No dataset of that name, or another user's draft: "
-                        "the two answer alike, word for word. Or a `page` "
-                        "past the last one, or not a number."
-                    ),
-                ),
-            },
+            also=DATASET_PAGE_NOT_FOUND,
         ),
     )
 )
