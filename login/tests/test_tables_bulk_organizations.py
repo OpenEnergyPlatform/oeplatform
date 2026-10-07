@@ -23,6 +23,7 @@ from django.test.utils import CaptureQueriesContext
 
 from api.services import table_actions
 from login import table_roles
+from login.list_views import RECHECKED
 from login.models import (
     ADMIN_PERM,
     DELETE_PERM,
@@ -33,7 +34,6 @@ from login.models import (
 )
 from login.tests.helpers import HTMX, make_user
 from login.tests.test_tables_bulk_delete_datasets import BulkCase
-from login.views import RECHECKED
 from modelview.tests.html import element_markup, element_with_id, text
 
 SHARE = table_actions.ORGANIZATION_SHARE

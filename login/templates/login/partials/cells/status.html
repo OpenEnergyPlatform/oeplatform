@@ -1,0 +1,18 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+Cell type "status badge": Draft, Embargoed or Published. Expects ``status``
+("draft", "embargoed" or "published"), and optionally ``until``, the end of
+an embargo, and ``since``, when a published item was published, which reads
+"since ‹date›" beside the badge.
+{% endcomment %}
+{% if status == "draft" %}
+  <span class="badge dash-badge dash-badge--draft">Draft</span>
+{% elif status == "embargoed" %}
+  <span class="badge dash-badge dash-badge--embargoed">Embargoed</span>
+  <span class="dash-until">until {{ until|date:"j M Y" }}</span>
+{% else %}
+  <span class="badge dash-badge dash-badge--published">Published</span>
+  {% if since %}<span class="dash-until">since {{ since|date:"j M Y" }}</span>{% endif %}
+{% endif %}

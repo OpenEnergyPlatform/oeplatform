@@ -26,13 +26,13 @@ from django.utils import timezone
 
 from api.services import table_actions
 from dataedit.models import Dataset, Embargo, Table
+from login.list_views import RECHECKED
 from login.models import WRITE_PERM
 from login.tests.helpers import HTMX
 from login.tests.test_table_actions import DIALOG
 from login.tests.test_table_dataset_actions import DatasetActionTestCase
 from login.tests.test_table_delete import DeleteTestCase
 from login.tests.test_tables_bulk import BulkTestCase
-from login.views import RECHECKED
 from modelview.tests.html import element_markup, element_with_id, text
 
 ADD, REMOVE = table_actions.DATASET_ADD, table_actions.DATASET_REMOVE

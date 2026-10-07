@@ -359,3 +359,9 @@ SPDX-License-Identifier: CC0-1.0
   [(#2603)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2603)
 
 ## Code Quality
+
+- Profile dashboard: the tables tab's views, page and results region are now
+  generic bases (`login/list_views.py`, `list_tab.html`, `list_region.html`)
+  that the coming datasets tab subclasses instead of copying, and the list
+  mechanics (`login/listing.py`) have their own tests. Nothing visible changes
+  [(#2616)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2616)

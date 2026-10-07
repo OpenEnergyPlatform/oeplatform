@@ -10,10 +10,10 @@ the stored verdict; this cell runs the checks live, so where the two
 disagree it shows the live result (see ``TableRow.publishable``).
 {% endcomment %}
 <button type="button"
-        id="pub-{{ row.table.pk }}"
+        id="pub-{{ row.key }}"
         class="dash-gate {% if row.publishable %}dash-gate--ok{% else %}dash-gate--bad{% endif %}"
         aria-expanded="false"
-        aria-controls="pub-{{ row.table.pk }}-pop"
+        aria-controls="pub-{{ row.key }}-pop"
         data-dash-popover>
   {% if row.publishable %}
     <span aria-hidden="true">✓</span><span class="visually-hidden">Publishable. Show the publish checks</span>
@@ -22,7 +22,7 @@ disagree it shows the live result (see ``TableRow.publishable``).
     <span aria-hidden="true">✗</span> {{ row.failed_label }}<span class="visually-hidden">. Show the publish checks</span>
   {% endif %}
 </button>
-<div id="pub-{{ row.table.pk }}-pop"
+<div id="pub-{{ row.key }}-pop"
      class="dash-pop"
      role="dialog"
      aria-label="Publish checks for {{ row.title }}"

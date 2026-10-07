@@ -18,8 +18,14 @@ navigation skips those, so the reason would be unreachable by keyboard.
 The menu is positioned fixed so the table's horizontal scroll container
 does not clip it. The toggle's id, menu-<pk>, is where focus returns after
 an action on this row.
+
+Each action entry is cells/menu_action.html, told whether the row may take
+it: the user's role on the Table against the action's RoleGate (``gates``).
+Its endpoint is reversed with positional arguments, because a keyword named
+``action=`` reads as a form address to base/tests/test_views.py.
 {% endcomment %}
-{% with pk=row.table.pk %}
+{% load list_cells %}
+{% with pk=row.key name=row.name %}
   <div class="dropdown dash-menu">
     <button type="button"
             id="menu-{{ pk }}"
@@ -35,20 +41,20 @@ an action on this row.
       <li>
         <a class="dropdown-item"
            id="menu-{{ pk }}-edit"
-           href="{% url 'dataedit:meta_edit' table=row.table.name %}"
+           href="{% url 'dataedit:meta_edit' table=name %}"
            hx-boost="false">Edit metadata</a>
       </li>
       <li>
         <a class="dropdown-item"
            id="menu-{{ pk }}-upload"
-           href="{% url 'dataedit:wizard_upload' table=row.table.name %}"
+           href="{% url 'dataedit:wizard_upload' table=name %}"
            hx-boost="false">Upload data</a>
       </li>
       <li>
         <button type="button"
                 class="dropdown-item"
                 id="menu-{{ pk }}-access"
-                hx-get="{% url 'login:table-access' user_id=profile_user.pk table_name=row.table.name %}"
+                hx-get="{% url 'login:table-access' user_id=profile_user.pk table_name=name %}"
                 hx-target="#table-access-body"
                 hx-swap="innerHTML"
                 hx-sync="this:replace"
@@ -56,24 +62,29 @@ an action on this row.
       </li>
       <li>
         {% if row.status == "draft" %}
-          {% include "login/partials/cells/menu_action.html" with verb="publish" label="Publish…" gate=gates.publish %}
+          {% url 'login:table-action' profile_user.pk "publish" as url %}
+          {% include "login/partials/cells/menu_action.html" with verb="publish" label="Publish…" url=url item=name allowed=row.level|at_least:gates.publish.level why=gates.publish.refusal %}
         {% else %}
-          {% include "login/partials/cells/menu_action.html" with verb="unpublish" label="Unpublish" gate=gates.unpublish %}
+          {% url 'login:table-action' profile_user.pk "unpublish" as url %}
+          {% include "login/partials/cells/menu_action.html" with verb="unpublish" label="Unpublish" url=url item=name allowed=row.level|at_least:gates.unpublish.level why=gates.unpublish.refusal %}
         {% endif %}
       </li>
       <li>
-        {% include "login/partials/cells/menu_action.html" with verb="dataset_add" label="Add to dataset…" gate=gates.dataset_add %}
+        {% url 'login:table-action' profile_user.pk "dataset_add" as url %}
+        {% include "login/partials/cells/menu_action.html" with verb="dataset_add" label="Add to dataset…" url=url item=name allowed=row.level|at_least:gates.dataset_add.level why=gates.dataset_add.refusal %}
       </li>
       {% if row.in_own_dataset %}
         <li>
-          {% include "login/partials/cells/menu_action.html" with verb="dataset_remove" label="Remove from dataset…" gate=gates.dataset_remove %}
+          {% url 'login:table-action' profile_user.pk "dataset_remove" as url %}
+          {% include "login/partials/cells/menu_action.html" with verb="dataset_remove" label="Remove from dataset…" url=url item=name allowed=row.level|at_least:gates.dataset_remove.level why=gates.dataset_remove.refusal %}
         </li>
       {% endif %}
       <li>
         <hr class="dropdown-divider" />
       </li>
       <li>
-        {% include "login/partials/cells/menu_action.html" with verb="delete" label="Delete…" gate=gates.delete tone="dash-menu__danger" %}
+        {% url 'login:table-action' profile_user.pk "delete" as url %}
+        {% include "login/partials/cells/menu_action.html" with verb="delete" label="Delete…" url=url item=name allowed=row.level|at_least:gates.delete.level why=gates.delete.refusal tone="dash-menu__danger" %}
       </li>
     </ul>
   </div>

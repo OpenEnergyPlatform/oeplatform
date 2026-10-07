@@ -9,6 +9,8 @@ inputs, one per end, each its own URL parameter; they apply on change, after
 a pause, so typing a year digit by digit sends one request rather than four.
 Each control requests ``path``; the page's module rewrites the request from
 the address bar, so the rest of the state is kept and the page returns to 1.
+An empty multi-valued control says "None on your ‹noun›", ``noun`` being
+the listing's plural.
 {% endcomment %}
 {% if control.kind == "range" %}
   <fieldset class="dash-range" id="f-{{ control.param }}">
@@ -47,7 +49,7 @@ the address bar, so the rest of the state is kept and the page returns to 1.
                  for="f-{{ control.param }}-{{ forloop.counter }}">{{ option.label }}</label>
         </div>
       {% empty %}
-        <p class="dash-muted">None on your tables</p>
+        <p class="dash-muted">None on your {{ noun }}</p>
       {% endfor %}
     </div>
   </fieldset>

@@ -3,26 +3,29 @@ SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 
 One action entry of a row's ⋯ menu: it loads the action's preflight into
-the dialog for this one Table, or, below the role the action needs, stays
-visible and focusable with the reason as text (see menu.html). Expects
-``pk``, ``row``, ``verb`` (the action), ``label`` and ``gate`` (a RoleGate),
-and optionally ``tone``, a class for an entry that stands out (Delete).
+the action dialog (``frame.dialog``) for this one item, or, where the row may
+not take the action, stays visible and focusable with the reason as text (see
+the tab's menu). Expects ``row``, ``verb`` (the action), ``label``, ``url``
+(the action's endpoint), ``item`` (what it acts on, sent as the frame's row
+parameter), ``allowed`` and ``why`` (the reason shown when not allowed), and
+optionally ``tone``, a class for an entry that stands out (Delete). It
+decides nothing itself: whether the row may take the action is the menu's.
 {% endcomment %}
-{% if row.level >= gate.level %}
+{% if allowed %}
   <button type="button"
           class="dropdown-item{% if tone %} {{ tone }}{% endif %}"
-          id="menu-{{ pk }}-{{ verb }}"
-          hx-get="{% url 'login:table-action' user_id=profile_user.pk action=verb %}?table={{ row.table.name|urlencode }}"
-          hx-target="#table-action-body"
+          id="menu-{{ row.key }}-{{ verb }}"
+          hx-get="{{ url }}?{{ frame.item }}={{ item|urlencode }}"
+          hx-target="#{{ frame.dialog }}-body"
           hx-swap="innerHTML"
           hx-sync="this:replace"
-          data-action-origin="menu-{{ pk }}">{{ label }}</button>
+          data-action-origin="menu-{{ row.key }}">{{ label }}</button>
 {% else %}
   <button type="button"
           class="dropdown-item dash-menu__off"
-          id="menu-{{ pk }}-{{ verb }}"
+          id="menu-{{ row.key }}-{{ verb }}"
           aria-disabled="true">
     {{ label }}
-    <span class="dash-menu__why">{{ gate.refusal }}</span>
+    <span class="dash-menu__why">{{ why }}</span>
   </button>
 {% endif %}
