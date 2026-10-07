@@ -16,6 +16,14 @@
   </div>
 {% endblock site-header %}
 {% block data_content %}
+  {% if not dataset.is_published %}
+    {# only the creator reaches a draft's page; everyone else gets 404 #}
+    <div class="alert alert-warning mt-4 mb-0"
+         id="dataset-draft-banner"
+         role="status">
+      <strong>Draft.</strong> Only you can see this dataset. It is not listed under its topics, and anyone else who opens this address gets "not found".
+    </div>
+  {% endif %}
   <div class="card mt-4 mb-3">
     <div class="card-body">
       <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">

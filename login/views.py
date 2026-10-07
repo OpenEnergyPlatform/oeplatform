@@ -656,19 +656,17 @@ def _serializer_errors(serializer):
 
 
 def dataset_creator_required(view_func):
-    """Resolve the dataset for the dataset partial views and enforce that
-    only the dataset's creator may act (403 otherwise).
+    """Resolve the dataset for the dataset partial views: only the
+    dataset's creator may act. Any other Dataset is 404, as an unknown name
+    is (the owner rule's "foreign is 404"), so these routes reveal nothing a
+    read would not.
 
     Stacks under ``profile_owner_required``, which has already settled that
     ``profile_user`` is the caller."""
 
     @wraps(view_func)
     def wrapper(request, profile_user, dataset_name, *args, **kwargs):
-        dataset = get_object_or_404(Dataset, name=dataset_name)
-        if dataset.creator is None or dataset.creator != request.user:
-            return HttpResponseForbidden(
-                "Only the dataset creator may manage this dataset."
-            )
+        dataset = get_object_or_404(Dataset, name=dataset_name, creator=request.user)
         return view_func(request, profile_user, dataset, *args, **kwargs)
 
     return wrapper

@@ -324,6 +324,19 @@ class DatasetQuickActionsTests(TestCase):
             "login:dataset-delete", args=[self.user.id, "quick_dataset"]
         )
 
+    def test_a_platform_admin_gets_404_for_someone_elses_dataset(self):
+        self.other_user.is_admin = True
+        self.other_user.save()
+        self.client.force_login(self.other_user)
+        for route in ("login:dataset-edit", "login:dataset-delete"):
+            with self.subTest(route):
+                response = self.client.post(
+                    reverse(route, args=[self.other_user.id, "quick_dataset"]),
+                    {"title": "Hijacked", "description": "Should fail"},
+                )
+                self.assertEqual(response.status_code, 404)
+        self.assertTrue(Dataset.objects.filter(name="quick_dataset").exists())
+
     def test_edit_form_keeps_name_readonly(self):
         response = self.client.get(self.edit_url)
         self.assertEqual(response.status_code, 200)
@@ -352,14 +365,15 @@ class DatasetQuickActionsTests(TestCase):
         self.assertEqual(self.dataset.metadata["title"], "Quick Dataset")
         self.assertContains(response, "invalid-feedback")
 
-    def test_edit_forbidden_for_non_creator(self):
-        # through the caller's own dashboard, so the creator check answers
+    def test_edit_is_404_for_non_creator(self):
+        # through the caller's own dashboard, so the creator check answers;
+        # a Dataset not your own is 404, the owner rule's "foreign is 404"
         self.client.force_login(self.other_user)
         response = self.client.post(
             reverse("login:dataset-edit", args=[self.other_user.id, "quick_dataset"]),
             {"title": "Hijacked", "description": "Should fail"},
         )
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
         self.dataset.refresh_from_db()
         self.assertEqual(self.dataset.metadata["title"], "Quick Dataset")
 
@@ -403,13 +417,14 @@ class DatasetQuickActionsTests(TestCase):
         # (other open panels, the create form) stays untouched
         self.assertNotContains(response, "Create dataset")
 
-    def test_delete_forbidden_for_non_creator(self):
-        # through the caller's own dashboard, so the creator check answers
+    def test_delete_is_404_for_non_creator(self):
+        # through the caller's own dashboard, so the creator check answers;
+        # a Dataset not your own is 404, the owner rule's "foreign is 404"
         self.client.force_login(self.other_user)
         response = self.client.post(
             reverse("login:dataset-delete", args=[self.other_user.id, "quick_dataset"])
         )
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
         self.assertTrue(Dataset.objects.filter(name="quick_dataset").exists())
 
     def test_delete_confirm_copy_mentions_tables_survive(self):
@@ -487,15 +502,16 @@ class DatasetResourceManagementTests(TestCase):
         )
         self.assertNotContains(response, 'hx-target="#datasets-container"')
 
-    def test_manage_view_creator_only(self):
-        # through the caller's own dashboard, so the creator check answers
+    def test_manage_view_is_404_for_non_creator(self):
+        # through the caller's own dashboard, so the creator check answers;
+        # a Dataset not your own is 404, the owner rule's "foreign is 404"
         self.client.force_login(self.other_user)
         response = self.client.get(
             reverse(
                 "login:dataset-manage", args=[self.other_user.id, "managed_dataset"]
             )
         )
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
 
     def test_manage_lists_resources_with_links_and_status_badges(self):
         published = self.make_table("t_pub_resource", published=True)
@@ -588,9 +604,10 @@ class DatasetResourceManagementTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(self.dataset.tables.filter(name="t_group_writable").exists())
 
-    def test_assign_forbidden_for_non_creator(self):
+    def test_assign_is_404_for_non_creator(self):
         self.make_table("t_free_for_all", published=True)
-        # through the caller's own dashboard, so the creator check answers
+        # through the caller's own dashboard, so the creator check answers;
+        # a Dataset not your own is 404, the owner rule's "foreign is 404"
         self.client.force_login(self.other_user)
 
         response = self.client.post(
@@ -599,7 +616,7 @@ class DatasetResourceManagementTests(TestCase):
             ),
             {"table": "t_free_for_all"},
         )
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
         self.assertFalse(self.dataset.tables.filter(name="t_free_for_all").exists())
 
     def test_unassign_removes_table_but_keeps_it(self):

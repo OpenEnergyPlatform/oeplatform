@@ -20,6 +20,7 @@ from unittest import mock
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
+from django.utils import timezone
 
 from api.services import table_actions
 from dataedit.models import Dataset, Embargo, Table
@@ -341,9 +342,18 @@ class BulkPreflightTests(BulkTestCase):
         self.draft("t_also", published=True)
         self.draft("t_draft_already")
         theirs = Dataset.objects.create(
-            name="ds_theirs", creator=self.stranger, metadata={"title": "Grid study"}
+            name="ds_theirs",
+            creator=self.stranger,
+            metadata={"title": "Grid study"},
+            published_at=timezone.now(),
         )
         theirs.tables.add(table, plain)
+        # a stranger's draft holding the Table is never named or counted
+        Dataset.objects.create(
+            name="ds_their_draft",
+            creator=self.stranger,
+            metadata={"title": "Secret plan"},
+        ).tables.add(table, plain)
         response = self.bulk_preflight(
             "unpublish", "t_cited", "t_plain", "t_also", "t_draft_already"
         )
@@ -360,6 +370,7 @@ class BulkPreflightTests(BulkTestCase):
             f"Grid study ({self.stranger.name}): 2 tables",
             text(element_markup(response.content.decode(), "table-action-datasets")),
         )
+        self.assertNotIn("Secret plan", response.content.decode())
 
     def test_a_preflight_writes_nothing(self):
         self.draft("t_untouched")

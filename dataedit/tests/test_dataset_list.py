@@ -7,6 +7,7 @@ from unittest import mock
 
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from dataedit.models import Dataset, Table, Tag, Topic
 from dataedit.views import ITEMS_PER_PAGE
@@ -43,6 +44,7 @@ class PublicDatasetListTests(TestCase):
                 "description": f"Description of {name}",
             },
             creator=creator or self.user,
+            published_at=timezone.now(),
         )
         if topic is ...:
             topic = self.topic
@@ -173,6 +175,7 @@ class DatasetListFilterTests(TestCase):
                 "description": description or f"Description of {name}",
             },
             creator=self.user,
+            published_at=timezone.now(),
         )
         dataset.topics.add(self.topic)
         for index, tags in enumerate(tags_by_table):

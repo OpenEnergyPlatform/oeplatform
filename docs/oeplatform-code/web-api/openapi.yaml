@@ -2008,9 +2008,11 @@ paths:
   /api/v0/datasets/:
     get:
       operationId: datasets_list
-      description: Every dataset on the platform, each with its metadata. The `resources`
-        of a dataset are assembled from its member tables at read time rather than
-        stored, so this never reports a resource the dataset no longer holds. Public.
+      description: Every published dataset on the platform, plus the caller's own
+        drafts, each with its metadata. The `resources` of a dataset are assembled
+        from its member tables at read time rather than stored, so this never reports
+        a resource the dataset no longer holds. Public. A draft is visible only to
+        its creator.
       summary: List datasets
       tags:
       - Datasets
@@ -2068,7 +2070,8 @@ paths:
   /api/v0/datasets/{dataset_name}/:
     get:
       operationId: datasets_retrieve
-      description: Returns metadata for a single dataset.
+      description: Returns metadata for a single dataset. Public. A draft is visible
+        only to its creator; anyone else gets 404, as for a name that does not exist.
       summary: Get dataset
       parameters:
       - in: path
@@ -2196,7 +2199,9 @@ paths:
   /api/v0/datasets/{dataset_name}/resources/:
     get:
       operationId: datasets_resources_list
-      description: Returns the tables/resources that belong to a dataset.
+      description: Returns the tables/resources that belong to a dataset. Public.
+        A draft is visible only to its creator; anyone else gets 404, as for a name
+        that does not exist.
       summary: List dataset resources
       parameters:
       - in: path

@@ -39,6 +39,8 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 from dataclasses import dataclass
 from typing import Optional, Sequence
 
+from django.db.models import Exists, OuterRef
+
 from dataedit.models import Dataset, PeerReview, Table
 
 # The review indicator is three-valued -- finished, in progress, or absent --
@@ -57,7 +59,8 @@ class Resolution:
     ``resolvable`` and ``tables`` are both nullable, and the null means the
     same thing in both: *this server cannot say*. That happens for a link
     pointing at an address this platform has no route for -- the live graph
-    holds databus URLs -- where `ref` already reads back null. Answering
+    holds databus URLs -- where `ref` already reads back null, and for a link
+    to a draft Dataset, which this server describes to nobody. Answering
     `false` there would claim the target had been deleted, which is a
     fabrication rather than an answer.
 
@@ -77,8 +80,14 @@ class Resolution:
         return {"resolvable": self.resolvable, "tables": self.tables}
 
 
-# A link this platform has no route for: not resolvable, not unresolvable.
+# A link this platform has no route for, or whose target this server will not
+# describe (a draft Dataset): not resolvable, not unresolvable.
 UNKNOWABLE = Resolution(resolvable=None, tables=None)
+
+# What a resolver answers for a target that exists but that this server does
+# not describe to anyone (a draft Dataset), beside a set of members for one it
+# does; a name it did not find is left out.
+UNDESCRIBED = None
 
 
 def resolve(targets: Sequence[tuple]) -> list:
@@ -106,6 +115,7 @@ def resolve(targets: Sequence[tuple]) -> list:
             table
             for kind in found.values()
             for members in kind.values()
+            if members is not UNDESCRIBED
             for table in members
         }
     )
@@ -113,11 +123,13 @@ def resolve(targets: Sequence[tuple]) -> list:
     def resolved(ref, name):
         if ref not in found:
             return UNKNOWABLE
-        members = found[ref].get(name)
-        if members is None:
+        if name not in found[ref]:
             # Looked for and not there -- which is not the same answer as
             # UNKNOWABLE's null, where there was nowhere to look.
             return Resolution(resolvable=False, tables=[])
+        members = found[ref][name]
+        if members is UNDESCRIBED:
+            return UNKNOWABLE
         return Resolution(
             resolvable=True,
             tables=[_table_entry(member, reviews) for member in sorted(members)],
@@ -147,12 +159,26 @@ def _members_by_dataset(names: set) -> dict:
     Existence and membership in one query: the left join answers both, and a
     catalogue entry with no members comes back as itself with a null member,
     which is how "it exists and is empty" is told apart from "it is gone".
+
+    A draft entry maps to ``UNDESCRIBED`` rather than to its members: it resolves as
+    UNKNOWABLE for every reader, its creator included, because the public
+    catalogue (``Dataset.objects.published``) does not hold it. Not as gone,
+    which would claim a deletion, and never with its members, which would let
+    anyone who can write a link read what somebody is preparing.
     """
     if not names:
         return {}
     members = {}
-    rows = Dataset.objects.filter(name__in=names).values_list("name", "tables__name")
-    for dataset, table in rows:
+    published = Dataset.objects.published().filter(pk=OuterRef("pk"))
+    rows = (
+        Dataset.objects.filter(name__in=names)
+        .annotate(published=Exists(published))
+        .values_list("name", "published", "tables__name")
+    )
+    for dataset, is_published, table in rows:
+        if not is_published:
+            members[dataset] = UNDESCRIBED
+            continue
         found = members.setdefault(dataset, set())
         if table is not None:
             found.add(table)
@@ -160,11 +186,11 @@ def _members_by_dataset(names: set) -> dict:
 
 
 # How each kind of target is looked up, keyed by the same names the link
-# vocabulary uses. Written as a table rather than as branches inside `resolve`
-# so a third kind of target is an entry here and a route there, and
-# `ResolverCoverageTest` fails until somebody adds it -- which is the point:
-# a new target kind that silently resolved to nothing would look like data
-# that had been deleted.
+# vocabulary uses. Each maps a name it found to its members or to UNDESCRIBED.
+# Written as a table rather than as branches inside `resolve` so a third kind
+# of target is an entry here and a route there, and `ResolverCoverageTest`
+# fails until somebody adds it -- which is the point: a new target kind that
+# silently resolved to nothing would look like data that had been deleted.
 RESOLVERS = {
     "table": _tables_by_name,
     "dataset": _members_by_dataset,

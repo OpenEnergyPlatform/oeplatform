@@ -79,7 +79,6 @@ from login import table_roles
 from login.models import Organization
 from login.permissions import ADMIN_PERM, DELETE_PERM, NO_PERM, WRITE_PERM
 from login.table_roles import table_levels
-from login.tables_tab import visible_datasets
 from oeplatform.settings import PSEUDO_TOPIC_DRAFT
 
 logger = logging.getLogger("oeplatform.table_actions")
@@ -572,14 +571,14 @@ def _check(user, action, table, level, assignable=frozenset(), republish=False) 
 
 
 def _datasets_holding(user, tables):
-    """The Datasets the user may see (``visible_datasets``) that hold one of
+    """The Datasets the user may see (``Dataset.objects.visible_to``) that hold one of
     ``tables``, each with how many of them it holds, named by title
     (``dataset_title``), as the Dataset chooser and the Datasets column name
     them. Returns the user's own as ``(title, count)`` and other people's as
     ``(owner's name, title, count)``, sorted by owner and title. One
     query."""
     datasets = (
-        Dataset.objects.filter(pk__in=visible_datasets(user).values("pk"))
+        Dataset.objects.visible_to(user)
         .annotate(held=Count("tables", filter=Q(tables__in=tables)))
         .filter(held__gt=0)
         .select_related("creator")
@@ -601,7 +600,7 @@ def _others_datasets(user, tables) -> list:
     """``(owner's name, Dataset title, count)`` for every other user's
     Dataset that holds one of ``tables``, the count being how many of them:
     after an unpublish those are its draft members. Only Datasets the user
-    may see are named (``visible_datasets``)."""
+    may see are named (``Dataset.objects.visible_to``)."""
     return _datasets_holding(user, tables)[1]
 
 

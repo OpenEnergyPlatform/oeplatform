@@ -12,8 +12,8 @@ markup details or seconds.
 
 from unittest import mock
 
-from django.db.models import Q
 from django.urls import reverse
+from django.utils import timezone
 
 from dataedit.models import Dataset, PeerReview, Table, Topic
 from login.models import ADMIN_PERM, WRITE_PERM, UserPermission
@@ -188,8 +188,12 @@ class ReviewColumnTests(ColumnTestCase):
 
 
 class DatasetsColumnTests(ColumnTestCase):
-    def dataset(self, name, creator, *tables):
-        dataset = Dataset.objects.create(name=name, creator=creator)
+    def dataset(self, name, creator, *tables, published=True):
+        dataset = Dataset.objects.create(
+            name=name,
+            creator=creator,
+            published_at=timezone.now() if published else None,
+        )
         dataset.tables.add(*tables)
         return dataset
 
@@ -229,21 +233,16 @@ class DatasetsColumnTests(ColumnTestCase):
         self.assertContains(self.get(), "In 2 datasets. Show them")
 
     def test_a_strangers_draft_dataset_is_never_counted_or_named(self):
-        """Dataset has no lifecycle yet, so no draft exists to make: the
-        rule is proven by giving ``PUBLISHED_DATASETS`` the condition the
-        lifecycle will, under which ``their_draft`` and ``my_draft`` are
-        drafts. Mine still shows; theirs never does, in the cell or the
-        sort."""
+        """My own draft shows; a stranger's never does, in the cell or the
+        sort (``Dataset.objects.visible_to``)."""
         counted = self.table("t_counted", title="A")
         uncounted = self.table("t_uncounted", title="B")
-        self.dataset("their_draft", self.stranger, counted, uncounted)
-        self.dataset("my_draft", self.user, counted)
+        self.dataset("their_draft", self.stranger, counted, uncounted, published=False)
+        self.dataset("my_draft", self.user, counted, published=False)
         self.dataset("their_published", self.stranger, counted, uncounted)
-        drafts = ~Q(name__in=["their_draft", "my_draft"])
-        with mock.patch("login.tables_tab.PUBLISHED_DATASETS", drafts):
-            page = self.page()
-            descending = self.names({"sort": "-datasets"})
-            body = self.get().content.decode()
+        page = self.page()
+        descending = self.names({"sort": "-datasets"})
+        body = self.get().content.decode()
         names = {row.table.name: [d.name for d in row.datasets] for row in page.rows}
         self.assertEqual(
             names,
@@ -255,12 +254,20 @@ class DatasetsColumnTests(ColumnTestCase):
         self.assertEqual(descending, ["t_counted", "t_uncounted"])
         self.assertNotIn("their_draft", body)
 
-    def test_today_every_strangers_dataset_is_published(self):
-        """The characterisation the test above stands beside: until Dataset
-        has a lifecycle, every Dataset is publicly listed, so it counts."""
+    def test_a_strangers_published_dataset_counts(self):
+        """The case the test above stands beside: a published Dataset is
+        public, so a stranger's counts."""
         table = self.table("t_listed")
         self.dataset("anyones", self.stranger, table)
         self.assertEqual([d.name for d in self.row("t_listed").datasets], ["anyones"])
+
+    def test_a_platform_admin_has_no_view_of_a_strangers_draft(self):
+        self.user.is_admin = True
+        self.user.save()
+        table = self.table("t_admin")
+        self.dataset("their_draft", self.stranger, table, published=False)
+        self.assertEqual(self.row("t_admin").datasets, [])
+        self.assertNotContains(self.get(), "their_draft")
 
     def test_sorted_by_the_visible_count_then_title(self):
         one = self.table("t_one", title="One")

@@ -297,8 +297,11 @@ def seed_account(
     for name, owner_name in DATASETS.items():
         dataset_name = f"{name}_{label}"
         creator = owner if owner_name is None else user(owner_name)
+        # published, as every Dataset was when this shape was measured: a
+        # stranger's draft would drop out of the account's Datasets column
         datasets[name], _ = Dataset.objects.get_or_create(
-            name=dataset_name, defaults={"creator": creator}
+            name=dataset_name,
+            defaults={"creator": creator, "published_at": timezone.now()},
         )
 
     now = timezone.now()
