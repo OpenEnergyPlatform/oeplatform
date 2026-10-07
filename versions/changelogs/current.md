@@ -12,6 +12,19 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- Datasets now have a lifecycle: a Dataset is a draft until it is published, and
+  a new one starts as a draft. A draft is visible only to its creator: it is
+  left out of the public topic list (for the creator too), its page, metadata
+  JSON and API address answer 404 for everyone else exactly as an unknown name
+  does, the table page's Datasets sidebar, the API list and the tables tab show
+  only published Datasets plus your own drafts (marked as drafts), and a
+  scenario bundle's link to it reads `resolvable: null`. Platform admins have no
+  exception. Writes through the API reveal no more than a read: someone else's
+  draft answers 404, someone else's published Dataset 403; the dashboard's
+  dataset routes answer 404 for a Dataset that is not yours. Every existing
+  Dataset is migrated as published since its creation (Django migration
+  `dataedit.0058_dataset_lifecycle`)
+  [(#2618)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2618)
 - The term search in the metadata editor and the oeo_ext unit picker no longer
   always asks openenergyplatform.org: an instance with its own lookup service
   searches itself, one without uses the public endpoint, and `OEO_SEARCH_URL`
