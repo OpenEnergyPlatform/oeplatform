@@ -3,7 +3,8 @@ SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 
 The Publish gate: the checks a Table's metadata must pass before publishing
-it would succeed, declared once (spec #2551).
+it would succeed, declared once (spec #2551); and beside it the Dataset's
+own gate, ``DATASET_GATE`` (spec #2613).
 
 Three readers run exactly ``PUBLISH_GATE``, so they cannot disagree about
 what the gate is:
@@ -62,11 +63,12 @@ PUBLISH_GATE = (
 )
 
 
-def publish_checks(table) -> list:
-    """Every check of the Publish gate, run on ``table`` now."""
+def publish_checks(subject, gate=PUBLISH_GATE) -> list:
+    """Every check of ``gate`` (the Table's Publish gate unless another is
+    named), run on ``subject`` now."""
     results = []
-    for check in PUBLISH_GATE:
-        outcome = check.run(table)
+    for check in gate:
+        outcome = check.run(subject)
         passed = bool(outcome["status"])
         results.append(
             CheckResult(
@@ -85,3 +87,35 @@ def is_publishable(table) -> bool:
     """The gate's verdict on ``table`` now: what ``Table.publishable``
     stores."""
     return passes(publish_checks(table))
+
+
+def _verdict(passed, error) -> dict:
+    return {"status": passed, "error": "" if passed else error}
+
+
+# The Dataset's Publish gate (spec #2613, WF-03): what publishing a Dataset
+# needs, run live at the moment of publishing by the Dataset action service
+# (``api.services.dataset_actions``) and never stored -- a user has a handful
+# of Datasets, and the gate is two EXISTS.
+#
+# **The names are a contract**: the API's 409 lists the failed checks by
+# ``name`` (``{"failed": ["members", "topics"]}``), so a pipeline can react
+# without parsing prose. Renaming one is a breaking change of the API.
+#
+# Title and description need no check (every write requires them), and a
+# license is a member Table's, not the Dataset's. Nothing about a member's
+# own state counts: a published Dataset may hold draft and embargoed Tables.
+# The gate judges the transition only, so a published Dataset that stops
+# passing stays published.
+DATASET_GATE = (
+    GateCheck(
+        "members",
+        "Member tables",
+        lambda dataset: _verdict(dataset.tables.exists(), "No member tables"),
+    ),
+    GateCheck(
+        "topics",
+        "Topics",
+        lambda dataset: _verdict(dataset.topics.exists(), "No topics"),
+    ),
+)

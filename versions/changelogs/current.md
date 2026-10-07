@@ -48,6 +48,23 @@ SPDX-License-Identifier: CC0-1.0
   membership really changes, from the API, the tables tab's "Add to dataset" /
   "Remove from dataset", or a member Table being deleted
   [(#2619)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2619)
+- Dataset API: a Dataset can now go from nothing to published through the API
+  alone. `POST /api/v0/datasets/` takes optional `topics` and answers with the
+  new Dataset's read body; `PATCH /api/v0/datasets/<name>/` replaces `PUT`
+  (which now answers 405): a key left out is left as it is, `topics` replaces
+  the set, an omitted `at_id` keeps the stored one, and `name` is refused even
+  when unchanged. An unknown topic or the draft pseudo-topic is a 400 naming it,
+  never silently dropped. New `POST …/publish/` and `…/unpublish/` take no body
+  and answer with the Dataset: publishing needs at least one member Table and
+  one topic (the Dataset's Publish gate), and a Dataset that fails it is a 409
+  listing the failed checks in `failed` (`members`, `topics`); republishing
+  moves `published_at`, unpublishing a draft writes nothing. Every read carries
+  `published_at`, `creator`, `topics` and `modified_at`; an update that changes
+  nothing leaves `modified_at` alone, and publishing never moves it. Every
+  Dataset refusal is DRF's `{"detail": …}` or field map, and each operation's
+  success and refusal bodies are declared in the API reference. The resources
+  read no longer claims a `schema` key it never sent
+  [(#2620)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2620)
 - The term search in the metadata editor and the oeo_ext unit picker no longer
   always asks openenergyplatform.org: an instance with its own lookup service
   searches itself, one without uses the public endpoint, and `OEO_SEARCH_URL`

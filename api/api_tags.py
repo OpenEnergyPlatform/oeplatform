@@ -91,7 +91,10 @@ TAGS = [
         "description": (
             "The catalogue entries that group tables. A dataset's `resources` "
             "are assembled from its member tables when it is read rather than "
-            "stored, so a dataset never reports a resource it no longer holds."
+            "stored, so a dataset never reports a resource it no longer holds. "
+            "A new dataset is a draft, visible only to its creator, until the "
+            "creator publishes it; publishing needs at least one member table "
+            "and at least one topic, and unpublishing makes it a draft again."
         ),
     },
     {

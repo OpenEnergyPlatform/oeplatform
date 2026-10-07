@@ -39,6 +39,7 @@ from drf_spectacular.utils import OpenApiParameter, OpenApiResponse
 from rest_framework import serializers
 
 from api.api_tags import TABLES_LEGACY
+from dataedit.publish_gate import DATASET_GATE
 
 
 def describes(description):
@@ -104,6 +105,127 @@ TABLE = OpenApiParameter(
         "they are published under."
     ),
 )
+
+
+# --------------------------------------------------------------------------
+# The dataset endpoints (spec #2613).
+# --------------------------------------------------------------------------
+
+#: The draft rule, in the words every dataset operation states it. A dataset is
+#: a draft until it is published, and a draft is its creator's alone: no
+#: platform-admin exemption, and a draft another user names reads exactly as a
+#: name that never existed.
+DATASET_DRAFT_RULE = (
+    "A draft is visible only to its creator; anyone else gets 404, as for a "
+    "name that does not exist."
+)
+
+#: The auth expectation, stated in words because Swagger's padlock reads the
+#: opposite of what it seems (closed on a public read, open on a write that
+#: needs a login). ``test_dataset_description`` cross-checks each against the
+#: operation's own ``security`` block.
+DATASET_PUBLIC = "**Public.** " + DATASET_DRAFT_RULE
+DATASET_LIST_PUBLIC = (
+    "**Public.** A draft is visible only to its creator; nobody else finds it "
+    "listed."
+)
+DATASET_CREATOR = (
+    "**Requires authentication**, and only the dataset's creator may change "
+    "it. " + DATASET_DRAFT_RULE
+)
+DATASET_ANY_ACCOUNT = (
+    "**Requires authentication.** The account that creates a dataset is its "
+    "creator, the one who may change it. A new dataset is a draft, visible "
+    "only to its creator until it is published."
+)
+
+
+class RefusalSerializer(serializers.Serializer):
+    """DRF's own refusal body, which every dataset refusal but a 400 is."""
+
+    detail = serializers.CharField(help_text="What was refused, and why.")
+
+
+class PublishGateRefusalSerializer(RefusalSerializer):
+    """A publish the dataset's state refused: the request was fine."""
+
+    failed = serializers.ListField(
+        child=serializers.ChoiceField(choices=[check.name for check in DATASET_GATE]),
+        help_text=(
+            "The publish gate's checks the dataset failed, by name: `members` "
+            "(it holds no table) and `topics` (it has no topic). The names "
+            "are stable; a client may branch on them."
+        ),
+    )
+
+
+class DatasetAssignedSerializer(serializers.Serializer):
+    """What `assign-tables/` answers."""
+
+    message = serializers.CharField()
+    added = serializers.ListField(
+        child=serializers.CharField(),
+        help_text=(
+            "Every table sent that the dataset holds after the call, those it "
+            "held already included, so a repeated call answers as the first."
+        ),
+    )
+    missing = serializers.ListField(
+        child=serializers.DictField(child=serializers.CharField()),
+        help_text="The references sent that name no table, as sent.",
+    )
+
+
+class DatasetUnassignedSerializer(serializers.Serializer):
+    """What `unassign-tables/` answers."""
+
+    message = serializers.CharField()
+    removed = serializers.ListField(
+        child=serializers.CharField(), help_text="The tables detached."
+    )
+    missing = serializers.ListField(
+        child=serializers.DictField(child=serializers.CharField()),
+        help_text="The references sent that the dataset did not hold, as sent.",
+    )
+
+
+def _refusal(description):
+    return OpenApiResponse(response=RefusalSerializer, description=description)
+
+
+DATASET_REFUSALS = {
+    400: describes(
+        "The request could not be carried out as sent: DRF's map of each "
+        "field to what is wrong with it -- an unknown topic or a taken name "
+        'among them -- or `{"detail": ...}` when the body is not JSON. '
+        "Nothing was written."
+    ),
+    401: _refusal("No credentials, or credentials this platform does not know."),
+    403: _refusal(
+        "Authenticated, but the dataset is somebody else's: only its creator "
+        "may change it."
+    ),
+    404: _refusal(
+        "No dataset of that name, or another user's draft: the two answer "
+        "alike, word for word."
+    ),
+    409: OpenApiResponse(
+        response=PublishGateRefusalSerializer,
+        description=(
+            "The dataset does not pass the publish gate, which needs at least "
+            "one member table and at least one topic. Nothing was written."
+        ),
+    ),
+}
+
+
+def dataset_responses(success, *codes, also=None):
+    """A dataset operation's success plus the refusals it can give, from
+    ``DATASET_REFUSALS``; ``also`` for wording only this operation has."""
+    described = {code: DATASET_REFUSALS[code] for code in codes}
+    described.update(success)
+    described.update(also or {})
+    return described
 
 
 # --------------------------------------------------------------------------

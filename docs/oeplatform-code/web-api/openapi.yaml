@@ -2011,8 +2011,8 @@ paths:
       description: Every published dataset on the platform, plus the caller's own
         drafts, each with its metadata. The `resources` of a dataset are assembled
         from its member tables at read time rather than stored, so this never reports
-        a resource the dataset no longer holds. Public. A draft is visible only to
-        its creator.
+        a resource the dataset no longer holds. **Public.** A draft is visible only
+        to its creator; nobody else finds it listed.
       summary: List datasets
       tags:
       - Datasets
@@ -2032,8 +2032,13 @@ paths:
           description: ''
     post:
       operationId: datasets_create
-      description: Creates a new dataset.
-      summary: Create dataset
+      description: Creates a catalogue entry that tables can then be assigned to.
+        The name must be free; a taken one is refused naming the field. `topics` must
+        name existing topics, and never the draft pseudo-topic; a 400 names any that
+        do not. **Requires authentication.** The account that creates a dataset is
+        its creator, the one who may change it. A new dataset is a draft, visible
+        only to its creator until it is published.
+      summary: Create a dataset
       tags:
       - Datasets
       requestBody:
@@ -2048,9 +2053,12 @@ paths:
                   title: Wind Power Dataset Germany
                   description: Contains hourly wind generation data for Germany.
                   at_id: https://example.org/datasets/test_dataset
+                  topics:
+                  - energy
                 summary: Example request body for creating a dataset
                 description: Use this JSON object to create a new dataset. The `at_id`
-                  field is optional and can contain a persistent identifier.
+                  field is optional and can contain a persistent identifier; `topics`
+                  is optional too.
           application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/DatasetCreate'
@@ -2063,21 +2071,42 @@ paths:
       - cookieAuth: []
       - tokenAuth: []
       responses:
-        '201':
-          description: Dataset created
         '400':
-          description: The payload was rejected.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'The request could not be carried out as sent: DRF''s map of
+            each field to what is wrong with it -- an unknown topic or a taken name
+            among them -- or `{"detail": ...}` when the body is not JSON. Nothing
+            was written.'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: No credentials, or credentials this platform does not know.
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatasetRead'
+          description: ''
   /api/v0/datasets/{dataset_name}/:
     get:
       operationId: datasets_retrieve
-      description: Returns metadata for a single dataset. Public. A draft is visible
-        only to its creator; anyone else gets 404, as for a name that does not exist.
+      description: Returns a single dataset with its metadata. **Public.** A draft
+        is visible only to its creator; anyone else gets 404, as for a name that does
+        not exist.
       summary: Get dataset
       parameters:
       - in: path
         name: dataset_name
         schema:
           type: string
+        description: 'The dataset''s name: its permanent identifier, fixed at creation.
+          Names are global and are never reused.'
         required: true
       tags:
       - Datasets
@@ -2087,21 +2116,38 @@ paths:
       - tokenAuth: []
       - {}
       responses:
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: 'No dataset of that name, or another user''s draft: the two
+            answer alike, word for word.'
         '200':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DatasetRead'
           description: ''
-    put:
-      operationId: datasets_update
-      description: Updates metadata for an existing dataset.
+    patch:
+      operationId: datasets_partial_update
+      description: 'Changes the dataset''s title, description, `at_id` or topics.
+        A key left out is left as it is: `topics` replaces the whole set (`[]` empties
+        it), and an omitted `at_id` keeps the stored one. `name` is fixed at creation,
+        so sending it is a 400, even unchanged. Topics must exist and may not be the
+        draft pseudo-topic; a 400 names any that do not. An update that changes nothing
+        writes nothing and leaves `modified_at` as it was. Answers with the dataset
+        as it now is. `PUT` is not offered and answers 405. **Requires authentication**,
+        and only the dataset''s creator may change it. A draft is visible only to
+        its creator; anyone else gets 404, as for a name that does not exist.'
       summary: Update dataset
       parameters:
       - in: path
         name: dataset_name
         schema:
           type: string
+        description: 'The dataset''s name: its permanent identifier, fixed at creation.
+          Names are global and are never reused.'
         required: true
       tags:
       - Datasets
@@ -2109,42 +2155,76 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DatasetCreate'
+              $ref: '#/components/schemas/PatchedDatasetPatch'
             examples:
               UpdateDatasetExample:
                 value:
-                  name: test_dataset
                   title: Updated Wind Power Dataset Germany
-                  description: Updated description with more details.
-                  at_id: https://example.org/datasets/test_dataset
-                summary: Example request body for updating a dataset
+                  topics:
+                  - energy
+                summary: Change the title and replace the topics
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/DatasetCreate'
+              $ref: '#/components/schemas/PatchedDatasetPatch'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/DatasetCreate'
-        required: true
+              $ref: '#/components/schemas/PatchedDatasetPatch'
       security:
       - basicAuth: []
       - cookieAuth: []
       - tokenAuth: []
       responses:
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'The request could not be carried out as sent: DRF''s map of
+            each field to what is wrong with it -- an unknown topic or a taken name
+            among them -- or `{"detail": ...}` when the body is not JSON. Nothing
+            was written.'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: No credentials, or credentials this platform does not know.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: 'Authenticated, but the dataset is somebody else''s: only its
+            creator may change it.'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: 'No dataset of that name, or another user''s draft: the two
+            answer alike, word for word.'
         '200':
-          description: Dataset updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatasetRead'
+          description: ''
     delete:
       operationId: datasets_destroy
-      description: 'Deletes the dataset. Its member tables are not deleted; they only
-        leave it. Needs a login, and only the dataset''s creator may delete it: the
-        address is the confirmation a published dataset asks for. A draft is visible
-        only to its creator; anyone else gets 404, as for a name that does not exist,
-        and so does a repeated delete.'
+      description: Deletes the dataset. Its member tables are not deleted; they only
+        leave it. The address is the confirmation a published dataset asks for, and
+        a repeated delete is a 404. **Requires authentication**, and only the dataset's
+        creator may change it. A draft is visible only to its creator; anyone else
+        gets 404, as for a name that does not exist.
       summary: Delete dataset
       parameters:
       - in: path
         name: dataset_name
         schema:
           type: string
+        description: 'The dataset''s name: its permanent identifier, fixed at creation.
+          Names are global and are never reused.'
         required: true
       tags:
       - Datasets
@@ -2157,41 +2237,43 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: {}
+                $ref: '#/components/schemas/Refusal'
           description: No credentials, or credentials this platform does not know.
-        '204':
-          description: Deleted. The body is empty.
         '403':
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: {}
-          description: Authenticated, but the dataset is somebody else's.
+                $ref: '#/components/schemas/Refusal'
+          description: 'Authenticated, but the dataset is somebody else''s: only its
+            creator may change it.'
         '404':
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: {}
+                $ref: '#/components/schemas/Refusal'
           description: 'No dataset of that name, or another user''s draft: the two
             answer alike, word for word.'
+        '204':
+          description: Deleted. The body is empty.
   /api/v0/datasets/{dataset_name}/assign-tables/:
     post:
       operationId: datasets_assign_tables_create
-      description: Assigns existing OEP tables to an existing dataset. The dataset
-        must already exist and the referenced tables must already exist. After assignment,
-        the dataset resources are updated from the table metadata. At most 2,500 tables
-        in one call.
+      description: Assigns existing OEP tables to an existing dataset; the tables'
+        topics are added to the dataset's. Any published table not under embargo may
+        be assigned; a draft or embargoed table needs Data editor on it, and one that
+        does not qualify refuses the whole request. A name that is no table is reported
+        in `missing` rather than refused. At most 2,500 tables in one call. **Requires
+        authentication**, and only the dataset's creator may change it. A draft is
+        visible only to its creator; anyone else gets 404, as for a name that does
+        not exist.
       summary: Assign tables to dataset
       parameters:
       - in: path
         name: dataset_name
         schema:
           type: string
-        description: 'Name of the dataset to which the tables should be assigned.
-          Example: `test_dataset`.'
+        description: 'The dataset''s name: its permanent identifier, fixed at creation.
+          Names are global and are never reused.'
         required: true
       tags:
       - Datasets
@@ -2219,16 +2301,105 @@ paths:
       - cookieAuth: []
       - tokenAuth: []
       responses:
-        '200':
-          description: Tables were assigned to the dataset.
-        '400':
-          description: The table list is unusable, or names more than 2,500.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: No credentials, or credentials this platform does not know.
         '404':
-          description: Dataset was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: 'No dataset of that name, or another user''s draft: the two
+            answer alike, word for word.'
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatasetAssigned'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'The table list is unusable, or names more than 2,500: DRF''s
+            map of each field to what is wrong with it.'
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: Authenticated, but the dataset is somebody else's, or a table
+            named is a draft or under embargo and the account holds no Data editor
+            on it. Nothing was assigned.
+  /api/v0/datasets/{dataset_name}/publish/:
+    post:
+      operationId: datasets_publish_create
+      description: 'Publishes the dataset: it enters the catalogue and anyone may
+        read it. The publish gate runs now and needs at least one member table and
+        at least one topic; a dataset failing it is a 409 listing the failed checks
+        in `failed`, and nothing is written. Members may be drafts or under embargo.
+        Publishing a published dataset republishes it: the gate runs again and `published_at`
+        becomes now. Never moves `modified_at`. No request body. **Requires authentication**,
+        and only the dataset''s creator may change it. A draft is visible only to
+        its creator; anyone else gets 404, as for a name that does not exist.'
+      summary: Publish a dataset
+      parameters:
+      - in: path
+        name: dataset_name
+        schema:
+          type: string
+        description: 'The dataset''s name: its permanent identifier, fixed at creation.
+          Names are global and are never reused.'
+        required: true
+      tags:
+      - Datasets
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: No credentials, or credentials this platform does not know.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: 'Authenticated, but the dataset is somebody else''s: only its
+            creator may change it.'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: 'No dataset of that name, or another user''s draft: the two
+            answer alike, word for word.'
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublishGateRefusal'
+          description: The dataset does not pass the publish gate, which needs at
+            least one member table and at least one topic. Nothing was written.
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatasetRead'
+          description: ''
   /api/v0/datasets/{dataset_name}/resources/:
     get:
       operationId: datasets_resources_list
-      description: Returns the tables/resources that belong to a dataset. Public.
+      description: Returns the tables/resources that belong to a dataset. **Public.**
         A draft is visible only to its creator; anyone else gets 404, as for a name
         that does not exist.
       summary: List dataset resources
@@ -2237,6 +2408,8 @@ paths:
         name: dataset_name
         schema:
           type: string
+        description: 'The dataset''s name: its permanent identifier, fixed at creation.
+          Names are global and are never reused.'
         required: true
       tags:
       - Datasets
@@ -2246,6 +2419,13 @@ paths:
       - tokenAuth: []
       - {}
       responses:
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: 'No dataset of that name, or another user''s draft: the two
+            answer alike, word for word.'
         '200':
           content:
             application/json:
@@ -2260,14 +2440,18 @@ paths:
       description: Removes the named tables from the dataset. The tables are not deleted
         -- a dataset is a catalogue entry, and leaving it is not leaving the platform.
         A name the dataset does not hold is reported in `missing` rather than refused,
-        so a repeated call is safe. At most 2,500 tables in one call.
+        so a repeated call is safe. The dataset's topics stay as they are. At most
+        2,500 tables in one call. **Requires authentication**, and only the dataset's
+        creator may change it. A draft is visible only to its creator; anyone else
+        gets 404, as for a name that does not exist.
       summary: Unassign tables from a dataset
       parameters:
       - in: path
         name: dataset_name
         schema:
           type: string
-        description: The dataset's name.
+        description: 'The dataset''s name: its permanent identifier, fixed at creation.
+          Names are global and are never reused.'
         required: true
       tags:
       - Datasets
@@ -2288,6 +2472,32 @@ paths:
       - cookieAuth: []
       - tokenAuth: []
       responses:
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: No credentials, or credentials this platform does not know.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: 'Authenticated, but the dataset is somebody else''s: only its
+            creator may change it.'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: 'No dataset of that name, or another user''s draft: the two
+            answer alike, word for word.'
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatasetUnassigned'
+          description: ''
         '400':
           content:
             application/json:
@@ -2296,37 +2506,57 @@ paths:
                 additionalProperties: {}
           description: 'The table list is unusable, or names more than 2,500: DRF''s
             map of each field to what is wrong with it.'
+  /api/v0/datasets/{dataset_name}/unpublish/:
+    post:
+      operationId: datasets_unpublish_create
+      description: 'Returns the dataset to draft: it leaves the catalogue, other users
+        get 404 for it, and scenario citations of it stop resolving. Always allowed
+        for the creator; unpublishing a draft succeeds and writes nothing. Never moves
+        `modified_at`. No request body. **Requires authentication**, and only the
+        dataset''s creator may change it. A draft is visible only to its creator;
+        anyone else gets 404, as for a name that does not exist.'
+      summary: Unpublish a dataset
+      parameters:
+      - in: path
+        name: dataset_name
+        schema:
+          type: string
+        description: 'The dataset''s name: its permanent identifier, fixed at creation.
+          Names are global and are never reused.'
+        required: true
+      tags:
+      - Datasets
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
         '401':
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: {}
+                $ref: '#/components/schemas/Refusal'
           description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: {}
-          description: 'Authenticated, but not permitted: the table belongs to somebody
-            else, or is under embargo, or the operation needs a level of permission
-            on it that this account does not hold.'
+                $ref: '#/components/schemas/Refusal'
+          description: 'Authenticated, but the dataset is somebody else''s: only its
+            creator may change it.'
         '404':
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: {}
-          description: No table of that name on this platform.
+                $ref: '#/components/schemas/Refusal'
+          description: 'No dataset of that name, or another user''s draft: the two
+            answer alike, word for word.'
         '200':
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: {}
-          description: '`removed` names what was detached and `missing` what the dataset
-            did not hold.'
+                $ref: '#/components/schemas/DatasetRead'
+          description: ''
   /api/v0/datasets/list_all/scenario/:
     get:
       operationId: datasets_list_all_scenario_list
@@ -9911,6 +10141,29 @@ components:
           minItems: 1
       required:
       - tables
+    DatasetAssigned:
+      type: object
+      description: What `assign-tables/` answers.
+      properties:
+        message:
+          type: string
+        added:
+          type: array
+          items:
+            type: string
+          description: Every table sent that the dataset holds after the call, those
+            it held already included, so a repeated call answers as the first.
+        missing:
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              type: string
+          description: The references sent that name no table, as sent.
+      required:
+      - added
+      - message
+      - missing
     DatasetCreate:
       type: object
       properties:
@@ -9928,6 +10181,13 @@ components:
           type: string
           format: uri
           description: 'Optional: persistent identifier or URL for the dataset'
+        topics:
+          type: array
+          items:
+            type: string
+          description: 'Names of existing topics, the dataset''s own set. An unknown
+            name, or the draft pseudo-topic, is refused naming it. Optional: a new
+            dataset has none without it.'
       required:
       - description
       - name
@@ -10118,6 +10378,9 @@ components:
       - results
     DatasetRead:
       type: object
+      description: |-
+        A Dataset as every read of the API sends it. Every field is read-only:
+        no write accepts one of them back.
       properties:
         uuid:
           type: string
@@ -10125,7 +10388,7 @@ components:
           readOnly: true
         name:
           type: string
-          maxLength: 255
+          readOnly: true
         metadata:
           type: object
           additionalProperties: {}
@@ -10134,19 +10397,49 @@ components:
           type: string
           format: date-time
           readOnly: true
+        modified_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          description: 'The last Modification of the dataset itself: a change to its
+            title, description, topics or member tables. Never moved by publishing
+            or unpublishing, nor by changes inside a member table; null for a dataset
+            older than the field.'
+        published_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          description: When the dataset was last published; null for a draft. A republish
+            overwrites it.
+        creator:
+          type: string
+          title: Username
+          readOnly: true
+          nullable: true
+          description: The username of the account that created the dataset, the one
+            who may change it; null for a dataset older than ownership.
+        topics:
+          type: array
+          items:
+            type: string
+          readOnly: true
+          description: The names of the dataset's own topics, sorted.
       required:
       - created_at
+      - creator
       - metadata
+      - modified_at
       - name
+      - published_at
+      - topics
       - uuid
     DatasetResource:
       type: object
       properties:
         id:
           type: integer
-          readOnly: true
-        schema:
-          type: string
           readOnly: true
         name:
           type: string
@@ -10160,7 +10453,28 @@ components:
       required:
       - id
       - name
-      - schema
+    DatasetUnassigned:
+      type: object
+      description: What `unassign-tables/` answers.
+      properties:
+        message:
+          type: string
+        removed:
+          type: array
+          items:
+            type: string
+          description: The tables detached.
+        missing:
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              type: string
+          description: The references sent that the dataset did not hold, as sent.
+      required:
+      - message
+      - missing
+      - removed
     Energyframework:
       type: object
       properties:
@@ -10305,6 +10619,14 @@ components:
       - id
       - model_name
       - url
+    FailedEnum:
+      enum:
+      - members
+      - topics
+      type: string
+      description: |-
+        * `members` - members
+        * `topics` - topics
     HistoryChange:
       type: object
       description: One field's worth of a write, rendered at read time from the triples.
@@ -10692,6 +11014,28 @@ components:
           nullable: true
       required:
       - label
+    PatchedDatasetPatch:
+      type: object
+      description: |-
+        `PATCH /datasets/<name>/`: every key optional, and a key left out is
+        left as it is. `name` is refused even when equal, so a client learns the
+        name is fixed instead of seeing it ignored.
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        at_id:
+          type: string
+          format: uri
+          description: Left out, the stored identifier is kept.
+        topics:
+          type: array
+          items:
+            type: string
+          description: Names of existing topics, the dataset's own set. An unknown
+            name, or the draft pseudo-topic, is refused naming it. Replaces the whole
+            set; `[]` empties it.
     PatchedHolderChange:
       type: object
       properties:
@@ -10822,6 +11166,23 @@ components:
       description: |-
         * `finished` - finished
         * `in_progress` - in_progress
+    PublishGateRefusal:
+      type: object
+      description: 'A publish the dataset''s state refused: the request was fine.'
+      properties:
+        detail:
+          type: string
+          description: What was refused, and why.
+        failed:
+          type: array
+          items:
+            $ref: '#/components/schemas/FailedEnum'
+          description: 'The publish gate''s checks the dataset failed, by name: `members`
+            (it holds no table) and `topics` (it has no topic). The names are stable;
+            a client may branch on them.'
+      required:
+      - detail
+      - failed
     QueryWrapped:
       type: object
       description: A payload this endpoint reads out of a `query` key.
@@ -10839,6 +11200,15 @@ components:
         * `table` - table
         * `dataset` - dataset
         * `external` - external
+    Refusal:
+      type: object
+      description: DRF's own refusal body, which every dataset refusal but a 400 is.
+      properties:
+        detail:
+          type: string
+          description: What was refused, and why.
+      required:
+      - detail
     Removal:
       type: object
       description: |-
@@ -11703,7 +12073,9 @@ tags:
 - name: Datasets
   description: The catalogue entries that group tables. A dataset's `resources` are
     assembled from its member tables when it is read rather than stored, so a dataset
-    never reports a resource it no longer holds.
+    never reports a resource it no longer holds. A new dataset is a draft, visible
+    only to its creator, until the creator publishes it; publishing needs at least
+    one member table and at least one topic, and unpublishing makes it a draft again.
 - name: Scenario Bundles
   description: 'The OEKG scenario bundles as a REST API: a bundle, the scenarios and
     study reports below it, the datasets a scenario cites, and the record of every

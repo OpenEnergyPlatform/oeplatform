@@ -60,8 +60,10 @@ from api.views import (
     AllTableSizesAPIView,
     AssignDatasetTables,
     DatasetManager,
+    DatasetPublish,
     DatasetsListCreate,
     DatasetsListResources,
+    DatasetUnpublish,
     EnergyframeworkFactsheetListAPIView,
     EnergymodelFactsheetListAPIView,
     ManageOekgScenarioDatasetsAPIView,
@@ -423,6 +425,16 @@ urlpatterns_v0 = [
         "datasets/",
         DatasetsListCreate.as_view(),
         name="dataset-list-create",
+    ),
+    path(
+        "datasets/<str:dataset_name>/publish/",
+        DatasetPublish.as_view(),
+        name="dataset-publish",
+    ),
+    path(
+        "datasets/<str:dataset_name>/unpublish/",
+        DatasetUnpublish.as_view(),
+        name="dataset-unpublish",
     ),
     path(
         "datasets/<str:dataset_name>/assign-tables/",

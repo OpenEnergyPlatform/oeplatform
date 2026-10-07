@@ -19,14 +19,30 @@ A row action is a batch of one: both operations take a list of names.
 
 The actions:
 
+- ``create``: the one name is the new Dataset's; ``title``, ``description``,
+  an optional ``at_id`` and optional ``topics`` are parameters. It goes
+  through the shared create path (``create_dataset``), so a new Dataset is a
+  draft whose ``modified_at`` is its ``created_at``. A taken name is an
+  ``InvalidParameters`` on ``name``.
+- ``edit``: ``title``, ``description``, ``at_id`` and ``topics`` of one of
+  the user's own Datasets, each only if given: a parameter left out is left
+  as it is, and an empty ``at_id`` keeps the stored one (the API refuses an
+  empty one before it gets here; a form may send one). **An edit that
+  changes nothing writes, stamps and logs nothing.**
+- ``publish``: ``DATASET_GATE`` runs live, under the lock; a Dataset failing
+  it is left out by the failed check's reason (``ActionRefused.failed_checks``
+  names the checks) and refuses the request. ``published_at`` becomes now,
+  also for a Dataset already published: a republish passes the gate again
+  and overwrites the date. The preflight states the member mix (members,
+  drafts, embargoed) for the dialog; it never refuses anything.
+- ``unpublish``: always allowed for the creator; ``published_at`` is
+  cleared. A draft is passed over (``ALREADY_DRAFT``), so unpublishing one
+  succeeds and writes nothing.
 - ``delete``: the named Datasets go; their member Tables never do, and there
-  is no OEDB work. A Dataset the user may not read (another user's draft, or
-  no such name) is left out as "No such dataset", one they may read but did
-  not create as "Not one of your datasets"; either refuses the request. The
-  typed confirmation (``Preflight.confirmation``) is enforced here, under the
-  lock: the name for one published Dataset, the count for a batch holding a
-  published Dataset or more than ``TYPED_COUNT_ABOVE``; a draft alone needs
-  none.
+  is no OEDB work. The typed confirmation (``Preflight.confirmation``) is
+  enforced here, under the lock: the name for one published Dataset, the
+  count for a batch holding a published Dataset or more than
+  ``TYPED_COUNT_ABOVE``; a draft alone needs none.
 - ``members_add`` and ``members_remove``: the Dataset is the subject (the
   ``dataset`` parameter, one of the user's own), the names are Tables. Adding
   takes any Table in ``assignable_tables(user)``, the curation rule, with no
@@ -37,20 +53,40 @@ The actions:
   for them, so a repeated call is safe. A Table no longer assignable when the
   lock is held refuses the whole request.
 
-``modified_at`` is stamped here, and only on a real change: Tables actually
-added or removed. Deleting leaves nothing to stamp.
+Publish, unpublish, edit and delete resolve their Datasets alike: one the
+user may not read (another user's draft, or no such name) is "No such
+dataset", one they may read but did not create "Not one of your datasets";
+either refuses the request. Edit names one Dataset and says so as an
+``ActionError`` instead (``DatasetNotFound``, ``NotYourDataset``), as the
+member actions do for their subject.
+
+**The service owns Topic validation** (``topics``, on create and edit): an
+unknown name and the draft pseudo-topic are an ``InvalidParameters`` naming
+them, never silently dropped.
+
+``modified_at`` is stamped here, and only on a real change (a Modification):
+an edit that changed something, Tables actually added or removed. A create's
+stamp is its creation time; publishing, unpublishing and deleting stamp
+nothing.
 
 Log lines, on the ``oeplatform.dataset_actions`` logger, written once the
-transaction has committed and never for a refused request::
+transaction has committed and never for a refused request nor for one that
+wrote nothing::
 
+    dataset_action dataset=<name> action=create by=<user pk>
+        via=<entry point> batch=-
+    dataset_action dataset=<name> action=edit changed=<field>,<field> by=…
+    dataset_action dataset=<name> action=publish republish=yes|no by=…
+    dataset_action dataset=<name> action=unpublish by=…
     dataset_action dataset=<name> action=delete published=yes|no members=<n>
-        by=<user pk> via=<entry point> batch=<id>|-
+        by=…
     dataset_action dataset=<name> action=members_add|members_remove
-        table=<name> by=<user pk> via=<entry point> batch=<id>|-
+        table=<name> by=…
 
-One line per Dataset deleted, one per Table added or removed. ``batch`` ties
-together the lines of one request writing more than one, and is ``-`` for a
-single line. No audit model: these lines are the record.
+One line per Dataset created, edited, published, unpublished or deleted,
+one per Table added or removed. ``batch`` ties together the lines of one
+request writing more than one, and is ``-`` for a single line. No audit
+model: these lines are the record.
 """  # noqa: 501
 
 import logging
@@ -58,9 +94,10 @@ import uuid
 from dataclasses import dataclass, field
 from typing import ClassVar
 
-from django.db import transaction
-from django.db.models import Count
+from django.db import IntegrityError, transaction
+from django.db.models import Count, Q
 from django.http import Http404
+from django.utils import timezone
 
 from api.services import batch_actions
 from api.services.batch_actions import (  # noqa: F401 (part of this module's interface)
@@ -73,18 +110,29 @@ from api.services.batch_actions import (  # noqa: F401 (part of this module's in
     unique,
 )
 from api.services.dataset_creation import (
+    DatasetNameTaken,
     assign_table,
     assignable_tables,
+    create_dataset,
     dataset_title,
+    name_taken_message,
+    set_dataset_topics,
+    update_dataset,
 )
-from dataedit.models import DATASET_NOT_FOUND, Dataset, Table
+from dataedit.models import DATASET_NOT_FOUND, Dataset, Table, Topic
+from dataedit.publish_gate import DATASET_GATE, publish_checks
+from oeplatform.settings import PSEUDO_TOPIC_DRAFT
 
 logger = logging.getLogger("oeplatform.dataset_actions")
 
+CREATE, EDIT = "create", "edit"
+PUBLISH, UNPUBLISH = "publish", "unpublish"
 DELETE = "delete"
 MEMBERS_ADD, MEMBERS_REMOVE = "members_add", "members_remove"
-ACTIONS = (DELETE, MEMBERS_ADD, MEMBERS_REMOVE)
+ACTIONS = (CREATE, EDIT, PUBLISH, UNPUBLISH, DELETE, MEMBERS_ADD, MEMBERS_REMOVE)
 MEMBER_ACTIONS = (MEMBERS_ADD, MEMBERS_REMOVE)
+# What an edit may change, in the order a log line names the changes.
+EDITABLE = ("title", "description", "at_id", "topics")
 
 # The most names one request may carry, per action; over it the request is
 # refused before anything is read.
@@ -96,9 +144,9 @@ MEMBER_ACTIONS = (MEMBERS_ADD, MEMBERS_REMOVE)
 # ``assign_table`` and membership rows, and this side reads less: no Table
 # role, only the curation rule, once per request.
 #
-# Delete has none yet: the bulk bar's ceiling for publish, unpublish and
-# delete is measured when the bulk bar arrives (#2626). Until then the only
-# caller is the API, one Dataset per request.
+# Publish, unpublish and delete have none yet: their shared ceiling is
+# measured when the bulk bar arrives (#2626). Until then every caller names
+# one Dataset per request. Create and edit take exactly one name.
 CEILINGS = {
     MEMBERS_ADD: 2500,
     MEMBERS_REMOVE: 2500,
@@ -107,6 +155,10 @@ CEILINGS = {
 # What an action is called at the start of a sentence, as in the ceiling's
 # "Adding tables to a dataset takes at most 2,500 tables at a time".
 ACTION_NAMES = {
+    CREATE: "Create",
+    EDIT: "Edit",
+    PUBLISH: "Publish",
+    UNPUBLISH: "Unpublish",
     DELETE: "Delete",
     MEMBERS_ADD: "Adding tables to a dataset",
     MEMBERS_REMOVE: "Removing tables from a dataset",
@@ -120,15 +172,20 @@ NOT_YOURS = "Not one of your datasets"
 NO_SUCH_TABLE = "No such table"
 ALREADY_IN = "Already in the dataset"
 NOT_IN = "Not in the dataset"
+ALREADY_DRAFT = "Already a draft"
 # The curation rule (``assignable_tables``) refusing a Table: a draft or
 # embargoed Table the user holds no Data editor grant on.
 MAY_NOT_ASSIGN = "Drafts and embargoed tables need Data editor on the table"
 
+# A Dataset failing ``DATASET_GATE`` is left out by the failed check's own
+# reason (the ``error`` its ``run`` answers: "No member tables", "No
+# topics"), which refuses a publish.
+
 # Left-out reasons ``execute`` passes over instead of refusing the request:
 # there is nothing to do for those names, because the outcome asked for holds
-# already (a member added, a non-member removed) or there is no such Table.
-# Every other reason refuses the whole request.
-PASSED_OVER = frozenset({ALREADY_IN, NOT_IN, NO_SUCH_TABLE})
+# already (a member added, a non-member removed, a draft unpublished) or
+# there is no such Table. Every other reason refuses the whole request.
+PASSED_OVER = frozenset({ALREADY_IN, NOT_IN, NO_SUCH_TABLE, ALREADY_DRAFT})
 
 
 class DatasetNotFound(ActionError):
@@ -159,12 +216,25 @@ class ActionRefused(batch_actions.ActionRefused):
     def not_found(self) -> bool:
         return any(group.reason == NOT_FOUND for group in self.refused)
 
+    @property
+    def failed_checks(self) -> list:
+        """The ``DATASET_GATE`` checks a refused publish failed, by name, in
+        the gate's order: what the API's 409 lists. Empty for any other
+        refusal."""
+        failed = {
+            name
+            for names in self.preflight.consequences.get("gate", {}).values()
+            for name in names
+        }
+        return [check.name for check in DATASET_GATE if check.name in failed]
+
 
 @dataclass
 class Preflight(batch_actions.Preflight):
     """What ``execute`` would do with these names, before it does it
-    (``batch_actions.Preflight``). The names are Datasets for delete and
-    Tables for the member actions, whose subject is ``dataset``."""
+    (``batch_actions.Preflight``). The names are Datasets, except for the
+    member actions, where they are Tables and the subject is ``dataset``.
+    A create has nothing to act on yet, so its ``eligible`` is empty."""
 
     action_names: ClassVar[dict] = ACTION_NAMES
 
@@ -183,13 +253,16 @@ class Preflight(batch_actions.Preflight):
 @dataclass(frozen=True)
 class Outcome:
     """What ``execute`` did. ``datasets`` are the Datasets acted on (after a
-    delete, as they were); for the member actions, ``tables`` are the Tables
-    added or removed and ``left_out`` the names passed over, by reason."""
+    delete, as they were; for an edit, the one Dataset whether or not
+    anything changed); ``left_out`` the names passed over, by reason; for the
+    member actions, ``tables`` are the Tables added or removed, and for an
+    edit ``changed`` the fields that changed."""
 
     action: str
     datasets: list
     tables: list = field(default_factory=list)
     left_out: list = field(default_factory=list)
+    changed: list = field(default_factory=list)
 
 
 def _nouns(action) -> tuple:
@@ -230,16 +303,16 @@ def _ceiling_message(action, total) -> str:
     )
 
 
-def _delete_preflight(user, names) -> Preflight:
-    """Delete: the user's own Datasets among ``names``, the rest left out
-    (``NOT_FOUND`` or ``NOT_YOURS``), each eligible one carrying its member
-    count as ``members``. One query."""
-    found = {
-        dataset.name: dataset
-        for dataset in Dataset.objects.visible_to(user)
-        .filter(name__in=names)
-        .annotate(members=Count("tables"))
-    }
+def _resolve(user, names, annotations=None):
+    """The Datasets ``names`` names, by the user's rights over them: those
+    the user may read (``found``, by name), the user's own among them
+    (``eligible``, in the order named) and the rest by left-out reason
+    (``NOT_FOUND`` or ``NOT_YOURS``). One query, with ``annotations`` on
+    each Dataset found."""
+    datasets = Dataset.objects.visible_to(user).filter(name__in=names)
+    if annotations:
+        datasets = datasets.annotate(**annotations)
+    found = {dataset.name: dataset for dataset in datasets}
     eligible, reasons = [], {}
     for name in names:
         dataset = found.get(name)
@@ -251,26 +324,205 @@ def _delete_preflight(user, names) -> Preflight:
             eligible.append(dataset)
             continue
         reasons.setdefault(reason, []).append(name)
+    return found, eligible, reasons
+
+
+def _subject(action, names, eligible, found) -> str:
+    """What the dialog is about: the one Dataset's title (its name when the
+    user may not read it), or the batch counted (``batch_subject``)."""
     if len(names) == 1:
-        subject = quoted([dataset_title(eligible[0]) if eligible else names[0]])
-    else:
-        subject = batch_actions.batch_subject(
-            len(eligible), len(names), _nouns(DELETE)[1]
-        )
+        dataset = found.get(names[0])
+        return quoted([dataset_title(dataset) if dataset else names[0]])
+    return batch_actions.batch_subject(len(eligible), len(names), _nouns(action)[1])
+
+
+def _left_out(reasons) -> list:
+    return [LeftOut(reason, group) for reason, group in reasons.items()]
+
+
+def _delete_preflight(user, names) -> Preflight:
+    """Delete: the user's own Datasets among ``names``, the rest left out
+    (``NOT_FOUND`` or ``NOT_YOURS``), each eligible one carrying its member
+    count as ``members``. One query."""
+    found, eligible, reasons = _resolve(user, names, {"members": Count("tables")})
     published = [dataset for dataset in eligible if dataset.is_published]
     return Preflight(
         action=DELETE,
         total=len(names),
         eligible=eligible,
-        left_out=[LeftOut(reason, group) for reason, group in reasons.items()],
+        left_out=_left_out(reasons),
         consequences={
             "published": published,
             "members": sum(dataset.members for dataset in eligible),
         },
-        subject=subject,
+        subject=_subject(DELETE, names, eligible, found),
         confirmation=batch_actions.typed_confirmation(
             eligible, lambda dataset: dataset.is_published
         ),
+        requested=names,
+    )
+
+
+def _member_mix(datasets) -> dict:
+    """How many distinct Tables ``datasets`` hold, and how many of them are
+    drafts or under an active embargo: what a publish dialog states and
+    never refuses on. One query, none for no Datasets."""
+    if not datasets:
+        return {"members": 0, "drafts": 0, "embargoed": 0}
+    return Table.objects.filter(
+        datasets__in=[dataset.pk for dataset in datasets]
+    ).aggregate(
+        members=Count("pk", distinct=True),
+        drafts=Count("pk", filter=Q(is_publish=False), distinct=True),
+        embargoed=Count(
+            "pk", filter=Q(embargos__date_ended__gt=timezone.now()), distinct=True
+        ),
+    )
+
+
+def _publish_preflight(user, names) -> Preflight:
+    """Publish: the user's own Datasets among ``names`` that pass
+    ``DATASET_GATE`` now; the rest left out (``NOT_FOUND``, ``NOT_YOURS``, or
+    a failed check's reason). ``consequences`` carry ``gate``, the failed
+    check names by Dataset, ``republished``, the eligible Datasets already
+    published, and the member mix of the eligible ones (``_member_mix``).
+    One query for the Datasets, two per own Dataset (the gate), one for the
+    mix."""
+    found, own, reasons = _resolve(user, names)
+    eligible, gate = [], {}
+    for dataset in own:
+        failed = [
+            check for check in publish_checks(dataset, DATASET_GATE) if not check.passed
+        ]
+        if not failed:
+            eligible.append(dataset)
+            continue
+        gate[dataset.name] = [check.name for check in failed]
+        for check in failed:
+            reasons.setdefault(check.reason, []).append(dataset.name)
+    return Preflight(
+        action=PUBLISH,
+        total=len(names),
+        eligible=eligible,
+        left_out=_left_out(reasons),
+        consequences={
+            "gate": gate,
+            "republished": [dataset for dataset in eligible if dataset.is_published],
+            **_member_mix(eligible),
+        },
+        subject=_subject(PUBLISH, names, eligible, found),
+        requested=names,
+    )
+
+
+def _unpublish_preflight(user, names) -> Preflight:
+    """Unpublish: the user's own published Datasets among ``names``; their
+    drafts are passed over (``ALREADY_DRAFT``), the rest left out
+    (``NOT_FOUND`` or ``NOT_YOURS``). One query."""
+    found, own, reasons = _resolve(user, names)
+    eligible = [dataset for dataset in own if dataset.is_published]
+    for dataset in own:
+        if not dataset.is_published:
+            reasons.setdefault(ALREADY_DRAFT, []).append(dataset.name)
+    return Preflight(
+        action=UNPUBLISH,
+        total=len(names),
+        eligible=eligible,
+        left_out=_left_out(reasons),
+        subject=_subject(UNPUBLISH, names, eligible, found),
+        requested=names,
+    )
+
+
+def validated_topics(names) -> list:
+    """The Topics ``names`` names, for a Dataset's own set, in the order
+    named. A name no Topic has, and the draft pseudo-topic (which marks a
+    draft Table and is never a Dataset's), are an ``InvalidParameters`` on
+    ``topics`` naming them: refused, never silently dropped. One query."""
+    names = unique(str(name).strip() for name in names)
+    found = {topic.name: topic for topic in Topic.objects.filter(name__in=names)}
+    draft = [name for name in names if name == PSEUDO_TOPIC_DRAFT]
+    unknown = [name for name in names if name not in found and name not in draft]
+    problems = []
+    if unknown:
+        problems.append(f"No such topic: {quoted(unknown)}.")
+    if draft:
+        problems.append(
+            f"{quoted(draft)} marks draft tables and is never a dataset's topic."
+        )
+    if problems:
+        raise InvalidParameters({"topics": " ".join(problems)})
+    return [found[name] for name in names]
+
+
+def _one_name(names) -> str:
+    if len(names) != 1:
+        raise InvalidParameters({"datasets": "Name exactly one dataset."})
+    return names[0]
+
+
+def _create_preflight(user, names, params) -> Preflight:
+    """Create: whether the one name in ``names`` is free and the parameters
+    are usable. A taken name, a missing title or description and an unusable
+    Topic are each an ``InvalidParameters``. The validated Topics ride in
+    ``consequences["topics"]``. Two queries."""
+    name = _one_name(names)
+    missing = {
+        key: "This field is required."
+        for key in ("title", "description")
+        if not (params.get(key) or "").strip()
+    }
+    if missing:
+        raise InvalidParameters(missing)
+    if Dataset.objects.filter(name=name).exists():
+        raise InvalidParameters({"name": name_taken_message(name)})
+    topics = validated_topics(params.get("topics") or [])
+    return Preflight(
+        action=CREATE,
+        total=1,
+        eligible=[],
+        left_out=[],
+        consequences={"topics": topics},
+        subject=quoted([params["title"]]),
+        requested=names,
+    )
+
+
+def _as_edited(dataset) -> dict:
+    """The editable fields of ``dataset`` as an edit compares them."""
+    metadata = dataset.metadata or {}
+    return {
+        "title": metadata.get("title"),
+        "description": metadata.get("description"),
+        "at_id": metadata.get("@id"),
+        "topics": sorted(dataset.topics.values_list("name", flat=True)),
+    }
+
+
+def _edit_preflight(user, names, params) -> Preflight:
+    """Edit: which of the given fields would change on the one Dataset
+    ``names`` names, one of the user's own (``own_dataset``). Only keys
+    present in ``params`` count, and an empty ``at_id`` keeps the stored one,
+    so a parameter left out is a field left alone. ``consequences`` carry
+    ``changes`` (in ``EDITABLE`` order; empty for a no-op) and the validated
+    ``topics`` (None when not given). Two queries, three with Topics."""
+    dataset = own_dataset(user, _one_name(names))
+    wanted = {key: params[key] for key in ("title", "description") if key in params}
+    if params.get("at_id"):
+        wanted["at_id"] = params["at_id"]
+    topics = None
+    if "topics" in params:
+        topics = validated_topics(params["topics"] or [])
+        wanted["topics"] = sorted(topic.name for topic in topics)
+    current = _as_edited(dataset)
+    changes = [key for key in EDITABLE if key in wanted and wanted[key] != current[key]]
+    return Preflight(
+        action=EDIT,
+        total=1,
+        eligible=[dataset],
+        left_out=[],
+        consequences={"changes": changes, "topics": topics},
+        subject=quoted([dataset_title(dataset)]),
         requested=names,
     )
 
@@ -336,16 +588,27 @@ def _dataset_param(params) -> str:
 def preflight(user, action, names, params=None) -> Preflight:
     """What ``action`` would do with ``names``. Writes nothing.
 
-    For delete, ``names`` are Datasets. For the member actions they are
-    Tables, and ``params["dataset"]`` names the Dataset (``own_dataset``:
-    ``DatasetNotFound`` or ``NotYourDataset`` when it is not the user's);
-    more names than ``CEILINGS`` allows are counted and nothing is read, not
-    even the Dataset.
+    For create and edit, ``names`` is the one Dataset (a taken name, or a
+    Dataset that is not the user's own, raises: ``InvalidParameters``,
+    ``DatasetNotFound``, ``NotYourDataset``), and the fields are
+    ``params``. For publish, unpublish and delete, ``names`` are Datasets.
+    For the member actions they are Tables, and ``params["dataset"]`` names
+    the Dataset (``own_dataset``); more names than ``CEILINGS`` allows are
+    counted and nothing is read, not even the Dataset. ``topics``, on create
+    and edit, are validated here (``validated_topics``).
     """
     if action not in ACTIONS:
         raise ValueError(f"unknown dataset action: {action}")
     params = params or {}
     names = unique(names)
+    if action == CREATE:
+        return _create_preflight(user, names, params)
+    if action == EDIT:
+        return _edit_preflight(user, names, params)
+    if action == PUBLISH:
+        return _publish_preflight(user, names)
+    if action == UNPUBLISH:
+        return _unpublish_preflight(user, names)
     if action == DELETE:
         return _delete_preflight(user, names)
     if _over_ceiling(action, names):
@@ -373,28 +636,36 @@ def _lock(action, names, params):
     Tables before the Dataset: the order the table action service takes
     (it locks Tables, then writes the Dataset's ``modified_at``), so the two
     services cannot wait on each other in a circle. Locking a Dataset the
-    user turns out not to own costs nothing: the check refuses it next."""
+    user turns out not to own costs nothing: the check refuses it next.
+
+    The Dataset's row is what every write to its members and Topics takes
+    first (or updates, which locks it too), so holding it keeps the
+    publish gate's verdict true until the commit. A create has no row to
+    lock: the name's unique constraint decides a race."""
+    if action == CREATE:
+        return
     if action == MEMBERS_ADD:
         tables = Table.objects.filter(name__in=names).select_for_update()
         list(tables.values_list("pk", flat=True))
-    if action == DELETE:
-        locked = Dataset.objects.filter(name__in=names)
-    else:
+    if action in MEMBER_ACTIONS:
         locked = Dataset.objects.filter(name=_dataset_param(params))
+    else:
+        locked = Dataset.objects.filter(name__in=names)
     list(locked.select_for_update().values_list("pk", flat=True))
 
 
 def _log(user, action, lines, via):
     """One line per ``(dataset, fields)`` in ``lines``: the Dataset's name
     and what the action adds after ``action=`` (``table=`` for a member
-    change, ``published= members=`` for a delete)."""
+    change, ``published= members=`` for a delete, ``changed=`` for an edit,
+    ``republish=`` for a publish; "" for nothing)."""
     batch = uuid.uuid4().hex[:12] if len(lines) > 1 else "-"
     for dataset, fields in lines:
         logger.info(
-            "dataset_action dataset=%s action=%s %s by=%s via=%s batch=%s",
+            "dataset_action dataset=%s action=%s %sby=%s via=%s batch=%s",
             dataset,
             action,
-            fields,
+            f"{fields} " if fields else "",
             user.pk,
             via,
             batch,
@@ -414,6 +685,77 @@ def _delete(user, check, via) -> Outcome:
     Dataset.objects.filter(pk__in=[dataset.pk for dataset in datasets]).delete()
     transaction.on_commit(lambda: _log(user, DELETE, lines, via))
     return Outcome(DELETE, datasets)
+
+
+def _create(user, name, params, check, via) -> Outcome:
+    fields = {
+        "name": name,
+        "title": params["title"],
+        "description": params["description"],
+        "at_id": params.get("at_id"),
+    }
+    # Only the insert can lose a race for the name: a request that passed
+    # the check above and committed first. Its unique constraint decides,
+    # and is told as a name taken before; any other integrity failure is not
+    # the name's and is not dressed up as it.
+    try:
+        with transaction.atomic():
+            dataset = create_dataset(fields, creator=user)
+    except (IntegrityError, DatasetNameTaken) as error:
+        raise InvalidParameters({"name": name_taken_message(name)}) from error
+    topics = check.consequences["topics"]
+    if topics:
+        # part of the creation, whose stamp is ``created_at``: no second one
+        set_dataset_topics(dataset, [topic.name for topic in topics])
+    transaction.on_commit(lambda: _log(user, CREATE, [(name, "")], via))
+    return Outcome(CREATE, [dataset])
+
+
+def _edit(user, params, check, via) -> Outcome:
+    dataset, changes = check.eligible[0], check.consequences["changes"]
+    if not changes:
+        return Outcome(EDIT, [dataset])
+    if set(changes) - {"topics"}:
+        current = _as_edited(dataset)
+        update_dataset(
+            dataset,
+            {
+                key: params[key] if key in changes else current[key]
+                for key in ("title", "description", "at_id")
+            },
+        )
+    if "topics" in changes:
+        topics = check.consequences["topics"]
+        set_dataset_topics(dataset, [topic.name for topic in topics])
+    Dataset.objects.filter(pk=dataset.pk).stamp_modified()
+    lines = [(dataset.name, f"changed={','.join(changes)}")]
+    transaction.on_commit(lambda: _log(user, EDIT, lines, via))
+    return Outcome(EDIT, [dataset], changed=changes)
+
+
+def _set_published(user, action, check, via) -> Outcome:
+    """Publish (``published_at`` now, overwriting a republished Dataset's)
+    or unpublish (cleared) the eligible Datasets. Neither is a Modification,
+    so nothing is stamped."""
+    datasets = check.eligible
+    if datasets:
+        published_at = timezone.now() if action == PUBLISH else None
+        Dataset.objects.filter(pk__in=[dataset.pk for dataset in datasets]).update(
+            published_at=published_at
+        )
+        lines = [
+            (
+                dataset.name,
+                (
+                    f"republish={'yes' if dataset.is_published else 'no'}"
+                    if action == PUBLISH
+                    else ""
+                ),
+            )
+            for dataset in datasets
+        ]
+        transaction.on_commit(lambda: _log(user, action, lines, via))
+    return Outcome(action, datasets, left_out=check.left_out)
 
 
 def _change_members(user, action, check, via) -> Outcome:
@@ -441,7 +783,9 @@ def execute(user, action, names, params=None, via="dashboard") -> Outcome:
     (``ActionRefused``). A typed confirmation that does not match what the
     check asks for now is an ``InvalidParameters`` on ``confirm``. A failure
     part-way leaves nothing behind, and the log lines are written only once
-    the transaction has committed.
+    the transaction has committed. A create that loses a race for its name
+    is an ``InvalidParameters`` on ``name``, as a name taken before it
+    (``_create``).
     """
     if action not in ACTIONS:
         raise ValueError(f"unknown dataset action: {action}")
@@ -464,6 +808,12 @@ def execute(user, action, names, params=None, via="dashboard") -> Outcome:
             raise ActionRefused(check, refused)
         if check.confirmation and confirm != check.confirmation:
             raise InvalidParameters({"confirm": confirm_error(check)})
+        if action == CREATE:
+            return _create(user, names[0], params, check, via)
+        if action == EDIT:
+            return _edit(user, params, check, via)
+        if action in (PUBLISH, UNPUBLISH):
+            return _set_published(user, action, check, via)
         if action == DELETE:
             return _delete(user, check, via)
         return _change_members(user, action, check, via)

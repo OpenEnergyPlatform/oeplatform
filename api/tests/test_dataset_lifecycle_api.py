@@ -18,10 +18,14 @@ from dataedit.models import Dataset, Table
 from login.models import myuser
 
 WRITES = {
-    "put": lambda client, name: client.put(
+    "patch": lambda client, name: client.patch(
         f"/api/v0/datasets/{name}/",
-        {"name": name, "title": "Changed", "description": "Changed"},
+        {"title": "Changed", "description": "Changed"},
         format="json",
+    ),
+    "publish": lambda client, name: client.post(f"/api/v0/datasets/{name}/publish/"),
+    "unpublish": lambda client, name: client.post(
+        f"/api/v0/datasets/{name}/unpublish/"
     ),
     "delete": lambda client, name: client.delete(f"/api/v0/datasets/{name}/"),
     "assign": lambda client, name: client.post(
@@ -154,7 +158,8 @@ class DatasetLifecycleAPITests(APITestCase):
 
     def test_the_creator_writes_to_their_draft(self):
         self.as_("creator")
-        for write in ("put", "unassign", "assign", "delete"):
+        # publish is left out: a draft with no topics fails the gate (409)
+        for write in ("patch", "unpublish", "unassign", "assign", "delete"):
             with self.subTest(write):
                 response = WRITES[write](self.client, "api_draft")
                 self.assertLess(response.status_code, 300)
