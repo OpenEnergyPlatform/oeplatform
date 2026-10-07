@@ -10,10 +10,7 @@ Assertions are on what the page says (rows, counts, chips, options, links,
 headers), never on markup details or seconds.
 """  # noqa: 501
 
-from unittest import mock
-
 from django.db import connection
-from django.db.models import Q
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
@@ -38,8 +35,12 @@ class FilterTestCase(TablesTabTestCase):
                 holder=organization, table=table, level=level
             )
 
-    def dataset(self, name, creator, *tables):
-        dataset = Dataset.objects.create(name=name, creator=creator)
+    def dataset(self, name, creator, *tables, published=True):
+        dataset = Dataset.objects.create(
+            name=name,
+            creator=creator,
+            published_at=timezone.now() if published else None,
+        )
         dataset.tables.add(*tables)
         return dataset
 
@@ -175,22 +176,15 @@ class DatasetFilterTests(FilterTestCase):
         )
 
     def test_in_none_is_exactly_the_rows_whose_datasets_cell_reads_a_dash(self):
-        """Proven also under the rule the Dataset lifecycle will bring, under
-        which ``their_draft`` is a draft the Datasets cell never counts: a
-        Table only in a stranger's draft reads "–" and so is in none."""
+        """A Table only in a stranger's draft reads "–", because the Datasets
+        cell never counts another user's draft, and so it is in none."""
         only_in_draft = self.table("t_only_in_draft", title="E")
-        self.dataset("their_draft", self.stranger, only_in_draft)
-        for published in (Q(uuid__isnull=False), ~Q(name="their_draft")):
-            with self.subTest(published=published), mock.patch(
-                "login.tables_tab.PUBLISHED_DATASETS", published
-            ):
-                dashes = {
-                    row.table.name for row in self.page().rows if not row.datasets
-                }
-                none = self.names({"dataset": "none"})
-                any_ = self.names({"dataset": "any"})
-            self.assertEqual(set(none), dashes)
-            self.assertEqual(len(none) + len(any_), 5)
+        self.dataset("their_draft", self.stranger, only_in_draft, published=False)
+        dashes = {row.table.name for row in self.page().rows if not row.datasets}
+        none = self.names({"dataset": "none"})
+        any_ = self.names({"dataset": "any"})
+        self.assertEqual(set(none), dashes)
+        self.assertEqual(len(none) + len(any_), 5)
         self.assertEqual(dashes, {"t_alone", "t_only_in_draft"})
 
     def test_options_are_any_none_then_own_datasets_first(self):
@@ -210,11 +204,10 @@ class DatasetFilterTests(FilterTestCase):
         )
 
     def test_a_strangers_draft_dataset_is_never_offered(self):
-        self.dataset("their_draft", self.stranger, self.alone)
-        with mock.patch("login.tables_tab.PUBLISHED_DATASETS", ~Q(name="their_draft")):
-            offered = [value for value, _ in self.options("dataset")]
-            chips = self.chips({"dataset": "their_draft"})
-            rows = self.names({"dataset": "their_draft"})
+        self.dataset("their_draft", self.stranger, self.alone, published=False)
+        offered = [value for value, _ in self.options("dataset")]
+        chips = self.chips({"dataset": "their_draft"})
+        rows = self.names({"dataset": "their_draft"})
         self.assertNotIn("their_draft", offered)
         self.assertEqual(
             chips, [("Filter ‹Dataset: their_draft› no longer applies", True)]

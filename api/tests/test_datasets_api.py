@@ -41,10 +41,13 @@ class DatasetOwnershipTests(APITestCase):
         )
 
     def create_owned_dataset(self, name="owned_dataset"):
+        # published: another user may read it, so a write by them is 403
+        # (a foreign draft is 404, see test_dataset_lifecycle_api)
         return Dataset.objects.create(
             name=name,
             metadata={"name": name, "resources": []},
             creator=self.creator,
+            published_at=timezone.now(),
         )
 
     def test_anonymous_cannot_create_dataset(self):
@@ -127,7 +130,7 @@ class DatasetOwnershipTests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_read_endpoints_stay_public(self):
+    def test_read_endpoints_are_public_for_a_published_dataset(self):
         dataset = self.create_owned_dataset()
         table = Table.objects.create(
             name="t_public", oemetadata={"resources": [{"name": "t_public"}]}
@@ -247,6 +250,8 @@ class DatasetCurationRulesTests(APITestCase):
         self.assertTrue(Table.objects.filter(name="t_member").exists())
 
     def test_unassign_requires_dataset_ownership(self):
+        # published, so the other user may read it and the refusal is 403
+        Dataset.objects.filter(pk=self.dataset.pk).update(published_at=timezone.now())
         table = self.make_table("t_member")
         self.dataset.tables.add(table)
         self.client.force_authenticate(user=self.table_owner)
@@ -565,8 +570,12 @@ class DatasetAPITests(APITestCase):
         self.assertEqual(response.data["metadata"]["name"], "test_dataset")
 
     def test_list_datasets(self):
-        Dataset.objects.create(name="ds1", metadata=self.setUpDatasetMetadata("ds1"))
-        Dataset.objects.create(name="ds2", metadata=self.setUpDatasetMetadata("ds2"))
+        for name in ("ds1", "ds2"):
+            Dataset.objects.create(
+                name=name,
+                metadata=self.setUpDatasetMetadata(name),
+                published_at=timezone.now(),
+            )
         response = self.client.get("/api/v0/datasets/")  # fixed
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
@@ -608,7 +617,9 @@ class DatasetAPITests(APITestCase):
         )
         table.topics.add(schema)
         dataset = Dataset.objects.create(
-            name="test_dataset", metadata=self.setUpDatasetMetadata("test_dataset")
+            name="test_dataset",
+            metadata=self.setUpDatasetMetadata("test_dataset"),
+            published_at=timezone.now(),
         )
         dataset.tables.add(table)
 

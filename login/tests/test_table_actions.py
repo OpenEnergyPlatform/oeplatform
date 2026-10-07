@@ -15,6 +15,7 @@ import json
 from unittest import mock
 
 from django.urls import reverse
+from django.utils import timezone
 
 from api.error import APIError
 from api.services import table_actions
@@ -224,11 +225,20 @@ class PreflightTests(ActionTestCase):
         table = self.draft("t_cited", published=True)
         Dataset.objects.create(name="ds_mine", creator=self.user).tables.add(table)
         Dataset.objects.create(
-            name="ds_theirs", creator=self.stranger, metadata={"title": "Grid study"}
+            name="ds_theirs",
+            creator=self.stranger,
+            metadata={"title": "Grid study"},
+            published_at=timezone.now(),
         ).tables.add(table)
-        Dataset.objects.create(name="ds_untitled", creator=self.stranger).tables.add(
-            table
-        )
+        Dataset.objects.create(
+            name="ds_untitled", creator=self.stranger, published_at=timezone.now()
+        ).tables.add(table)
+        # a stranger's draft holding the Table is never named or counted
+        Dataset.objects.create(
+            name="ds_their_draft",
+            creator=self.stranger,
+            metadata={"title": "Secret plan"},
+        ).tables.add(table)
         response = self.preflight("unpublish", "t_cited")
         # by title, falling back to the name, each with how many it holds
         self.assertEqual(
@@ -243,6 +253,7 @@ class PreflightTests(ActionTestCase):
         listed = text(element_markup(html, "table-action-datasets"))
         self.assertIn(f"Grid study ({self.stranger.name})", listed)
         self.assertNotIn("ds_theirs", listed)
+        self.assertNotIn("Secret plan", response.content.decode())
 
     def test_nothing_eligible_offers_no_confirmation(self):
         self.draft("t_noconfirm", level=WRITE_PERM)

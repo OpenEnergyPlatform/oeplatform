@@ -7,6 +7,7 @@ from unittest import mock
 
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from dataedit.models import Dataset, Table, Topic
 from login.models import myuser
@@ -40,6 +41,7 @@ class DatasetDetailTests(TestCase):
                 "description": "Everything about heat",
             },
             creator=self.creator,
+            published_at=timezone.now(),
         )
         self.dataset.topics.add(self.topic)
         self.published = Table.objects.create(

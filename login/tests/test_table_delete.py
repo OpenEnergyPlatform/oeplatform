@@ -131,7 +131,16 @@ class DeletePreflightTests(DeleteTestCase):
             name="ds_mine", creator=self.user, metadata={"title": "Wind atlas"}
         ).tables.add(table)
         Dataset.objects.create(
-            name="ds_theirs", creator=self.stranger, metadata={"title": "Grid study"}
+            name="ds_theirs",
+            creator=self.stranger,
+            metadata={"title": "Grid study"},
+            published_at=timezone.now(),
+        ).tables.add(table)
+        # a stranger's draft holding the Table is never named or counted
+        Dataset.objects.create(
+            name="ds_their_draft",
+            creator=self.stranger,
+            metadata={"title": "Secret plan"},
         ).tables.add(table)
         self.review("t_cited", finished=True)
         Embargo.objects.create(table=table, duration="6_months")
@@ -144,6 +153,7 @@ class DeletePreflightTests(DeleteTestCase):
         self.assertEqual([t for t, _ in c["embargoed"]], [table])
         self.assertTrue(c["knowledge_graph"])
         html = self.html(response)
+        self.assertNotIn("Secret plan", html)
         for element in (
             "table-action-published",
             "table-action-own-datasets",

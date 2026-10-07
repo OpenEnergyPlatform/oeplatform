@@ -52,7 +52,6 @@ from django.contrib.postgres.search import TrigramSimilarity
 from django.db import transaction
 from django.db.models import Q
 from django.http import Http404, HttpRequest, JsonResponse
-from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from drf_spectacular.types import OpenApiTypes
@@ -69,7 +68,11 @@ from oemetadata.latest.template import OEMETADATA_LATEST_TEMPLATE
 from rest_framework import generics, status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.exceptions import PermissionDenied, ValidationError
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import (
+    AllowAny,
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
+)
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -364,25 +367,35 @@ def assert_dataset_ownership(user, dataset: Dataset) -> None:
         raise PermissionDenied("Only the dataset creator may modify this dataset.")
 
 
+def owned_dataset_or_404(user, dataset_name: str) -> Dataset:
+    """The Dataset a write acts on. Resolved through the read rule first, so
+    a write never tells more than a read: a Dataset the user may not read (a
+    foreign draft, or no such name) is 404, one they may read but do not own
+    is 403."""
+    dataset = Dataset.objects.readable_or_404(user, dataset_name)
+    assert_dataset_ownership(user, dataset)
+    return dataset
+
+
 def load_owned_dataset_from_request(request, dataset_name: str):
     """Shared prologue of the dataset membership endpoints: validate the
-    table list, load the dataset and enforce ownership.
+    table list, load the dataset and enforce ownership
+    (``owned_dataset_or_404``).
 
     Returns (dataset, table_refs) or (error_response, None) when the
-    dataset does not exist.
+    dataset does not exist for this user.
     """
     serializer = DatasetAssignTablesSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
 
     try:
-        dataset = Dataset.objects.get(name=dataset_name)
-    except Dataset.DoesNotExist:
+        dataset = owned_dataset_or_404(request.user, dataset_name)
+    except Http404:
         return (
             Response({"error": "Dataset not found"}, status=status.HTTP_404_NOT_FOUND),
             None,
         )
 
-    assert_dataset_ownership(request.user, dataset)
     return dataset, serializer.validated_data["tables"]
 
 
@@ -422,10 +435,11 @@ def load_owned_dataset_from_request(request, dataset_name: str):
     get=extend_schema(
         summary="List datasets",
         description=(
-            "Every dataset on the platform, each with its metadata. The "
-            "`resources` of a dataset are assembled from its member tables at "
-            "read time rather than stored, so this never reports a resource "
-            "the dataset no longer holds. Public."
+            "Every published dataset on the platform, plus the caller's own "
+            "drafts, each with its metadata. The `resources` of a dataset are "
+            "assembled from its member tables at read time rather than "
+            "stored, so this never reports a resource the dataset no longer "
+            "holds. Public. A draft is visible only to its creator."
         ),
     ),
     post=extend_schema(
@@ -437,8 +451,10 @@ def load_owned_dataset_from_request(request, dataset_name: str):
     ),
 )
 class DatasetsListCreate(generics.ListCreateAPIView):
-    queryset = Dataset.objects.prefetch_related("tables")
     permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        return Dataset.objects.visible_to(self.request.user).prefetch_related("tables")
 
     def get_serializer_class(self):
         if self.request.method == "POST":
@@ -467,16 +483,23 @@ class DatasetsListCreate(generics.ListCreateAPIView):
 @extend_schema_view(
     get=extend_schema(
         summary="List dataset resources",
-        description="Returns the tables/resources that belong to a dataset.",
+        description=(
+            "Returns the tables/resources that belong to a dataset. Public. "
+            "A draft is visible only to its creator; anyone else gets 404, "
+            "as for a name that does not exist."
+        ),
         responses=DatasetResourceSerializer(many=True),
     )
 )
 class DatasetsListResources(generics.ListAPIView):
     serializer_class = DatasetResourceSerializer
+    # declared, not inherited: REST_FRAMEWORK sets no default, and the draft
+    # rule below is what keeps a draft's members private
+    permission_classes = [AllowAny]
 
     def get_queryset(self):
         dataset_name = self.kwargs["dataset_name"]
-        dataset = get_object_or_404(Dataset, name=dataset_name)
+        dataset = Dataset.objects.readable_or_404(self.request.user, dataset_name)
         return dataset.tables.all()
 
 
@@ -484,7 +507,11 @@ class DatasetsListResources(generics.ListAPIView):
 @extend_schema_view(
     get=extend_schema(
         summary="Get dataset",
-        description="Returns metadata for a single dataset.",
+        description=(
+            "Returns metadata for a single dataset. Public. A draft is "
+            "visible only to its creator; anyone else gets 404, as for a "
+            "name that does not exist."
+        ),
         responses=DatasetReadSerializer,
     ),
     put=extend_schema(
@@ -521,13 +548,12 @@ class DatasetManager(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request, dataset_name):
-        dataset = get_object_or_404(Dataset, name=dataset_name)
+        dataset = Dataset.objects.readable_or_404(request.user, dataset_name)
         serializer = DatasetReadSerializer(dataset)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request, dataset_name):
-        dataset = get_object_or_404(Dataset, name=dataset_name)
-        assert_dataset_ownership(request.user, dataset)
+        dataset = owned_dataset_or_404(request.user, dataset_name)
         serializer = DatasetCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -541,8 +567,7 @@ class DatasetManager(APIView):
         return Response({"message": "Dataset updated"}, status=status.HTTP_200_OK)
 
     def delete(self, request, dataset_name):
-        dataset = get_object_or_404(Dataset, name=dataset_name)
-        assert_dataset_ownership(request.user, dataset)
+        dataset = owned_dataset_or_404(request.user, dataset_name)
         dataset.delete()
         return Response(
             {"message": "Dataset deleted"},
