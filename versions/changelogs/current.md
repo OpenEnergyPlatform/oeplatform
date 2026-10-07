@@ -20,7 +20,7 @@ SPDX-License-Identifier: CC0-1.0
   column collapse is scoped to the tables tab, so another list's columns cannot
   collapse at its widths. `benchmarks/tables_tab/widths.mjs` takes the tab, its
   column sets, its id prefix and the filter-bar query as parameters
-  [(#2617)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2617)
+  [(#2630)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2630)
 - The term search in the metadata editor and the oeo_ext unit picker no longer
   always asks openenergyplatform.org: an instance with its own lookup service
   searches itself, one without uses the public endpoint, and `OEO_SEARCH_URL`
