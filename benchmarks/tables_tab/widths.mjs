@@ -1,10 +1,12 @@
-// How wide the tables tab's list must be for each set of columns, and
-// whether anything scrolls sideways at common screen widths (#2555).
+// How wide a dashboard list must be for each set of columns, and whether
+// anything scrolls sideways at common screen widths (#2555). Written for the
+// tables tab; since #2617 it measures any tab built on dash_list.css, and
+// its defaults are the tables tab's.
 //
-// happy-dom has no layout, so the container-query thresholds in
-// login/static/login/tables_tab.css are measured here, once, in a real
-// browser on the real row partial, and written beside the queries. A slice
-// that adds a column re-runs this and moves them.
+// happy-dom has no layout, so the container-query thresholds in a tab's
+// stylesheet (login/static/login/tables_tab.css) are measured here, once,
+// in a real browser on the real row partial, and written beside the
+// queries. A slice that adds a column re-runs this and moves them.
 //
 // Needs a running dev server whose database holds the seeded accounts
 // (seed.py), and puppeteer-core with a Chrome:
@@ -28,6 +30,21 @@
 //   prototype's cells, so a threshold can be set for the complete row.
 // - PAGES: how many pages of each account (default 6).
 //
+// Which list it measures, all defaulting to the tables tab:
+//
+// - TAB: the tab's address below /user/profile/<id>/ (default "tables").
+// - SETS: the column sets, as JSON mapping a name to the cells that set
+//   hides, from every column to the fewest before the rows stack (default
+//   the tables tab's three, below). A screen reports the set whose hidden
+//   cells match what it shows.
+// - IDS_PREFIX: what the list's ids start with, `<prefix>-search` and
+//   `<prefix>-fold` (default "tables").
+// - BAR_QUERY: the query the filter bar is measured on, with a filter
+//   behind "More filters" applied so its count shows too (default
+//   "?topics=grid").
+//
+// STAND_INS knows only the tables tab's cells.
+//
 // Prints JSON: "min" is the narrowest list each set of columns fits, worst
 // page of any account (table plus the wrapper's border); "bar" the filter
 // bar's one-line width; "screens" the list width, the active set of
@@ -40,11 +57,16 @@ const BASE = process.env.BASE || "http://127.0.0.1:8655";
 const ACCOUNTS = JSON.parse(process.env.ACCOUNTS);
 const PAGES = Number(process.env.PAGES || 6);
 const SCREENS = [1920, 1440, 1280, 1024, 800, 390];
-const SETS = {
-  every: [],
-  withoutTopics: [".c-created", ".c-topics"],
-  withoutReview: [".c-created", ".c-topics", ".c-review", ".c-ds"],
-};
+const TAB = process.env.TAB || "tables";
+const SETS = process.env.SETS
+  ? JSON.parse(process.env.SETS)
+  : {
+      every: [],
+      withoutTopics: [".c-created", ".c-topics"],
+      withoutReview: [".c-created", ".c-topics", ".c-review", ".c-ds"],
+    };
+const IDS_PREFIX = process.env.IDS_PREFIX || "tables";
+const BAR_QUERY = process.env.BAR_QUERY ?? "?topics=grid";
 
 const FONT_CSS = process.env.FONT_DIR
   ? [
@@ -68,7 +90,7 @@ const errors = [];
 page.on("pageerror", (e) => errors.push(String(e)));
 
 async function go(uid, query = "") {
-  await page.goto(`${BASE}/user/profile/${uid}/tables${query}`, {
+  await page.goto(`${BASE}/user/profile/${uid}/${TAB}${query}`, {
     waitUntil: "networkidle0",
   });
   if (FONT_CSS) {
@@ -140,10 +162,10 @@ function minWidth(hide) {
   return { width, columns };
 }
 
-function barWidth() {
+function barWidth(prefix) {
   const row = document.querySelector(".dash-filters__row");
   row.style.flexWrap = "nowrap";
-  const search = document.querySelector("#tables-search");
+  const search = document.querySelector(`#${prefix}-search`);
   search.style.flex = "0 0 auto";
   search.style.width = getComputedStyle(search).minWidth;
   const items = [
@@ -156,24 +178,22 @@ function barWidth() {
   );
 }
 
-function screen() {
+function screen({ sets, prefix }) {
   const shown = (selector) => {
     const cell = document.querySelector(`tbody ${selector}`);
     return !!cell && getComputedStyle(cell).display !== "none";
   };
   const stacked = getComputedStyle(document.querySelector("tbody tr")).display === "grid";
+  const hidden = [...new Set(Object.values(sets).flat())].filter((s) => !shown(s));
+  const set = Object.entries(sets).find(
+    ([, hide]) => hide.length === hidden.length && hide.every((s) => hidden.includes(s)),
+  );
   const wrap = document.querySelector(".dash-table-wrap");
   const root = document.documentElement;
   return {
     list: Math.round(document.querySelector(".dash").getBoundingClientRect().width),
-    columns: stacked
-      ? "stacked"
-      : shown(".c-topics")
-        ? "every"
-        : shown(".c-review")
-          ? "withoutTopics"
-          : "withoutReview",
-    barFolded: !!document.querySelector("#tables-fold").offsetParent,
+    columns: stacked ? "stacked" : set ? set[0] : `hiding ${hidden.join(" ")}`,
+    barFolded: !!document.querySelector(`#${prefix}-fold`).offsetParent,
     tableOverflow: wrap.scrollWidth - wrap.clientWidth,
     pageOverflow: root.scrollWidth - root.clientWidth,
   };
@@ -184,8 +204,8 @@ await page.setViewport({ width: 2560, height: 900 });
 for (const [key, [uid, cookie]] of Object.entries(ACCOUNTS)) {
   await page.setCookie({ name: "sessionid", value: cookie, url: BASE });
   // a filter behind "More filters" applied, so its count shows too
-  await go(uid, "?topics=grid");
-  result.bar = Math.max(result.bar, await page.evaluate(barWidth));
+  await go(uid, BAR_QUERY);
+  result.bar = Math.max(result.bar, await page.evaluate(barWidth, IDS_PREFIX));
   for (const standIns of process.env.STAND_INS ? [false, true] : [false]) {
     for (let n = 1; n <= PAGES; n++) {
       await go(uid, `?page=${n}`);
@@ -208,7 +228,10 @@ for (const [key, [uid, cookie]] of Object.entries(ACCOUNTS)) {
     let worst = null;
     for (let n = 1; n <= PAGES; n++) {
       await go(uid, `?page=${n}`);
-      const seen = { ...(await page.evaluate(screen)), page: n };
+      const seen = {
+        ...(await page.evaluate(screen, { sets: SETS, prefix: IDS_PREFIX })),
+        page: n,
+      };
       const excess = (s) => s.tableOverflow + s.pageOverflow;
       if (!worst || excess(seen) > excess(worst)) worst = seen;
     }

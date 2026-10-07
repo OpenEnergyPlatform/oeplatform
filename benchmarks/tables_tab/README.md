@@ -75,9 +75,12 @@ for key in ("p90", "max", "maxreal"):
 ```
 
 The numbers it produced, and the thresholds taken from them, are written beside
-the container queries in `tables_tab.css`. A slice that adds a column re-runs it
-and moves the thresholds; with `STAND_INS=1` it also measures the complete row,
-standing in only for the columns that are still missing.
+the container queries in `tables_tab.css`. Its defaults measure the tables tab;
+`TAB`, `SETS`, `IDS_PREFIX` and `BAR_QUERY` point it at another list built on
+`dash_list.css` (#2617, the header of `widths.mjs` says what each takes). A
+slice that adds a column re-runs it and moves the thresholds; with `STAND_INS=1`
+it also measures the complete row, standing in only for the columns that are
+still missing.
 
 ## Delete cost
 

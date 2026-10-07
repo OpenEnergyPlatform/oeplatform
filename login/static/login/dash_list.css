@@ -1,0 +1,551 @@
+/*
+ * SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
+ * A profile dashboard list (spec #2551, made generic for spec #2613 in
+ * #2617): the filter bar and its fold, the chips, the status segment, the
+ * table, the cells' popovers, the selection, the bulk bar, the ⋯ menu, the
+ * action dialog, the toasts and the status badges. Plain CSS beside the
+ * page rather than in the theme build, so a tab can change without a
+ * rebuild of bootstrap.min.css.
+ *
+ * Nothing here knows a tab's columns: a column's class (`c-…`) and the
+ * container queries that hide and place columns by it belong to the tab's
+ * own stylesheet (tables_tab.css), scoped to that tab, because the widths
+ * they collapse at are measured per tab. The base rules here that those
+ * queries switch (the fold, "Sort by", "Select this page", "Actions ▾")
+ * hold for the widest list.
+ */
+
+.dash {
+  --dash-muted: #6c757d;
+  --dash-primary: #2972a6;
+  --dash-secondary: #1f567d;
+  container-type: inline-size;
+}
+
+/* filter bar: one primary row, "More filters" below it */
+.dash-filters {
+  margin-bottom: 0.6rem;
+}
+
+.dash-filters__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+/* With the profile sidebar the tables tab's list is about 974 px wide at
+   1440 px. The selects are capped (a long Dataset or Organization name
+   would otherwise set the width) and the search box gives way, so the
+   primary row stays one line there. */
+.dash-search {
+  flex: 1 1 9rem;
+  min-width: 9rem;
+  max-width: 28rem;
+}
+
+.dash-select {
+  flex: 0 1 auto;
+  width: auto;
+  max-width: 10.5rem;
+  text-overflow: ellipsis;
+}
+
+/* "Filters (n)": on a wide list the fold panel is not a box at all, so its
+   controls sit in the row; on a list too narrow for the bar it folds (see
+   the tab's container queries) */
+.dash-fold {
+  display: contents;
+}
+
+.dash-fold-toggle {
+  display: none;
+}
+
+.dash-more {
+  display: flex;
+  flex: 1 0 100%;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  margin-top: 0.1rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+}
+
+.dash-more[hidden] {
+  display: none;
+}
+
+.dash-multi {
+  min-width: 12rem;
+  margin: 0;
+}
+
+.dash-multi__legend {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.dash-multi__list {
+  max-height: 12rem;
+  overflow-y: auto;
+  font-size: 0.875rem;
+}
+
+/* a date range: two date inputs, from and to */
+.dash-range {
+  margin: 0;
+}
+
+/* the two ends one above the other, their inputs aligned */
+.dash-range__end {
+  display: grid;
+  grid-template-columns: 2.5rem auto;
+  align-items: center;
+  margin-bottom: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.dash-date-input {
+  width: 9.5rem;
+}
+
+/* active filters, inside the region */
+.dash-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.dash-chips:empty {
+  display: none;
+}
+
+.dash-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.05rem 0.2rem 0.05rem 0.6rem;
+  border-radius: 1rem;
+  background: #e7f0f7;
+  color: var(--dash-secondary);
+  font-size: 0.8125rem;
+}
+
+.dash-chip--stale {
+  background: #f1f1f1;
+  color: var(--dash-muted);
+  font-style: italic;
+}
+
+.dash-chip__x {
+  padding: 0 0.3rem;
+  color: inherit;
+  text-decoration: none;
+  line-height: 1;
+}
+
+.dash-chip__x:hover,
+.dash-chip__x:focus {
+  text-decoration: underline;
+}
+
+.dash-chips__reset {
+  margin-left: 0.25rem;
+  font-size: 0.8125rem;
+}
+
+/* results region */
+.dash-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.dash-seg--zero:not(.active) {
+  opacity: 0.55;
+}
+
+.dash-seg__count {
+  opacity: 0.75;
+}
+
+/* "Sort by": shown only where the rows stack and lose their headers */
+.dash-sortby {
+  display: none;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.dash-sortby__label {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--dash-muted);
+  white-space: nowrap;
+}
+
+/* "Select this page": the header's page box where the rows stack and the
+   header row is hidden (see the tab's container queries) */
+.dash-selectpage {
+  display: none;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.dash-selectpage__label {
+  margin: 0;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.dash-summary {
+  margin-left: auto;
+  color: var(--dash-muted);
+  font-size: 0.875rem;
+}
+
+.dash-table-wrap {
+  overflow-x: auto;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+}
+
+.dash-table {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.dash-table th {
+  white-space: nowrap;
+  font-weight: 600;
+  color: #495057;
+  background: #f8f9fa;
+  vertical-align: middle;
+}
+
+.dash-table td {
+  vertical-align: middle;
+}
+
+.dash-sort {
+  color: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.dash-sort:hover,
+.dash-sort--active {
+  color: var(--dash-primary);
+}
+
+.dash-title {
+  font-weight: 600;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.dash-badge--draft {
+  background: #e9ecef;
+  color: #495057;
+}
+
+.dash-badge--published {
+  background: #d1e7dd;
+  color: #0f5132;
+}
+
+.dash-badge--embargoed {
+  background: #fff3cd;
+  color: #664d03;
+}
+
+.dash-until {
+  display: block;
+  font-size: 0.6875rem;
+  color: #664d03;
+  white-space: nowrap;
+}
+
+/* Modified: the date, unbroken, and beneath it "data" when only the data
+   half is known, the way Status puts "until" beneath an embargo */
+.dash-date {
+  white-space: nowrap;
+}
+
+.dash-half {
+  display: block;
+  font-size: 0.6875rem;
+  color: var(--dash-muted);
+  cursor: help;
+}
+
+.dash-pager {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.dash-pager .btn {
+  min-width: 2.2rem;
+}
+
+.dash-pager__gap {
+  padding: 0 0.25rem;
+  color: var(--dash-muted);
+}
+
+.dash-pager__range {
+  margin-left: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--dash-muted);
+}
+
+.dash-empty {
+  padding: 3rem 1rem;
+  text-align: center;
+}
+
+.dash-empty--nomatch {
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+}
+
+.dash-empty__title {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.dash-muted {
+  color: var(--dash-muted);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+/* Datasets and the Topics' "+n": a count that opens a popover */
+.dash-count {
+  padding: 0.1rem 0.4rem;
+  background: none;
+  border: 0;
+  border-radius: 4px;
+}
+
+.dash-count--small {
+  font-size: 0.75rem;
+}
+
+.dash-count:hover {
+  background: #eef2f5;
+}
+
+.dash-tchip {
+  display: inline-block;
+  margin: 1px 2px 1px 0;
+  padding: 0 0.35rem;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  background: #f1f3f5;
+  border-radius: 3px;
+}
+
+/* a cell's popover, placed beside its button by list_popovers.js */
+.dash-pop {
+  z-index: 1070;
+  max-width: 22rem;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.8125rem;
+  background: #fff;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15);
+}
+
+.dash-pop:focus {
+  outline: 2px solid var(--dash-primary);
+}
+
+.dash-pop__title {
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+}
+
+.dash-pop__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dash-pop__list li {
+  overflow-wrap: anywhere;
+}
+
+.dash-pop__links {
+  margin-top: 0.35rem;
+}
+
+/* a row's checkbox, and the page's */
+.dash-check {
+  margin: 0;
+  cursor: pointer;
+}
+
+/* The bulk bar: sticky at the top of the list while it scrolls, outside
+   the region. Its slot keeps one height whether it holds the muted line,
+   the note or the bar, so the first tick moves nothing. */
+.dash-bulk {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  min-height: 2.5rem;
+  margin-bottom: 0.4rem;
+  padding: 0.2rem 0.5rem;
+  background: #fff;
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+.dash-bulk__idle,
+.dash-bulk__note {
+  margin: 0;
+  color: var(--dash-muted);
+}
+
+.dash-bulk:has(.dash-bulk__bar:not([hidden])) {
+  background: #eef4f9;
+}
+
+.dash-bulk__bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+  width: 100%;
+}
+
+.dash-bulk__count {
+  font-weight: 600;
+}
+
+.dash-bulk__clear {
+  padding: 0 0.25rem;
+}
+
+.dash-bulk__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-left: auto;
+}
+
+/* "Actions ▾": only where the rows stack (see the tab's container queries) */
+.dash-bulk__menu {
+  display: none;
+  margin-left: auto;
+}
+
+/* "Select all N matching", once the page is ticked */
+.dash-selectall {
+  margin-bottom: 0.5rem;
+  padding: 0.35rem 0.6rem;
+  background: #eef4f9;
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
+
+.dash-selectall__button {
+  padding: 0 0.25rem;
+  vertical-align: baseline;
+}
+
+.dash-menu__toggle {
+  padding: 0 0.5rem;
+  font-size: 1.1rem;
+  line-height: 1.4;
+}
+
+.dash-menu__list {
+  font-size: 0.875rem;
+}
+
+/* an action above the user's role: still focusable, so the reason is
+   reachable by keyboard; aria-disabled, not Bootstrap's .disabled */
+/* Delete, last in the menu */
+.dash-menu__danger {
+  color: #b02a37;
+}
+
+.dash-menu__off,
+.dash-menu__off:hover,
+.dash-menu__off:focus {
+  color: var(--dash-muted);
+  cursor: not-allowed;
+  background: transparent;
+}
+
+.dash-menu__why {
+  display: block;
+  font-size: 0.75rem;
+}
+
+/* the action dialog */
+.dash-leftout {
+  font-size: 0.875rem;
+}
+
+.dash-action-list {
+  max-height: 12rem;
+  overflow-y: auto;
+}
+
+/* messages after an action */
+.dash-toasts {
+  z-index: 1090;
+}
+
+.dash-toast {
+  margin-top: 0.5rem;
+  background: #fff;
+}
+
+.dash-toast--ok {
+  border-left: 4px solid #198754;
+}
+
+.dash-toast--error {
+  border-left: 4px solid #dc3545;
+}
+
+/* done, but not cleanly: a delete whose database table stayed behind */
+.dash-toast--warning {
+  border-left: 4px solid #ffc107;
+}
+
+.dash-toast .toast-body a {
+  font-weight: 600;
+}
+
+/* a bulk success: "Show tables" (the list's noun) opens the list of what
+   it changed */
+.dash-toast__more {
+  padding: 0;
+  vertical-align: baseline;
+}
+
+.dash-toast__list {
+  max-height: 10rem;
+  margin: 0.35rem 0 0;
+  padding-left: 1.1rem;
+  overflow-y: auto;
+}

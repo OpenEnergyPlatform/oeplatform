@@ -12,7 +12,7 @@ rest. The chips and Reset are inside the region. Where the list is too
 narrow for the bar on one line (960 px, measured), everything but Search
 folds behind "Filters (n)": the fold panel is ``display: contents`` on a
 wider list, so the controls sit in the row as if it were not there
-(``tables_tab.css``).
+(``dash_list.css``; the width it folds at is in ``tables_tab.css``).
 
 The tab keeps the profile sidebar, like every other profile tab. The spec
 decided on a slim identity strip instead, to give the list the width
@@ -23,6 +23,7 @@ sidebar on 2026-10-02, so the column collapse (#2555) works with that width.
 {% load compress %}
 {% load static %}
 {% block after-head %}
+  <link rel="stylesheet" href="{% static 'login/dash_list.css' %}" />
   <link rel="stylesheet" href="{% static 'login/tables_tab.css' %}" />
 {% endblock after-head %}
 {% block main-right-sidebar-content %}

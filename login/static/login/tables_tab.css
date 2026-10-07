@@ -2,249 +2,14 @@
  * SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
  * SPDX-License-Identifier: AGPL-3.0-or-later
  *
- * The profile dashboard's tables tab (spec #2551). Plain CSS beside the
- * page rather than in the theme build, so the tab can change without a
- * rebuild of bootstrap.min.css. The column collapse by the list's own width
- * (#2555) is the container queries at the end of this file.
+ * The profile dashboard's tables tab (spec #2551): its columns and Table
+ * cells, the access drawer, and the column collapse by the list's own width
+ * (#2555), the container queries at the end of this file. Everything a list
+ * has whatever it lists is in dash_list.css, which the page loads first.
  */
-
-.dash {
-  --dash-muted: #6c757d;
-  --dash-primary: #2972a6;
-  --dash-secondary: #1f567d;
-  container-type: inline-size;
-}
-
-/* filter bar: one primary row, "More filters" below it */
-.dash-filters {
-  margin-bottom: 0.6rem;
-}
-
-.dash-filters__row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  align-items: center;
-}
-
-/* With the profile sidebar the list is about 974 px wide at 1440 px. The
-   selects are capped (a long Dataset or Organization name would otherwise
-   set the width) and the search box gives way, so the primary row stays one
-   line there. */
-.dash-search {
-  flex: 1 1 9rem;
-  min-width: 9rem;
-  max-width: 28rem;
-}
-
-.dash-select {
-  flex: 0 1 auto;
-  width: auto;
-  max-width: 10.5rem;
-  text-overflow: ellipsis;
-}
-
-/* "Filters (n)": on a wide list the fold panel is not a box at all, so its
-   controls sit in the row; below 900 px it folds (see the container queries) */
-.dash-fold {
-  display: contents;
-}
-
-.dash-fold-toggle {
-  display: none;
-}
-
-.dash-more {
-  display: flex;
-  flex: 1 0 100%;
-  flex-wrap: wrap;
-  gap: 0.75rem 1.5rem;
-  margin-top: 0.1rem;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid #dee2e6;
-  border-radius: 6px;
-}
-
-.dash-more[hidden] {
-  display: none;
-}
-
-.dash-multi {
-  min-width: 12rem;
-  margin: 0;
-}
-
-.dash-multi__legend {
-  font-size: 0.875rem;
-  font-weight: 600;
-  margin-bottom: 0.25rem;
-}
-
-.dash-multi__list {
-  max-height: 12rem;
-  overflow-y: auto;
-  font-size: 0.875rem;
-}
-
-/* a date range: two date inputs, from and to */
-.dash-range {
-  margin: 0;
-}
-
-/* the two ends one above the other, their inputs aligned */
-.dash-range__end {
-  display: grid;
-  grid-template-columns: 2.5rem auto;
-  align-items: center;
-  margin-bottom: 0.25rem;
-  font-size: 0.875rem;
-}
-
-.dash-date-input {
-  width: 9.5rem;
-}
-
-/* active filters, inside the region */
-.dash-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.3rem;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.dash-chips:empty {
-  display: none;
-}
-
-.dash-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.15rem;
-  padding: 0.05rem 0.2rem 0.05rem 0.6rem;
-  border-radius: 1rem;
-  background: #e7f0f7;
-  color: var(--dash-secondary);
-  font-size: 0.8125rem;
-}
-
-.dash-chip--stale {
-  background: #f1f1f1;
-  color: var(--dash-muted);
-  font-style: italic;
-}
-
-.dash-chip__x {
-  padding: 0 0.3rem;
-  color: inherit;
-  text-decoration: none;
-  line-height: 1;
-}
-
-.dash-chip__x:hover,
-.dash-chip__x:focus {
-  text-decoration: underline;
-}
-
-.dash-chips__reset {
-  margin-left: 0.25rem;
-  font-size: 0.8125rem;
-}
-
-/* results region */
-.dash-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.dash-seg--zero:not(.active) {
-  opacity: 0.55;
-}
-
-.dash-seg__count {
-  opacity: 0.75;
-}
-
-/* "Sort by": shown only where the rows stack and lose their headers */
-.dash-sortby {
-  display: none;
-  gap: 0.4rem;
-  align-items: center;
-}
-
-.dash-sortby__label {
-  margin: 0;
-  font-size: 0.875rem;
-  color: var(--dash-muted);
-  white-space: nowrap;
-}
-
-/* "Select this page": the header's page box where the rows stack and the
-   header row is hidden (see the container queries) */
-.dash-selectpage {
-  display: none;
-  gap: 0.4rem;
-  align-items: center;
-}
-
-.dash-selectpage__label {
-  margin: 0;
-  font-size: 0.875rem;
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.dash-summary {
-  margin-left: auto;
-  color: var(--dash-muted);
-  font-size: 0.875rem;
-}
-
-.dash-table-wrap {
-  overflow-x: auto;
-  border: 1px solid #dee2e6;
-  border-radius: 6px;
-}
-
-.dash-table {
-  margin: 0;
-  font-size: 0.875rem;
-}
-
-.dash-table th {
-  white-space: nowrap;
-  font-weight: 600;
-  color: #495057;
-  background: #f8f9fa;
-  vertical-align: middle;
-}
-
-.dash-table td {
-  vertical-align: middle;
-}
-
-.dash-sort {
-  color: inherit;
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.dash-sort:hover,
-.dash-sort--active {
-  color: var(--dash-primary);
-}
 
 .c-table {
   min-width: 13rem;
-}
-
-.dash-title {
-  font-weight: 600;
-  text-decoration: none;
-  overflow-wrap: anywhere;
 }
 
 /* technical names are unbreakable snake_case; letting them break anywhere
@@ -253,28 +18,6 @@
   font: 0.75rem ui-monospace, Consolas, monospace;
   color: var(--dash-muted);
   overflow-wrap: anywhere;
-}
-
-.dash-badge--draft {
-  background: #e9ecef;
-  color: #495057;
-}
-
-.dash-badge--published {
-  background: #d1e7dd;
-  color: #0f5132;
-}
-
-.dash-badge--embargoed {
-  background: #fff3cd;
-  color: #664d03;
-}
-
-.dash-until {
-  display: block;
-  font-size: 0.6875rem;
-  color: #664d03;
-  white-space: nowrap;
 }
 
 /* An Organization's name may be 150 characters; capped, so that the Access
@@ -302,67 +45,10 @@
   border-color: var(--dash-secondary);
 }
 
-/* Modified: the date, unbroken, and beneath it "data" when only the data
-   half is known, the way Status puts "until" beneath an embargo */
-.dash-date {
-  white-space: nowrap;
-}
-
-.dash-half {
-  display: block;
-  font-size: 0.6875rem;
-  color: var(--dash-muted);
-  cursor: help;
-}
-
 .dash-role {
   display: block;
   font-size: 0.6875rem;
   color: #664d03;
-}
-
-.dash-pager {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem;
-  align-items: center;
-  margin-top: 0.5rem;
-}
-
-.dash-pager .btn {
-  min-width: 2.2rem;
-}
-
-.dash-pager__gap {
-  padding: 0 0.25rem;
-  color: var(--dash-muted);
-}
-
-.dash-pager__range {
-  margin-left: 0.5rem;
-  font-size: 0.875rem;
-  color: var(--dash-muted);
-}
-
-.dash-empty {
-  padding: 3rem 1rem;
-  text-align: center;
-}
-
-.dash-empty--nomatch {
-  border: 1px solid #dee2e6;
-  border-radius: 6px;
-}
-
-.dash-empty__title {
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-.dash-muted {
-  color: var(--dash-muted);
-  font-size: 0.8125rem;
-  white-space: nowrap;
 }
 
 /* Publishable: the Publish gate's result */
@@ -427,148 +113,15 @@
   border-radius: 4px;
 }
 
-/* Datasets and the Topics' "+n": a count that opens a popover */
-.dash-count {
-  padding: 0.1rem 0.4rem;
-  background: none;
-  border: 0;
-  border-radius: 4px;
-}
-
-.dash-count--small {
-  font-size: 0.75rem;
-}
-
 .dash-gate:hover,
-.dash-count:hover,
 .dash-access:hover {
   background: #eef2f5;
-}
-
-.dash-tchip {
-  display: inline-block;
-  margin: 1px 2px 1px 0;
-  padding: 0 0.35rem;
-  font-size: 0.75rem;
-  white-space: nowrap;
-  background: #f1f3f5;
-  border-radius: 3px;
-}
-
-/* a cell's popover, placed beside its button by list_popovers.js */
-.dash-pop {
-  z-index: 1070;
-  max-width: 22rem;
-  padding: 0.5rem 0.7rem;
-  font-size: 0.8125rem;
-  background: #fff;
-  border: 1px solid #ced4da;
-  border-radius: 6px;
-  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15);
-}
-
-.dash-pop:focus {
-  outline: 2px solid var(--dash-primary);
-}
-
-.dash-pop__title {
-  margin-bottom: 0.25rem;
-  font-weight: 600;
-}
-
-.dash-pop__list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.dash-pop__list li {
-  overflow-wrap: anywhere;
-}
-
-.dash-pop__links {
-  margin-top: 0.35rem;
 }
 
 /* the select column (#2564): a checkbox per row, the page's in the header */
 .c-select {
   width: 2.25rem;
   padding-right: 0;
-}
-
-.dash-check {
-  margin: 0;
-  cursor: pointer;
-}
-
-/* The bulk bar: sticky at the top of the list while it scrolls, outside
-   the region. Its slot keeps one height whether it holds the muted line,
-   the note or the bar, so the first tick moves nothing. */
-.dash-bulk {
-  position: sticky;
-  top: 0;
-  z-index: 3;
-  display: flex;
-  align-items: center;
-  min-height: 2.5rem;
-  margin-bottom: 0.4rem;
-  padding: 0.2rem 0.5rem;
-  background: #fff;
-  border-radius: 6px;
-  font-size: 0.875rem;
-}
-
-.dash-bulk__idle,
-.dash-bulk__note {
-  margin: 0;
-  color: var(--dash-muted);
-}
-
-.dash-bulk:has(.dash-bulk__bar:not([hidden])) {
-  background: #eef4f9;
-}
-
-.dash-bulk__bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  align-items: center;
-  width: 100%;
-}
-
-.dash-bulk__count {
-  font-weight: 600;
-}
-
-.dash-bulk__clear {
-  padding: 0 0.25rem;
-}
-
-.dash-bulk__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  margin-left: auto;
-}
-
-/* "Actions ▾": only where the rows stack (see the container queries) */
-.dash-bulk__menu {
-  display: none;
-  margin-left: auto;
-}
-
-/* "Select all N matching tables", once the page is ticked */
-.dash-selectall {
-  margin-bottom: 0.5rem;
-  padding: 0.35rem 0.6rem;
-  background: #eef4f9;
-  border-radius: 4px;
-  font-size: 0.875rem;
-}
-
-.dash-selectall__button {
-  padding: 0 0.25rem;
-  vertical-align: baseline;
 }
 
 /* the row's ⋯ slot stays at the right edge while the list scrolls sideways */
@@ -589,46 +142,6 @@
 .c-menu:focus-within,
 .c-menu:has(.dropdown-menu.show) {
   z-index: 2;
-}
-
-.dash-menu__toggle {
-  padding: 0 0.5rem;
-  font-size: 1.1rem;
-  line-height: 1.4;
-}
-
-.dash-menu__list {
-  font-size: 0.875rem;
-}
-
-/* an action above the user's role: still focusable, so the reason is
-   reachable by keyboard; aria-disabled, not Bootstrap's .disabled */
-/* Delete, last in the menu */
-.dash-menu__danger {
-  color: #b02a37;
-}
-
-.dash-menu__off,
-.dash-menu__off:hover,
-.dash-menu__off:focus {
-  color: var(--dash-muted);
-  cursor: not-allowed;
-  background: transparent;
-}
-
-.dash-menu__why {
-  display: block;
-  font-size: 0.75rem;
-}
-
-/* the action dialog */
-.dash-leftout {
-  font-size: 0.875rem;
-}
-
-.dash-action-list {
-  max-height: 12rem;
-  overflow-y: auto;
 }
 
 /* The access drawer (#2566). It sits outside .dash, so it states the
@@ -782,51 +295,19 @@
   border-radius: 4px;
 }
 
-/* messages after an action */
-.dash-toasts {
-  z-index: 1090;
-}
-
-.dash-toast {
-  margin-top: 0.5rem;
-  background: #fff;
-}
-
-.dash-toast--ok {
-  border-left: 4px solid #198754;
-}
-
-.dash-toast--error {
-  border-left: 4px solid #dc3545;
-}
-
-/* done, but not cleanly: a delete whose database table stayed behind */
-.dash-toast--warning {
-  border-left: 4px solid #ffc107;
-}
-
-.dash-toast .toast-body a {
-  font-weight: 600;
-}
-
-/* a bulk success: "Show tables" opens the list of what it changed */
-.dash-toast__more {
-  padding: 0;
-  vertical-align: baseline;
-}
-
-.dash-toast__list {
-  max-height: 10rem;
-  margin: 0.35rem 0 0;
-  padding-left: 1.1rem;
-  overflow-y: auto;
-}
-
 /* ------------------------------------------------------------------------
  * Columns collapse by the list's own width (container queries on `.dash`),
  * not the viewport's: the profile sidebar takes a different share of each
  * screen. Drop order: Topics and Created, then Review and
  * Datasets, then the rows stack. The filter bar folds by its own width.
+ *
+ * Every rule here is scoped to the tables tab (`#tables-tab`, which is the
+ * `.dash` container itself), because the queries hide columns by their
+ * class and the widths are this tab's: another list with a column called
+ * `c-topics` or `c-created` would otherwise collapse at these widths
+ * (#2617). The scope raises each rule's specificity, which only makes it
+ * win where it already did. A structural test holds the scope
+ * (login/tests/test_list_styles.py).
  *
  * Measured 2026-10-02 (#2555) in headless Chrome 152: the narrowest list
  * each set of columns fits without scrolling, worst of the first six pages
@@ -891,15 +372,15 @@
  * ---------------------------------------------------------------------- */
 
 @container (width < 1310px) {
-  .c-created,
-  .c-topics {
+  #tables-tab .c-created,
+  #tables-tab .c-topics {
     display: none;
   }
 }
 
 @container (width < 1070px) {
-  .c-review,
-  .c-ds {
+  #tables-tab .c-review,
+  #tables-tab .c-ds {
     display: none;
   }
 }
@@ -907,15 +388,15 @@
 /* Too narrow for the bar on one line: everything but Search folds behind
    "Filters (n)", which shows it below as a block of its own. */
 @container (width < 960px) {
-  .dash-fold-toggle {
+  #tables-tab .dash-fold-toggle {
     display: inline-block;
   }
 
-  .dash-fold {
+  #tables-tab .dash-fold {
     display: none;
   }
 
-  .dash-fold-toggle[aria-expanded="true"] ~ .dash-fold {
+  #tables-tab .dash-fold-toggle[aria-expanded="true"] ~ .dash-fold {
     display: flex;
     flex: 1 0 100%;
     flex-wrap: wrap;
@@ -923,7 +404,7 @@
     align-items: center;
   }
 
-  .dash-search {
+  #tables-tab .dash-search {
     max-width: none;
   }
 }
@@ -933,29 +414,29 @@
    say here where it goes. The headers go with the columns, so "Sort by"
    and "Select this page" take their place. */
 @container (width < 850px) {
-  .dash-sortby,
-  .dash-selectpage {
+  #tables-tab .dash-sortby,
+  #tables-tab .dash-selectpage {
     display: flex;
   }
 
-  .dash-bulk__actions {
+  #tables-tab .dash-bulk__actions {
     display: none;
   }
 
-  .dash-bulk__menu {
+  #tables-tab .dash-bulk__menu {
     display: block;
   }
 
-  .dash-table,
-  .dash-table tbody {
+  #tables-tab .dash-table,
+  #tables-tab .dash-table tbody {
     display: block;
   }
 
-  .dash-table thead {
+  #tables-tab .dash-table thead {
     display: none;
   }
 
-  .dash-table tr {
+  #tables-tab .dash-table tr {
     display: grid;
     grid-template-columns: auto auto auto 1fr auto;
     align-items: center;
@@ -963,17 +444,17 @@
     border-bottom: 1px solid #dee2e6;
   }
 
-  .dash-table tr:last-child {
+  #tables-tab .dash-table tr:last-child {
     border-bottom: 0;
   }
 
-  .dash-table td {
+  #tables-tab .dash-table td {
     display: none;
     padding: 0.15rem 0.5rem;
     border: 0;
   }
 
-  .dash-table td.c-select {
+  #tables-tab .dash-table td.c-select {
     display: block;
     grid-row: 1 / span 2;
     grid-column: 1;
@@ -982,14 +463,14 @@
     padding-left: 0.25rem;
   }
 
-  .dash-table td.c-table {
+  #tables-tab .dash-table td.c-table {
     display: block;
     grid-row: 1;
     grid-column: 2 / 5;
     min-width: 0;
   }
 
-  .dash-table td.c-menu {
+  #tables-tab .dash-table td.c-menu {
     display: block;
     grid-row: 1;
     grid-column: 5;
@@ -997,19 +478,19 @@
     width: auto;
   }
 
-  .dash-table td.c-status {
+  #tables-tab .dash-table td.c-status {
     display: block;
     grid-row: 2;
     grid-column: 2;
   }
 
-  .dash-table td.c-pub {
+  #tables-tab .dash-table td.c-pub {
     display: block;
     grid-row: 2;
     grid-column: 3;
   }
 
-  .dash-table td.c-modified {
+  #tables-tab .dash-table td.c-modified {
     display: block;
     grid-row: 2;
     grid-column: 4;
