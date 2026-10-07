@@ -142,6 +142,17 @@
   color: var(--primaryColor2);
 }
 
+.index-hero-btn-primary {
+  background-color: #2972a6;
+  color: var(--white);
+  border: none;
+}
+
+.index-hero-btn-primary:hover {
+  background-color: var(--bs-primary);
+  color: var(--white);
+}
+
 .index-hero-btn-outline {
   background-color: transparent;
   color: var(--white);
@@ -779,7 +790,7 @@
   justify-content: center;
   width: 100%;
   padding: 96px 24px;
-  background-color: var(--bs-primary);
+  background-color: #f6fbff;
 }
 
 .index-academy-inner {
@@ -825,7 +836,7 @@
   font-size: 36px;
   font-weight: 700;
   letter-spacing: 0.72px;
-  color: var(--white);
+  color: #294456;
 }
 
 .index-academy-subtitle {
@@ -833,7 +844,7 @@
   font-size: 20px;
   line-height: 1.4;
   letter-spacing: 0.2px;
-  color: #e7f1f9;
+  color: #4d748f;
 }
 
 .index-academy-feature-list {
@@ -841,7 +852,7 @@
 }
 
 .index-academy-feature-list span {
-  color: var(--white);
+  color: #294456;
 }
 
 .index-academy-quickstart {
@@ -853,7 +864,7 @@
   border: 1px solid #f6f9fb;
   border-radius: 4px;
   background-color: var(--white);
-  box-shadow: 0 4px 2px rgba(41, 114, 166, 0.25);
+  box-shadow: 0 2px 1px rgba(41, 114, 166, 0.1);
   text-align: left;
 }
 
