@@ -3016,15 +3016,6 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "theming/.dockerignore"
-precedence = "override"
-SPDX-License-Identifier = "AGPL-3.0-or-later"
-SPDX-FileCopyrightText = [
-  "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
-]
-
-[[annotations]]
 path = "theming/oepstrap.scss"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
@@ -3035,24 +3026,6 @@ SPDX-FileCopyrightText = [
   "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-]
-
-[[annotations]]
-path = "theming/.gitignore"
-precedence = "override"
-SPDX-License-Identifier = "AGPL-3.0-or-later"
-SPDX-FileCopyrightText = [
-  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
-]
-
-[[annotations]]
-path = "theming/Dockerfile"
-precedence = "override"
-SPDX-License-Identifier = "AGPL-3.0-or-later"
-SPDX-FileCopyrightText = [
-  "2020 Johann Wagner <https://github.com/johannwagner>  © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
-  "2024 Eike Broda <https://github.com/ebroda>",
 ]
 
 [[annotations]]
