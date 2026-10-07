@@ -17,9 +17,9 @@ against about 1,340 px for all nine columns); the maintainer chose the
 sidebar on 2026-10-02, so the column collapse (#2555) works with that width.
 {% endcomment %}
 {% load static %}
-{% block after-head %}
+{% block list-styles %}
   <link rel="stylesheet" href="{% static 'login/tables_tab.css' %}" />
-{% endblock after-head %}
+{% endblock list-styles %}
 {% block region %}
   {% include "login/partials/tables_region.html" %}
 {% endblock region %}

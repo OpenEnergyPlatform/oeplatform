@@ -18,11 +18,17 @@ the controls sit in the row as if it were not there.
 
 Blocks: ``region`` (include the tab's region, which extends
 list_region.html), ``drawers`` (anything the tab opens beside the action
-dialog) and ``list-script`` (the module that binds the tab). A tab adds its
-stylesheet in ``after-head``.
+dialog), ``list-script`` (the module that binds the tab) and
+``list-styles`` (the tab's stylesheet: its columns, cells and the container
+queries that collapse them, loaded after the generic dash_list.css).
 {% endcomment %}
 {% load compress %}
 {% load static %}
+{% block after-head %}
+  <link rel="stylesheet" href="{% static 'login/dash_list.css' %}" />
+  {% block list-styles %}
+  {% endblock list-styles %}
+{% endblock after-head %}
 {% block main-right-sidebar-content %}
   {% include "login/sidebar_user.html" %}
 {% endblock main-right-sidebar-content %}
