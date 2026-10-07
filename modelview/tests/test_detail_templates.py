@@ -53,13 +53,15 @@ class TooltipSetupTest(DetailPageTestCase):
 
 
 def section_bodies(html):
-    """The class attribute of every collapsible section body on the page,
+    """The class attribute of every section body a section heading toggles,
     read off each `<div>` whole so the order of its attributes does not
-    matter."""
+    matter. Only the toggled ones: the navbar collapses too."""
+    toggled = set(re.findall(r'<a\b[^>]*\bhref="#(\w+)"', html))
     found = []
     for div in re.findall(r"<div\b[^>]*>", html):
+        element_id = re.search(r'\bid="(\w+)"', div)
         classes = re.search(r'\bclass="([^"]*)"', div)
-        if classes and re.search(r"\b(collapse|expand)\b", classes.group(1)):
+        if element_id and element_id.group(1) in toggled and classes:
             found.append(classes.group(1))
     return found
 
