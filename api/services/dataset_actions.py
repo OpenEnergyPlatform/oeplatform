@@ -31,10 +31,12 @@ The actions:
   changes nothing writes, stamps and logs nothing.**
 - ``publish``: ``DATASET_GATE`` runs live, under the lock; a Dataset failing
   it is left out by the failed check's reason (``ActionRefused.failed_checks``
-  names the checks) and refuses the request. ``published_at`` becomes now,
-  also for a Dataset already published: a republish passes the gate again
-  and overwrites the date. The preflight states the member mix (members,
-  drafts, embargoed) for the dialog; it never refuses anything.
+  names the checks) and refuses the request. ``published_at`` becomes now. A
+  Dataset already published is passed over (``ALREADY_PUBLISHED``) unless
+  ``params["republish"]`` is set, which only the API sets (the dashboard
+  offers no republish): then it passes the gate again and the date is
+  overwritten. The preflight states the member mix (members, drafts,
+  embargoed) for the dialog; it never refuses anything.
 - ``unpublish``: always allowed for the creator; ``published_at`` is
   cleared. A draft is passed over (``ALREADY_DRAFT``), so unpublishing one
   succeeds and writes nothing.
@@ -173,6 +175,7 @@ NO_SUCH_TABLE = "No such table"
 ALREADY_IN = "Already in the dataset"
 NOT_IN = "Not in the dataset"
 ALREADY_DRAFT = "Already a draft"
+ALREADY_PUBLISHED = "Already published"
 # The curation rule (``assignable_tables``) refusing a Table: a draft or
 # embargoed Table the user holds no Data editor grant on.
 MAY_NOT_ASSIGN = "Drafts and embargoed tables need Data editor on the table"
@@ -185,7 +188,9 @@ MAY_NOT_ASSIGN = "Drafts and embargoed tables need Data editor on the table"
 # there is nothing to do for those names, because the outcome asked for holds
 # already (a member added, a non-member removed, a draft unpublished) or
 # there is no such Table. Every other reason refuses the whole request.
-PASSED_OVER = frozenset({ALREADY_IN, NOT_IN, NO_SUCH_TABLE, ALREADY_DRAFT})
+PASSED_OVER = frozenset(
+    {ALREADY_IN, NOT_IN, NO_SUCH_TABLE, ALREADY_DRAFT, ALREADY_PUBLISHED}
+)
 
 
 class DatasetNotFound(ActionError):
@@ -380,17 +385,21 @@ def _member_mix(datasets) -> dict:
     )
 
 
-def _publish_preflight(user, names) -> Preflight:
+def _publish_preflight(user, names, republish=False) -> Preflight:
     """Publish: the user's own Datasets among ``names`` that pass
     ``DATASET_GATE`` now; the rest left out (``NOT_FOUND``, ``NOT_YOURS``, or
-    a failed check's reason). ``consequences`` carry ``gate``, the failed
-    check names by Dataset, ``republished``, the eligible Datasets already
-    published, and the member mix of the eligible ones (``_member_mix``).
-    One query for the Datasets, two per own Dataset (the gate), one for the
-    mix."""
+    a failed check's reason). A published one is passed over
+    (``ALREADY_PUBLISHED``) unless ``republish``, and then judged by the gate
+    like a draft. ``consequences`` carry ``gate``, the failed check names by
+    Dataset, ``republished``, the eligible Datasets already published, and
+    the member mix of the eligible ones (``_member_mix``). One query for the
+    Datasets, two per own Dataset judged by the gate, one for the mix."""
     found, own, reasons = _resolve(user, names)
     eligible, gate = [], {}
     for dataset in own:
+        if dataset.is_published and not republish:
+            reasons.setdefault(ALREADY_PUBLISHED, []).append(dataset.name)
+            continue
         failed = [
             check for check in publish_checks(dataset, DATASET_GATE) if not check.passed
         ]
@@ -577,6 +586,15 @@ def _members_preflight(user, action, names, dataset) -> Preflight:
     )
 
 
+def choice(action, params) -> str:
+    """The choice a dialog makes before it is confirmed, as one string
+    (``batch_actions.choice``): none, for every Dataset action. Every
+    parameter a Dataset dialog sends is entered, never chosen and re-checked,
+    so its preview is never stale. Offered because the dashboard's action
+    view asks every action service for it."""
+    return batch_actions.choice((), params)
+
+
 def _dataset_param(params) -> str:
     value = params.get("dataset")
     name = value.name if isinstance(value, Dataset) else (value or "").strip()
@@ -606,7 +624,7 @@ def preflight(user, action, names, params=None) -> Preflight:
     if action == EDIT:
         return _edit_preflight(user, names, params)
     if action == PUBLISH:
-        return _publish_preflight(user, names)
+        return _publish_preflight(user, names, bool(params.get("republish")))
     if action == UNPUBLISH:
         return _unpublish_preflight(user, names)
     if action == DELETE:

@@ -51,6 +51,14 @@
 //   carries `warning` (a delete whose database table stayed behind, #2562)
 //   was done, but not cleanly: its message is an assertive warning that
 //   stays, never a success that goes.
+// - close before open (#2623): a modal cannot open a drawer or another
+//   modal while it is showing, so a link in the dialog that opens something
+//   else carries `data-close-then` and `hx-trigger="dialog-closed"`
+//   (`DIALOG_CLOSED`). Its click closes the dialog and nothing else; once
+//   the dialog has closed (Bootstrap's `hidden.bs.modal`), the link is sent
+//   `dialog-closed`, and htmx sends its request then. Focus is left to what
+//   that request opens, which says where it came from as any opener does
+//   (`data-action-origin`, the drawer's origin attribute).
 // - the drawer, when the list has one (the tables tab's access drawer,
 //   #2566): a cell or a menu entry loads it, and it opens once it is filled.
 //   Every write in it answers with the drawer again, swapped in place, so
@@ -175,6 +183,10 @@ const DIALOG_STATUSES = [400, 403, 409];
 // unusable request (400), a viewer who may not make it (403; on the tables
 // tab, not a Table admin) and a guard (409; the last-admin guard).
 const DRAWER_STATUSES = [400, 403, 409];
+
+// What a link marked `data-close-then` is sent once the dialog it sits in
+// has closed: the event its `hx-trigger` names.
+export const DIALOG_CLOSED = "dialog-closed";
 
 export const LOGGED_OUT = "You have been logged out.";
 const RELOAD =
@@ -836,6 +848,8 @@ export function bindList(
   // the row whose ⋯ opened the dialog, and where focus goes after an action
   let origin = null;
   let afterAction = null;
+  // a link in the dialog waiting for it to close (`data-close-then`)
+  let thenOpen = null;
   const isRegion = (event) =>
     event.detail &&
     event.detail.target &&
@@ -949,11 +963,25 @@ export function bindList(
     return false;
   };
 
+  // a link in the dialog that opens something else: close the dialog, and
+  // send the link its event once the dialog has closed (`dialog.onHidden`)
+  const onCloseThen = (event) => {
+    const link = event.target.closest("[data-close-then]");
+    const body = doc.getElementById(ids.dialogBody);
+    if (!link || !body || !body.contains(link)) {
+      return false;
+    }
+    event.preventDefault();
+    thenOpen = link;
+    dialog.close();
+    return true;
+  };
+
   const onClick = (event) => {
     if (!event.target.closest) {
       return;
     }
-    if (onSelect(event)) {
+    if (onCloseThen(event) || onSelect(event)) {
       return;
     }
     const more = event.target.closest(`#${ids.more}`);
@@ -1087,8 +1115,16 @@ export function bindList(
   };
 
   // Cancelled: focus goes back to the ⋯ that opened the dialog. After an
-  // action the region's settle does that instead.
+  // action the region's settle does that instead, and after a link that
+  // opens something else, what it opens.
   dialog.onHidden(() => {
+    if (thenOpen) {
+      const link = thenOpen;
+      thenOpen = null;
+      origin = null;
+      link.dispatchEvent(new CustomEvent(DIALOG_CLOSED));
+      return;
+    }
     if (afterAction === null && origin) {
       const target = doc.getElementById(origin);
       if (target) {

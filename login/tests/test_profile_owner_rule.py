@@ -267,6 +267,7 @@ class ProfileRoutesTests(OwnerRuleFixture):
         return [
             ("login:profile", {}, 200),
             ("login:datasets", {}, 200),
+            ("login:dataset-action", {"action": "publish"}, 200),
             ("login:tables", {}, 200),
             ("login:table-names", {}, 200),
             (
@@ -288,6 +289,7 @@ class ProfileRoutesTests(OwnerRuleFixture):
         """(name, extra kwargs) for every route that takes a POST."""
         return [
             ("login:table-action-check", {"action": "publish"}),
+            ("login:dataset-action", {"action": "delete"}),
             ("login:edit", {}),
         ]
 

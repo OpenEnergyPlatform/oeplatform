@@ -43,6 +43,11 @@ default the listing's plural and Reset), ``head_cells`` and ``row_cells``
 (every column after the selection box). The ids that are not per tab
 (``select-page``, ``row-<key>``, ``nomatch-reset``, ...) stay unprefixed:
 a page holds one list.
+
+The filter bar and the bulk slot sit outside the region, and the empty state
+has neither. So when the region alone comes back (``region_only``) for an
+account with nothing left to list, its last item deleted, it removes both out
+of band, and the page shows the empty state without a reload.
 {% endcomment %}
 <div id="{{ frame.region_id }}"
      class="dash-results"
@@ -153,3 +158,9 @@ a page holds one list.
     {% endif %}
   {% endif %}
 </div>
+{% if region_only and not page.has_any %}
+  <div id="{{ frame.items }}-filters" hx-swap-oob="delete"></div>
+  {% if bulk_actions %}
+    <div id="{{ frame.items }}-bulk" hx-swap-oob="delete"></div>
+  {% endif %}
+{% endif %}

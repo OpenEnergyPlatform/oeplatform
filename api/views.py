@@ -669,14 +669,18 @@ class DatasetManager(APIView):
 class DatasetTransition(APIView):
     """Publish or unpublish one Dataset (``transition``) through the Dataset
     action service. No body is read. Answers 200 with the Dataset as it now
-    is, also when nothing had to change (unpublishing a draft)."""
+    is, also when nothing had to change (unpublishing a draft). ``params``
+    are the service parameters the transition always sends."""
 
     permission_classes = [IsAuthenticated]
     transition = None
+    params = {}
 
     def post(self, request, dataset_name):
         try:
-            dataset_action(request.user, self.transition, [dataset_name], {})
+            dataset_action(
+                request.user, self.transition, [dataset_name], dict(self.params)
+            )
         except dataset_actions.ActionRefused as refused:
             # a Dataset not there or not the user's has been answered as a
             # read already (``answered_as_a_read``): what is left is the
@@ -719,6 +723,8 @@ class DatasetTransition(APIView):
 )
 class DatasetPublish(DatasetTransition):
     transition = dataset_actions.PUBLISH
+    # the API republishes a published Dataset; the dashboard never does
+    params = {"republish": True}
 
 
 @extend_schema(tags=[DATASETS])
