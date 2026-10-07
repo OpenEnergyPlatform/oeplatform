@@ -12,6 +12,8 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- Updated the homepage with new content and styling
+  [(#2352)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2352)
 - Datasets now have a lifecycle: a Dataset is a draft until it is published, and
   a new one starts as a draft. A draft is visible only to its creator: it is
   left out of the public topic list (for the creator too), its page, metadata

@@ -238,6 +238,16 @@ ROOT_URLCONF = "oeplatform.urls"
 
 EXTERNAL_URLS = {
     "oekg_chat": "https://oekg-chat.openenergyplatform.org/",
+    "academy_courses_introduction": "https://openenergyplatform.github.io/academy/courses/01_introduction/",  # noqa E501
+    "academy_course_upload": "https://openenergyplatform.github.io/academy/courses/04_upload/",  # noqa E501
+    "academy_course_scenario_bundle": "https://openenergyplatform.github.io/academy/courses/10_scenario_bundle/",  # noqa E501
+    "academy_course_enable_comparisons": "https://openenergyplatform.github.io/academy/courses/06_enable_comparisons/",  # noqa E501
+    # Tools linked from the homepage's Integrated Workflows section
+    "academy_course_peer_review": "https://openenergyplatform.github.io/academy/courses/09_peer_review/",  # noqa E501
+    "github_openenergyplatform_oedb_compliance_manager": "https://github.com/OpenEnergyPlatform/open-energy-database-compliance-manager",  # noqa E501
+    "github_openenergyplatform_oem2orm": "https://github.com/OpenEnergyPlatform/oem2orm",  # noqa E501
+    "github_openenergyplatform_omi": "https://github.com/OpenEnergyPlatform/omi",  # noqa E501
+    "github_jh_rli_oep_upload": "https://github.com/jh-RLI/oep-upload",  # noqa E501
     "tutorials_index": "https://openenergyplatform.github.io/academy/",
     "tutorials_faq": "https://openenergyplatform.github.io/academy/questions/",
     "tutorials_api1": "https://openenergyplatform.github.io/academy/tutorials/01_api/01_api_download/",  # noqa E501
@@ -248,16 +258,18 @@ EXTERNAL_URLS = {
     "tutorials_oemetadata": "https://openenergyplatform.github.io/academy/tutorials/99_other/getting_started_with_OEMetadata/",  # noqa E501
     "tutorials_oemetabuilder": "https://openenergyplatform.github.io/academy/tutorials/99_other/oemetadata/",  # noqa E501
     "rest_api_docs": "https://openenergyplatform.github.io/oeplatform/oeplatform-code/web-api/",  # noqa E501
+    "oekg_api_scenario_bundles": "https://openenergyplatform.github.io/oeplatform/oeplatform-code/web-api/oekg-api/scenario-bundles/",  # noqa E501
     "mkdocs": "https://openenergyplatform.github.io/oeplatform/",
     "compendium": "https://openenergyplatform.github.io/organisation/",
     "tib_terminology_service": "https://terminology.tib.eu/ts/collections",
     "tib_ts_oeo": "https://terminology.tib.eu/ts/ontologies/oeo",
     "spdx_licenses": "https://spdx.github.io/license-list-data/",
     "oemetadata_key_description": "https://github.com/OpenEnergyPlatform/oemetadata/blob/develop/oemetadata/latest/metadata_key_description.md",  # noqa E501
+    "oemetadata_latest": "https://openenergyplatform.github.io/oemetadata/latest/",
     "oeo_extended_github": "https://github.com/OpenEnergyPlatform/oeo-extended",  # noqa E501
     "oedatamodel": "https://github.com/OpenEnergyPlatform/oedatamodel",
     "github_openenergyplatform": "https://github.com/OpenEnergyPlatform",
-    "ORKG": "https://academy.orkg.org/orkg-academy/main/index.html",
+    "ORKG": "https://academy.orkg.org/index.html",
     "open_plan": "https://open-plan-tool.org/",
     "open_egon": "https://rego-n.org/",
     "open_mastr": "https://open-mastr.readthedocs.io/en/latest/",
