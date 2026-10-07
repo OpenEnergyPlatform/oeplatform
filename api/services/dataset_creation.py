@@ -32,6 +32,12 @@ def normalize_dataset_name(title: str) -> str | None:
     return name or None
 
 
+def dataset_title(dataset: Dataset) -> str:
+    """What a Dataset is called where a user reads it: its title, or its
+    name when it has none."""
+    return (dataset.metadata or {}).get("title") or dataset.name
+
+
 def assemble_dataset_metadata(
     validated_data: dict[str, Any], oemetadata: dict = OEMETADATA_V20_TEMPLATE
 ) -> dict[str, Any]:
@@ -56,6 +62,9 @@ def create_dataset(validated_data: dict[str, Any], creator) -> Dataset:
     Shared by the JSON API and the dashboard UI so both enforce the same
     rules. Raises DatasetNameTaken on a name collision (the name is the
     permanent identifier, so it must be unique).
+
+    A new Dataset is a draft, and its first Modification is its creation:
+    ``modified_at`` is ``created_at``, to the microsecond.
     """
     name = validated_data["name"]
     if Dataset.objects.filter(name=name).exists():
@@ -65,7 +74,12 @@ def create_dataset(validated_data: dict[str, Any], creator) -> Dataset:
         )
 
     metadata = assemble_dataset_metadata(validated_data)
-    return Dataset.objects.create(metadata=metadata, name=name, creator=creator)
+    dataset = Dataset.objects.create(metadata=metadata, name=name, creator=creator)
+    # ``created_at`` is ``auto_now_add``, which overwrites any value given to
+    # ``create``, so the copy follows it
+    Dataset.objects.filter(pk=dataset.pk).update(modified_at=dataset.created_at)
+    dataset.modified_at = dataset.created_at
+    return dataset
 
 
 def assignable_tables(user) -> QuerySet[Table]:

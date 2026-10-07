@@ -245,8 +245,14 @@ class Table(Tagable):
         badge included. Deleting the reviews deletes their
         ``PeerReviewManager`` and ``ReviewRound`` rows with them (both
         ``on_delete=CASCADE``, which Django's collector follows for a
-        queryset delete too)."""
+        queryset delete too).
+
+        Every Dataset holding this Table loses a member, which is a
+        Modification of it (``DatasetQuerySet.stamp_modified``), whoever
+        created it: a stranger's draft included, which the deleter is never
+        told of."""
         with transaction.atomic():
+            Dataset.objects.filter(tables=self).stamp_modified()
             PeerReview.objects.filter(table=self.name).delete()
             return super().delete(*args, **kwargs)
 
@@ -571,6 +577,22 @@ class DatasetQuerySet(models.QuerySet):
         if dataset is None or not dataset.readable_by(user):
             raise Http404(DATASET_NOT_FOUND)
         return dataset
+
+    def stamp_modified(self):
+        """Record a Modification of these Datasets just now
+        (``modified_at``): a change to their title, description, Topics or
+        membership, never one inside a member Table, nor publishing or
+        unpublishing. Called only on a real change, by the paths that make
+        one: today the membership writes of the Dataset action service and
+        of the tables tab's Dataset actions, and ``Table.delete_record``.
+        (A new Dataset's stamp is its ``created_at``, set by
+        ``create_dataset``; edits stamp once they go through the service.)
+
+        One UPDATE of the one field, not ``save()``, so every other field
+        stays as the database holds it; the application's clock, as
+        ``Table.stamp_data_modified`` uses, not the database's ``now()``,
+        which would be the start of the surrounding transaction."""
+        return self.update(modified_at=timezone.now())
 
 
 class Dataset(models.Model):

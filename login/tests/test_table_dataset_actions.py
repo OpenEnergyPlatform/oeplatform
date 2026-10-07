@@ -14,7 +14,8 @@ afterwards, which response headers came back and which log lines were
 written; never on seconds.
 """  # noqa: 501
 
-from datetime import timedelta
+from datetime import datetime, timedelta
+from datetime import timezone as dt_timezone
 from unittest import mock
 
 from django.utils import timezone
@@ -371,6 +372,55 @@ class DatasetActionLogTests(DatasetActionTestCase):
         with self.assertNoLogs("oeplatform.table_actions", "INFO"):
             with self.captureOnCommitCallbacks(execute=True):
                 self.run_action(ADD, "t_log_ds_refused", dataset="ds_missing")
+
+
+class ModificationStampTests(DatasetActionTestCase):
+    """Adding a Table to a Dataset and removing it are Modifications of the
+    Dataset (#2619): its ``modified_at`` moves. A change inside a member
+    Table is not one."""
+
+    LONG_AGO = datetime(2020, 1, 1, tzinfo=dt_timezone.utc)
+
+    def stamped(self, dataset):
+        return Dataset.objects.get(pk=dataset.pk).modified_at
+
+    def test_add_and_remove_stamp_the_dataset(self):
+        self.draft("t_stamp_ds")
+        dataset = self.dataset("ds_stamp")
+        Dataset.objects.filter(pk=dataset.pk).update(modified_at=self.LONG_AGO)
+        before = timezone.now()
+        self.assertEqual(
+            self.run_action(ADD, "t_stamp_ds", dataset="ds_stamp").status_code, 204
+        )
+        added = self.stamped(dataset)
+        self.assertGreaterEqual(added, before)
+        Dataset.objects.filter(pk=dataset.pk).update(modified_at=self.LONG_AGO)
+        self.assertEqual(
+            self.run_action(REMOVE, "t_stamp_ds", dataset="ds_stamp").status_code, 204
+        )
+        self.assertGreaterEqual(self.stamped(dataset), added)
+
+    def test_a_no_op_is_refused_and_does_not_stamp(self):
+        """Adding a member or removing a non-member changes nothing: the
+        tables tab refuses either whole, and the stamp stays."""
+        inside = self.draft("t_stamp_inside")
+        self.draft("t_stamp_outside")
+        dataset = self.dataset("ds_stamp_refused", inside)
+        Dataset.objects.filter(pk=dataset.pk).update(modified_at=self.LONG_AGO)
+        for action, name in ((ADD, "t_stamp_inside"), (REMOVE, "t_stamp_outside")):
+            with self.subTest(action=action):
+                response = self.run_action(action, name, dataset="ds_stamp_refused")
+                self.assertEqual(response.status_code, 409)
+                self.assertEqual(self.stamped(dataset), self.LONG_AGO)
+
+    def test_a_member_tables_own_change_does_not_stamp(self):
+        member = self.draft("t_stamp_member")
+        dataset = self.dataset("ds_stamp_member", member)
+        Dataset.objects.filter(pk=dataset.pk).update(modified_at=self.LONG_AGO)
+        response = self.run_action("publish", "t_stamp_member", topic="climate")
+        self.assertEqual(response.status_code, 204)
+        member.stamp_data_modified()
+        self.assertEqual(self.stamped(dataset), self.LONG_AGO)
 
 
 class DraftTopicTests(DatasetActionTestCase):

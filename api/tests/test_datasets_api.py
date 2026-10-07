@@ -344,11 +344,11 @@ class DatasetCurationRulesTests(APITestCase):
         self.assertEqual(self.dataset.tables.count(), 0)
 
     def test_assign_is_all_or_nothing(self):
-        from api import views
+        from api.services import dataset_actions
 
         self.make_table("t_first")
         self.make_table("t_second")
-        real = views.assign_table
+        real = dataset_actions.assign_table
 
         def fail_on_second(dataset, table):
             if table.name == "t_second":
@@ -357,7 +357,7 @@ class DatasetCurationRulesTests(APITestCase):
 
         self.client.raise_request_exception = False
         with self.assertLogs("django.request", "ERROR"):
-            with mock.patch.object(views, "assign_table", fail_on_second):
+            with mock.patch.object(dataset_actions, "assign_table", fail_on_second):
                 response = self.client.post(
                     "/api/v0/datasets/curated_dataset/assign-tables/",
                     {"tables": [{"name": "t_first"}, {"name": "t_second"}]},

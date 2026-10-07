@@ -260,6 +260,31 @@ class DeleteTests(DeleteTestCase):
         # ``gone`` lets the bulk selection drop it (#2564)
         self.assertEqual(detail, {"message": "Deleted “Gone”.", "gone": [table.name]})
 
+    def test_every_dataset_it_leaves_is_stamped_without_a_word_of_it(self):
+        """Losing a member is a Modification of the Dataset (#2619), whoever
+        made the Dataset: a stranger's draft included, which the deleter is
+        never told of. A Dataset the Table was not in keeps its stamp."""
+        table = self.draft("t_stamping_delete", published=True)
+        long_ago = timezone.now() - timedelta(days=2000)
+        mine = Dataset.objects.create(name="ds_stamp_mine", creator=self.user)
+        their_draft = Dataset.objects.create(
+            name="ds_stamp_secret", creator=self.stranger, metadata={"title": "Secret"}
+        )
+        Dataset.objects.create(name="ds_stamp_other", creator=self.user)
+        mine.tables.add(table)
+        their_draft.tables.add(table)
+        Dataset.objects.update(modified_at=long_ago)
+        before = timezone.now()
+        response = self.run_action("delete", table.name, confirm=table.name)
+        self.assertEqual(response.status_code, 204)
+        stamps = dict(Dataset.objects.values_list("name", "modified_at"))
+        self.assertGreaterEqual(stamps["ds_stamp_mine"], before)
+        self.assertGreaterEqual(stamps["ds_stamp_secret"], before)
+        self.assertEqual(stamps["ds_stamp_other"], long_ago)
+        said = response["HX-Trigger"]
+        for word in ("ds_stamp_secret", "Secret"):
+            self.assertNotIn(word, said)
+
     def test_a_published_table_without_its_name_typed_is_kept(self):
         table = self.oedb_table(title="Typed")
         Table.objects.filter(pk=table.pk).update(is_publish=True)

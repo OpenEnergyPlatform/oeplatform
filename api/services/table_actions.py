@@ -28,7 +28,11 @@ The actions are ``publish``, ``unpublish``, ``delete``, and adding a Table to
 or removing it from one of the user's own Datasets (``dataset_add``,
 ``dataset_remove``, with the Dataset as the ``dataset`` parameter). Whether a Table may be added at all is the
 curation rule of ``api.services.dataset_creation.assignable_tables``, the
-same rule the dataset assign API and the Dataset tab's picker read.
+same rule the dataset assign API and the Dataset tab's picker read. Either
+changes the Dataset's membership, which is a Modification of it: ``execute``
+stamps its ``modified_at`` (``DatasetQuerySet.stamp_modified``). The other
+direction, many Tables in one Dataset, is the Dataset action service's
+(``api.services.dataset_actions``).
 
 Two more change who holds a role (#2568): sharing the Tables with one of the
 user's Organizations (``organization_share``, with ``organization`` and
@@ -65,6 +69,7 @@ traceback. No audit model: these lines are the record.
 import logging
 import uuid
 from dataclasses import dataclass, field
+from typing import ClassVar
 
 from django.db import transaction
 from django.db.models import Count, Q
@@ -72,7 +77,21 @@ from django.utils import timezone
 
 from api.actions import move_publish
 from api.error import APIError
-from api.services.dataset_creation import assign_table, assignable_tables
+from api.services import batch_actions
+from api.services.batch_actions import (  # noqa: F401 (part of this module's interface)
+    TYPED_COUNT_ABOVE,
+    ActionError,
+    InvalidParameters,
+    LeftOut,
+    confirm_error,
+)
+from api.services.batch_actions import quoted as _quoted
+from api.services.batch_actions import unique as _unique
+from api.services.dataset_creation import (
+    assign_table,
+    assignable_tables,
+    dataset_title,
+)
 from dataedit.models import Dataset, Embargo, PeerReview, Table, Topic
 from dataedit.publish_gate import publish_checks
 from login import table_roles
@@ -222,8 +241,6 @@ CEILINGS = {
     DELETE: 50,
 }
 
-# A batch of more than this many Tables is confirmed by typing its count.
-TYPED_COUNT_ABOVE = 10
 
 # How long a delete's drop of a Table's OEDB tables waits for a lock another
 # session holds on one of them (a reader inside an open transaction, an Apply,
@@ -265,84 +282,42 @@ MAY_NOT_ASSIGN = "Drafts and embargoed tables need Data editor on the table"
 LOSE_ACCESS_UNSAID = "You would also lose access to these, which the dialog did not say"
 
 
-def _role_refusals() -> set:
-    """The left-out reasons that mean "you lack the role"."""
-    return {gate.refusal for gate in ROLE_GATES.values()} | {NOT_YOURS}
+# What an action is called at the start of a sentence, as in the ceiling's
+# "Delete takes at most 50 tables at a time".
+ACTION_NAMES = {
+    PUBLISH: "Publish",
+    UNPUBLISH: "Unpublish",
+    DELETE: "Delete",
+    DATASET_ADD: "Adding to a dataset",
+    DATASET_REMOVE: "Removing from a dataset",
+    ORGANIZATION_SHARE: "Sharing with an organization",
+    ORGANIZATION_REMOVE: "Removing an organization",
+}
 
 
-class ActionError(Exception):
-    """Base of the two ways ``execute`` can decline."""
-
-
-class InvalidParameters(ActionError):
-    """A parameter of the request is unusable; ``errors`` maps each
-    parameter to what is wrong with it. Nothing was written."""
-
-    def __init__(self, errors: dict):
-        super().__init__("; ".join(errors.values()))
-        self.errors = errors
-
-
-class ActionRefused(ActionError):
+class ActionRefused(batch_actions.ActionRefused):
     """At least one named Table is no longer allowed, so nothing was
-    written. ``refused`` is the left-out groups that caused it, and
-    ``preflight`` the check as it stands now."""
+    written (``batch_actions.ActionRefused``). Its ``role_refusals``, the
+    reasons that mean "you lack the role", are every role gate's and "Not
+    one of your tables"."""
 
-    def __init__(self, preflight: "Preflight", refused: list):
-        self.preflight = preflight
-        self.refused = refused
-        super().__init__(self.message)
-
-    @property
-    def message(self) -> str:
-        parts = [f"{group.reason} ({_quoted(group.names)})" for group in self.refused]
-        return "Nothing was changed: " + "; ".join(parts) + "."
-
-    @property
-    def for_role(self) -> bool:
-        """Whether a Table was refused because the user lacks the role the
-        action needs there (or holds none at all), rather than because the
-        Tables changed."""
-        return any(group.reason in _role_refusals() for group in self.refused)
-
-
-@dataclass(frozen=True)
-class LeftOut:
-    """Tables an action would not touch, all for the same reason. The
-    reason is the text the user is shown."""
-
-    reason: str
-    names: list
+    role_refusals = frozenset(
+        {gate.refusal for gate in ROLE_GATES.values()} | {NOT_YOURS}
+    )
 
 
 @dataclass
-class Preflight:
-    """What ``execute`` would do with these names, before it does it.
-
-    ``eligible`` are the Tables it would act on, in the order named;
-    ``left_out`` the rest, grouped by reason. ``ceiling`` is the most Tables
-    the action takes in one request (``CEILINGS``), None where no limit is
-    set; ``over_ceiling`` says the names sent exceed it, and then nothing
-    can be confirmed. ``consequences`` holds what the dialog has to state
-    for this action, and ``subject`` is what the request is about: the one
-    Table's title, or for a batch the Tables it acts on (``_batch_subject``:
-    "n tables", or "e of n tables" when some are not acted on).
-    ``confirmation`` is what the user has to type to confirm, "" for a plain
-    confirmation (``_confirmation``).
+class Preflight(batch_actions.Preflight):
+    """What ``execute`` would do with these Table names, before it does it
+    (``batch_actions.Preflight``). ``ceiling`` is the action's entry in
+    ``CEILINGS``; ``subject`` is the one Table's title, or for a batch the
+    Tables it acts on; ``confirmation`` comes from ``_confirmation``.
     """
 
-    action: str
-    total: int
-    eligible: list
-    left_out: list
-    ceiling: int = None
-    consequences: dict = field(default_factory=dict)
-    subject: str = ""
-    confirmation: str = ""
-    # every name sent, once each, in the order sent: what a bulk dialog
-    # re-checks when the user chooses a Dataset, so the left-out groups stay
-    # complete although the form posts only the eligible names
-    requested: list = field(default_factory=list)
+    item: ClassVar[str] = "table"
+    items: ClassVar[str] = "tables"
+    action_names: ClassVar[dict] = ACTION_NAMES
+
     # The Dataset actions only: the user's own Datasets the action could
     # change for these Tables, and the one it is about (None until chosen).
     datasets: list = field(default_factory=list)
@@ -358,10 +333,6 @@ class Preflight:
     level: int = None
     members: int = 0
     unchanged: list = field(default_factory=list)
-
-    @property
-    def names(self) -> list:
-        return [table.name for table in self.eligible]
 
     @property
     def role(self) -> str:
@@ -404,25 +375,6 @@ class Preflight:
         return bool(self.eligible)
 
     @property
-    def left_out_count(self) -> int:
-        """How many of the names sent are left out, over every reason."""
-        return sum(len(group.names) for group in self.left_out)
-
-    @property
-    def over_ceiling(self) -> bool:
-        return self.ceiling is not None and self.total > self.ceiling
-
-    @property
-    def ceiling_message(self) -> str:
-        return _ceiling_message(self.action, self.ceiling, self.total)
-
-    @property
-    def ceiling_rule(self) -> str:
-        """The ceiling as the dialog states it before anything exceeds it,
-        "" where the action has none."""
-        return _ceiling_rule(self.action, self.ceiling) if self.ceiling else ""
-
-    @property
     def dataset_title(self) -> str:
         """What the chosen Dataset is called, "" while none is chosen."""
         return dataset_title(self.dataset) if self.dataset else ""
@@ -448,23 +400,10 @@ def own_datasets(user):
     return Dataset.objects.filter(creator=user)
 
 
-def dataset_title(dataset) -> str:
-    """What a Dataset is called where the user reads it."""
-    return (dataset.metadata or {}).get("title") or dataset.name
-
-
 def publish_topics():
     """The Topics a Table can be published under: every real Topic. The
     draft pseudo-topic is a status, never a Topic."""
     return Topic.objects.exclude(name=PSEUDO_TOPIC_DRAFT).order_by("name")
-
-
-def _quoted(names) -> str:
-    return ", ".join(f"“{name}”" for name in names)
-
-
-def _unique(names) -> list:
-    return list(dict.fromkeys(name for name in names if name))
 
 
 def _gate_reason(table) -> str:
@@ -498,42 +437,15 @@ def _gate_reason(table) -> str:
     return "Fails the Publish gate: " + ", ".join(failed)
 
 
-# What an action is called at the start of a sentence, as in the ceiling's
-# "Delete takes at most 50 tables at a time".
-ACTION_NAMES = {
-    PUBLISH: "Publish",
-    UNPUBLISH: "Unpublish",
-    DELETE: "Delete",
-    DATASET_ADD: "Adding to a dataset",
-    DATASET_REMOVE: "Removing from a dataset",
-    ORGANIZATION_SHARE: "Sharing with an organization",
-    ORGANIZATION_REMOVE: "Removing an organization",
-}
-
-
 def choice(action, params) -> str:
     """The dialog's choice in ``params`` (``CHOICES``) as one string: what
     the preview carries as ``previewed``, and what a confirmation's own
     parameters are compared with."""
-    return ",".join(str(params.get(key) or "") for key in CHOICES.get(action, ()))
+    return batch_actions.choice(CHOICES.get(action, ()), params)
 
 
 def _batch_subject(acted_on, total) -> str:
-    """What a batch's dialog is about, counting what its list counts: the
-    Tables the action would act on, out of the names sent when that is
-    fewer ("14 of 16 tables"), so the title and the list agree and the
-    left-out difference shows in the title."""
-    if acted_on == total:
-        return f"{total:,} tables"
-    return f"{acted_on:,} of {total:,} tables"
-
-
-def _ceiling_rule(action, ceiling) -> str:
-    return f"{ACTION_NAMES[action]} takes at most {ceiling:,} tables at a time."
-
-
-def _ceiling_message(action, ceiling, total) -> str:
-    return f"{_ceiling_rule(action, ceiling)[:-1]}; you selected {total:,}."
+    return batch_actions.batch_subject(acted_on, total, Preflight.items)
 
 
 def _confirmation(action, eligible) -> str:
@@ -541,14 +453,9 @@ def _confirmation(action, eligible) -> str:
     "" for a plain confirmation. Only delete asks: the Table's name for one
     published Table, the number of Tables for a batch holding a published
     Table or more than ``TYPED_COUNT_ABOVE``."""
-    if action != DELETE or not eligible:
+    if action != DELETE:
         return ""
-    published = any(table.is_publish for table in eligible)
-    if len(eligible) == 1:
-        return eligible[0].name if published else ""
-    if published or len(eligible) > TYPED_COUNT_ABOVE:
-        return str(len(eligible))
-    return ""
+    return batch_actions.typed_confirmation(eligible, lambda table: table.is_publish)
 
 
 def _check(user, action, table, level, assignable=frozenset(), republish=False) -> str:
@@ -963,12 +870,6 @@ def _checked_params(user, action, params) -> dict:
     return {}
 
 
-def _confirm_error(check) -> str:
-    if check.total == 1:
-        return f"Type the table's name, {check.confirmation}, to confirm."
-    return f"Type the number of tables, {check.confirmation}, to confirm."
-
-
 def _write(action, table, params):
     if action == PUBLISH:
         move_publish(table, params["topic"], params["embargo"])
@@ -1076,7 +977,11 @@ def execute(user, action, names, params=None, via="dashboard") -> Outcome:
     ceiling = CEILINGS.get(action)
     if ceiling is not None and len(_unique(names)) > ceiling:
         raise InvalidParameters(
-            {"table": _ceiling_message(action, ceiling, len(_unique(names)))}
+            {
+                "table": batch_actions.ceiling_message(
+                    ACTION_NAMES[action], ceiling, len(_unique(names)), Preflight.items
+                )
+            }
         )
     deleted = None
     try:
@@ -1092,7 +997,7 @@ def execute(user, action, names, params=None, via="dashboard") -> Outcome:
             if not check.eligible:
                 raise InvalidParameters({"table": "Name at least one table."})
             if check.confirmation and params["confirm"] != check.confirmation:
-                raise InvalidParameters({"confirm": _confirm_error(check)})
+                raise InvalidParameters({"confirm": confirm_error(check)})
             tables = check.eligible
             if action in ORGANIZATION_ACTIONS:
                 lost = _organization_write(user, action, check, params, via)
@@ -1104,6 +1009,10 @@ def execute(user, action, names, params=None, via="dashboard") -> Outcome:
                     _write(action, table, params)
                 except APIError as error:
                     raise _WriteRefused(table, error) from error
+            if action in DATASET_ACTIONS:
+                # every Table changed the membership: the preflight left out
+                # those already in the Dataset (add) or not in it (remove)
+                Dataset.objects.filter(pk=params["dataset"].pk).stamp_modified()
             if action != DELETE:
                 transaction.on_commit(lambda: _log(user, action, tables, params, via))
     except _WriteRefused as refused:
