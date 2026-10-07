@@ -36,6 +36,18 @@ SPDX-License-Identifier: CC0-1.0
   Dataset is migrated as published since its creation (Django migration
   `dataedit.0058_dataset_lifecycle`)
   [(#2618)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2618)
+- Dataset API: deleting a Dataset (`DELETE /api/v0/datasets/<name>/`) and
+  changing its members (`assign-tables/`, `unassign-tables/`) now go through one
+  Dataset action service, the path the dashboard will take too. A delete answers
+  a bare 204 (the body is gone), and a repeat 404; the member Tables are never
+  deleted. Each delete and each Table added or removed is logged on
+  `oeplatform.dataset_actions`. The member routes take at most 2,500 Tables per
+  call (more is a 400 naming the limit), and answer an unknown Dataset or
+  someone else's draft with the same `{"detail": …}` 404 as every read. A
+  Dataset's `modified_at` is now kept: set at creation, and moved whenever its
+  membership really changes, from the API, the tables tab's "Add to dataset" /
+  "Remove from dataset", or a member Table being deleted
+  [(#2619)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2619)
 - The term search in the metadata editor and the oeo_ext unit picker no longer
   always asks openenergyplatform.org: an instance with its own lookup service
   searches itself, one without uses the public endpoint, and `OEO_SEARCH_URL`

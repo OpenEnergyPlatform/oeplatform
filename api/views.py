@@ -49,7 +49,6 @@ import zipstream
 from django.conf import settings as django_settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import TrigramSimilarity
-from django.db import transaction
 from django.db.models import Q
 from django.http import Http404, HttpRequest, JsonResponse
 from django.utils.decorators import method_decorator
@@ -209,13 +208,11 @@ from api.serializers import (
     ScenarioBundleScenarioDatasetSerializer,
     ScenarioDataTablesSerializer,
 )
-from api.services import table_actions
+from api.services import dataset_actions, table_actions
 from api.services.dataset_creation import (
     DatasetNameTaken,
     assemble_dataset_metadata,
-    assign_table,
     create_dataset,
-    user_may_assign_table,
 )
 from api.services.embargo import (
     EmbargoValidationError,
@@ -233,7 +230,7 @@ from api.validators.column import validate_column_names
 from api.validators.identifier import (
     assert_valid_table_name,
 )
-from dataedit.models import BulkLoadEvent, Dataset, Table
+from dataedit.models import DATASET_NOT_FOUND, BulkLoadEvent, Dataset, Table
 from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
 from modelview.models import Energyframework, Energymodel
 from oekg.utils import (
@@ -361,42 +358,60 @@ class TableMetadataAPIView(APIView):
             raise APIError(error)
 
 
-def assert_dataset_ownership(user, dataset: Dataset) -> None:
-    """Datasets are creator-owned: only the creator may modify one."""
-    if dataset.creator is None or dataset.creator != user:
-        raise PermissionDenied("Only the dataset creator may modify this dataset.")
+# What a write on a Dataset the user may read but did not create is told.
+NOT_THE_CREATOR = "Only the dataset creator may modify this dataset."
 
 
-def owned_dataset_or_404(user, dataset_name: str) -> Dataset:
-    """The Dataset a write acts on. Resolved through the read rule first, so
-    a write never tells more than a read: a Dataset the user may not read (a
-    foreign draft, or no such name) is 404, one they may read but do not own
-    is 403."""
-    dataset = Dataset.objects.readable_or_404(user, dataset_name)
-    assert_dataset_ownership(user, dataset)
-    return dataset
+def owned_dataset(user, dataset_name: str) -> Dataset:
+    """The Dataset a write acts on, by the Dataset action service's rule
+    (``dataset_actions.own_dataset``: the read rule first, then ownership),
+    so a write never tells more than a read: a Dataset the user may not
+    read (a foreign draft, or no such name) is 404 in the words every read
+    uses, one they may read but did not create 403."""
+    try:
+        return dataset_actions.own_dataset(user, dataset_name)
+    except dataset_actions.DatasetNotFound as error:
+        raise Http404(DATASET_NOT_FOUND) from error
+    except dataset_actions.NotYourDataset as error:
+        raise PermissionDenied(NOT_THE_CREATOR) from error
 
 
-def load_owned_dataset_from_request(request, dataset_name: str):
-    """Shared prologue of the dataset membership endpoints: validate the
-    table list, load the dataset and enforce ownership
-    (``owned_dataset_or_404``).
+def dataset_action(user, action, names, params):
+    """Do ``action`` through the Dataset action service, the path the
+    dashboard takes (spec #2613), with ``via="api"``, and answer its
+    refusals as this API answers a read: a Dataset the user may not read is
+    404 (``DATASET_NOT_FOUND``), one they may read but did not create 403,
+    an unusable parameter (the member ceiling among them) 400 naming it.
+    Any other refusal comes back to the caller as the service raised it."""
+    try:
+        return dataset_actions.execute(user, action, names, params, via="api")
+    except dataset_actions.InvalidParameters as error:
+        # DRF's field map, as a serializer's refusal reads
+        errors = {key: [message] for key, message in error.errors.items()}
+        raise ValidationError(errors) from error
+    except dataset_actions.DatasetNotFound as error:
+        raise Http404(DATASET_NOT_FOUND) from error
+    except dataset_actions.NotYourDataset as error:
+        raise PermissionDenied(NOT_THE_CREATOR) from error
+    except dataset_actions.ActionRefused as refused:
+        if refused.not_found:
+            raise Http404(DATASET_NOT_FOUND) from refused
+        if refused.for_role:
+            raise PermissionDenied(NOT_THE_CREATOR) from refused
+        raise
 
-    Returns (dataset, table_refs) or (error_response, None) when the
-    dataset does not exist for this user.
-    """
+
+def change_dataset_members(request, dataset_name, action):
+    """The prologue both membership endpoints share: the table list
+    validated, then the change made through the Dataset action service
+    (``dataset_action``). Returns the table references sent and the
+    ``Outcome``."""
     serializer = DatasetAssignTablesSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-
-    try:
-        dataset = owned_dataset_or_404(request.user, dataset_name)
-    except Http404:
-        return (
-            Response({"error": "Dataset not found"}, status=status.HTTP_404_NOT_FOUND),
-            None,
-        )
-
-    return dataset, serializer.validated_data["tables"]
+    refs = serializer.validated_data["tables"]
+    names = [ref["name"] for ref in refs]
+    outcome = dataset_action(request.user, action, names, {"dataset": dataset_name})
+    return refs, outcome
 
 
 @extend_schema(tags=[DATASETS])
@@ -535,8 +550,25 @@ class DatasetsListResources(generics.ListAPIView):
     ),
     delete=extend_schema(
         summary="Delete dataset",
-        description="Deletes the specified dataset.",
-        responses={204: OpenApiResponse(description="Dataset deleted")},
+        description=(
+            "Deletes the dataset. Its member tables are not deleted; they "
+            "only leave it. Needs a login, and only the dataset's creator may "
+            "delete it: the address is the confirmation a published dataset "
+            "asks for. A draft is visible only to its creator; anyone else "
+            "gets 404, as for a name that does not exist, and so does a "
+            "repeated delete."
+        ),
+        responses=responses(
+            {204: OpenApiResponse(description="Deleted. The body is empty.")},
+            401,
+            also={
+                403: describes("Authenticated, but the dataset is somebody else's."),
+                404: describes(
+                    "No dataset of that name, or another user's draft: the two "
+                    "answer alike, word for word."
+                ),
+            },
+        ),
     ),
 )
 class DatasetManager(APIView):
@@ -553,7 +585,7 @@ class DatasetManager(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request, dataset_name):
-        dataset = owned_dataset_or_404(request.user, dataset_name)
+        dataset = owned_dataset(request.user, dataset_name)
         serializer = DatasetCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -567,12 +599,14 @@ class DatasetManager(APIView):
         return Response({"message": "Dataset updated"}, status=status.HTTP_200_OK)
 
     def delete(self, request, dataset_name):
-        dataset = owned_dataset_or_404(request.user, dataset_name)
-        dataset.delete()
-        return Response(
-            {"message": "Dataset deleted"},
-            status=status.HTTP_204_NO_CONTENT,
+        # the address is the typed confirmation a published Dataset asks for
+        dataset_action(
+            request.user,
+            dataset_actions.DELETE,
+            [dataset_name],
+            {"confirm": dataset_name},
         )
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 @extend_schema(tags=[DATASETS])
@@ -589,7 +623,8 @@ class AssignDatasetTables(APIView):
             "Assigns existing OEP tables to an existing dataset. "
             "The dataset must already exist and the referenced "
             "tables must already exist. After assignment, the "
-            "dataset resources are updated from the table metadata."
+            "dataset resources are updated from the table metadata. "
+            "At most 2,500 tables in one call."
         ),
         parameters=[
             OpenApiParameter(
@@ -606,6 +641,9 @@ class AssignDatasetTables(APIView):
         request=DatasetAssignTablesSerializer,
         responses={
             200: OpenApiResponse(description="Tables were assigned to the dataset."),
+            400: OpenApiResponse(
+                description="The table list is unusable, or names more than 2,500."
+            ),
             404: OpenApiResponse(description="Dataset was not found."),
         },
         examples=[
@@ -623,42 +661,33 @@ class AssignDatasetTables(APIView):
         ],
     )
     def post(self, request, dataset_name):
-        dataset, table_refs = load_owned_dataset_from_request(request, dataset_name)
-        if table_refs is None:
-            return dataset
-
-        missing = []
-        tables = []
-
-        for table_ref in table_refs:
-            try:
-                tables.append(Table.load(table_ref["name"]))
-            except Table.DoesNotExist:
-                missing.append(table_ref)
-
-        forbidden = [
-            table.name
-            for table in tables
-            if not user_may_assign_table(request.user, table)
-        ]
-        if forbidden:
+        try:
+            refs, outcome = change_dataset_members(
+                request, dataset_name, dataset_actions.MEMBERS_ADD
+            )
+        except dataset_actions.ActionRefused as refused:
+            forbidden = [name for group in refused.refused for name in group.names]
             raise PermissionDenied(
                 "Draft or embargoed tables require Data editor on the table, "
                 "directly or through an organization, to be assigned: "
                 f"{', '.join(forbidden)}."
-            )
+            ) from refused
 
-        added_tables = []
-        with transaction.atomic():
-            for table in tables:
-                assign_table(dataset, table)
-                added_tables.append(table.name)
-
+        missing = {
+            name
+            for group in outcome.left_out
+            if group.reason == dataset_actions.NO_SUCH_TABLE
+            for name in group.names
+        }
+        # A Table the Dataset holds already is reported as added, as it
+        # always was: after the call it is in the Dataset, so a repeated
+        # call answers as the first did.
+        added_tables = [ref["name"] for ref in refs if ref["name"] not in missing]
         return Response(
             {
                 "message": f"Added {len(added_tables)} tables.",
                 "added": added_tables,
-                "missing": missing,
+                "missing": [ref for ref in refs if ref["name"] in missing],
             },
             status=status.HTTP_200_OK,
         )
@@ -677,7 +706,7 @@ class UnassignDatasetTables(APIView):
             "deleted -- a dataset is a catalogue entry, and leaving it is not "
             "leaving the platform. A name the dataset does not hold is "
             "reported in `missing` rather than refused, so a repeated call is "
-            "safe."
+            "safe. At most 2,500 tables in one call."
         ),
         parameters=[
             OpenApiParameter(
@@ -699,21 +728,12 @@ class UnassignDatasetTables(APIView):
         ),
     )
     def post(self, request, dataset_name):
-        dataset, table_refs = load_owned_dataset_from_request(request, dataset_name)
-        if table_refs is None:
-            return dataset
-
-        missing = []
-        removed_tables = []
-
-        with transaction.atomic():
-            for table_ref in table_refs:
-                table = dataset.tables.filter(name=table_ref["name"]).first()
-                if table is None:
-                    missing.append(table_ref)
-                else:
-                    dataset.tables.remove(table)
-                    removed_tables.append(table.name)
+        refs, outcome = change_dataset_members(
+            request, dataset_name, dataset_actions.MEMBERS_REMOVE
+        )
+        removed = {table.name for table in outcome.tables}
+        removed_tables = [ref["name"] for ref in refs if ref["name"] in removed]
+        missing = [ref for ref in refs if ref["name"] not in removed]
 
         return Response(
             {

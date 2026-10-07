@@ -2134,7 +2134,11 @@ paths:
           description: Dataset updated
     delete:
       operationId: datasets_destroy
-      description: Deletes the specified dataset.
+      description: 'Deletes the dataset. Its member tables are not deleted; they only
+        leave it. Needs a login, and only the dataset''s creator may delete it: the
+        address is the confirmation a published dataset asks for. A draft is visible
+        only to its creator; anyone else gets 404, as for a name that does not exist,
+        and so does a repeated delete.'
       summary: Delete dataset
       parameters:
       - in: path
@@ -2149,14 +2153,37 @@ paths:
       - cookieAuth: []
       - tokenAuth: []
       responses:
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No credentials, or credentials this platform does not know.
         '204':
-          description: Dataset deleted
+          description: Deleted. The body is empty.
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Authenticated, but the dataset is somebody else's.
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'No dataset of that name, or another user''s draft: the two
+            answer alike, word for word.'
   /api/v0/datasets/{dataset_name}/assign-tables/:
     post:
       operationId: datasets_assign_tables_create
       description: Assigns existing OEP tables to an existing dataset. The dataset
         must already exist and the referenced tables must already exist. After assignment,
-        the dataset resources are updated from the table metadata.
+        the dataset resources are updated from the table metadata. At most 2,500 tables
+        in one call.
       summary: Assign tables to dataset
       parameters:
       - in: path
@@ -2194,6 +2221,8 @@ paths:
       responses:
         '200':
           description: Tables were assigned to the dataset.
+        '400':
+          description: The table list is unusable, or names more than 2,500.
         '404':
           description: Dataset was not found.
   /api/v0/datasets/{dataset_name}/resources/:
@@ -2231,7 +2260,7 @@ paths:
       description: Removes the named tables from the dataset. The tables are not deleted
         -- a dataset is a catalogue entry, and leaving it is not leaving the platform.
         A name the dataset does not hold is reported in `missing` rather than refused,
-        so a repeated call is safe.
+        so a repeated call is safe. At most 2,500 tables in one call.
       summary: Unassign tables from a dataset
       parameters:
       - in: path

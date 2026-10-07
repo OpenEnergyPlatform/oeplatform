@@ -28,7 +28,11 @@ The actions are ``publish``, ``unpublish``, ``delete``, and adding a Table to
 or removing it from one of the user's own Datasets (``dataset_add``,
 ``dataset_remove``, with the Dataset as the ``dataset`` parameter). Whether a Table may be added at all is the
 curation rule of ``api.services.dataset_creation.assignable_tables``, the
-same rule the dataset assign API and the Dataset tab's picker read.
+same rule the dataset assign API and the Dataset tab's picker read. Either
+changes the Dataset's membership, which is a Modification of it: ``execute``
+stamps its ``modified_at`` (``DatasetQuerySet.stamp_modified``). The other
+direction, many Tables in one Dataset, is the Dataset action service's
+(``api.services.dataset_actions``).
 
 Two more change who holds a role (#2568): sharing the Tables with one of the
 user's Organizations (``organization_share``, with ``organization`` and
@@ -1006,6 +1010,10 @@ def execute(user, action, names, params=None, via="dashboard") -> Outcome:
                     _write(action, table, params)
                 except APIError as error:
                     raise _WriteRefused(table, error) from error
+            if action in DATASET_ACTIONS:
+                # every Table changed the membership: the preflight left out
+                # those already in the Dataset (add) or not in it (remove)
+                Dataset.objects.filter(pk=params["dataset"].pk).stamp_modified()
             if action != DELETE:
                 transaction.on_commit(lambda: _log(user, action, tables, params, via))
     except _WriteRefused as refused:
