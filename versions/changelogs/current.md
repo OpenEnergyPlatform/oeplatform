@@ -243,6 +243,10 @@ SPDX-License-Identifier: CC0-1.0
   (`profile/<id>/table-actions/…`, `…/table-names`), so no Table name collides
   with them; their URL names are unchanged
   [(#2611)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2611)
+- The privacy policy names the platform's own domain, openenergyplatform.org,
+  for the site and its cookies instead of openenergy-platform.org, which only
+  redirects there. Three typos in the terms of use are corrected
+  [(#2615)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2615)
 - Errors on the sign-up, set-password and reset-password forms are shown as
   errors (red) instead of green "success" alerts, and the reset-password form
   shows its errors at all: it looked for them on a field it does not have.
