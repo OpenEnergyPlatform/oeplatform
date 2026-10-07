@@ -41,6 +41,7 @@ import json
 import logging
 import re
 import time
+from contextlib import contextmanager
 from copy import deepcopy
 
 import geoalchemy2  # noqa:F401 Although this import seems unused is has to be here
@@ -362,31 +363,17 @@ class TableMetadataAPIView(APIView):
 NOT_THE_CREATOR = "Only the dataset creator may modify this dataset."
 
 
-def owned_dataset(user, dataset_name: str) -> Dataset:
-    """The Dataset a write acts on, by the Dataset action service's rule
-    (``dataset_actions.own_dataset``: the read rule first, then ownership),
-    so a write never tells more than a read: a Dataset the user may not
-    read (a foreign draft, or no such name) is 404 in the words every read
-    uses, one they may read but did not create 403."""
+@contextmanager
+def answered_as_a_read():
+    """Answer the Dataset action service's refusals of a Dataset as this
+    API answers a read, so a write never tells more than a read: a Dataset
+    the user may not read (a foreign draft, or no such name) is 404 in the
+    words every read uses, one they may read but did not create 403, and an
+    unusable parameter (the member ceiling among them) 400 in DRF's field
+    map. Any other refusal passes through as the service raised it."""
     try:
-        return dataset_actions.own_dataset(user, dataset_name)
-    except dataset_actions.DatasetNotFound as error:
-        raise Http404(DATASET_NOT_FOUND) from error
-    except dataset_actions.NotYourDataset as error:
-        raise PermissionDenied(NOT_THE_CREATOR) from error
-
-
-def dataset_action(user, action, names, params):
-    """Do ``action`` through the Dataset action service, the path the
-    dashboard takes (spec #2613), with ``via="api"``, and answer its
-    refusals as this API answers a read: a Dataset the user may not read is
-    404 (``DATASET_NOT_FOUND``), one they may read but did not create 403,
-    an unusable parameter (the member ceiling among them) 400 naming it.
-    Any other refusal comes back to the caller as the service raised it."""
-    try:
-        return dataset_actions.execute(user, action, names, params, via="api")
+        yield
     except dataset_actions.InvalidParameters as error:
-        # DRF's field map, as a serializer's refusal reads
         errors = {key: [message] for key, message in error.errors.items()}
         raise ValidationError(errors) from error
     except dataset_actions.DatasetNotFound as error:
@@ -399,6 +386,21 @@ def dataset_action(user, action, names, params):
         if refused.for_role:
             raise PermissionDenied(NOT_THE_CREATOR) from refused
         raise
+
+
+def owned_dataset(user, dataset_name: str) -> Dataset:
+    """The Dataset a write acts on, by the Dataset action service's rule
+    (``dataset_actions.own_dataset``: the read rule first, then
+    ownership)."""
+    with answered_as_a_read():
+        return dataset_actions.own_dataset(user, dataset_name)
+
+
+def dataset_action(user, action, names, params):
+    """Do ``action`` through the Dataset action service, the path the
+    dashboard takes (spec #2613), with ``via="api"``."""
+    with answered_as_a_read():
+        return dataset_actions.execute(user, action, names, params, via="api")
 
 
 def change_dataset_members(request, dataset_name, action):
@@ -724,7 +726,13 @@ class UnassignDatasetTables(APIView):
                     "`removed` names what was detached and `missing` what the "
                     "dataset did not hold."
                 )
-            }
+            },
+            also={
+                400: describes(
+                    "The table list is unusable, or names more than 2,500: "
+                    "DRF's map of each field to what is wrong with it."
+                )
+            },
         ),
     )
     def post(self, request, dataset_name):

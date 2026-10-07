@@ -32,6 +32,12 @@ def normalize_dataset_name(title: str) -> str | None:
     return name or None
 
 
+def dataset_title(dataset: Dataset) -> str:
+    """What a Dataset is called where a user reads it: its title, or its
+    name when it has none."""
+    return (dataset.metadata or {}).get("title") or dataset.name
+
+
 def assemble_dataset_metadata(
     validated_data: dict[str, Any], oemetadata: dict = OEMETADATA_V20_TEMPLATE
 ) -> dict[str, Any]:

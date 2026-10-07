@@ -579,12 +579,14 @@ class DatasetQuerySet(models.QuerySet):
         return dataset
 
     def stamp_modified(self):
-        """Record a Modification of these Datasets just now: a change to
-        their title, description, Topics or membership (``modified_at``).
-        Called only on a real change, by the paths that make one: the
-        Dataset action service, the shared create path, the tables tab's
-        Dataset actions and ``Table.delete_record``. Never for a change
-        inside a member Table, nor for publishing or unpublishing.
+        """Record a Modification of these Datasets just now
+        (``modified_at``): a change to their title, description, Topics or
+        membership, never one inside a member Table, nor publishing or
+        unpublishing. Called only on a real change, by the paths that make
+        one: today the membership writes of the Dataset action service and
+        of the tables tab's Dataset actions, and ``Table.delete_record``.
+        (A new Dataset's stamp is its ``created_at``, set by
+        ``create_dataset``; edits stamp once they go through the service.)
 
         One UPDATE of the one field, not ``save()``, so every other field
         stays as the database holds it; the application's clock, as

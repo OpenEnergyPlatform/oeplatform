@@ -43,8 +43,8 @@ added or removed. Deleting leaves nothing to stamp.
 Log lines, on the ``oeplatform.dataset_actions`` logger, written once the
 transaction has committed and never for a refused request::
 
-    dataset_action dataset=<name> action=delete by=<user pk> via=<entry point>
-        batch=<id>|- published=yes|no members=<n>
+    dataset_action dataset=<name> action=delete published=yes|no members=<n>
+        by=<user pk> via=<entry point> batch=<id>|-
     dataset_action dataset=<name> action=members_add|members_remove
         table=<name> by=<user pk> via=<entry point> batch=<id>|-
 
@@ -72,7 +72,11 @@ from api.services.batch_actions import (  # noqa: F401 (part of this module's in
     quoted,
     unique,
 )
-from api.services.dataset_creation import assign_table, assignable_tables
+from api.services.dataset_creation import (
+    assign_table,
+    assignable_tables,
+    dataset_title,
+)
 from dataedit.models import DATASET_NOT_FOUND, Dataset, Table
 
 logger = logging.getLogger("oeplatform.dataset_actions")
@@ -194,9 +198,10 @@ def _nouns(action) -> tuple:
     return "dataset", "datasets"
 
 
-def dataset_title(dataset) -> str:
-    """What a Dataset is called where the user reads it."""
-    return (dataset.metadata or {}).get("title") or dataset.name
+def _created_by(dataset, user) -> bool:
+    """Whether ``user`` created ``dataset``: the one who may change it. An
+    ownerless Dataset is nobody's."""
+    return dataset.creator_id is not None and dataset.creator_id == user.pk
 
 
 def own_dataset(user, name) -> Dataset:
@@ -209,7 +214,7 @@ def own_dataset(user, name) -> Dataset:
         dataset = Dataset.objects.readable_or_404(user, name)
     except Http404 as error:
         raise DatasetNotFound() from error
-    if dataset.creator_id is None or dataset.creator_id != user.pk:
+    if not _created_by(dataset, user):
         raise NotYourDataset()
     return dataset
 
@@ -240,7 +245,7 @@ def _delete_preflight(user, names) -> Preflight:
         dataset = found.get(name)
         if dataset is None:
             reason = NOT_FOUND
-        elif dataset.creator_id is None or dataset.creator_id != user.pk:
+        elif not _created_by(dataset, user):
             reason = NOT_YOURS
         else:
             eligible.append(dataset)
@@ -249,7 +254,9 @@ def _delete_preflight(user, names) -> Preflight:
     if len(names) == 1:
         subject = quoted([dataset_title(eligible[0]) if eligible else names[0]])
     else:
-        subject = batch_actions.batch_subject(len(eligible), len(names), "datasets")
+        subject = batch_actions.batch_subject(
+            len(eligible), len(names), _nouns(DELETE)[1]
+        )
     published = [dataset for dataset in eligible if dataset.is_published]
     return Preflight(
         action=DELETE,
@@ -303,7 +310,9 @@ def _members_preflight(user, action, names, dataset) -> Preflight:
         table = found.get(names[0])
         subject = quoted([(table and table.human_readable_name) or names[0]])
     else:
-        subject = batch_actions.batch_subject(len(eligible), len(names), "tables")
+        subject = batch_actions.batch_subject(
+            len(eligible), len(names), _nouns(action)[1]
+        )
     return Preflight(
         action=action,
         total=len(names),
@@ -346,7 +355,9 @@ def preflight(user, action, names, params=None) -> Preflight:
             eligible=[],
             left_out=[],
             ceiling=CEILINGS[action],
-            subject=batch_actions.batch_subject(len(names), len(names), "tables"),
+            subject=batch_actions.batch_subject(
+                len(names), len(names), _nouns(action)[1]
+            ),
             requested=names,
         )
     dataset = own_dataset(user, _dataset_param(params))
@@ -354,8 +365,18 @@ def preflight(user, action, names, params=None) -> Preflight:
 
 
 def _lock(action, names, params):
-    """Hold a row lock on every Dataset the request is about until the
-    transaction ends, so the check and the write are one step."""
+    """Hold a row lock until the transaction ends on everything the check
+    reads that another request could change, so the check and the write are
+    one step: the Datasets the request is about and, for an add, the named
+    Tables, whose state the curation rule judges (published, embargoed).
+
+    Tables before the Dataset: the order the table action service takes
+    (it locks Tables, then writes the Dataset's ``modified_at``), so the two
+    services cannot wait on each other in a circle. Locking a Dataset the
+    user turns out not to own costs nothing: the check refuses it next."""
+    if action == MEMBERS_ADD:
+        tables = Table.objects.filter(name__in=names).select_for_update()
+        list(tables.values_list("pk", flat=True))
     if action == DELETE:
         locked = Dataset.objects.filter(name__in=names)
     else:
@@ -364,19 +385,19 @@ def _lock(action, names, params):
 
 
 def _log(user, action, lines, via):
-    """One line per ``(dataset, before, after)`` in ``lines``: the fields
-    each line carries before ``by=`` and after ``batch=``."""
+    """One line per ``(dataset, fields)`` in ``lines``: the Dataset's name
+    and what the action adds after ``action=`` (``table=`` for a member
+    change, ``published= members=`` for a delete)."""
     batch = uuid.uuid4().hex[:12] if len(lines) > 1 else "-"
-    for dataset, before, after in lines:
+    for dataset, fields in lines:
         logger.info(
-            "dataset_action dataset=%s action=%s%s by=%s via=%s batch=%s%s",
+            "dataset_action dataset=%s action=%s %s by=%s via=%s batch=%s",
             dataset,
             action,
-            before,
+            fields,
             user.pk,
             via,
             batch,
-            after,
         )
 
 
@@ -385,8 +406,7 @@ def _delete(user, check, via) -> Outcome:
     lines = [
         (
             dataset.name,
-            "",
-            f" published={'yes' if dataset.is_published else 'no'}"
+            f"published={'yes' if dataset.is_published else 'no'}"
             f" members={dataset.members}",
         )
         for dataset in datasets
@@ -405,7 +425,7 @@ def _change_members(user, action, check, via) -> Outcome:
         dataset.tables.remove(*tables)
     if tables:
         Dataset.objects.filter(pk=dataset.pk).stamp_modified()
-        lines = [(dataset.name, f" table={table.name}", "") for table in tables]
+        lines = [(dataset.name, f"table={table.name}") for table in tables]
         transaction.on_commit(lambda: _log(user, action, lines, via))
     return Outcome(action, [dataset], tables=tables, left_out=check.left_out)
 
@@ -428,7 +448,9 @@ def execute(user, action, names, params=None, via="dashboard") -> Outcome:
     params = params or {}
     names = unique(names)
     if _over_ceiling(action, names):
-        raise InvalidParameters({"tables": _ceiling_message(action, len(names))})
+        raise InvalidParameters(
+            {_nouns(action)[1]: _ceiling_message(action, len(names))}
+        )
     if not names:
         raise InvalidParameters(
             {_nouns(action)[1]: f"Name at least one {_nouns(action)[0]}."}

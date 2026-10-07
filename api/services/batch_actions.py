@@ -95,7 +95,8 @@ class Preflight:
     confirmation.
 
     A service's subclass sets ``item`` and ``items`` (the noun, singular and
-    plural) and ``action_names`` (each action at the start of a sentence).
+    plural; as properties where the noun depends on the action) and
+    ``action_names`` (each action at the start of a sentence).
     """
 
     item: ClassVar[str] = "item"

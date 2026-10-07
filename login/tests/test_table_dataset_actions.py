@@ -400,13 +400,18 @@ class ModificationStampTests(DatasetActionTestCase):
         )
         self.assertGreaterEqual(self.stamped(dataset), added)
 
-    def test_a_refused_request_does_not_stamp(self):
+    def test_a_no_op_is_refused_and_does_not_stamp(self):
+        """Adding a member or removing a non-member changes nothing: the
+        tables tab refuses either whole, and the stamp stays."""
         inside = self.draft("t_stamp_inside")
+        self.draft("t_stamp_outside")
         dataset = self.dataset("ds_stamp_refused", inside)
         Dataset.objects.filter(pk=dataset.pk).update(modified_at=self.LONG_AGO)
-        response = self.run_action(ADD, "t_stamp_inside", dataset="ds_stamp_refused")
-        self.assertEqual(response.status_code, 409)
-        self.assertEqual(self.stamped(dataset), self.LONG_AGO)
+        for action, name in ((ADD, "t_stamp_inside"), (REMOVE, "t_stamp_outside")):
+            with self.subTest(action=action):
+                response = self.run_action(action, name, dataset="ds_stamp_refused")
+                self.assertEqual(response.status_code, 409)
+                self.assertEqual(self.stamped(dataset), self.LONG_AGO)
 
     def test_a_member_tables_own_change_does_not_stamp(self):
         member = self.draft("t_stamp_member")

@@ -138,14 +138,13 @@ class DeleteAPITests(DatasetActionAPITestCase):
                 self.delete("ds_logged_draft")
                 self.delete("ds_logged_published")
         self.assertEqual(len(callbacks), 2)
-        prefix = "dataset_action dataset=%s action=delete by=%s via=api batch=- "
+        line = "dataset_action dataset=%s action=delete %s by=%s via=api batch=-"
         self.assertEqual(
             [record.getMessage() for record in logs.records],
             [
-                prefix % ("ds_logged_draft", self.creator.pk)
-                + "published=no members=2",
-                prefix % ("ds_logged_published", self.creator.pk)
-                + "published=yes members=0",
+                line % ("ds_logged_draft", "published=no members=2", self.creator.pk),
+                line
+                % ("ds_logged_published", "published=yes members=0", self.creator.pk),
             ],
         )
 
@@ -338,6 +337,39 @@ class CeilingTests(DatasetActionAPITestCase):
         response = self.unassign("ds_at_ceiling", *names)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["missing"]), 2500)
+
+
+class PreflightQueryTests(DatasetActionAPITestCase):
+    """What a preflight costs is constant in the number of names: delete one
+    query, an add four (the Dataset, the Tables, the members and the
+    assignable among them), a removal two (the Dataset, the members)."""
+
+    def test_the_budgets_hold_for_one_name_and_for_many(self):
+        tables = [self.table(f"t_budget_{i}") for i in range(30)]
+        self.dataset("ds_budget", *tables[:10])
+        for i in range(30):
+            self.dataset(f"ds_budget_del_{i}")
+        names = [table.name for table in tables]
+        params = {"dataset": "ds_budget"}
+        for count in (1, 30):
+            with self.subTest(names=count):
+                with self.assertNumQueries(1):
+                    dataset_actions.preflight(
+                        self.creator,
+                        dataset_actions.DELETE,
+                        [f"ds_budget_del_{i}" for i in range(count)],
+                    )
+                with self.assertNumQueries(4):
+                    dataset_actions.preflight(
+                        self.creator, dataset_actions.MEMBERS_ADD, names[:count], params
+                    )
+                with self.assertNumQueries(2):
+                    dataset_actions.preflight(
+                        self.creator,
+                        dataset_actions.MEMBERS_REMOVE,
+                        names[:count],
+                        params,
+                    )
 
 
 class MemberLogTests(DatasetActionAPITestCase):

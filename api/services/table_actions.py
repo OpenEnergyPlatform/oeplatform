@@ -87,7 +87,11 @@ from api.services.batch_actions import (  # noqa: F401 (part of this module's in
 )
 from api.services.batch_actions import quoted as _quoted
 from api.services.batch_actions import unique as _unique
-from api.services.dataset_creation import assign_table, assignable_tables
+from api.services.dataset_creation import (
+    assign_table,
+    assignable_tables,
+    dataset_title,
+)
 from dataedit.models import Dataset, Embargo, PeerReview, Table, Topic
 from dataedit.publish_gate import publish_checks
 from login import table_roles
@@ -394,11 +398,6 @@ def own_datasets(user):
     """The Datasets ``user`` created: the only ones they may add a Table to
     or remove one from."""
     return Dataset.objects.filter(creator=user)
-
-
-def dataset_title(dataset) -> str:
-    """What a Dataset is called where the user reads it."""
-    return (dataset.metadata or {}).get("title") or dataset.name
 
 
 def publish_topics():

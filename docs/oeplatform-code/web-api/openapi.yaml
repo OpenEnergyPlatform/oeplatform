@@ -2294,10 +2294,8 @@ paths:
               schema:
                 type: object
                 additionalProperties: {}
-          description: 'The request could not be carried out as sent: a payload key
-            missing or holding something this endpoint cannot use, a column name that
-            is not a Postgres identifier, or a query the database refused. The body
-            carries `reason` or `error` naming which.'
+          description: 'The table list is unusable, or names more than 2,500: DRF''s
+            map of each field to what is wrong with it.'
         '401':
           content:
             application/json:
