@@ -21,6 +21,8 @@ SPDX-License-Identifier: CC0-1.0
   collapse at its widths. `benchmarks/tables_tab/widths.mjs` takes the tab, its
   column sets, its id prefix and the filter-bar query as parameters
   [(#2630)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2630)
+- Updated the homepage with new content and styling
+  [(#2352)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2352)
 - Datasets now have a lifecycle: a Dataset is a draft until it is published, and
   a new one starts as a draft. A draft is visible only to its creator: it is
   left out of the public topic list (for the creator too), its page, metadata
@@ -366,3 +368,9 @@ SPDX-License-Identifier: CC0-1.0
   [(#2603)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2603)
 
 ## Code Quality
+
+- Profile dashboard: the tables tab's views, page and results region are now
+  generic bases (`login/list_views.py`, `list_tab.html`, `list_region.html`)
+  that the coming datasets tab subclasses instead of copying, and the list
+  mechanics (`login/listing.py`) have their own tests. Nothing visible changes
+  [(#2616)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2616)

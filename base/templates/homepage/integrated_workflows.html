@@ -1,0 +1,293 @@
+{% load static %}
+<div class="index-workflow">
+  <div class="index-features-header index-animate-in">
+    <h2 class="index-features-title">Integrated Workflows</h2>
+    <p class="index-features-subtitle">
+      A typical path through the platform. Steps can be taken in another order or
+      revisited.
+    </p>
+  </div>
+  <ol class="index-workflow-steps">
+    <li class="index-workflow-step index-animate-in">
+      <div class="index-workflow-rail">
+        <img src="{% static 'img/welcome/i_workflow_dataset_architect.svg' %}"
+             width="64"
+             height="64"
+             alt="" />
+      </div>
+      <div class="index-workflow-card">
+        <div class="index-workflow-card-intro">
+          <div class="index-workflow-card-header">
+            <img class="index-workflow-card-icon"
+                 src="{% static 'img/welcome/i_workflow_dataset_architect.svg' %}"
+                 width="32"
+                 height="32"
+                 alt="" />
+            <h3 class="index-workflow-card-title">
+              <span class="index-workflow-card-number">1</span>
+              <span>Dataset Architect</span>
+            </h3>
+          </div>
+          <p class="index-workflow-card-description">
+            Structures data records at the schema level. Defines tables, data types, and
+            relationships as the foundation for consistent and validatable data management.
+          </p>
+        </div>
+        <div class="index-workflow-card-details">
+          <div class="index-workflow-card-group">
+            <h4 class="index-workflow-card-group-title">Tasks</h4>
+            <ul class="index-workflow-tasks">
+              <li>
+                {% include "base/index-tick.html" %}
+                <span>Dataset structure</span>
+              </li>
+              <li>
+                {% include "base/index-tick.html" %}
+                <span>Table structures</span>
+              </li>
+              <li>
+                {% include "base/index-tick.html" %}
+                <span>Data types</span>
+              </li>
+              <li>
+                {% include "base/index-tick.html" %}
+                <span>Naming</span>
+              </li>
+            </ul>
+          </div>
+          <div class="index-workflow-card-group">
+            <h4 class="index-workflow-card-group-title">Tools</h4>
+            <div class="index-workflow-tools">
+              <a class="index-workflow-tool"
+                 href="{{ EXTERNAL_URLS.github_openenergyplatform_oedb_compliance_manager }}">
+                {% include "base/index-arrow.html" %}
+                <span>oedb-cm</span>
+              </a>
+              <a class="index-workflow-tool"
+                 href="{% url 'dataedit:oemetabuilder' %}">
+                {% include "base/index-arrow.html" %}
+                <span>MetadataBuilder</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </li>
+    <li class="index-workflow-step index-animate-in">
+      <div class="index-workflow-rail">
+        <img src="{% static 'img/welcome/i_workflow_data_importer.svg' %}"
+             width="64"
+             height="64"
+             alt="" />
+      </div>
+      <div class="index-workflow-card">
+        <div class="index-workflow-card-intro">
+          <div class="index-workflow-card-header">
+            <img class="index-workflow-card-icon"
+                 src="{% static 'img/welcome/i_workflow_data_importer.svg' %}"
+                 width="32"
+                 height="32"
+                 alt="" />
+            <h3 class="index-workflow-card-title">
+              <span class="index-workflow-card-number">2</span>
+              <span>Data Importer</span>
+            </h3>
+          </div>
+          <p class="index-workflow-card-description">
+            Transfers data to the OEP. Processes metadata, generates table structures, and
+            enables efficient bulk data loading with validation
+          </p>
+        </div>
+        <div class="index-workflow-card-details">
+          <div class="index-workflow-card-group">
+            <h4 class="index-workflow-card-group-title">Tasks</h4>
+            <ul class="index-workflow-tasks">
+              <li>
+                {% include "base/index-tick.html" %}
+                <span>Metadata extraction</span>
+              </li>
+              <li>
+                {% include "base/index-tick.html" %}
+                <span>Table creation</span>
+              </li>
+              <li>
+                {% include "base/index-tick.html" %}
+                <span>Data Upload</span>
+              </li>
+              <li>
+                {% include "base/index-tick.html" %}
+                <span>Revisions</span>
+              </li>
+            </ul>
+          </div>
+          <div class="index-workflow-card-group">
+            <h4 class="index-workflow-card-group-title">Tools</h4>
+            <div class="index-workflow-tools">
+              <a class="index-workflow-tool"
+                 href="{{ EXTERNAL_URLS.github_jh_rli_oep_upload }}">
+                {% include "base/index-arrow.html" %}
+                <span>OEP Upload</span>
+              </a>
+              <a class="index-workflow-tool"
+                 href="{{ EXTERNAL_URLS.github_openenergyplatform_oem2orm }}">
+                {% include "base/index-arrow.html" %}
+                <span>oem2orm</span>
+              </a>
+              <a class="index-workflow-tool"
+                 href="{{ EXTERNAL_URLS.github_openenergyplatform_omi }}">
+                {% include "base/index-arrow.html" %}
+                <span>OMI</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </li>
+    <li class="index-workflow-step index-animate-in">
+      <div class="index-workflow-rail">
+        <img src="{% static 'img/welcome/i_workflow_metadata_wizard.svg' %}"
+             width="64"
+             height="64"
+             alt="" />
+      </div>
+      <div class="index-workflow-card">
+        <div class="index-workflow-card-intro">
+          <div class="index-workflow-card-header">
+            <img class="index-workflow-card-icon"
+                 src="{% static 'img/welcome/i_workflow_metadata_wizard.svg' %}"
+                 width="32"
+                 height="32"
+                 alt="" />
+            <h3 class="index-workflow-card-title">
+              <span class="index-workflow-card-number">3</span>
+              <span>Metadata Wizard</span>
+            </h3>
+          </div>
+          <p class="index-workflow-card-description">
+            Guides users through comprehensive metadata creation. Ensures compliance with
+            OEMetadata standard and enhances data discoverability
+          </p>
+        </div>
+        <div class="index-workflow-card-details">
+          <div class="index-workflow-card-group">
+            <h4 class="index-workflow-card-group-title">Tasks</h4>
+            <ul class="index-workflow-tasks">
+              <li>
+                {% include "base/index-tick.html" %}
+                <span>Metadata+Templates</span>
+              </li>
+              <li>
+                {% include "base/index-tick.html" %}
+                <span>Ontology annotation</span>
+              </li>
+              <li>
+                {% include "base/index-tick.html" %}
+                <span>Versioning</span>
+              </li>
+            </ul>
+          </div>
+          <div class="index-workflow-card-group">
+            <h4 class="index-workflow-card-group-title">Tools</h4>
+            <div class="index-workflow-tools">
+              <a class="index-workflow-tool"
+                 href="{% url 'dataedit:oemetabuilder' %}">
+                {% include "base/index-arrow.html" %}
+                <span>MetadataBuilder</span>
+              </a>
+              <a class="index-workflow-tool"
+                 href="{{ EXTERNAL_URLS.github_openenergyplatform_omi }}">
+                {% include "base/index-arrow.html" %}
+                <span>OMI</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </li>
+    <li class="index-workflow-step index-animate-in">
+      <div class="index-workflow-rail">
+        <img src="{% static 'img/welcome/i_workflow_data_certifier.svg' %}"
+             width="64"
+             height="64"
+             alt="" />
+      </div>
+      <div class="index-workflow-card">
+        <div class="index-workflow-card-intro">
+          <div class="index-workflow-card-header">
+            <img class="index-workflow-card-icon"
+                 src="{% static 'img/welcome/i_workflow_data_certifier.svg' %}"
+                 width="32"
+                 height="32"
+                 alt="" />
+            <h3 class="index-workflow-card-title">
+              <span class="index-workflow-card-number">4</span>
+              <span>Data Certifier</span>
+            </h3>
+          </div>
+          <p class="index-workflow-card-description">
+            Validates data quality and assigns trust levels. Enables peer review and
+            quality control workflows for published datasets
+          </p>
+        </div>
+        <div class="index-workflow-card-details">
+          <div class="index-workflow-card-group">
+            <h4 class="index-workflow-card-group-title">Tasks</h4>
+            <ul class="index-workflow-tasks">
+              <li>
+                {% include "base/index-tick.html" %}
+                <span>Metadata validation</span>
+              </li>
+              <li>
+                {% include "base/index-tick.html" %}
+                <span>Badges</span>
+              </li>
+              <li>
+                {% include "base/index-tick.html" %}
+                <span>Data publication</span>
+              </li>
+            </ul>
+          </div>
+          <div class="index-workflow-card-group">
+            <h4 class="index-workflow-card-group-title">Tools</h4>
+            <div class="index-workflow-tools">
+              <a class="index-workflow-tool"
+                 href="{{ EXTERNAL_URLS.academy_course_peer_review }}">
+                {% include "base/index-arrow.html" %}
+                <span>Open Peer Review</span>
+              </a>
+              <span class="index-workflow-tool">Persistent links</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </li>
+    <li class="index-workflow-step index-workflow-step--disabled index-animate-in">
+      <div class="index-workflow-rail">
+        <img src="{% static 'img/welcome/i_workflow_data_archivar_disabled.svg' %}"
+             width="64"
+             height="64"
+             alt="" />
+      </div>
+      <div class="index-workflow-card">
+        <div class="index-workflow-card-intro">
+          <div class="index-workflow-card-header">
+            <img class="index-workflow-card-icon"
+                 src="{% static 'img/welcome/i_workflow_data_archivar_disabled.svg' %}"
+                 width="32"
+                 height="32"
+                 alt="" />
+            <h3 class="index-workflow-card-title">
+              <span class="index-workflow-card-number">5</span>
+              <span>Data Archivar</span>
+            </h3>
+            <span class="index-workflow-badge">Under development</span>
+          </div>
+          <p class="index-workflow-card-description">
+            Manages long-term data preservation and assigns DOI. Enables archival and
+            citation of research datasets — under development
+          </p>
+        </div>
+      </div>
+    </li>
+  </ol>
+</div>

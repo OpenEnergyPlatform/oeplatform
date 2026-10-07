@@ -533,6 +533,17 @@ class TableRow:
     topics: list = field(default_factory=list)
 
     @property
+    def key(self) -> int:
+        """What the row's and its cells' ids are built from
+        (``list_region.html``)."""
+        return self.table.pk
+
+    @property
+    def name(self) -> str:
+        """What a selection and an action carry for this row."""
+        return self.table.name
+
+    @property
     def title(self) -> str:
         return self.table.human_readable_name or self.table.name
 

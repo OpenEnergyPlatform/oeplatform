@@ -2,6 +2,7 @@
 {% load django_bootstrap5 %}
 {% load fontawesome_5 %}
 {% load django_vite %}
+{% load compress %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -18,21 +19,31 @@
           href="{% static 'favicon.ico' %}"
           type="image/x-icon" />
     {% fontawesome_5_static %}
-    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/base-style.css' %}" />
+    {% comment %}
+      Through compress, like the other shells: the bundle's name changes with its
+      content, so a browser cannot keep serving last release's base-style.css on
+      these pages. Loaded directly, the files carry no version and no
+      Cache-Control, and returning visitors saw the old navbar until their cache
+      expired.
+    {% endcomment %}
+    {% compress css %}
+      <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
+      <link rel="stylesheet" href="{% static 'css/base-style.css' %}" />
+    {% endcompress %}
     {% vite_hmr_client %}
     {% block after-head %}
     {% endblock after-head %}
     {% block style %}{% endblock %}
   </head>
   <body class="h-100 d-flex flex-column">
+    <a class="visually-hidden-focusable"
+       href="#main-content">Skip to main content</a>
     {% block header %}
-      <nav class="navbar navbar-expand-lg navbar-dark bg-secondary">
-        ^
+      <nav class="navbar navbar-expand-lg navbar-dark bg-primary index-navbar">
         <div class="container-fluid">{% include "base/_header.html" %}</div>
       </nav>
     {% endblock header %}
-    <main class="main" style="flex: 1">
+    <main class="main" id="main-content" style="flex: 1">
       <div class="" style="padding:0">
         {% block site-header %}
         {% endblock site-header %}

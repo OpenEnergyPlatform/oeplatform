@@ -6,7 +6,7 @@ Cell type "review pill": Reviewed as a pill showing the badge level, linked
 to the finished review; In review and Not reviewed as muted text.
 {% endcomment %}
 {% if row.review_state == "reviewed" %}
-  <a id="rev-{{ row.table.pk }}"
+  <a id="rev-{{ row.key }}"
      class="badge rounded-pill dash-pill dash-pill--{{ row.review_badge|lower|default:'none' }}"
      href="{% url 'dataedit:peer_review_reviewer' table=row.table.name review_id=row.review_id %}"
      hx-boost="false"

@@ -9,13 +9,13 @@ people's are named with their owner; another user's draft never appears.
 {% with count=row.datasets|length %}
   {% if count %}
     <button type="button"
-            id="ds-{{ row.table.pk }}"
+            id="ds-{{ row.key }}"
             class="dash-count"
             aria-expanded="false"
-            aria-controls="ds-{{ row.table.pk }}-pop"
+            aria-controls="ds-{{ row.key }}-pop"
             aria-label="In {{ count }} dataset{{ count|pluralize }}. Show {{ count|pluralize:'it,them' }}"
             data-dash-popover>{{ count }}</button>
-    <div id="ds-{{ row.table.pk }}-pop"
+    <div id="ds-{{ row.key }}-pop"
          class="dash-pop"
          role="dialog"
          aria-label="Datasets containing {{ row.title }}"

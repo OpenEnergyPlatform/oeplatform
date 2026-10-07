@@ -1,18 +1,14 @@
-{% extends "base/base-profile.html" %}
+{% extends "login/list_tab.html" %}
 {% comment %}
 SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
 
-The tables tab. Only the results region (#tables-results) is swapped; the
-filter bar and the live count sit outside it, so focus and half-typed input
-survive a swap and the live region is announced reliably. The primary row is
-Search, Publishable, Review, Access and Dataset; "More filters (n)" holds the
-rest. The chips and Reset are inside the region. Where the list is too
-narrow for the bar on one line (960 px, measured), everything but Search
-folds behind "Filters (n)": the fold panel is ``display: contents`` on a
-wider list, so the controls sit in the row as if it were not there
-(``dash_list.css``; the width it folds at is in ``tables_tab.css``).
+The tables tab (list_tab.html). The primary filter row is Search,
+Publishable, Review, Access and Dataset; "More filters (n)" holds the rest.
+The bar folds behind "Filters (n)" below 960 px of list (measured,
+``tables_tab.css``). The bulk bar (#2564) sends the selection as
+``tables`` to TableActionCheckView.
 
 The tab keeps the profile sidebar, like every other profile tab. The spec
 decided on a slim identity strip instead, to give the list the width
@@ -20,160 +16,14 @@ decided on a slim identity strip instead, to give the list the width
 against about 1,340 px for all nine columns); the maintainer chose the
 sidebar on 2026-10-02, so the column collapse (#2555) works with that width.
 {% endcomment %}
-{% load compress %}
 {% load static %}
-{% block after-head %}
-  <link rel="stylesheet" href="{% static 'login/dash_list.css' %}" />
+{% block list-styles %}
   <link rel="stylesheet" href="{% static 'login/tables_tab.css' %}" />
-{% endblock after-head %}
-{% block main-right-sidebar-content %}
-  {% include "login/sidebar_user.html" %}
-{% endblock main-right-sidebar-content %}
-{% block main-content-body %}
-  {% include "login/user_nav.html" %}
-  <div id="tables-tab"
-       class="dash"
-       data-login-url="{% url 'account_login' %}"
-       hx-boost="true"
-       hx-target="#tables-results"
-       hx-swap="outerHTML"
-       hx-sync="this:replace">
-    {% if page.has_any %}
-      {% with controls=page.controls %}
-        <div id="tables-filters"
-             class="dash-filters"
-             role="search"
-             aria-label="Filter your tables">
-          <div class="dash-filters__row">
-            <label class="visually-hidden"
-                   for="tables-search">Search title or technical name</label>
-            <input type="search"
-                   id="tables-search"
-                   name="search"
-                   class="form-control form-control-sm dash-search"
-                   placeholder="Search title or name"
-                   autocomplete="off"
-                   value="{{ page.state.raw.search|default:'' }}"
-                   hx-get="{{ request.path }}"
-                   hx-trigger="input changed delay:300ms, search" />
-            <button type="button"
-                    id="tables-fold"
-                    class="btn btn-outline-secondary btn-sm dash-fold-toggle"
-                    aria-expanded="false"
-                    aria-controls="tables-fold-panel">
-              Filters<span id="tables-fold-count">{% if page.folded_count %} ({{ page.folded_count }}){% endif %}</span>
-            </button>
-            <div id="tables-fold-panel" class="dash-fold">
-              {% for control in controls %}
-                {% if not control.more %}
-                  {% include "login/partials/list_filter_control.html" with path=request.path %}
-                {% endif %}
-              {% endfor %}
-              <button type="button"
-                      id="tables-more"
-                      class="btn btn-outline-secondary btn-sm"
-                      aria-expanded="false"
-                      aria-controls="tables-more-panel">
-                More filters<span id="tables-more-count">{% if page.more_count %} ({{ page.more_count }}){% endif %}</span>
-              </button>
-              <div id="tables-more-panel" class="dash-more" hidden>
-                {% for control in controls %}
-                  {% if control.more %}
-                    {% include "login/partials/list_filter_control.html" with path=request.path %}
-                  {% endif %}
-                {% endfor %}
-              </div>
-            </div>
-          </div>
-        </div>
-      {% endwith %}
-      {% comment %}
-      The bulk bar (#2564), sticky at the top of the list and outside the
-      region, so a swap neither moves it nor takes focus out of it. Its slot
-      is reserved while nothing is selected: a muted line, hidden from screen
-      readers and not focusable, turns into the bar on the first tick, so the
-      list does not jump under the pointer. tables_tab.js holds the selection
-      and sends it, comma-joined, as the ``tables`` parameter of an action's
-      preflight, POSTed (TableActionCheckView), since a selection does not
-      fit in an address. Every action is enabled while anything is selected: the
-      preflight says what it would leave out. Delete is red and last. Where the rows stack, the
-      actions fold into "Actions ▾". Its requests are synced only with
-      themselves, never with the list's.
-      {% endcomment %}
-      <div id="tables-bulk"
-           class="dash-bulk"
-           hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
-        <p id="tables-bulk-idle"
-           class="dash-bulk__idle"
-           aria-hidden="true">Tick tables to act on several at once.</p>
-        <p id="tables-bulk-note" class="dash-bulk__note" role="status"></p>
-        <div id="tables-bulk-bar"
-             class="dash-bulk__bar"
-             role="group"
-             aria-label="Selected tables"
-             hidden>
-          <span id="tables-bulk-count" class="dash-bulk__count"></span>
-          <button type="button"
-                  id="tables-bulk-clear"
-                  class="btn btn-link btn-sm dash-bulk__clear">Clear</button>
-          <div class="dash-bulk__actions">
-            {% for verb, label in bulk_actions %}
-              <button type="button"
-                      id="bulk-{{ verb }}"
-                      class="btn {% if verb == "delete" %}btn-outline-danger{% else %}btn-outline-primary{% endif %} btn-sm"
-                      hx-post="{% url 'login:table-action-check' user_id=profile_user.pk action=verb %}"
-                      hx-target="#table-action-body"
-                      hx-swap="innerHTML"
-                      hx-sync="this:replace"
-                      data-bulk-action
-                      data-action-origin="bulk-{{ verb }}">{{ label }}</button>
-            {% endfor %}
-          </div>
-          <div class="dropdown dash-bulk__menu">
-            <button type="button"
-                    id="bulk-menu"
-                    class="btn btn-outline-primary btn-sm dropdown-toggle"
-                    data-bs-toggle="dropdown"
-                    aria-expanded="false">Actions</button>
-            <ul class="dropdown-menu" aria-labelledby="bulk-menu">
-              {% for verb, label in bulk_actions %}
-                <li>
-                  <button type="button"
-                          id="bulk-menu-{{ verb }}"
-                          class="dropdown-item{% if verb == "delete" %} text-danger{% endif %}"
-                          hx-post="{% url 'login:table-action-check' user_id=profile_user.pk action=verb %}"
-                          hx-target="#table-action-body"
-                          hx-swap="innerHTML"
-                          hx-sync="this:replace"
-                          data-bulk-action
-                          data-action-origin="bulk-menu">{{ label }}</button>
-                </li>
-              {% endfor %}
-            </ul>
-          </div>
-        </div>
-      </div>
-    {% endif %}
-    <div id="tables-live"
-         class="visually-hidden"
-         aria-live="polite"
-         aria-atomic="true"></div>
-    {% include "login/partials/tables_region.html" %}
-  </div>
-  {% comment %}
-  The one action dialog, outside the tab so its requests are not synced
-  with (and cannot cancel) the list's. Its contents come from the action's
-  preflight endpoint; tables_tab.js opens it once they are in.
-  {% endcomment %}
-  <div id="table-action"
-       class="modal fade"
-       tabindex="-1"
-       aria-labelledby="table-action-title"
-       aria-hidden="true">
-    <div class="modal-dialog modal-dialog-scrollable">
-      <div id="table-action-body" class="modal-content"></div>
-    </div>
-  </div>
+{% endblock list-styles %}
+{% block region %}
+  {% include "login/partials/tables_region.html" %}
+{% endblock region %}
+{% block drawers %}
   {% comment %}
   The access drawer, outside the tab for the same reason as the dialog. Its
   contents come from the drawer endpoint (login:table-access) and every
@@ -186,25 +36,11 @@ sidebar on 2026-10-02, so the column collapse (#2555) works with that width.
        aria-labelledby="table-access-title">
     <div id="table-access-body" class="dash-access-body"></div>
   </div>
-  {% comment %}
-  Messages after an action. Two persistent live regions, so a message is
-  announced when it is added: success politely (and it dismisses itself),
-  refusals and failures assertively (and they stay until dismissed).
-  {% endcomment %}
-  <div class="toast-container position-fixed bottom-0 end-0 p-3 dash-toasts">
-    <div id="tables-toasts-polite" aria-live="polite" aria-atomic="false"></div>
-    <div id="tables-toasts-assertive"
-         aria-live="assertive"
-         aria-atomic="false"></div>
-  </div>
-{% endblock main-content-body %}
-{% block after-body-bottom-js %}
-  {% compress js %}
-    <script src="{% static 'ontology/htmx.js' %}"></script>
-  {% endcompress %}
+{% endblock drawers %}
+{% block list-script %}
   <script type="module">
     import { bindTablesTab } from "{% static 'login/tables_tab.js' %}";
 
     bindTablesTab(document);
   </script>
-{% endblock after-body-bottom-js %}
+{% endblock list-script %}

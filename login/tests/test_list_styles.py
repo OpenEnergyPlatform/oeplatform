@@ -125,9 +125,21 @@ class GenericStylesheetTests(SimpleTestCase):
 
 
 class TablesPageTests(SimpleTestCase):
-    def test_the_page_loads_the_generic_styles_first(self):
-        """The tab's rules come after the generic ones they build on."""
+    def test_every_tab_loads_the_generic_styles_before_its_own(self):
+        """The frame links dash_list.css, then the tab's ``list-styles``."""
+        frame = (TEMPLATES / "list_tab.html").read_text()
+        generic = frame.index("{% static 'login/dash_list.css' %}")
+        self.assertLess(generic, frame.index("{% block list-styles %}"))
+        self.assertLess(
+            frame.index("{% block after-head %}"),
+            generic,
+        )
+
+    def test_the_tables_tab_adds_its_styles_without_replacing_the_frames(self):
         page = (TEMPLATES / "user_tables.html").read_text()
-        generic = page.index("{% static 'login/dash_list.css' %}")
-        tab = page.index("{% static 'login/tables_tab.css' %}")
-        self.assertLess(generic, tab)
+        styles = re.search(
+            r"{% block list-styles %}(.*?){% endblock list-styles %}", page, re.S
+        )
+        self.assertIn("{% static 'login/tables_tab.css' %}", styles.group(1))
+        # overriding after-head would drop dash_list.css
+        self.assertNotIn("{% block after-head %}", page)
