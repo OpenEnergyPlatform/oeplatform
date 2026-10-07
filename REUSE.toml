@@ -3473,6 +3473,11 @@ path = [
   "base/static/img/welcome/i_hex_light_workflow.svg",
   "base/static/img/welcome/i_questions.svg",
   "base/static/img/welcome/i_tutorials.svg",
+  "base/static/img/welcome/i_workflow_data_archivar_disabled.svg",
+  "base/static/img/welcome/i_workflow_data_certifier.svg",
+  "base/static/img/welcome/i_workflow_data_importer.svg",
+  "base/static/img/welcome/i_workflow_dataset_architect.svg",
+  "base/static/img/welcome/i_workflow_metadata_wizard.svg",
 ]
 precedence = "override"
 SPDX-License-Identifier = "CC-BY-4.0"
@@ -3486,6 +3491,7 @@ SPDX-FileCopyrightText = [
 path = [
   "base/templates/base/index-arrow.html",
   "base/templates/base/index-checkmark.html",
+  "base/templates/base/index-tick.html",
   "base/templates/homepage/academy.html",
   "base/templates/homepage/capabilities.html",
   "base/templates/homepage/features.html",

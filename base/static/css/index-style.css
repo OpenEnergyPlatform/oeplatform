@@ -210,10 +210,6 @@
   max-width: 1248px;
 }
 
-.index-features-grid--five {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-}
-
 .index-features-grid-quad {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -224,10 +220,6 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .index-features-grid--five {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .index-features-grid-quad {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -235,10 +227,6 @@
 
 @media screen and (max-width: 800px) {
   .index-features-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .index-features-grid--five {
     grid-template-columns: 1fr;
   }
 
@@ -520,6 +508,269 @@
   .index-capability-columns {
     flex-direction: column;
     gap: 24px;
+  }
+}
+
+.index-workflow {
+  --index-workflow-icon-size: 64px;
+  /* centres the icon on the card's number and title */
+  --index-workflow-icon-offset: 28px;
+  --index-workflow-step-gap: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 64px;
+  padding: 96px 24px;
+  width: 100%;
+  background-color: var(--bs-primary);
+}
+
+.index-workflow .index-features-title,
+.index-workflow .index-features-subtitle {
+  color: var(--white);
+}
+
+.index-workflow-steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--index-workflow-step-gap);
+  width: 100%;
+  max-width: 1248px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.index-workflow-step {
+  display: grid;
+  grid-template-columns: 106px minmax(0, 1fr);
+  column-gap: 64px;
+}
+
+.index-workflow-rail {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: var(--index-workflow-icon-offset);
+}
+
+/* runs from this step's icon to the next one's, 8px clear of both */
+.index-workflow-rail::after {
+  content: "";
+  position: absolute;
+  top: calc(var(--index-workflow-icon-offset) + var(--index-workflow-icon-size) + 8px);
+  bottom: calc(8px - var(--index-workflow-step-gap) - var(--index-workflow-icon-offset));
+  left: calc(50% - 1.5px);
+  width: 3px;
+  background-color: #54a7e2;
+}
+
+.index-workflow-step:last-child .index-workflow-rail::after {
+  content: none;
+}
+
+.index-workflow-step:has(+ .index-workflow-step--disabled) .index-workflow-rail::after {
+  opacity: 0.2;
+}
+
+.index-workflow-card {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+  padding: 32px;
+  border: 1px solid #427aa1;
+  border-radius: 4px;
+  box-shadow: 0 2px 2px rgba(41, 114, 166, 0.1);
+  text-align: left;
+  color: var(--white);
+}
+
+.index-workflow-card-intro {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.index-workflow-card-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}
+
+/* stands in for the timeline icon once the rail is hidden */
+.index-workflow-card-icon {
+  display: none;
+  flex-shrink: 0;
+}
+
+.index-workflow-card-title {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 24px;
+  color: inherit;
+}
+
+.index-workflow-card-number {
+  font-family: "Roboto Mono", var(--bs-font-monospace);
+  font-size: 20px;
+}
+
+.index-workflow-badge {
+  align-self: flex-end;
+  padding: 0 12px;
+  border: 1px solid var(--white);
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 24px;
+  white-space: nowrap;
+  color: var(--white);
+}
+
+.index-workflow-card-description {
+  margin: 0;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.index-workflow-card-details {
+  display: grid;
+  grid-template-columns: minmax(0, 645fr) minmax(0, 369fr);
+  gap: 32px;
+}
+
+.index-workflow-card-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.index-workflow-card-group-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+  color: inherit;
+}
+
+.index-workflow-tasks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.index-workflow-tasks li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 12px;
+  border-radius: 4px;
+  background-color: #427aa1;
+  font-size: 14px;
+  line-height: 24px;
+}
+
+.index-workflow-tick {
+  flex-shrink: 0;
+}
+
+.index-workflow-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.index-workflow-tool {
+  display: flex;
+  flex: 1 0 auto;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 12px;
+  border: 1px solid #d7e2ea;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 24px;
+  white-space: nowrap;
+  color: var(--white);
+  text-decoration: none;
+  background-image: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.index-workflow-tool:hover,
+.index-workflow-tool:focus-visible {
+  color: var(--white);
+}
+
+.index-workflow-tool[href]:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.index-workflow-tool[href]:hover .index-feature-link-arrow,
+.index-workflow-tool[href]:focus-visible .index-feature-link-arrow {
+  transform: translateX(4px);
+}
+
+.index-workflow-step--disabled .index-workflow-card {
+  border-style: dashed;
+  box-shadow: none;
+  color: #93a4af;
+}
+
+@media screen and (max-width: 1024px) {
+  .index-workflow-step {
+    grid-template-columns: var(--index-workflow-icon-size) minmax(0, 1fr);
+    column-gap: 24px;
+  }
+
+  .index-workflow-card-details {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+}
+
+@media screen and (max-width: 800px) {
+  .index-workflow {
+    padding: 48px 24px;
+  }
+
+  .index-workflow-step {
+    display: block;
+  }
+
+  .index-workflow-rail {
+    display: none;
+  }
+
+  .index-workflow-card {
+    padding: 24px;
+  }
+
+  .index-workflow-card-icon {
+    display: block;
+  }
+
+  /* keeps the icon beside the title when the title has to wrap */
+  .index-workflow-card-title {
+    max-width: calc(100% - 48px);
+  }
+
+  .index-workflow-tools {
+    flex-direction: column;
+    flex-wrap: nowrap;
   }
 }
 
