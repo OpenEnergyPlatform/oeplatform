@@ -14,5 +14,5 @@ an embargo, and ``since``, when a published item was published, which reads
   <span class="dash-until">until {{ until|date:"j M Y" }}</span>
 {% else %}
   <span class="badge dash-badge dash-badge--published">Published</span>
-  {% if since %}<span class="dash-until">since {{ since|date:"j M Y" }}</span>{% endif %}
+  {% if since %}<span class="dash-until dash-since">since {{ since|date:"j M Y" }}</span>{% endif %}
 {% endif %}

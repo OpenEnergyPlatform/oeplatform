@@ -345,6 +345,18 @@ class FilterControl:
     options: list
     kind: str = "choice"
 
+    @property
+    def summary(self) -> str:
+        """What a dropdown of this control's checkboxes says on its button:
+        the blank text, up to two ticked labels, or how many are ticked.
+        ``summarizeMulti`` in dash_list.js says the same after a change."""
+        ticked = [option.label for option in self.options if option.selected]
+        if not ticked:
+            return self.blank
+        if len(ticked) <= 2:
+            return f"{self.label}: {', '.join(ticked)}"
+        return f"{self.label}: {len(ticked)} ticked"
+
 
 @dataclass(frozen=True)
 class RangeEnd:

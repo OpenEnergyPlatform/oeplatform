@@ -28,6 +28,8 @@ list of names in page memory; the region only says which scope it shows
 selection) and where the names of every matching item come from (the
 banner's ``data-names-url``). The banner offers "Select all N matching" once
 the whole page is ticked; the tab's module shows it and picks its wording.
+A tab with no bulk actions offers no selection: its ☐ cells stay empty
+slots, so the columns keep the widths they were measured with.
 
 After an action the region re-fetches itself with the state it shows
 (``<items>-changed``, sent by the action's response). The request names the
@@ -60,7 +62,7 @@ a page holds one list.
   {% else %}
     <div class="dash-bar">
       {% include "login/partials/list_segment.html" with links=page.segment_links label="Status" %}
-      {% if page.total %}
+      {% if page.total and bulk_actions %}
         {% comment %}Where the rows stack, the header row and #select-page with it are hidden, so this takes its place (CSS shows it only then). It is the same control: the tab's module reads every data-select-page box alike.{% endcomment %}
         <div class="dash-selectpage">
           <input type="checkbox"
@@ -70,42 +72,50 @@ a page holds one list.
           <label class="dash-selectpage__label"
                  for="select-page-stacked">Select this page</label>
         </div>
+      {% endif %}
+      {% if page.total %}
         {% include "login/partials/list_sort_select.html" %}
       {% endif %}
       <div class="dash-summary">{{ page.summary }}</div>
     </div>
     {% include "login/partials/list_chips.html" with id=frame.items|add:"-chips" %}
     {% if page.total %}
-      {% with on_page=page.rows|length singular=page.listing.singular plural=page.listing.plural %}
-        <div id="{{ frame.items }}-select-all"
-             class="dash-selectall"
-             data-total="{{ page.total }}"
-             data-names-url="{% url frame.names_url user_id=profile_user.pk %}{{ page.scope }}"
-             hidden>
-          <span data-when="page">All {{ on_page }} {% if on_page == 1 %}{{ singular }}{% else %}{{ plural }}{% endif %} on this page {{ on_page|pluralize:"is,are" }} selected.</span>
-          <button type="button"
-                  id="{{ frame.items }}-select-matching"
-                  class="btn btn-link btn-sm dash-selectall__button"
-                  data-when="page">Select all {{ page.total }} matching {{ plural }}</button>
-          <span data-when="all">All {{ page.total }} matching {% if page.total == 1 %}{{ singular }}{% else %}{{ plural }}{% endif %} {{ page.total|pluralize:"is,are" }} selected.</span>
-          <button type="button"
-                  id="{{ frame.items }}-select-none"
-                  class="btn btn-link btn-sm dash-selectall__button"
-                  data-when="all">Clear selection</button>
-        </div>
-      {% endwith %}
+      {% if bulk_actions %}
+        {% with on_page=page.rows|length singular=page.listing.singular plural=page.listing.plural %}
+          <div id="{{ frame.items }}-select-all"
+               class="dash-selectall"
+               data-total="{{ page.total }}"
+               data-names-url="{% url frame.names_url user_id=profile_user.pk %}{{ page.scope }}"
+               hidden>
+            <span data-when="page">All {{ on_page }} {% if on_page == 1 %}{{ singular }}{% else %}{{ plural }}{% endif %} on this page {{ on_page|pluralize:"is,are" }} selected.</span>
+            <button type="button"
+                    id="{{ frame.items }}-select-matching"
+                    class="btn btn-link btn-sm dash-selectall__button"
+                    data-when="page">Select all {{ page.total }} matching {{ plural }}</button>
+            <span data-when="all">All {{ page.total }} matching {% if page.total == 1 %}{{ singular }}{% else %}{{ plural }}{% endif %} {{ page.total|pluralize:"is,are" }} selected.</span>
+            <button type="button"
+                    id="{{ frame.items }}-select-none"
+                    class="btn btn-link btn-sm dash-selectall__button"
+                    data-when="all">Clear selection</button>
+          </div>
+        {% endwith %}
+      {% endif %}
       <div class="dash-table-wrap">
         <table class="table dash-table">
           <caption class="visually-hidden">Your {{ page.listing.plural }}, {{ page.summary }}</caption>
           <thead>
             <tr>
-              <th class="c-select" scope="col">
-                <input type="checkbox"
-                       class="form-check-input dash-check"
-                       id="select-page"
-                       data-select-page
-                       aria-label="Select all {{ page.rows|length }} {{ page.listing.plural }} on this page" />
-              </th>
+              {% if bulk_actions %}
+                <th class="c-select" scope="col">
+                  <input type="checkbox"
+                         class="form-check-input dash-check"
+                         id="select-page"
+                         data-select-page
+                         aria-label="Select all {{ page.rows|length }} {{ page.listing.plural }} on this page" />
+                </th>
+              {% else %}
+                <td class="c-select"></td>
+              {% endif %}
               {% block head_cells %}
               {% endblock head_cells %}
             </tr>
@@ -114,12 +124,14 @@ a page holds one list.
             {% for row in page.rows %}
               <tr id="row-{{ row.key }}">
                 <td class="c-select">
-                  <input type="checkbox"
-                         class="form-check-input dash-check"
-                         id="select-{{ row.key }}"
-                         value="{{ row.name }}"
-                         data-select-row
-                         aria-label="Select {{ row.title }}" />
+                  {% if bulk_actions %}
+                    <input type="checkbox"
+                           class="form-check-input dash-check"
+                           id="select-{{ row.key }}"
+                           value="{{ row.name }}"
+                           data-select-row
+                           aria-label="Select {{ row.title }}" />
+                  {% endif %}
                 </td>
                 {% block row_cells %}
                 {% endblock row_cells %}

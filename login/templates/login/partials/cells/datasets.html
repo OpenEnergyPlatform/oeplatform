@@ -25,7 +25,7 @@ people's are named with their owner; another user's draft never appears.
         {% for dataset in row.datasets %}
           <li>
             {% if dataset.own %}
-              <a href="{% url 'login:datasets' user_id=profile_user.pk %}?search={{ dataset.name|urlencode }}#dataset-card-{{ dataset.name }}"
+              <a href="{% url 'login:datasets' user_id=profile_user.pk %}?search={{ dataset.name|urlencode }}"
                  hx-boost="false">{{ dataset.name }}</a>
               <span class="dash-muted">your dataset</span>
             {% else %}
