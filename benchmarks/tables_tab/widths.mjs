@@ -41,7 +41,8 @@
 //   `<prefix>-fold` (default "tables").
 // - BAR_QUERY: the query the filter bar is measured on, with a filter
 //   behind "More filters" applied so its count shows too (default
-//   "?topics=grid").
+//   "?topics=grid"; set it empty, BAR_QUERY="", to measure the bare bar,
+//   which is why it alone is read with ?? rather than ||).
 //
 // STAND_INS knows only the tables tab's cells.
 //
