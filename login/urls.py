@@ -95,18 +95,21 @@ urlpatterns = [
         TablesView.as_view(),
         name="tables",
     ),
+    # Whatever is not one Table sits beside tables/, never under it: a Table
+    # may be named "actions" or "names", and tables/<table_name>/access must
+    # reach its drawer (#2611).
     re_path(
-        r"^profile/(?P<user_id>[\d]+)/tables/actions/(?P<action>[a-z_]+)$",
+        r"^profile/(?P<user_id>[\d]+)/table-actions/(?P<action>[a-z_]+)$",
         TableActionView.as_view(),
         name="table-action",
     ),
     re_path(
-        r"^profile/(?P<user_id>[\d]+)/tables/actions/(?P<action>[a-z_]+)/check$",
+        r"^profile/(?P<user_id>[\d]+)/table-actions/(?P<action>[a-z_]+)/check$",
         TableActionCheckView.as_view(),
         name="table-action-check",
     ),
     re_path(
-        r"^profile/(?P<user_id>[\d]+)/tables/names$",
+        r"^profile/(?P<user_id>[\d]+)/table-names$",
         TableNamesView.as_view(),
         name="table-names",
     ),

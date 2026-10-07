@@ -238,6 +238,11 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
+- Tables tab: a Table named `actions` can open its access drawer again. The
+  dashboard's action, check and "select all" routes moved beside `tables/`
+  (`profile/<id>/table-actions/…`, `…/table-names`), so no Table name collides
+  with them; their URL names are unchanged
+  [(#2611)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2611)
 - The privacy policy names the platform's own domain, openenergyplatform.org,
   for the site and its cookies instead of openenergy-platform.org, which only
   redirects there. Three typos in the terms of use are corrected

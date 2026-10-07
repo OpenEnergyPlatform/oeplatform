@@ -260,6 +260,30 @@ class DrawerTests(AccessTestCase):
         self.assertEqual(queries("t_few"), queries("t_many"))
 
 
+class RouteTests(AccessTestCase):
+    """A Table's name is any identifier, so nothing that is not one Table may
+    sit under ``tables/``: ``tables/actions/<action>`` used to swallow the
+    drawer of a Table named ``actions`` (#2611)."""
+
+    def test_a_table_named_like_a_route_word_opens_its_drawer(self):
+        for name in ("actions", "names", "check"):
+            with self.subTest(name=name):
+                self.table(name)
+                self.assertEqual(self.access(name).table.name, name)
+
+    def test_the_routes_that_are_not_one_table_sit_beside_tables(self):
+        uid = self.user.pk
+        for path in (
+            reverse("login:table-action", kwargs={"user_id": uid, "action": "delete"}),
+            reverse(
+                "login:table-action-check", kwargs={"user_id": uid, "action": "delete"}
+            ),
+            reverse("login:table-names", kwargs={"user_id": uid}),
+        ):
+            with self.subTest(path=path):
+                self.assertNotIn("/tables/", path)
+
+
 class EntryPointTests(AccessTestCase):
     def test_the_access_cell_and_the_menu_open_the_drawer(self):
         table = self.table("t_openers", level=WRITE_PERM)
