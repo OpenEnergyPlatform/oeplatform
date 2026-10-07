@@ -71,8 +71,9 @@
  * `c-created` too. A structural test holds the scope
  * (login/tests/test_list_styles.py).
  *
- * Measured 2026-10-07 (#2622) in headless Chrome 152 with
- * benchmarks/tables_tab/widths.mjs: the narrowest list each set of columns
+ * Measured 2026-10-07 in headless Chrome 152 with
+ * benchmarks/tables_tab/widths.mjs (#2622, and again for #2623 once the
+ * row's ⋯ menu was in): the narrowest list each set of columns
  * fits without scrolling, worst page of the accounts `six` (one Dataset per
  * case, a 2,500-member one among them) and `sixty` (generated, three pages),
  * seeded by benchmarks/tables_tab/seed_datasets.py. Taken in DejaVu Sans,
@@ -81,10 +82,14 @@
  * the prototype's, in brackets, were measured on a stand-in row.
  *
  *                              DejaVu   threshold
- *   every column                  879     880 (920)
- *   without Created               771     780 (810)
- *   without Topics too            621     630 (660)   below: rows stack
- *   the filter bar on one line    508     510 (630)   below: bar folds
+ *   every column                  915     920
+ *   without Created               807     810
+ *   without Topics too            657     660   below: rows stack
+ *   the filter bar on one line    508     510   below: bar folds
+ *
+ * The ⋯ button made the row 36 px wider than its empty slot had (#2622
+ * measured 879 / 771 / 621 and set 880 / 780 / 630), which put the numbers
+ * back exactly on the prototype's, measured on a row that had the button.
  *
  * The bar is measured with a Created range applied ("More filters (1)") and
  * two values ticked in each of Topic and Tag (the bare bar is 500). Their
@@ -93,20 +98,20 @@
  * stacking line. So it folds only where the rows already stack.
  *
  * With the sidebar the list is 1,392 px wide at a 1920 px screen, 976 at
- * 1440 and 1366, 896 at 1280 (all four: every column), 640 at 1024 (without
- * Created and Topics), 416 at 800 and 342 at 390 (stacked, bar folded).
+ * 1440 and 1366 (all three: every column), 896 at 1280 (without Created),
+ * 640 at 1024 (stacked), 416 at 800 and 342 at 390 (stacked, bar folded).
  * Nothing in the list scrolls sideways at any of them; at 1024 the page
  * does, by the site header's user name and Sign Out, on every profile tab
  * alike.
  * ---------------------------------------------------------------------- */
 
-@container (width < 880px) {
+@container (width < 920px) {
   #datasets-tab .c-created {
     display: none;
   }
 }
 
-@container (width < 780px) {
+@container (width < 810px) {
   #datasets-tab .c-topics {
     display: none;
   }
@@ -141,7 +146,7 @@
    it: the Tables hint stays), so a column added later has to say here
    where it goes. The headers go with the columns, so "Sort by" and "Select
    this page" take their place. */
-@container (width < 630px) {
+@container (width < 660px) {
   #datasets-tab .dash-sortby,
   #datasets-tab .dash-selectpage {
     display: flex;
@@ -218,10 +223,12 @@
     grid-column: 3;
   }
 
+  /* into the ⋯ button's column too: row 2 has no cell of its own there,
+     and without it the button's width is taken from row 2 as well */
   #datasets-tab .dash-table td.c-modified {
     display: block;
     grid-row: 2;
-    grid-column: 4;
+    grid-column: 4 / 6;
   }
 
   #datasets-tab .dash-until {

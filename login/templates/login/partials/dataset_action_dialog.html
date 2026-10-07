@@ -1,0 +1,193 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+The datasets tab's action dialog, for a row (a batch of one): the contents
+of #dataset-action-body, from the Dataset action service's preflight
+(login.views.DatasetActionView). It states what the action does in words:
+
+- publish: where the Dataset will be listed (its Topics) and its member mix,
+  as information only (draft and embargoed members stay hidden from others
+  until their holders publish them, and never stop a publish). A draft
+  failing the publish gate gets what it needs (``needs``) and no
+  confirmation. A Dataset published already is passed over: the dashboard
+  offers no republish.
+- unpublish: what leaves the catalogue, what others are told, what the
+  scenario bundles citing it can no longer tell, and what stays.
+- delete: the member Tables are not deleted; a published Dataset also
+  leaves the catalogue, its addresses answer 404 and citing bundles read the
+  link as deleted, and its name has to be typed (``preflight.confirmation``),
+  which the service checks under the lock.
+
+The form posts the eligible names only, as one comma-joined ``datasets``
+field, so what runs is what was shown. A refused request comes back here
+with ``notice`` ("Nothing was changed: …") and the preflight run again; an
+unusable parameter comes back with ``errors`` beside its field.
+
+Links that open something else (a drawer, another dialog) carry
+``data-close-then`` and ``hx-trigger="dialog-closed"``: dash_list.js closes
+this dialog first and sends their request once it has closed, because a
+modal cannot open a drawer or another modal while it is showing. The gate's
+"Edit…" and "Manage tables…" arrive with the dialogs they open.
+{% endcomment %}
+{% with check=preflight n=preflight.eligible|length %}
+  <div class="modal-header">
+    <h2 class="modal-title h5 m-0" id="dataset-action-title">
+      {% if check.action == "publish" %}
+        Publish {{ check.subject }}
+      {% elif check.action == "unpublish" %}
+        Unpublish {{ check.subject }}
+      {% else %}
+        Delete {{ check.subject }}
+      {% endif %}
+    </h2>
+    <button type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Cancel"></button>
+  </div>
+  <form id="dataset-action-form"
+        hx-post="{% url 'login:dataset-action' profile_user.pk check.action %}"
+        hx-target="#dataset-action-body"
+        hx-swap="innerHTML"
+        hx-disabled-elt="#dataset-action-confirm">
+    {% csrf_token %}
+    <input type="hidden" name="datasets" value="{{ check.names|join:',' }}" />
+    <div class="modal-body">
+      {% if notice %}
+        <div id="dataset-action-notice"
+             class="alert alert-danger"
+             role="alert">{{ notice }}</div>
+      {% endif %}
+      {% if errors.datasets %}
+        <div id="dataset-action-error"
+             class="alert alert-danger"
+             role="alert">{{ errors.datasets }}</div>
+      {% endif %}
+      {% if needs %}
+        <div id="dataset-action-gate">
+          <p class="mb-1">
+            {% if check.total == 1 %}
+              This dataset cannot be published yet:
+            {% else %}
+              Some of these datasets cannot be published yet:
+            {% endif %}
+          </p>
+          <ul class="mb-2">
+            {% for need in needs %}<li>{{ need }}</li>{% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+      {% if check.eligible %}
+        {% if check.action == "publish" %}
+          <p id="dataset-action-listed">
+            {% if listed_under %}
+              {{ n|pluralize:"It,They" }} will be listed publicly under
+              <strong>{{ listed_under|join:", " }}</strong>, where anyone can find {{ n|pluralize:"it,them" }}.
+            {% else %}
+              {{ n|pluralize:"It,They" }} will be listed publicly under {{ n|pluralize:"its,their" }} topics, where anyone can find {{ n|pluralize:"it,them" }}.
+            {% endif %}
+            Everyone can then read {{ n|pluralize:"its,their" }} title, description and published member tables.
+          </p>
+          {% with c=check.consequences %}
+            <p id="dataset-action-mix">
+              {{ n|pluralize:"It holds,They hold" }} {{ c.members }} table{{ c.members|pluralize }}.
+              {% if c.drafts or c.embargoed %}
+                {% if c.drafts %}{{ c.drafts }} {{ c.drafts|pluralize:"is a draft,are drafts" }}{% endif %}{% if c.drafts and c.embargoed %} and {% endif %}{% if c.embargoed %}{{ c.embargoed }} {{ c.embargoed|pluralize:"is,are" }} under embargo{% endif %}:
+                others see {{ c.drafts|add:c.embargoed|pluralize:"it,them" }} only once {{ c.drafts|add:c.embargoed|pluralize:"its holder publishes it,their holders publish them" }}.
+                This does not stop the publish.
+              {% endif %}
+            </p>
+          {% endwith %}
+        {% elif check.action == "unpublish" %}
+          <p id="dataset-action-consequences">
+            {{ n|pluralize:"It leaves,They leave" }} the public catalogue: {{ n|pluralize:"it is,they are" }} no longer listed
+            under {{ n|pluralize:"its,their" }} topics, and others are told “not found” (404) at
+            {{ n|pluralize:"its,their" }} page and API address. Scenario bundles citing
+            {{ n|pluralize:"it,them" }} can no longer tell whether the link is still alive.
+          </p>
+          <p id="dataset-action-stays">
+            The title, description, topics and member tables stay as they are, and you
+            can publish again at any time.
+          </p>
+        {% else %}
+          {% with members=check.consequences.members published=check.consequences.published %}
+            <p id="dataset-action-members">
+              {% if members %}
+                The {{ members }} member table{{ members|pluralize }} {{ members|pluralize:"is,are" }} not deleted;
+                {{ members|pluralize:"it only leaves,they only leave" }} {{ n|pluralize:"this dataset,these datasets" }}.
+              {% else %}
+                {{ n|pluralize:"It holds,They hold" }} no tables.
+              {% endif %}
+              Deleting cannot be undone.
+            </p>
+            {% if published %}
+              <p id="dataset-action-published">
+                {% if n == 1 %}
+                  It is published: it leaves the public catalogue, its page and API address
+                  answer “not found” (404), and scenario bundles citing it read the link as deleted.
+                {% else %}
+                  {{ published|length }} of them {{ published|length|pluralize:"is,are" }} published: {{ published|length|pluralize:"it leaves,they leave" }} the public
+                  catalogue, {{ published|length|pluralize:"its,their" }} pages and API addresses answer “not found” (404),
+                  and scenario bundles citing {{ published|length|pluralize:"it,them" }} read the link as deleted.
+                {% endif %}
+              </p>
+            {% endif %}
+          {% endwith %}
+          {% if check.confirmation %}
+            <div class="mb-2">
+              <label class="form-label" for="dataset-action-confirm-input">
+                {% if n == 1 %}
+                  Type the dataset's name, <code>{{ check.confirmation }}</code>, to confirm
+                {% else %}
+                  Type the number of datasets, <strong>{{ check.confirmation }}</strong>, to confirm
+                {% endif %}
+              </label>
+              <input id="dataset-action-confirm-input"
+                     name="confirm"
+                     type="text"
+                     class="form-control{% if errors.confirm %} is-invalid{% endif %}"
+                     value="{{ values.confirm|default:'' }}"
+                     autocomplete="off"
+                     spellcheck="false"
+                     required
+                     {% if errors.confirm %}aria-describedby="dataset-action-confirm-error" aria-invalid="true"{% endif %} />
+              {% if errors.confirm %}
+                <div id="dataset-action-confirm-error"
+                     class="invalid-feedback">{{ errors.confirm }}</div>
+              {% endif %}
+            </div>
+          {% endif %}
+        {% endif %}
+      {% elif not needs %}
+        <p id="dataset-action-nothing">
+          {% if check.action == "publish" %}
+            Nothing to publish: {{ check.total|pluralize:"it is,they are" }} published already.
+          {% elif check.action == "unpublish" %}
+            Nothing to unpublish: {{ check.total|pluralize:"it is a draft,they are drafts" }} already.
+          {% else %}
+            Nothing to delete.
+          {% endif %}
+        </p>
+      {% endif %}
+    </div>
+    <div class="modal-footer" id="dataset-action-footer">
+      <button type="button"
+              class="btn btn-outline-secondary"
+              data-bs-dismiss="modal">Cancel</button>
+      {% if check.eligible and not check.over_ceiling %}
+        <button type="submit"
+                id="dataset-action-confirm"
+                class="btn {% if check.action == "delete" %}btn-danger{% else %}btn-primary{% endif %}">
+          {% if check.action == "publish" %}
+            Publish
+          {% elif check.action == "unpublish" %}
+            Unpublish
+          {% else %}
+            Delete
+          {% endif %}
+        </button>
+      {% endif %}
+    </div>
+  </form>
+{% endwith %}

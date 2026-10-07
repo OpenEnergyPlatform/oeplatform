@@ -5,9 +5,10 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 The datasets tab's results region (list_region.html): its empty state and its
 columns, Dataset · Status · Tables · Topics · Modified · Created, between the
-selection slot and the ⋯ slot, both empty until the tab offers actions. Each
-cell type is its own partial under ``cells/``; the container queries that
-collapse the columns are in ``datasets_tab.css``.
+selection slot (empty until the tab offers bulk actions) and the row's ⋯ menu
+(cells/dataset_menu.html). Each cell type is its own partial under
+``cells/``; the container queries that collapse the columns are in
+``datasets_tab.css``.
 {% endcomment %}
 {% block empty %}
   <div class="dash-empty">
@@ -25,7 +26,9 @@ collapse the columns are in ``datasets_tab.css``.
   <th class="c-topics" scope="col">Topics</th>
   {% include "login/partials/list_sort_header.html" with link=page.sort_links.modified cell="c-modified" %}
   {% include "login/partials/list_sort_header.html" with link=page.sort_links.created cell="c-created" %}
-  <td class="c-menu"></td>
+  <th class="c-menu" scope="col">
+    <span class="visually-hidden">Actions</span>
+  </th>
 {% endblock head_cells %}
 {% block row_cells %}
   <td class="c-dataset">
@@ -44,5 +47,5 @@ collapse the columns are in ``datasets_tab.css``.
   </td>
   <td class="c-modified">{% include "login/partials/cells/modified.html" %}</td>
   <td class="c-created">{% include "login/partials/cells/created.html" %}</td>
-  <td class="c-menu"></td>
+  <td class="c-menu">{% include "login/partials/cells/dataset_menu.html" %}</td>
 {% endblock row_cells %}

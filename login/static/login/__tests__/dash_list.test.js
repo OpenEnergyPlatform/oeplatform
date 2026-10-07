@@ -10,7 +10,7 @@
 // than the tables tab's values, which the wrapper alone could not show.
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { bindList, listConfig } from "../dash_list.js";
+import { DIALOG_CLOSED, bindList, listConfig } from "../dash_list.js";
 
 const WIDGETS = listConfig({
   plural: "widgets",
@@ -250,5 +250,100 @@ describe("bindList for a list without a drawer", () => {
       )
     ).not.toThrow();
     unbind();
+  });
+});
+
+describe("a dialog link that opens something else (close before open)", () => {
+  let unbind;
+  let dialog;
+  let sent;
+
+  beforeEach(() => {
+    renderPage();
+    $("widget-action-body").innerHTML = `
+      <p>This widget cannot be published yet.</p>
+      <a href="#" id="gate-edit" data-close-then
+         hx-trigger="${DIALOG_CLOSED}" data-action-origin="menu-alpha">Edit…</a>`;
+    dialog = fakeOverlay();
+    unbind = bindList(document, WIDGETS, {
+      announceDelay: 0,
+      dialog,
+      drawer: fakeOverlay(),
+      schedule: () => {},
+    });
+    sent = [];
+    $("gate-edit").addEventListener(DIALOG_CLOSED, (event) => sent.push(event));
+  });
+
+  afterEach(() => {
+    unbind();
+  });
+
+  const hidden = () => dialog.hidden.forEach((callback) => callback());
+
+  it("closes the dialog and opens the target only once it has closed", () => {
+    const event = new MouseEvent("click", { bubbles: true, cancelable: true });
+    $("gate-edit").dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(true);
+    expect(dialog.closed).toBe(1);
+    // still showing: the target must not open yet
+    expect(sent).toHaveLength(0);
+
+    hidden();
+    expect(sent).toHaveLength(1);
+    expect(sent[0].target).toBe($("gate-edit"));
+  });
+
+  it("opens the target once, not again when the dialog closes later", () => {
+    click($("gate-edit"));
+    hidden();
+    hidden();
+    expect(sent).toHaveLength(1);
+  });
+
+  // the dialog as a row's ⋯ opened it
+  const openedFromTheRow = () => {
+    $("menu-alpha").dataset.actionOrigin = "menu-alpha";
+    $("widget-action-body").dispatchEvent(
+      new CustomEvent("htmx:afterSwap", {
+        bubbles: true,
+        detail: {
+          target: $("widget-action-body"),
+          requestConfig: { elt: $("menu-alpha") },
+        },
+      })
+    );
+  };
+
+  it("leaves focus to what the target opens, not the row's ⋯", () => {
+    openedFromTheRow();
+    click($("gate-edit"));
+    hidden();
+    expect(document.activeElement).not.toBe($("menu-alpha"));
+  });
+
+  it("still sends focus back to the row's ⋯ when cancelled", () => {
+    openedFromTheRow();
+    hidden();
+    expect(document.activeElement).toBe($("menu-alpha"));
+    expect(sent).toHaveLength(0);
+  });
+
+  it("opens nothing when the dialog is only cancelled", () => {
+    hidden();
+    expect(sent).toHaveLength(0);
+  });
+
+  it("ignores the marker outside the dialog", () => {
+    const outside = document.createElement("a");
+    outside.setAttribute("data-close-then", "");
+    $("widgets-results").append(outside);
+    outside.addEventListener(DIALOG_CLOSED, (event) => sent.push(event));
+    const event = new MouseEvent("click", { bubbles: true, cancelable: true });
+    outside.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(false);
+    expect(dialog.closed).toBe(0);
+    hidden();
+    expect(sent).toHaveLength(0);
   });
 });

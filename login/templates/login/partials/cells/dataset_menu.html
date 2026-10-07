@@ -1,0 +1,48 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+Cell type "actions slot" of the datasets tab: the row's ⋯ menu. Every entry
+opens the one action dialog (#dataset-action) with this Dataset as a batch of
+one: Publish… on a draft or Unpublish… on a published Dataset, then, set
+apart, Delete… in red and last. Every entry is enabled on every row: the
+tab lists only the user's own Datasets, and a draft that cannot be published
+yet hears why in the dialog. Edit… and Manage tables… join this menu with
+the dialogs they open.
+
+The menu is positioned fixed so the table's horizontal scroll container
+does not clip it. The toggle's id, menu-<key>, is where focus returns after
+an action on this row. Each entry is cells/menu_action.html; its endpoint is
+reversed with positional arguments, because a keyword named ``action=``
+reads as a form address to base/tests/test_views.py.
+{% endcomment %}
+<div class="dropdown dash-menu">
+  <button type="button"
+          id="menu-{{ row.key }}"
+          class="btn btn-sm dash-menu__toggle"
+          data-bs-toggle="dropdown"
+          data-bs-popper-config='{"strategy":"fixed"}'
+          aria-expanded="false"
+          aria-label="Actions for {{ row.title }}">
+    <span aria-hidden="true">⋯</span>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end dash-menu__list"
+      aria-labelledby="menu-{{ row.key }}">
+    <li>
+      {% if row.is_draft %}
+        {% url 'login:dataset-action' profile_user.pk "publish" as url %}
+        {% include "login/partials/cells/menu_action.html" with verb="publish" label="Publish…" url=url item=row.name allowed=True %}
+      {% else %}
+        {% url 'login:dataset-action' profile_user.pk "unpublish" as url %}
+        {% include "login/partials/cells/menu_action.html" with verb="unpublish" label="Unpublish…" url=url item=row.name allowed=True %}
+      {% endif %}
+    </li>
+    <li>
+      <hr class="dropdown-divider" />
+    </li>
+    <li>
+      {% url 'login:dataset-action' profile_user.pk "delete" as url %}
+      {% include "login/partials/cells/menu_action.html" with verb="delete" label="Delete…" url=url item=row.name allowed=True tone="dash-menu__danger" %}
+    </li>
+  </ul>
+</div>

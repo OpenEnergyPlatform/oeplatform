@@ -277,16 +277,15 @@ class ColumnTests(DatasetsTabTestCase):
         body = self.get().content.decode()
         self.assertIn("2 Jan 2026", text(element_markup(body, f"row-{dataset.pk}")))
 
-    def test_no_selection_and_no_menu_until_the_tab_offers_actions(self):
+    def test_no_selection_until_the_tab_offers_bulk_actions(self):
         self.dataset("ds_slots")
         body = self.get().content.decode()
         self.assertNotIn("data-select-row", body)
         self.assertNotIn("data-select-page", body)
         self.assertNotIn('id="datasets-bulk"', body)
         self.assertNotIn("datasets-select-all", body)
-        # the slots are there, so the columns keep their measured widths
+        # the slot is there, so the columns keep their measured widths
         self.assertIn('<td class="c-select">', body)
-        self.assertIn('<td class="c-menu"></td>', body)
 
 
 class SegmentAndSearchTests(DatasetsTabTestCase):

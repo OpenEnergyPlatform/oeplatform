@@ -128,6 +128,11 @@ class ListTabView(ProfileOwnerRequiredMixin, View):
     action (``<items>-changed``) gets ``HX-Replace-Url`` instead. A history
     restore is a full page, because htmx swaps it into the body.
 
+    The region alone is rendered with ``region_only``: when the account has
+    nothing left to list (its last item deleted), it then also removes the
+    filter bar and the bulk slot, which sit outside it, out of band, so the
+    page shows the empty state without a reload.
+
     Hooks: ``page_template``, ``region_template``, ``bulk_actions`` (the bulk
     bar's ``(action, label)`` pairs, in order), ``rows(user)`` (the
     ``rows`` callable for ``Listing.page``) and ``extra_context()``.
@@ -155,6 +160,7 @@ class ListTabView(ProfileOwnerRequiredMixin, View):
             **self.extra_context(),
         }
         if is_htmx(request) and "HX-History-Restore-Request" not in request.headers:
+            context["region_only"] = True
             response = render(request, self.region_template, context)
             # The region re-fetching itself after an action changes nothing
             # the user navigated to, so it replaces the history entry rather
@@ -220,25 +226,34 @@ class ActionView(ProfileOwnerRequiredMixin, View):
     names it was opened with as ``selection``, a superset of what its form
     posts, so an item left out before is still named as left out.
 
+    A request naming an item the user may not even be told about (where
+    ``is_unknown`` says so of the check) answers 404, the owner rule's
+    answer, and writes nothing.
+
     Hooks: ``service`` (a module offering ``ACTIONS``, ``preflight``,
     ``execute``, ``choice``, ``InvalidParameters`` and ``ActionRefused``),
-    ``dialog_template``, ``params`` (the parameters passed to the service),
-    ``dialog_context()``, ``done_detail(request, outcome)`` and
-    ``is_forbidden(action, refusal)``.
+    ``actions`` (the service's actions this tab offers; all by default, any
+    other is a 404), ``dialog_template``, ``params`` (the parameters passed
+    to the service), ``dialog_context(check)``, ``done_detail(request,
+    outcome)``, ``is_forbidden(action, refusal)`` and ``is_unknown(check)``.
     """
 
     frame: ListFrame
     service = None
+    actions = None
     dialog_template: str
     params = ()
 
-    def dialog_context(self) -> dict:
+    def dialog_context(self, check) -> dict:
         return {}
 
     def done_detail(self, request, outcome) -> dict:
         raise NotImplementedError
 
     def is_forbidden(self, action, refusal) -> bool:
+        return False
+
+    def is_unknown(self, check) -> bool:
         return False
 
     def hidden(self, request, items) -> list:
@@ -254,10 +269,12 @@ class ActionView(ProfileOwnerRequiredMixin, View):
         return {key: data.get(key, "") for key in self.params}
 
     def _dialog(self, request, check, status=200, **extra):
+        if self.is_unknown(check):
+            raise Http404
         context = {
             "profile_user": self.profile_user,
             "preflight": check,
-            **self.dialog_context(),
+            **self.dialog_context(check),
             "errors": {},
             "values": {},
             **extra,
@@ -265,7 +282,8 @@ class ActionView(ProfileOwnerRequiredMixin, View):
         return render(request, self.dialog_template, context, status=status)
 
     def _action(self, action):
-        if action not in self.service.ACTIONS:
+        offered = self.service.ACTIONS if self.actions is None else self.actions
+        if action not in offered:
             raise Http404
         return action
 

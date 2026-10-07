@@ -32,15 +32,18 @@ from django.http import (
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
+from django.utils.text import capfirst
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 from django.views.generic import RedirectView, TemplateView, View
 from django.views.generic.edit import DeleteView
 from rest_framework.authtoken.models import Token
 
-from api.services import table_actions
+from api.services import dataset_actions, table_actions
+from api.services.dataset_creation import dataset_title
 from dataedit.helper import delete_peer_review
-from dataedit.models import PeerReviewManager, Table
+from dataedit.models import PeerReviewManager, Table, Topic
+from dataedit.publish_gate import DATASET_GATE
 from login import table_roles
 from login.access import (
     ProfileOwnerRequiredMixin,
@@ -171,7 +174,7 @@ class TableActionView(TablesList, ActionView):
         "confirm",
     )
 
-    def dialog_context(self):
+    def dialog_context(self, check):
         return {
             "topics": table_actions.publish_topics(),
             "embargo_periods": table_actions.EMBARGO_PERIODS,
@@ -475,11 +478,147 @@ class DatasetsList:
 
 class DatasetsView(DatasetsList, ListTabView):
     """The datasets tab, where the profile opens: one list of the user's own
-    Datasets (``ListTabView``). It offers no actions yet, so no selection:
-    its select and menu cells are empty slots."""
+    Datasets (``ListTabView``). Each row's ⋯ menu offers the row actions
+    (``DatasetActionView``); there are no bulk actions yet, so no selection:
+    the select cells are empty slots."""
 
     page_template = "login/user_datasets.html"
     region_template = "login/partials/datasets_region.html"
+
+
+# What a draft failing ``DATASET_GATE`` needs, by the failed check's name,
+# as the publish dialog asks for it.
+GATE_NEEDS = {
+    "members": "Add at least one table",
+    "topics": "Choose at least one topic",
+}
+
+
+class DatasetActionView(DatasetsList, ActionView):
+    """One action on the user's own Datasets from the dashboard, through
+    ``dataset_actions`` with ``via="dashboard"`` (``ActionView``): publish,
+    unpublish and delete, for a row (one ``dataset``) or a batch (a
+    comma-joined ``datasets``). The service's other actions are not offered
+    here (404): create and edit have their own dialog, the member actions
+    the members drawer.
+
+    - GET: the dialog. Publish on a draft failing the gate names what is
+      missing (``GATE_NEEDS``) and offers no confirmation; a published
+      Dataset is passed over, because the dashboard offers no republish
+      (the API does). Unpublish states what happens in words; delete
+      states that the member Tables stay and, for a published Dataset, asks
+      for its name to be typed (``confirm``), which the service checks
+      under the lock.
+    - POST, done: 204 with ``HX-Trigger: datasets-changed``, the message
+      and, for a row that is still there, its menu to focus; a delete
+      carries ``gone`` instead.
+    - POST, refused (the gate failing by now, say): 409 and
+      ``datasets-refused``, the dialog run again.
+    - POST, unusable parameters (no Dataset named, a typed confirmation that
+      does not match): 400.
+
+    A request naming a Dataset that is not the user's own answers 404 and
+    writes nothing, alike for another user's draft, another user's published
+    Dataset and a name nobody has (``is_unknown``): the dashboard knows only
+    the user's own Datasets.
+    """
+
+    service = dataset_actions
+    actions = (
+        dataset_actions.PUBLISH,
+        dataset_actions.UNPUBLISH,
+        dataset_actions.DELETE,
+    )
+    dialog_template = "login/partials/dataset_action_dialog.html"
+    params = ("confirm",)
+
+    def is_unknown(self, check):
+        return any(
+            group.reason in (dataset_actions.NOT_FOUND, dataset_actions.NOT_YOURS)
+            for group in check.left_out
+        )
+
+    def dialog_context(self, check):
+        context = {}
+        if check.action == dataset_actions.PUBLISH:
+            failed = {
+                name for names in check.consequences["gate"].values() for name in names
+            }
+            context["needs"] = [
+                GATE_NEEDS[gate.name] for gate in DATASET_GATE if gate.name in failed
+            ]
+            # where the Datasets will be listed: their own Topics
+            context["listed_under"] = [
+                capfirst(name)
+                for name in Topic.objects.filter(datasets__in=check.eligible)
+                .distinct()
+                .order_by("name")
+                .values_list("name", flat=True)
+            ]
+        return context
+
+    def done_detail(self, request, outcome):
+        datasets = outcome.datasets
+        if outcome.action == dataset_actions.DELETE:
+            return {
+                "message": _dataset_deleted_message(datasets),
+                "gone": [dataset.name for dataset in datasets],
+            }
+        if not datasets:
+            # passed over at execute: the state asked for held already
+            return {"message": _dataset_unchanged_message(outcome)}
+        hidden = self.hidden(request, datasets)
+        detail = {"message": _dataset_done_message(outcome, hidden)}
+        if len(datasets) == 1:
+            detail["focus"] = f"menu-{datasets[0].pk}"
+        return detail
+
+
+def _dataset_what(datasets) -> str:
+    if len(datasets) == 1:
+        return f"\u201c{dataset_title(datasets[0])}\u201d"
+    return f"{len(datasets)} datasets"
+
+
+def _dataset_done_message(outcome, hidden) -> str:
+    """The message after a publish or an unpublish, and whether the rows it
+    changed still show under the current filter."""
+    datasets = outcome.datasets
+    what = _dataset_what(datasets)
+    if outcome.action == dataset_actions.PUBLISH:
+        message = f"Published {what}. Anyone can now find it under its topics."
+        if len(datasets) > 1:
+            message = f"Published {what}. Anyone can now find them under their topics."
+    elif len(datasets) == 1:
+        message = f"Unpublished {what}. It is a draft again, visible only to you."
+    else:
+        message = f"Unpublished {what}. They are drafts again, visible only to you."
+    if hidden and len(datasets) == 1:
+        message += " It is not shown under the current filter."
+    elif hidden and len(hidden) == len(datasets):
+        message += " They are not shown under the current filter."
+    elif hidden:
+        message += f" {len(hidden)} of them are not shown under the current filter."
+    return message
+
+
+def _dataset_unchanged_message(outcome) -> str:
+    names = [name for group in outcome.left_out for name in group.names]
+    what = f"\u201c{names[0]}\u201d" if len(names) == 1 else "These datasets"
+    if outcome.action == dataset_actions.PUBLISH:
+        return f"Nothing was changed: {what} was published already."
+    return f"Nothing was changed: {what} was a draft already."
+
+
+def _dataset_deleted_message(datasets) -> str:
+    """The message after a delete: the member Tables were kept."""
+    members = sum(dataset.members for dataset in datasets)
+    kept = (
+        " Its member tables were kept."
+        if len(datasets) == 1
+        else " Their member tables were kept."
+    )
+    return f"Deleted {_dataset_what(datasets)}.{kept if members else ''}"
 
 
 ##############################################################################

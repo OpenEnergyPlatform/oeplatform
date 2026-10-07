@@ -13,6 +13,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 from django.urls import path, re_path
 
 from login.views import (
+    DatasetActionView,
     DatasetsView,
     EditUserView,
     OrganizationListView,
@@ -47,6 +48,13 @@ urlpatterns = [
         r"^profile/(?P<user_id>[\d]+)/datasets$",
         DatasetsView.as_view(),
         name="datasets",
+    ),
+    # Whatever is not one Dataset sits beside datasets/, never under it: a
+    # Dataset may be named "actions" or "names" (spec #2613).
+    re_path(
+        r"^profile/(?P<user_id>[\d]+)/dataset-actions/(?P<action>[a-z_]+)$",
+        DatasetActionView.as_view(),
+        name="dataset-action",
     ),
     re_path(
         r"^profile/(?P<user_id>[\d]+)/tables$",
