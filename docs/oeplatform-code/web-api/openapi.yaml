@@ -2008,12 +2008,53 @@ paths:
   /api/v0/datasets/:
     get:
       operationId: datasets_list
-      description: Every published dataset on the platform, plus the caller's own
-        drafts, each with its metadata. The `resources` of a dataset are assembled
-        from its member tables at read time rather than stored, so this never reports
-        a resource the dataset no longer holds. **Public.** A draft is visible only
-        to its creator; nobody else finds it listed.
+      description: 'Every published dataset on the platform, plus the caller''s own
+        drafts, by name, a page at a time. `mine` and `published` narrow that and
+        never widen it: `mine=true&published=false` lists the caller''s drafts. Each
+        item is a summary: the dataset''s read body without `metadata.resources`,
+        plus `resource_count`. The resources themselves are on the dataset''s own
+        read and its `resources/`. **Public.** A draft is visible only to its creator;
+        nobody else finds it listed.'
       summary: List datasets
+      parameters:
+      - in: query
+        name: mine
+        schema:
+          enum:
+          - 'true'
+          - 'false'
+          type: string
+          minLength: 1
+        description: |-
+          `true`: only the caller's own datasets, drafts included. Needs a login: asked anonymously it is a 401.
+
+          * `true` - true
+          * `false` - false
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: 'How many per page: 20 if left out, at most 100.'
+        schema:
+          type: integer
+      - in: query
+        name: published
+        schema:
+          enum:
+          - 'true'
+          - 'false'
+          type: string
+          minLength: 1
+        description: |-
+          `true`: published datasets only. `false`: drafts only, which are only ever the caller's own, so none for an anonymous caller.
+
+          * `true` - true
+          * `false` - false
       tags:
       - Datasets
       security:
@@ -2022,13 +2063,31 @@ paths:
       - tokenAuth: []
       - {}
       responses:
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'A filter holds something other than `true` or `false`: DRF''s
+            map names the parameter.'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: '`mine=true`, asked without a login.'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: A `page` past the last one, or not a number.
         '200':
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/DatasetRead'
+                $ref: '#/components/schemas/PaginatedDatasetSummaryList'
           description: ''
     post:
       operationId: datasets_create
@@ -2399,9 +2458,9 @@ paths:
   /api/v0/datasets/{dataset_name}/resources/:
     get:
       operationId: datasets_resources_list
-      description: Returns the tables/resources that belong to a dataset. **Public.**
-        A draft is visible only to its creator; anyone else gets 404, as for a name
-        that does not exist.
+      description: Returns the tables/resources that belong to a dataset, by name,
+        a page at a time. **Public.** A draft is visible only to its creator; anyone
+        else gets 404, as for a name that does not exist.
       summary: List dataset resources
       parameters:
       - in: path
@@ -2411,6 +2470,18 @@ paths:
         description: 'The dataset''s name: its permanent identifier, fixed at creation.
           Names are global and are never reused.'
         required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: 'How many per page: 20 if left out, at most 100.'
+        schema:
+          type: integer
       tags:
       - Datasets
       security:
@@ -2425,14 +2496,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Refusal'
           description: 'No dataset of that name, or another user''s draft: the two
-            answer alike, word for word.'
+            answer alike, word for word. Or a `page` past the last one, or not a number.'
         '200':
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/DatasetResource'
+                $ref: '#/components/schemas/PaginatedDatasetResourceList'
           description: ''
   /api/v0/datasets/{dataset_name}/unassign-tables/:
     post:
@@ -10453,6 +10522,74 @@ components:
       required:
       - id
       - name
+    DatasetSummary:
+      type: object
+      description: |-
+        A Dataset as a list sends it: the read body without the assembled
+        `metadata.resources`, plus how many members there are. A member's
+        resource entry is its whole schema, so a page of full bodies would run to
+        megabytes; the entries stay on the dataset's own read and its paged
+        `resources/`.
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        metadata:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        modified_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          description: 'The last Modification of the dataset itself: a change to its
+            title, description, topics or member tables. Never moved by publishing
+            or unpublishing, nor by changes inside a member table; null for a dataset
+            older than the field.'
+        published_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          description: When the dataset was last published; null for a draft. A republish
+            overwrites it.
+        creator:
+          type: string
+          title: Username
+          readOnly: true
+          nullable: true
+          description: The username of the account that created the dataset, the one
+            who may change it; null for a dataset older than ownership.
+        topics:
+          type: array
+          items:
+            type: string
+          readOnly: true
+          description: The names of the dataset's own topics, sorted.
+        resource_count:
+          type: integer
+          readOnly: true
+          description: 'How many member tables the dataset holds: the `count` its
+            `resources/` pages through.'
+      required:
+      - created_at
+      - creator
+      - metadata
+      - modified_at
+      - name
+      - published_at
+      - resource_count
+      - topics
+      - uuid
     DatasetUnassigned:
       type: object
       description: What `unassign-tables/` answers.
@@ -11003,6 +11140,52 @@ components:
     NullEnum:
       enum:
       - null
+    PaginatedDatasetResourceList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DatasetResource'
+    PaginatedDatasetSummaryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DatasetSummary'
     Part:
       type: object
       description: 'A framework or model factsheet: bundle-local, with a link out.'

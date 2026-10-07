@@ -50,7 +50,7 @@ import zipstream
 from django.conf import settings as django_settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import TrigramSimilarity
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.http import Http404, HttpRequest, JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
@@ -67,7 +67,12 @@ from oemetadata.latest.example import OEMETADATA_LATEST_EXAMPLE
 from oemetadata.latest.template import OEMETADATA_LATEST_TEMPLATE
 from rest_framework import generics, status
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.exceptions import (
+    NotAuthenticated,
+    PermissionDenied,
+    ValidationError,
+)
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (
     AllowAny,
     IsAuthenticated,
@@ -210,9 +215,11 @@ from api.parser import (
 from api.serializers import (
     DatasetAssignTablesSerializer,
     DatasetCreateSerializer,
+    DatasetListFiltersSerializer,
     DatasetPatchSerializer,
     DatasetReadSerializer,
     DatasetResourceSerializer,
+    DatasetSummarySerializer,
     EnergyframeworkSerializer,
     EnergymodelSerializer,
     ScenarioBundleScenarioDatasetSerializer,
@@ -431,18 +438,56 @@ DATASET_NAME = OpenApiParameter(
 )
 
 
+class DatasetPagination(PageNumberPagination):
+    """A ceiling, not a default: neither Dataset list has an unbounded mode.
+    `page` and `page_size`, as every collection of the OEKG API pages (WF-08).
+    A class of its own rather than one of theirs, so a change to how an OEKG
+    history pages can not move this API's documented default."""
+
+    page_size = 20
+    page_size_query_param = "page_size"
+    page_size_query_description = "How many per page: 20 if left out, at most 100."
+    max_page_size = 100
+
+
+# What `?mine=true` without a login is told.
+MINE_NEEDS_A_LOGIN = "`mine=true` lists the caller's own datasets and needs a login."
+
+
 @extend_schema(tags=[DATASETS])
 @extend_schema_view(
     get=extend_schema(
         summary="List datasets",
         description=(
             "Every published dataset on the platform, plus the caller's own "
-            "drafts, each with its metadata. The `resources` of a dataset are "
-            "assembled from its member tables at read time rather than "
-            "stored, so this never reports a resource the dataset no longer "
-            "holds. " + DATASET_LIST_PUBLIC
+            "drafts, by name, a page at a time. `mine` and `published` narrow "
+            "that and never widen it: `mine=true&published=false` lists the "
+            "caller's drafts. Each item is a summary: the dataset's read body "
+            "without `metadata.resources`, plus `resource_count`. The "
+            "resources themselves are on the dataset's own read and its "
+            "`resources/`. " + DATASET_LIST_PUBLIC
         ),
-        responses={200: DatasetReadSerializer(many=True)},
+        parameters=[DatasetListFiltersSerializer],
+        responses=dataset_responses(
+            {200: DatasetSummarySerializer(many=True)},
+            400,
+            401,
+            404,
+            also={
+                400: describes(
+                    "A filter holds something other than `true` or `false`: "
+                    "DRF's map names the parameter."
+                ),
+                401: OpenApiResponse(
+                    response=RefusalSerializer,
+                    description="`mine=true`, asked without a login.",
+                ),
+                404: OpenApiResponse(
+                    response=RefusalSerializer,
+                    description="A `page` past the last one, or not a number.",
+                ),
+            },
+        ),
     ),
     post=extend_schema(
         summary="Create a dataset",
@@ -479,18 +524,36 @@ DATASET_NAME = OpenApiParameter(
 )
 class DatasetsListCreate(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
+    pagination_class = DatasetPagination
 
     def get_queryset(self):
+        """What the caller may see (``visible_to``), narrowed by the filters.
+        A page costs the same queries however many Datasets or members there
+        are: the count, the page, the Topics."""
+        filters = DatasetListFiltersSerializer(data=self.request.query_params)
+        filters.is_valid(raise_exception=True)
+        asked = filters.validated_data
+        user = self.request.user
+        datasets = Dataset.objects.visible_to(user)
+        if asked.get("mine") == "true":
+            if not user.is_authenticated:
+                raise NotAuthenticated(MINE_NEEDS_A_LOGIN)
+            datasets = datasets.filter(creator=user)
+        if "published" in asked:
+            datasets = datasets.filter(
+                published_at__isnull=asked["published"] == "false"
+            )
         return (
-            Dataset.objects.visible_to(self.request.user)
-            .select_related("creator")
-            .prefetch_related("tables", "topics")
+            datasets.select_related("creator")
+            .prefetch_related("topics")
+            .annotate(resource_count=Count("tables"))
+            .order_by("name")
         )
 
     def get_serializer_class(self):
         if self.request.method == "POST":
             return DatasetCreateSerializer
-        return DatasetReadSerializer
+        return DatasetSummarySerializer
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -510,10 +573,24 @@ class DatasetsListCreate(generics.ListCreateAPIView):
     get=extend_schema(
         summary="List dataset resources",
         description=(
-            "Returns the tables/resources that belong to a dataset. " + DATASET_PUBLIC
+            "Returns the tables/resources that belong to a dataset, by name, "
+            "a page at a time. " + DATASET_PUBLIC
         ),
         parameters=[DATASET_NAME],
-        responses=dataset_responses({200: DatasetResourceSerializer(many=True)}, 404),
+        responses=dataset_responses(
+            {200: DatasetResourceSerializer(many=True)},
+            404,
+            also={
+                404: OpenApiResponse(
+                    response=RefusalSerializer,
+                    description=(
+                        "No dataset of that name, or another user's draft: "
+                        "the two answer alike, word for word. Or a `page` "
+                        "past the last one, or not a number."
+                    ),
+                ),
+            },
+        ),
     )
 )
 class DatasetsListResources(generics.ListAPIView):
@@ -521,11 +598,12 @@ class DatasetsListResources(generics.ListAPIView):
     # declared, not inherited: REST_FRAMEWORK sets no default, and the draft
     # rule below is what keeps a draft's members private
     permission_classes = [AllowAny]
+    pagination_class = DatasetPagination
 
     def get_queryset(self):
         dataset_name = self.kwargs["dataset_name"]
         dataset = Dataset.objects.readable_or_404(self.request.user, dataset_name)
-        return dataset.tables.all()
+        return dataset.tables.order_by("name")
 
 
 @extend_schema(tags=[DATASETS])

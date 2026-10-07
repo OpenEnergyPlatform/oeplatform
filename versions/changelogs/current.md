@@ -80,6 +80,18 @@ SPDX-License-Identifier: CC0-1.0
   success and refusal bodies are declared in the API reference. The resources
   read no longer claims a `schema` key it never sent
   [(#2620)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2620)
+- Dataset API: `GET /api/v0/datasets/` and `GET …/<name>/resources/` are now
+  paged, in DRF's `{count, next, previous, results}` envelope, by name, with
+  `page` and `page_size` (20 if left out, at most 100); a page past the last is
+  a 404. Clients reading either as a bare array must read `results`. The list
+  takes `?mine=true` (the caller's own Datasets, drafts included; a 401 without
+  a login) and `?published=true|false`, so `mine=true&published=false` lists
+  your drafts; any other value is a 400 naming the parameter. List items are
+  summaries: the Dataset's read body without `metadata.resources`, plus
+  `resource_count`; the resources stay on the Dataset's own read and its
+  `resources/`. Both lists cost the same few queries per page however many
+  Datasets or members there are
+  [(#2621)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2621)
 - The term search in the metadata editor and the oeo_ext unit picker no longer
   always asks openenergyplatform.org: an instance with its own lookup service
   searches itself, one without uses the public endpoint, and `OEO_SEARCH_URL`

@@ -94,7 +94,9 @@ class DatasetLifecycleAPITests(APITestCase):
                 self.as_(who)
                 response = self.client.get("/api/v0/datasets/")
                 self.assertEqual(response.status_code, status.HTTP_200_OK)
-                self.assertEqual({item["name"] for item in response.data}, names)
+                self.assertEqual(
+                    {item["name"] for item in response.data["results"]}, names
+                )
 
     def test_the_creator_reads_their_draft(self):
         self.as_("creator")
