@@ -38,3 +38,6 @@ class JsonContentTest(SimpleTestCase):
         self.assertEqual(
             get_json_content(str(self.root), json_id="beta"), {"id": "beta"}
         )
+
+    def test_an_unknown_id_is_none(self):
+        self.assertIsNone(get_json_content(str(self.root), json_id="gamma"))

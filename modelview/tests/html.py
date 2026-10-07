@@ -88,6 +88,29 @@ def text(markup: str) -> str:
     return " ".join(re.sub(r"<[^>]*>", "", markup).split())
 
 
+def table_rows(html: str) -> list[tuple[int, str]]:
+    """`(depth, row)` for every `<tr>` on the page: how many rows of its own
+    table were still open when it started, and its opening tag.
+
+    Counted per table, because a cell may hold a table of its own (the
+    checklists do), and a row in that table is not nested in the outer row.
+    """
+    open_rows, rows = [0], []
+    for match in re.finditer(r"<(/?)(tr|table)\b[^>]*>", html, re.IGNORECASE):
+        closing, tag = match.group(1), match.group(2).lower()
+        if tag == "table":
+            if closing:
+                open_rows.pop()
+            else:
+                open_rows.append(0)
+        elif closing:
+            open_rows[-1] -= 1
+        else:
+            rows.append((open_rows[-1], match.group(0)))
+            open_rows[-1] += 1
+    return rows
+
+
 def checkboxes(html: str, css_class: str) -> list[tuple[str, bool]]:
     """Every `<input>` carrying `css_class`, as (value, checked) pairs.
 

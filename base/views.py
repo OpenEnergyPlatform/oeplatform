@@ -16,7 +16,7 @@ import logging
 import os
 
 from django.core.mail import send_mail
-from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.http import Http404, HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.generic import View
@@ -106,6 +106,8 @@ class AboutProjectDetailView(AboutPageView):
 
     def get(self, request, project_id):
         project = get_json_content(path=self.projects_content_path, json_id=project_id)
+        if project is None:
+            raise Http404("No such project.")
 
         return render(request, "base/project-detail.html", {"project": project})
 

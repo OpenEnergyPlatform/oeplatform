@@ -80,7 +80,7 @@ def get_json_content(path, json_id=None):
     Returns:
         list[object]: List of all deserialized json files in path
         or
-        object: single json python object
+        object: single json python object, None if no json carries that id
     """
 
     if path is not None:
@@ -97,10 +97,10 @@ def get_json_content(path, json_id=None):
         if json_id is None:
             return all_jsons
         else:
-            content_by_id = [
-                i for i in all_jsons if json_id == i["id"] and "template" != i["id"]
-            ]
-            return content_by_id[0]
+            return next(
+                (i for i in all_jsons if json_id == i["id"] and "template" != i["id"]),
+                None,
+            )
     # TODO: catch the exception if path is none
     else:
         return {
