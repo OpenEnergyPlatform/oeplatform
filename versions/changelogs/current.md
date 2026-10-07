@@ -17,7 +17,7 @@ SPDX-License-Identifier: CC0-1.0
   Common Log Format line so existing parsers keep working. Referer, cookies and
   the `Authorization` header are deliberately not logged. The maintenance guide
   documents the fields and a one-liner ranking paths by total server time
-  [(#2412)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2412)
+  [(#2670)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2670)
 - The profile's datasets tab is one dense list of your own Datasets, replacing
   the cards: Dataset (title linked to its page, the name beneath), Status
   (Draft, or Published since a date), Tables (a count whose popover names the
