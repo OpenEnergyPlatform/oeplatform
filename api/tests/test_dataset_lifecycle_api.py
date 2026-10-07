@@ -134,6 +134,15 @@ class DatasetLifecycleAPITests(APITestCase):
         self.assertEqual(self.draft.metadata["title"], "api_draft")
         self.assertEqual(list(self.draft.tables.all()), [self.member])
 
+    def test_an_anonymous_write_is_refused_before_the_dataset_is_looked_up(self):
+        # 401 for a draft, a published Dataset and an unknown name alike
+        self.as_("anonymous")
+        for write, call in WRITES.items():
+            for name in ("api_draft", "api_published", "no_such"):
+                with self.subTest(write=write, name=name):
+                    response = call(self.client, name)
+                    self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
     def test_a_write_on_a_foreign_published_dataset_is_403(self):
         for who in ("other", "admin"):
             for write, call in WRITES.items():

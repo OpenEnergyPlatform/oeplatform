@@ -84,6 +84,11 @@ class Resolution:
 # describe (a draft Dataset): not resolvable, not unresolvable.
 UNKNOWABLE = Resolution(resolvable=None, tables=None)
 
+# What a resolver answers for a target that exists but that this server does
+# not describe to anyone (a draft Dataset), beside a set of members for one it
+# does; a name it did not find is left out.
+UNDESCRIBED = None
+
 
 def resolve(targets: Sequence[tuple]) -> list:
     """Resolve ``(ref, name)`` pairs, in order, in a fixed number of queries.
@@ -110,7 +115,7 @@ def resolve(targets: Sequence[tuple]) -> list:
             table
             for kind in found.values()
             for members in kind.values()
-            if members is not None
+            if members is not UNDESCRIBED
             for table in members
         }
     )
@@ -123,8 +128,7 @@ def resolve(targets: Sequence[tuple]) -> list:
             # UNKNOWABLE's null, where there was nowhere to look.
             return Resolution(resolvable=False, tables=[])
         members = found[ref][name]
-        if members is None:
-            # There, but not something this server describes to anyone.
+        if members is UNDESCRIBED:
             return UNKNOWABLE
         return Resolution(
             resolvable=True,
@@ -156,7 +160,7 @@ def _members_by_dataset(names: set) -> dict:
     catalogue entry with no members comes back as itself with a null member,
     which is how "it exists and is empty" is told apart from "it is gone".
 
-    A draft entry maps to ``None`` rather than to its members: it resolves as
+    A draft entry maps to ``UNDESCRIBED`` rather than to its members: it resolves as
     UNKNOWABLE for every reader, its creator included, because the public
     catalogue (``Dataset.objects.published``) does not hold it. Not as gone,
     which would claim a deletion, and never with its members, which would let
@@ -173,7 +177,7 @@ def _members_by_dataset(names: set) -> dict:
     )
     for dataset, is_published, table in rows:
         if not is_published:
-            members[dataset] = None
+            members[dataset] = UNDESCRIBED
             continue
         found = members.setdefault(dataset, set())
         if table is not None:
@@ -182,13 +186,11 @@ def _members_by_dataset(names: set) -> dict:
 
 
 # How each kind of target is looked up, keyed by the same names the link
-# vocabulary uses. Each maps a name it found to its members, or to None for a
-# target that exists but is not described (a draft Dataset); a name it did not
-# find is absent. Written as a table rather than as branches inside `resolve`
-# so a third kind of target is an entry here and a route there, and
-# `ResolverCoverageTest` fails until somebody adds it -- which is the point:
-# a new target kind that silently resolved to nothing would look like data
-# that had been deleted.
+# vocabulary uses. Each maps a name it found to its members or to UNDESCRIBED.
+# Written as a table rather than as branches inside `resolve` so a third kind
+# of target is an entry here and a route there, and `ResolverCoverageTest`
+# fails until somebody adds it -- which is the point: a new target kind that
+# silently resolved to nothing would look like data that had been deleted.
 RESOLVERS = {
     "table": _tables_by_name,
     "dataset": _members_by_dataset,

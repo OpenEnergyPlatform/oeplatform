@@ -520,7 +520,10 @@
                 <a href="{% url 'dataedit:dataset-detail' dataset_name=dataset.name %}"
                    target="_blank"
                    rel="noopener">{{ dataset.metadata.title|default:dataset.name }}</a>
-                {% if not dataset.is_published %}<span class="badge text-bg-warning ms-1">Draft</span>{% endif %}
+                {% if not dataset.is_published %}
+                  <span class="badge text-bg-warning ms-1"
+                        data-dataset-state="draft">Draft</span>
+                {% endif %}
               </li>
             {% endif %}
           {% endfor %}
@@ -534,7 +537,10 @@
                     <a href="{% url 'dataedit:dataset-detail' dataset_name=dataset.name %}"
                        target="_blank"
                        rel="noopener">{{ dataset.metadata.title|default:dataset.name }}</a>
-                    {% if not dataset.is_published %}<span class="badge text-bg-warning ms-1">Draft</span>{% endif %}
+                    {% if not dataset.is_published %}
+                      <span class="badge text-bg-warning ms-1"
+                            data-dataset-state="draft">Draft</span>
+                    {% endif %}
                   </li>
                 {% endif %}
               {% endfor %}

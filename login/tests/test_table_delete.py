@@ -125,6 +125,23 @@ class DeletePreflightTests(DeleteTestCase):
         self.assertEqual(element_with_id(html, "action-confirm"), "")
         self.assertNotEqual(element_with_id(html, "table-action-confirm"), "")
 
+    def test_a_platform_admin_is_not_told_of_a_strangers_draft(self):
+        # deleting strips the Table from the draft; the dialog stays silent
+        # about it, for an admin too (only the operator log names it)
+        self.user.is_admin = True
+        self.user.save()
+        table = self.draft("t_in_a_draft", title="In a draft", published=True)
+        Dataset.objects.create(
+            name="ds_their_draft",
+            creator=self.stranger,
+            metadata={"title": "Secret plan"},
+        ).tables.add(table)
+        response = self.preflight("delete", "t_in_a_draft")
+        self.assertEqual(
+            response.context["preflight"].consequences["others_datasets"], []
+        )
+        self.assertNotIn("Secret plan", self.html(response))
+
     def test_a_published_table_states_what_deleting_breaks(self):
         table = self.draft("t_cited", title="Cited", published=True)
         Dataset.objects.create(

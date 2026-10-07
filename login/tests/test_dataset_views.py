@@ -324,6 +324,19 @@ class DatasetQuickActionsTests(TestCase):
             "login:dataset-delete", args=[self.user.id, "quick_dataset"]
         )
 
+    def test_a_platform_admin_gets_404_for_someone_elses_dataset(self):
+        self.other_user.is_admin = True
+        self.other_user.save()
+        self.client.force_login(self.other_user)
+        for route in ("login:dataset-edit", "login:dataset-delete"):
+            with self.subTest(route):
+                response = self.client.post(
+                    reverse(route, args=[self.other_user.id, "quick_dataset"]),
+                    {"title": "Hijacked", "description": "Should fail"},
+                )
+                self.assertEqual(response.status_code, 404)
+        self.assertTrue(Dataset.objects.filter(name="quick_dataset").exists())
+
     def test_edit_form_keeps_name_readonly(self):
         response = self.client.get(self.edit_url)
         self.assertEqual(response.status_code, 200)

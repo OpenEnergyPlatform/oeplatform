@@ -214,6 +214,12 @@ class DatasetFilterTests(FilterTestCase):
         )
         self.assertEqual(len(rows), 4)
 
+    def test_a_platform_admin_is_not_offered_a_strangers_draft(self):
+        self.user.is_admin = True
+        self.user.save()
+        self.dataset("their_draft", self.stranger, self.alone, published=False)
+        self.assertNotIn("their_draft", [value for value, _ in self.options("dataset")])
+
     def test_a_deleted_dataset_is_a_stale_chip(self):
         Dataset.objects.filter(name="theirs").delete()
         self.assertEqual(len(self.names({"dataset": "theirs"})), 4)

@@ -114,7 +114,7 @@ class TableSidebarDraftDatasetsTests(SidebarFixture):
         response = self.client.get(self.view_url)
         self.assertContains(response, self.detail("sidebar_own_draft"))
         self.assertContains(response, self.detail("sidebar_published"))
-        self.assertContains(response, 'class="badge text-bg-warning ms-1">Draft<')
+        self.assertContains(response, 'data-dataset-state="draft"', count=1)
 
     def test_nobody_else_sees_the_draft(self):
         for who in (self.other, self.admin, None):
