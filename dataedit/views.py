@@ -21,6 +21,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 import csv
 import json
+from functools import wraps
 from io import TextIOWrapper
 
 from django.contrib import messages
@@ -548,10 +549,11 @@ def tables_view(request: HttpRequest, topic: str) -> HttpResponse:
 
 @never_cache
 def datasets_view(request: HttpRequest, topic: str) -> HttpResponse:
-    """Public, paginated card list of the datasets in one topic: name,
-    description, resource count and combined size of the member tables.
-    Datasets never list under the draft pseudo-topic — it stays
-    tables-only (dataset drafts become private with the publish PR)."""
+    """Public, paginated card list of the published datasets in one topic:
+    name, description, resource count and combined size of the member
+    tables. A draft Dataset is never listed here, not even to its creator,
+    so the catalogue reads the same for everyone. Datasets never list under
+    the draft pseudo-topic; it stays tables-only."""
     is_draft_topic = topic == PSEUDO_TOPIC_DRAFT
     if not is_draft_topic:
         get_object_or_404(Topic, name=topic)
@@ -566,7 +568,7 @@ def datasets_view(request: HttpRequest, topic: str) -> HttpResponse:
 
     Tag.increment_usage_count_many(searched_tag_ids)
 
-    datasets = Dataset.objects.filter(topics__name=topic)
+    datasets = Dataset.objects.published().filter(topics__name=topic)
     if searched_query_string:
         datasets = datasets.filter(
             Q(name__icontains=searched_query_string)
@@ -610,11 +612,11 @@ def datasets_view(request: HttpRequest, topic: str) -> HttpResponse:
 def dataset_detail_view(request: HttpRequest, dataset_name: str) -> HttpResponse:
     """Public read view for one dataset. Deliberately not topic-bound
     (datasets carry several topics); linked from the cards and the
-    dashboard, opening in a new tab."""
-    dataset = get_object_or_404(
-        Dataset.objects.prefetch_related("tables__topics", "topics"),
-        name=dataset_name,
-    )
+    dashboard, opening in a new tab. A draft is readable by its creator
+    only, with a banner; anyone else gets the 404 of an unknown name."""
+    dataset = Dataset.objects.prefetch_related(
+        "tables__topics", "topics"
+    ).readable_or_404(request.user, dataset_name)
     resources = dataset.tables.all().order_by("name")
 
     sizes = {row["table_name"]: row["total_bytes"] for row in list_table_sizes()}
@@ -644,8 +646,8 @@ def dataset_detail_view(request: HttpRequest, dataset_name: str) -> HttpResponse
 def dataset_metadata_json_view(request: HttpRequest, dataset_name: str) -> JsonResponse:
     """The dataset's oemetadata document with live resources, as plain
     JSON: feeds the metadata viewer on the detail page and doubles as
-    the raw-JSON download."""
-    dataset = get_object_or_404(Dataset, name=dataset_name)
+    the raw-JSON download. Read by the detail page's rule."""
+    dataset = Dataset.objects.readable_or_404(request.user, dataset_name)
     metadata = dict(dataset.metadata)
     metadata["resources"] = dataset.resource_entries()
     return JsonResponse(metadata)
@@ -669,7 +671,29 @@ def view_name_taken(
     return redirect(f"{url}?view={existing.pk}" if existing else url)
 
 
+def require_table_write(view):
+    """Login, then write permission on the table the URL names.
+
+    For the views that create or change a table's saved views (graph and map
+    views, the default view). Those are shown to every visitor of the table, so
+    changing them is changing the table's page: an anonymous caller is sent to
+    log in, and a logged-in caller without write permission gets a 403.
+    """
+
+    @login_required
+    @wraps(view)
+    def guarded(request: HttpRequest, *args, table: str, **kwargs):
+        table_obj = table_or_404(table=table)
+        user: login_models.myuser = request.user  # type: ignore
+        if user.get_table_permission_level(table_obj) < login.permissions.WRITE_PERM:
+            raise PermissionDenied
+        return view(request, *args, table=table, **kwargs)
+
+    return guarded
+
+
 @require_POST
+@require_table_write
 def table_view_save_view(request: HttpRequest, table: str) -> HttpResponse:
     table_obj = table_or_404(table=table)
 
@@ -706,7 +730,8 @@ def table_view_save_view(request: HttpRequest, table: str) -> HttpResponse:
 
     # update or create corresponding view
     if post_id:
-        update_view = DBView.objects.filter(id=post_id).get()
+        # only a view of this table: the id alone would reach any table's view
+        update_view = get_object_or_404(DBView, id=post_id, table=table_obj.name)
         if post_name:
             update_view.name = post_name
         update_view.options = post_options
@@ -767,6 +792,7 @@ def table_view_save_view(request: HttpRequest, table: str) -> HttpResponse:
 
 
 @require_POST
+@require_table_write
 def table_view_set_default_view(
     request: HttpRequest, table: str, view_id: str
 ) -> HttpResponse:
@@ -783,6 +809,7 @@ def table_view_set_default_view(
 
 
 @require_POST
+@require_table_write
 def table_view_delete_view(
     request: HttpRequest, table: str, view_id: str
 ) -> HttpResponse:
@@ -794,6 +821,7 @@ def table_view_delete_view(
     return redirect("dataedit:view", table=table_obj.name)
 
 
+@method_decorator(require_table_write, name="dispatch")
 class TableCreateGraphView(View):
     @method_decorator(never_cache)
     def get(self, request: HttpRequest, table: str) -> HttpResponse:
@@ -830,6 +858,7 @@ class TableCreateGraphView(View):
         )
 
 
+@method_decorator(require_table_write, name="dispatch")
 class TableCreateMapView(View):
     @method_decorator(never_cache)
     def get(self, request: HttpRequest, table: str, maptype: str) -> HttpResponse:
@@ -1013,6 +1042,13 @@ class TableDataView(View):
             "kinds": ["table", "map", "graph"],
             "table": table,
             "table_obj": table_obj,
+            # the sidebar's Datasets: published ones plus the viewer's own
+            # drafts, which the template marks (spec #2613)
+            "table_datasets": list(
+                Dataset.objects.visible_to(request.user)
+                .filter(tables=table_obj)
+                .order_by("name")
+            ),
             "is_in_scenario": table_obj.topics.contains(
                 Topic.objects.get(name=TOPIC_SCENARIO)
             ),

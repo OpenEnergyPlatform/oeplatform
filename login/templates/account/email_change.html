@@ -1,0 +1,79 @@
+{% extends "allauth/layouts/base.html" %}
+{% load i18n %}
+{% block head_title %}
+  {% trans "Email address" %}
+{% endblock head_title %}
+{% block content %}
+  <h1 class="login__heading">{% trans "Email address" %}</h1>
+  <form method="post" action="{% url 'account_email' %}">
+    {% csrf_token %}
+    {% if current_emailaddress %}
+      <div class="login__field">
+        <label for="current_email">{% trans "Current address" %}</label>
+        <input id="current_email"
+               type="email"
+               value="{{ current_emailaddress.email }}"
+               disabled />
+      </div>
+    {% endif %}
+    {% if new_emailaddress %}
+      <div class="login__field">
+        <label for="new_email">
+          {% if current_emailaddress %}
+            {% trans "Changing to" %}
+          {% else %}
+            {% trans "Current address" %}
+          {% endif %}
+        </label>
+        <input id="new_email"
+               type="email"
+               value="{{ new_emailaddress.email }}"
+               disabled />
+        <div class="login__hint">
+          {% trans "Waiting for confirmation: open the link in the mail we sent to this address." %}
+          <button type="submit"
+                  form="pending-email"
+                  name="action_send"
+                  class="btn btn-link p-0 align-baseline">{% trans "Send the link again" %}</button>
+          {% if current_emailaddress %}
+            ·
+            <button type="submit"
+                    form="pending-email"
+                    name="action_remove"
+                    class="btn btn-link p-0 align-baseline text-danger">
+              {% trans "Cancel the change" %}
+            </button>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+    <div class="login__field">
+      <label for="{{ form.email.auto_id }}">{% trans "Change to" %}</label>
+      <input id="{{ form.email.auto_id }}"
+             type="email"
+             name="email"
+             value="{{ form.email.value|default_if_none:'' }}"
+             autocomplete="email"
+             required />
+      {% for error in form.email.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+      <div class="login__hint">
+        {% trans "You will be asked for your password. We send a confirmation link to the new address; once you open it, the new address replaces the current one, and the current one gets a mail about the change." %}
+      </div>
+    </div>
+    <button type="submit"
+            name="action_add"
+            class="login__button">{% trans "Change email address" %}</button>
+  </form>
+  {% if new_emailaddress %}
+    <form id="pending-email"
+          method="post"
+          action="{% url 'account_email' %}"
+          hidden>
+      {% csrf_token %}
+      <input type="hidden" name="email" value="{{ new_emailaddress.email }}" />
+    </form>
+  {% endif %}
+  <div class="login__alternative">
+    <a href="{% url 'login:settings' request.user.id %}">{% trans "Back to your settings" %}</a>
+  </div>
+{% endblock content %}

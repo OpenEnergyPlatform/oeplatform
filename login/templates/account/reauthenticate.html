@@ -1,0 +1,29 @@
+{% extends "allauth/layouts/base.html" %}
+{% load i18n %}
+{% block head_title %}
+  {% trans "Confirm it is you" %}
+{% endblock head_title %}
+{% block content %}
+  <h1 class="login__heading">{% trans "Confirm it is you" %}</h1>
+  <p>{% trans "Enter your password to continue." %}</p>
+  <form method="post" action="{% url 'account_reauthenticate' %}">
+    {% csrf_token %}
+    {{ redirect_field }}
+    {% for error in form.non_field_errors %}
+      <div class="login__alert login__alert--danger">
+        <p>{{ error }}</p>
+      </div>
+    {% endfor %}
+    <div class="login__field">
+      <label for="{{ form.password.auto_id }}">{% trans "Password" %}</label>
+      <input id="{{ form.password.auto_id }}"
+             type="password"
+             name="password"
+             autocomplete="current-password"
+             required
+             autofocus />
+      {% for error in form.password.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+    </div>
+    <button type="submit" class="login__button">{% trans "Confirm" %}</button>
+  </form>
+{% endblock content %}

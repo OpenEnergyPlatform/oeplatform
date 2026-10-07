@@ -1,0 +1,65 @@
+{% extends "allauth/layouts/base.html" %}
+{% load i18n socialaccount %}
+{% block head_title %}
+  {% trans "Connected accounts" %}
+{% endblock head_title %}
+{% block content %}
+  <h1 class="login__heading">{% trans "Connected accounts" %}</h1>
+  {% if form.accounts %}
+    <p>{% trans "You can also sign in with these accounts:" %}</p>
+    <form method="post" action="{% url 'socialaccount_connections' %}">
+      {% csrf_token %}
+      {% for error in form.non_field_errors %}
+        <div class="login__alert login__alert--danger">
+          <p>{{ error }}</p>
+        </div>
+      {% endfor %}
+      <div class="mb-3">
+        {% for acc in form.fields.account.choices %}
+          {% with account=acc.0.instance.get_provider_account %}
+            <div class="form-check">
+              <input class="form-check-input"
+                     type="radio"
+                     name="account"
+                     id="id_account_{{ account.account.pk }}"
+                     value="{{ account.account.pk }}"
+                     {% if form.accounts|length == 1 %}checked{% endif %} />
+              <label class="form-check-label"
+                     for="id_account_{{ account.account.pk }}">
+                {{ account }}
+                <span class="badge bg-secondary">{{ account.get_brand.name }}</span>
+              </label>
+            </div>
+          {% endwith %}
+        {% endfor %}
+      </div>
+      <button type="submit"
+              class="login__button login__button--danger">{% trans "Disconnect" %}</button>
+    </form>
+  {% else %}
+    <p>{% trans "No account from another sign-in service is connected." %}</p>
+  {% endif %}
+  {% if not request.user.has_usable_password %}
+    <div class="login__alert login__alert--info">
+      <p>
+        {% url 'account_set_password' as set_password_url %}
+        {% blocktrans %}Your account has no password yet. To sign in with your email address and a password instead of another service, first <a href="{{ set_password_url }}">set a password</a>. You can then disconnect the other service.{% endblocktrans %}
+      </p>
+    </div>
+  {% endif %}
+  <h2 class="login__heading">{% trans "Connect an account" %}</h2>
+  {% get_providers as socialaccount_providers %}
+  {% for provider in socialaccount_providers %}
+    <form method="post"
+          action="{% provider_login_url provider.id process='connect' %}">
+      {% csrf_token %}
+      <button type="submit"
+              class="login__button login__button--outline-secondary">
+        {% blocktrans with name=provider.name %}Connect {{ name }}{% endblocktrans %}
+      </button>
+    </form>
+  {% endfor %}
+  <div class="login__alternative">
+    <a href="{% url 'login:settings' request.user.id %}">{% trans "Back to your settings" %}</a>
+  </div>
+{% endblock content %}

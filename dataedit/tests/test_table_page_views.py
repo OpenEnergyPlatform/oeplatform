@@ -21,6 +21,7 @@ from django.urls import reverse
 from base.tests import TestViewsTestCase
 from dataedit.models import Filter, Table
 from dataedit.models import View as DBView
+from login.models import myuser as User
 
 migration_0054 = importlib.import_module(
     "dataedit.migrations.0054_view_unique_table_type_name"
@@ -109,6 +110,7 @@ class ViewNamesTest(WithTable):
     table_name = "test_table_view_names"
 
     def setUp(self):
+        self.client.force_login(self.user)  # the table's creator may write
         self.taken = DBView.objects.create(
             table=self.table_name, type="graph", name="taken"
         )
@@ -157,6 +159,7 @@ class ViewEndpointsTest(WithTable):
     table_name = "test_table_view_endpoints"
 
     def setUp(self):
+        self.client.force_login(self.user)  # the table's creator may write
         self.default = DBView.objects.create(
             table=self.table_name, type="table", name="default", is_default=True
         )
@@ -365,3 +368,78 @@ class MigrationLockTest(TestCase):
                 self.fail("another connection could insert during the migration")
         finally:
             other.close()
+
+
+class ViewPermissionTest(WithTable):
+    """Changing a table's saved views needs login and write permission on it.
+
+    The views are shown to everyone who opens the table, so changing them is
+    changing the table's page.
+    """
+
+    table_name = "test_table_view_permissions"
+
+    def setUp(self):
+        self.graph = DBView.objects.create(
+            table=self.table_name, type="graph", name="g"
+        )
+        self.reader = User.objects.create_user(  # type: ignore
+            name="reader", email="reader@test.test", affiliation="test"
+        )
+
+    def requests(self):
+        table = {"table": self.table_name}
+        view = {"table": self.table_name, "view_id": self.graph.pk}
+        yield "post", reverse("dataedit:table-view-save", kwargs=table), {
+            "name": "new",
+            "type": "graph",
+        }
+        yield "post", reverse("dataedit:table-view-set-default", kwargs=view), {}
+        yield "post", reverse("dataedit:table-view-delete-default", kwargs=view), {}
+        yield "get", reverse("dataedit:table-graph", kwargs=table), {}
+        yield "post", reverse("dataedit:table-graph", kwargs=table), {"name": "x"}
+        yield "get", reverse(
+            "dataedit:table-map", kwargs={**table, "maptype": "latlon"}
+        ), {}
+
+    def test_an_anonymous_caller_is_sent_to_log_in(self):
+        before = self.snapshot()
+        for method, url, data in self.requests():
+            with self.subTest(method=method, url=url):
+                response = getattr(self.client, method)(url, data)
+                self.assertEqual(response.status_code, 302)
+                self.assertIn("login", response.url)
+        self.assertEqual(self.snapshot(), before)
+
+    def test_a_logged_in_caller_without_write_permission_is_refused(self):
+        self.client.force_login(self.reader)
+        before = self.snapshot()
+        for method, url, data in self.requests():
+            with self.subTest(method=method, url=url):
+                response = getattr(self.client, method)(url, data)
+                self.assertEqual(response.status_code, 403)
+        self.assertEqual(self.snapshot(), before)
+
+    def test_saving_reaches_only_a_view_of_the_same_table(self):
+        stranger = DBView.objects.create(
+            table="some_other_table", type="graph", name="theirs"
+        )
+        self.client.force_login(self.user)
+        response = self.client.post(
+            reverse("dataedit:table-view-save", kwargs={"table": self.table_name}),
+            {"id": stranger.pk, "name": "mine now", "type": "graph"},
+        )
+        self.assertEqual(response.status_code, 404)
+        stranger.refresh_from_db()
+        self.assertEqual(stranger.name, "theirs")
+
+    def test_only_a_writer_is_offered_to_add_views(self):
+        add_graph = reverse("dataedit:table-graph", kwargs={"table": self.table_name})
+        self.assertNotContains(self.page(), add_graph)
+        self.client.force_login(self.reader)
+        self.assertNotContains(self.page(), add_graph)
+        self.client.force_login(self.user)
+        self.assertContains(self.page(), add_graph)
+
+    def snapshot(self):
+        return list(self.views().order_by("pk").values_list("pk", "name", "is_default"))

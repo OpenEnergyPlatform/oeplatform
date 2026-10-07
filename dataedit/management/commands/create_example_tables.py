@@ -17,15 +17,19 @@ from api.actions import (
     try_validate_metadata,
 )
 from dataedit.models import Table
-from oeplatform.settings import SCHEMA_DATA
 
 User = get_user_model()
 
+EXAMPLE_TABLE = "example_wind_farm_capacity"
 
+# Every run must leave each table complete: its record, its table in the schema
+# the record names (the sandbox), its rows and its metadata. A run finds
+# whatever an earlier run left, and a test run used to drop the table while the
+# record survived in the dev database (see oeplatform/oedb_for_tests.py).
 TABLE_DEFS = [
     {
-        "schema": SCHEMA_DATA,
-        "table": "example_wind_farm_capacity",
+        "is_sandbox": True,
+        "table": EXAMPLE_TABLE,
         "columns": [
             {
                 "name": "id",
@@ -79,14 +83,17 @@ class Command(BaseCommand):
     help = "Seed DataEdit tables + actual DB tables as in the Tables API"
 
     def handle(self, *args, **opts):
-        # 1) Ensure your dev user exists
-        user, _ = User.objects.get_or_create(
-            name="test", defaults={"email": "test@mail.com", "is_staff": True}
+        # 1) Ensure your dev user exists, made as create_dev_user makes it
+        # (the dev entrypoint runs that first). ``is_staff`` is a property of
+        # the user model, not a field, so it can not be a creation default.
+        user = User.objects.filter(name="test").first() or (
+            User.objects.create_devuser("test", "test@mail.com")
         )
 
         for spec in TABLE_DEFS:
-            schema_name = spec["schema"]
             table_name = spec["table"]
+            is_sandbox = spec["is_sandbox"]
+            schema_name = Table.get_oedb_schema(is_sandbox=is_sandbox)
             raw_columns = spec["columns"]
             raw_constraints = spec.get("constraints", [])
 
@@ -111,18 +118,21 @@ class Command(BaseCommand):
             constraint_defs = raw_constraints
 
             try:
-                # 4) Create physical table → Django metadata
-                Table.create_with_oedb_table(
-                    name=table_name,
-                    is_sandbox=True,  # tests ALWAYS in sandbox
-                    user=user,  # type: ignore
-                    column_definitions=column_defs,
-                    constraints_definitions=constraint_defs,
-                )
-
-                self.stdout.write(
-                    self.style.SUCCESS(f"✔ Created table {schema_name}.{table_name}")
-                )
+                # 4) Create physical table → Django metadata, unless both are
+                # there already
+                if self._needs_creating(table_name, is_sandbox, schema_name):
+                    Table.create_with_oedb_table(
+                        name=table_name,
+                        is_sandbox=is_sandbox,
+                        user=user,  # type: ignore
+                        column_definitions=column_defs,
+                        constraints_definitions=constraint_defs,
+                    )
+                    self.stdout.write(
+                        self.style.SUCCESS(
+                            f"✔ Created table {schema_name}.{table_name}"
+                        )
+                    )
 
             except Exception as e:
                 self.stderr.write(
@@ -130,6 +140,7 @@ class Command(BaseCommand):
                         f"✘ Failed to create {schema_name}.{table_name}: {e}"
                     )
                 )
+                continue
 
             try:
                 # Seed the table with data from CSV
@@ -153,6 +164,40 @@ class Command(BaseCommand):
                     )
                 )
 
+    def _needs_creating(self, name, is_sandbox, schema) -> bool:
+        """Whether the table has to be created, after clearing away what an
+        earlier run left half done: a record whose table is gone (or that
+        names the other schema), or a table without its record."""
+        full_name = f"{schema}.{name}"
+        record = Table.objects.filter(name=name).first()
+        if record is not None:
+            if (
+                record.is_sandbox == is_sandbox
+                and record.get_oedb_table_proxy().exists()
+            ):
+                self.stdout.write(f"• Table {full_name} already exists")
+                return False
+            self.stdout.write(
+                self.style.WARNING(
+                    f"↻ The record of {full_name} has no table behind it; "
+                    "creating both again"
+                )
+            )
+            # Drops whatever is left of its own table too: this is the
+            # example table, nothing else is in it.
+            record.delete()
+            return True
+        orphan = Table(name=name, is_sandbox=is_sandbox)
+        if orphan.get_oedb_table_proxy().exists():
+            self.stdout.write(
+                self.style.WARNING(
+                    f"↻ Table {full_name} exists without its record; "
+                    "creating both again"
+                )
+            )
+            orphan.drop_oedb_table()
+        return True
+
     def _seed_data(self, schema, table, csv_file):
         engine = _get_engine()
         Session = sessionmaker(bind=engine)
@@ -162,8 +207,6 @@ class Command(BaseCommand):
 
         full_table_name = f"{schema}.{table}"
         table = metadata.tables.get(full_table_name)
-
-        print(table)
 
         if table is None:
             self.stderr.write(
@@ -195,11 +238,12 @@ class Command(BaseCommand):
             try:
                 stmt = pg_insert(table).values(rows)
                 stmt = stmt.on_conflict_do_nothing(index_elements=["id"])
-                session.execute(stmt)
+                inserted = session.execute(stmt).rowcount
                 session.commit()
                 self.stdout.write(
                     self.style.SUCCESS(
-                        f"✔ Inserted {len(rows)} rows into {full_table_name}"
+                        f"✔ Inserted {inserted} rows into {full_table_name}"
+                        f" ({len(rows) - inserted} were there already)"
                     )
                 )
             except SQLAlchemyError as e:

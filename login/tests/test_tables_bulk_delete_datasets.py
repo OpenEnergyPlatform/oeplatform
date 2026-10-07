@@ -22,6 +22,7 @@ from unittest import mock
 
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
+from django.utils import timezone
 
 from api.services import table_actions
 from dataedit.models import Dataset, Embargo, Table
@@ -97,9 +98,18 @@ class BulkDeletePreflightTests(BulkCase, DeleteTestCase):
         )
         mine.tables.add(a, b)
         theirs = Dataset.objects.create(
-            name="ds_theirs", creator=self.stranger, metadata={"title": "Grid study"}
+            name="ds_theirs",
+            creator=self.stranger,
+            metadata={"title": "Grid study"},
+            published_at=timezone.now(),
         )
         theirs.tables.add(a)
+        # a stranger's draft holding the Table is never named or counted
+        Dataset.objects.create(
+            name="ds_their_draft",
+            creator=self.stranger,
+            metadata={"title": "Secret plan"},
+        ).tables.add(a, b)
         self.review("t_a", finished=True)
         self.review("t_b", finished=True)
         self.review("t_c", finished=False)
@@ -117,6 +127,7 @@ class BulkDeletePreflightTests(BulkCase, DeleteTestCase):
         self.assertEqual([t.name for t, _ in consequences["embargoed"]], ["t_b"])
         self.assertTrue(consequences["knowledge_graph"])
         html = self.html(response)
+        self.assertNotIn("Secret plan", html)
         self.assertIn(
             "2 of them are published",
             text(element_markup(html, "table-action-published")),

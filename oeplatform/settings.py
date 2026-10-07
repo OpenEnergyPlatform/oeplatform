@@ -43,6 +43,12 @@ from pathlib import Path
 # be in the settings the generator reads, and nothing that touches Django can
 # be imported at this point.
 from api.api_tags import TAGS as API_REFERENCE_TAGS
+from oeplatform.oedb_for_tests import (
+    TEST_NAME_VARIABLE,
+    oedb_name_for_tests,
+    running_tests,
+)
+from oeplatform.oeo_search import oeo_search_url
 from oeplatform.securitysettings import (
     ALLOWED_HOSTS,
     ANON_CONNECTION_LIMIT,
@@ -124,6 +130,16 @@ __all__ = [  # mark imports as "used"
     "dbport",
     "dbuser",
 ]
+
+# A test run gets its own data database (OEDB), as Django gives it its own
+# Django database: never the one configured above, which on a developer's
+# machine holds their dev data. See oeplatform/oedb_for_tests.py; the test
+# runner creates and migrates it.
+OEDB_CONFIGURED_NAME = dbname
+OEDB_TEST_NAME = oedb_name_for_tests(dbname, os.environ.get(TEST_NAME_VARIABLE))
+if running_tests(sys.argv, os.environ):
+    dbname = OEDB_TEST_NAME
+TEST_RUNNER = "oeplatform.runner.OepTestRunner"
 
 
 # ── Reverse proxy / HTTPS ─────────────────────────────────────────────────────
@@ -457,10 +473,22 @@ AUTHENTICATION_BACKENDS = [
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
-STATICFILES_FINDERS = {
+# A list, because the first finder that has a path serves it.
+STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
     "compressor.finders.CompressorFinder",
+]
+
+# Static files are named after their content (#2604). A deploy runs
+# `collectstatic`, then `compress` under the server's DEBUG; see "Loading and
+# compressing static assets" in docs/installation/guides/installation.md. The
+# test runner serves plain names, refusing the same ones (oeplatform/runner.py).
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
+    },
 }
 
 
@@ -483,19 +511,26 @@ COMPRESS_FILTERS = {
 ACCOUNT_USER_MODEL_USERNAME_FIELD = "name"
 ACCOUNT_USER_MODEL_EMAIL_FIELD = "email"
 # https://django-allauth.readthedocs.io/en/latest/configuration.html
-ACCOUNT_EMAIL_VERIFICATION = "mandatory"  # requires ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"  # requires "email*" in ACCOUNT_SIGNUP_FIELDS
 # https://django-allauth.readthedocs.io/en/latest/configuration.html
 ACCOUNT_ADAPTER = "login.adapters.AccountAdapter"
 # https://django-allauth.readthedocs.io/en/latest/forms.html
 ACCOUNT_FORMS = {"signup": "login.forms.CreateUserForm"}
-ACCOUNT_EMAIL_REQUIRED = True
-# ACCOUNT_USERNAME_REQUIRED = False
-# ACCOUNT_AUTHENTICATION_METHOD = 'email'
+# "*" marks a required field. This is what ACCOUNT_EMAIL_REQUIRED = True meant
+# before allauth 65.4 deprecated it.
+ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
 ACCOUNT_ALLOW_REGISTRATION = True
-ACCOUNT_FORMS = {"signup": "login.forms.CreateUserForm"}
-# ACCOUNT_SIGNUP_FORM_CLASS = {"login.forms.CreateUserForm"}
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 ACCOUNT_LOGOUT_ON_PASSWORD_CHANGE = True
+# The address an account signs in and resets its password with is managed at
+# /accounts/email/. Changing it asks for the password again (as changing the
+# password already does), the previous address is told, and an account keeps one
+# address: a new one replaces it once confirmed. allauth asks no password of an
+# account that signs in only through a provider, because it has none; for those
+# the mail to the previous address is what remains.
+ACCOUNT_REAUTHENTICATION_REQUIRED = True
+ACCOUNT_EMAIL_NOTIFICATIONS = True
+ACCOUNT_CHANGE_EMAIL = True
 
 
 # https://django-allauth.readthedocs.io/en/latest/configuration.html
@@ -547,6 +582,11 @@ SCHEMA_DEFAULT = SCHEMA_DEFAULT_TEST_SANDBOX if IS_SANDBOX else SCHEMA_DATA
 
 USE_ONTOP = bool(ONTOP_SPARQL_ENDPOINT_URL)
 USE_LOEP = bool(DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL)
+
+# Term search of the metadata editor and the oeo_ext unit picker (#2292):
+# this instance's own search if it has one, else the public endpoint;
+# OEO_SEARCH_URL in the environment overrides both.
+EXTERNAL_URLS["oeo_search"] = oeo_search_url(USE_LOEP, os.environ)
 
 
 # when running approximate (fast) row count: if number is below this

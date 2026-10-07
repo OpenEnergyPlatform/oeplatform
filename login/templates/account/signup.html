@@ -24,10 +24,10 @@
         {% csrf_token %}
         <!-- Username field -->
         <div class="login__field">
-          <label for="{{ form.email.id_for_label }}">{{ form.username.label }}</label>
+          <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
           {{ form.username }}
           {% if form.username.errors %}
-            <div class="login__alert login__alert--success login__alert--100">
+            <div class="login__alert login__alert--danger login__alert--100">
               {{ form.username.errors }}
             </div>
           {% endif %}
@@ -37,7 +37,7 @@
           <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
           {{ form.email }}
           {% if form.email.errors %}
-            <div class="login__alert login__alert--success login__alert--100">
+            <div class="login__alert login__alert--danger login__alert--100">
               {{ form.email.errors }}
             </div>
           {% endif %}
@@ -49,7 +49,7 @@
           </label>
           {{ form.password1 }}
           {% if form.password1.errors %}
-            <div class="login__alert login__alert--success login__alert--100">
+            <div class="login__alert login__alert--danger login__alert--100">
               {{ form.password1.errors }}
             </div>
           {% endif %}
@@ -61,7 +61,7 @@
           </label>
           {{ form.password2 }}
           {% if form.password2.errors %}
-            <div class="login__alert login__alert--success login__alert--100">
+            <div class="login__alert login__alert--danger login__alert--100">
               {{ form.password2.errors }}
             </div>
           {% endif %}
@@ -71,7 +71,7 @@
           <label for="{{ form.captcha.id_for_label }}">{{ form.captcha.label }}</label>
           {{ form.captcha }}
           {% if form.captcha.errors %}
-            <div class="login__alert login__alert--success login__alert--100">
+            <div class="login__alert login__alert--danger login__alert--100">
               {{ form.captcha.errors }}
             </div>
           {% endif %}

@@ -502,7 +502,7 @@ window.MetaEdit = function (config) {
           autocomplete: {
             search_name: function search(jseditor_editor, input) {
               var url =
-                "https://openenergyplatform.org/api/oeo-search?query=" + input;
+                config.oeo_search_url + "?query=" + encodeURIComponent(input);
 
               return new Promise(function (resolve) {
                 fetch(url, {
@@ -625,7 +625,7 @@ window.MetaEdit = function (config) {
           autocomplete: {
             search_name: function search(jseditor_editor, input) {
               var url =
-                "https://openenergyplatform.org/api/oeo-search?query=" + input;
+                config.oeo_search_url + "?query=" + encodeURIComponent(input);
 
               return new Promise(function (resolve) {
                 fetch(url, {

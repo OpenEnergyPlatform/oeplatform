@@ -13,9 +13,11 @@ sees there, how the list filters and sorts, and what each row says.
 - ``tables_listing``: the tab's ``login.listing.Listing`` for one viewer. It
   is a function of the viewer because the Datasets column counts only the
   Datasets that viewer may see, and so does its sort.
-- ``visible_datasets``: the one statement of which Datasets a viewer may see
-  in a row, read by both the Datasets cell and its sort, so the number shown
-  and the order it sorts by cannot disagree.
+- the Datasets a viewer may see in a row are ``Dataset.objects.visible_to``,
+  the platform's one lifecycle rule (published plus the viewer's own drafts),
+  read by the Datasets cell, its sort, its filter and the action dialogs, so
+  the number shown and the order it sorts by cannot disagree, and the tab
+  agrees with the table page's sidebar.
 - the filters: Search, Publishable, Review, Access, Dataset, and behind
   "More filters" Created, Modified, Topic and Tags, each one declaration. Every clause is a
   column test or a primary-key subquery, so no filter joins anything into
@@ -172,12 +174,6 @@ DIRECT = "direct"
 # The Dataset filter's two values beside a Dataset name.
 IN_ANY, IN_NONE = "any", "none"
 
-# Which Datasets count as published. Dataset has no lifecycle yet, so today
-# every Dataset is published (they are all publicly listed). When the
-# lifecycle gives Dataset its flag, this condition is the one line to change:
-# the Datasets cell and its sort both read it through ``visible_datasets``.
-PUBLISHED_DATASETS = Q(uuid__isnull=False)
-
 
 def accessible_tables(user):
     """Every non-sandbox Table ``user`` holds at least Data editor on,
@@ -189,20 +185,13 @@ def accessible_tables(user):
     )
 
 
-def visible_datasets(user):
-    """The Datasets ``user`` may see in a row: their own, drafts included,
-    and other people's published ones. Never another user's draft, because
-    the dashboard must not reveal what others are preparing."""
-    return Dataset.objects.filter(Q(creator=user) | PUBLISHED_DATASETS)
-
-
 def visible_dataset_count(user):
-    """How many of ``visible_datasets(user)`` contain the outer Table, as an
+    """How many of ``Dataset.objects.visible_to(user)`` contain the outer Table, as an
     expression: one annotated ``Count`` in a subquery, so it joins nothing
     into the outer query that could multiply its rows."""
     memberships = (
         Dataset.tables.through.objects.filter(
-            table_id=OuterRef("pk"), dataset__in=visible_datasets(user)
+            table_id=OuterRef("pk"), dataset__in=Dataset.objects.visible_to(user)
         )
         .order_by()
         .values("table_id")
@@ -295,7 +284,7 @@ def dataset_options(user) -> list:
     """In any, In none, then each Dataset the user may see that holds at
     least one of their Tables, their own first, each group by name. One
     query."""
-    datasets = visible_datasets(user).filter(
+    datasets = Dataset.objects.visible_to(user).filter(
         pk__in=_memberships()
         .filter(table__in=accessible_tables(user))
         .values("dataset_id")
@@ -327,12 +316,14 @@ def dataset_options(user) -> list:
 
 
 def _dataset(user):
-    """In any and In none read ``visible_datasets``, the rule the Datasets
+    """In any and In none read ``Dataset.objects.visible_to``, the rule the Datasets
     cell reads, so "In none" is exactly the rows whose cell reads "–"."""
 
     def apply(queryset, value):
         if value in (IN_ANY, IN_NONE):
-            members = _memberships().filter(dataset__in=visible_datasets(user))
+            members = _memberships().filter(
+                dataset__in=Dataset.objects.visible_to(user)
+            )
             members = members.values("table_id")
             if value == IN_ANY:
                 return queryset.filter(pk__in=members)
@@ -689,7 +680,7 @@ def table_rows(user):
             creator_id,
             creator_name,
         ) in Dataset.tables.through.objects.filter(
-            table_id__in=ids, dataset__in=visible_datasets(user)
+            table_id__in=ids, dataset__in=Dataset.objects.visible_to(user)
         ).values_list(
             "table_id",
             "dataset__name",

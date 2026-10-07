@@ -14,6 +14,25 @@ SPDX-License-Identifier: CC0-1.0
 
 - Updated the homepage with new content and styling
   [(#2352)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2352)
+- Datasets now have a lifecycle: a Dataset is a draft until it is published, and
+  a new one starts as a draft. A draft is visible only to its creator: it is
+  left out of the public topic list (for the creator too), its page, metadata
+  JSON and API address answer 404 for everyone else exactly as an unknown name
+  does, the table page's Datasets sidebar, the API list and the tables tab show
+  only published Datasets plus your own drafts (marked as drafts), and a
+  scenario bundle's link to it reads `resolvable: null`. Platform admins have no
+  exception. Writes through the API reveal no more than a read: someone else's
+  draft answers 404, someone else's published Dataset 403; the dashboard's
+  dataset routes answer 404 for a Dataset that is not yours. Every existing
+  Dataset is migrated as published since its creation (Django migration
+  `dataedit.0058_dataset_lifecycle`)
+  [(#2618)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2618)
+- The term search in the metadata editor and the oeo_ext unit picker no longer
+  always asks openenergyplatform.org: an instance with its own lookup service
+  searches itself, one without uses the public endpoint, and `OEO_SEARCH_URL`
+  overrides both (`EXTERNAL_URLS["oeo_search"]`). Search terms are now
+  URL-encoded
+  [(#2607)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2607)
 - Speed up the row upload API: index the unapplied rows of the edit-journal meta
   tables (`_<table>_insert/_edit/_delete`, back-filled by an oedb migration),
   mark applied rows with one set-based update instead of a per-row OR chain,
@@ -53,6 +72,17 @@ SPDX-License-Identifier: CC0-1.0
 - Refactor user groups into organizations; add fields to the organization model;
   refactor HTMX for organization management pages
   [(#2261)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2261)
+- Changing an account's email address at `/accounts/email/` now asks for the
+  password again, as a password change already does. The previous address gets a
+  mail when the address changes, and an account keeps one address: a new one
+  replaces it once it is confirmed
+  [(#2609)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2609)
+- The account pages under `/accounts/` (email address, password prompt,
+  connected accounts, inactive account, cancelled sign-in) use the OEP layout,
+  and the settings page links them. An account that signs in through RegApp can
+  set a password there and then disconnect RegApp. The unused second password
+  reset under `/user/password_reset/` is removed
+  [(#2610)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2610)
 
 ## Features
 
@@ -223,6 +253,38 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
+- Tables tab: a Table named `actions` can open its access drawer again. The
+  dashboard's action, check and "select all" routes moved beside `tables/`
+  (`profile/<id>/table-actions/…`, `…/table-names`), so no Table name collides
+  with them; their URL names are unchanged
+  [(#2611)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2611)
+- The privacy policy names the platform's own domain, openenergyplatform.org,
+  for the site and its cookies instead of openenergy-platform.org, which only
+  redirects there. Three typos in the terms of use are corrected
+  [(#2615)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2615)
+- Errors on the sign-up, set-password and reset-password forms are shown as
+  errors (red) instead of green "success" alerts, and the reset-password form
+  shows its errors at all: it looked for them on a field it does not have.
+  `securitysettings.py.default` no longer lists a login provider with an empty
+  `provider_id`, which made the sign-in and sign-up pages fail on a fresh setup
+  [(#2608)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2608)
+- Saved table views (graph and map views, the default view) can only be created,
+  changed or deleted by someone with write permission on the table; the "Add …
+  view" links are shown only to them. Saving a view now finds it only within its
+  own table
+  [(#2601)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2601)
+- Running the test suite no longer deletes your own tables. The tests used the
+  data database configured for the platform, and one of them clears its whole
+  sandbox schema, which took the dev container's example table with it while its
+  record stayed behind (the metadata editor then showed it without columns). A
+  test run now uses a data database of its own, `test_<name>` or
+  `LOCAL_TEST_DB_NAME`, which the test runner creates and migrates. And
+  `create_example_tables` now leaves a complete example table however often it
+  runs: it repairs a record whose table is gone, seeds the schema the table is
+  really in (it never had its 4 rows before), and no longer fails to create its
+  fallback user
+  [(#2602)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2602)
+
 - Deleting a table removes its peer reviews with it. A review names its table
   only by name, so a table created later under the same name used to inherit the
   old review state and badge. Dropping a deleted table's database tables now
@@ -278,7 +340,22 @@ SPDX-License-Identifier: CC0-1.0
   change writes one log line (`via=table-page`). Error messages across the site
   are now shown in red
   [(#2567)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2567)
+- Browsers no longer keep last release's stylesheets and scripts after a deploy.
+  Static files are now named after their content (`css/base-style.<hash>.css`),
+  so a changed file gets a new address. For deploys: run `collectstatic` before
+  `compress`, and run `compress` under the same `DEBUG` as the server, or no
+  page renders. The Podman image now builds with `OEP_DEBUG=False` for that
+  step. `collectstatic` now refuses a stylesheet whose `url()` points at a
+  missing file. The 18 such references in the vendored jQuery UI and Leaflet
+  stylesheets are removed (they never loaded), and so is the unused
+  `filterform.css`
+  [(#2604)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2604)
 
 ## Documentation updates
+
+- Reworked the pull request template: sections for testing, deploy notes and a
+  new "For reviewers" block; the changelog line is now written only in the
+  changelog; fixed the broken reviewer-guidelines link
+  [(#2603)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2603)
 
 ## Code Quality

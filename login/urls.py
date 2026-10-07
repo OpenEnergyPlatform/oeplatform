@@ -10,12 +10,6 @@ SPDX-FileCopyrightText: 2025 Daryna Barabanova <https://github.com/Darynarli> ©
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
-from django.contrib.auth.views import (
-    PasswordResetCompleteView,
-    PasswordResetConfirmView,
-    PasswordResetDoneView,
-    PasswordResetView,
-)
 from django.urls import path, re_path
 
 from login.views import (
@@ -50,36 +44,6 @@ from login.views import (
 
 app_name = "login"
 urlpatterns = [
-    re_path(
-        "password_reset/",
-        PasswordResetView.as_view(
-            html_email_template_name="account/password_reset_email.html",
-            email_template_name="account/password_reset_email.txt",
-            template_name="account/custom_password_reset_form.html",
-        ),
-        name="password_reset",
-    ),
-    re_path(
-        "password_reset/done/",
-        PasswordResetDoneView.as_view(
-            template_name="account/custom_password_reset_done.html"
-        ),
-        name="password_reset_done",
-    ),
-    re_path(
-        "reset/<uidb64>/<token>/",
-        PasswordResetConfirmView.as_view(
-            template_name="account/custom_password_reset_confirm.html"
-        ),
-        name="password_reset_confirm",
-    ),
-    re_path(
-        "reset/done/",
-        PasswordResetCompleteView.as_view(
-            template_name="account/custom_password_reset_complete.html"
-        ),
-        name="password_reset_complete",
-    ),
     re_path(
         # dataset-first dashboard: the profile opens on the datasets view
         r"^profile/(?P<user_id>[\d]+)$",
@@ -131,18 +95,21 @@ urlpatterns = [
         TablesView.as_view(),
         name="tables",
     ),
+    # Whatever is not one Table sits beside tables/, never under it: a Table
+    # may be named "actions" or "names", and tables/<table_name>/access must
+    # reach its drawer (#2611).
     re_path(
-        r"^profile/(?P<user_id>[\d]+)/tables/actions/(?P<action>[a-z_]+)$",
+        r"^profile/(?P<user_id>[\d]+)/table-actions/(?P<action>[a-z_]+)$",
         TableActionView.as_view(),
         name="table-action",
     ),
     re_path(
-        r"^profile/(?P<user_id>[\d]+)/tables/actions/(?P<action>[a-z_]+)/check$",
+        r"^profile/(?P<user_id>[\d]+)/table-actions/(?P<action>[a-z_]+)/check$",
         TableActionCheckView.as_view(),
         name="table-action-check",
     ),
     re_path(
-        r"^profile/(?P<user_id>[\d]+)/tables/names$",
+        r"^profile/(?P<user_id>[\d]+)/table-names$",
         TableNamesView.as_view(),
         name="table-names",
     ),

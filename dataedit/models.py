@@ -35,8 +35,10 @@ from django.db.models import (
     IntegerField,
     JSONField,
     PositiveIntegerField,
+    Q,
     QuerySet,
 )
+from django.http import Http404
 from django.urls import reverse
 from django.utils import timezone
 from omi.license import LicenseError, validate_oemetadata_licenses
@@ -533,11 +535,51 @@ class Table(Tagable):
         )
 
 
+# What every reader says about a Dataset it will not show: the same words for
+# another user's draft as for a name that never existed, so a read cannot tell
+# the two apart.
+DATASET_NOT_FOUND = "No dataset by that name."
+
+
+class DatasetQuerySet(models.QuerySet):
+    """The Dataset lifecycle rule (spec #2613): who may see a Dataset.
+
+    A Dataset is a draft (``published_at`` null) or published. A published
+    Dataset is visible to everyone, a draft only to its creator. There is no
+    platform-admin exemption, and an ownerless draft is visible to nobody.
+    Every reader goes through one of these, or ``Dataset.readable_by`` for an
+    object already loaded, so the rule is stated once.
+    """
+
+    def published(self):
+        """Published Datasets only, whoever asks: the public catalogue and
+        OEKG resolution, where not even the creator sees their draft."""
+        return self.filter(published_at__isnull=False)
+
+    def visible_to(self, user):
+        """Published Datasets plus ``user``'s own drafts; published only for
+        an anonymous user. For lists beside the viewer's own work."""
+        if not getattr(user, "is_authenticated", False):
+            return self.published()
+        return self.filter(Q(published_at__isnull=False) | Q(creator=user))
+
+    def readable_or_404(self, user, name):
+        """The Dataset called ``name`` if ``user`` may read it
+        (``Dataset.readable_by``), else Http404 with ``DATASET_NOT_FOUND``.
+        One query; a foreign draft and an unknown name raise the same."""
+        dataset = self.filter(name=name).first()
+        if dataset is None or not dataset.readable_by(user):
+            raise Http404(DATASET_NOT_FOUND)
+        return dataset
+
+
 class Dataset(models.Model):
     """Represents a dataset in the database.
 
     Datasets are implemented according to oemetadata specification.
     """
+
+    objects = DatasetQuerySet.as_manager()
 
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, unique=True)
@@ -555,6 +597,27 @@ class Dataset(models.Model):
         null=True,
         blank=True,
     )
+    # null = draft, a value = published since then. Null is the default, so
+    # a bare create is a draft. Republishing overwrites it.
+    published_at = models.DateTimeField(null=True, blank=True)
+    # The last change to the Dataset itself (title, description, Topics,
+    # membership), never to its member Tables. Null until something stamps it.
+    modified_at = models.DateTimeField(null=True, blank=True)
+
+    @property
+    def is_published(self) -> bool:
+        return self.published_at is not None
+
+    def readable_by(self, user) -> bool:
+        """``DatasetQuerySet.visible_to`` for one loaded Dataset: published,
+        or ``user``'s own draft. No platform-admin exemption."""
+        if self.is_published:
+            return True
+        return (
+            getattr(user, "is_authenticated", False)
+            and self.creator_id is not None
+            and self.creator_id == user.pk
+        )
 
     def resource_entries(self):
         """Assemble the oemetadata `resources` list live from member tables.
