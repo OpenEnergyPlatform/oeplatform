@@ -26,7 +26,7 @@ SPDX-License-Identifier: CC0-1.0
   editing, deleting and managing a Dataset from the dashboard until the row
   actions land; the API still does all of it. A multi-valued filter in a list's
   primary row is now a dropdown of checkboxes
-  [(#2622)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2622)
+  [(#2662)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2662)
 - The profile dashboard's tables tab now runs on a generic list module, with no
   change in what it does: `login/static/login/dash_list.js` holds the behaviour
   (filter bar, selection, bulk bar, dialog, drawer, toasts) driven by a config
