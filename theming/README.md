@@ -43,9 +43,10 @@ a clean checkout and fails when the result differs from the committed file.
 because compressed output differs between Sass releases, and a floating version
 would make the check fail without anyone having changed the theme. Bootstrap's
 Sass sources come from `node_modules/bootstrap/scss` (the build passes
-`--load-path=node_modules`). Upgrading either package is a deliberate change:
-bump it, rebuild, and review the diff of the compiled file in the same pull
-request.
+`--load-path=node_modules`; a `theming/bootstrap` clone left over from the old
+Docker route is no longer read and can be deleted). Upgrading either package is
+a deliberate change: bump it, rebuild, and review the diff of the compiled file
+in the same pull request.
 
 `--quiet-deps` silences the deprecation warnings that Bootstrap 5.2's own
 sources raise under this Sass version. Warnings from the files in this directory
@@ -93,7 +94,7 @@ Minified CSS is one long line, so a plain diff only says that it changed. Split
 it at declarations first:
 
 ```sh
-split() { sed 's/\([;}]\)/\1\n/g'; }
-diff <(git show HEAD:base/static/css/bootstrap.min.css | split) \
-     <(split < base/static/css/bootstrap.min.css)
+split_css() { sed 's/\([;}]\)/\1\n/g'; }
+diff <(git show HEAD:base/static/css/bootstrap.min.css | split_css) \
+     <(split_css < base/static/css/bootstrap.min.css)
 ```

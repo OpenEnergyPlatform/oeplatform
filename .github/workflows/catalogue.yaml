@@ -51,8 +51,8 @@ jobs:
             exit 0
           fi
           echo "::error file=base/static/css/bootstrap.min.css::The committed theme differs from a rebuild of theming/. Run 'npm run build:theme' and commit the result; never edit bootstrap.min.css by hand (see theming/README.md)."
-          split() { sed 's/\([;}]\)/\1\n/g'; }
+          split_css() { sed 's/\([;}]\)/\1\n/g'; }
           echo "Committed (<) against rebuilt (>), split at declarations:"
-          diff <(git show HEAD:base/static/css/bootstrap.min.css | split) \
-               <(split < base/static/css/bootstrap.min.css) | head -n 200 || true
+          diff <(git show HEAD:base/static/css/bootstrap.min.css | split_css) \
+               <(split_css < base/static/css/bootstrap.min.css) | head -n 200 || true
           exit 1
