@@ -193,6 +193,14 @@ def _refusal(description):
     return OpenApiResponse(response=RefusalSerializer, description=description)
 
 
+NO_SUCH_DATASET = (
+    "No dataset of that name, or another user's draft: the two answer alike, "
+    "word for word."
+)
+#: What either paged Dataset list answers for a page it does not have.
+NO_SUCH_PAGE = "No such page: `page` is past the last one, or not a number."
+
+
 DATASET_REFUSALS = {
     400: describes(
         "The request could not be carried out as sent: DRF's map of each "
@@ -205,10 +213,7 @@ DATASET_REFUSALS = {
         "Authenticated, but the dataset is somebody else's: only its creator "
         "may change it."
     ),
-    404: _refusal(
-        "No dataset of that name, or another user's draft: the two answer "
-        "alike, word for word."
-    ),
+    404: _refusal(NO_SUCH_DATASET),
     409: OpenApiResponse(
         response=PublishGateRefusalSerializer,
         description=(
@@ -217,6 +222,20 @@ DATASET_REFUSALS = {
         ),
     ),
 }
+
+
+#: The wording only the dataset list has: its filters and its pages.
+DATASET_LIST_REFUSALS = {
+    400: describes(
+        "A filter holds something other than `true` or `false`: DRF's map "
+        "names the parameter."
+    ),
+    401: _refusal("`mine=true`, asked without a login."),
+    404: _refusal(NO_SUCH_PAGE),
+}
+
+#: A dataset's members are paged too, so its 404 has one cause more.
+DATASET_PAGE_NOT_FOUND = {404: _refusal(f"{NO_SUCH_DATASET} {NO_SUCH_PAGE}")}
 
 
 def dataset_responses(success, *codes, also=None):

@@ -227,6 +227,73 @@ class DatasetReadSerializer(serializers.ModelSerializer):
         return sorted(topic.name for topic in obj.topics.all())
 
 
+class DatasetSummarySerializer(DatasetReadSerializer):
+    """A Dataset as a list sends it: the read body without the assembled
+    `metadata.resources`, plus how many members there are. A member's
+    resource entry is its whole schema, so a page of full bodies would run to
+    megabytes; the entries stay on the dataset's own read and its paged
+    `resources/`."""
+
+    # annotated on the list's queryset, so a page costs no query per Dataset
+    resource_count = serializers.IntegerField(
+        read_only=True,
+        help_text=(
+            "How many member tables the dataset holds: the `count` its "
+            "`resources/` pages through. A member whose metadata describes "
+            "no resource counts here but has no entry in the dataset's "
+            "`metadata.resources`."
+        ),
+    )
+
+    class Meta(DatasetReadSerializer.Meta):
+        fields = [*DatasetReadSerializer.Meta.fields, "resource_count"]
+        read_only_fields = fields
+
+    def get_metadata(self, obj) -> dict:
+        # a row older than live assembly may still store the key
+        return {key: value for key, value in obj.metadata.items() if key != "resources"}
+
+
+# The two values a list filter takes, spelled as the query string spells them.
+TRUE_OR_FALSE = ["true", "false"]
+
+
+class DatasetListFiltersSerializer(serializers.Serializer):
+    """`GET /datasets/`'s filters. They narrow what the caller may see and
+    never widen it; an unknown value is a 400 naming the parameter."""
+
+    mine = serializers.ChoiceField(
+        choices=TRUE_OR_FALSE,
+        required=False,
+        help_text=(
+            "`true`: only the caller's own datasets, drafts included. Needs a "
+            "login: asked anonymously it is a 401."
+        ),
+    )
+    published = serializers.ChoiceField(
+        choices=TRUE_OR_FALSE,
+        required=False,
+        help_text=(
+            "`true`: published datasets only. `false`: drafts only, which "
+            "are only ever the caller's own, so none for an anonymous caller."
+        ),
+    )
+
+    @property
+    def only_mine(self) -> bool:
+        return self.validated_data.get("mine") == "true"
+
+    def narrowed(self, datasets, user):
+        """``datasets`` (what ``user`` may see) narrowed as asked. Validate
+        first; ``only_mine`` assumes a login, which the caller checks."""
+        if self.only_mine:
+            datasets = datasets.filter(creator=user)
+        if "published" in self.validated_data:
+            drafts = self.validated_data["published"] == "false"
+            datasets = datasets.filter(published_at__isnull=drafts)
+        return datasets
+
+
 TOPICS_HELP = (
     "Names of existing topics, the dataset's own set. An unknown name, or the "
     "draft pseudo-topic, is refused naming it."

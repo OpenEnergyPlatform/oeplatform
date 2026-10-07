@@ -567,7 +567,7 @@ class DatasetAPITests(APITestCase):
             )
         response = self.client.get("/api/v0/datasets/")  # fixed
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 2)
+        self.assertEqual(response.data["count"], 2)
 
     def test_assign_tables_to_dataset(self):
         # schema = Topic.objects.create(name="test_schema")
@@ -616,8 +616,8 @@ class DatasetAPITests(APITestCase):
             f"/api/v0/datasets/{dataset.name}/resources/"
         )  # fixed
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]["name"], "t1")
+        self.assertEqual(response.data["count"], 1)
+        self.assertEqual(response.data["results"][0]["name"], "t1")
 
     def test_assign_missing_table(self):
         Dataset.objects.create(

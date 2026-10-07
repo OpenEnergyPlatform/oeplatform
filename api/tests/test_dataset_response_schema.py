@@ -37,7 +37,10 @@ MEMBER = {"tables": [{"name": "rs_member"}]}
 # (path, method, code) -> (who asks, the request). Who is "creator",
 # "stranger" or None (anonymous); the request takes the client.
 CASES = {
-    (ROOT, "get", 200): (None, lambda c: c.get(ROOT)),
+    (ROOT, "get", 200): ("creator", lambda c: c.get(ROOT)),
+    (ROOT, "get", 400): ("creator", lambda c: c.get(ROOT + "?published=maybe")),
+    (ROOT, "get", 401): (None, lambda c: c.get(ROOT + "?mine=true")),
+    (ROOT, "get", 404): (None, lambda c: c.get(ROOT + "?page=9")),
     (ROOT, "post", 201): (
         "creator",
         lambda c: c.post(
