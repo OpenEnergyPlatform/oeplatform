@@ -40,7 +40,7 @@
            data-bs-toggle="collapse"
            href="#Overview">Overview</a>
       </div>
-      <div id="Overview" class="title= expand in in">
+      <div id="Overview" class="card-body expand in in">
         <div class="container" style="padding:0">
           <table class="profiletable">
             {% include "modelview/model_snippet.html" with model=model field="last_updated" %}
@@ -68,27 +68,15 @@
            data-bs-toggle="collapse"
            href="#GeneralInformation">General Information</a>
       </div>
-      <div id="GeneralInformation" class="title= collapse in in">
+      <div id="GeneralInformation" class="card-body collapse in in">
         <div class="container" style="padding:0">
           <table class="profiletable">
-            <tr>
-              {% include "modelview/model_snippet.html" with model=model field="model_name" fieldNameOverride="Framework Name" %}
-            </tr>
-            <tr>
-              {% include "modelview/model_snippet.html" with model=model field="acronym" %}
-            </tr>
-            <tr>
-              {% include "modelview/model_snippet.html" with model=model field="contact_email" %}
-            </tr>
-            <tr>
-              {% include "modelview/model_snippet.html" with model=model field="current_contact_person" %}
-            </tr>
-            <tr>
-              {% include "modelview/model_snippet.html" with model=model field="website" %}
-            </tr>
-            <tr>
-              {% include "modelview/model_snippet.html" with model=model field="institutions" %}
-            </tr>
+            {% include "modelview/model_snippet.html" with model=model field="model_name" fieldNameOverride="Framework Name" %}
+            {% include "modelview/model_snippet.html" with model=model field="acronym" %}
+            {% include "modelview/model_snippet.html" with model=model field="contact_email" %}
+            {% include "modelview/model_snippet.html" with model=model field="current_contact_person" %}
+            {% include "modelview/model_snippet.html" with model=model field="website" %}
+            {% include "modelview/model_snippet.html" with model=model field="institutions" %}
             <tr>
               <td class="sheetlabel">Geographical Scope</td>
               <td>
@@ -121,27 +109,13 @@
                 </table>
               </td>
             </tr>
-            <tr>
-              {% include "modelview/model_snippet.html" with model=model field="inital_purpose" %}
-            </tr>
-            <tr>
-              {% include "modelview/model_snippet.html" with model=model field="inital_purpose_change" %}
-            </tr>
-            <tr>
-              {% include "modelview/model_snippet.html" with model=model field="research_questions" %}
-            </tr>
-            <tr>
-              {% include "modelview/model_snippet.html" with model=model field="inital_release_date" %}
-            </tr>
-            <tr>
-              {% include "modelview/model_snippet.html" with model=model field="parent_framework" %}
-            </tr>
-            <tr>
-              {% include "modelview/model_snippet.html" with model=model field="version" %}
-            </tr>
-            <tr>
-              {% include "modelview/model_snippet.html" with model=model field="source_of_funding" %}
-            </tr>
+            {% include "modelview/model_snippet.html" with model=model field="inital_purpose" %}
+            {% include "modelview/model_snippet.html" with model=model field="inital_purpose_change" %}
+            {% include "modelview/model_snippet.html" with model=model field="research_questions" %}
+            {% include "modelview/model_snippet.html" with model=model field="inital_release_date" %}
+            {% include "modelview/model_snippet.html" with model=model field="parent_framework" %}
+            {% include "modelview/model_snippet.html" with model=model field="version" %}
+            {% include "modelview/model_snippet.html" with model=model field="source_of_funding" %}
           </table>
         </div>
       </div>
@@ -151,12 +125,10 @@
         <a data-bs-toggle="collapse"
            href="#MathematicalDescription">Mathematical Description</a>
       </div>
-      <div id="MathematicalDescription" class="title= collapse in">
+      <div id="MathematicalDescription" class="card-body collapse in">
         <div class="container" style="padding:0">
           <table class="profiletable">
-            <tr>
-              {% include "modelview/model_snippet.html" with model=model field="gui" %}
-            </tr>
+            {% include "modelview/model_snippet.html" with model=model field="gui" %}
             <tr>
               <td class="sheetlabel">Programming Framework</td>
               <td>
@@ -181,12 +153,8 @@
                 </table>
               </td>
             </tr>
-            <tr>
-              {% include "modelview/model_snippet.html" with model=model field="auto_model_generator" %}
-            </tr>
-            <tr>
-              {% include "modelview/model_snippet.html" with model=model field="data_preprocessing" add=model.data_preprocessing_other %}
-            </tr>
+            {% include "modelview/model_snippet.html" with model=model field="auto_model_generator" %}
+            {% include "modelview/model_snippet.html" with model=model field="data_preprocessing" add=model.data_preprocessing_other %}
             <tr>
               <td class="sheetlabel">Output Data Format</td>
               <td>
@@ -195,12 +163,8 @@
                 </table>
               </td>
             </tr>
-            <tr>
-              {% include "modelview/model_snippet.html" with model=model field="data_postprocessing" add=model.data_postprocessing_other %}
-            </tr>
-            <tr>
-              {% include "modelview/model_snippet.html" with model=model field="plotting_functionalities" %}
-            </tr>
+            {% include "modelview/model_snippet.html" with model=model field="data_postprocessing" add=model.data_postprocessing_other %}
+            {% include "modelview/model_snippet.html" with model=model field="plotting_functionalities" %}
             <tr>
               <td class="sheetlabel">The analytical approach</td>
               <td>
@@ -209,12 +173,8 @@
                 </table>
               </td>
             </tr>
-            <tr>
-              {% include "modelview/model_snippet.html" with model=model field="additional_software" %}
-            </tr>
-            <tr>
-              {% include "modelview/model_snippet.html" with model=model field="interfaces" %}
-            </tr>
+            {% include "modelview/model_snippet.html" with model=model field="additional_software" %}
+            {% include "modelview/model_snippet.html" with model=model field="interfaces" %}
             <tr>
               <td class="sheetlabel">The mathematical approach</td>
               <td>
@@ -247,7 +207,7 @@
       <div class="card-header">
         <a href="#Openness" data-bs-toggle="collapse">Openness</a>
       </div>
-      <div id="Openness" class="title= collapse in">
+      <div id="Openness" class="card-body collapse in">
         <div class="container" style="padding:0">
           <table class="profiletable">
             {% include "modelview/model_snippet.html" with model=model field="open_source" %}
@@ -291,9 +251,7 @@
       <div id="ModelBuilding" class="card-body collapse">
         <div class="container" style="padding:0">
           <table class="profiletable">
-            <tr>
-              {% include "modelview/model_snippet.html" with model=model field="fixed_units" %}
-            </tr>
+            {% include "modelview/model_snippet.html" with model=model field="fixed_units" %}
             <tr>
               <td class="sheetlabel">Renewable Technology Inclusion</td>
               <td>
@@ -393,6 +351,7 @@
   </div>
 {% endblock %}
 {% block after-body-bottom-js %}
+  {{ block.super }}
   <script>
     document.body.addEventListener("htmx:configRequest", (event) => {
       event.detail.headers["X-CSRFToken"] = "{{ csrf_token }}";

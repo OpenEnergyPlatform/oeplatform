@@ -26,6 +26,15 @@ from django.shortcuts import get_object_or_404
 from modelview.forms import EnergyframeworkForm, EnergymodelForm
 from modelview.models import Energyframework, Energymodel
 
+#: The factsheet types there are, with the model and form class of each. The
+#: URLs accept nothing else, so an unknown type is a 404 on every route under
+#: `/factsheets/<type>s/`.
+SHEET_CLASSES = {
+    "model": (Energymodel, EnergymodelForm),
+    "framework": (Energyframework, EnergyframeworkForm),
+}
+SHEET_TYPES = tuple(SHEET_CLASSES)
+
 BASE_VIEW_PROPS = OrderedDict(
     [
         (
@@ -454,20 +463,7 @@ def getClasses(
     """
     Returns the model and form class w.r.t sheettype.
     """
-    allowed_sheet_types = ["model", "framework"]
-    cls = None
-    frm = None
-
-    if isinstance(sheettype, str):
-        if sheettype in allowed_sheet_types:
-            if sheettype == "model":
-                cls = Energymodel
-                frm = EnergymodelForm
-            elif sheettype == "framework":
-                cls = Energyframework
-                frm = EnergyframeworkForm
-
-    return cls, frm
+    return SHEET_CLASSES.get(sheettype, (None, None))
 
 
 def printable(model, field):

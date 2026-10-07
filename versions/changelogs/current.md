@@ -335,6 +335,16 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
+- Six small defects found while rendering the platform for the design work: an
+  unknown research project page answers 404 instead of a server error; an
+  unknown factsheet type (`/factsheets/<anything>s/` and every page under it)
+  answers 404 instead of an empty list or a server error; the profile's Reviews
+  tab loads its script as a module, so the browser no longer refuses it; a stray
+  `^` no longer shows above the navbar of the table view; the help tooltips on
+  model and framework factsheets open again; and the framework factsheet's
+  sections get the card padding the model factsheet has, with no table row
+  nested in another
+  [(#2634)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2634)
 - Tables tab: a Table named `actions` can open its access drawer again. The
   dashboard's action, check and "select all" routes moved beside `tables/`
   (`profile/<id>/table-actions/…`, `…/table-names`), so no Table name collides

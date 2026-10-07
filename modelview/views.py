@@ -132,16 +132,7 @@ def list_sheets_view(request, sheettype):
     """
     c, _ = getClasses(sheettype)
     if c is None:
-        # Handle the case where getClasses returned None
-        # You can return an error message or take appropriate action here.
-        # For example, you can return an HttpResponse indicating that the
-        # requested sheettype is not supported.
-        sheettype_error_message = "Invalid sheettype"
-        return render(
-            request,
-            "modelview/error_template.html",
-            {"sheettype_error_message": sheettype_error_message},
-        )
+        raise Http404("No such factsheet type.")
 
     fields = {}
     defaults = set()
