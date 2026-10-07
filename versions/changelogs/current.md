@@ -12,6 +12,23 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- The theme now emits the platform's design tokens as CSS custom properties at
+  `:root`: Bootstrap's `--bs-*` names where Bootstrap has one, plus a small
+  `--oep-*` set (text, borders, surfaces, shadows, dense size, heading weight,
+  reading width, content width, transition), with the homepage's values as
+  defaults in `theming/_variables.scss`. A re-map layer points Bootstrap's
+  component variables (buttons, fields and their focus ring, checkboxes,
+  dropdowns, pagination, tabs, cards, dialogs, links) at the tokens, so one
+  stylesheet that sets `--bs-primary` and `--bs-primary-rgb` recolours all of
+  them, not just the navbar. The homepage and the navbar read only tokens and
+  render pixel for pixel as before; `--primaryColor*` and `--white` are gone.
+  Off the homepage two defaults change what renders: corners follow the radius
+  scale (4px; 2px small; 8px on what floats, so buttons and pagination lose half
+  their rounding), and `--bs-border-color` is the homepage's lighter `#e9f0f5`,
+  which lightens table borders, `.border` utilities and dialog dividers.
+  `benchmarks/homepage/compare.mjs` compares full-page homepage screenshots
+  before and after a change
+  [(#PRNUMBER)](https://github.com/OpenEnergyPlatform/oeplatform/pull/PRNUMBER)
 - The Bootstrap theme builds with one npm command, `npm run build:theme` (`sass`
   1.77.0 and `bootstrap` 5.2.0 as exactly pinned dev dependencies), instead of
   by hand in a Docker container, which is removed. The compiled
