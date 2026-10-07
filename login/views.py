@@ -32,6 +32,7 @@ from django.http import (
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
+from django.utils.text import capfirst
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 from django.views.generic import RedirectView, TemplateView, View
@@ -547,12 +548,13 @@ class DatasetActionView(DatasetsList, ActionView):
                 GATE_NEEDS[gate.name] for gate in DATASET_GATE if gate.name in failed
             ]
             # where the Datasets will be listed: their own Topics
-            context["listed_under"] = list(
-                Topic.objects.filter(datasets__in=check.eligible)
+            context["listed_under"] = [
+                capfirst(name)
+                for name in Topic.objects.filter(datasets__in=check.eligible)
                 .distinct()
                 .order_by("name")
                 .values_list("name", flat=True)
-            )
+            ]
         return context
 
     def done_detail(self, request, outcome):

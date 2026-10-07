@@ -83,9 +83,7 @@ modal cannot open a drawer or another modal while it is showing. The gate's
           <p id="dataset-action-listed">
             {% if listed_under %}
               {{ n|pluralize:"It,They" }} will be listed publicly under
-              {% for topic in listed_under %}
-                <strong>{{ topic|capfirst }}</strong>{% if not forloop.last %},{% endif %}
-              {% endfor %}, where anyone can find {{ n|pluralize:"it,them" }}.
+              <strong>{{ listed_under|join:", " }}</strong>, where anyone can find {{ n|pluralize:"it,them" }}.
             {% else %}
               {{ n|pluralize:"It,They" }} will be listed publicly under {{ n|pluralize:"its,their" }} topics, where anyone can find {{ n|pluralize:"it,them" }}.
             {% endif %}

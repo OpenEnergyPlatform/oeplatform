@@ -98,6 +98,16 @@ SPDX-License-Identifier: CC0-1.0
   `resources/`. Both lists cost the same few queries per page however many
   Datasets or members there are
   [(#2621)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2621)
+- Profile dashboard, datasets tab: every row has a ⋯ menu with Publish… (or
+  Unpublish… for a published Dataset) and Delete…. Publish says where the
+  Dataset will be listed and how many of its tables are drafts or under embargo,
+  which never stops it; a draft without tables or topics is told what it needs
+  and cannot be confirmed. Unpublish and delete state their consequences;
+  deleting a published Dataset asks for its name, and member tables are never
+  deleted. The list refreshes in place, a message names what was done, and
+  deleting the last Dataset shows the empty state without a reload. The
+  dashboard never republishes; the API still does
+  [(#2623)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2623)
 - The term search in the metadata editor and the oeo_ext unit picker no longer
   always asks openenergyplatform.org: an instance with its own lookup service
   searches itself, one without uses the public endpoint, and `OEO_SEARCH_URL`
