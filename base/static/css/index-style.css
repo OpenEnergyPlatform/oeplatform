@@ -523,6 +523,9 @@
 }
 
 .index-workflow {
+  /* #54a7e2 (the rail), #427aa1 (card borders, task pills) and #93a4af
+     (a disabled step) below are this section's own colours, which no
+     design token covers. */
   --index-workflow-icon-size: 64px;
   /* centres the icon on the card's number and title */
   --index-workflow-icon-offset: 28px;

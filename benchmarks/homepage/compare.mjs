@@ -33,7 +33,7 @@
 // `diff` compares every PNG of the first directory with its namesake in the
 // second, prints one line per shot, writes a diff image (changed pixels in
 // red over a faded copy) for each that differs, and exits 1 if any differs.
-// With CHROME and PUPPETEER set it decodes the PNGs in the browser, so it
+// It decodes the PNGs in the browser (CHROME and PUPPETEER), so it
 // needs no image library.
 
 import {
@@ -45,14 +45,27 @@ import {
 } from "node:fs";
 import { join } from "node:path";
 
+const [mode, ...dirs] = process.argv.slice(2);
+const valid =
+  (mode === "shoot" && dirs.length === 1) ||
+  (mode === "diff" && dirs.length === 2);
+if (!valid) {
+  console.error(
+    "usage: compare.mjs shoot <dir> | compare.mjs diff <before-dir> <after-dir>"
+  );
+  process.exit(2);
+}
+if (!process.env.PUPPETEER || !process.env.CHROME) {
+  console.error("set PUPPETEER and CHROME, see the top of this file");
+  process.exit(2);
+}
+
 const { default: puppeteer } = await import(process.env.PUPPETEER);
 const launch = () =>
   puppeteer.launch({
     executablePath: process.env.CHROME,
     args: ["--no-sandbox"],
   });
-
-const [mode, ...dirs] = process.argv.slice(2);
 
 async function settle(page) {
   await page.evaluate(async () => {
@@ -230,11 +243,5 @@ async function diff(before, after) {
   process.exit(differs ? 1 : 0);
 }
 
-if (mode === "shoot" && dirs.length === 1) await shoot(dirs[0]);
-else if (mode === "diff" && dirs.length === 2) await diff(dirs[0], dirs[1]);
-else {
-  console.error(
-    "usage: compare.mjs shoot <dir> | compare.mjs diff <before-dir> <after-dir>"
-  );
-  process.exit(2);
-}
+if (mode === "shoot") await shoot(dirs[0]);
+else await diff(dirs[0], dirs[1]);

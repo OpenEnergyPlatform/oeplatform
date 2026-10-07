@@ -39,6 +39,8 @@ $focus-border: color-mix(in srgb, var(--bs-primary) 50%, white);
 :root {
   --bs-link-color: var(--bs-primary);
   --bs-link-hover-color: #{shade(--bs-primary, 20%)};
+  // Bootstrap's pink inline code is a colour no token covers
+  --bs-code-color: var(--bs-body-color);
 }
 
 // Buttons: the radius scale, then the colour roles. The sizes come after
@@ -125,7 +127,9 @@ $focus-border: color-mix(in srgb, var(--bs-primary) 50%, white);
   border-color: var(--bs-primary);
 }
 
-// Dropdowns
+// Dropdowns. Being later at equal specificity, this also wins over
+// Bootstrap's `.dropdown-menu-dark`, which no template uses; restate that
+// variant here before using it.
 .dropdown-menu {
   --bs-dropdown-color: var(--bs-body-color);
   --bs-dropdown-bg: var(--oep-surface);

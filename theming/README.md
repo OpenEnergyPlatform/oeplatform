@@ -54,17 +54,17 @@ are still printed.
 
 ## What is where
 
-| File                               | What it holds                                                                                     |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `oepstrap.scss`                    | The entry point. One `@use` per component or layout.                                              |
-| `_variables.scss`                  | The OEP values for Bootstrap variables (colours, radii, font sizes, ...).                         |
-| `scss/base/_index.scss`            | Forwards Bootstrap, configured with those values. **Only variables listed here reach Bootstrap.** |
-| `scss/base/_custom_variables.scss` | OEP-only variables (`$C--…`) that Bootstrap does not know.                                        |
-| `scss/base/_mixins.scss`           | Shared mixins.                                                                                    |
-| `scss/tokens/_root.scss`           | Emits the `--oep-*` design tokens at `:root`.                                                     |
-| `scss/tokens/_remap.scss`          | The re-map layer: Bootstrap's component variables pointed at the tokens.                          |
-| `scss/components/`                 | Components (buttons, cards, tags, ...).                                                           |
-| `scss/layouts/`                    | Page layouts (database, profile, review, ...).                                                    |
+| File                               | What it holds                                                                                                         |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `oepstrap.scss`                    | The entry point. One `@use` per component or layout.                                                                  |
+| `_variables.scss`                  | The OEP values for Bootstrap variables (colours, radii, font sizes, ...) and the `--oep-*` token defaults (`$oep-*`). |
+| `scss/base/_index.scss`            | Forwards Bootstrap, configured with those values. **Only variables listed here reach Bootstrap.**                     |
+| `scss/base/_custom_variables.scss` | OEP-only layout variables (`$C--…`) that are not tokens.                                                              |
+| `scss/base/_mixins.scss`           | Shared mixins.                                                                                                        |
+| `scss/tokens/_root.scss`           | Emits the `--oep-*` design tokens at `:root`.                                                                         |
+| `scss/tokens/_remap.scss`          | The re-map layer: Bootstrap's component variables pointed at the tokens.                                              |
+| `scss/components/`                 | Components (buttons, cards, tags, ...).                                                                               |
+| `scss/layouts/`                    | Page layouts (database, profile, review, ...).                                                                        |
 
 ## Design tokens
 
@@ -94,6 +94,10 @@ variables as the tokens they came from, with hover and active shades computed by
 `color-mix()` the way Bootstrap's `shade-color()` computes them. At the default
 token values it changes nothing. When a house component starts using a Bootstrap
 component that is not re-mapped yet, add its variables there.
+
+The shades need `color-mix()` (Chrome and Edge 111, Firefox 113, Safari 16.2,
+all from 2023). In an older browser a button's hover and active backgrounds fall
+back to transparent rather than to Bootstrap's shade.
 
 An instance's stylesheet must set a colour **and** its `-rgb` twin
 (`--bs-primary` and `--bs-primary-rgb`): Bootstrap's utilities, among them the

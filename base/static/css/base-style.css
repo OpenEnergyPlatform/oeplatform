@@ -183,7 +183,7 @@ i.default-user-icon {
   --bs-navbar-toggler-padding-y: calc(0.25 * var(--navbar-rem));
   --bs-navbar-toggler-padding-x: calc(0.75 * var(--navbar-rem));
   --bs-navbar-toggler-font-size: calc(1.25 * var(--navbar-rem));
-  --bs-navbar-toggler-border-radius: calc(0.5 * var(--navbar-rem));
+  --bs-navbar-toggler-border-radius: var(--bs-border-radius-lg);
   --bs-navbar-toggler-focus-width: calc(0.25 * var(--navbar-rem));
 }
 
