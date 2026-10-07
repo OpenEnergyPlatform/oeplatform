@@ -1,0 +1,138 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+A list tab's results region (login.list_views.ListTabView): status segment,
+chips slot, table, pager. Every id, event and URL comes from ``frame`` and
+every noun from ``page.listing``, so nothing here names what is listed.
+
+A direct load and an htmx request render this same state; htmx gets only
+this. Every control carries a stable id, so focus can be put back by id
+after a swap. ``data-announce`` is what the persistent live region outside
+reads after the swap; ``data-filters`` is what each filter keeps in the URL,
+``data-more`` how many filters behind "More filters" apply and
+``data-folded`` how many behind "Filters (n)", so the bar outside can follow
+a change made in here (a chip removed, a Reset).
+
+The columns collapse by the list's own width, not the viewport's: the tab's
+container queries hide a column by its cell class, and on the narrowest
+lists stack each row into two lines and show the "Sort by" select in place
+of the column headers. Every cell therefore carries its column's class.
+
+Selecting: a checkbox per row, labelled with the row's title and carrying
+``row.name``, and a tri-state one in the header for the page. Where the rows
+stack and the header row is hidden, "Select this page" in the bar above is
+that same tri-state box (#2596). The selection itself is the browser's, a
+list of names in page memory; the region only says which scope it shows
+(``data-scope``, its filters without sort and page: another scope clears the
+selection) and where the names of every matching item come from (the
+banner's ``data-names-url``). The banner offers "Select all N matching" once
+the whole page is ticked; the tab's module shows it and picks its wording.
+
+After an action the region re-fetches itself with the state it shows
+(``<items>-changed``, sent by the action's response). The request names the
+region as its trigger, so the view answers with HX-Replace-Url: an action
+adds no history entry.
+
+A row offers ``key`` (what its ids are built from), ``name`` (what a
+selection and an action carry) and ``title``. Blocks: ``empty`` (the
+account has nothing yet), ``head_cells`` and ``row_cells`` (every column
+after the selection box).
+{% endcomment %}
+<div id="{{ frame.region_id }}"
+     class="dash-results"
+     hx-get="{{ page.url }}"
+     hx-trigger="{{ frame.changed_event }} from:body"
+     data-announce="{{ page.announcement }}"
+     data-filters="{{ page.filters_json }}"
+     data-more="{{ page.more_count }}"
+     data-folded="{{ page.folded_count }}"
+     data-scope="{{ page.scope }}">
+  <h2 id="{{ frame.items }}-heading"
+      class="visually-hidden"
+      tabindex="-1">Your {{ page.listing.plural }}</h2>
+  {% if not page.has_any %}
+    {% block empty %}
+    {% endblock empty %}
+  {% else %}
+    <div class="dash-bar">
+      {% include "login/partials/list_segment.html" with links=page.segment_links label="Status" %}
+      {% if page.total %}
+        {% comment %}Where the rows stack, the header row and #select-page with it are hidden, so this takes its place (CSS shows it only then). It is the same control: the tab's module reads every data-select-page box alike.{% endcomment %}
+        <div class="dash-selectpage">
+          <input type="checkbox"
+                 class="form-check-input dash-check"
+                 id="select-page-stacked"
+                 data-select-page />
+          <label class="dash-selectpage__label"
+                 for="select-page-stacked">Select this page</label>
+        </div>
+        {% include "login/partials/list_sort_select.html" %}
+      {% endif %}
+      <div class="dash-summary">{{ page.summary }}</div>
+    </div>
+    {% include "login/partials/list_chips.html" with id=frame.items|add:"-chips" %}
+    {% if page.total %}
+      {% with on_page=page.rows|length singular=page.listing.singular plural=page.listing.plural %}
+        <div id="{{ frame.items }}-select-all"
+             class="dash-selectall"
+             data-total="{{ page.total }}"
+             data-names-url="{% url frame.names_url user_id=profile_user.pk %}{{ page.scope }}"
+             hidden>
+          <span data-when="page">All {{ on_page }} {% if on_page == 1 %}{{ singular }}{% else %}{{ plural }}{% endif %} on this page {{ on_page|pluralize:"is,are" }} selected.</span>
+          <button type="button"
+                  id="{{ frame.items }}-select-matching"
+                  class="btn btn-link btn-sm dash-selectall__button"
+                  data-when="page">Select all {{ page.total }} matching {{ plural }}</button>
+          <span data-when="all">All {{ page.total }} matching {% if page.total == 1 %}{{ singular }}{% else %}{{ plural }}{% endif %} {{ page.total|pluralize:"is,are" }} selected.</span>
+          <button type="button"
+                  id="{{ frame.items }}-select-none"
+                  class="btn btn-link btn-sm dash-selectall__button"
+                  data-when="all">Clear selection</button>
+        </div>
+      {% endwith %}
+      <div class="dash-table-wrap">
+        <table class="table dash-table">
+          <caption class="visually-hidden">Your {{ page.listing.plural }}, {{ page.summary }}</caption>
+          <thead>
+            <tr>
+              <th class="c-select" scope="col">
+                <input type="checkbox"
+                       class="form-check-input dash-check"
+                       id="select-page"
+                       data-select-page
+                       aria-label="Select all {{ page.rows|length }} {{ page.listing.plural }} on this page" />
+              </th>
+              {% block head_cells %}
+              {% endblock head_cells %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in page.rows %}
+              <tr id="row-{{ row.key }}">
+                <td class="c-select">
+                  <input type="checkbox"
+                         class="form-check-input dash-check"
+                         id="select-{{ row.key }}"
+                         value="{{ row.name }}"
+                         data-select-row
+                         aria-label="Select {{ row.title }}" />
+                </td>
+                {% block row_cells %}
+                {% endblock row_cells %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% include "login/partials/list_pager.html" %}
+    {% else %}
+      <div class="dash-empty dash-empty--nomatch">
+        <h3 class="dash-empty__title">No {{ page.listing.plural }} match these filters</h3>
+        <a class="btn btn-outline-primary btn-sm"
+           id="nomatch-reset"
+           href="{{ page.reset_url }}">Reset filters</a>
+      </div>
+    {% endif %}
+  {% endif %}
+</div>
