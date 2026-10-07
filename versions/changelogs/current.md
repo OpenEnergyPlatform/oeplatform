@@ -28,7 +28,7 @@ SPDX-License-Identifier: CC0-1.0
   which lightens table borders, `.border` utilities and dialog dividers.
   `benchmarks/homepage/compare.mjs` compares full-page homepage screenshots
   before and after a change
-  [(#PRNUMBER)](https://github.com/OpenEnergyPlatform/oeplatform/pull/PRNUMBER)
+  [(#2679)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2679)
 - The Bootstrap theme builds with one npm command, `npm run build:theme` (`sass`
   1.77.0 and `bootstrap` 5.2.0 as exactly pinned dev dependencies), instead of
   by hand in a Docker container, which is removed. The compiled
