@@ -57,10 +57,10 @@ class TheBasesNameNoTableTests(SimpleTestCase):
             source = re.sub(
                 r"{% comment %}.*?{% endcomment %}", "", path.read_text(), flags=re.S
             )
-            # the HTML element and its Bootstrap classes are not a Table
-            source = re.sub(
-                r"</?table\b|\b(dash-)?table(-wrap)?\b(?=[ \"])", "", source
-            )
+            # the HTML element and its classes are not a Table
+            for markup in ('class="table dash-table"', "dash-table-wrap"):
+                source = source.replace(markup, "")
+            source = re.sub(r"</?table>?", "", source)
             with self.subTest(template=path.name):
                 self.assertNotRegex(source.lower(), r"table")
 

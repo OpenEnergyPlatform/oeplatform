@@ -23,7 +23,9 @@ its docstring names. Put the class supplying ``listing`` and ``base`` before
 the base in the bases, so it is found first.
 
 Every base starts with ``ProfileOwnerRequiredMixin``, so the owner rule runs
-for every subclass (``login/access.py``).
+for every subclass (``login/access.py``). A class listed before a base must
+not define ``dispatch``: the rule holds while ``dispatch`` resolves to the
+mixin's, which is what ``test_profile_owner_rule`` checks.
 """  # noqa: 501
 
 import json
@@ -53,7 +55,8 @@ class ListFrame:
     the plural (``"tables"``), and ``item``, the singular (``"table"``).
 
     The plural prefixes the tab's own ids (``<items>-results``,
-    ``<items>-bulk``, ...), names its events and is the comma-joined
+    ``<items>-bulk``, ...; ids a page holds once, such as ``select-page``,
+    stay unprefixed), names its events and is the comma-joined
     selection parameter; the singular prefixes the action dialog's ids, is
     the repeated parameter a row's menu sends and is the stem of the tab's
     URL names. The base templates read every id from here, so two tabs can
@@ -173,10 +176,11 @@ class ListNamesView(ProfileOwnerRequiredMixin, View):
     The query is the list's own, parsed by the same declarations
     (``Listing.matching``), so the names and the list cannot disagree; a
     sort or a page in it is ignored. JSON: ``{"names": [...], "total": n}``,
-    ordered by ``key``, the field a selection carries (default ``name``).
+    ordered by ``name_field``, the field a selection carries (the field a
+    row's ``name`` reads).
     """
 
-    key = "name"
+    name_field = "name"
 
     @method_decorator(never_cache)
     def get(self, request, user_id):
@@ -184,8 +188,8 @@ class ListNamesView(ProfileOwnerRequiredMixin, View):
         names = list(
             self.listing(user)
             .matching(self.base(user), request.GET)
-            .order_by(self.key)
-            .values_list(self.key, flat=True)
+            .order_by(self.name_field)
+            .values_list(self.name_field, flat=True)
         )
         return JsonResponse({"names": names, "total": len(names)})
 

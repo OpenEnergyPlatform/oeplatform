@@ -21,9 +21,11 @@ an action on this row.
 
 Each action entry is cells/menu_action.html, told whether the row may take
 it: the user's role on the Table against the action's RoleGate (``gates``).
+Its endpoint is reversed with positional arguments, because a keyword named
+``action=`` reads as a form address to base/tests/test_views.py.
 {% endcomment %}
 {% load list_cells %}
-{% with pk=row.key name=row.table.name %}
+{% with pk=row.key name=row.name %}
   <div class="dropdown dash-menu">
     <button type="button"
             id="menu-{{ pk }}"

@@ -36,8 +36,11 @@ adds no history entry.
 
 A row offers ``key`` (what its ids are built from), ``name`` (what a
 selection and an action carry) and ``title``. Blocks: ``empty`` (the
-account has nothing yet), ``head_cells`` and ``row_cells`` (every column
-after the selection box).
+account has nothing yet), ``nomatch`` (nothing matches the filters; by
+default the listing's plural and Reset), ``head_cells`` and ``row_cells``
+(every column after the selection box). The ids that are not per tab
+(``select-page``, ``row-<key>``, ``nomatch-reset``, ...) stay unprefixed:
+a page holds one list.
 {% endcomment %}
 <div id="{{ frame.region_id }}"
      class="dash-results"
@@ -127,12 +130,14 @@ after the selection box).
       </div>
       {% include "login/partials/list_pager.html" %}
     {% else %}
-      <div class="dash-empty dash-empty--nomatch">
-        <h3 class="dash-empty__title">No {{ page.listing.plural }} match these filters</h3>
-        <a class="btn btn-outline-primary btn-sm"
-           id="nomatch-reset"
-           href="{{ page.reset_url }}">Reset filters</a>
-      </div>
+      {% block nomatch %}
+        <div class="dash-empty dash-empty--nomatch">
+          <h3 class="dash-empty__title">No {{ page.listing.plural }} match these filters</h3>
+          <a class="btn btn-outline-primary btn-sm"
+             id="nomatch-reset"
+             href="{{ page.reset_url }}">Reset filters</a>
+        </div>
+      {% endblock nomatch %}
     {% endif %}
   {% endif %}
 </div>
