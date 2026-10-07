@@ -157,10 +157,8 @@ includes the latest release of the oeo)
 
 ```plaintext
 ├── theming
-│   ├── Dockerfile
 │   ├── README.md
 │   ├── _variables.scss
-│   ├── buildTheme.sh
 │   ├── oepstrap.scss
 │   └── scss
 ```

@@ -68,6 +68,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:theme": "sass --no-source-map --style=compressed --quiet-deps --load-path=node_modules theming/oepstrap.scss base/static/css/bootstrap.min.css",
     "prepare": "patch-package",
     "test": "vitest run",
     "test:watch": "vitest"
@@ -81,6 +82,7 @@
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
     "@vitejs/plugin-react": "^6.0.2",
+    "bootstrap": "5.2.0",
     "eslint": "^9.25.1",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-jsdoc": "^48.2.1",
@@ -89,6 +91,7 @@
     "eslint-plugin-react-hooks": "^5.1.0",
     "happy-dom": "^20.13.2",
     "prettier": "^3.3.2",
+    "sass": "1.77.0",
     "vite": "8.0.13",
     "vite-plugin-eslint": "^1.8.1",
     "vitest": "^5.0.0"

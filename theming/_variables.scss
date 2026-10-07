@@ -121,15 +121,18 @@ $theme-colors: (
   "dark":       $dark
 );
 
-$theme-colors: map-merge($theme-colors, (
+// Light tints for the .background-* classes below. Kept out of $theme-colors,
+// which is forwarded into Bootstrap: there each entry would mint a button,
+// alert, text, border and link variant nobody asked for.
+$theme-background-colors: (
   "background-success": $green-100,
   "background-warning": $yellow-100,
   "background-danger": $red-050,
   "background-info": $blue-100,
   "background-neutral": $gray-100
-));
+);
 
-@each $color, $value in $theme-colors {
+@each $color, $value in map-merge($theme-colors, $theme-background-colors) {
   .#{$color} {
     background-color: $value !important;
   }
@@ -190,7 +193,7 @@ $input-border-radius-sm: 0;
 $input-border-color: $gray-300;
 $btn-font-weight: 600;
 $border-radius: 0.5rem;
-$border-radius-lg: 1rem;
+$border-radius-lg: 0.5rem;
 $border-radius-sm: 0.4rem;
 $card-border-color: $gray-300;
 $card-cap-padding-y: 0.75rem;

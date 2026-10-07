@@ -12,6 +12,17 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- The Bootstrap theme builds with one npm command, `npm run build:theme` (`sass`
+  1.77.0 and `bootstrap` 5.2.0 as exactly pinned dev dependencies), instead of
+  by hand in a Docker container, which is removed. The compiled
+  `bootstrap.min.css` stays committed and is byte-identical. A new "Catalogue
+  check" workflow rebuilds it on pull requests touching templates, CSS or the
+  theme and fails when the committed file differs. `$success`, `$info`,
+  `$warning`, `$danger`, `$light`, `$dark` and `$theme-colors` now reach
+  Bootstrap, and `$border-radius-lg` is forwarded as itself (and set to the
+  0.5rem that always rendered), so changing them in `theming/_variables.scss`
+  takes effect
+  [(#2671)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2671)
 - The podman stack's Apache access log now records each request's user agent and
   the time it took to serve (`%D`, microseconds), appended to the end of the
   Common Log Format line so existing parsers keep working. Referer, cookies and

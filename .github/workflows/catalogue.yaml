@@ -1,0 +1,58 @@
+# SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+# The catalogue check: guards the theme and, later, the component catalogue.
+# Deliberately its own workflow and outside tox / `manage.py test`, so it shows
+# as its own status and only runs when the look of the platform can change.
+#
+# Today it has one step, the theme rebuild. The compiled theme
+# (base/static/css/bootstrap.min.css) is committed, because the production
+# image has no Node stage and the production host has no internet access. This
+# rebuilds it from theming/ and fails when the result differs from the
+# committed file, so a hand edit or a forgotten rebuild cannot merge.
+# The catalogue's own two checks (`check_catalogue` and the literal scan) join
+# this job when the catalogue exists (#2636).
+name: Catalogue check
+
+on:
+  pull_request:
+    paths:
+      - "**/templates/**"
+      - "**/*.html"
+      - "**/*.css"
+      - "**/*.scss"
+      - "theming/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/catalogue.yaml"
+
+permissions:
+  contents: read
+
+jobs:
+  catalogue:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      # Scripts are skipped: the build needs only sass and bootstrap, and the
+      # `prepare` hook (patch-package) patches packages the build never loads.
+      - name: Install npm dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Rebuild the theme
+        run: npm run build:theme
+      - name: The committed theme matches the rebuild
+        run: |
+          if git diff --quiet -- base/static/css/bootstrap.min.css; then
+            echo "base/static/css/bootstrap.min.css matches a rebuild of theming/."
+            exit 0
+          fi
+          echo "::error file=base/static/css/bootstrap.min.css::The committed theme differs from a rebuild of theming/. Run 'npm run build:theme' and commit the result; never edit bootstrap.min.css by hand (see theming/README.md)."
+          split_css() { sed 's/\([;}]\)/\1\n/g'; }
+          echo "Committed (<) against rebuilt (>), split at declarations:"
+          diff <(git show HEAD:base/static/css/bootstrap.min.css | split_css) \
+               <(split_css < base/static/css/bootstrap.min.css) | head -n 200 || true
+          exit 1
