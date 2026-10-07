@@ -300,10 +300,6 @@ class DatasetAssignTablesSerializer(serializers.Serializer):
 
 
 class DatasetResourceSerializer(serializers.ModelSerializer):
-    # There is no ``schema``: it named the Table's old schema relation, which
-    # Topics replaced, and DRF silently skipped it on every read since, while
-    # the description went on promising it.
-
     class Meta:
         model = Table
         fields = ["id", "name", "oemetadata", "human_readable_name"]

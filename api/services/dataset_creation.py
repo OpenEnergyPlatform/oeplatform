@@ -21,7 +21,7 @@ class DatasetNameTaken(Exception):
     """Raised when creating a dataset under a name that already exists."""
 
 
-def name_taken(name: str) -> str:
+def name_taken_message(name: str) -> str:
     """What a create under the taken ``name`` is told."""
     return (
         f"A dataset named '{name}' already exists. Names are permanent "
@@ -76,7 +76,7 @@ def create_dataset(validated_data: dict[str, Any], creator) -> Dataset:
     """
     name = validated_data["name"]
     if Dataset.objects.filter(name=name).exists():
-        raise DatasetNameTaken(name_taken(name))
+        raise DatasetNameTaken(name_taken_message(name))
 
     metadata = assemble_dataset_metadata(validated_data)
     dataset = Dataset.objects.create(metadata=metadata, name=name, creator=creator)

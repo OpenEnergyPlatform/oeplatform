@@ -26,7 +26,8 @@ The actions:
   ``InvalidParameters`` on ``name``.
 - ``edit``: ``title``, ``description``, ``at_id`` and ``topics`` of one of
   the user's own Datasets, each only if given: a parameter left out is left
-  as it is, and an empty ``at_id`` keeps the stored one. **An edit that
+  as it is, and an empty ``at_id`` keeps the stored one (the API refuses an
+  empty one before it gets here; a form may send one). **An edit that
   changes nothing writes, stamps and logs nothing.**
 - ``publish``: ``DATASET_GATE`` runs live, under the lock; a Dataset failing
   it is left out by the failed check's reason (``ActionRefused.failed_checks``
@@ -114,7 +115,7 @@ from api.services.dataset_creation import (
     assignable_tables,
     create_dataset,
     dataset_title,
-    name_taken,
+    name_taken_message,
     set_dataset_topics,
     update_dataset,
 )
@@ -130,9 +131,6 @@ DELETE = "delete"
 MEMBERS_ADD, MEMBERS_REMOVE = "members_add", "members_remove"
 ACTIONS = (CREATE, EDIT, PUBLISH, UNPUBLISH, DELETE, MEMBERS_ADD, MEMBERS_REMOVE)
 MEMBER_ACTIONS = (MEMBERS_ADD, MEMBERS_REMOVE)
-# The actions that take exactly one name: the Dataset to create, or the one
-# to edit.
-SINGLE_ACTIONS = (CREATE, EDIT)
 # What an edit may change, in the order a log line names the changes.
 EDITABLE = ("title", "description", "at_id", "topics")
 
@@ -477,7 +475,7 @@ def _create_preflight(user, names, params) -> Preflight:
     if missing:
         raise InvalidParameters(missing)
     if Dataset.objects.filter(name=name).exists():
-        raise InvalidParameters({"name": name_taken(name)})
+        raise InvalidParameters({"name": name_taken_message(name)})
     topics = validated_topics(params.get("topics") or [])
     return Preflight(
         action=CREATE,
@@ -690,15 +688,21 @@ def _delete(user, check, via) -> Outcome:
 
 
 def _create(user, name, params, check, via) -> Outcome:
-    dataset = create_dataset(
-        {
-            "name": name,
-            "title": params["title"],
-            "description": params["description"],
-            "at_id": params.get("at_id"),
-        },
-        creator=user,
-    )
+    fields = {
+        "name": name,
+        "title": params["title"],
+        "description": params["description"],
+        "at_id": params.get("at_id"),
+    }
+    # Only the insert can lose a race for the name: a request that passed
+    # the check above and committed first. Its unique constraint decides,
+    # and is told as a name taken before; any other integrity failure is not
+    # the name's and is not dressed up as it.
+    try:
+        with transaction.atomic():
+            dataset = create_dataset(fields, creator=user)
+    except (IntegrityError, DatasetNameTaken) as error:
+        raise InvalidParameters({"name": name_taken_message(name)}) from error
     topics = check.consequences["topics"]
     if topics:
         # part of the creation, whose stamp is ``created_at``: no second one
@@ -780,7 +784,8 @@ def execute(user, action, names, params=None, via="dashboard") -> Outcome:
     check asks for now is an ``InvalidParameters`` on ``confirm``. A failure
     part-way leaves nothing behind, and the log lines are written only once
     the transaction has committed. A create that loses a race for its name
-    is an ``InvalidParameters`` on ``name``, as a name taken before it.
+    is an ``InvalidParameters`` on ``name``, as a name taken before it
+    (``_create``).
     """
     if action not in ACTIONS:
         raise ValueError(f"unknown dataset action: {action}")
@@ -795,27 +800,20 @@ def execute(user, action, names, params=None, via="dashboard") -> Outcome:
             {_nouns(action)[1]: f"Name at least one {_nouns(action)[0]}."}
         )
     confirm = (params.get("confirm") or "").strip()
-    try:
-        with transaction.atomic():
-            _lock(action, names, params)
-            check = preflight(user, action, names, params)
-            refused = [
-                group for group in check.left_out if group.reason not in PASSED_OVER
-            ]
-            if refused:
-                raise ActionRefused(check, refused)
-            if check.confirmation and confirm != check.confirmation:
-                raise InvalidParameters({"confirm": confirm_error(check)})
-            if action == CREATE:
-                return _create(user, names[0], params, check, via)
-            if action == EDIT:
-                return _edit(user, params, check, via)
-            if action in (PUBLISH, UNPUBLISH):
-                return _set_published(user, action, check, via)
-            if action == DELETE:
-                return _delete(user, check, via)
-            return _change_members(user, action, check, via)
-    except (IntegrityError, DatasetNameTaken) as error:
-        if action != CREATE:
-            raise
-        raise InvalidParameters({"name": name_taken(names[0])}) from error
+    with transaction.atomic():
+        _lock(action, names, params)
+        check = preflight(user, action, names, params)
+        refused = [group for group in check.left_out if group.reason not in PASSED_OVER]
+        if refused:
+            raise ActionRefused(check, refused)
+        if check.confirmation and confirm != check.confirmation:
+            raise InvalidParameters({"confirm": confirm_error(check)})
+        if action == CREATE:
+            return _create(user, names[0], params, check, via)
+        if action == EDIT:
+            return _edit(user, params, check, via)
+        if action in (PUBLISH, UNPUBLISH):
+            return _set_published(user, action, check, via)
+        if action == DELETE:
+            return _delete(user, check, via)
+        return _change_members(user, action, check, via)

@@ -15,6 +15,7 @@ a foreign published Dataset's 403) is pinned for every write route in
 
 from datetime import datetime
 from datetime import timezone as dt_timezone
+from unittest import mock
 
 from django.utils import timezone
 from rest_framework import status
@@ -142,6 +143,17 @@ class CreateTests(DatasetWriteTestCase):
         response = self.create("ds_taken")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("name", response.json())
+
+    def test_a_create_losing_the_race_for_its_name_is_a_400_on_name(self):
+        # Another request took the name between the check and the insert:
+        # every "is it free?" answers yes, and the unique constraint decides.
+        self.dataset("ds_raced", creator=self.stranger)
+        free = mock.Mock(**{"exists.return_value": False})
+        with mock.patch.object(Dataset.objects, "filter", return_value=free):
+            response = self.create("ds_raced")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("name", response.json())
+        self.assertEqual(Dataset.objects.filter(name="ds_raced").count(), 1)
 
     def test_one_line_after_commit(self):
         with self.assertLogs(LOGGER, "INFO") as logged:

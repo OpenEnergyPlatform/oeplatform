@@ -629,7 +629,10 @@ class DatasetTransition(APIView):
         except dataset_actions.ActionRefused as refused:
             # a Dataset not there or not the user's has been answered as a
             # read already (``answered_as_a_read``): what is left is the
-            # Dataset's own state, the publish gate
+            # Dataset's own state, the publish gate, which only a publish
+            # can fail
+            if not refused.failed_checks:
+                raise
             reasons = "; ".join(group.reason for group in refused.refused)
             return Response(
                 {
