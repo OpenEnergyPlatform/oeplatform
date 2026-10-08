@@ -73,36 +73,38 @@
     </div>
   </div>
 {% endblock data_content %}
-{% block main-right-sidebar-content-additional %}
-  <div class="card">
-    <div class="card-header">Resources</div>
-    <div class="list-group list-group-flush overflow-auto"
-         style="max-height: 30rem">
-      {% for table in resources %}
-        <a class="list-group-item list-group-item-action"
-           href="{% url 'dataedit:view' table=table.name %}">
-          <div class="d-flex justify-content-between align-items-start gap-2">
-            <span class="text-truncate">{{ table.human_readable_name|default:table.name }}</span>
-            {% if table.is_publish %}
-              <span class="badge badge--success flex-shrink-0">Published</span>
-            {% else %}
-              <span class="badge badge--warning flex-shrink-0">Draft</span>
-            {% endif %}
-          </div>
-          {% if table.topics.all %}
-            <div class="mt-1">
-              {% for topic in table.topics.all %}
-                <span class="badge text-bg-light border">{{ topic.name }}</span>
-              {% endfor %}
+{% block side-column %}
+  <aside class="content__side">
+    <div class="card">
+      <div class="card-header">Resources</div>
+      <div class="list-group list-group-flush overflow-auto"
+           style="max-height: 30rem">
+        {% for table in resources %}
+          <a class="list-group-item list-group-item-action"
+             href="{% url 'dataedit:view' table=table.name %}">
+            <div class="d-flex justify-content-between align-items-start gap-2">
+              <span class="text-truncate">{{ table.human_readable_name|default:table.name }}</span>
+              {% if table.is_publish %}
+                <span class="badge badge--success flex-shrink-0">Published</span>
+              {% else %}
+                <span class="badge badge--warning flex-shrink-0">Draft</span>
+              {% endif %}
             </div>
-          {% endif %}
-        </a>
-      {% empty %}
-        <div class="list-group-item text-muted">No tables assigned yet.</div>
-      {% endfor %}
+            {% if table.topics.all %}
+              <div class="mt-1">
+                {% for topic in table.topics.all %}
+                  <span class="badge text-bg-light border">{{ topic.name }}</span>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </a>
+        {% empty %}
+          <div class="list-group-item text-muted">No tables assigned yet.</div>
+        {% endfor %}
+      </div>
     </div>
-  </div>
-{% endblock main-right-sidebar-content-additional %}
+  </aside>
+{% endblock side-column %}
 {% block after-body-bottom-js %}
   {{ block.super }}
   <script>window.meta_api = "{{ metadata_url|escapejs }}";</script>

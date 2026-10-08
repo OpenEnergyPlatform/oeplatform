@@ -18,103 +18,106 @@
     <div class="main-header__wizard">Overview</div>
   </div>
 {% endblock site-header %}
-{% block main-right-sidebar-content %}
-  <hr>
-  <h3>Actions</h3>
-  <a role="button"
-     class="btn btn-success"
-     href="{% url 'modelview:modeladd' sheettype %}">
-    <span class="fas fa-plus"></span> Add {{ label }}
-  </a>
-  <a id="dlcsv"
-     role="button"
-     class="btn btn-info"
-     href="{% url 'modelview:download' sheettype %}">
-    <span class="fas fa-download"></span> Download CSV
-  </a>
-  <hr>
-  {# Fields ABOVE Tags on purpose: the tag list grows to the number of tags in #}
-  {# use (273 on production) and expanding it would push the column toggles #}
-  {# off the screen. Whatever grows goes last. #}
-  <h3>Fields</h3>
-  <div class="checkbox-container">
-    {% for heading,d in fields.items %}
-      <div class="checkbox-item">
-        <a class="fill-div"
-           data-bs-toggle="collapse"
-           href="#{{ heading.split|join:'_' }}">{{ heading }}</a>
-        <div id="{{ heading.split|join:'_' }}" class="collapse">
-          {% for key,value in d.items %}
-            <div style="display: flex;flex-flow: nowrap;align-items: center">
-              <input type="checkbox"
-                     onchange="apply_filter(event.target)"
-                     id="{{ key }}"
-                     {% if key.split|join:'_' in default %}checked="checked"{% endif %}>
-              <label class="form-label"
-                     style="margin: 0"
-                     for="{{ key }}">{{ key }}</label>
-            </div>
-          {% endfor %}
+{% block side-column %}
+  <aside class="content__side">
+    <hr>
+    <h3>Actions</h3>
+    <a role="button"
+       class="btn btn-success"
+       href="{% url 'modelview:modeladd' sheettype %}">
+      <span class="fas fa-plus"></span> Add {{ label }}
+    </a>
+    <a id="dlcsv"
+       role="button"
+       class="btn btn-info"
+       href="{% url 'modelview:download' sheettype %}">
+      <span class="fas fa-download"></span> Download CSV
+    </a>
+    <hr>
+    {# Fields ABOVE Tags on purpose: the tag list grows to the number of tags in #}
+    {# use (273 on production) and expanding it would push the column toggles #}
+    {# off the screen. Whatever grows goes last. #}
+    <h3>Fields</h3>
+    <div class="checkbox-container">
+      {% for heading,d in fields.items %}
+        <div class="checkbox-item">
+          <a class="fill-div"
+             data-bs-toggle="collapse"
+             href="#{{ heading.split|join:'_' }}">{{ heading }}</a>
+          <div id="{{ heading.split|join:'_' }}" class="collapse">
+            {% for key,value in d.items %}
+              <div style="display: flex;flex-flow: nowrap;align-items: center">
+                <input type="checkbox"
+                       onchange="apply_filter(event.target)"
+                       id="{{ key }}"
+                       {% if key.split|join:'_' in default %}checked="checked"{% endif %}>
+                <label class="form-label"
+                       style="margin: 0"
+                       for="{{ key }}">{{ key }}</label>
+              </div>
+            {% endfor %}
+          </div>
         </div>
-      </div>
-    {% endfor %}
-  </div>
-  <hr>
-  <h3>Tags</h3>
-  {# These tags are one platform-wide vocabulary shared with database tables, #}
-  {# and until now nothing on the site linked to where it is administered. #}
-  <p class="text-muted">
-    <small>
-      Filter by tag. <a href="{% url 'dataedit:tags' %}">Manage tags</a> —
-      one vocabulary, shared with database tables.
-    </small>
-  </p>
-  {# The list leads with the tags this sheet type actually uses most and #}
-  {# shows ten; searching reaches the rest without expanding. Rendered in #}
-  {# full either way, so a reader without javascript sees what they saw #}
-  {# before. `dataedit/tag_list.js` does the showing and hiding. #}
-  <div class="d-flex gap-2 mb-2">
-    <label class="visually-hidden" for="tag-filter-search">Search tags</label>
-    <input id="tag-filter-search"
-           data-tag-search
-           type="search"
-           class="form-control form-control-sm"
-           placeholder="Search tags"
-           autocomplete="off">
-    <label class="visually-hidden" for="tag-filter-sort">Sort tags</label>
-    <select id="tag-filter-sort"
-            data-tag-sort
-            class="form-select form-select-sm w-auto">
-      <option value="usage">Most used</option>
-      <option value="name">By name</option>
-    </select>
-  </div>
-  <div data-tag-list class="tag-group">
-    {% for t in tags %}
-      <span data-tag-name="{{ t.name }}" data-tag-usage="{{ t.tag_usage }}">
-        {# `selected_tag_pks` is a SET of pks from `?tags=`, never a queryset: #}
-        {# `in` against a queryset has no `__contains__` to use, so it scans #}
-        {# the whole result cache once per checkbox. #}
-        {% with box_id="select_"|add:t.pk %}
-          {% if t.pk in selected_tag_pks %}
-            {% include "components/tag.html" with name=t.name color=t.color_hex toggle_name="tags" toggle_value=t.pk toggle_id=box_id checked=True %}
-          {% else %}
-            {% include "components/tag.html" with name=t.name color=t.color_hex toggle_name="tags" toggle_value=t.pk toggle_id=box_id %}
-          {% endif %}
-        {% endwith %}
-      </span>
-    {% endfor %}
-  </div>
-  <button data-tag-expand type="button" class="btn btn-sm btn-link p-0" hidden>
-    Show all tags
-  </button>
-  <button id="clear-tag-filter"
-          type="button"
-          class="btn btn-sm btn-outline-secondary mt-2"
-          onclick="clear_tag_filter()"
-          {% if not selected_tag_pks %}hidden{% endif %}>Clear tag filter</button>
-  <hr>
-{% endblock main-right-sidebar-content %}
+      {% endfor %}
+    </div>
+    <hr>
+    <h3>Tags</h3>
+    {# These tags are one platform-wide vocabulary shared with database tables, #}
+    {# and until now nothing on the site linked to where it is administered. #}
+    <p class="text-muted">
+      <small>
+        Filter by tag. <a href="{% url 'dataedit:tags' %}">Manage tags</a> —
+        one vocabulary, shared with database tables.
+      </small>
+    </p>
+    {# The list leads with the tags this sheet type actually uses most and #}
+    {# shows ten; searching reaches the rest without expanding. Rendered in #}
+    {# full either way, so a reader without javascript sees what they saw #}
+    {# before. `dataedit/tag_list.js` does the showing and hiding. #}
+    <div class="d-flex gap-2 mb-2">
+      <label class="visually-hidden" for="tag-filter-search">Search tags</label>
+      <input id="tag-filter-search"
+             data-tag-search
+             type="search"
+             class="form-control form-control-sm"
+             placeholder="Search tags"
+             autocomplete="off">
+      <label class="visually-hidden" for="tag-filter-sort">Sort tags</label>
+      <select id="tag-filter-sort"
+              data-tag-sort
+              class="form-select form-select-sm w-auto">
+        <option value="usage">Most used</option>
+        <option value="name">By name</option>
+      </select>
+    </div>
+    <div data-tag-list class="tag-group">
+      {% for t in tags %}
+        <span data-tag-name="{{ t.name }}" data-tag-usage="{{ t.tag_usage }}">
+          {# `selected_tag_pks` is a SET of pks from `?tags=`, never a queryset: #}
+          {# `in` against a queryset has no `__contains__` to use, so it scans #}
+          {# the whole result cache once per checkbox. #}
+          {% with box_id="select_"|add:t.pk %}
+            {% if t.pk in selected_tag_pks %}
+              {% include "components/tag.html" with name=t.name color=t.color_hex toggle_name="tags" toggle_value=t.pk toggle_id=box_id checked=True %}
+            {% else %}
+              {% include "components/tag.html" with name=t.name color=t.color_hex toggle_name="tags" toggle_value=t.pk toggle_id=box_id %}
+            {% endif %}
+          {% endwith %}
+        </span>
+      {% endfor %}
+    </div>
+    <button data-tag-expand
+            type="button"
+            class="btn btn-sm btn-link p-0"
+            hidden>Show all tags</button>
+    <button id="clear-tag-filter"
+            type="button"
+            class="btn btn-sm btn-outline-secondary mt-2"
+            onclick="clear_tag_filter()"
+            {% if not selected_tag_pks %}hidden{% endif %}>Clear tag filter</button>
+    <hr>
+  </aside>
+{% endblock side-column %}
 {% block factsheets_content %}
   {% if label == "Model" %}
     <div>

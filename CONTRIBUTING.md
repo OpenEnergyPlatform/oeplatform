@@ -184,6 +184,12 @@ OEP-Desing is based on a
 that should be inherited by every new template. Be aware that some OEP-apps may
 implement their own base design (see `<app>/templates/<app>/base.html`)
 
+A page's content spans the whole content width. A page with side content (a
+filter list, actions, a table of contents) fills the `side-column` block of its
+base template with `<aside class="content__side">...</aside>`; a page without
+fills nothing and gets no side column. Section headings are plain `<h2>` and
+`<h3>` without a class: the theme gives them their size and spacing.
+
 Build pages from the house components in the component catalogue at
 `/styleguide/` (copy the source shown under each one). If none fits, add a
 component with its catalogue entry, as described in

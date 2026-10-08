@@ -12,6 +12,26 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- Pages without side content use the whole content width: the base templates no
+  longer render an empty 21rem side column. A page with side content fills the
+  new `side-column` block with `<aside class="content__side">`, and every page
+  that had side content (factsheet list and detail, table view, table
+  permissions, dataset detail, the profile tabs, the ontology page, the
+  catalogue) moved to it; the old `main-right-sidebar*` blocks are gone, and a
+  test fails when a template fills a block its base no longer defines.
+  `--oep-content-width` caps the content column. Body text is 1rem (the
+  `.content` shrink to 0.875rem is gone; the side column, tables and the
+  dashboard lists stay at the dense size). Headings in the content take one
+  scale (h1-h6 2/1.5/1.25/1.125/1/0.875rem, h1 and h2 scaling down on small
+  screens as before), the heading weight and colour tokens, and one rhythm
+  (2.5rem above an h2, 1.75rem above an h3, none above a heading that opens its
+  container); the 3rem padding above every h2 is gone and the content area
+  starts 1.75rem below the navbar or page header. `section_heading` is a house
+  component with a catalogue entry: the profile and organization pages'
+  `h2.header` and `profile-category__heading` became plain `h2`/`h3`. The
+  profile columns' five-class `!important` padding rules are replaced by plain
+  rules with the same column widths. The homepage renders pixel for pixel as
+  before [(#2684)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2684)
 - A tag looks the same everywhere: the house component `tag`
   (`base/templates/components/tag.html`), a pill in the tag's own colour with
   its text colour from `readable_text_color`, as a static label, a link that

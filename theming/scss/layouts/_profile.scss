@@ -4,18 +4,20 @@
 @use '../legacy/cards' as *;
 @use '../legacy/empty_states' as *;
 
-main.main .content .content__container.content__container--profile {
-    .content {
-        &__side {
-            @extend .py-5;
-            @extend .pe-4;
-        }
-        &__main {
-            @extend .py-5;
-            @extend .pe-0;
+// The profile shell puts its side column (the profile sidebar) on the left.
+// The column's text box keeps the width it had beside the 1.5rem gap; the
+// space above both columns is the content area's own, as on every page.
+.content__container--profile {
+    gap: $C--padding-large $C--padding-standard;
+
+    > .content__side {
+        @include media-breakpoint-up(md) {
+            flex-basis: calc(#{$C--db-side-width} - #{$C--padding-standard});
         }
     }
+}
 
+main.main .content .content__container.content__container--profile {
     .profile-sidebar {
         &__img {
             @extend .d-flex;
@@ -76,12 +78,6 @@ main.main .content .content__container.content__container--profile {
         }
     }
 
-    .header {
-        @extend .pt-2;
-        @extend .fs-4;
-        @extend .fw-semibold;
-        @extend .text-secondary;
-    }
 }
 
 .profile {
@@ -216,24 +212,6 @@ main.main .content .content__container.content__container--profile {
 .profile-category {
     @extend .pb-3;
 
-    &__heading {
-        @extend .py-2;
-        @extend .fs-6;
-        @extend .fw-bold;
-        @extend .text-body;
-        @extend .d-inline-block;
-
-        &--sm {
-            @extend .fs-7;
-            @extend .fw-light;
-        }
-
-        &--border-btm {
-            @extend .border-bottom;
-            @extend .mb-3;
-        }
-    }
-
     &__input {
         @extend .pb-3;
 
@@ -281,7 +259,6 @@ main.main .content .content__container.content__container--profile {
         }
 
         &--add {
-            @include translateY(-3px);
             @extend .btn-link;
         }
     }

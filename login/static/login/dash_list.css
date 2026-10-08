@@ -22,6 +22,9 @@
   --dash-primary: #2972a6;
   --dash-secondary: #1f567d;
   container-type: inline-size;
+  /* A list is dense. The page around it is body size since #2638, and the
+     column thresholds in the tabs' stylesheets were measured at this size. */
+  font-size: var(--oep-font-size-dense);
 }
 
 /* filter bar: one primary row, "More filters" below it */

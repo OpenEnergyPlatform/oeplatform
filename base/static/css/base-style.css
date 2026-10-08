@@ -26,15 +26,6 @@ body {
   margin: 1em 0 1.5em;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  color: var(--oep-heading-color);
-}
-
 .base {
   height: calc(100% - 1em);
   box-sizing: border-box;

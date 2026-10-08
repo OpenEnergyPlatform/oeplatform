@@ -3,7 +3,7 @@
 {% block main-content-body %}
   {% load static %}
   <div>
-    <div class="d-flex justify-content-between flex-md-wrap">
+    <div class="d-flex justify-content-between flex-wrap">
       <!-- full title and acronym -->
       <h1>{{ project.fullTitle }}</h1>
       <!-- logo -->
@@ -30,7 +30,7 @@
     <h2>Partners</h2>
     {% for partner in project.partners %}
       <ul>
-        <div class="d-flex flex-md-wrap">
+        <div class="d-flex flex-wrap">
           <!-- <li>{{ partner.name }}</li> -->
           {% if partner.logo %}
             <img src="{% static 'logos/partner/'|add:partner.logo %}"

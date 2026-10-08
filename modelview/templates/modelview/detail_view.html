@@ -41,22 +41,24 @@
     {% if model.name_of_scenario %}{{ model.name_of_scenario }}{% endif %}
   </h2>
 {% endblock site-header %}
-{% block main-right-sidebar-content-before %}
-  <hr />
-  <h3>Actions</h3>
-  {% block main-right-sidebar-content-actions %}
-  {% endblock main-right-sidebar-content-actions %}
-  <hr />
-  <h3>Tags</h3>
-  {# Each tag links to this sheet type's list, filtered by it. #}
-  {% url 'modelview:modellist' displaySheetType|lower as list_url %}
-  <div class="tag-group">
-    {% for t in model.tags.all %}
-      {% with pk=t.pk|urlencode %}
-        {% with filtered=list_url|add:"?tags="|add:pk %}
-          {% include "components/tag.html" with name=t.name color=t.color_hex href=filtered title="Filter by "|add:t.name %}
+{% block side-column %}
+  <aside class="content__side">
+    <hr />
+    <h3>Actions</h3>
+    {% block factsheet-actions %}
+    {% endblock factsheet-actions %}
+    <hr />
+    <h3>Tags</h3>
+    {# Each tag links to this sheet type's list, filtered by it. #}
+    {% url 'modelview:modellist' displaySheetType|lower as list_url %}
+    <div class="tag-group">
+      {% for t in model.tags.all %}
+        {% with pk=t.pk|urlencode %}
+          {% with filtered=list_url|add:"?tags="|add:pk %}
+            {% include "components/tag.html" with name=t.name color=t.color_hex href=filtered title="Filter by "|add:t.name %}
+          {% endwith %}
         {% endwith %}
-      {% endwith %}
-    {% endfor %}
-  </div>
-{% endblock main-right-sidebar-content-before %}
+      {% endfor %}
+    </div>
+  </aside>
+{% endblock side-column %}

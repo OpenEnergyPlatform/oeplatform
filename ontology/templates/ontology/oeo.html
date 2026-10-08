@@ -17,26 +17,28 @@
     </div>
   </div>
 {% endblock site-header %}
-{% block main-right-sidebar-content %}
-  <div hx-get="{% url 'ontology:partial-page-sidebar-content' %}"
-       hx-swap="outerHTML"
-       hx-target="#content-sidebar"
-       hx-trigger="load"
-       id="content-sidebar"></div>
-  <div id="loading-spinner-sidebar"
-       class="btn btn-primary disabled placeholder"
-       role="status"
-       style="display: none">
-    <p class="card-text placeholder-glow">
-      <span class="placeholder col-7"></span>
-      <span class="placeholder col-4"></span>
-      <span class="placeholder col-4"></span>
-      <span class="placeholder col-6"></span>
-      <span class="placeholder col-8"></span>
-    </p>
-    <span class="visually-hidden">Loading...</span>
-  </div>
-{% endblock main-right-sidebar-content %}
+{% block side-column %}
+  <aside class="content__side">
+    <div hx-get="{% url 'ontology:partial-page-sidebar-content' %}"
+         hx-swap="outerHTML"
+         hx-target="#content-sidebar"
+         hx-trigger="load"
+         id="content-sidebar"></div>
+    <div id="loading-spinner-sidebar"
+         class="btn btn-primary disabled placeholder"
+         role="status"
+         style="display: none">
+      <p class="card-text placeholder-glow">
+        <span class="placeholder col-7"></span>
+        <span class="placeholder col-4"></span>
+        <span class="placeholder col-4"></span>
+        <span class="placeholder col-6"></span>
+        <span class="placeholder col-8"></span>
+      </p>
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </aside>
+{% endblock side-column %}
 {% block main-content-body %}
   <div hx-get="{% url 'ontology:partial-page-content' %}"
        hx-swap="outerHTML"

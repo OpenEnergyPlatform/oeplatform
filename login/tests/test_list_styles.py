@@ -140,7 +140,8 @@ class GenericStylesheetTests(SimpleTestCase):
                 (),
                 (".dash",),
                 "--dash-muted: #6c757d; --dash-primary: #2972a6; "
-                "--dash-secondary: #1f567d; container-type: inline-size;",
+                "--dash-secondary: #1f567d; container-type: inline-size; "
+                "font-size: var(--oep-font-size-dense);",
             ),
             self.generic,
         )

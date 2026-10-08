@@ -4,7 +4,7 @@
 .main-header {
     @extend .bg-light;
     @extend .p-4;
-    margin-bottom: $C--padding-standard;
+    // No margin below: the content area gives the space under it (#2638).
 
     &__title {
         @extend .fs-4;

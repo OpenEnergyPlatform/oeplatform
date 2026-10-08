@@ -21,21 +21,23 @@
     </div>
   </div>
 {% endblock site-header %}
-{% block main-right-sidebar-content-additional %}
-  <h3>Permissions</h3>
-  This page shows the users and user groups that have permissions to alter the
-  contents of this table. Only admins of this dataset can alter these
-  settings.
-  <br />
-  <br />
-  {% if is_admin %}
-    <b> You are allowed to administrate this table </b>
-  {% else %}
-    <div class="alert alert-danger" role="alert">
-      You do not have permissions to alter these settings
-    </div>
-  {% endif %}
-{% endblock %}
+{% block side-column %}
+  <aside class="content__side">
+    <h3>Permissions</h3>
+    This page shows the users and user groups that have permissions to alter the
+    contents of this table. Only admins of this dataset can alter these
+    settings.
+    <br />
+    <br />
+    {% if is_admin %}
+      <b> You are allowed to administrate this table </b>
+    {% else %}
+      <div class="alert alert-danger" role="alert">
+        You do not have permissions to alter these settings
+      </div>
+    {% endif %}
+  </aside>
+{% endblock side-column %}
 {% block data_content %}
   {% load dataedit.taghandler %}
   {% url 'dataedit:table-permission' table=table as permission_url %}

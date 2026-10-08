@@ -37,7 +37,7 @@
     {% endfor %}
   </nav>
   <section id="tokens" aria-labelledby="tokens-heading">
-    <h2 id="tokens-heading" class="styleguide-heading">Tokens</h2>
+    <h2 id="tokens-heading">Tokens</h2>
     <p class="styleguide-prose">
       {% if stock_tokens %}
         Every token at Bootstrap 5.2's stock value, without any instance
@@ -85,7 +85,7 @@
     <section class="styleguide-entry"
              id="{{ entry.name }}"
              aria-labelledby="{{ entry.name }}-heading">
-      <h2 id="{{ entry.name }}-heading" class="styleguide-heading">
+      <h2 id="{{ entry.name }}-heading">
         <code>{{ entry.name }}</code>
       </h2>
       <p class="styleguide-prose">{{ entry.note }}</p>
@@ -100,13 +100,15 @@
     </section>
   {% endfor %}
 {% endblock main-content-body %}
-{% block main-right-sidebar-content %}
-  <nav class="styleguide-contents" aria-label="On this page">
-    <h2 class="styleguide-contents__heading">On this page</h2>
-    <a href="#tokens">Tokens</a>
-    {% for entry in entries %}<a href="#{{ entry.name }}">{{ entry.name }}</a>{% endfor %}
-  </nav>
-{% endblock main-right-sidebar-content %}
+{% block side-column %}
+  <aside class="content__side">
+    <nav class="styleguide-contents" aria-label="On this page">
+      <h2 class="styleguide-contents__heading">On this page</h2>
+      <a href="#tokens">Tokens</a>
+      {% for entry in entries %}<a href="#{{ entry.name }}">{{ entry.name }}</a>{% endfor %}
+    </nav>
+  </aside>
+{% endblock side-column %}
 {% block after-body-bottom-js %}
   <script type="module" src="{% static 'styleguide/styleguide.js' %}"></script>
 {% endblock after-body-bottom-js %}

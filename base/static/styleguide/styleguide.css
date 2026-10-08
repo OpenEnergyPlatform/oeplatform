@@ -6,12 +6,8 @@
   max-width: var(--oep-measure);
 }
 
-.styleguide-heading {
-  margin-top: 2.5rem;
-  margin-bottom: 0.75rem;
-}
-
-.styleguide-heading code {
+/* An entry's heading is a plain h2 (section_heading) around its name */
+.styleguide-entry > h2 code {
   color: inherit;
   font-size: inherit;
 }

@@ -32,9 +32,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
     {% include "login/partials/organization_members.html" %}
     <section class="profile-category">
       <div class="profile-category__danger">
-        <h2 class="profile-category__heading profile-category__heading--border-btm">
-          Danger zone
-        </h2>
+        <h3>Danger zone</h3>
         <div>
           <button class="profile-category__btn profile-category__btn--leave"
                   hx-post="{% url 'login:organization-leave' organization.id %}"

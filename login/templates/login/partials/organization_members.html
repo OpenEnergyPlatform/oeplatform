@@ -6,11 +6,7 @@ SPDX-FileCopyrightText: 2026 Hendrik Huyskens <https://github.com/henhuy> © Rei
 SPDX-License-Identifier: AGPL-3.0-or-later
 -->
 <section class="profile-category htmxComponentGroupMembership">
-  <h2 class="profile-category__heading profile-category__heading--border-btm">
-    <span class="profile-category__heading--sm">
-      <div class="member-count">{{ organization.member_count }} member</div>
-    </span>
-  </h2>
+  <h3>{{ organization.member_count }} member</h3>
   <div class="profile-category__members">
     {% for membership in organization.memberships.all %}
       {% if is_admin %}
