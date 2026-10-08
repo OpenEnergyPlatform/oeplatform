@@ -1,3 +1,9 @@
+// What is left of the old tags partial: only the `tag-mark` mixin, for the
+// keyword pills on topic cards and the role pills on organization cards
+// (legacy/_cards.scss, layouts/_profile.scss), which the cards ticket (#2646)
+// replaces. A Tag is the house component `tag` (components/_tag.scss) and a
+// status is `badge` (components/_badge.scss) since #2645; `.early-access` and
+// `.success-badge` went with that. This file goes with #2646 or #2660.
 @use '../base/' as *;
 @use '../base/mixins' as *;
 
@@ -45,16 +51,4 @@ $tag-mark-width: 7rem;
         min-width: $tag-mark-width;
         border: 1px solid $warning;
     }
-}
-
-.early-access {
-    @extend .badge;
-    @extend .rounded-pill;
-    background-color: $danger;
-}
-
-.success-badge {
-    @extend .badge;
-    @extend .rounded-pill;
-    background-color: $success;
 }

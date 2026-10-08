@@ -1,4 +1,3 @@
-{% load dataedit.taghandler %}
 {# Re-rendered with the manager after every save and delete, so the list #}
 {# and the editor can never disagree about what exists. #}
 {# Searching, sorting and collapsing are `dataedit/tag_list.js`, shared with #}
@@ -19,24 +18,16 @@
     <option value="usage">Most used</option>
   </select>
 </div>
-<ul class="tag-list tag-list--scroll" data-tag-list>
+<ul class="tag-group tag-list--scroll mb-3" data-tag-list>
   {% for t in tags %}
     <li data-tag-name="{{ t.name }}" data-tag-usage="{{ t.tag_usage }}">
       {% if t.pk %}
-        <a href="{% url 'dataedit:tags-edit' t.pk %}"
-           hx-get="{% url 'dataedit:tags-edit' t.pk %}"
-           hx-target="#tag-manager"
-           hx-swap="outerHTML"
-           class="btn tag"
-           style="color:{% readable_text_color t.color_hex %};
-                  background:{{ t.color_hex }}">{{ t.name }}</a>
+        {% url 'dataedit:tags-edit' t.pk as edit_url %}
+        {% include "components/tag.html" with name=t.name color=t.color_hex href=edit_url hx_get=edit_url hx_target="#tag-manager" hx_swap="outerHTML" %}
       {% else %}
         {# An empty key, from data migrated verbatim out of the OEDB: no #}
         {# route can address it, and reversing one 500ed the whole page. #}
-        <span class="btn tag disabled"
-              title="This tag has an empty identifier and cannot be edited here."
-              style="color:{% readable_text_color t.color_hex %};
-                     background:{{ t.color_hex }}">{{ t.name }}</span>
+        {% include "components/tag.html" with name=t.name color=t.color_hex title="This tag has an empty identifier and cannot be edited here." %}
         <span class="visually-hidden">(cannot be edited here: empty identifier)</span>
       {% endif %}
     </li>

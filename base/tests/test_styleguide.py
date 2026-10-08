@@ -91,9 +91,12 @@ class CatalogueTest(TestCase):
                 self.assertEqual([c.strip() for c in current], [label])
 
     def test_every_button_on_the_page_carries_a_role(self):
-        # The page's own; the navbar's toggler is the shell's.
+        # The page's own; the navbar's toggler is the shell's, and a house
+        # component's own control (a tag's close button) is the component's.
         main = element_markup(self.page(), "main-content")
         for button in re.findall(r"<button\b[^>]*>", main):
+            if "tag__remove" in button:
+                continue
             with self.subTest(button=button):
                 self.assertRegex(button, r'class="[^"]*\bbtn\b[^"]*\bbtn-link\b')
 

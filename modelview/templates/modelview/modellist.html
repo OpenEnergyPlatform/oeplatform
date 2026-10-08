@@ -2,7 +2,6 @@
 {% load django_bootstrap5 %}
 {% load static %}
 {% load modelview_extras %}
-{% load dataedit.taghandler %}
 {% block after-head %}
   <link rel="stylesheet" href="{% static 'css/mv-style.css' %}">
   <link href="{% static 'dataedit/jquery.dataTables.min.css' %}"
@@ -90,26 +89,20 @@
       <option value="name">By name</option>
     </select>
   </div>
-  <div data-tag-list style="display: flex; flex-flow: wrap">
+  <div data-tag-list class="tag-group">
     {% for t in tags %}
-      <label class="tag-checkbox-container form-label"
-             data-tag-name="{{ t.name }}"
-             data-tag-usage="{{ t.tag_usage }}"
-             style="background:{{ t.color_hex }};
-                    color:{% readable_text_color t.color_hex %}">
+      <span data-tag-name="{{ t.name }}" data-tag-usage="{{ t.tag_usage }}">
         {# `selected_tag_pks` is a SET of pks from `?tags=`, never a queryset: #}
         {# `in` against a queryset has no `__contains__` to use, so it scans #}
         {# the whole result cache once per checkbox. #}
-        <input type="checkbox"
-               class="tag-checkbox"
-               name="tags"
-               id="select_{{ t.pk }}"
-               value="{{ t.pk }}"
-               {% if t.pk in selected_tag_pks %}checked{% endif %}
-               onchange="apply_tag_filter(event.target)">
-        <span>{{ t.name }}</span>
-        <span class="tag-checkbox-icon fas fa-check"></span>
-      </label>
+        {% with box_id="select_"|add:t.pk %}
+          {% if t.pk in selected_tag_pks %}
+            {% include "components/tag.html" with name=t.name color=t.color_hex toggle_name="tags" toggle_value=t.pk toggle_id=box_id checked=True %}
+          {% else %}
+            {% include "components/tag.html" with name=t.name color=t.color_hex toggle_name="tags" toggle_value=t.pk toggle_id=box_id %}
+          {% endif %}
+        {% endwith %}
+      </span>
     {% endfor %}
   </div>
   <button data-tag-expand type="button" class="btn btn-sm btn-link p-0" hidden>
@@ -149,6 +142,9 @@
   {# Which columns those rows already carry, so a toggle of one of them does #}
   {# not fetch the other 165 for nothing. #}
   {{ initial_columns|json_script:"factsheet-initial-columns" }}
+  <template id="factsheet-tag-template">
+    {% include "components/tag.html" with name="" href="?tags=" %}
+  </template>
   {# ONE module, importing what it needs at the top.                        #}
   {#                                                                        #}
   {# It used to be a module that assigned `tag_filter` to `window` followed #}
@@ -175,26 +171,28 @@
     var initial_columns = JSON.parse(
         document.getElementById("factsheet-initial-columns").textContent);
 
+    // The table's tag column, built from the `tag` include's own markup (the
+    // template below), so a pill here cannot drift from one the server draws.
+    // `href` is the filtered view of this one tag, so the pill works as a
+    // link -- middle-click, "open in new tab", no javascript. The click
+    // handler below intercepts a plain click and filters in place instead.
+    var tag_template = document.getElementById("factsheet-tag-template");
     var render_tag = function (data, type, row){
-        // `href` is the filtered view of this one tag, so the pill works as a
-        // link -- middle-click, "open in new tab", no javascript. The click
-        // handler below intercepts a plain click and filters in place instead.
-        // It used to be `href=""`, which is not "do nothing": an empty href
-        // is the current URL, so clicking a tag reloaded the page and looked
-        // like the filter had silently failed.
         var s = '';
         for(var i in data){
             if(i <= 4) {
                 var tag = data[i];
-                s += '<a href="?tags=' + encodeURIComponent(tag.pk) + '"'
-                  + ' data-tag-pk="' + tag.pk + '"'
-                  + ' title="Filter by ' + tag.name + '"'
-                  + ' class="btn tag" style="background:' + tag.color_hex
-                  + '; color:' + tag.textcolor_hex + '; display:inline-block;">'
-                  + tag.name + '</a>'
+                var pill = tag_template.content.firstElementChild.cloneNode(true);
+                pill.setAttribute("href", "?tags=" + encodeURIComponent(tag.pk));
+                pill.setAttribute("data-tag-pk", tag.pk);
+                pill.setAttribute("title", "Filter by " + tag.name);
+                pill.style.setProperty("--tag-color", tag.color_hex);
+                pill.style.setProperty("--tag-text-color", tag.textcolor_hex);
+                pill.textContent = tag.name;
+                s += pill.outerHTML;
             }
         }
-        return s;
+        return s ? '<span class="tag-group">' + s + '</span>' : s;
     }
 
     var all_columns = [
@@ -309,7 +307,6 @@
                 + tag_filter.filterQuery(active_tags));
         history.replaceState(
             null, '', tag_filter.filteredUrl(window.location, active_tags));
-        tag_filter.showCheckedTags(document);
         var clear = document.getElementById("clear-tag-filter");
         if (clear) {
             clear.hidden = active_tags.length === 0;
@@ -339,6 +336,14 @@
         // The box does not exist until the table above has been initialised.
         lazy_payload.bindSearchTrigger(document, request_full_payload);
 
+        // A ticked box in the sidebar filters, as a click on a pill does.
+        document.querySelector("[data-tag-list]").addEventListener(
+            "change", function (event) {
+                if (event.target.matches(".tag__check")) {
+                    apply_tag_filter(event.target);
+                }
+            });
+
         // Delegated, because the table redraws its cells constantly -- paging,
         // sorting, the lazy column fetch -- so a handler bound to the pills
         // themselves would be lost on the next draw.
@@ -360,10 +365,10 @@
     // URL would be active with nothing on screen to say so.
     bindTagList(document, {limit: 10, sort: "usage"});
 
-    // The sidebar's checkboxes call these through `onchange` attributes,
-    // which resolve against `window` and not against this module's scope.
+    // The sidebar's field checkboxes and the clear button call these through
+    // `onchange`/`onclick` attributes, which resolve against `window` and not
+    // against this module's scope.
     window.apply_filter = apply_filter;
-    window.apply_tag_filter = apply_tag_filter;
     window.clear_tag_filter = clear_tag_filter;
   </script>
 {% endblock %}

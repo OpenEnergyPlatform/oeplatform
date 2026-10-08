@@ -2551,14 +2551,6 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "dataedit/templates/dataedit/tagged_field.html"
-precedence = "override"
-SPDX-License-Identifier = "AGPL-3.0-or-later"
-SPDX-FileCopyrightText = [
-  "2016 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-]
-
-[[annotations]]
 path = "dataedit/templates/dataedit/dataview.html"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
@@ -3597,6 +3589,9 @@ path = [
   "base/templates/styleguide/**",
   "base/static/styleguide/**",
   "theming/scss/components/_link_with_arrow.scss",
+  "theming/scss/components/_tag.scss",
+  "theming/scss/components/_badge.scss",
+  "base/templates/components/**",
   "theming/stock_tokens.scss",
   "theming/literal_scan.mjs",
 ]

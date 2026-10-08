@@ -1,0 +1,50 @@
+// badge: a status ("Published", "Draft", "Early Access", "You can edit this
+// table"), never a tag (#2645). Bootstrap's `.badge` plus one status modifier:
+// a light status background, text and border in a darker shade of the same
+// status colour, the small radius, never a pill. Pure CSS, no include.
+// Catalogue entry: base/templates/styleguide/entries/badge.html.
+//
+// The shades are mixed by the browser from the status token and the surface
+// (as Bootstrap 5.3's "subtle" and "emphasis" colours are mixed by Sass), so
+// an instance that sets `--bs-success` recolours every badge of that status.
+@use '../base/' as *;
+
+@mixin badge-status($token) {
+    color: color-mix(in srgb, var(#{$token}) 40%, black);
+    background-color: color-mix(in srgb, var(#{$token}) 15%, var(--oep-surface));
+    border-color: color-mix(in srgb, var(#{$token}) 45%, var(--oep-surface));
+}
+
+.badge--success,
+.badge--info,
+.badge--warning,
+.badge--danger,
+.badge--neutral {
+    --bs-badge-font-size: var(--oep-font-size-dense);
+    --bs-badge-font-weight: #{$font-weight-semibold};
+    --bs-badge-border-radius: var(--bs-border-radius-sm);
+    border: 1px solid;
+}
+
+.badge--success {
+    @include badge-status(--bs-success);
+}
+
+.badge--info {
+    @include badge-status(--bs-info);
+}
+
+.badge--warning {
+    @include badge-status(--bs-warning);
+}
+
+.badge--danger {
+    @include badge-status(--bs-danger);
+}
+
+// Not a status: a count or a label beside a heading.
+.badge--neutral {
+    color: var(--oep-text-muted);
+    background-color: var(--oep-surface-subtle);
+    border-color: var(--oep-border-strong);
+}

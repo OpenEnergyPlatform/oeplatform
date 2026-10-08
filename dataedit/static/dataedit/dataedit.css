@@ -342,24 +342,6 @@ This is a fix, because we use modals within a position:fixed context, which is n
   display: none !important;
 }
 
-/* The tag overview's pill list.
- *
- * A real list, laid out by flex. It used to be bare <a> elements inside a
- * <ul> held in place by `float: left`, which is invalid markup and let the
- * buttons underneath escape the flow. */
-.tag-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  list-style: none;
-  padding: 0;
-  margin: 0 0 1rem 0;
-}
-
-.tag-list > li {
-  display: flex;
-}
-
 /* A tag vocabulary is 800+ items. Left to grow, it pushes everything below it
  * off the screen; boxed and scrollable, the page keeps its shape however far
  * the vocabulary grows, and a search shortens what is inside it anyway. */

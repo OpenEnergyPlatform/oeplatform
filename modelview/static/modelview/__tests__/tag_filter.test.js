@@ -16,15 +16,12 @@ import {
   filterQuery,
   filteredUrl,
   rowMatchesTags,
-  showCheckedTags,
   toggleTag,
 } from "../tag_filter.js";
 
 /**
- * Render the sidebar's tag checkboxes the way `modellist.html` does.
- *
- * The label wraps the input, which matters: the visible tick is drawn from a
- * class on that parent, not on the input itself.
+ * Render the sidebar's tag checkboxes the way the `tag` include's toggle
+ * variant does in `modellist.html`.
  *
  * @param {{pk: string, checked?: boolean}[]} tags the tags to render.
  * @return {void}
@@ -33,8 +30,8 @@ function renderSidebar(tags) {
   document.body.innerHTML = tags
     .map(
       (tag) =>
-        `<label class="tag-checkbox-container">
-           <input type="checkbox" class="tag-checkbox" id="select_${tag.pk}"
+        `<label class="tag tag--toggle">
+           <input type="checkbox" class="tag__check" id="select_${tag.pk}"
                   value="${tag.pk}" ${tag.checked ? "checked" : ""}>
          </label>`
     )
@@ -186,39 +183,6 @@ describe("checkedTagValues", () => {
     renderSidebar([{ pk: "wind", checked: true }]);
 
     expect(checkedTagValues(document)).toEqual(["wind"]);
-  });
-});
-
-describe("showCheckedTags", () => {
-  beforeEach(() => {
-    document.body.innerHTML = "";
-  });
-
-  it("gives a checked tag its visible tick", () => {
-    // The bug this exists for: the input is `display: none`, so a filter
-    // restored from the URL filtered the table while the sidebar looked
-    // untouched.
-    renderSidebar([{ pk: "wind", checked: true }, { pk: "solar" }]);
-
-    showCheckedTags(document);
-
-    const labels = document.querySelectorAll(".tag-checkbox-container");
-    expect(labels[0].classList.contains("tag-checkbox-checked")).toBe(true);
-    expect(labels[1].classList.contains("tag-checkbox-checked")).toBe(false);
-  });
-
-  it("removes the tick from a tag that is no longer checked", () => {
-    renderSidebar([{ pk: "wind", checked: true }]);
-    showCheckedTags(document);
-    document.querySelector(".tag-checkbox").checked = false;
-
-    showCheckedTags(document);
-
-    expect(
-      document
-        .querySelector(".tag-checkbox-container")
-        .classList.contains("tag-checkbox-checked")
-    ).toBe(false);
   });
 });
 

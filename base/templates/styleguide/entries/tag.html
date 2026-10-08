@@ -1,0 +1,9 @@
+{# use: One Tag wherever it appears, in its own colour: static to show it, link to filter by it, removable in a picker's current selection, toggle in a pick list. Never for a status; that is a badge. #}
+<div class="tag-group">
+  {% include "components/tag.html" with name="Wind" color="#2e7d32" %}
+  {% include "components/tag.html" with name="Electricity" color="#f9a825" href="?tags=electricity" title="Filter by Electricity" %}
+  {% include "components/tag.html" with name="Heat" color="#6a1b9a" remove="heat" %}
+  {% include "components/tag.html" with name="Hydrogen" color="#00838f" toggle_name="catalogue_tags" toggle_value="hydrogen" checked=True %}
+  {% include "components/tag.html" with name="Mobility" color="#ad1457" toggle_name="catalogue_tags" toggle_value="mobility" %}
+  {% include "components/tag.html" with name="A topic, no colour" %}
+</div>

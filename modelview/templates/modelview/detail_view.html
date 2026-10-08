@@ -2,7 +2,6 @@
 {% load django_bootstrap5 %}
 {% load static %}
 {% load modelview_extras %}
-{% load dataedit.taghandler %}
 {% block after-head %}
   <link rel="stylesheet" href="{% static 'css/mv-style.css' %}" />
 {% endblock after-head %}
@@ -49,11 +48,15 @@
   {% endblock main-right-sidebar-content-actions %}
   <hr />
   <h3>Tags</h3>
-  {% for t in model.tags.all %}
-    <a href=""
-       class="btn tag"
-       style="background:{{ t.color_hex }};
-              color:{% readable_text_color t.color_hex %};
-              display:inline-block">{{ t.name }}</a>
-  {% endfor %}
+  {# Each tag links to this sheet type's list, filtered by it. #}
+  {% url 'modelview:modellist' displaySheetType|lower as list_url %}
+  <div class="tag-group">
+    {% for t in model.tags.all %}
+      {% with pk=t.pk|urlencode %}
+        {% with filtered=list_url|add:"?tags="|add:pk %}
+          {% include "components/tag.html" with name=t.name color=t.color_hex href=filtered title="Filter by "|add:t.name %}
+        {% endwith %}
+      {% endwith %}
+    {% endfor %}
+  </div>
 {% endblock main-right-sidebar-content-before %}
