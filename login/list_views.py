@@ -135,7 +135,8 @@ class ListTabView(ProfileOwnerRequiredMixin, View):
 
     Hooks: ``page_template``, ``region_template``, ``bulk_actions`` (the bulk
     bar's ``(action, label)`` pairs, in order), ``rows(user)`` (the
-    ``rows`` callable for ``Listing.page``) and ``extra_context()``.
+    ``rows`` callable for ``Listing.page``) and ``extra_context()``, which
+    may ask ``renders_page`` whether anything outside the region is drawn.
     """
 
     frame: ListFrame
@@ -145,6 +146,11 @@ class ListTabView(ProfileOwnerRequiredMixin, View):
 
     def extra_context(self) -> dict:
         return {}
+
+    def renders_page(self, request) -> bool:
+        """Whether ``request`` gets the whole page rather than the results
+        region alone: a direct load or a history restore."""
+        return not is_htmx(request) or "HX-History-Restore-Request" in request.headers
 
     @method_decorator(never_cache)
     def get(self, request, user_id):
@@ -159,7 +165,7 @@ class ListTabView(ProfileOwnerRequiredMixin, View):
             "bulk_actions": self.bulk_actions,
             **self.extra_context(),
         }
-        if is_htmx(request) and "HX-History-Restore-Request" not in request.headers:
+        if not self.renders_page(request):
             context["region_only"] = True
             response = render(request, self.region_template, context)
             # The region re-fetching itself after an action changes nothing

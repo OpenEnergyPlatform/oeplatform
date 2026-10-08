@@ -8,7 +8,8 @@
 // swapped region, focus put back by id after a swap. This is its binding to
 // the datasets tab's ids (`datasets-…` for the list, `dataset-…` for the
 // action dialog and the members drawer) and its events (`datasets-changed`,
-// `datasets-refused`).
+// `datasets-refused`). The members drawer is page state in the address,
+// `?members=<name>`, and opens by itself after a Create.
 
 import { bindList, listConfig } from "./dash_list.js";
 
@@ -16,6 +17,10 @@ export const DATASETS = listConfig({
   plural: "datasets",
   singular: "dataset",
   drawer: "members",
+  // the members drawer is in the address, `?members=<name>` (#2625)
+  drawerParam: "members",
+  // after a Create the drawer opens on the new Dataset, ready to add to it
+  createdFocus: "dataset-members-add-search",
 });
 
 /**

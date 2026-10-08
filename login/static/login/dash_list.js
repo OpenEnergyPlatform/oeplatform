@@ -69,7 +69,21 @@
 //   event with `stay`: a toast says what happened and the region re-fetches
 //   behind the drawer, but nothing closes and focus does not move. Closed,
 //   focus goes back to what opened it, or to the list heading when that row
-//   has left the list.
+//   has left the list. The server may name the control to focus instead of
+//   the one that went (`data-drawer-focus`, the next Remove after a member
+//   was removed) and what to say (`data-announce`, through the drawer's live
+//   region outside its swapped contents).
+// - the drawer in the address (#2625), when the config names a parameter
+//   (`?members=<name>` on the datasets tab): page state, not list state. It
+//   is written with `replaceState` when the drawer opens, on the key its
+//   contents carry (`data-drawer-key`), and removed when it closes, so it adds
+//   no history entry; htmx replacing or pushing the list's own address while
+//   the drawer is open puts it back, and no filter or sort request carries
+//   it. On a load or a history restore the drawer reopens when the page says
+//   the parameter names something of the user's (`data-open` on the drawer,
+//   which the server sets only then) and the address still holds it. A
+//   changed event carrying `created` (a Create) opens the drawer on the new
+//   item once the dialog has closed, with focus where the config says.
 // - menu entries the user may not use carry `aria-disabled="true"` and
 //   their reason as text. They stay in the keyboard order, unlike
 //   Bootstrap's `.disabled`; their clicks are swallowed here.
@@ -112,10 +126,19 @@ import { bindPopovers } from "./list_popovers.js";
  * @param {object} nouns `plural` and `singular` (lower case, as the ids
  *     spell them), and `drawer`, the drawer's name (`access` gives
  *     `table-access`, opened by an element with `data-access-origin`), or
- *     null for a list without one.
+ *     null for a list without one. `drawerParam` puts the open drawer in the
+ *     address under that parameter (page state, `?members=<name>`), and
+ *     `createdFocus` is the id to focus in a drawer opened on a newly created
+ *     item.
  * @return {object} the config `bindList` and the helpers here take.
  */
-export function listConfig({ plural, singular, drawer = null }) {
+export function listConfig({
+  plural,
+  singular,
+  drawer = null,
+  drawerParam = null,
+  createdFocus = null,
+}) {
   const own = (name) => `${plural}-${name}`;
   const ids = {
     region: own("results"),
@@ -152,8 +175,11 @@ export function listConfig({ plural, singular, drawer = null }) {
           body: `${drawerId}-body`,
           title: `${drawerId}-title`,
           confirm: `${drawerId}-confirm-box`,
+          live: `${drawerId}-live`,
           // the opener's `data-<drawer>-origin`, as `dataset` spells it
           origin: `${drawer.replace(/-(\w)/g, (_, c) => c.toUpperCase())}Origin`,
+          param: drawerParam,
+          createdFocus,
         })
       : null,
     changedEvent: own("changed"),
@@ -544,7 +570,8 @@ export function bootstrapDialog(doc, config) {
 
 /**
  * The list's drawer as Bootstrap's offcanvas, with the members of
- * `bootstrapDialog`. On a list without a drawer it does nothing.
+ * `bootstrapDialog` and `onShown`. On a list without a drawer it does
+ * nothing.
  *
  * @param {Document} doc the document.
  * @param {object} config the list's, from `listConfig`.
@@ -563,13 +590,19 @@ export function bootstrapDrawer(doc, config) {
     close: () => offcanvas() && offcanvas().hide(),
     onHidden: (callback) =>
       element() && element().addEventListener("hidden.bs.offcanvas", callback),
+    // once shown: Bootstrap focuses the drawer itself then, so a control is
+    // focused only after that
+    onShown: (callback) =>
+      element() && element().addEventListener("shown.bs.offcanvas", callback),
   };
 }
 
 /**
  * Put focus back inside the drawer after its contents were replaced, if it
  * was inside before: on the confirmation question when the server asks
- * one, else on the control with the same id, else on the drawer's title.
+ * one, else on the control the server named instead of the one that went
+ * (`data-drawer-focus`), else on the control with the same id, else on the
+ * drawer's title.
  *
  * @param {Document} doc the document.
  * @param {object} config the list's, from `listConfig`.
@@ -579,13 +612,75 @@ export function restoreDrawerFocus(doc, config, id) {
   if (!id || !config.drawer) {
     return;
   }
+  const named = drawerMark(doc, config, "drawerFocus");
   const target =
     doc.getElementById(config.drawer.confirm) ||
+    (named && doc.getElementById(named)) ||
     doc.getElementById(id) ||
     doc.getElementById(config.drawer.title);
   if (target) {
     target.focus();
   }
+}
+
+/**
+ * What the drawer's current contents say about themselves, read off the
+ * element carrying the `data-` attribute `key` names (`drawerKey`,
+ * `drawerFocus`, `announce`).
+ *
+ * @param {Document} doc the document.
+ * @param {object} config the list's, from `listConfig`.
+ * @param {string} key the attribute, as `dataset` spells it.
+ * @return {string|null} its value, or null when nothing carries it.
+ */
+export function drawerMark(doc, config, key) {
+  const body = config.drawer && doc.getElementById(config.drawer.body);
+  if (!body) {
+    return null;
+  }
+  const attribute = key.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
+  const element = body.querySelector(`[data-${attribute}]`);
+  return element ? element.dataset[key] : null;
+}
+
+/**
+ * The current address with the drawer's parameter set to `key`, or removed
+ * for null: what the address bar holds while the drawer is open or after
+ * it closed. Everything else in it is kept.
+ *
+ * @param {string} href the current address.
+ * @param {string} param the drawer's parameter.
+ * @param {string|null} key what the open drawer shows.
+ * @return {string} the path, query and hash to write.
+ */
+export function withDrawerParam(href, param, key) {
+  const url = new URL(href);
+  if (key) {
+    url.searchParams.set(param, key);
+  } else {
+    url.searchParams.delete(param);
+  }
+  return url.pathname + url.search + url.hash;
+}
+
+/**
+ * Fill the drawer from `url` through htmx, which then swaps it like an
+ * opener's request. Tests pass their own function.
+ *
+ * @param {Document} doc the document.
+ * @param {object} config the list's, from `listConfig`.
+ * @return {function(string)} loads the drawer's contents from a URL.
+ */
+export function htmxDrawerLoader(doc, config) {
+  return (url) => {
+    const htmx = doc.defaultView && doc.defaultView.htmx;
+    if (htmx && config.drawer) {
+      htmx.ajax("GET", url, {
+        target: `#${config.drawer.body}`,
+        swap: "innerHTML",
+      });
+    }
+  };
 }
 
 /**
@@ -768,9 +863,9 @@ export async function fetchMatchingNames(url) {
  * @param {Document} doc the document.
  * @param {object} config the list's ids and names, from `listConfig`.
  * @param {object} options test seams: `announceDelay`, `dialog` (see
- *     `bootstrapDialog`), `drawer` (see `bootstrapDrawer`), `schedule`
- *     (setTimeout, for the toasts) and `fetchNames` (see
- *     `fetchMatchingNames`).
+ *     `bootstrapDialog`), `drawer` (see `bootstrapDrawer`; `onShown` is
+ *     optional), `schedule` (setTimeout, for the toasts), `fetchNames` (see
+ *     `fetchMatchingNames`) and `loadDrawer` (see `htmxDrawerLoader`).
  * @return {function(): void} removes the listeners again.
  */
 export function bindList(
@@ -782,6 +877,7 @@ export function bindList(
     drawer = bootstrapDrawer(doc, config),
     schedule = setTimeout,
     fetchNames = fetchMatchingNames,
+    loadDrawer = htmxDrawerLoader(doc, config),
   } = {}
 ) {
   const { ids } = config;
@@ -845,6 +941,49 @@ export function bindList(
   // what opened the drawer, and the control focused in it before a swap
   let drawerOrigin = null;
   let drawerFocusedId = null;
+  // what the open drawer shows (its `data-drawer-key`), null while closed;
+  // a drawer this module asked for itself ({origin, focus}) until it comes;
+  // the control to focus once it is shown; an item to open it on once the
+  // dialog has closed (a Create)
+  let drawerKey = null;
+  let pendingDrawer = null;
+  let drawerFocus = null;
+  let createdKey = null;
+  const drawerParam = config.drawer && config.drawer.param;
+  const history = doc.defaultView && doc.defaultView.history;
+  const writeDrawerParam = (key) => {
+    if (drawerParam && history) {
+      history.replaceState(
+        history.state,
+        "",
+        withDrawerParam(doc.location.href, drawerParam, key)
+      );
+    }
+  };
+  const drawerElement = () =>
+    config.drawer && doc.getElementById(config.drawer.id);
+  // open the drawer on `key` by itself, through its address template
+  const openDrawerOn = (key, origin, focus = null) => {
+    const element = drawerElement();
+    const template = element && element.dataset.urlTemplate;
+    if (!template || !key) {
+      return;
+    }
+    pendingDrawer = { origin: origin || "", focus };
+    loadDrawer(template.replace("__key__", encodeURIComponent(key)));
+  };
+  // a load or a history restore: reopen the drawer when the server says the
+  // address names something of the user's, and the address still says so
+  const reopenFromAddress = () => {
+    const element = drawerElement();
+    if (!drawerParam || !element || !element.dataset.open) {
+      return;
+    }
+    const named = new URLSearchParams(doc.location.search).get(drawerParam);
+    if (named === element.dataset.open) {
+      openDrawerOn(named, element.dataset.openOrigin);
+    }
+  };
   // the row whose ⋯ opened the dialog, and where focus goes after an action
   let origin = null;
   let afterAction = null;
@@ -891,6 +1030,10 @@ export function bindList(
       controlValue(bar, elt)
     )) {
       parameters[key] = value;
+    }
+    if (drawerParam) {
+      // the open drawer is page state: no list request carries it
+      delete parameters[drawerParam];
     }
   };
 
@@ -1037,9 +1180,21 @@ export function bindList(
     if (isDialog(event) && data.actionOrigin) {
       origin = data.actionOrigin;
       dialog.open();
-    } else if (isDrawer(event) && data[config.drawer.origin]) {
-      drawerOrigin = data[config.drawer.origin];
+      return;
+    }
+    if (!isDrawer(event)) {
+      return;
+    }
+    const opener = data[config.drawer.origin];
+    if (opener || pendingDrawer) {
+      drawerOrigin = opener || pendingDrawer.origin;
+      drawerFocus = opener ? null : pendingDrawer.focus;
+      pendingDrawer = null;
       drawer.open();
+    }
+    if (drawerOrigin !== null) {
+      drawerKey = drawerMark(doc, config, "drawerKey");
+      writeDrawerParam(drawerKey);
     }
   };
 
@@ -1047,6 +1202,11 @@ export function bindList(
     if (isDrawer(event)) {
       restoreDrawerFocus(doc, config, drawerFocusedId);
       drawerFocusedId = null;
+      const live = doc.getElementById(config.drawer.live);
+      const said = drawerMark(doc, config, "announce");
+      if (live && said) {
+        announce(live, said, announceDelay);
+      }
       return;
     }
     if (!isRegion(event)) {
@@ -1081,6 +1241,12 @@ export function bindList(
     }
     afterAction = detail.focus || origin || "";
     origin = null;
+    if (detail.created && config.drawer && config.drawer.param) {
+      // a Create: the drawer opens on the new item once the dialog has
+      // closed, and holds focus from there on
+      createdKey = detail.created;
+      afterAction = null;
+    }
     dialog.close();
     if (detail.message) {
       showToast(doc, config, detail.message, {
@@ -1118,6 +1284,13 @@ export function bindList(
   // action the region's settle does that instead, and after a link that
   // opens something else, what it opens.
   dialog.onHidden(() => {
+    if (createdKey) {
+      const key = createdKey;
+      createdKey = null;
+      origin = null;
+      openDrawerOn(key, "", config.drawer.createdFocus);
+      return;
+    }
     if (thenOpen) {
       const link = thenOpen;
       thenOpen = null;
@@ -1141,12 +1314,41 @@ export function bindList(
       focusAfterAction(doc, config, drawerOrigin);
     }
     drawerOrigin = null;
+    drawerFocus = null;
+    if (drawerKey !== null) {
+      drawerKey = null;
+      writeDrawerParam(null);
+    }
   });
+
+  // Shown: a drawer opened on a new item puts focus where the config says
+  // (the add search), after Bootstrap has focused the drawer itself.
+  if (drawer.onShown) {
+    drawer.onShown(() => {
+      const target = drawerFocus && doc.getElementById(drawerFocus);
+      drawerFocus = null;
+      if (target) {
+        target.focus();
+      }
+    });
+  }
+
+  // htmx wrote the list's own address, which never carries the drawer: put
+  // it back while the drawer is open
+  const onAddressWritten = () => {
+    if (drawerKey !== null) {
+      writeDrawerParam(drawerKey);
+    }
+  };
 
   const onHistoryRestore = () => {
     const region = doc.getElementById(ids.region);
     syncFilters(doc, config, region);
     followScope(region);
+    // the page was put back, its drawer closed with it
+    drawerKey = null;
+    drawerOrigin = null;
+    reopenFromAddress();
   };
 
   const listeners = [
@@ -1155,6 +1357,8 @@ export function bindList(
     ["htmx:afterSwap", onAfterSwap],
     ["htmx:afterSettle", onAfterSettle],
     ["htmx:historyRestore", onHistoryRestore],
+    ["htmx:pushedIntoHistory", onAddressWritten],
+    ["htmx:replacedInHistory", onAddressWritten],
     ["htmx:responseError", onResponseError],
     ["htmx:sendError", onSendError],
     [config.changedEvent, onChanged],
@@ -1170,6 +1374,13 @@ export function bindList(
   doc.body.addEventListener("click", onGuard, true);
   const popovers = bindPopovers(doc);
   render();
+  // htmx processes the page once it has loaded; a drawer it is asked to
+  // fill before then would not open
+  if (doc.readyState === "loading") {
+    doc.addEventListener("DOMContentLoaded", reopenFromAddress, { once: true });
+  } else {
+    reopenFromAddress();
+  }
   return () => {
     for (const [name, listener] of listeners) {
       doc.body.removeEventListener(name, listener);

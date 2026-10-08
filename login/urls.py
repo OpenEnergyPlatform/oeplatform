@@ -14,6 +14,8 @@ from django.urls import path, re_path
 
 from login.views import (
     DatasetActionView,
+    DatasetMembersSearchView,
+    DatasetMembersView,
     DatasetsView,
     EditUserView,
     OrganizationListView,
@@ -55,6 +57,19 @@ urlpatterns = [
         r"^profile/(?P<user_id>[\d]+)/dataset-actions/(?P<action>[a-z_]+)$",
         DatasetActionView.as_view(),
         name="dataset-action",
+    ),
+    # One Dataset's members drawer: under datasets/<name>/, which only a
+    # Dataset's own routes use.
+    re_path(
+        r"^profile/(?P<user_id>[\d]+)/datasets/(?P<dataset_name>[\w-]+)/members$",
+        DatasetMembersView.as_view(),
+        name="dataset-members",
+    ),
+    re_path(
+        r"^profile/(?P<user_id>[\d]+)/datasets/(?P<dataset_name>[\w-]+)"
+        r"/members/search$",
+        DatasetMembersSearchView.as_view(),
+        name="dataset-members-search",
     ),
     re_path(
         r"^profile/(?P<user_id>[\d]+)/tables$",

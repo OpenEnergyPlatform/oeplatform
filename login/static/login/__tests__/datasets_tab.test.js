@@ -274,3 +274,199 @@ describe("a multi-valued filter's dropdown", () => {
     expect($("f-topics-button").textContent).toBe("Topic (1)");
   });
 });
+
+// The members drawer in the address (#2625): `?members=<name>` is page
+// state, written with replaceState when the drawer opens and removed when it
+// closes; on a load or a history restore the drawer opens by itself when the
+// server marked the name as one of the user's (`data-open`); after a Create
+// it opens on the new Dataset with focus in the add search.
+describe("the members drawer in the address", () => {
+  const LIST = "/user/profile/1/datasets";
+  let unbind;
+  let dialog;
+  let drawer;
+  let loaded;
+
+  function drawerOverlay() {
+    const overlay = fakeOverlay();
+    overlay.hidden = [];
+    overlay.shown = [];
+    overlay.onHidden = (callback) => overlay.hidden.push(callback);
+    overlay.onShown = (callback) => overlay.shown.push(callback);
+    return overlay;
+  }
+
+  function mount({ open = null, address = `${LIST}?sort=created` } = {}) {
+    renderPage();
+    document.body.insertAdjacentHTML(
+      "beforeend",
+      `<div id="dataset-members"
+            data-url-template="/user/profile/1/datasets/__key__/members"
+            ${open ? `data-open="${open}" data-open-origin="menu-7"` : ""}>
+         <div id="dataset-members-live" aria-live="polite"></div>
+         <div id="dataset-members-body"></div>
+       </div>`
+    );
+    $("datasets-results").insertAdjacentHTML(
+      "beforeend",
+      `<button type="button" id="menu-7">⋯</button>
+       <button type="button" id="menu-7-members"
+               data-members-origin="menu-7">Manage tables…</button>`
+    );
+    window.history.replaceState(null, "", address);
+    dialog = fakeOverlay();
+    dialog.hidden = [];
+    dialog.onHidden = (callback) => dialog.hidden.push(callback);
+    drawer = drawerOverlay();
+    loaded = [];
+    unbind = bindDatasetsTab(document, {
+      announceDelay: 0,
+      dialog,
+      drawer,
+      schedule: () => {},
+      loadDrawer: (url) => loaded.push(url),
+    });
+  }
+
+  // the drawer's contents arriving, as htmx swaps them
+  function fill(key, requester = document.body, extra = "") {
+    const body = $("dataset-members-body");
+    const detail = { target: body, requestConfig: { elt: requester } };
+    body.dispatchEvent(
+      new CustomEvent("htmx:beforeSwap", { bubbles: true, detail })
+    );
+    body.innerHTML = `
+      <h2 id="dataset-members-title" tabindex="-1" data-drawer-key="${key}"
+          ${extra}>Tables in “${key}”</h2>
+      <input type="search" id="dataset-members-add-search" />
+      <button type="button" id="dataset-members-remove-1">Remove</button>
+      <button type="button" id="dataset-members-remove-2">Remove</button>`;
+    body.dispatchEvent(
+      new CustomEvent("htmx:afterSwap", { bubbles: true, detail })
+    );
+    body.dispatchEvent(
+      new CustomEvent("htmx:afterSettle", { bubbles: true, detail })
+    );
+  }
+
+  const close = () => drawer.hidden.forEach((callback) => callback());
+  const members = () =>
+    new URLSearchParams(window.location.search).get("members");
+
+  afterEach(() => {
+    unbind();
+  });
+
+  it("is written on open, with no history entry, the rest kept", () => {
+    mount();
+    const entries = window.history.length;
+    fill("wind_atlas", $("menu-7-members"));
+    expect(drawer.opened).toBe(1);
+    expect(members()).toBe("wind_atlas");
+    expect(new URLSearchParams(window.location.search).get("sort")).toBe(
+      "created"
+    );
+    expect(window.history.length).toBe(entries);
+  });
+
+  it("is removed on close, and focus goes back to the opener", () => {
+    mount();
+    fill("wind_atlas", $("menu-7-members"));
+    close();
+    expect(members()).toBeNull();
+    expect(window.location.search).toBe("?sort=created");
+    expect(document.activeElement).toBe($("menu-7"));
+  });
+
+  it("stays while a change in the drawer swaps it again", () => {
+    mount();
+    fill("wind_atlas", $("menu-7-members"));
+    fill("wind_atlas", $("dataset-members-remove-1"));
+    expect(drawer.opened).toBe(1);
+    expect(members()).toBe("wind_atlas");
+  });
+
+  it("is put back when htmx writes the list's own address", () => {
+    mount();
+    fill("wind_atlas", $("menu-7-members"));
+    window.history.replaceState(null, "", `${LIST}?sort=created`);
+    fire("htmx:replacedInHistory", { path: `${LIST}?sort=created` });
+    expect(members()).toBe("wind_atlas");
+    close();
+    fire("htmx:replacedInHistory", { path: `${LIST}?sort=created` });
+    expect(members()).toBeNull();
+  });
+
+  it("is carried by no filter request", () => {
+    mount({ address: `${LIST}?sort=created&members=wind_atlas` });
+    $("datasets-search").value = "heat";
+    expect(configRequest($("datasets-search"))).toEqual({
+      sort: "created",
+      search: "heat",
+    });
+  });
+
+  it("reopens the drawer on load when the server names the Dataset", () => {
+    mount({ open: "wind_atlas", address: `${LIST}?members=wind_atlas` });
+    expect(loaded).toEqual(["/user/profile/1/datasets/wind_atlas/members"]);
+    fill("wind_atlas");
+    expect(drawer.opened).toBe(1);
+    close();
+    // closed, focus goes to the Dataset's ⋯, as if the menu had opened it
+    expect(document.activeElement).toBe($("menu-7"));
+    expect(members()).toBeNull();
+  });
+
+  it("ignores a name the server did not mark (foreign or unknown)", () => {
+    mount({ address: `${LIST}?members=someone_elses` });
+    expect(loaded).toEqual([]);
+    expect(drawer.opened).toBe(0);
+  });
+
+  it("ignores a mark the address no longer carries", () => {
+    mount({ open: "wind_atlas", address: `${LIST}?sort=created` });
+    expect(loaded).toEqual([]);
+  });
+
+  it("reopens the drawer on a history restore", () => {
+    mount();
+    window.history.replaceState(null, "", `${LIST}?members=wind_atlas`);
+    $("dataset-members").dataset.open = "wind_atlas";
+    fire("htmx:historyRestore", { path: `${LIST}?members=wind_atlas` });
+    expect(loaded).toEqual(["/user/profile/1/datasets/wind_atlas/members"]);
+  });
+
+  it("opens on a new Dataset after a Create, once the dialog has closed", () => {
+    mount();
+    fire("datasets-changed", { message: "Created.", created: "new_one" });
+    expect(dialog.closed).toBe(1);
+    // still showing: nothing loads yet
+    expect(loaded).toEqual([]);
+    dialog.hidden.forEach((callback) => callback());
+    expect(loaded).toEqual(["/user/profile/1/datasets/new_one/members"]);
+    fill("new_one");
+    expect(drawer.opened).toBe(1);
+    expect(members()).toBe("new_one");
+    drawer.shown.forEach((callback) => callback());
+    expect(document.activeElement).toBe($("dataset-members-add-search"));
+  });
+
+  it("focuses what the server names after a removal took the control away", () => {
+    mount();
+    fill("wind_atlas", $("menu-7-members"));
+    $("dataset-members-remove-1").focus();
+    fill(
+      "wind_atlas",
+      $("dataset-members-remove-1"),
+      'data-drawer-focus="dataset-members-remove-2"'
+    );
+    expect(document.activeElement).toBe($("dataset-members-remove-2"));
+  });
+
+  it("says what a change did through the drawer's own live region", async () => {
+    mount();
+    fill("wind_atlas", $("menu-7-members"), 'data-announce="Added “Grid”."');
+    await settle();
+    expect($("dataset-members-live").textContent).toBe("Added “Grid”.");
+  });
+});

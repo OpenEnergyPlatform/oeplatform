@@ -28,7 +28,10 @@ Links that open something else (a drawer, another dialog) carry
 ``data-close-then`` and ``hx-trigger="dialog-closed"``: dash_list.js closes
 this dialog first and sends their request once it has closed, because a
 modal cannot open a drawer or another modal while it is showing. The gate's
-"Edit…" and "Manage tables…" arrive with the dialogs they open.
+"Manage tables…" (``gate_members``, one Dataset lacking members) opens the
+members drawer that way, disabling only itself while it loads (the form's
+``hx-disabled-elt`` names a confirm button a failing gate does not render);
+its "Edit…" arrives with the dialog it opens.
 {% endcomment %}
 {% with check=preflight n=preflight.eligible|length %}
   <div class="modal-header">
@@ -76,6 +79,21 @@ modal cannot open a drawer or another modal while it is showing. The gate's
           <ul class="mb-2">
             {% for need in needs %}<li>{{ need }}</li>{% endfor %}
           </ul>
+          {% if gate_members %}
+            {% url 'login:dataset-members' profile_user.pk gate_members.name as members_url %}
+            <p class="mb-2">
+              <button type="button"
+                      id="dataset-action-gate-members"
+                      class="btn btn-link p-0"
+                      data-close-then
+                      hx-trigger="dialog-closed"
+                      hx-get="{{ members_url }}"
+                      hx-target="#dataset-members-body"
+                      hx-swap="innerHTML"
+                      hx-disabled-elt="this"
+                      data-members-origin="menu-{{ gate_members.pk }}">Manage tables…</button>
+            </p>
+          {% endif %}
         </div>
       {% endif %}
       {% if check.eligible %}

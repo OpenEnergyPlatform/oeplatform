@@ -44,7 +44,7 @@ from api.services.dataset_creation import dataset_title
 from dataedit.helper import delete_peer_review
 from dataedit.models import PeerReviewManager, Table, Topic
 from dataedit.publish_gate import DATASET_GATE
-from login import table_roles
+from login import dataset_members, table_roles
 from login.access import (
     ProfileOwnerRequiredMixin,
     is_htmx,
@@ -479,11 +479,30 @@ class DatasetsList:
 class DatasetsView(DatasetsList, ListTabView):
     """The datasets tab, where the profile opens: one list of the user's own
     Datasets (``ListTabView``). Each row's ⋯ menu offers the row actions
-    (``DatasetActionView``); there are no bulk actions yet, so no selection:
-    the select cells are empty slots."""
+    (``DatasetActionView``) and the members drawer (``DatasetMembersView``);
+    there are no bulk actions yet, so no selection: the select cells are
+    empty slots.
+
+    ``?members=<name>`` is the open drawer, page state rather than list
+    state: no list address carries it. A whole page reopens the drawer when
+    it names one of the user's own Datasets (``members_open``, and the
+    Dataset's ⋯ as where focus returns), and says nothing about any other
+    name. The region alone never looks it up."""
 
     page_template = "login/user_datasets.html"
     region_template = "login/partials/datasets_region.html"
+
+    def extra_context(self):
+        name = self.request.GET.get("members", "").strip()
+        if not name or not self.renders_page(self.request):
+            return {}
+        pk = (
+            own_datasets(self.profile_user)
+            .filter(name=name)
+            .values_list("pk", flat=True)
+            .first()
+        )
+        return {"members_open": {"name": name, "pk": pk}} if pk else {}
 
 
 # What a draft failing ``DATASET_GATE`` needs, by the failed check's name,
@@ -547,6 +566,21 @@ class DatasetActionView(DatasetsList, ActionView):
             context["needs"] = [
                 GATE_NEEDS[gate.name] for gate in DATASET_GATE if gate.name in failed
             ]
+            lacking = [
+                name
+                for name, names in check.consequences["gate"].items()
+                if "members" in names
+            ]
+            if check.total == 1 and lacking:
+                # "Manage tables…" opens the members drawer once the dialog
+                # has closed; focus comes back to the row's ⋯ from there
+                context["gate_members"] = {
+                    "name": lacking[0],
+                    "pk": own_datasets(self.profile_user)
+                    .filter(name=lacking[0])
+                    .values_list("pk", flat=True)
+                    .first(),
+                }
             # where the Datasets will be listed: their own Topics
             context["listed_under"] = [
                 capfirst(name)
@@ -572,6 +606,269 @@ class DatasetActionView(DatasetsList, ActionView):
         if len(datasets) == 1:
             detail["focus"] = f"menu-{datasets[0].pk}"
         return detail
+
+
+class DatasetMembersView(ProfileOwnerRequiredMixin, View):
+    """The members drawer for one of the user's own Datasets (#2625): every
+    member, 25 per page with a search over them, an add search over the
+    Tables the user may assign, and the hand-off to the tables tab. GET
+    renders it; POST makes one change through the Dataset action service
+    (``members_add`` / ``members_remove``, ``via="dashboard"``) and renders
+    it again in place, so it stays open for the next change.
+
+    The drawer's state travels with every request, so an answer shows the
+    lists as they were: ``search`` and ``page`` (the members), ``add_search``
+    and ``add_page`` (the add search). A request whose ``HX-Target`` is one
+    of the two lists (``dataset-members-list``) gets that list alone.
+
+    POST takes ``op`` (``add`` or ``remove``) and ``table``:
+
+    - done: 200, the drawer saying what was done (and which Topics an add
+      brought along, and that a published Dataset left without members stays
+      published), with ``HX-Trigger: datasets-changed`` carrying ``stay``:
+      the list re-fetches behind the drawer, which neither closes nor moves
+      focus.
+    - nothing to do (already in, not in, no such Table): 200, the drawer
+      saying so, no event; nothing is written or stamped.
+    - removing a member the user could not add back (a draft or embargoed
+      Table they hold no Data editor role on) without ``confirm=yes``: 200,
+      the drawer asking, nothing written, no event. GET with ``ask=<table>``
+      asks the same without trying, which is what that member's Remove does,
+      since the page knows.
+    - refused (a Table no longer assignable once locked): 409, the drawer
+      with the refusal.
+    - unusable (no Table named, an unknown ``op``): 400.
+
+    A Dataset that is not the user's own answers 404 alike for another
+    user's draft, another user's published Dataset and a name nobody has:
+    the dashboard knows only the user's own Datasets.
+    """
+
+    template = "login/partials/dataset_members_drawer.html"
+    list_template = "login/partials/dataset_members_list.html"
+
+    def _dataset(self, name):
+        try:
+            return dataset_actions.own_dataset(self.profile_user, name)
+        except (dataset_actions.DatasetNotFound, dataset_actions.NotYourDataset):
+            raise Http404
+
+    @staticmethod
+    def _state(data) -> dict:
+        return {
+            key: data.get(key, "").strip()
+            for key in ("search", "page", "add_search", "add_page")
+        }
+
+    def _drawer(self, request, dataset, state, status=200, **extra):
+        user = self.profile_user
+        members = dataset_members.member_page(
+            user, dataset, state["search"], state["page"]
+        )
+        focus_id = _members_focus(members.rows, extra.pop("at", None), extra)
+        context = {
+            "profile_user": user,
+            "dataset": dataset,
+            "members": members,
+            "page_size": dataset_members.PAGE_SIZE,
+            "state": state,
+            "focus_id": focus_id,
+            **extra,
+        }
+        if request.headers.get("HX-Target") == "dataset-members-list":
+            return render(request, self.list_template, context, status=status)
+        context.update(
+            title=dataset_title(dataset),
+            candidates=dataset_members.candidate_page(
+                user, dataset, state["add_search"], state["add_page"]
+            ),
+            own_count=dataset_members.own_member_count(user, dataset),
+            needs=dataset_members.gate_needs(dataset),
+        )
+        ask = context.get("ask")
+        if ask is not None:
+            context["ask_row"] = ask
+            context["ask_at"] = next(
+                (
+                    index
+                    for index, row in enumerate(members.rows)
+                    if row.table.pk == ask.table.pk
+                ),
+                0,
+            )
+        return render(request, self.template, context, status=status)
+
+    @method_decorator(never_cache)
+    def get(self, request, user_id, dataset_name):
+        dataset = self._dataset(dataset_name)
+        state = self._state(request.GET)
+        extra = {"kept": request.GET.get("kept", "").strip()}
+        asked = request.GET.get("ask", "").strip()
+        if asked:
+            extra["ask"] = dataset_members.lost_member(
+                self.profile_user, dataset, asked
+            )
+        return self._drawer(request, dataset, state, **extra)
+
+    def post(self, request, user_id, dataset_name):
+        user = self.profile_user
+        dataset = self._dataset(dataset_name)
+        state = self._state(request.POST)
+        op = request.POST.get("op", "")
+        name = request.POST.get("table", "").strip()
+        if op not in ("add", "remove"):
+            return self._drawer(
+                request,
+                dataset,
+                state,
+                status=400,
+                message=_problem("Choose a change to make."),
+            )
+        if op == "remove" and request.POST.get("confirm") != "yes":
+            lost = dataset_members.lost_member(user, dataset, name)
+            if lost is not None:
+                return self._drawer(request, dataset, state, ask=lost)
+        action = (
+            dataset_actions.MEMBERS_ADD
+            if op == "add"
+            else dataset_actions.MEMBERS_REMOVE
+        )
+        topics_before = set(dataset.topics.values_list("name", flat=True))
+        try:
+            outcome = dataset_actions.execute(
+                user,
+                action,
+                [name] if name else [],
+                {"dataset": dataset.name},
+                via="dashboard",
+            )
+        except (dataset_actions.DatasetNotFound, dataset_actions.NotYourDataset):
+            # deleted, or no longer the user's, since the drawer opened
+            raise Http404
+        except dataset_actions.InvalidParameters as error:
+            message = " ".join(str(text) for text in error.errors.values())
+            return self._drawer(
+                request, dataset, state, status=400, message=_problem(message)
+            )
+        except dataset_actions.ActionRefused as refusal:
+            return self._drawer(
+                request, dataset, state, status=409, message=_problem(refusal.message)
+            )
+
+        if not outcome.tables:
+            return self._drawer(
+                request,
+                dataset,
+                state,
+                message=_note(_members_unchanged_message(op, name, outcome)),
+            )
+        table = outcome.tables[0]
+        extra = {}
+        if op == "add":
+            seeded = sorted(
+                set(dataset.topics.values_list("name", flat=True)) - topics_before
+            )
+            message = _members_added_message(table, seeded)
+            extra["added"] = table.pk
+        else:
+            message = _members_removed_message(table, dataset)
+            extra["at"] = request.POST.get("at", "")
+        response = self._drawer(
+            request, dataset, state, message=_done(message), **extra
+        )
+        response["HX-Trigger"] = json.dumps({"datasets-changed": {"stay": True}})
+        return response
+
+
+class DatasetMembersSearchView(DatasetMembersView):
+    """The members drawer's add search (``DatasetMembersView``): one page of
+    the Tables the user may add, for ``add_search`` and ``add_page``. With
+    nothing typed it lists the user's own Tables. GET only."""
+
+    http_method_names = ["get"]
+
+    @method_decorator(never_cache)
+    def get(self, request, user_id, dataset_name):
+        dataset = self._dataset(dataset_name)
+        state = self._state(request.GET)
+        return render(
+            request,
+            "login/partials/dataset_members_results.html",
+            {
+                "profile_user": self.profile_user,
+                "dataset": dataset,
+                "candidates": dataset_members.candidate_page(
+                    self.profile_user, dataset, state["add_search"], state["add_page"]
+                ),
+                "state": state,
+            },
+        )
+
+
+def _members_focus(rows, at, extra) -> str:
+    """The id of the control the drawer should focus after a change took
+    away the one that was focused, or "" to keep the same id: after a
+    removal the Remove now at the removed member's place (``at``), or the
+    add search when no member is left on the page; after "Keep it" the kept
+    member's Remove (``kept``)."""
+    kept = extra.pop("kept", "")
+    if at is not None:
+        if not rows:
+            return "dataset-members-add-search"
+        try:
+            index = int(at)
+        except ValueError:
+            index = 0
+        row = rows[min(max(index, 0), len(rows) - 1)]
+        return f"dataset-members-remove-{row.table.pk}"
+    for row in rows:
+        if kept and row.table.name == kept:
+            return f"dataset-members-remove-{row.table.pk}"
+    return ""
+
+
+def _done(text) -> dict:
+    return {"level": "success", "text": text}
+
+
+def _note(text) -> dict:
+    return {"level": "info", "text": text}
+
+
+def _problem(text) -> dict:
+    return {"level": "danger", "text": text}
+
+
+def _members_added_message(table, seeded) -> str:
+    """What an add says: the Table, and the Topics it brought along, which
+    may be what the Dataset still needed to be published."""
+    message = f"Added {_title(table)}."
+    if len(seeded) == 1:
+        message += f" Its topic {seeded[0]} was added to the dataset."
+    elif seeded:
+        message += f" Its topics {', '.join(seeded)} were added to the dataset."
+    return message
+
+
+def _members_removed_message(table, dataset) -> str:
+    """What a removal says, and that a published Dataset left without
+    members stays published: the gate judges publishing, not what follows."""
+    message = f"Removed {_title(table)}."
+    if dataset.is_published and not dataset.tables.exists():
+        message += (
+            " The dataset holds no tables now and stays published; unpublish it"
+            " from the list if that is not what you want."
+        )
+    return message
+
+
+def _members_unchanged_message(op, name, outcome) -> str:
+    reasons = {group.reason for group in outcome.left_out}
+    if dataset_actions.NO_SUCH_TABLE in reasons:
+        return f"Nothing was changed: there is no table \u201c{name}\u201d."
+    if op == "add":
+        return f"Nothing was changed: \u201c{name}\u201d is already in this dataset."
+    return f"Nothing was changed: \u201c{name}\u201d is not in this dataset."
 
 
 def _dataset_what(datasets) -> str:

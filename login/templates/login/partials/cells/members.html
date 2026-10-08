@@ -7,7 +7,8 @@ a popover. The popover says how the members split, naming only the parts
 there are ("2 drafts · 1 embargoed", neutral: a published Dataset may hold
 both), then the first members by title (``MEMBERS_SHOWN``), each linked to its
 table page with the tables tab's Draft or Embargoed badge, then how many it
-does not name. Reads ``row.key``, ``row.title``, ``row.member_count``,
+does not name, as a link that opens the members drawer, where every member
+is. Reads ``row.key``, ``row.title``, ``row.member_count``,
 ``row.count_label``,
 ``row.mix``, ``row.members``, ``row.more_members``, ``row.more_label`` and
 ``row.is_draft``: an
@@ -42,7 +43,19 @@ empty draft reads "– needed to publish".
           </li>
         {% endfor %}
       </ul>
-      {% if row.more_members %}<p class="dash-pop__more">{{ row.more_label }}</p>{% endif %}
+      {% if row.more_members %}
+        {% url 'login:dataset-members' profile_user.pk row.name as members_url %}
+        <p class="dash-pop__more">
+          <button type="button"
+                  id="mb-{{ row.key }}-more"
+                  class="btn btn-link btn-sm p-0"
+                  hx-get="{{ members_url }}"
+                  hx-target="#dataset-members-body"
+                  hx-swap="innerHTML"
+                  hx-sync="this:replace"
+                  data-members-origin="mb-{{ row.key }}">{{ row.more_label }}</button>
+        </p>
+      {% endif %}
     </div>
   {% elif row.is_draft %}
     {% include "login/partials/cells/needed.html" with what="tables" %}
