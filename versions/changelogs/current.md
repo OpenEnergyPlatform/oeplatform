@@ -31,7 +31,7 @@ SPDX-License-Identifier: CC0-1.0
   `h2.header` and `profile-category__heading` became plain `h2`/`h3`. The
   profile columns' five-class `!important` padding rules are replaced by plain
   rules with the same column widths. The homepage renders pixel for pixel as
-  before [(#PR)](https://github.com/OpenEnergyPlatform/oeplatform/pull/PR)
+  before [(#2684)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2684)
 - A component catalogue at `/styleguide/` (public, not indexed, linked from no
   menu) shows every house component rendered from its entry template and as
   copyable source from the same file, under a table of every design token with
