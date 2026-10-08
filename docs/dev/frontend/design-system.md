@@ -37,7 +37,7 @@ The page is public, not indexed by search engines, and linked from no menu.
   entry.
 - **Tokens, never literals.** A component reads `var(--bs-primary)`, never
   `#1F567D`. That is what lets an instance restyle the platform without forking
-  it.
+  it; see [theming an instance](../../installation/guides/instance-theming.md).
 - **Colour means something.** Green, cyan and yellow are status only, red is
   danger; none of them is used to make an action stand out.
 - **Accessible by default.** Real buttons and links, a visible focus ring,

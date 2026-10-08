@@ -1,6 +1,7 @@
 {% extends "base/base.html" %}
 {% load django_bootstrap5 %}
 {% load static %}
+{% load instance_theming %}
 {% load compress %}
 {% block title %}– Open and FAIR Energy Data Platform{% endblock %}
 {% block after-head %}
@@ -14,11 +15,8 @@
       <div class="index-footer-top">
         <div class="index-footer-brand">
           <div class="index-footer-logo">
-            <img src="{% static 'OpenEnergyFamily_Logo_OpenEnergyPlatform_untitled_white.svg' %}"
-                 width="32"
-                 height="32"
-                 alt="" />
-            <p class="index-footer-brand-name">Open Energy Platform</p>
+            {% include "brand/logo.html" with size=32 alt="" %}
+            <p class="index-footer-brand-name">{% brand_name %}</p>
           </div>
           <p class="index-footer-tagline">
             Collaborative platform for open energy data, scenarios, and
@@ -55,7 +53,7 @@
           </div>
         </div>
       </div>
-      <p class="index-footer-copyright">© {% now "Y" %} Open Energy Platform. All rights reserved.</p>
+      <p class="index-footer-copyright">© {% now "Y" %} {% brand_name %}. All rights reserved.</p>
     </div>
   </footer>
 {% endblock footer %}

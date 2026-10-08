@@ -43,6 +43,7 @@ from pathlib import Path
 # be in the settings the generator reads, and nothing that touches Django can
 # be imported at this point.
 from api.api_tags import TAGS as API_REFERENCE_TAGS
+from oeplatform import securitysettings as _local_settings
 from oeplatform.oedb_for_tests import (
     TEST_NAME_VARIABLE,
     oedb_name_for_tests,
@@ -346,10 +347,24 @@ DOCUMENTATION_LINKS = {
 
 SITE_ID = 1
 
+# The instance theming contract (#2637, docs/installation/guides/instance-theming.md).
+# Both are read from securitysettings.py and optional there, so an instance
+# that sets neither looks exactly like the platform.
+#
+# INSTANCE_STYLESHEETS: static paths, linked after every platform stylesheet
+# on every page (base/templates/base/_instance_stylesheets.html), so an
+# instance's token values win.
+INSTANCE_STYLESHEETS = list(getattr(_local_settings, "INSTANCE_STYLESHEETS", []))
+# INSTANCE_TEMPLATE_DIRS: searched before every app's templates, so a template
+# there replaces the platform's of the same name (brand/, the legal pages).
+INSTANCE_TEMPLATE_DIRS = [
+    str(path) for path in getattr(_local_settings, "INSTANCE_TEMPLATE_DIRS", [])
+]
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": list(INSTANCE_TEMPLATE_DIRS),
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [

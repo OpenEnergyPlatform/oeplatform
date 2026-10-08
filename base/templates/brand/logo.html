@@ -1,0 +1,10 @@
+{% load static %}
+{% comment %}
+  The platform's logo (#2637). An instance replaces this file from a directory
+  in INSTANCE_TEMPLATE_DIRS. Called with size, the square in px the slot is
+  drawn for, and alt, empty where the name stands beside the logo.
+{% endcomment %}
+<img width="{{ size }}"
+     height="{{ size }}"
+     alt="{{ alt }}"
+     src="{% static 'OpenEnergyFamily_Logo_OpenEnergyPlatform_untitled_white.svg' %}" />

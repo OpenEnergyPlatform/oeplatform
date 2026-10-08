@@ -10,11 +10,14 @@ whose ``url()`` points at nothing, and ``compress`` must run after it, under
 the same ``DEBUG`` as the server.
 """  # noqa: 501
 
+import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
 import textwrap
+from pathlib import Path
 
 from django.conf import settings
 from django.templatetags.static import static
@@ -25,6 +28,13 @@ from django.test import SimpleTestCase
 HASHED = r"\.[0-9a-f]{12}\.\w+"
 
 DEPLOY_SETTINGS = """
+import oeplatform.securitysettings as _local
+
+# An instance's two theming settings (#2637), as its securitysettings.py carries
+# them, so oeplatform.settings reads them on import below.
+_local.INSTANCE_STYLESHEETS = [{stylesheet!r}]
+_local.INSTANCE_TEMPLATE_DIRS = [{templates!r}]
+
 import oeplatform.settings as _configured
 
 globals().update(
@@ -34,11 +44,16 @@ DEBUG = False
 STATIC_ROOT = COMPRESS_ROOT = {static_root!r}
 # STATICFILES_DIRS is host configuration and holds Vite's build output, which
 # Vite has hashed already and which CI never builds. What is checked here is
-# what this repository ships in the apps' static directories.
-STATICFILES_DIRS = []
+# what this repository ships in the apps' static directories, and an instance's
+# stylesheet beside it.
+STATICFILES_DIRS = [{instance_static!r}]
 """
 
-RENDER_A_PAGE = """
+SHELLS = ["base", "base-full", "base-profile", "base-sidebar", "base-wide-react"]
+
+RENDER_THE_SHELLS = """
+import json
+
 import django
 
 django.setup()
@@ -49,14 +64,21 @@ from django.test import RequestFactory
 
 request = RequestFactory().get("/")
 request.user = AnonymousUser()
-print(render_to_string("base/base.html", request=request))
+print(json.dumps({{
+    shell: render_to_string(f"base/{{shell}}.html", request=request)
+    for shell in {shells!r}
+}}))
 """
+
+INSTANCE_STYLESHEET = "instance/theme.css"
+INSTANCE_NAME = "Example Grid Platform"
 
 
 class DeploySequenceTest(SimpleTestCase):
     """``collectstatic``, then ``compress``, then a page, as a deploy runs
     them: each in its own process, with the configured storage and ``DEBUG``
-    off.
+    off, for an instance that sets both theming settings, as the derived image
+    in docs/installation/guides/instance-theming.md does.
 
     Processes rather than ``call_command``, because the suite's own storage
     deliberately differs (see ``TestRunStorageTest``), and because
@@ -70,13 +92,31 @@ class DeploySequenceTest(SimpleTestCase):
         super().setUpClass()
         cls.directory = tempfile.TemporaryDirectory()
         cls.addClassCleanup(cls.directory.cleanup)
-        static_root = os.path.join(cls.directory.name, "static")
-        with open(os.path.join(cls.directory.name, "deploy_settings.py"), "w") as f:
-            f.write(DEPLOY_SETTINGS.format(static_root=static_root))
+        root = Path(cls.directory.name)
+        instance_static = root / "instance_static"
+        (instance_static / "instance").mkdir(parents=True)
+        (instance_static / INSTANCE_STYLESHEET).write_text(
+            ":root { --bs-primary: #7a1f5d; }\n"
+        )
+        templates = root / "instance_templates"
+        (templates / "brand").mkdir(parents=True)
+        (templates / "brand" / "name.html").write_text(f"{INSTANCE_NAME}\n")
+        (root / "deploy_settings.py").write_text(
+            DEPLOY_SETTINGS.format(
+                stylesheet=INSTANCE_STYLESHEET,
+                templates=str(templates),
+                static_root=str(root / "static"),
+                instance_static=str(instance_static),
+            )
+        )
 
         cls.collected = cls._run("manage.py", "collectstatic", "--noinput")
         cls.compressed = cls._run("manage.py", "compress", "--force")
-        cls.page = cls._run("-c", textwrap.dedent(RENDER_A_PAGE))
+        rendered = cls._run(
+            "-c", textwrap.dedent(RENDER_THE_SHELLS.format(shells=SHELLS))
+        )
+        cls.rendered = rendered
+        cls.shells = json.loads(rendered.stdout) if rendered.returncode == 0 else {}
 
     @classmethod
     def _run(cls, *arguments):
@@ -106,16 +146,37 @@ class DeploySequenceTest(SimpleTestCase):
         self.assertSucceeded(self.compressed)
 
     def test_a_page_links_its_static_files_by_content(self):
-        self.assertSucceeded(self.page)
-        self.assertRegex(self.page.stdout, rf'href="/static/favicon{HASHED}"')
+        self.assertSucceeded(self.rendered)
+        self.assertRegex(self.shells["base"], rf'href="/static/favicon{HASHED}"')
 
-    def test_a_page_finds_the_bundles_compress_wrote(self):
+    def test_every_shell_finds_the_bundle_compress_wrote(self):
         # The offline manifest is keyed on the block's rendered content, which
         # includes every {% static %} inside it. A page that renders at all
         # has found its keys, which is why compress must run under the
-        # server's DEBUG: under DEBUG, {% static %} returns plain names.
-        self.assertSucceeded(self.page)
-        self.assertRegex(self.page.stdout, rf'href="/static/CACHE/css/output{HASHED}"')
+        # server's DEBUG: under DEBUG, {% static %} returns plain names. The
+        # five shells share one head (base/_head.html), so one bundle.
+        self.assertSucceeded(self.rendered)
+        bundles = {
+            shell: re.findall(rf'href="(/static/CACHE/css/output{HASHED})"', html)
+            for shell, html in self.shells.items()
+        }
+        self.assertEqual(sorted(bundles), sorted(SHELLS))
+        self.assertEqual(len({tuple(found) for found in bundles.values()}), 1)
+        self.assertEqual(len(bundles["base"]), 1)
+
+    def test_every_shell_links_the_instance_stylesheet_by_content_last(self):
+        self.assertSucceeded(self.rendered)
+        for shell, html in self.shells.items():
+            with self.subTest(shell=shell):
+                links = re.findall(
+                    r'<link rel="stylesheet" href="([^"]*)"',
+                    html[: html.index("</head>")],
+                )
+                self.assertRegex(links[-1], rf"^/static/instance/theme{HASHED}$")
+
+    def test_a_template_in_the_instance_directory_wins(self):
+        self.assertSucceeded(self.rendered)
+        self.assertIn(f'alt="{INSTANCE_NAME} home"', self.shells["base"])
 
 
 class TestRunStorageTest(SimpleTestCase):
