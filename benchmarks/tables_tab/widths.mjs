@@ -172,7 +172,7 @@ function barWidth(prefix) {
   search.style.width = getComputedStyle(search).minWidth;
   const items = [
     ...row.querySelectorAll(
-      ":scope > input, :scope > .dash-fold > select, :scope > .dash-fold > button, :scope > .dash-fold > .dropdown",
+      ":scope > input, :scope > .dash-fold > select, :scope > .dash-fold > button, :scope > .dash-fold > .dropdown, :scope > .dash-new",
     ),
   ];
   const gap = parseFloat(getComputedStyle(row).columnGap);

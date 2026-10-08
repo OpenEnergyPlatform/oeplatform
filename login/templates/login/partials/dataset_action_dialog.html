@@ -31,7 +31,8 @@ modal cannot open a drawer or another modal while it is showing. The gate's
 "Edit…" (beside the missing Topic, for one Dataset: ``gate_dataset``) opens
 the Create and Edit form in this same dialog once it has closed, and hands
 focus back to the row's ⋯ (``data-action-origin``); "Manage tables…" arrives
-with the drawer it opens.
+with the drawer it opens. Such a link sits inside the form, so it names its own
+``hx-disabled-elt``: the form's names a confirm button a gate dialog lacks.
 {% endcomment %}
 {% with check=preflight n=preflight.eligible|length %}
   <div class="modal-header">
@@ -91,6 +92,7 @@ with the drawer it opens.
                           hx-target="#dataset-action-body"
                           hx-swap="innerHTML"
                           hx-sync="this:replace"
+                          hx-disabled-elt="this"
                           data-action-origin="menu-{{ gate_dataset.pk }}">Edit…</button>
                 {% endif %}
               </li>
