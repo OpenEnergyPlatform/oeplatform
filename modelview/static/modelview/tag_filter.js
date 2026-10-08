@@ -8,8 +8,8 @@
 // the "Download CSV" link carried the checkbox DOM ids where the endpoint
 // filters on raw primary keys (so a filtered download silently returned a
 // header-only file), and the checkbox restored from the URL rendered with no
-// tick, because the input is `display: none` and the tick comes from a class
-// that `oep-tags.js` only toggles on click.
+// tick. (The tick is CSS since #2645 -- the `tag` component's toggle draws it
+// from `:checked` -- so that one cannot recur.)
 //
 // Everything here is either pure or takes its DOM root as an argument, so it
 // can be tested without a page. The DataTables wiring stays in the template,
@@ -98,34 +98,17 @@ export function rowMatchesTags(rowTags, activeTags) {
  * @return {string[]} the checked tags' primary keys, in document order.
  */
 export function checkedTagValues(root) {
-  return Array.from(root.querySelectorAll(".tag-checkbox:checked")).map(
+  return Array.from(root.querySelectorAll(".tag__check:checked")).map(
     (box) => box.value
   );
-}
-
-/**
- * Give every checked tag checkbox its visible tick.
- *
- * The input itself is `display: none`; the tick is drawn from
- * `tag-checkbox-checked` on the surrounding label, and `oep-tags.js` only ever
- * toggles that on click. Without this, a filter restored from the URL filters
- * the table while the sidebar renders as though nothing were selected.
- *
- * @param {ParentNode} root the element to search, usually `document`.
- * @return {void}
- */
-export function showCheckedTags(root) {
-  root.querySelectorAll(".tag-checkbox").forEach((box) => {
-    box.parentElement.classList.toggle("tag-checkbox-checked", box.checked);
-  });
 }
 
 /**
  * Tick or clear one tag's checkbox in the sidebar.
  *
  * The sidebar's checkboxes are the single source of truth for the filter --
- * `checkedTagValues` seeds the selection from them and `showCheckedTags`
- * paints their ticks. So anything else that wants to change the filter (a tag
+ * `checkedTagValues` seeds the selection from them and their `:checked`
+ * state draws their ticks. So anything else that wants to change the filter (a tag
  * pill clicked in the table, say) drives the checkbox rather than keeping a
  * second copy of the state that could disagree with it.
  *
@@ -136,7 +119,7 @@ export function showCheckedTags(root) {
  *   not offer that tag.
  */
 export function checkTag(root, pk, checked) {
-  const box = Array.from(root.querySelectorAll(".tag-checkbox")).find(
+  const box = Array.from(root.querySelectorAll(".tag__check")).find(
     (candidate) => candidate.value === pk
   );
   if (!box) {
@@ -153,7 +136,7 @@ export function checkTag(root, pk, checked) {
  * @return {string[]} the now-empty selection, for the caller to adopt.
  */
 export function clearTags(root) {
-  root.querySelectorAll(".tag-checkbox").forEach((box) => {
+  root.querySelectorAll(".tag__check").forEach((box) => {
     box.checked = false;
   });
   return [];

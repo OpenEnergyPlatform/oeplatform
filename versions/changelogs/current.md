@@ -32,6 +32,22 @@ SPDX-License-Identifier: CC0-1.0
   profile columns' five-class `!important` padding rules are replaced by plain
   rules with the same column widths. The homepage renders pixel for pixel as
   before [(#2684)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2684)
+- A tag looks the same everywhere: the house component `tag`
+  (`base/templates/components/tag.html`), a pill in the tag's own colour with
+  its text colour from `readable_text_color`, as a static label, a link that
+  filters by the tag, a removable pill (the factsheet editor's current tags, now
+  with a close button) or a toggle in a pick list. It replaces the tag
+  renderings on the factsheet detail page (whose tags now link to the list
+  filtered by them, instead of an empty `href`), the factsheet list (its filter
+  and its tags column), the factsheet editor, the table list (no longer a dot in
+  a grey badge), the table page and the tag overview. Statuses are the separate
+  `badge` (`badge--success`, `--info`, `--warning`, `--danger`, `--neutral`): a
+  light status colour and a small radius, never a pill. "Early Access" is an
+  info badge instead of a red pill that read like an error, and the table list's
+  "Reviewed" is a success badge. `.early-access`, `.success-badge`, the unused
+  `tagged_field.html` and `oep-tags.js` (which only ticked the old tag
+  checkboxes; the tick is CSS now) are gone. Both components have a catalogue
+  entry [(#2683)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2683)
 - A component catalogue at `/styleguide/` (public, not indexed, linked from no
   menu) shows every house component rendered from its entry template and as
   copyable source from the same file, under a table of every design token with

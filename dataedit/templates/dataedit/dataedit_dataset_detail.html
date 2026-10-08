@@ -85,9 +85,9 @@
             <div class="d-flex justify-content-between align-items-start gap-2">
               <span class="text-truncate">{{ table.human_readable_name|default:table.name }}</span>
               {% if table.is_publish %}
-                <span class="badge text-bg-success flex-shrink-0">Published</span>
+                <span class="badge badge--success flex-shrink-0">Published</span>
               {% else %}
-                <span class="badge text-bg-warning flex-shrink-0">Draft</span>
+                <span class="badge badge--warning flex-shrink-0">Draft</span>
               {% endif %}
             </div>
             {% if table.topics.all %}
