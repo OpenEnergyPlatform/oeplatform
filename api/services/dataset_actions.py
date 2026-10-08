@@ -116,6 +116,7 @@ from api.services.dataset_creation import (
     assign_table,
     assignable_tables,
     create_dataset,
+    dataset_name_taken,
     dataset_title,
     name_taken_message,
     set_dataset_topics,
@@ -165,6 +166,9 @@ ACTION_NAMES = {
     MEMBERS_ADD: "Adding tables to a dataset",
     MEMBERS_REMOVE: "Removing tables from a dataset",
 }
+
+# What a required field left empty is told.
+REQUIRED = "This field is required."
 
 # Left-out reasons. A Dataset the user may not read and a name that never
 # existed are told apart by nothing, as every reader tells them apart by
@@ -477,13 +481,13 @@ def _create_preflight(user, names, params) -> Preflight:
     ``consequences["topics"]``. Two queries."""
     name = _one_name(names)
     missing = {
-        key: "This field is required."
+        key: REQUIRED
         for key in ("title", "description")
         if not (params.get(key) or "").strip()
     }
     if missing:
         raise InvalidParameters(missing)
-    if Dataset.objects.filter(name=name).exists():
+    if dataset_name_taken(name):
         raise InvalidParameters({"name": name_taken_message(name)})
     topics = validated_topics(params.get("topics") or [])
     return Preflight(
@@ -514,8 +518,17 @@ def _edit_preflight(user, names, params) -> Preflight:
     present in ``params`` count, and an empty ``at_id`` keeps the stored one,
     so a parameter left out is a field left alone. ``consequences`` carry
     ``changes`` (in ``EDITABLE`` order; empty for a no-op) and the validated
-    ``topics`` (None when not given). Two queries, three with Topics."""
+    ``topics`` (None when not given). A title or description given empty is
+    an ``InvalidParameters``, as on create. Two queries, three with
+    Topics."""
     dataset = own_dataset(user, _one_name(names))
+    blank = {
+        key: REQUIRED
+        for key in ("title", "description")
+        if key in params and not (params[key] or "").strip()
+    }
+    if blank:
+        raise InvalidParameters(blank)
     wanted = {key: params[key] for key in ("title", "description") if key in params}
     if params.get("at_id"):
         wanted["at_id"] = params["at_id"]

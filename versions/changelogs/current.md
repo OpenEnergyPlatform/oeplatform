@@ -119,6 +119,17 @@ SPDX-License-Identifier: CC0-1.0
   deleting the last Dataset shows the empty state without a reload. The
   dashboard never republishes; the API still does
   [(#2623)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2623)
+- Profile dashboard, datasets tab: Create and Edit share one dialog with title,
+  description and topics. "New dataset" ends the filter row and "Create a
+  dataset" fills the empty state; Edit… is the first entry of each row's ⋯ menu
+  and sits in the publish dialog beside a missing topic. While the title is
+  typed, the dialog shows the web address it gives, or says that the name is
+  taken or that the title needs a letter or number, and Create stays disabled
+  until the name is free. A new Dataset is a private draft; a refused save keeps
+  what was typed and names an unknown topic; a save that changes nothing changes
+  nothing. The first Create in an empty account brings the filter bar in without
+  a reload
+  [(#2624)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2624)
 - The term search in the metadata editor and the oeo_ext unit picker no longer
   always asks openenergyplatform.org: an instance with its own lookup service
   searches itself, one without uses the public endpoint, and `OEO_SEARCH_URL`

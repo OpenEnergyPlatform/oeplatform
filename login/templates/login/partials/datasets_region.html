@@ -3,7 +3,9 @@
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
 
-The datasets tab's results region (list_region.html): its empty state and its
+The datasets tab's results region (list_region.html): its empty state, which
+offers "Create a dataset" (the dialog "New dataset" in the filter row opens),
+and its
 columns, Dataset · Status · Tables · Topics · Modified · Created, between the
 selection slot (empty until the tab offers bulk actions) and the row's ⋯ menu
 (cells/dataset_menu.html). Each cell type is its own partial under
@@ -17,6 +19,15 @@ selection slot (empty until the tab offers bulk actions) and the row's ⋯ menu
       A dataset is a collection of tables, yours or other people's, under one
       title. It stays a private draft until you publish it.
     </p>
+    {% url 'login:dataset-action' profile_user.pk "create" as create_url %}
+    <button type="button"
+            id="datasets-create"
+            class="btn btn-primary"
+            hx-get="{{ create_url }}"
+            hx-target="#dataset-action-body"
+            hx-swap="innerHTML"
+            hx-sync="this:replace"
+            data-action-origin="datasets-create">Create a dataset</button>
   </div>
 {% endblock empty %}
 {% block head_cells %}

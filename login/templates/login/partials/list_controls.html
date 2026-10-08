@@ -1,0 +1,150 @@
+{% comment %}
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+A list tab's controls outside its results region: the filter bar and, for a
+tab with bulk actions, the bulk slot (login.list_views.ListTabView). The page
+renders them when the account has anything to list (list_tab.html); the
+region brings them in out of band when its first item arrives without a
+reload (list_region.html, ``brings_controls``).
+
+The filters marked ``more`` sit behind "More filters (n)"; the chips and
+Reset are inside the region. Where the list is too narrow for the bar on one
+line, everything but Search folds behind "Filters (n)": the fold panel is
+``display: contents`` on a wider list, so the controls sit in the row as if
+it were not there. A tab that creates (``create_action``) ends the row with
+"New <item>", which opens the action dialog on that action's form.
+{% endcomment %}
+{% with controls=page.controls %}
+  <div id="{{ frame.items }}-filters"
+       class="dash-filters"
+       role="search"
+       aria-label="Filter your {{ page.listing.plural }}">
+    <div class="dash-filters__row">
+      <label class="visually-hidden"
+             for="{{ frame.items }}-search">Search title or technical name</label>
+      <input type="search"
+             id="{{ frame.items }}-search"
+             name="search"
+             class="form-control form-control-sm dash-search"
+             placeholder="Search title or name"
+             autocomplete="off"
+             value="{{ page.state.raw.search|default:'' }}"
+             hx-get="{{ request.path }}"
+             hx-trigger="input changed delay:300ms, search" />
+      <button type="button"
+              id="{{ frame.items }}-fold"
+              class="btn btn-outline-secondary btn-sm dash-fold-toggle"
+              aria-expanded="false"
+              aria-controls="{{ frame.items }}-fold-panel">
+        Filters<span id="{{ frame.items }}-fold-count">{% if page.folded_count %} ({{ page.folded_count }}){% endif %}</span>
+      </button>
+      <div id="{{ frame.items }}-fold-panel" class="dash-fold">
+        {% for control in controls %}
+          {% if not control.more %}
+            {% include "login/partials/list_filter_control.html" with path=request.path noun=page.listing.plural %}
+          {% endif %}
+        {% endfor %}
+        <button type="button"
+                id="{{ frame.items }}-more"
+                class="btn btn-outline-secondary btn-sm"
+                aria-expanded="false"
+                aria-controls="{{ frame.items }}-more-panel">
+          More filters<span id="{{ frame.items }}-more-count">{% if page.more_count %} ({{ page.more_count }}){% endif %}</span>
+        </button>
+        <div id="{{ frame.items }}-more-panel" class="dash-more" hidden>
+          {% for control in controls %}
+            {% if control.more %}
+              {% include "login/partials/list_filter_control.html" with path=request.path noun=page.listing.plural %}
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+      {% if create_action %}
+        {% url frame.action_url user_id=profile_user.pk action=create_action as create_url %}
+        <button type="button"
+                id="{{ frame.items }}-new"
+                class="btn btn-primary btn-sm dash-new"
+                hx-get="{{ create_url }}"
+                hx-target="#{{ frame.dialog }}-body"
+                hx-swap="innerHTML"
+                hx-sync="this:replace"
+                data-action-origin="{{ frame.items }}-new">New {{ page.listing.singular }}</button>
+      {% endif %}
+    </div>
+  </div>
+{% endwith %}
+{% comment %}
+The bulk bar, sticky at the top of the list and outside the region, so
+a swap neither moves it nor takes focus out of it. Its slot is reserved
+while nothing is selected: a muted line, hidden from screen readers and
+not focusable, turns into the bar on the first tick, so the list does
+not jump under the pointer. The tab's module holds the selection and
+sends it, comma-joined, as the ``<items>`` parameter of an action's
+preflight, POSTed (ActionCheckView), since a selection does not fit in
+an address. Every action is enabled while anything is selected: the
+preflight says what it would leave out. Delete is red and last. Where
+the rows stack, the actions fold into "Actions ▾". Its requests are
+synced only with themselves, never with the list's. A tab with no bulk
+actions has no bar and offers no selection.
+{% endcomment %}
+{% if bulk_actions %}
+  <div id="{{ frame.items }}-bulk"
+       class="dash-bulk"
+       hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    <p id="{{ frame.items }}-bulk-idle"
+       class="dash-bulk__idle"
+       aria-hidden="true">Tick {{ page.listing.plural }} to act on several at once.</p>
+    <p id="{{ frame.items }}-bulk-note"
+       class="dash-bulk__note"
+       role="status"></p>
+    <div id="{{ frame.items }}-bulk-bar"
+         class="dash-bulk__bar"
+         role="group"
+         aria-label="Selected {{ page.listing.plural }}"
+         hidden>
+      <span id="{{ frame.items }}-bulk-count" class="dash-bulk__count"></span>
+      <button type="button"
+              id="{{ frame.items }}-bulk-clear"
+              class="btn btn-link btn-sm dash-bulk__clear">Clear</button>
+      <div class="dash-bulk__actions">
+        {% for verb, label in bulk_actions %}
+          {% url frame.check_url user_id=profile_user.pk action=verb as check_url %}
+          <button type="button"
+                  id="bulk-{{ verb }}"
+                  class="btn {% if verb == "delete" %}btn-outline-danger{% else %}btn-outline-primary{% endif %} btn-sm"
+                  hx-post="{{ check_url }}"
+                  hx-target="#{{ frame.dialog }}-body"
+                  hx-swap="innerHTML"
+                  hx-sync="this:replace"
+                  data-bulk-action
+                  data-action-origin="bulk-{{ verb }}">{{ label }}</button>
+        {% endfor %}
+      </div>
+      <div class="dropdown dash-bulk__menu">
+        <button type="button"
+                id="bulk-menu"
+                class="btn btn-outline-primary btn-sm dropdown-toggle"
+                data-bs-toggle="dropdown"
+                aria-expanded="false">Actions</button>
+        <ul class="dropdown-menu" aria-labelledby="bulk-menu">
+          {% for verb, label in bulk_actions %}
+            {% url frame.check_url user_id=profile_user.pk action=verb as check_url %}
+            <li>
+              <button type="button"
+                      id="bulk-menu-{{ verb }}"
+                      class="dropdown-item{% if verb == "delete" %} text-danger{% endif %}"
+                      hx-post="{{ check_url }}"
+                      hx-target="#{{ frame.dialog }}-body"
+                      hx-swap="innerHTML"
+                      hx-sync="this:replace"
+                      data-bulk-action
+                      data-action-origin="bulk-menu">{{ label }}</button>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+{% endif %}

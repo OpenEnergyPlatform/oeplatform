@@ -274,3 +274,81 @@ describe("a multi-valued filter's dropdown", () => {
     expect($("f-topics-button").textContent).toBe("Topic (1)");
   });
 });
+
+describe("Create and Edit (#2624)", () => {
+  let unbind;
+  let dialog;
+
+  const bind = () => {
+    dialog = fakeOverlay();
+    unbind = bindDatasetsTab(document, {
+      announceDelay: 0,
+      dialog,
+      drawer: fakeOverlay(),
+      schedule: () => {},
+    });
+  };
+
+  const shown = (element) =>
+    element.dispatchEvent(new CustomEvent("shown.bs.modal", { bubbles: true }));
+
+  afterEach(() => {
+    unbind();
+  });
+
+  it("puts focus in the form's title once the dialog is shown", () => {
+    renderPage();
+    bind();
+    $("dataset-action-body").innerHTML = `
+      <form id="dataset-form">
+        <input id="dataset-form-title" name="title" autofocus />
+        <textarea id="dataset-form-description" name="description"></textarea>
+      </form>`;
+    shown($("dataset-action"));
+    expect(document.activeElement).toBe($("dataset-form-title"));
+  });
+
+  it("leaves focus alone in a dialog that asks for none", () => {
+    renderPage();
+    bind();
+    $("dataset-action-body").innerHTML = `<button id="dataset-action-confirm">Delete</button>`;
+    $("datasets-search").focus();
+    shown($("dataset-action"));
+    expect(document.activeElement).toBe($("datasets-search"));
+  });
+
+  it("filters with a bar brought in after the page had none", () => {
+    // the empty account's page: no filter bar, then the first Create
+    renderPage();
+    $("datasets-filters").remove();
+    window.history.replaceState(null, "", "/user/profile/1/datasets");
+    bind();
+    $("datasets-live").insertAdjacentHTML(
+      "beforebegin",
+      `<div id="datasets-filters" role="search">
+         <input type="search" id="datasets-search" name="search" />
+       </div>`
+    );
+    $("datasets-search").value = "wind";
+    expect(configRequest($("datasets-search"))).toEqual({ search: "wind" });
+  });
+
+  it("closes the dialog and focuses the new row's menu after a Create", () => {
+    renderPage();
+    bind();
+    fire("datasets-changed", {
+      message: "Created “Wind atlas” as a private draft, visible only to you.",
+      created: "wind_atlas",
+      focus: "menu-new",
+    });
+    expect(dialog.closed).toBe(1);
+    expect($("datasets-toasts-polite").textContent).toContain("Wind atlas");
+    swapRegion(
+      region().replace(
+        '<td class="c-menu"></td>',
+        '<td class="c-menu"><button type="button" id="menu-new">⋯</button></td>'
+      )
+    );
+    expect(document.activeElement).toBe($("menu-new"));
+  });
+});

@@ -22,6 +22,7 @@ LOGIN = Path(__file__).resolve().parent.parent
 BASES = (
     LOGIN / "templates/login/list_tab.html",
     LOGIN / "templates/login/partials/list_region.html",
+    LOGIN / "templates/login/partials/list_controls.html",
     LOGIN / "templates/login/partials/cells/menu_action.html",
     LOGIN / "templates/login/partials/cells/status.html",
     LOGIN / "templates/login/partials/cells/chips.html",
