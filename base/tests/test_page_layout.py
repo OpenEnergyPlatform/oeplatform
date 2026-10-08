@@ -41,7 +41,7 @@ class SideColumnTestCase(SidebarFixture):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
-        cls.factsheet = {
+        cls.factsheets = {
             sheettype: seed_corpus(sheettype=sheettype, factsheets=1, corrupted=0)
             .factsheets[0]
             .pk
@@ -91,7 +91,7 @@ class PagesWithoutSideContentTest(SideColumnTestCase):
         self.assertEqual(sides, [])
 
     def test_factsheet_edit_pages_render_no_side_column(self):
-        for sheettype, pk in self.factsheet.items():
+        for sheettype, pk in self.factsheets.items():
             with self.subTest(sheettype=sheettype):
                 _main, sides = self.columns(
                     "modelview:edit",
@@ -120,7 +120,7 @@ class PagesWithSideContentTest(SideColumnTestCase):
         return re.search(r'class="(?:[^"]*\s)?%s[\s"]' % css_class, html).start()
 
     def test_factsheet_detail(self):
-        for sheettype, pk in self.factsheet.items():
+        for sheettype, pk in self.factsheets.items():
             with self.subTest(sheettype=sheettype):
                 self.assertSide(
                     "modelview:show-factsheet",
@@ -179,7 +179,8 @@ class SectionHeadingTest(SideColumnTestCase):
     headings lost their classes, and the theme's heading rules style them."""
 
     CLASSED = re.compile(
-        r"<h[1-6]\b[^>]*\bclass=\"[^\"]*\b(header|profile-category__heading)\b"
+        # the class itself, not one that ends in it (card-header, site-header)
+        r"<h[1-6]\b[^>]*\bclass=\"(?:[^\"]*\s)?(header|profile-category__heading)[\s\"]"
     )
 
     def test_profile_section_headings_carry_no_class(self):

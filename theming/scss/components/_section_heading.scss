@@ -18,6 +18,11 @@ h6 {
     color: var(--oep-heading-color);
 }
 
+// The heading scale (spec #2632). Its own map rather than Bootstrap's
+// $h1-font-size..$h6-font-size: those also size the .fs-1..6 utilities used
+// across the platform and the homepage, which must not move. So .h4 and .h6
+// keep Bootstrap's sizes (1.25rem, 1rem) while <h4> and <h6> in a page's
+// content are 1.125rem and 0.875rem.
 $heading-sizes: (
     h1: 2rem,
     h2: 1.5rem,

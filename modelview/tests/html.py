@@ -32,72 +32,23 @@ def element_with_id(html: str, element_id: str) -> str:
     return found.group(0) if found else ""
 
 
-class _Element(HTMLParser):
-    """Collects the markup of the first element carrying one id, children
-    included, by counting how deep the parser is inside it."""
+class _Elements(HTMLParser):
+    """Collects the markup of every element `matches` picks out of its
+    attributes, children included, by counting how deep the parser is inside
+    it. A matching element inside another is part of the outer one's markup,
+    not an element of its own."""
 
     VOID = {"area", "br", "col", "hr", "img", "input", "link", "meta", "source"}
 
-    def __init__(self, element_id):
+    def __init__(self, matches):
         super().__init__(convert_charrefs=False)
-        self.element_id = element_id
-        self.depth = 0
-        self.done = False
-        self.parts = []
-
-    def handle_starttag(self, tag, attrs):
-        if self.done:
-            return
-        if self.depth == 0 and dict(attrs).get("id") != self.element_id:
-            return
-        self.parts.append(self.get_starttag_text())
-        if tag not in self.VOID:
-            self.depth += 1
-        elif self.depth == 0:
-            self.done = True
-
-    def handle_endtag(self, tag):
-        if self.depth and not self.done and tag not in self.VOID:
-            self.parts.append(f"</{tag}>")
-            self.depth -= 1
-            self.done = self.depth == 0
-
-    def handle_data(self, data):
-        if self.depth and not self.done:
-            self.parts.append(data)
-
-    def handle_entityref(self, name):
-        self.handle_data(f"&{name};")
-
-    def handle_charref(self, name):
-        self.handle_data(f"&#{name};")
-
-
-def element_markup(html: str, element_id: str) -> str:
-    """The element carrying `element_id` with everything inside it, or ""
-    when there is none: for asserting on what an element contains, where
-    `element_with_id` gives only its opening tag."""
-    parser = _Element(element_id)
-    parser.feed(html)
-    return "".join(parser.parts)
-
-
-class _Elements(HTMLParser):
-    """Collects the markup of every element carrying one class, children
-    included; an element of that class inside another is part of the outer
-    one's markup, not an element of its own."""
-
-    VOID = _Element.VOID
-
-    def __init__(self, css_class):
-        super().__init__(convert_charrefs=False)
-        self.css_class = css_class
+        self.matches = matches
         self.depth = 0
         self.found = []
 
     def handle_starttag(self, tag, attrs):
         if self.depth == 0:
-            if self.css_class not in (dict(attrs).get("class") or "").split():
+            if not self.matches(dict(attrs)):
                 return
             self.found.append([])
         self.found[-1].append(self.get_starttag_text())
@@ -113,13 +64,31 @@ class _Elements(HTMLParser):
         if self.depth:
             self.found[-1].append(data)
 
+    def handle_entityref(self, name):
+        self.handle_data(f"&{name};")
+
+    def handle_charref(self, name):
+        self.handle_data(f"&#{name};")
+
+
+def _markup(html, matches):
+    parser = _Elements(matches)
+    parser.feed(html)
+    return ["".join(parts) for parts in parser.found]
+
+
+def element_markup(html: str, element_id: str) -> str:
+    """The element carrying `element_id` with everything inside it, or ""
+    when there is none: for asserting on what an element contains, where
+    `element_with_id` gives only its opening tag."""
+    found = _markup(html, lambda attrs: attrs.get("id") == element_id)
+    return found[0] if found else ""
+
 
 def elements_with_class(html: str, css_class: str) -> list[str]:
     """The markup of every element carrying `css_class`, in page order: for
     asserting how many of them a page has and what each one contains."""
-    parser = _Elements(css_class)
-    parser.feed(html)
-    return ["".join(parts) for parts in parser.found]
+    return _markup(html, lambda attrs: css_class in (attrs.get("class") or "").split())
 
 
 def text(markup: str) -> str:
