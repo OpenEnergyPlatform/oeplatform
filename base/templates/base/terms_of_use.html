@@ -1,5 +1,9 @@
 {% extends "base/base.html" %}
 {% load django_bootstrap5 %}
+{% block site-header %}
+  {% url 'base:about' as about_url %}
+  {% include "components/page_header.html" with area="About" icon="icons/area_about.html" crumb_label="Overview" crumb_url=about_url title="Terms of Use" %}
+{% endblock site-header %}
 {% block main-content-body %}
   ~Deutsche Version weiter unten~
   <h3>🇬🇧 Terms of Use</h3>
