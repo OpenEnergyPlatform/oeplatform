@@ -3,12 +3,16 @@
   {% load dataedit.taghandler %}
   {% get_tags as all_tags %}
   {% if not selected %}No tags were added, yet.{% endif %}
-  {% for t in selected %}
-    <a href="{% url 'dataedit:topic-list' %}?query=&tags={{ t.pk }}"
-       class="btn tag"
-       style="background:{{ t.color_hex }};
-              color:{% readable_text_color t.color_hex %}">{{ t.name }}</a>
-  {% endfor %}
+  {% url 'dataedit:topic-list' as topics_url %}
+  <div class="tag-group">
+    {% for t in selected %}
+      {% with pk=t.pk|urlencode %}
+        {% with filtered=topics_url|add:"?query=&tags="|add:pk %}
+          {% include "components/tag.html" with name=t.name color=t.color_hex href=filtered title="Filter by "|add:t.name %}
+        {% endwith %}
+      {% endwith %}
+    {% endfor %}
+  </div>
   {% if is_admin %}
     <button data-bs-toggle="collapse"
             data-bs-target="#tag_handler"
@@ -17,20 +21,18 @@
       <form action="{% url 'dataedit:tags-add' %}" method="post">
         {% csrf_token %}
         <h4>Choose tags to attach:</h4>
-        {% for t in all_tags %}
-          <span>
-            <input type="checkbox"
-                   class="hidden"
-                   name="tag_{{ t.pk }}"
-                   id="select_{{ t.pk }}"
-                   {% if t in selected %}checked{% endif %} />
-            <label class="form-label"
-                   style="background:{{ t.color_hex }};
-                          color:{% readable_text_color t.color_hex %}"
-                   class="btn tag"
-                   for="select_{{ t.pk }}">{{ t.name }}</label>
-          </span>
-        {% endfor %}
+        {# One checkbox per tag, named `tag_<pk>`: the view reads the prefix. #}
+        <div class="tag-group mb-2">
+          {% for t in all_tags %}
+            {% with box_name="tag_"|add:t.pk box_id="select_"|add:t.pk %}
+              {% if t in selected %}
+                {% include "components/tag.html" with name=t.name color=t.color_hex toggle_name=box_name toggle_value="on" toggle_id=box_id checked=True %}
+              {% else %}
+                {% include "components/tag.html" with name=t.name color=t.color_hex toggle_name=box_name toggle_value="on" toggle_id=box_id %}
+              {% endif %}
+            {% endwith %}
+          {% endfor %}
+        </div>
         {% if table %}
           <input type="hidden" name="table" value="{{ table }}" />
         {% endif %}

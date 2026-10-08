@@ -488,13 +488,13 @@ class TestTheListDoesNotRunAwayWithThePage(TagPageTestCase):
             cls.make_tag(name="Tag %02d" % i)
 
     def test_the_list_is_boxed_and_scrollable(self):
-        self.assertIn("tag-list--scroll", self.overview())
+        self.assertIn("tag-group--scroll", self.overview())
 
     def test_the_actions_come_before_the_list(self):
         html = self.overview()
 
         create = html.index(reverse("dataedit:tags-new"))
-        listing = html.index("tag-list--scroll")
+        listing = html.index("tag-group--scroll")
 
         self.assertLess(create, listing)
 

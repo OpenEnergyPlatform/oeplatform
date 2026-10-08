@@ -255,7 +255,7 @@ async function fetchMetadataForCards() {
             `${escapeHTML(meta.reviewBadge)} Reviewed`,
             "",
             "fas fa-award me-1",
-            "badge bg-success bg-opacity-10 text-success border border-success me-2 mb-2",
+            "badge badge--success me-2 mb-2",
             "Peer Review Status"
           );
         if (sizeText)

@@ -76,6 +76,8 @@
         {% endif %}
       </div>
     </div>
+    {# A tag links to this topic's list, filtered by it. #}
+    {% url 'dataedit:tables-in-topic' topic=topic as topic_url %}
     <div class="oep-resource-list d-flex flex-column gap-3">
       {% for table in tables_paginated %}
         <div class="card border-0 shadow-sm resource-card w-100"
@@ -115,17 +117,13 @@
                 {% endif %}
               </div>
             </div>
-            <div class="mb-3">
+            <div class="tag-group mb-3">
               {% for tag in table.tags.all %}
-                <a href="{% url 'dataedit:tables-in-topic' topic=topic %}?query=&tags={{ tag.pk }}"
-                   class="badge bg-light text-dark text-decoration-none border fw-normal me-1 tag-badge"
-                   style="border-color: #dee2e6 !important">
-                  <span class="d-inline-block rounded-circle me-1 align-middle"
-                        style="width: 8px;
-                               height: 8px;
-                               background-color: {{ tag.color_hex }}"></span>
-                  {{ tag.name }}
-                </a>
+                {% with pk=tag.pk|urlencode %}
+                  {% with filtered=topic_url|add:"?query=&tags="|add:pk %}
+                    {% include "components/tag.html" with name=tag.name color=tag.color_hex href=filtered title="Filter by "|add:tag.name %}
+                  {% endwith %}
+                {% endwith %}
               {% endfor %}
             </div>
             <div class="metadata-injection-zone">
