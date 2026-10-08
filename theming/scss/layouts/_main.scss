@@ -9,101 +9,87 @@ main.main {
     padding-bottom: $C--padding-large;
 
     .content {
-        @extend .fs-7;
         @include flex-row;
-        padding: 0 $C--padding-standard;
+        // The space under the navbar (or under the page's header band) and
+        // the page's side gutters. Body text keeps the body size, 1rem.
+        padding: $C--content-padding-top $C--padding-standard 0;
 
         @include media-breakpoint-up(md) {
             justify-content: center;
         }
+    }
+}
 
-        &__container {
-            @include flex-column;
-            position: relative;
-            width: 100%;
+// Tables keep the dense size (--oep-font-size-dense) now that body text is
+// 1rem. Zero specificity, so the table component (#2647) overrides it.
+:where(.content) table {
+    font-size: var(--oep-font-size-dense);
+}
 
-            @include media-breakpoint-up(md) {
-                @include flex-row;
-                max-width: $C--container-width;
-            }
+// The content column, and the opt-in side column beside it (#2638). A page
+// with side content overrides the `side-column` block of its shell with
+// <aside class="content__side">; a page without renders no side column. The
+// main column takes whatever width is left, so nothing here assumes a side
+// column exists. One width, --oep-content-width, caps the container; the
+// header band above it reads the same token.
+.content {
+    &__container {
+        @include flex-column;
+        position: relative;
+        width: 100%;
+        max-width: var(--oep-content-width);
 
-            @include media-breakpoint-up(x3l) {
-                max-width: $C--container-width-x3l;
-            }
+        @include media-breakpoint-up(md) {
+            @include flex-row;
+            column-gap: $C--padding-large;
+        }
+    }
 
-            @include media-breakpoint-up(x4l) {
-                max-width: $C--container-width-x4l;
-            }
+    &__main {
+        width: 100%;
 
-            @include media-breakpoint-up(x5l) {
-                max-width: $C--container-width-x5l;
-            }
+        @include media-breakpoint-up(md) {
+            flex: 1 1 0;
+            min-width: 0;
+        }
+    }
+
+    &__fullwidth {
+        width: 100%;
+    }
+
+    &__side {
+        width: 100%;
+        height: fit-content;
+        font-size: var(--oep-font-size-dense);
+
+        @include media-breakpoint-up(md) {
+            flex: 0 0 $C--db-side-width;
+            // Truncated names inside stay truncated rather than widening it.
+            min-width: 0;
         }
 
-        &__main {
-            width: 100%;
+        .review-status {
+            @extend .p-2;
+            @extend .w-100;
+            @extend .text-center;
+            @extend .fw-semibold;
+            @extend .fs-6;
+            @extend .mb-3;
 
-            @include media-breakpoint-up(md) {
-                padding-right: calc(#{$C--padding-standard} * 2);
-                width: calc(100% - #{$C--db-side-width});
+            &--done {
+                background-color: $green-100;
+                color: $green-600;
             }
 
-            @include media-breakpoint-up(x3l) {
-                max-width: $C--container-width-x3l;
+            &--ongoing {
+                background-color: $blue-100;
+                color: $blue-700;
             }
 
-            @include media-breakpoint-up(x4l) {
-                max-width: $C--container-width-x4l;
-            }
-
-            @include media-breakpoint-up(x5l) {
-                max-width: $C--container-width-x5l;
-            }
-
-            &.content__main--100w {
-                @extend .w-100;
-                @extend .pe-0;
-            }
-
-            h2 {
-                padding-top: $C--padding-large;
-            }
-        }
-
-        &__fullwidth {
-            width: 100%;
-        }
-
-        &__side {
-            width: 100%;
-            height: fit-content;
-
-            @include media-breakpoint-up(md) {
-                width: $C--db-side-width;
-            }
-
-            .review-status {
-                @extend .p-2;
-                @extend .w-100;
-                @extend .text-center;
-                @extend .fw-semibold;
-                @extend .fs-6;
-                @extend .mb-3;
-
-                &--done {
-                    background-color: $green-100;
-                    color: $green-600;
-                }
-
-                &--ongoing {
-                    background-color: $blue-100;
-                    color: $blue-700;
-                }
-
-                &--start {
-                    background-color: $red-100;
-                    color: $red-600;
-                }
+            &--start {
+                background-color: $red-100;
+                color: $red-600;
             }
         }
     }

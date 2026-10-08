@@ -3,6 +3,8 @@ $C--color-green: #21A179;
 
 $C--padding-standard: 1.5rem; // = .p-4
 $C--padding-large: calc(#{$C--padding-standard} * 2);
+// Above a page's content: under the navbar, or under the header band.
+$C--content-padding-top: 1.75rem;
 
 // Layout
 $C--container-width: 82rem; // container width between md and x3l

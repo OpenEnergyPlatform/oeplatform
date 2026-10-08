@@ -82,6 +82,46 @@ def element_markup(html: str, element_id: str) -> str:
     return "".join(parser.parts)
 
 
+class _Elements(HTMLParser):
+    """Collects the markup of every element carrying one class, children
+    included; an element of that class inside another is part of the outer
+    one's markup, not an element of its own."""
+
+    VOID = _Element.VOID
+
+    def __init__(self, css_class):
+        super().__init__(convert_charrefs=False)
+        self.css_class = css_class
+        self.depth = 0
+        self.found = []
+
+    def handle_starttag(self, tag, attrs):
+        if self.depth == 0:
+            if self.css_class not in (dict(attrs).get("class") or "").split():
+                return
+            self.found.append([])
+        self.found[-1].append(self.get_starttag_text())
+        if tag not in self.VOID:
+            self.depth += 1
+
+    def handle_endtag(self, tag):
+        if self.depth and tag not in self.VOID:
+            self.found[-1].append(f"</{tag}>")
+            self.depth -= 1
+
+    def handle_data(self, data):
+        if self.depth:
+            self.found[-1].append(data)
+
+
+def elements_with_class(html: str, css_class: str) -> list[str]:
+    """The markup of every element carrying `css_class`, in page order: for
+    asserting how many of them a page has and what each one contains."""
+    parser = _Elements(css_class)
+    parser.feed(html)
+    return ["".join(parts) for parts in parser.found]
+
+
 def text(markup: str) -> str:
     """What `markup` reads as: its text without tags, whitespace collapsed,
     so an assertion on a sentence does not depend on how djlint wrapped it."""

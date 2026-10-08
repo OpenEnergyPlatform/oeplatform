@@ -18,58 +18,60 @@
     </div>
   </div>
 {% endblock site-header %}
-{% block main-right-sidebar-content %}
-  {% if super_classes|length != 0 %}
-    <h6>Back to the super classes:</h6>
-    <div id="super_classes_accordion">
-      {% for super_class in super_classes|dictsort:"name" %}
-        <div class="card">
-          <div class="card-header">
-            <a class="card-link"
-               data-bs-toggle="collapse"
-               href="#super_classes_accordion{{ forloop.counter }}">
-              {{ super_class.name }}
-            </a>
-            <div class="btn-group float-end"
-                 role="group"
-                 aria-label="Basic example">
-              <a class="btn btn-primary"
-                 href="{% url 'ontology:oeo-class-detail' ontology=ontology module_or_id=super_class.ID %}">
-                view
+{% block side-column %}
+  <aside class="content__side">
+    {% if super_classes|length != 0 %}
+      <h6>Back to the super classes:</h6>
+      <div id="super_classes_accordion">
+        {% for super_class in super_classes|dictsort:"name" %}
+          <div class="card">
+            <div class="card-header">
+              <a class="card-link"
+                 data-bs-toggle="collapse"
+                 href="#super_classes_accordion{{ forloop.counter }}">
+                {{ super_class.name }}
               </a>
+              <div class="btn-group float-end"
+                   role="group"
+                   aria-label="Basic example">
+                <a class="btn btn-primary"
+                   href="{% url 'ontology:oeo-class-detail' ontology=ontology module_or_id=super_class.ID %}">
+                  view
+                </a>
+              </div>
+            </div>
+            <div id="super_classes_accordion{{ forloop.counter }}"
+                 class="collapse"
+                 data-bs-parent="#super_classes_accordion">
+              <div class="card-body">
+                {% if super_class.definitions != "" %}
+                  {% for definition in super_class.definitions %}
+                    <h6>Definition:</h6>
+                    {{ definition }}
+                    <br />
+                    <br />
+                  {% endfor %}
+                {% endif %}
+                {% if super_class.notes != "" %}
+                  {% for note in super_class.notes %}
+                    <h6>Editor note:</h6>
+                    {{ note }}
+                    <br />
+                    <br />
+                  {% endfor %}
+                {% endif %}
+                {% if super_class.definitions == "" and super_class.notes == "" %}
+                  No description found.
+                {% endif %}
+              </div>
             </div>
           </div>
-          <div id="super_classes_accordion{{ forloop.counter }}"
-               class="collapse"
-               data-bs-parent="#super_classes_accordion">
-            <div class="card-body">
-              {% if super_class.definitions != "" %}
-                {% for definition in super_class.definitions %}
-                  <h6>Definition:</h6>
-                  {{ definition }}
-                  <br />
-                  <br />
-                {% endfor %}
-              {% endif %}
-              {% if super_class.notes != "" %}
-                {% for note in super_class.notes %}
-                  <h6>Editor note:</h6>
-                  {{ note }}
-                  <br />
-                  <br />
-                {% endfor %}
-              {% endif %}
-              {% if super_class.definitions == "" and super_class.notes == "" %}
-                No description found.
-              {% endif %}
-            </div>
-          </div>
-        </div>
-      {% endfor %}
-    </div>
-    <hr />
-  {% endif %}
-{% endblock main-right-sidebar-content %}
+        {% endfor %}
+      </div>
+      <hr />
+    {% endif %}
+  </aside>
+{% endblock side-column %}
 {% block main-content-body %}
   <h5>Label: {{ class_name }}</h5>
   <hr />

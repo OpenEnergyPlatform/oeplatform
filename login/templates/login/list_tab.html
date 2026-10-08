@@ -27,9 +27,11 @@ queries that collapse them, loaded after the generic dash_list.css).
   {% block list-styles %}
   {% endblock list-styles %}
 {% endblock after-head %}
-{% block main-right-sidebar-content %}
-  {% include "login/sidebar_user.html" %}
-{% endblock main-right-sidebar-content %}
+{% block side-column %}
+  <aside class="content__side">
+    {% include "login/sidebar_user.html" %}
+  </aside>
+{% endblock side-column %}
 {% block main-content-body %}
   {% include "login/user_nav.html" %}
   <div id="{{ frame.items }}-tab"

@@ -22,6 +22,7 @@
 // (base/templates/styleguide/entries/<name>.html). `manage.py check_catalogue`
 // fails for a partial here without an entry.
 @use 'scss/components/link_with_arrow';
+@use 'scss/components/section_heading';
 @use 'scss/layouts/login';
 @use 'scss/layouts/database';
 @use 'scss/layouts/main';

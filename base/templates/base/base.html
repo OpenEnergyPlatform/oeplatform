@@ -42,40 +42,20 @@
         {% endblock site-header %}
         <div class="content">
           <div class="content__container">
-            {% block main-left-sidebar %}
-            {% endblock main-left-sidebar %}
             {% block main-content %}
               <section class="content__main">
                 {% include "base/messages.html" %}
                 {% block main-content-body %}{% endblock %}
               </section>
             {% endblock main-content %}
-            {% block main-right-sidebar %}
-              <section class="content__side">
-                <!-- {% block main-right-sidebar-disclaimer %}
-                  <div>
-                    <p>
-                      If you find bugs or if you have ideas to improve the Open
-                      Energy Platform, you are welcome to add your comments to
-                      the existing issues on
-                      <a href="{{ EXTERNAL_URLS.github_openenergyplatform_oeplatform }}" target="_blank">GitHub</a>.
-<br />
-                      You can also fork the project and get involved.
-                    </p>
-                    <p>
-                      <b>
-                        Please note that the platform is still under
-                        construction and therefore the design of this page is
-                        still highly volatile!</b>
-                    </p>
-                  </div>
-                {% endblock main-right-sidebar-disclaimer %} -->
-                <div>
-                  {% block main-right-sidebar-content %}
-                  {% endblock main-right-sidebar-content %}
-                </div>
-              </section>
-            {% endblock main-right-sidebar %}
+            {% comment %}
+              The side column is opt-in (#2638). A page with side content
+              overrides side-column with <aside class="content__side">...</aside>;
+              a page without renders no column, and its main column takes the
+              whole content width.
+            {% endcomment %}
+            {% block side-column %}
+            {% endblock side-column %}
           </div>
         </div>
       </main>

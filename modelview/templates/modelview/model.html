@@ -4,7 +4,7 @@
 {% load modelview_extras %}
 {% load dataedit.taghandler %}
 {% load compress %}
-{% block main-right-sidebar-content-actions %}
+{% block factsheet-actions %}
   {% if user.is_authenticated %}
     <a class="btn btn-info"
        href="{% url 'modelview:edit' 'model' model.pk %}">Edit</a>
@@ -16,7 +16,7 @@
          hx-swap="innerHTML">Delete</a>
     {% endif %}
   {% endif %}
-{% endblock main-right-sidebar-content-actions %}
+{% endblock factsheet-actions %}
 {% block factsheets_content %}
   <!-- Bootstrap 5 Toast Container -->
   <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">

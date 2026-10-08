@@ -42,18 +42,20 @@
     {% if model.name_of_scenario %}{{ model.name_of_scenario }}{% endif %}
   </h2>
 {% endblock site-header %}
-{% block main-right-sidebar-content-before %}
-  <hr />
-  <h3>Actions</h3>
-  {% block main-right-sidebar-content-actions %}
-  {% endblock main-right-sidebar-content-actions %}
-  <hr />
-  <h3>Tags</h3>
-  {% for t in model.tags.all %}
-    <a href=""
-       class="btn tag"
-       style="background:{{ t.color_hex }};
-              color:{% readable_text_color t.color_hex %};
-              display:inline-block">{{ t.name }}</a>
-  {% endfor %}
-{% endblock main-right-sidebar-content-before %}
+{% block side-column %}
+  <aside class="content__side">
+    <hr />
+    <h3>Actions</h3>
+    {% block factsheet-actions %}
+    {% endblock factsheet-actions %}
+    <hr />
+    <h3>Tags</h3>
+    {% for t in model.tags.all %}
+      <a href=""
+         class="btn tag"
+         style="background:{{ t.color_hex }};
+                color:{% readable_text_color t.color_hex %};
+                display:inline-block">{{ t.name }}</a>
+    {% endfor %}
+  </aside>
+{% endblock side-column %}

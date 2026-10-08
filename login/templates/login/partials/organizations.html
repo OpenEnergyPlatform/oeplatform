@@ -11,7 +11,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 {% if request.user.is_authenticated and request.user == user %}
   <div class="htmxReplacementBox">
     <div class="row">
-      <h2 class="header">User Organizations</h2>
+      <h2>User Organizations</h2>
       <div class="collapse-container collapse-container--right">
         <div class="collapse-container__button collapse-container__button--right">
           <button type="button"
@@ -55,7 +55,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
       </div>
     </div>
     <section class="profile-category">
-      <h2 class="profile-category__heading">Memberships</h2>
+      <h3>Memberships</h3>
       <button class="profile-category__btn profile-category__btn--add"
               hx-get="{% url 'login:organization-create' %}"
               hx-target=".htmxReplacementBox"

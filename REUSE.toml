@@ -3597,6 +3597,7 @@ path = [
   "base/templates/styleguide/**",
   "base/static/styleguide/**",
   "theming/scss/components/_link_with_arrow.scss",
+  "theming/scss/components/_section_heading.scss",
   "theming/stock_tokens.scss",
   "theming/literal_scan.mjs",
 ]
