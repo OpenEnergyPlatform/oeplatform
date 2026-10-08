@@ -25,7 +25,7 @@ SPDX-License-Identifier: CC0-1.0
   house component is `link_with_arrow`, the homepage's sliding-arrow link, now
   in the theme; the homepage renders pixel for pixel as before, and its arrows
   no longer slide for visitors who ask for reduced motion
-  [(#XXXX)](https://github.com/OpenEnergyPlatform/oeplatform/pull/XXXX)
+  [(#2682)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2682)
 - The theme now emits the platform's design tokens as CSS custom properties at
   `:root`: Bootstrap's `--bs-*` names where Bootstrap has one, plus a small
   `--oep-*` set (text, borders, surfaces, shadows, dense size, heading weight,
