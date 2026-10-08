@@ -18,7 +18,7 @@
     <option value="usage">Most used</option>
   </select>
 </div>
-<ul class="tag-group tag-list--scroll mb-3" data-tag-list>
+<ul class="tag-group tag-group--scroll mb-3" data-tag-list>
   {% for t in tags %}
     <li data-tag-name="{{ t.name }}" data-tag-usage="{{ t.tag_usage }}">
       {% if t.pk %}

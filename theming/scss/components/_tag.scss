@@ -100,6 +100,15 @@
         display: inline-block;
     }
 
+    // Without `:has()` the ring above cannot reach the label; the name
+    // carries it instead, so a keyboard user still sees where focus is.
+    @supports not selector(:has(*)) {
+        &__check:focus-visible ~ &__name {
+            outline: 2px solid var(--bs-primary);
+            outline-offset: 2px;
+        }
+    }
+
     &--toggle:has(.tag__check:checked) {
         font-weight: $font-weight-semibold;
         box-shadow: inset 0 0 0 2px currentColor;

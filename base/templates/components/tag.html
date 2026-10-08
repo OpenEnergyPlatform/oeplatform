@@ -8,7 +8,8 @@
   title     optional tooltip
 
   One variant at a time:
-  href      link: an <a> to that address, usually the list filtered by the tag;
+  href      link: an <a> to that address -- the list filtered by the tag, or
+            where a tag is administered (the tag overview) its editor;
             hx_get, hx_target and hx_swap load it in place with htmx
   remove    removable: a close button carrying data-tag-remove="<remove>",
             for a picker's current selection; the picker's script does the removing
@@ -20,6 +21,9 @@
   contrast; both colours are custom properties, so no tag carries an inline
   background.
 {% endcomment %}
+{% if color %}
+  {% readable_text_color color as text_color %}
+{% endif %}
 {% if href %}
   <a class="tag tag--link"
      href="{{ href }}"
@@ -27,11 +31,11 @@
      {% if hx_target %}hx-target="{{ hx_target }}"{% endif %}
      {% if hx_swap %}hx-swap="{{ hx_swap }}"{% endif %}
      {% if title %}title="{{ title }}"{% endif %}
-     {% if color %}style="--tag-color: {{ color }}; --tag-text-color: {% readable_text_color color %}"{% endif %}>{{ name }}</a>
+     {% if color %}style="--tag-color: {{ color }}; --tag-text-color: {{ text_color }}"{% endif %}>{{ name }}</a>
 {% elif toggle_name %}
   <label class="tag tag--toggle"
          {% if title %}title="{{ title }}"{% endif %}
-         {% if color %}style="--tag-color: {{ color }}; --tag-text-color: {% readable_text_color color %}"{% endif %}>
+         {% if color %}style="--tag-color: {{ color }}; --tag-text-color: {{ text_color }}"{% endif %}>
     <input type="checkbox"
            class="tag__check"
            name="{{ toggle_name }}"
@@ -44,7 +48,7 @@
 {% elif remove %}
   <span class="tag tag--removable"
         {% if title %}title="{{ title }}"{% endif %}
-        {% if color %}style="--tag-color: {{ color }}; --tag-text-color: {% readable_text_color color %}"{% endif %}>
+        {% if color %}style="--tag-color: {{ color }}; --tag-text-color: {{ text_color }}"{% endif %}>
     <span class="tag__name">{{ name }}</span>
     <button type="button"
             class="tag__remove"
@@ -56,5 +60,5 @@
 {% else %}
   <span class="tag"
         {% if title %}title="{{ title }}"{% endif %}
-        {% if color %}style="--tag-color: {{ color }}; --tag-text-color: {% readable_text_color color %}"{% endif %}>{{ name }}</span>
+        {% if color %}style="--tag-color: {{ color }}; --tag-text-color: {{ text_color }}"{% endif %}>{{ name }}</span>
 {% endif %}

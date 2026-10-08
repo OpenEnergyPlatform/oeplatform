@@ -29,6 +29,10 @@ from modelview.tests.html import element_markup, text
 
 STYLEGUIDE = reverse("base:styleguide")
 
+#: Buttons that belong to a house component rather than carrying a role of
+#: their own (spec #2632, "button": the component's own controls).
+HOUSE_CONTROLS = ("tag__remove",)
+
 
 class CatalogueTest(TestCase):
     def page(self, query=""):
@@ -92,10 +96,10 @@ class CatalogueTest(TestCase):
 
     def test_every_button_on_the_page_carries_a_role(self):
         # The page's own; the navbar's toggler is the shell's, and a house
-        # component's own control (a tag's close button) is the component's.
+        # component's own control is the component's.
         main = element_markup(self.page(), "main-content")
         for button in re.findall(r"<button\b[^>]*>", main):
-            if "tag__remove" in button:
+            if any(control in button for control in HOUSE_CONTROLS):
                 continue
             with self.subTest(button=button):
                 self.assertRegex(button, r'class="[^"]*\bbtn\b[^"]*\bbtn-link\b')

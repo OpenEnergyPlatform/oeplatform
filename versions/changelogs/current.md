@@ -23,10 +23,11 @@ SPDX-License-Identifier: CC0-1.0
   a grey badge), the table page and the tag overview. Statuses are the separate
   `badge` (`badge--success`, `--info`, `--warning`, `--danger`, `--neutral`): a
   light status colour and a small radius, never a pill. "Early Access" is an
-  info badge instead of a red pill that read like an error; `.early-access`,
-  `.success-badge` and the unused `tagged_field.html` are gone. Both components
-  have a catalogue entry
-  [(#PR)](https://github.com/OpenEnergyPlatform/oeplatform/pull/PR)
+  info badge instead of a red pill that read like an error, and the table list's
+  "Reviewed" is a success badge. `.early-access`, `.success-badge`, the unused
+  `tagged_field.html` and `oep-tags.js` (which only ticked the old tag
+  checkboxes; the tick is CSS now) are gone. Both components have a catalogue
+  entry [(#PR)](https://github.com/OpenEnergyPlatform/oeplatform/pull/PR)
 - A component catalogue at `/styleguide/` (public, not indexed, linked from no
   menu) shows every house component rendered from its entry template and as
   copyable source from the same file, under a table of every design token with
