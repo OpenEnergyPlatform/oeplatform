@@ -138,9 +138,9 @@ class OfferedActionsTests(DatasetActionTestCase):
             with self.subTest(name=name):
                 self.assertTrue(hasattr(dataset_actions, name))
 
-    def test_only_publish_unpublish_and_delete_are_served_here(self):
+    def test_the_member_actions_are_not_served_here(self):
         dataset = self.dataset("ds_offered")
-        for action in ("create", "edit", "members_add", "members_remove", "nope"):
+        for action in ("members_add", "members_remove", "nope"):
             with self.subTest(action=action):
                 get = self.client.get(
                     self.action_path(action), {"dataset": dataset.name}, **HTMX

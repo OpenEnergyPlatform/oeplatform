@@ -22,6 +22,8 @@ sees there, how the list filters and sorts, and what each row says.
   query capped at ``MEMBERS_SHOWN`` per Dataset, and the Topics from one
   prefetch, so a page costs the same whether a Dataset holds 3 members or
   2,500.
+- ``name_preview`` and ``topic_choices``: what the Create and Edit dialog
+  says about the name a title gives, and the Topics it offers.
 
 A page through htmx costs 6 queries: the session and the user, the faceted
 segment aggregate, the page, the member titles and the Topics. Naming the
@@ -53,6 +55,7 @@ from django.db.models import (
 from django.db.models.fields.json import KeyTextTransform
 from django.db.models.functions import Coalesce, Lower, Now, NullIf, RowNumber
 
+from api.services.dataset_creation import dataset_name_taken, normalize_dataset_name
 from dataedit.models import Dataset, Embargo, Table, Tag, Topic
 from login.listing import (
     NULLS_LAST,
@@ -443,3 +446,49 @@ def dataset_rows(user):
         ]
 
     return rows
+
+
+# What the Create dialog's name preview can say about a title: nothing typed
+# yet, no letter or number to make a name from, the name taken, or free.
+NAME_EMPTY = "empty"
+NAME_MISSING = "missing"
+NAME_TAKEN = "taken"
+NAME_AVAILABLE = "available"
+
+
+@dataclass(frozen=True)
+class NamePreview:
+    """The name a title gives (``normalize_dataset_name``, the server's one
+    name rule) and whether a Dataset can be created under it."""
+
+    state: str
+    name: str | None = None
+
+    @property
+    def available(self) -> bool:
+        return self.state == NAME_AVAILABLE
+
+
+def name_preview(title) -> NamePreview:
+    """What a Create with ``title`` would be named, and whether it can be.
+    A name taken by anyone's Dataset, a stranger's draft included, reads as
+    taken and nothing more, so the preview tells no more about a draft than
+    a read does. One query, none when there is no name."""
+    if not (title or "").strip():
+        return NamePreview(NAME_EMPTY)
+    name = normalize_dataset_name(title)
+    if name is None:
+        return NamePreview(NAME_MISSING)
+    if dataset_name_taken(name):
+        return NamePreview(NAME_TAKEN, name)
+    return NamePreview(NAME_AVAILABLE, name)
+
+
+def topic_choices() -> list:
+    """The Topics a Dataset may have, as the Create and Edit dialog offers
+    them: every Topic but the draft pseudo-topic, by name. One query."""
+    return list(
+        Topic.objects.exclude(name=PSEUDO_TOPIC_DRAFT)
+        .order_by("name")
+        .values_list("name", flat=True)
+    )

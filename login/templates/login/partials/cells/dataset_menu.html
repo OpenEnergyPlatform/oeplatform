@@ -2,14 +2,14 @@
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
 
-Cell type "actions slot" of the datasets tab: the row's ⋯ menu. Manage
-tables… opens the members drawer (#dataset-members) on this Dataset. Every
-other entry opens the one action dialog (#dataset-action) with this Dataset as
-a batch of one: Publish… on a draft or Unpublish… on a published Dataset,
-then, set apart, Delete… in red and last. Every entry is enabled on every
-row: the tab lists only the user's own Datasets, and a draft that cannot be
-published yet hears why in the dialog. Edit… joins this menu, first, with the
-dialog it opens.
+Cell type "actions slot" of the datasets tab: the row's ⋯ menu: Edit…
+first (the Create and Edit form), then Manage tables…, which opens the members
+drawer (#dataset-members) on this Dataset, then Publish… on a draft or
+Unpublish… on a published Dataset, then, set apart, Delete… in red and last.
+Every entry but Manage tables… opens the one action dialog (#dataset-action)
+with this Dataset as a batch of one. Every entry is enabled on every row: the
+tab lists only the user's own Datasets, and a draft that cannot be published
+yet hears why in the dialog.
 
 The menu is positioned fixed so the table's horizontal scroll container
 does not clip it. The toggle's id, menu-<key>, is where focus returns after
@@ -29,6 +29,10 @@ reads as a form address to base/tests/test_views.py.
   </button>
   <ul class="dropdown-menu dropdown-menu-end dash-menu__list"
       aria-labelledby="menu-{{ row.key }}">
+    <li>
+      {% url 'login:dataset-action' profile_user.pk "edit" as url %}
+      {% include "login/partials/cells/menu_action.html" with verb="edit" label="Edit…" url=url item=row.name allowed=True %}
+    </li>
     <li>
       {% url 'login:dataset-members' profile_user.pk row.name as members_url %}
       <button type="button"

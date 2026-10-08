@@ -81,6 +81,8 @@ $cyan: $cyan-500;
 $black: $gray-900;
 $body-color: $gray-700;
 $text-muted: #5F7484;
+// Borders and dividers: the homepage's border colour (Bryan's #e9f0f5).
+$border-color: #e9f0f5;
 
 // Grid
 $grid-breakpoints: (
@@ -165,7 +167,6 @@ $card-border-radius: 0;
 $input-border-radius: 0;
 $input-border-radius-lg: 0;
 $dropdown-inner-border-radius: 0;
-$navbar-toggler-border-radius: 0;
 $modal-content-border-radius: 0;
 $breadcrumb-border-radius: 0;
 $list-group-border-radius: 0;
@@ -192,9 +193,36 @@ $input-btn-font-size-lg: 1rem;
 $input-border-radius-sm: 0;
 $input-border-color: $gray-300;
 $btn-font-weight: 600;
-$border-radius: 0.5rem;
-$border-radius-lg: 0.5rem;
-$border-radius-sm: 0.4rem;
+// The radius scale (spec #2632): 4px in the page, 2px small, 8px on what
+// floats. In px, not rem, so that a React app's smaller root font size
+// does not shrink the corners of the shared navbar.
+$border-radius: 4px;
+$border-radius-lg: 8px;
+$border-radius-sm: 2px;
 $card-border-color: $gray-300;
 $card-cap-padding-y: 0.75rem;
 $alert-bg-scale: -90%;
+
+//// Design tokens
+// The OEP tokens Bootstrap has no name for. scss/tokens/_root.scss emits
+// them at :root as --oep-*; the --bs-* tokens come from the Bootstrap
+// variables above. Their defaults are the homepage's own values, so the
+// homepage renders the same on them. A token name is a promise to every
+// instance that overrides it: keep the set small, and keep a renamed token's
+// old name as an alias for one release.
+$oep-text-muted: #4d748f;
+$oep-heading-color: var(--bs-primary);
+$oep-border-strong: #d7e2ea;
+$oep-surface: #fff;
+$oep-surface-subtle: #f6fbff;
+$oep-surface-strong: var(--bs-primary);
+$oep-surface-hover: #eaf3fa;
+$oep-on-strong: #fff;
+$oep-on-strong-muted: #e7f1f9;
+$oep-shadow-rgb: 41, 114, 166;
+$oep-shadow-sm: 0 2px 1px rgba(var(--oep-shadow-rgb), 0.1);
+$oep-shadow-lg: 0 8px 24px rgba(var(--oep-shadow-rgb), 0.15);
+$oep-font-size-dense: 0.875rem;
+$oep-heading-weight: 700;
+$oep-measure: 70ch;
+$oep-transition: 0.2s ease;

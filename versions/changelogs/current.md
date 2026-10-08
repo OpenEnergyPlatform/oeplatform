@@ -12,6 +12,23 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- The theme now emits the platform's design tokens as CSS custom properties at
+  `:root`: Bootstrap's `--bs-*` names where Bootstrap has one, plus a small
+  `--oep-*` set (text, borders, surfaces, shadows, dense size, heading weight,
+  reading width, content width, transition), with the homepage's values as
+  defaults in `theming/_variables.scss`. A re-map layer points Bootstrap's
+  component variables (buttons, fields and their focus ring, checkboxes,
+  dropdowns, pagination, tabs, cards, dialogs, links) at the tokens, so one
+  stylesheet that sets `--bs-primary` and `--bs-primary-rgb` recolours all of
+  them, not just the navbar. The homepage and the navbar read only tokens and
+  render pixel for pixel as before; `--primaryColor*` and `--white` are gone.
+  Off the homepage two defaults change what renders: corners follow the radius
+  scale (4px; 2px small; 8px on what floats, so buttons and pagination lose half
+  their rounding), and `--bs-border-color` is the homepage's lighter `#e9f0f5`,
+  which lightens table borders, `.border` utilities and dialog dividers.
+  `benchmarks/homepage/compare.mjs` compares full-page homepage screenshots
+  before and after a change
+  [(#2679)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2679)
 - The Bootstrap theme builds with one npm command, `npm run build:theme` (`sass`
   1.77.0 and `bootstrap` 5.2.0 as exactly pinned dev dependencies), instead of
   by hand in a Docker container, which is removed. The compiled
@@ -119,6 +136,17 @@ SPDX-License-Identifier: CC0-1.0
   deleting the last Dataset shows the empty state without a reload. The
   dashboard never republishes; the API still does
   [(#2623)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2623)
+- Profile dashboard, datasets tab: Create and Edit share one dialog with title,
+  description and topics. "New dataset" ends the filter row and "Create a
+  dataset" fills the empty state; Edit… is the first entry of each row's ⋯ menu
+  and sits in the publish dialog beside a missing topic. While the title is
+  typed, the dialog shows the web address it gives, or says that the name is
+  taken or that the title needs a letter or number, and Create stays disabled
+  until the name is free. A new Dataset is a private draft; a refused save keeps
+  what was typed and names an unknown topic; a save that changes nothing changes
+  nothing. The first Create in an empty account brings the filter bar in without
+  a reload
+  [(#2624)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2624)
 - Profile dashboard, datasets tab: a members drawer, opened by "Manage tables…"
   in a row's ⋯ menu, by "and n more" in the Tables popover and by the publish
   dialog of a Dataset without tables. It lists every member, 25 per page with a

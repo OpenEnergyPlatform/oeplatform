@@ -81,6 +81,7 @@
     $dark: $dark,
     $theme-colors: $theme-colors,
     $body-color: $body-color,
+    $border-color: $border-color,
     $text-muted:  $text-muted,
     $grid-breakpoints: $grid-breakpoints,
     $font-size-base: $font-size-base,
@@ -130,3 +131,6 @@
 );
 
 @forward 'custom_variables';
+
+// After Bootstrap and upstream of every partial, see the file.
+@use '../tokens/remap';

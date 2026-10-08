@@ -1,0 +1,177 @@
+// The re-map layer: Bootstrap's component variables pointed at the tokens.
+//
+// Bootstrap 5.2 compiles literal values into its component variables
+// (`.btn-primary{--bs-btn-bg:#1F567D}`, likewise dropdowns, pagination,
+// fields and their focus ring). Overriding `--bs-primary` alone therefore
+// recolours links and not a single button. Each rule below restates, for a
+// component the house components use, the variables that hold such a
+// literal, as the token they came from. Hover and active shades are the
+// ones Bootstrap computes (shade-color(): a mix with black), computed by
+// the browser from the token instead of by Sass from the literal.
+//
+// At the default token values every variable here equals the literal it
+// replaces, so nothing renders differently; only an instance that sets
+// tokens sees the difference.
+//
+// This file is loaded by scss/base/_index.scss, after Bootstrap and before
+// every partial that `@use`s the base. That makes it upstream of them, so a
+// partial that `@extend`s `.btn-primary` (or any class below) extends these
+// rules too. Keep it free of `@use`: it must not depend on the base it is
+// loaded from.
+
+// Bootstrap's shade-color($token, $weight), done by the browser.
+@function shade($token, $weight) {
+  @return color-mix(in srgb, var($token) (100% - $weight), black);
+}
+
+// Bootstrap's focus ring around a button: the text colour mixed 15% into
+// the border colour, at half opacity.
+@function button-focus-ring($token, $on) {
+  @return 0 0 0 0.25rem color-mix(in srgb, color-mix(in srgb, var($token) 85%, var($on)) 50%, transparent);
+}
+
+// The focus ring of a field, a pagination link or a dialog's close button.
+$focus-ring: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+// The border of a focused field: the primary colour tinted 50% (tint-color()).
+$focus-border: color-mix(in srgb, var(--bs-primary) 50%, white);
+
+// Links (Bootstrap's own root variables, still literals in 5.2)
+:root {
+  --bs-link-color: var(--bs-primary);
+  --bs-link-hover-color: #{shade(--bs-primary, 20%)};
+  // Bootstrap's pink inline code is a colour no token covers
+  --bs-code-color: var(--bs-body-color);
+}
+
+// Buttons: the radius scale, then the colour roles. The sizes come after
+// `.btn` because they set the same variable with the same specificity.
+.btn {
+  --bs-btn-border-radius: var(--bs-border-radius);
+}
+
+.btn-lg,
+.btn-group-lg > .btn {
+  --bs-btn-border-radius: var(--bs-border-radius-lg);
+}
+
+.btn-sm,
+.btn-group-sm > .btn {
+  --bs-btn-border-radius: var(--bs-border-radius-sm);
+}
+
+@mixin solid-button($token, $on) {
+  --bs-btn-color: var(#{$on});
+  --bs-btn-bg: var(#{$token});
+  --bs-btn-border-color: var(#{$token});
+  --bs-btn-hover-color: var(#{$on});
+  --bs-btn-hover-bg: #{shade($token, 15%)};
+  --bs-btn-hover-border-color: #{shade($token, 20%)};
+  --bs-btn-focus-box-shadow: #{button-focus-ring($token, $on)};
+  --bs-btn-active-color: var(#{$on});
+  --bs-btn-active-bg: #{shade($token, 20%)};
+  --bs-btn-active-border-color: #{shade($token, 25%)};
+  --bs-btn-disabled-color: var(#{$on});
+  --bs-btn-disabled-bg: var(#{$token});
+  --bs-btn-disabled-border-color: var(#{$token});
+}
+
+@mixin outline-button($token, $on) {
+  --bs-btn-color: var(#{$token});
+  --bs-btn-border-color: var(#{$token});
+  --bs-btn-hover-color: var(#{$on});
+  --bs-btn-hover-bg: var(#{$token});
+  --bs-btn-hover-border-color: var(#{$token});
+  --bs-btn-focus-box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(#{$token}) 50%, transparent);
+  --bs-btn-active-color: var(#{$on});
+  --bs-btn-active-bg: var(#{$token});
+  --bs-btn-active-border-color: var(#{$token});
+  --bs-btn-disabled-color: var(#{$token});
+  --bs-btn-disabled-border-color: var(#{$token});
+}
+
+.btn-primary {
+  @include solid-button(--bs-primary, --oep-on-strong);
+}
+
+.btn-outline-primary {
+  @include outline-button(--bs-primary, --oep-on-strong);
+}
+
+.btn-danger {
+  @include solid-button(--bs-danger, --oep-on-strong);
+}
+
+.btn-outline-danger {
+  @include outline-button(--bs-danger, --oep-on-strong);
+}
+
+.btn-link {
+  --bs-btn-focus-box-shadow: #{button-focus-ring(--bs-primary, --oep-on-strong)};
+}
+
+.btn-close:focus {
+  box-shadow: $focus-ring;
+}
+
+// Fields: the focus ring and the checked state
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus {
+  border-color: $focus-border;
+  box-shadow: $focus-ring;
+}
+
+.form-check-input:checked,
+.form-check-input[type="checkbox"]:indeterminate {
+  background-color: var(--bs-primary);
+  border-color: var(--bs-primary);
+}
+
+// Dropdowns. Being later at equal specificity, this also wins over
+// Bootstrap's `.dropdown-menu-dark`, which no template uses; restate that
+// variant here before using it.
+.dropdown-menu {
+  --bs-dropdown-color: var(--bs-body-color);
+  --bs-dropdown-bg: var(--oep-surface);
+  --bs-dropdown-link-active-color: var(--oep-on-strong);
+  --bs-dropdown-link-active-bg: var(--bs-primary);
+}
+
+// Pagination
+.pagination {
+  --bs-pagination-bg: var(--oep-surface);
+  --bs-pagination-border-radius: var(--bs-border-radius);
+  --bs-pagination-focus-box-shadow: #{$focus-ring};
+  --bs-pagination-active-color: var(--oep-on-strong);
+  --bs-pagination-active-bg: var(--bs-primary);
+  --bs-pagination-active-border-color: var(--bs-primary);
+  --bs-pagination-disabled-bg: var(--oep-surface);
+}
+
+.pagination-lg {
+  --bs-pagination-border-radius: var(--bs-border-radius-lg);
+}
+
+.pagination-sm {
+  --bs-pagination-border-radius: var(--bs-border-radius-sm);
+}
+
+// Tabs
+.nav-tabs {
+  --bs-nav-tabs-link-active-color: var(--bs-body-color);
+  --bs-nav-tabs-link-active-bg: var(--oep-surface);
+}
+
+.nav-pills {
+  --bs-nav-pills-link-active-color: var(--oep-on-strong);
+  --bs-nav-pills-link-active-bg: var(--bs-primary);
+}
+
+// Cards and dialogs
+.card {
+  --bs-card-bg: var(--oep-surface);
+}
+
+.modal {
+  --bs-modal-bg: var(--oep-surface);
+}

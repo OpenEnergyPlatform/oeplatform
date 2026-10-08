@@ -85,7 +85,7 @@
  *   every column                  915     920
  *   without Created               807     810
  *   without Topics too            657     660   below: rows stack
- *   the filter bar on one line    508     510   below: bar folds
+ *   the filter bar on one line    637     640   below: bar folds
  *
  * The ⋯ button made the row 36 px wider than its empty slot had (#2622
  * measured 879 / 771 / 621 and set 880 / 780 / 630), which put the numbers
@@ -95,7 +95,9 @@
  * two values ticked in each of Topic and Tag (the bare bar is 500). Their
  * dropdown buttons count what is ticked, "Topic (2)", rather than naming it:
  * named, the bar measured 693 and would have had to fold above the
- * stacking line. So it folds only where the rows already stack.
+ * stacking line. So it folds only where the rows already stack. "New
+ * dataset" at the end of the row (#2624) took the bar from 508 to 637, so it
+ * now folds at 640 rather than 510, still below the stacking line.
  *
  * With the sidebar the list is 1,392 px wide at a 1920 px screen, 976 at
  * 1440 and 1366 (all three: every column), 896 at 1280 (without Created),
@@ -119,7 +121,7 @@
 
 /* Too narrow for the bar on one line: everything but Search folds behind
    "Filters (n)", which shows it below as a block of its own. */
-@container (width < 510px) {
+@container (width < 640px) {
   #datasets-tab .dash-fold-toggle {
     display: inline-block;
   }

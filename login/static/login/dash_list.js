@@ -944,11 +944,11 @@ export function bindList(
   // what the open drawer shows (its `data-drawer-key`), null while closed;
   // a drawer this module asked for itself ({origin, focus}) until it comes;
   // the control to focus once it is shown; an item to open it on once the
-  // dialog has closed (a Create)
+  // dialog has closed (a Create: {key, origin})
   let drawerKey = null;
   let pendingDrawer = null;
   let drawerFocus = null;
-  let createdKey = null;
+  let created = null;
   const drawerParam = config.drawer && config.drawer.param;
   const history = doc.defaultView && doc.defaultView.history;
   const writeDrawerParam = (key) => {
@@ -1241,10 +1241,13 @@ export function bindList(
     }
     afterAction = detail.focus || origin || "";
     origin = null;
-    if (detail.created && config.drawer && config.drawer.param) {
+    const drawerHere = drawerElement();
+    if (detail.created && drawerHere && drawerHere.dataset.urlTemplate) {
       // a Create: the drawer opens on the new item once the dialog has
-      // closed, and holds focus from there on
-      createdKey = detail.created;
+      // closed and holds focus from there on; closed, focus goes where the
+      // event says (the new row's ⋯). A page without the drawer focuses
+      // that at once.
+      created = { key: detail.created, origin: afterAction };
       afterAction = null;
     }
     dialog.close();
@@ -1284,11 +1287,11 @@ export function bindList(
   // action the region's settle does that instead, and after a link that
   // opens something else, what it opens.
   dialog.onHidden(() => {
-    if (createdKey) {
-      const key = createdKey;
-      createdKey = null;
+    if (created) {
+      const { key, origin: returnTo } = created;
+      created = null;
       origin = null;
-      openDrawerOn(key, "", config.drawer.createdFocus);
+      openDrawerOn(key, returnTo, config.drawer.createdFocus);
       return;
     }
     if (thenOpen) {
@@ -1341,6 +1344,19 @@ export function bindList(
     }
   };
 
+  // Bootstrap's modal ignores `autofocus` and focuses itself: a dialog
+  // that is a form (Create and Edit) gets focus on the field marked so once
+  // it is shown; a confirmation keeps Bootstrap's focus
+  const onDialogShown = (event) => {
+    if (!event.target || event.target.id !== ids.dialog) {
+      return;
+    }
+    const field = event.target.querySelector("[autofocus]");
+    if (field) {
+      field.focus();
+    }
+  };
+
   const onHistoryRestore = () => {
     const region = doc.getElementById(ids.region);
     syncFilters(doc, config, region);
@@ -1365,6 +1381,7 @@ export function bindList(
     [config.refusedEvent, onRefused],
     ["click", onClick],
     ["change", onChange],
+    ["shown.bs.modal", onDialogShown],
   ];
   for (const [name, listener] of listeners) {
     doc.body.addEventListener(name, listener);

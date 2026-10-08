@@ -47,7 +47,11 @@ a page holds one list.
 The filter bar and the bulk slot sit outside the region, and the empty state
 has neither. So when the region alone comes back (``region_only``) for an
 account with nothing left to list, its last item deleted, it removes both out
-of band, and the page shows the empty state without a reload.
+of band, and the page shows the empty state without a reload. The reverse: the
+empty region's re-fetch carries ``X-List-Empty``, and when it comes back with
+something to list (the first item created), it brings both in
+(``brings_controls``, partials/list_controls.html), in front of the live
+count, where the page renders them.
 {% endcomment %}
 <div id="{{ frame.region_id }}"
      class="dash-results"
@@ -57,7 +61,8 @@ of band, and the page shows the empty state without a reload.
      data-filters="{{ page.filters_json }}"
      data-more="{{ page.more_count }}"
      data-folded="{{ page.folded_count }}"
-     data-scope="{{ page.scope }}">
+     data-scope="{{ page.scope }}"
+     {% if not page.has_any %}hx-headers='{"X-List-Empty": "true"}'{% endif %}>
   <h2 id="{{ frame.items }}-heading"
       class="visually-hidden"
       tabindex="-1">Your {{ page.listing.plural }}</h2>
@@ -163,4 +168,8 @@ of band, and the page shows the empty state without a reload.
   {% if bulk_actions %}
     <div id="{{ frame.items }}-bulk" hx-swap-oob="delete"></div>
   {% endif %}
+{% elif region_only and brings_controls %}
+  <div hx-swap-oob="beforebegin:#{{ frame.items }}-live">
+    {% include "login/partials/list_controls.html" %}
+  </div>
 {% endif %}

@@ -16,6 +16,7 @@ from login.views import (
     DatasetActionView,
     DatasetMembersSearchView,
     DatasetMembersView,
+    DatasetNamePreviewView,
     DatasetsView,
     EditUserView,
     OrganizationListView,
@@ -70,6 +71,11 @@ urlpatterns = [
         r"/members/search$",
         DatasetMembersSearchView.as_view(),
         name="dataset-members-search",
+    ),
+    re_path(
+        r"^profile/(?P<user_id>[\d]+)/dataset-name-preview$",
+        DatasetNamePreviewView.as_view(),
+        name="dataset-name-preview",
     ),
     re_path(
         r"^profile/(?P<user_id>[\d]+)/tables$",

@@ -53,6 +53,12 @@
   text-overflow: ellipsis;
 }
 
+/* "New <item>" ends the row, right-aligned, and never wraps its words */
+.dash-new {
+  margin-left: auto;
+  white-space: nowrap;
+}
+
 /* "Filters (n)": on a wide list the fold panel is not a box at all, so its
    controls sit in the row; on a list too narrow for the bar it folds (see
    the tab's container queries) */

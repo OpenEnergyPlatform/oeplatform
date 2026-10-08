@@ -40,7 +40,7 @@ from django.views.generic.edit import DeleteView
 from rest_framework.authtoken.models import Token
 
 from api.services import dataset_actions, table_actions
-from api.services.dataset_creation import dataset_title
+from api.services.dataset_creation import dataset_title, normalize_dataset_name
 from dataedit.helper import delete_peer_review
 from dataedit.models import PeerReviewManager, Table, Topic
 from dataedit.publish_gate import DATASET_GATE
@@ -54,8 +54,10 @@ from login.access import (
 from login.datasets_tab import (
     dataset_rows,
     datasets_listing,
+    name_preview,
     own_dataset_pk,
     own_datasets,
+    topic_choices,
 )
 from login.forms import EditUserForm, OrganizationForm
 from login.list_views import (
@@ -483,10 +485,11 @@ class DatasetsList:
 
 class DatasetsView(DatasetsList, ListTabView):
     """The datasets tab, where the profile opens: one list of the user's own
-    Datasets (``ListTabView``). Each row's ⋯ menu offers the row actions
-    (``DatasetActionView``) and the members drawer (``DatasetMembersView``);
-    there are no bulk actions yet, so no selection: the select cells are
-    empty slots.
+    Datasets (``ListTabView``). "New dataset" ends the filter row and
+    "Create a dataset" fills the empty state; each row's ⋯ menu offers the
+    row actions (``DatasetActionView``) and the members drawer
+    (``DatasetMembersView``). There are no bulk actions yet, so no
+    selection: the select cells are empty slots.
 
     ``?members=<name>`` is the open drawer, page state rather than list
     state: no list address carries it. A whole page reopens the drawer when
@@ -496,6 +499,7 @@ class DatasetsView(DatasetsList, ListTabView):
 
     page_template = "login/user_datasets.html"
     region_template = "login/partials/datasets_region.html"
+    create_action = dataset_actions.CREATE
 
     def extra_context(self):
         name = self.request.GET.get("members", "").strip()
@@ -512,22 +516,25 @@ GATE_NEEDS = {
     "topics": "Choose at least one topic",
 }
 
+# The actions whose dialog is a form to fill in rather than a confirmation of
+# a preflight: Create and Edit.
+FORM_ACTIONS = (dataset_actions.CREATE, dataset_actions.EDIT)
+
 
 class DatasetActionView(DatasetsList, ActionView):
     """One action on the user's own Datasets from the dashboard, through
-    ``dataset_actions`` with ``via="dashboard"`` (``ActionView``): publish,
-    unpublish and delete, for a row (one ``dataset``) or a batch (a
-    comma-joined ``datasets``). The service's other actions are not offered
-    here (404): create and edit have their own dialog, the member actions
-    the members drawer.
+    ``dataset_actions`` with ``via="dashboard"`` (``ActionView``): create
+    and edit, and publish, unpublish and delete, for a row (one
+    ``dataset``) or a batch (a comma-joined ``datasets``). The member
+    actions are not offered here (404): the members drawer has them.
 
     - GET: the dialog. Publish on a draft failing the gate names what is
-      missing (``GATE_NEEDS``) and offers no confirmation; a published
-      Dataset is passed over, because the dashboard offers no republish
-      (the API does). Unpublish states what happens in words; delete
-      states that the member Tables stay and, for a published Dataset, asks
-      for its name to be typed (``confirm``), which the service checks
-      under the lock.
+      missing (``GATE_NEEDS``), with "Edit…" beside a missing Topic, and
+      offers no confirmation; a published Dataset is passed over, because
+      the dashboard offers no republish (the API does). Unpublish states
+      what happens in words; delete states that the member Tables stay and,
+      for a published Dataset, asks for its name to be typed (``confirm``),
+      which the service checks under the lock.
     - POST, done: 204 with ``HX-Trigger: datasets-changed``, the message
       and, for a row that is still there, its menu to focus; a delete
       carries ``gone`` instead.
@@ -535,6 +542,16 @@ class DatasetActionView(DatasetsList, ActionView):
       ``datasets-refused``, the dialog run again.
     - POST, unusable parameters (no Dataset named, a typed confirmation that
       does not match): 400.
+
+    Create and edit are a form, not a confirmation (``FORM_ACTIONS``,
+    dataset_form_dialog.html): GET is the form, empty for a create and
+    filled with what is stored for an edit; POST saves it. The name is the
+    title's (``normalize_dataset_name``, the server's one name rule), never
+    a field, and an edit never changes it. A refused save (a taken name, an
+    unknown Topic, a missing field) answers 400 with the form as it was
+    typed. A done create's ``datasets-changed`` carries ``created``, the new
+    Dataset's name, which the members drawer opens on; an edit that changes
+    nothing writes nothing and says so.
 
     A request naming a Dataset that is not the user's own answers 404 and
     writes nothing, alike for another user's draft, another user's published
@@ -544,12 +561,16 @@ class DatasetActionView(DatasetsList, ActionView):
 
     service = dataset_actions
     actions = (
+        dataset_actions.CREATE,
+        dataset_actions.EDIT,
         dataset_actions.PUBLISH,
         dataset_actions.UNPUBLISH,
         dataset_actions.DELETE,
     )
     dialog_template = "login/partials/dataset_action_dialog.html"
-    params = ("confirm",)
+    form_template = "login/partials/dataset_form_dialog.html"
+    params = ("confirm", "title", "description", "topics")
+    list_params = ("topics",)
 
     def is_unknown(self, check):
         return any(
@@ -560,24 +581,22 @@ class DatasetActionView(DatasetsList, ActionView):
     def dialog_context(self, check):
         context = {}
         if check.action == dataset_actions.PUBLISH:
-            failed = {
-                name for names in check.consequences["gate"].values() for name in names
-            }
+            gate = check.consequences["gate"]
+            failed = {name for names in gate.values() for name in names}
             context["needs"] = [
-                GATE_NEEDS[gate.name] for gate in DATASET_GATE if gate.name in failed
+                {"check": check_.name, "text": GATE_NEEDS[check_.name]}
+                for check_ in DATASET_GATE
+                if check_.name in failed
             ]
-            # one Dataset failing the gate: "Manage tables…" opens the
-            # members drawer once the dialog has closed, whichever check
-            # failed, since a member brings its Topics along; focus comes
-            # back to the row's ⋯ from there
-            failing = list(check.consequences["gate"])
-            pk = (
-                own_dataset_pk(self.profile_user, failing[0])
-                if check.total == 1 and failing
-                else None
-            )
-            if pk:
-                context["gate_members"] = {"name": failing[0], "pk": pk}
+            if check.total == 1 and gate:
+                # what the gate's links ("Edit…", "Manage tables…") open
+                # their target on
+                context["gate_dataset"] = (
+                    own_datasets(self.profile_user)
+                    .filter(name__in=list(gate))
+                    .only("pk", "name")
+                    .first()
+                )
             # where the Datasets will be listed: their own Topics
             context["listed_under"] = [
                 capfirst(name)
@@ -588,6 +607,82 @@ class DatasetActionView(DatasetsList, ActionView):
             ]
         return context
 
+    def _own(self, names):
+        """The one Dataset ``names`` names, which must be the user's own;
+        anything else is the owner rule's 404."""
+        if len(names) != 1:
+            raise Http404
+        try:
+            return dataset_actions.own_dataset(self.profile_user, names[0])
+        except (dataset_actions.DatasetNotFound, dataset_actions.NotYourDataset):
+            raise Http404
+
+    def _form(
+        self, request, action, dataset=None, values=None, errors=None, status=200
+    ):
+        """The Create or Edit form: ``values`` as typed, or what ``dataset``
+        holds (nothing, for a create)."""
+        if values is None:
+            values = {"title": "", "description": "", "topics": []}
+            if dataset is not None:
+                metadata = dataset.metadata or {}
+                values = {
+                    "title": metadata.get("title") or "",
+                    "description": metadata.get("description") or "",
+                    "topics": list(dataset.topics.values_list("name", flat=True)),
+                }
+        context = {
+            "profile_user": self.profile_user,
+            "action": action,
+            "dataset": dataset,
+            "stored_title": dataset_title(dataset) if dataset is not None else "",
+            "values": values,
+            "errors": errors or {},
+            "topics": topic_choices(),
+            "preview": (
+                name_preview(values["title"])
+                if action == dataset_actions.CREATE
+                else None
+            ),
+        }
+        return render(request, self.form_template, context, status=status)
+
+    def _preflight(self, request, action, data):
+        if action not in FORM_ACTIONS:
+            return super()._preflight(request, action, data)
+        action = self._action(action)
+        if action == dataset_actions.EDIT:
+            return self._form(request, action, self._own(self._names(data)))
+        return self._form(request, action)
+
+    def post(self, request, user_id, action):
+        if action not in FORM_ACTIONS:
+            return super().post(request, user_id, action)
+        action = self._action(action)
+        params = self._params(request.POST)
+        # as the API's serializers take them: surrounding blanks trimmed
+        values = {
+            "title": params["title"].strip(),
+            "description": params["description"].strip(),
+            "topics": params["topics"],
+        }
+        dataset = None
+        try:
+            if action == dataset_actions.CREATE:
+                names = [_created_name(values["title"])]
+            else:
+                dataset = self._own(self._names(request.POST))
+                names = [dataset.name]
+            outcome = dataset_actions.execute(
+                self.profile_user, action, names, values, via="dashboard"
+            )
+        except dataset_actions.InvalidParameters as error:
+            return self._form(request, action, dataset, values, error.errors, 400)
+        except (dataset_actions.DatasetNotFound, dataset_actions.NotYourDataset):
+            # gone, or no longer the user's, since the form was opened
+            raise Http404
+        return self._done(request, outcome)
+
     def done_detail(self, request, outcome):
         datasets = outcome.datasets
         if outcome.action == dataset_actions.DELETE:
@@ -595,6 +690,8 @@ class DatasetActionView(DatasetsList, ActionView):
                 "message": _dataset_deleted_message(datasets),
                 "gone": [dataset.name for dataset in datasets],
             }
+        if outcome.action in FORM_ACTIONS:
+            return self._saved_detail(request, outcome)
         if not datasets:
             # passed over at execute: the state asked for held already
             return {"message": _dataset_unchanged_message(outcome)}
@@ -603,6 +700,58 @@ class DatasetActionView(DatasetsList, ActionView):
         if len(datasets) == 1:
             detail["focus"] = f"menu-{datasets[0].pk}"
         return detail
+
+    def _saved_detail(self, request, outcome):
+        """After a create or an edit: what was saved, focus on the row's
+        menu and, for a create, the new name (``created``)."""
+        dataset = outcome.datasets[0]
+        what = _dataset_what([dataset])
+        detail = {"focus": f"menu-{dataset.pk}"}
+        if outcome.action == dataset_actions.CREATE:
+            detail["created"] = dataset.name
+            message = f"Created {what} as a private draft, visible only to you."
+        elif outcome.changed:
+            message = f"Saved {what}."
+        else:
+            return {
+                **detail,
+                "message": f"Nothing was changed: {what} is saved that way already.",
+            }
+        if self.hidden(request, [dataset]):
+            message += " It is not shown under the current filter."
+        return {**detail, "message": message}
+
+
+def _created_name(title) -> str:
+    """The name a create with ``title`` gets (``normalize_dataset_name``). A
+    title that gives none is refused like any other unusable field: required
+    when empty, and named for the name otherwise."""
+    name = normalize_dataset_name(title)
+    if name is None:
+        raise dataset_actions.InvalidParameters(
+            {"title": dataset_actions.REQUIRED}
+            if not title
+            else {
+                "name": "The title needs a letter or number to make a web address from."
+            }
+        )
+    return name
+
+
+class DatasetNamePreviewView(ProfileOwnerRequiredMixin, View):
+    """The Create form's name preview (``name_preview``): what the typed
+    ``title`` would be named and whether it is free, with the Create button
+    enabled or not, out of band (dataset_name_preview.html). Reads one
+    query and writes nothing; a name taken by another user's draft reads as
+    taken and nothing more."""
+
+    @method_decorator(never_cache)
+    def get(self, request, user_id):
+        return render(
+            request,
+            "login/partials/dataset_name_preview.html",
+            {"preview": name_preview(request.GET.get("title", ""))},
+        )
 
 
 class DatasetMembersBase(ProfileOwnerRequiredMixin, View):

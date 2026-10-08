@@ -275,6 +275,84 @@ describe("a multi-valued filter's dropdown", () => {
   });
 });
 
+describe("Create and Edit (#2624)", () => {
+  let unbind;
+  let dialog;
+
+  const bind = () => {
+    dialog = fakeOverlay();
+    unbind = bindDatasetsTab(document, {
+      announceDelay: 0,
+      dialog,
+      drawer: fakeOverlay(),
+      schedule: () => {},
+    });
+  };
+
+  const shown = (element) =>
+    element.dispatchEvent(new CustomEvent("shown.bs.modal", { bubbles: true }));
+
+  afterEach(() => {
+    unbind();
+  });
+
+  it("puts focus in the form's title once the dialog is shown", () => {
+    renderPage();
+    bind();
+    $("dataset-action-body").innerHTML = `
+      <form id="dataset-form">
+        <input id="dataset-form-title" name="title" autofocus />
+        <textarea id="dataset-form-description" name="description"></textarea>
+      </form>`;
+    shown($("dataset-action"));
+    expect(document.activeElement).toBe($("dataset-form-title"));
+  });
+
+  it("leaves focus alone in a dialog that asks for none", () => {
+    renderPage();
+    bind();
+    $("dataset-action-body").innerHTML = `<button id="dataset-action-confirm">Delete</button>`;
+    $("datasets-search").focus();
+    shown($("dataset-action"));
+    expect(document.activeElement).toBe($("datasets-search"));
+  });
+
+  it("filters with a bar brought in after the page had none", () => {
+    // the empty account's page: no filter bar, then the first Create
+    renderPage();
+    $("datasets-filters").remove();
+    window.history.replaceState(null, "", "/user/profile/1/datasets");
+    bind();
+    $("datasets-live").insertAdjacentHTML(
+      "beforebegin",
+      `<div id="datasets-filters" role="search">
+         <input type="search" id="datasets-search" name="search" />
+       </div>`
+    );
+    $("datasets-search").value = "wind";
+    expect(configRequest($("datasets-search"))).toEqual({ search: "wind" });
+  });
+
+  it("closes the dialog and focuses the new row's menu after a Create", () => {
+    renderPage();
+    bind();
+    fire("datasets-changed", {
+      message: "Created “Wind atlas” as a private draft, visible only to you.",
+      created: "wind_atlas",
+      focus: "menu-new",
+    });
+    expect(dialog.closed).toBe(1);
+    expect($("datasets-toasts-polite").textContent).toContain("Wind atlas");
+    swapRegion(
+      region().replace(
+        '<td class="c-menu"></td>',
+        '<td class="c-menu"><button type="button" id="menu-new">⋯</button></td>'
+      )
+    );
+    expect(document.activeElement).toBe($("menu-new"));
+  });
+});
+
 // The members drawer in the address (#2625): `?members=<name>` is page
 // state, written with replaceState when the drawer opens and removed when it
 // closes; on a load or a history restore the drawer opens by itself when the
@@ -438,7 +516,11 @@ describe("the members drawer in the address", () => {
 
   it("opens on a new Dataset after a Create, once the dialog has closed", () => {
     mount();
-    fire("datasets-changed", { message: "Created.", created: "new_one" });
+    fire("datasets-changed", {
+      message: "Created.",
+      created: "new_one",
+      focus: "menu-7",
+    });
     expect(dialog.closed).toBe(1);
     // still showing: nothing loads yet
     expect(loaded).toEqual([]);
@@ -449,6 +531,9 @@ describe("the members drawer in the address", () => {
     expect(members()).toBe("new_one");
     drawer.shown.forEach((callback) => callback());
     expect(document.activeElement).toBe($("dataset-members-add-search"));
+    // closed, focus goes to the new row's ⋯ (#2624's `focus`)
+    close();
+    expect(document.activeElement).toBe($("menu-7"));
   });
 
   it("focuses what the server names after a removal took the control away", () => {
