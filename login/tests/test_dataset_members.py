@@ -528,9 +528,15 @@ class OpenersTests(MembersTestCase):
         self.assertIn(f'hx-get="{self.members_path("ds_gate_link")}"', link)
         self.assertIn(f'data-members-origin="menu-{dataset.pk}"', link)
 
-    def test_no_link_when_the_gate_needs_only_a_topic(self):
+    def test_the_link_is_offered_when_only_a_topic_is_missing(self):
+        # a member brings its Topics along, so adding one may be the fix
         self.dataset("ds_gate_topic", tables=[self.table("o_gate_t")])
         dialog = self.preflight("publish", "ds_gate_topic").content.decode()
+        self.assertIn('id="dataset-action-gate-members"', dialog)
+
+    def test_no_link_for_a_dataset_that_passes(self):
+        self.ready("ds_gate_passes")
+        dialog = self.preflight("publish", "ds_gate_passes").content.decode()
         self.assertNotIn('id="dataset-action-gate-members"', dialog)
 
 

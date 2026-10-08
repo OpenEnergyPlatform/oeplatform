@@ -51,7 +51,12 @@ from login.access import (
     membership_or_404,
     profile_owner_required,
 )
-from login.datasets_tab import dataset_rows, datasets_listing, own_datasets
+from login.datasets_tab import (
+    dataset_rows,
+    datasets_listing,
+    own_dataset_pk,
+    own_datasets,
+)
 from login.forms import EditUserForm, OrganizationForm
 from login.list_views import (
     ActionCheckView,
@@ -496,12 +501,7 @@ class DatasetsView(DatasetsList, ListTabView):
         name = self.request.GET.get("members", "").strip()
         if not name or not self.renders_page(self.request):
             return {}
-        pk = (
-            own_datasets(self.profile_user)
-            .filter(name=name)
-            .values_list("pk", flat=True)
-            .first()
-        )
+        pk = own_dataset_pk(self.profile_user, name)
         return {"members_open": {"name": name, "pk": pk}} if pk else {}
 
 
@@ -566,21 +566,18 @@ class DatasetActionView(DatasetsList, ActionView):
             context["needs"] = [
                 GATE_NEEDS[gate.name] for gate in DATASET_GATE if gate.name in failed
             ]
-            lacking = [
-                name
-                for name, names in check.consequences["gate"].items()
-                if "members" in names
-            ]
-            if check.total == 1 and lacking:
-                # "Manage tables…" opens the members drawer once the dialog
-                # has closed; focus comes back to the row's ⋯ from there
-                context["gate_members"] = {
-                    "name": lacking[0],
-                    "pk": own_datasets(self.profile_user)
-                    .filter(name=lacking[0])
-                    .values_list("pk", flat=True)
-                    .first(),
-                }
+            # one Dataset failing the gate: "Manage tables…" opens the
+            # members drawer once the dialog has closed, whichever check
+            # failed, since a member brings its Topics along; focus comes
+            # back to the row's ⋯ from there
+            failing = list(check.consequences["gate"])
+            pk = (
+                own_dataset_pk(self.profile_user, failing[0])
+                if check.total == 1 and failing
+                else None
+            )
+            if pk:
+                context["gate_members"] = {"name": failing[0], "pk": pk}
             # where the Datasets will be listed: their own Topics
             context["listed_under"] = [
                 capfirst(name)
@@ -608,7 +605,28 @@ class DatasetActionView(DatasetsList, ActionView):
         return detail
 
 
-class DatasetMembersView(ProfileOwnerRequiredMixin, View):
+class DatasetMembersBase(ProfileOwnerRequiredMixin, View):
+    """What the members drawer's two views share: the Dataset the address
+    names, which must be one of the user's own (else 404, alike for another
+    user's draft, another user's published Dataset and a name nobody has),
+    and the drawer's state as a request carries it: ``search`` and ``page``
+    (the members), ``add_search`` and ``add_page`` (the add search)."""
+
+    def _dataset(self, name):
+        try:
+            return dataset_actions.own_dataset(self.profile_user, name)
+        except (dataset_actions.DatasetNotFound, dataset_actions.NotYourDataset):
+            raise Http404
+
+    @staticmethod
+    def _state(data) -> dict:
+        return {
+            key: data.get(key, "").strip()
+            for key in ("search", "page", "add_search", "add_page")
+        }
+
+
+class DatasetMembersView(DatasetMembersBase):
     """The members drawer for one of the user's own Datasets (#2625): every
     member, 25 per page with a search over them, an add search over the
     Tables the user may assign, and the hand-off to the tables tab. GET
@@ -647,30 +665,20 @@ class DatasetMembersView(ProfileOwnerRequiredMixin, View):
     template = "login/partials/dataset_members_drawer.html"
     list_template = "login/partials/dataset_members_list.html"
 
-    def _dataset(self, name):
-        try:
-            return dataset_actions.own_dataset(self.profile_user, name)
-        except (dataset_actions.DatasetNotFound, dataset_actions.NotYourDataset):
-            raise Http404
-
-    @staticmethod
-    def _state(data) -> dict:
-        return {
-            key: data.get(key, "").strip()
-            for key in ("search", "page", "add_search", "add_page")
-        }
-
-    def _drawer(self, request, dataset, state, status=200, **extra):
+    def _drawer(self, request, dataset, state, status=200, at=None, kept="", **extra):
+        """The drawer, or its member list alone for a request aimed at it.
+        ``at`` (the index of a member just removed) and ``kept`` (a member
+        the user chose to keep) say where focus goes (``_members_focus``);
+        ``extra`` goes to the template: ``message``, ``added``, ``ask``."""
         user = self.profile_user
         members = dataset_members.member_page(
             user, dataset, state["search"], state["page"]
         )
-        focus_id = _members_focus(members.rows, extra.pop("at", None), extra)
+        focus_id = _members_focus(members.rows, at, kept)
         context = {
             "profile_user": user,
             "dataset": dataset,
             "members": members,
-            "page_size": dataset_members.PAGE_SIZE,
             "state": state,
             "focus_id": focus_id,
             **extra,
@@ -733,7 +741,9 @@ class DatasetMembersView(ProfileOwnerRequiredMixin, View):
             if op == "add"
             else dataset_actions.MEMBERS_REMOVE
         )
-        topics_before = set(dataset.topics.values_list("name", flat=True))
+        topics_before = (
+            set(dataset.topics.values_list("name", flat=True)) if op == "add" else None
+        )
         try:
             outcome = dataset_actions.execute(
                 user,
@@ -780,12 +790,10 @@ class DatasetMembersView(ProfileOwnerRequiredMixin, View):
         return response
 
 
-class DatasetMembersSearchView(DatasetMembersView):
+class DatasetMembersSearchView(DatasetMembersBase):
     """The members drawer's add search (``DatasetMembersView``): one page of
     the Tables the user may add, for ``add_search`` and ``add_page``. With
     nothing typed it lists the user's own Tables. GET only."""
-
-    http_method_names = ["get"]
 
     @method_decorator(never_cache)
     def get(self, request, user_id, dataset_name):
@@ -805,13 +813,12 @@ class DatasetMembersSearchView(DatasetMembersView):
         )
 
 
-def _members_focus(rows, at, extra) -> str:
+def _members_focus(rows, at, kept) -> str:
     """The id of the control the drawer should focus after a change took
     away the one that was focused, or "" to keep the same id: after a
     removal the Remove now at the removed member's place (``at``), or the
     add search when no member is left on the page; after "Keep it" the kept
     member's Remove (``kept``)."""
-    kept = extra.pop("kept", "")
     if at is not None:
         if not rows:
             return "dataset-members-add-search"

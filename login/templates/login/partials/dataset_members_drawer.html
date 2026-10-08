@@ -14,10 +14,9 @@ it decides again on every change; this only offers it.
   members are published, shared or removed at once;
 - ``message``: what the last change did, or why it did nothing;
 - the gate line on a draft (``needs``);
-- every member, 25 per page, with a search over them where there are more
-  than a page or a search is running. Remove is neutral and acts at once,
-  except for a member the user could not add back (``row.lost``), whose
-  Remove asks first (``ask_row``);
+- every member, 25 per page, with a search over them. Remove is neutral and
+  acts at once, except for a member the user could not add back
+  (``row.lost``), whose Remove asks first (``ask_row``);
 - the add search (dataset_members_results.html).
 
 Every control has a stable id, so focus can be put back after a swap. The
@@ -100,22 +99,20 @@ the drawer's live region outside these contents).
                 hx-swap="innerHTML">Keep it</button>
       </div>
     {% endif %}
-    {% if members.all > page_size or members.search %}
-      <label class="visually-hidden"
-             for="dataset-members-search">Find a table in this dataset</label>
-      <input type="search"
-             id="dataset-members-search"
-             name="search"
-             class="form-control form-control-sm mb-1"
-             placeholder="Find a table in this dataset"
-             autocomplete="off"
-             value="{{ members.search }}"
-             hx-get="{{ members_url }}"
-             hx-trigger="input changed delay:300ms, search"
-             hx-target="#dataset-members-list"
-             hx-swap="outerHTML"
-             hx-sync="this:replace" />
-    {% endif %}
+    <label class="visually-hidden"
+           for="dataset-members-search">Find a table in this dataset</label>
+    <input type="search"
+           id="dataset-members-search"
+           name="search"
+           class="form-control form-control-sm mb-1"
+           placeholder="Find a table in this dataset"
+           autocomplete="off"
+           value="{{ members.search }}"
+           hx-get="{{ members_url }}"
+           hx-trigger="input changed delay:300ms, search"
+           hx-target="#dataset-members-list"
+           hx-swap="outerHTML"
+           hx-sync="this:replace" />
     {% include "login/partials/dataset_members_list.html" %}
   </section>
   <section class="dash-members-section"

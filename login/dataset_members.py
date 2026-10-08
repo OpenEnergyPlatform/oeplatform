@@ -33,15 +33,18 @@ from django.db.models.functions import Coalesce, Lower, Now, NullIf
 from api.services.dataset_creation import assignable_tables
 from dataedit.models import Dataset, Embargo, Table
 from dataedit.publish_gate import DATASET_GATE, publish_checks
+from login.listing import PAGE_SIZE as LIST_PAGE_SIZE
 from login.tables_tab import DRAFT, accessible_tables, table_status
 
-# Members and add-search results per page.
-PAGE_SIZE = 25
+# Members and add-search results per page: the list's own page size.
+PAGE_SIZE = LIST_PAGE_SIZE
 
 # What the drawer's gate line says a draft needs, by ``DATASET_GATE``'s check
-# name. A Topic arrives with a member too (``assign_table`` seeds the
-# member's), so the topic line names both ways.
-GATE_NEEDS = {
+# name. Worded as one sentence, unlike the publish dialog's list
+# (``login.views.GATE_NEEDS``): a Topic arrives with a member too
+# (``assign_table`` seeds the member's), and adding members is what the
+# drawer is for, so its topic line names both ways.
+GATE_LINE = {
     "members": "add at least one table",
     "topics": "choose at least one topic (Edit…, or add a table that has one)",
 }
@@ -64,10 +67,14 @@ def _matching(tables, search):
     )
 
 
+def _pages(total) -> int:
+    return max(1, -(-total // PAGE_SIZE))
+
+
 def _page_number(raw, total) -> int:
     """``raw`` as a page within ``total`` results: a page past the end shows
     the last one, anything unreadable the first."""
-    pages = max(1, -(-total // PAGE_SIZE))
+    pages = _pages(total)
     try:
         number = int(raw)
     except (TypeError, ValueError):
@@ -87,7 +94,7 @@ class Slice:
 
     @property
     def pages(self) -> int:
-        return max(1, -(-self.total // PAGE_SIZE))
+        return _pages(self.total)
 
     @property
     def previous(self):
@@ -202,7 +209,7 @@ def candidate_page(user, dataset: Dataset, search="", page=None) -> Slice:
     return Slice(rows=rows, total=total, page=number, search=search)
 
 
-def lost_member(user, dataset: Dataset, name) -> MemberRow:
+def lost_member(user, dataset: Dataset, name) -> MemberRow | None:
     """The member ``name`` of ``dataset`` as a ``MemberRow`` when the user
     could not add it back after removing it, else None (not a member, or one
     they could add again). Two queries."""
@@ -221,12 +228,12 @@ def own_member_count(user, dataset: Dataset) -> int:
 
 def gate_needs(dataset: Dataset) -> list:
     """What a draft still needs to pass ``DATASET_GATE``, in the gate's order
-    (``GATE_NEEDS``); nothing for a published Dataset, whose state no member
+    (``GATE_LINE``); nothing for a published Dataset, whose state no member
     change alters. Two queries for a draft, none otherwise."""
     if dataset.is_published:
         return []
     return [
-        GATE_NEEDS[check.name]
+        GATE_LINE[check.name]
         for check in publish_checks(dataset, DATASET_GATE)
         if not check.passed
     ]
