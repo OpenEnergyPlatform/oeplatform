@@ -30,9 +30,11 @@ this dialog first and sends their request once it has closed, because a
 modal cannot open a drawer or another modal while it is showing. The gate's
 "Edit…" (beside the missing Topic, for one Dataset: ``gate_dataset``) opens
 the Create and Edit form in this same dialog once it has closed, and hands
-focus back to the row's ⋯ (``data-action-origin``); "Manage tables…" arrives
-with the drawer it opens. Such a link sits inside the form, so it names its own
-``hx-disabled-elt``: the form's names a confirm button a gate dialog lacks.
+focus back to the row's ⋯ (``data-action-origin``). "Manage tables…" (under
+the list, for one Dataset failing the gate, whichever check: a member brings
+its Topics along) opens the members drawer the same way. Such a link sits
+inside the form, so it names its own ``hx-disabled-elt``: the form's names a
+confirm button a gate dialog lacks.
 {% endcomment %}
 {% with check=preflight n=preflight.eligible|length %}
   <div class="modal-header">
@@ -98,6 +100,21 @@ with the drawer it opens. Such a link sits inside the form, so it names its own
               </li>
             {% endfor %}
           </ul>
+          {% if gate_dataset %}
+            {% url 'login:dataset-members' profile_user.pk gate_dataset.name as members_url %}
+            <p class="mb-2">
+              <button type="button"
+                      id="dataset-action-gate-members"
+                      class="btn btn-link p-0"
+                      data-close-then
+                      hx-trigger="dialog-closed"
+                      hx-get="{{ members_url }}"
+                      hx-target="#dataset-members-body"
+                      hx-swap="innerHTML"
+                      hx-disabled-elt="this"
+                      data-members-origin="menu-{{ gate_dataset.pk }}">Manage tables…</button>
+            </p>
+          {% endif %}
         </div>
       {% endif %}
       {% if check.eligible %}

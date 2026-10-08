@@ -237,3 +237,89 @@
     white-space: normal;
   }
 }
+
+/* The members drawer (#2625). Like the tables tab's access drawer it sits
+   outside .dash, so it states the colours it uses itself, and its body is a
+   wrapper the drawer's contents are swapped into, so it carries the
+   offcanvas' column layout on. */
+.dash-members-offcanvas {
+  --dash-muted: #6c757d;
+  --dash-secondary: #1f567d;
+
+  width: min(32rem, 100vw);
+}
+
+.dash-members-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.dash-members-head {
+  min-width: 0;
+}
+
+.dash-members-sub {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--dash-muted);
+}
+
+/* the list's .dash-muted keeps a cell on one line; prose here wraps */
+.dash-members .dash-muted {
+  font-size: 0.8125rem;
+  color: var(--dash-muted);
+  white-space: normal;
+}
+
+.dash-members-handoff {
+  margin-bottom: 0.75rem;
+  padding: 0.45rem 0.6rem;
+  font-size: 0.875rem;
+  background: #f5f9fc;
+  border: 1px solid #d6e4ef;
+  border-radius: 6px;
+}
+
+.dash-members-section + .dash-members-section {
+  margin-top: 1rem;
+}
+
+.dash-members-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dash-members-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.35rem 0.25rem;
+  font-size: 0.875rem;
+  border-bottom: 1px solid #f1f3f5;
+}
+
+.dash-members-row__what {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.dash-members-added {
+  font-size: 0.875rem;
+  color: #198754;
+  white-space: nowrap;
+}
+
+.dash-members-confirm {
+  font-size: 0.875rem;
+}
+
+.dash-members-pager {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+  margin-top: 0.35rem;
+}

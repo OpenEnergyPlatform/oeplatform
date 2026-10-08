@@ -147,6 +147,16 @@ SPDX-License-Identifier: CC0-1.0
   nothing. The first Create in an empty account brings the filter bar in without
   a reload
   [(#2624)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2624)
+- Profile dashboard, datasets tab: a members drawer, opened by "Manage tables…"
+  in a row's ⋯ menu, by "and n more" in the Tables popover and by the publish
+  dialog of a Dataset without tables. It lists every member, 25 per page with a
+  search, and adds any table you may assign: your own before you type, anyone's
+  published table once you search. Add and Remove act at once and the list
+  refreshes behind the drawer; removing a draft or embargoed table you could not
+  add back asks first. An add names the topics it brought along, and a link
+  hands over to the tables tab for your own members. The open drawer is in the
+  address (`?members=<name>`), so browser Back from that hand-off reopens it
+  [(#2625)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2625)
 - The term search in the metadata editor and the oeo_ext unit picker no longer
   always asks openenergyplatform.org: an instance with its own lookup service
   searches itself, one without uses the public endpoint, and `OEO_SEARCH_URL`

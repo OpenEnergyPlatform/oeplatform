@@ -110,7 +110,10 @@ describe("listConfig", () => {
       body: "widget-members-body",
       title: "widget-members-title",
       confirm: "widget-members-confirm-box",
+      live: "widget-members-live",
       origin: "membersOrigin",
+      param: null,
+      createdFocus: null,
     });
   });
 

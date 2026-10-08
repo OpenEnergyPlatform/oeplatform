@@ -1,0 +1,73 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+One page of the members drawer's member list (dataset_members_drawer.html),
+also answered alone to a search or a page turn inside the drawer
+(``HX-Target: dataset-members-list``). ``members`` is a
+login.dataset_members.MembersSlice; ``page`` travels with every change as
+#dataset-members-page, so an answer shows the page the user was on.
+{% endcomment %}
+{% url 'login:dataset-members' profile_user.pk dataset.name as members_url %}
+<div id="dataset-members-list">
+  <input type="hidden"
+         id="dataset-members-page"
+         name="page"
+         value="{{ members.page }}" />
+  {% if members.rows %}
+    <ul class="dash-members-rows">
+      {% for row in members.rows %}
+        <li id="dataset-member-{{ row.table.pk }}" class="dash-members-row">
+          <div class="dash-members-row__what">
+            <a href="{% url 'dataedit:view' table=row.table.name %}">{{ row.title }}</a>
+            {% if row.status == "draft" %}
+              <span class="badge dash-badge dash-badge--draft">Draft</span>
+            {% elif row.status == "embargoed" %}
+              <span class="badge dash-badge dash-badge--embargoed">Embargoed</span>
+            {% endif %}
+            <div class="dash-tname">{{ row.table.name }}</div>
+          </div>
+          {% if row.lost %}
+            <button type="button"
+                    id="dataset-members-remove-{{ row.table.pk }}"
+                    class="btn btn-outline-secondary btn-sm"
+                    aria-label="Remove {{ row.title }} from this dataset"
+                    hx-get="{{ members_url }}?ask={{ row.table.name|urlencode }}"
+                    hx-include="#dataset-members-search, #dataset-members-page, #dataset-members-add-search, #dataset-members-add-page"
+                    hx-target="#dataset-members-body"
+                    hx-swap="innerHTML">Remove</button>
+          {% else %}
+            <button type="button"
+                    id="dataset-members-remove-{{ row.table.pk }}"
+                    class="btn btn-outline-secondary btn-sm"
+                    aria-label="Remove {{ row.title }} from this dataset"
+                    hx-post="{{ members_url }}"
+                    hx-vals='{"op": "remove", "table": "{{ row.table.name|escapejs }}", "at": "{{ forloop.counter0 }}"}'
+                    hx-include="#dataset-members-search, #dataset-members-page, #dataset-members-add-search, #dataset-members-add-page"
+                    hx-target="#dataset-members-body"
+                    hx-swap="innerHTML">Remove</button>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% elif members.search %}
+    <p class="dash-muted">No table in this dataset matches.</p>
+  {% else %}
+    <p class="dash-muted">No tables yet.</p>
+  {% endif %}
+  {% if members.pages > 1 %}
+    <nav class="dash-members-pager" aria-label="Pages of member tables">
+      <button type="button"
+              id="dataset-members-previous"
+              class="btn btn-outline-secondary btn-sm"
+              aria-label="Previous page"
+              {% if members.previous %}hx-get="{{ members_url }}?page={{ members.previous }}" hx-include="#dataset-members-search" hx-target="#dataset-members-list" hx-swap="outerHTML"{% else %}disabled{% endif %}>‹</button>
+      <span class="dash-muted">Page {{ members.page }} of {{ members.pages }}</span>
+      <button type="button"
+              id="dataset-members-next"
+              class="btn btn-outline-secondary btn-sm"
+              aria-label="Next page"
+              {% if members.next %}hx-get="{{ members_url }}?page={{ members.next }}" hx-include="#dataset-members-search" hx-target="#dataset-members-list" hx-swap="outerHTML"{% else %}disabled{% endif %}>›</button>
+    </nav>
+  {% endif %}
+</div>

@@ -1,0 +1,78 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+One page of the members drawer's add search, also answered alone by
+login:dataset-members-search. ``candidates`` is a login.dataset_members.Slice
+over ``assignable_tables``: with nothing typed, the user's own Tables. Each
+row offers Add, which acts at once and comes back as "Added" (``added``, with
+the button's id, so focus stays on it), or reads "Already in" for a member.
+``add_page`` travels with every change as #dataset-members-add-page.
+{% endcomment %}
+{% url 'login:dataset-members' profile_user.pk dataset.name as members_url %}
+{% url 'login:dataset-members-search' profile_user.pk dataset.name as search_url %}
+<div id="dataset-members-results">
+  <input type="hidden"
+         id="dataset-members-add-page"
+         name="add_page"
+         value="{{ candidates.page }}" />
+  <p class="dash-muted mb-1">
+    {% if candidates.search %}
+      {{ candidates.total }} table{{ candidates.total|pluralize }} match{{ candidates.total|pluralize:"es," }}.
+    {% else %}
+      Your tables. Type to search every published table too.
+    {% endif %}
+    Anyone's published table can be added; a draft or embargoed one only by its holders.
+  </p>
+  {% if candidates.rows %}
+    <ul class="dash-members-rows">
+      {% for row in candidates.rows %}
+        <li id="dataset-candidate-{{ row.table.pk }}" class="dash-members-row">
+          <div class="dash-members-row__what">
+            {{ row.title }}
+            {% if row.status == "draft" %}
+              <span class="badge dash-badge dash-badge--draft">Draft</span>
+            {% elif row.status == "embargoed" %}
+              <span class="badge dash-badge dash-badge--embargoed">Embargoed</span>
+            {% endif %}
+            <div class="dash-tname">{{ row.table.name }}</div>
+          </div>
+          {% if added == row.table.pk %}
+            <span id="dataset-members-add-{{ row.table.pk }}"
+                  class="dash-members-added"
+                  tabindex="-1">Added</span>
+          {% elif row.member %}
+            <span class="dash-muted">Already in</span>
+          {% else %}
+            <button type="button"
+                    id="dataset-members-add-{{ row.table.pk }}"
+                    class="btn btn-outline-primary btn-sm"
+                    aria-label="Add {{ row.title }}"
+                    hx-post="{{ members_url }}"
+                    hx-vals='{"op": "add", "table": "{{ row.table.name|escapejs }}"}'
+                    hx-include="#dataset-members-search, #dataset-members-page, #dataset-members-add-search, #dataset-members-add-page"
+                    hx-target="#dataset-members-body"
+                    hx-swap="innerHTML">Add</button>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="dash-muted">No table you could add matches.</p>
+  {% endif %}
+  {% if candidates.pages > 1 %}
+    <nav class="dash-members-pager" aria-label="Pages of tables to add">
+      <button type="button"
+              id="dataset-members-add-previous"
+              class="btn btn-outline-secondary btn-sm"
+              aria-label="Previous page"
+              {% if candidates.previous %}hx-get="{{ search_url }}?add_page={{ candidates.previous }}" hx-include="#dataset-members-add-search" hx-target="#dataset-members-results" hx-swap="outerHTML"{% else %}disabled{% endif %}>‹</button>
+      <span class="dash-muted">Page {{ candidates.page }} of {{ candidates.pages }}</span>
+      <button type="button"
+              id="dataset-members-add-next"
+              class="btn btn-outline-secondary btn-sm"
+              aria-label="Next page"
+              {% if candidates.next %}hx-get="{{ search_url }}?add_page={{ candidates.next }}" hx-include="#dataset-members-add-search" hx-target="#dataset-members-results" hx-swap="outerHTML"{% else %}disabled{% endif %}>›</button>
+    </nav>
+  {% endif %}
+</div>

@@ -145,7 +145,8 @@ class ListTabView(ProfileOwnerRequiredMixin, View):
     bar's ``(action, label)`` pairs, in order), ``create_action`` (the
     action service's action behind "New <item>" at the end of the filter
     row, or None for a tab that creates nothing), ``rows(user)`` (the
-    ``rows`` callable for ``Listing.page``) and ``extra_context()``.
+    ``rows`` callable for ``Listing.page``) and ``extra_context()``, which
+    may ask ``renders_page`` whether anything outside the region is drawn.
     """
 
     frame: ListFrame
@@ -156,6 +157,11 @@ class ListTabView(ProfileOwnerRequiredMixin, View):
 
     def extra_context(self) -> dict:
         return {}
+
+    def renders_page(self, request) -> bool:
+        """Whether ``request`` gets the whole page rather than the results
+        region alone: a direct load or a history restore."""
+        return not is_htmx(request) or "HX-History-Restore-Request" in request.headers
 
     @method_decorator(never_cache)
     def get(self, request, user_id):
@@ -171,7 +177,7 @@ class ListTabView(ProfileOwnerRequiredMixin, View):
             "create_action": self.create_action,
             **self.extra_context(),
         }
-        if is_htmx(request) and "HX-History-Restore-Request" not in request.headers:
+        if not self.renders_page(request):
             context["region_only"] = True
             context["brings_controls"] = request.headers.get(WAS_EMPTY_HEADER) == "true"
             response = render(request, self.region_template, context)

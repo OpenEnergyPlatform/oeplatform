@@ -101,6 +101,12 @@ def own_datasets(user):
     return Dataset.objects.filter(creator=user)
 
 
+def own_dataset_pk(user, name):
+    """The pk of the user's own Dataset called ``name``, or None. One
+    query."""
+    return own_datasets(user).filter(name=name).values_list("pk", flat=True).first()
+
+
 def _active_embargo(table_ref):
     return Embargo.objects.filter(table_id=table_ref, date_ended__gt=Now())
 

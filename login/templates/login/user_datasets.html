@@ -7,7 +7,8 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 The datasets tab (list_tab.html), where the profile opens. The filter row is
 Search, Topic and Tag; "More filters (n)" holds Created and Modified. The
 bar folds behind "Filters (n)" only where the rows already stack (measured,
-``datasets_tab.css``). It keeps the profile sidebar, like the tables tab.
+``datasets_tab.css``). It keeps the profile sidebar, like the tables tab. The
+members drawer (#dataset-members) sits beside the action dialog.
 {% endcomment %}
 {% load static %}
 {% block list-styles %}
@@ -16,6 +17,33 @@ bar folds behind "Filters (n)" only where the rows already stack (measured,
 {% block region %}
   {% include "login/partials/datasets_region.html" %}
 {% endblock region %}
+{% block drawers %}
+  {% comment %}
+  The members drawer, outside the tab for the same reason as the dialog. Its
+  contents come from login:dataset-members and every change in it replaces
+  them, so it stays open; datasets_tab.js opens it once "Manage tables…", a
+  Tables popover's "and n more" or the publish dialog's "Manage tables…" has
+  filled it. ``data-url-template`` is that address for any Dataset
+  (``__key__`` stands for its name), which the script uses to open the
+  drawer by itself: on a load or history restore whose ``?members=`` names
+  one of the user's own Datasets (``data-open``, with the Dataset's ⋯ as where
+  focus returns), and after a Create. The live region outside the swapped
+  contents says what each change did.
+  {% endcomment %}
+  {% url 'login:dataset-members' profile_user.pk "__key__" as members_template %}
+  <div id="dataset-members"
+       class="offcanvas offcanvas-end dash-members-offcanvas"
+       tabindex="-1"
+       aria-labelledby="dataset-members-title"
+       data-url-template="{{ members_template }}"
+       {% if members_open %}data-open="{{ members_open.name }}" data-open-origin="menu-{{ members_open.pk }}"{% endif %}>
+    <div id="dataset-members-live"
+         class="visually-hidden"
+         aria-live="polite"
+         aria-atomic="true"></div>
+    <div id="dataset-members-body" class="dash-members-body"></div>
+  </div>
+{% endblock drawers %}
 {% block list-script %}
   <script type="module">
     import { bindDatasetsTab } from "{% static 'login/datasets_tab.js' %}";

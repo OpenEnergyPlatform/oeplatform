@@ -1,0 +1,137 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+The members drawer: the contents of #dataset-members-body, one of the user's
+own Datasets and its member Tables (login.views.DatasetMembersView). Every
+change posts here and the answer replaces these contents, so the drawer stays
+open while the list re-fetches behind it (``datasets-changed`` with ``stay``).
+What may be added and removed is the Dataset action service's to decide, and
+it decides again on every change; this only offers it.
+
+- the hand-off to the tables tab, filtered to this Dataset, when the user
+  holds a role on any member (``own_count``): where several of their own
+  members are published, shared or removed at once;
+- ``message``: what the last change did, or why it did nothing;
+- the gate line on a draft (``needs``);
+- every member, 25 per page, with a search over them. Remove is neutral and
+  acts at once, except for a member the user could not add back
+  (``row.lost``), whose Remove asks first (``ask_row``);
+- the add search (dataset_members_results.html).
+
+Every control has a stable id, so focus can be put back after a swap. The
+title carries what the page script reads after a swap: ``data-drawer-key``
+(the Dataset, written into the address as ``?members=``),
+``data-drawer-focus`` (the control to focus instead of the one that went, a
+Remove of a member removed) and ``data-announce`` (the message, said through
+the drawer's live region outside these contents).
+{% endcomment %}
+{% url 'login:dataset-members' profile_user.pk dataset.name as members_url %}
+<div class="offcanvas-header">
+  <div class="dash-members-head">
+    <h2 class="offcanvas-title h5"
+        id="dataset-members-title"
+        tabindex="-1"
+        data-drawer-key="{{ dataset.name }}"
+        {% if focus_id %}data-drawer-focus="{{ focus_id }}"{% endif %}
+        data-announce="{{ message.text|default:'' }}">Tables in “{{ title }}”</h2>
+    <p class="dash-members-sub">
+      <code>{{ dataset.name }}</code> ·
+      {% if dataset.is_published %}
+        Published
+      {% else %}
+        Draft
+      {% endif %}
+    </p>
+  </div>
+  <button type="button"
+          class="btn-close"
+          data-bs-dismiss="offcanvas"
+          aria-label="Close"></button>
+</div>
+<div class="offcanvas-body dash-members"
+     hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+  {% if own_count %}
+    <div id="dataset-members-handoff" class="dash-members-handoff">
+      <a id="dataset-members-handoff-link"
+         href="{% url 'login:tables' profile_user.pk %}?dataset={{ dataset.name|urlencode }}">Work on your own tables in this dataset in the tables tab →</a>
+      <p class="dash-muted mb-0">
+        {{ own_count }} of its tables {{ own_count|pluralize:"is,are" }} yours: select them there to publish,
+        share or remove several at once.
+      </p>
+    </div>
+  {% endif %}
+  {% if message %}
+    <div id="dataset-members-message"
+         class="alert alert-{{ message.level }} py-2"
+         {% if message.level == "danger" %}role="alert"{% endif %}>{{ message.text }}</div>
+  {% endif %}
+  {% if needs %}
+    <p id="dataset-members-gate"
+       class="dash-muted">To publish: {{ needs|join:"; " }}.</p>
+  {% endif %}
+  <section class="dash-members-section" aria-labelledby="dataset-members-count">
+    <h3 class="h6"
+        id="dataset-members-count">In this dataset ({{ members.all }})</h3>
+    {% if ask_row %}
+      <div id="dataset-members-confirm-box"
+           class="alert alert-warning dash-members-confirm"
+           tabindex="-1"
+           role="alertdialog"
+           aria-labelledby="dataset-members-confirm-text">
+        <p id="dataset-members-confirm-text" class="mb-2">
+          Remove “{{ ask_row.title }}”? You will not be able to add it back while it is {{ ask_row.lost_while }}.
+        </p>
+        <button type="button"
+                id="dataset-members-confirm"
+                class="btn btn-warning btn-sm"
+                hx-post="{{ members_url }}"
+                hx-vals='{"op": "remove", "table": "{{ ask_row.table.name|escapejs }}", "confirm": "yes", "at": "{{ ask_at|default:0 }}"}'
+                hx-include="#dataset-members-search, #dataset-members-page, #dataset-members-add-search, #dataset-members-add-page"
+                hx-target="#dataset-members-body"
+                hx-swap="innerHTML">Remove anyway</button>
+        <button type="button"
+                id="dataset-members-keep"
+                class="btn btn-outline-secondary btn-sm"
+                hx-get="{{ members_url }}?kept={{ ask_row.table.name|urlencode }}"
+                hx-include="#dataset-members-search, #dataset-members-page, #dataset-members-add-search, #dataset-members-add-page"
+                hx-target="#dataset-members-body"
+                hx-swap="innerHTML">Keep it</button>
+      </div>
+    {% endif %}
+    <label class="visually-hidden"
+           for="dataset-members-search">Find a table in this dataset</label>
+    <input type="search"
+           id="dataset-members-search"
+           name="search"
+           class="form-control form-control-sm mb-1"
+           placeholder="Find a table in this dataset"
+           autocomplete="off"
+           value="{{ members.search }}"
+           hx-get="{{ members_url }}"
+           hx-trigger="input changed delay:300ms, search"
+           hx-target="#dataset-members-list"
+           hx-swap="outerHTML"
+           hx-sync="this:replace" />
+    {% include "login/partials/dataset_members_list.html" %}
+  </section>
+  <section class="dash-members-section"
+           aria-labelledby="dataset-members-add-heading">
+    <h3 class="h6" id="dataset-members-add-heading">Add tables</h3>
+    <label class="visually-hidden"
+           for="dataset-members-add-search">Search tables to add</label>
+    <input type="search"
+           id="dataset-members-add-search"
+           name="add_search"
+           class="form-control form-control-sm mb-1"
+           placeholder="Search all published tables, and your own"
+           autocomplete="off"
+           value="{{ candidates.search }}"
+           hx-get="{% url 'login:dataset-members-search' profile_user.pk dataset.name %}"
+           hx-trigger="input changed delay:300ms, search"
+           hx-target="#dataset-members-results"
+           hx-swap="outerHTML"
+           hx-sync="this:replace" />
+    {% include "login/partials/dataset_members_results.html" %}
+  </section>
+</div>
