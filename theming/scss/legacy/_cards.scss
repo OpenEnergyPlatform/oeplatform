@@ -1,6 +1,6 @@
 @use '../base/' as *;
 @use '../base/mixins' as *;
-@use '../components/tags' as *;
+@use '../legacy/tags' as *;
 
 @mixin cards-layout($apply-2-cols-x4l-screens: true) {
     @extend .container-fluid;

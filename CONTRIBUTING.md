@@ -183,3 +183,9 @@ OEP-Desing is based on a
 [generic template](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/base/templates/base/base.html)
 that should be inherited by every new template. Be aware that some OEP-apps may
 implement their own base design (see `<app>/templates/<app>/base.html`)
+
+Build pages from the house components in the component catalogue at
+`/styleguide/` (copy the source shown under each one). If none fits, add a
+component with its catalogue entry, as described in
+[docs/dev/frontend/design-system.md](docs/dev/frontend/design-system.md); the
+catalogue check workflow fails a pull request that adds a component without one.

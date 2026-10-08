@@ -1,6 +1,6 @@
 @use '../base/' as *;
 @use '../base/mixins' as *;
-@use '../components/tables' as *;
+@use '../legacy/tables' as *;
 
 .content .tab-content {
     overflow: hidden;

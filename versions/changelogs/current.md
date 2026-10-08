@@ -12,6 +12,20 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- A component catalogue at `/styleguide/` (public, not indexed, linked from no
+  menu) shows every house component rendered from its entry template and as
+  copyable source from the same file, under a table of every design token with
+  its live value. `?tokens=bootstrap` renders it with Bootstrap 5.2's stock
+  token values. The "Catalogue check" workflow now also runs
+  `manage.py check_catalogue` (every component partial and include has an entry,
+  and the page renders in both modes) and a literal scan in headless Chrome that
+  fails when a component still paints an OEP colour under stock tokens. The
+  theme's twelve component partials moved to `theming/scss/legacy/` (and
+  `layouts/` for the collapse and sidebar rules), compiled unchanged. The first
+  house component is `link_with_arrow`, the homepage's sliding-arrow link, now
+  in the theme; the homepage renders pixel for pixel as before, and its arrows
+  no longer slide for visitors who ask for reduced motion
+  [(#2682)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2682)
 - The theme now emits the platform's design tokens as CSS custom properties at
   `:root`: Bootstrap's `--bs-*` names where Bootstrap has one, plus a small
   `--oep-*` set (text, borders, surfaces, shadows, dense size, heading weight,

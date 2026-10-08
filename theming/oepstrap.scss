@@ -1,16 +1,27 @@
 @use 'scss/tokens/root';
-@use 'scss/components/alerts';
-@use 'scss/components/buttons';
-@use 'scss/components/cards';
-@use 'scss/components/collapses';
-@use 'scss/components/controls';
-@use 'scss/components/empty_states';
-@use 'scss/components/headers';
-@use 'scss/components/sidebars';
-@use 'scss/components/paginations';
-@use 'scss/components/tables';
-@use 'scss/components/tabs';
-@use 'scss/components/tags';
+// The legacy layer: the theme's component partials from before the house
+// components (#2632). Still compiled, so nothing renders differently; each one
+// leaves this layer in the ticket that turns it into a house component (with
+// its singular snake_case name and its catalogue entry), and the empty layer
+// goes in #2660. Nothing new is added here. (The two layouts/ lines keep the
+// place in this order they had as components, so the compiled theme does not
+// move.)
+@use 'scss/legacy/alerts';
+@use 'scss/legacy/buttons';
+@use 'scss/legacy/cards';
+@use 'scss/layouts/collapses';
+@use 'scss/legacy/controls';
+@use 'scss/legacy/empty_states';
+@use 'scss/legacy/headers';
+@use 'scss/layouts/sidebars';
+@use 'scss/legacy/paginations';
+@use 'scss/legacy/tables';
+@use 'scss/legacy/tabs';
+@use 'scss/legacy/tags';
+// House components: one partial per component, named as its catalogue entry
+// (base/templates/styleguide/entries/<name>.html). `manage.py check_catalogue`
+// fails for a partial here without an entry.
+@use 'scss/components/link_with_arrow';
 @use 'scss/layouts/login';
 @use 'scss/layouts/database';
 @use 'scss/layouts/main';

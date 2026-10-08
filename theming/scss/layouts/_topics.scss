@@ -1,6 +1,6 @@
 @use '../base/' as *;
 @use '../base/mixins' as *;
-@use '../components/cards' as *;
+@use '../legacy/cards' as *;
 
 .topics {
     @include cards-layout($apply-2-cols-x4l-screens: false);

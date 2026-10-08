@@ -13,6 +13,13 @@ The platform is styled by one stylesheet, `base/static/css/bootstrap.min.css`:
 Bootstrap 5.2.0 with the OEP variables and the OEP components and layouts
 compiled into it. This directory is its source.
 
+Every house component and token is shown, live, in the **component catalogue**
+at `/styleguide/` (on
+[openenergyplatform.org](https://openenergyplatform.org/styleguide/), or
+`http://localhost:8000/styleguide/` locally). How a component is named, where
+its entry goes and what the catalogue check enforces is in
+[docs/dev/frontend/design-system.md](../docs/dev/frontend/design-system.md).
+
 ## Build it
 
 From the repository root:
@@ -20,11 +27,12 @@ From the repository root:
 ```sh
 npm install            # once, or after package.json changed
 npm run build:theme    # theming/oepstrap.scss -> base/static/css/bootstrap.min.css
+                       # theming/stock_tokens.scss -> base/static/styleguide/stock_tokens.css
 ```
 
-Commit the SCSS change **and** the rebuilt `bootstrap.min.css` together. Never
-edit `bootstrap.min.css` by hand: the next rebuild drops the edit, and CI fails
-the pull request before that.
+Commit the SCSS change **and** the rebuilt files together. Never edit
+`bootstrap.min.css` or `stock_tokens.css` by hand: the next rebuild drops the
+edit, and CI fails the pull request before that.
 
 ### Why the compiled file is committed
 
@@ -35,7 +43,9 @@ be in the tree when the image is built.
 To keep the committed file honest, the **catalogue check** workflow
 (`.github/workflows/catalogue.yaml`) runs on every pull request that touches
 templates, CSS, the theme or the npm manifests. It runs `npm run build:theme` on
-a clean checkout and fails when the result differs from the committed file.
+a clean checkout and fails when the result differs from the committed files. It
+also runs the catalogue's two checks, `manage.py check_catalogue` and the
+literal scan (see [Check a component](#check-a-component)).
 
 ### Pinned versions
 
@@ -63,8 +73,11 @@ are still printed.
 | `scss/base/_mixins.scss`           | Shared mixins.                                                                                                        |
 | `scss/tokens/_root.scss`           | Emits the `--oep-*` design tokens at `:root`.                                                                         |
 | `scss/tokens/_remap.scss`          | The re-map layer: Bootstrap's component variables pointed at the tokens.                                              |
-| `scss/components/`                 | Components (buttons, cards, tags, ...).                                                                               |
-| `scss/layouts/`                    | Page layouts (database, profile, review, ...).                                                                        |
+| `scss/components/`                 | House components only, one partial per component, each with its catalogue entry.                                      |
+| `scss/legacy/`                     | The component partials from before the catalogue (buttons, cards, tags, ...). Still compiled; add nothing here.       |
+| `scss/layouts/`                    | Page layouts (database, profile, review, ...) and the collapse and sidebar rules.                                     |
+| `stock_tokens.scss`                | Every token at Bootstrap 5.2's stock value, for the catalogue's `?tokens=bootstrap`.                                  |
+| `literal_scan.mjs`                 | The literal scan the catalogue check runs.                                                                            |
 
 ## Design tokens
 
@@ -134,7 +147,42 @@ tints behind the theme's `.background-*` classes live in their own map,
 
 Create `scss/components/_<name>.scss` (or `scss/layouts/_<name>.scss`), start it
 with `@use '../base/' as *;` like its neighbours, add
-`@use 'scss/components/<name>';` to `oepstrap.scss`, and rebuild.
+`@use 'scss/components/<name>';` to `oepstrap.scss`, and rebuild. A partial in
+`scss/components/` is a house component: give it a catalogue entry,
+`base/templates/styleguide/entries/<name>.html`, or the catalogue check fails.
+
+The partials in `scss/legacy/` predate the catalogue. A ticket that turns one
+into a house component moves it to `scss/components/` under its singular
+snake_case name (`_alerts` becomes `_alert`) and adds its entry; the empty layer
+is deleted at the end (#2660).
+
+## Check a component
+
+Open `/styleguide/?tokens=bootstrap`. It loads `stock_tokens.css` after the
+theme, so every token carries Bootstrap 5.2's stock value and no instance
+stylesheet applies. A component that still shows an OEP colour there reads a
+literal or a Bootstrap palette variable (`--bs-gray-300`, ...) instead of a
+token, and an instance cannot restyle it.
+
+The catalogue check does the same mechanically. `check_catalogue` renders the
+page itself; the scan needs a running server:
+
+```sh
+python manage.py check_catalogue        # every component has an entry, both modes render
+PUPPETEER=.../puppeteer-core/lib/esm/puppeteer/puppeteer-core.js \
+CHROME=.../chrome BASE=http://127.0.0.1:8000 \
+node theming/literal_scan.mjs           # no component paints an OEP colour under stock tokens
+```
+
+The scan learns the OEP colours from the catalogue as shipped (every colour
+declared at `:root`, plus every colour literal in `_variables.scss`) and then
+lists each visible element inside a catalogue entry that still paints one under
+`?tokens=bootstrap`. It looks at what is visible at rest, not at hover states.
+
+A new token goes in three places: its default in `_variables.scss` (and
+`scss/tokens/_root.scss` for an `--oep-*` one), its stock value in
+`stock_tokens.scss`, and the catalogue's token table, `TOKENS` in
+`base/styleguide.py`. `check_catalogue` fails when the three disagree.
 
 ## Review what a change did
 

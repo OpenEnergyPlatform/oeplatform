@@ -289,32 +289,19 @@
   color: var(--bs-body-color);
 }
 
+/* A house link_with_arrow (theming/scss/components/_link_with_arrow.scss)
+   stretched across its card, with the arrow at the far end. */
 .index-feature-link {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 8px;
   font-size: 16px;
-  font-weight: 700;
   letter-spacing: 0.32px;
   line-height: 24px;
-  color: var(--bs-primary);
-  text-decoration: none;
   background-image: none;
   border: none;
   padding: 0;
   -webkit-user-select: none;
   user-select: none;
-}
-
-.index-feature-link-arrow {
-  flex-shrink: 0;
-  transition: transform var(--oep-transition);
-}
-
-.index-feature-link:hover .index-feature-link-arrow,
-.index-feature-link:focus-visible .index-feature-link-arrow {
-  transform: translateX(4px);
 }
 
 @media screen and (max-width: 800px) {
@@ -498,9 +485,12 @@
   user-select: none;
 }
 
-.index-resource-link:hover .index-feature-link-arrow,
-.index-resource-link:focus-visible .index-feature-link-arrow {
-  transform: translateX(4px);
+/* The arrow of link_with_arrow, sliding when the whole row is hovered. */
+@media (prefers-reduced-motion: no-preference) {
+  .index-resource-link:hover .link-with-arrow__icon,
+  .index-resource-link:focus-visible .link-with-arrow__icon {
+    transform: translateX(4px);
+  }
 }
 
 @media screen and (max-width: 800px) {
@@ -733,9 +723,11 @@
   background-color: color-mix(in srgb, var(--oep-on-strong) 10%, transparent);
 }
 
-.index-workflow-tool[href]:hover .index-feature-link-arrow,
-.index-workflow-tool[href]:focus-visible .index-feature-link-arrow {
-  transform: translateX(4px);
+@media (prefers-reduced-motion: no-preference) {
+  .index-workflow-tool[href]:hover .link-with-arrow__icon,
+  .index-workflow-tool[href]:focus-visible .link-with-arrow__icon {
+    transform: translateX(4px);
+  }
 }
 
 .index-workflow-step--disabled .index-workflow-card {

@@ -1,0 +1,33 @@
+// link_with_arrow: a "go to ..." link whose arrow slides on hover, taken from
+// the homepage. Catalogue entry: base/templates/styleguide/entries/
+// link_with_arrow.html; the arrow is the icon icons/arrow_right.html.
+//
+// The arrow moves only for visitors who have not asked for reduced motion.
+// A container that should move the arrow too (the homepage's resource rows)
+// adds its own hover rule for `.link-with-arrow__icon`, under the same media
+// query.
+@use '../base/' as *;
+
+.link-with-arrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: $font-weight-bold;
+    color: var(--bs-primary);
+    text-decoration: none;
+
+    &__icon {
+        flex-shrink: 0;
+    }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .link-with-arrow__icon {
+        transition: transform var(--oep-transition);
+    }
+
+    .link-with-arrow:hover .link-with-arrow__icon,
+    .link-with-arrow:focus-visible .link-with-arrow__icon {
+        transform: translateX(4px);
+    }
+}

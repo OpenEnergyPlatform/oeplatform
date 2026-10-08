@@ -1,0 +1,112 @@
+{% extends "base/base.html" %}
+{% load static %}
+{% comment %}
+  The component catalogue (#2636): every house component, rendered from its
+  entry under styleguide/entries/ and shown as source from the same file, under
+  the token table. Public, noindex, linked from no menu. See base/styleguide.py.
+{% endcomment %}
+{% block before-head %}
+  <meta name="robots" content="noindex" />
+{% endblock before-head %}
+{% block title %}- Component catalogue{% endblock %}
+{% block after-head %}
+  <link rel="stylesheet" href="{% static 'styleguide/styleguide.css' %}" />
+  {% if stock_tokens %}
+    {# after the theme, so Bootstrap's stock values win at :root #}
+    <link rel="stylesheet" href="{% static 'styleguide/stock_tokens.css' %}" />
+  {% endif %}
+{% endblock after-head %}
+{% block site-header %}
+  <div class="main-header">
+    <h1 class="main-header__title">Styleguide</h1>
+    <div class="main-header__wizard">Component catalogue</div>
+  </div>
+{% endblock site-header %}
+{% block main-content-body %}
+  <p class="styleguide-prose">
+    Every house component, rendered from the templates and the stylesheet this
+    instance ships. Copy the source under a component. When you add a
+    component, add its entry here (<code>base/templates/styleguide/entries/</code>);
+    <code>manage.py check_catalogue</code> fails without one.
+  </p>
+  <nav class="styleguide-modes" aria-label="Token values">
+    <span class="styleguide-modes__label">Token values:</span>
+    {% for mode, label in token_modes.items %}
+      <a href="?tokens={{ mode }}"
+         {% if mode == token_mode %}aria-current="page"{% endif %}>{{ label }}</a>
+    {% endfor %}
+  </nav>
+  <section id="tokens" aria-labelledby="tokens-heading">
+    <h2 id="tokens-heading" class="styleguide-heading">Tokens</h2>
+    <p class="styleguide-prose">
+      {% if stock_tokens %}
+        Every token at Bootstrap 5.2's stock value, without any instance
+        stylesheet. A component that still looks like this platform here paints
+        a value no token controls.
+      {% else %}
+        The values as this page computes them, so an instance sees its own.
+        Style a component with a token, never with a literal colour, radius or
+        shadow; an instance restyles the platform by overriding tokens.
+      {% endif %}
+    </p>
+    <div class="styleguide-table">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th scope="col">Token</th>
+            <th scope="col">Sample</th>
+            <th scope="col">Value here</th>
+            <th scope="col">Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for token in tokens %}
+            <tr>
+              <td>
+                <code>{{ token.name }}</code>
+              </td>
+              <td>
+                <span class="styleguide-sample styleguide-sample--{{ token.kind }}"
+                      style="--sample: var({{ token.name }})"
+                      aria-hidden="true">{% if token.kind == "font" %}Aa{% endif %}</span>
+              </td>
+              <td>
+                <code class="styleguide-value"
+                      data-token="{{ token.name }}"></code>
+              </td>
+              <td>{{ token.role }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  {% for entry in entries %}
+    <section class="styleguide-entry"
+             id="{{ entry.name }}"
+             aria-labelledby="{{ entry.name }}-heading">
+      <h2 id="{{ entry.name }}-heading" class="styleguide-heading">
+        <code>{{ entry.name }}</code>
+      </h2>
+      <p class="styleguide-prose">{{ entry.note }}</p>
+      <div class="styleguide-preview"
+           data-entry="{{ entry.name }}">{{ entry.rendered }}</div>
+      <div class="styleguide-source">
+        <button type="button"
+                class="btn btn-link btn-sm styleguide-source__copy"
+                data-copy="{{ entry.name }}-source">Copy source</button>
+        <pre><code id="{{ entry.name }}-source">{{ entry.source }}</code></pre>
+      </div>
+    </section>
+  {% endfor %}
+{% endblock main-content-body %}
+{% block main-right-sidebar-content %}
+  <nav class="styleguide-contents" aria-label="On this page">
+    <h2 class="styleguide-contents__heading">On this page</h2>
+    <a href="#tokens">Tokens</a>
+    {% for entry in entries %}<a href="#{{ entry.name }}">{{ entry.name }}</a>{% endfor %}
+  </nav>
+{% endblock main-right-sidebar-content %}
+{% block after-body-bottom-js %}
+  <script type="module" src="{% static 'styleguide/styleguide.js' %}"></script>
+{% endblock after-body-bottom-js %}
