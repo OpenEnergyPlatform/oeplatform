@@ -68,7 +68,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:theme": "sass --no-source-map --style=compressed --quiet-deps --load-path=node_modules theming/oepstrap.scss base/static/css/bootstrap.min.css",
+    "build:theme": "sass --no-source-map --style=compressed --quiet-deps --load-path=node_modules theming/oepstrap.scss:base/static/css/bootstrap.min.css theming/stock_tokens.scss:base/static/styleguide/stock_tokens.css",
     "prepare": "patch-package",
     "test": "vitest run",
     "test:watch": "vitest"

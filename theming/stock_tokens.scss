@@ -1,0 +1,55 @@
+// Every design token at Bootstrap 5.2's stock value, for the component
+// catalogue's ?tokens=bootstrap switch (base/templates/styleguide/index.html).
+//
+// The catalogue loads this after the theme, so its :root wins. A house
+// component that still looks like OEP under it paints a literal value no
+// token controls, which is what the literal scan (theming/literal_scan.mjs)
+// fails on. The values are read from Bootstrap's own, unconfigured variables,
+// not copied, so they are Bootstrap's by construction.
+//
+// Built with the theme (`npm run build:theme`) into
+// base/static/styleguide/stock_tokens.css. Lists the same tokens as the
+// catalogue's token table (base/styleguide.py, TOKENS); a test holds the two
+// together.
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+
+:root {
+  // The theme colours with their -rgb twins (utilities read the twin).
+  @each $name in (primary, secondary, success, info, warning, danger) {
+    --bs-#{$name}: #{map-get($theme-colors, $name)};
+    --bs-#{$name}-rgb: #{to-rgb(map-get($theme-colors, $name))};
+  }
+
+  --bs-body-color: #{$body-color};
+  --bs-body-color-rgb: #{to-rgb($body-color)};
+  --bs-border-color: #{$border-color};
+  --bs-border-radius: #{$border-radius};
+  --bs-border-radius-sm: #{$border-radius-sm};
+  --bs-border-radius-lg: #{$border-radius-lg};
+  --bs-border-radius-pill: #{$border-radius-pill};
+  --bs-font-sans-serif: #{inspect($font-family-sans-serif)};
+  --bs-body-font-size: #{$font-size-base};
+
+  // Bootstrap has no name for these, so each takes the value Bootstrap uses
+  // for the same role.
+  --oep-text-muted: #{$text-muted};
+  --oep-heading-color: var(--bs-body-color);
+  --oep-border-strong: #{$input-border-color};
+  --oep-surface: #{$body-bg};
+  --oep-surface-subtle: #{$light};
+  --oep-surface-strong: var(--bs-primary);
+  --oep-surface-hover: #{$dropdown-link-hover-bg};
+  --oep-on-strong: #{$white};
+  --oep-on-strong-muted: #{$navbar-dark-color};
+  --oep-shadow-rgb: #{to-rgb($black)};
+  --oep-shadow-sm: #{$box-shadow-sm};
+  --oep-shadow-lg: #{$box-shadow};
+  --oep-font-size-dense: #{$font-size-sm};
+  --oep-heading-weight: #{$headings-font-weight};
+  // No reading width and no content width: Bootstrap's text and its fluid
+  // container run as wide as their parent.
+  --oep-measure: none;
+  --oep-content-width: 100%;
+  --oep-transition: #{nth($transition-base, 2)} #{nth($transition-base, 3)};
+}

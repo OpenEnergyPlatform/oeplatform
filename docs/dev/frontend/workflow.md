@@ -10,9 +10,12 @@ If you need or wish to work on the visual part of the platform, here are some
 resources to help you started with.
 
 Be sure to know the existing OEP styling, in order to keep the visual consistent
-throughout the platform. You can double-check by reviewing the website or going
-through the the [design system](design-system.md). Try to keep
-[accessibility](accessibility.md) in mind as well.
+throughout the platform. Every house component and design token is shown, live,
+in the component catalogue at
+[`/styleguide/` :fontawesome-solid-arrow-up-right-from-square:](https://openenergyplatform.org/styleguide/){:target="\_blank"}
+(locally `http://localhost:8000/styleguide/`); use what is there, or add a
+component with its catalogue entry, as the [design system](design-system.md)
+describes. Try to keep [accessibility](accessibility.md) in mind as well.
 
 ## Main workflow
 

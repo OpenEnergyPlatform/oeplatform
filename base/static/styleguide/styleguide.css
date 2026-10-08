@@ -1,0 +1,141 @@
+/* The component catalogue's own layout (base/templates/styleguide/index.html).
+   Page CSS: it reads tokens only, so the page follows ?tokens=bootstrap and an
+   instance's values like every component on it. */
+
+.styleguide-prose {
+  max-width: var(--oep-measure);
+}
+
+.styleguide-heading {
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.styleguide-heading code {
+  color: inherit;
+  font-size: inherit;
+}
+
+.styleguide-modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  font-size: var(--oep-font-size-dense);
+}
+
+.styleguide-modes__label {
+  color: var(--oep-text-muted);
+}
+
+.styleguide-modes a[aria-current="page"] {
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--bs-body-color);
+}
+
+.styleguide-table {
+  overflow-x: auto;
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  font-size: var(--oep-font-size-dense);
+}
+
+.styleguide-table td {
+  vertical-align: middle;
+}
+
+.styleguide-table td:first-child {
+  white-space: nowrap;
+}
+
+.styleguide-sample {
+  display: inline-grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 1.75rem;
+  border-radius: var(--bs-border-radius-sm);
+}
+
+.styleguide-sample--colour {
+  background-color: var(--sample);
+  border: 1px solid var(--oep-border-strong);
+}
+
+.styleguide-sample--rgb {
+  background-color: rgb(var(--sample));
+  border: 1px solid var(--oep-border-strong);
+}
+
+.styleguide-sample--radius {
+  border: 2px solid var(--bs-body-color);
+  border-radius: var(--sample);
+}
+
+.styleguide-sample--shadow {
+  background-color: var(--oep-surface);
+  border: 1px solid var(--bs-border-color);
+  box-shadow: var(--sample);
+}
+
+.styleguide-sample--font {
+  font-family: var(--sample);
+  font-size: 1.25rem;
+}
+
+.styleguide-preview {
+  padding: 1.5rem;
+  border: 1px solid var(--bs-border-color);
+  border-bottom: 0;
+  border-radius: var(--bs-border-radius) var(--bs-border-radius) 0 0;
+  background-color: var(--oep-surface);
+}
+
+.styleguide-source {
+  position: relative;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0 0 var(--bs-border-radius) var(--bs-border-radius);
+  background-color: var(--oep-surface-subtle);
+  font-size: var(--oep-font-size-dense);
+}
+
+.styleguide-source__copy {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+}
+
+.styleguide-source pre {
+  margin: 0;
+  padding: 1rem;
+  padding-right: 8rem;
+  max-height: 22rem;
+  overflow: auto;
+}
+
+.styleguide-source code {
+  color: var(--bs-body-color);
+}
+
+.styleguide-contents {
+  position: sticky;
+  top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  font-size: var(--oep-font-size-dense);
+}
+
+.styleguide-contents__heading {
+  margin: 0 0 0.5rem;
+  font-size: var(--oep-font-size-dense);
+}
+
+.styleguide-contents a {
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--bs-border-radius);
+  text-decoration: none;
+}
+
+.styleguide-contents a:hover {
+  background-color: var(--oep-surface-hover);
+}

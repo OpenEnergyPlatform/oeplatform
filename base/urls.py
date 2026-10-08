@@ -11,6 +11,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 from django.urls import path, re_path
 from django.views.generic import TemplateView
 
+from base.styleguide import StyleguideView
 from base.views import (
     AboutPageView,
     AboutProjectDetailView,
@@ -26,6 +27,7 @@ app_name = "base"
 urlpatterns = [
     path("", WelcomeView.as_view(), name="home"),
     re_path(r"^robots.txt$", robot_view, name="robots"),
+    path("styleguide/", StyleguideView.as_view(), name="styleguide"),
     re_path(r"^about/$", AboutPageView.as_view(), name="about"),
     re_path(
         r"^oefamily-sc/$",

@@ -1,17 +1,23 @@
 # SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-# The catalogue check: guards the theme and, later, the component catalogue.
-# Deliberately its own workflow and outside tox / `manage.py test`, so it shows
-# as its own status and only runs when the look of the platform can change.
+# The catalogue check: guards the theme and the component catalogue at
+# /styleguide/. Deliberately its own workflow and outside tox / `manage.py
+# test`, so it shows as its own status and only runs when the look of the
+# platform can change. Three checks, in order of cost:
 #
-# Today it has one step, the theme rebuild. The compiled theme
-# (base/static/css/bootstrap.min.css) is committed, because the production
-# image has no Node stage and the production host has no internet access. This
-# rebuilds it from theming/ and fails when the result differs from the
-# committed file, so a hand edit or a forgotten rebuild cannot merge.
-# The catalogue's own two checks (`check_catalogue` and the literal scan) join
-# this job when the catalogue exists (#2636).
+# 1. The theme rebuild. The compiled theme (base/static/css/bootstrap.min.css)
+#    and the catalogue's stock tokens (base/static/styleguide/stock_tokens.css)
+#    are committed, because the production image has no Node stage and the
+#    production host has no internet access. This rebuilds both from theming/
+#    and fails when the result differs from the committed files, so a hand
+#    edit or a forgotten rebuild cannot merge.
+# 2. `manage.py check_catalogue`: every house component has a catalogue entry,
+#    the token table matches the stylesheets, and the catalogue renders in both
+#    token modes.
+# 3. The literal scan (theming/literal_scan.mjs): under ?tokens=bootstrap, no
+#    house component in the catalogue paints an OEP colour that no token
+#    controls.
 name: Catalogue check
 
 on:
@@ -22,6 +28,8 @@ on:
       - "**/*.css"
       - "**/*.scss"
       - "theming/**"
+      - "base/styleguide.py"
+      - "base/management/commands/check_catalogue.py"
       - "package.json"
       - "package-lock.json"
       - ".github/workflows/catalogue.yaml"
@@ -32,6 +40,24 @@ permissions:
 jobs:
   catalogue:
     runs-on: ubuntu-latest
+    env:
+      OEP_DJANGO_USER: "postgres"
+      OEP_DB_PW: "postgres"
+      LOCAL_DB_USER: "postgres"
+      LOCAL_DB_PASSWORD: "postgres"
+    # The platform needs its database to start, for the catalogue's rendering
+    # and the scan; the same prepared image the test workflow uses.
+    services:
+      postgres:
+        image: ghcr.io/openenergyplatform/oeplatform-postgres:latest
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -46,13 +72,61 @@ jobs:
         run: npm run build:theme
       - name: The committed theme matches the rebuild
         run: |
-          if git diff --quiet -- base/static/css/bootstrap.min.css; then
-            echo "base/static/css/bootstrap.min.css matches a rebuild of theming/."
-            exit 0
-          fi
-          echo "::error file=base/static/css/bootstrap.min.css::The committed theme differs from a rebuild of theming/. Run 'npm run build:theme' and commit the result; never edit bootstrap.min.css by hand (see theming/README.md)."
+          status=0
           split_css() { sed 's/\([;}]\)/\1\n/g'; }
-          echo "Committed (<) against rebuilt (>), split at declarations:"
-          diff <(git show HEAD:base/static/css/bootstrap.min.css | split_css) \
-               <(split_css < base/static/css/bootstrap.min.css) | head -n 200 || true
+          for file in base/static/css/bootstrap.min.css base/static/styleguide/stock_tokens.css; do
+            if git diff --quiet -- "$file"; then
+              echo "$file matches a rebuild of theming/."
+              continue
+            fi
+            echo "::error file=$file::The committed file differs from a rebuild of theming/. Run 'npm run build:theme' and commit the result; never edit it by hand (see theming/README.md)."
+            echo "Committed (<) against rebuilt (>), split at declarations:"
+            diff <(git show "HEAD:$file" | split_css) <(split_css < "$file") | head -n 200 || true
+            status=1
+          done
+          exit $status
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - name: Install python dependencies
+        run: |
+          python -m pip install --upgrade pip 'setuptools<72.0.0' wheel
+          pip install -r requirements.txt
+      # Every request imports the URL configuration, which parses the OEO.
+      - name: Ontologies
+        run: |
+          mkdir -p ontologies/oeo/1/imports ontologies/oeo/1/modules
+          wget -q https://openenergyplatform.org/ontology/oeo/releases/oeo-full.owl -P ontologies/oeo/1/
+          mkdir -p media/oeo_ext/
+          cp oeo_ext/oeo_extended_store/oeox_template/oeo_ext_template_empty.owl media/oeo_ext/oeo_ext.owl
+      - name: Settings, static files and the database
+        run: |
+          cp oeplatform/securitysettings.py.default oeplatform/securitysettings.py
+          python manage.py collectstatic --no-input -v 0
+          python manage.py compress -v 0
+          python manage.py migrate -v 0
+      - name: Every house component has a catalogue entry
+        run: python manage.py check_catalogue
+
+      - name: Start the platform
+        run: |
+          python manage.py runserver 127.0.0.1:8000 > runserver.log 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -sf -o /dev/null http://127.0.0.1:8000/styleguide/; then exit 0; fi
+            sleep 2
+          done
+          cat runserver.log
           exit 1
+      # The runner's own Chrome, driven by a pinned puppeteer-core installed
+      # beside the checkout, so the repository's lockfile is not touched.
+      - name: No house component paints an OEP literal
+        env:
+          BASE: http://127.0.0.1:8000
+        run: |
+          npm install --prefix "$RUNNER_TEMP/scan" --ignore-scripts --no-audit --no-fund puppeteer-core@24.43.1
+          PUPPETEER="$RUNNER_TEMP/scan/node_modules/puppeteer-core/lib/esm/puppeteer/puppeteer-core.js" \
+          CHROME="$(command -v google-chrome)" \
+            node theming/literal_scan.mjs

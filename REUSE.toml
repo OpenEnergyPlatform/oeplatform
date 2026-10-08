@@ -3123,7 +3123,7 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "theming/scss/components/_tabs.scss"
+path = "theming/scss/legacy/_tabs.scss"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
@@ -3135,7 +3135,7 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "theming/scss/components/_paginations.scss"
+path = "theming/scss/legacy/_paginations.scss"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
@@ -3144,7 +3144,7 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "theming/scss/components/_buttons.scss"
+path = "theming/scss/legacy/_buttons.scss"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
@@ -3153,7 +3153,7 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "theming/scss/components/_headers.scss"
+path = "theming/scss/legacy/_headers.scss"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
@@ -3163,7 +3163,7 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "theming/scss/components/_alerts.scss"
+path = "theming/scss/legacy/_alerts.scss"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
@@ -3172,7 +3172,7 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "theming/scss/components/_sidebars.scss"
+path = "theming/scss/layouts/_sidebars.scss"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
@@ -3182,7 +3182,7 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "theming/scss/components/_empty_states.scss"
+path = "theming/scss/legacy/_empty_states.scss"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
@@ -3190,7 +3190,7 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "theming/scss/components/_tables.scss"
+path = "theming/scss/legacy/_tables.scss"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
@@ -3199,7 +3199,7 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "theming/scss/components/_cards.scss"
+path = "theming/scss/legacy/_cards.scss"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
@@ -3208,7 +3208,7 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "theming/scss/components/_tags.scss"
+path = "theming/scss/legacy/_tags.scss"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
@@ -3217,7 +3217,7 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "theming/scss/components/_controls.scss"
+path = "theming/scss/legacy/_controls.scss"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
@@ -3226,7 +3226,7 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "theming/scss/components/_collapses.scss"
+path = "theming/scss/layouts/_collapses.scss"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
@@ -3460,7 +3460,7 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = [
-  "base/templates/base/index-arrow.html",
+  "base/templates/icons/arrow_right.html",
   "base/templates/base/index-checkmark.html",
   "base/templates/base/index-tick.html",
   "base/templates/homepage/academy.html",
@@ -3586,6 +3586,20 @@ SPDX-FileCopyrightText = [
 
 [[annotations]]
 path = "theming/scss/tokens/**"
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = [
+  "base/templates/styleguide/**",
+  "base/static/styleguide/**",
+  "theming/scss/components/_link_with_arrow.scss",
+  "theming/stock_tokens.scss",
+  "theming/literal_scan.mjs",
+]
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [

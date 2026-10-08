@@ -57,6 +57,9 @@ Help the reviewer spend their time well. Fill in what applies, delete the rest.
 - [ ] 🧪 Added or updated tests, and the test suite passes
 - [ ] 🔌 Changed an API route or serializer? Regenerated the API reference:
       `python manage.py spectacular --validate --file docs/oeplatform-code/web-api/openapi.yaml`
+- [ ] 🎨 UI change: uses components from the
+      [catalogue](https://openenergyplatform.org/styleguide/), or adds one with
+      an entry
 - [ ] 🤖 Used AI tools? Disclosed any changes you do not fully understand, as
       the
       [AI covenant](https://github.com/rl-institut/super-repo/blob/develop/AI_COVENANT.md)
