@@ -48,6 +48,11 @@ RECHECKED = (
     " Look it over and confirm again."
 )
 
+# The header the results region sends when it re-fetches itself while it
+# shows the empty state (``list_region.html``): the page then has no filter
+# bar and no bulk slot, so the answer brings them in.
+WAS_EMPTY_HEADER = "X-List-Empty"
+
 
 @dataclass(frozen=True)
 class ListFrame:
@@ -131,10 +136,15 @@ class ListTabView(ProfileOwnerRequiredMixin, View):
     The region alone is rendered with ``region_only``: when the account has
     nothing left to list (its last item deleted), it then also removes the
     filter bar and the bulk slot, which sit outside it, out of band, so the
-    page shows the empty state without a reload.
+    page shows the empty state without a reload. The reverse holds too: the
+    empty region re-fetching itself says so (``WAS_EMPTY_HEADER``), and once
+    there is something to list (the first item created) the answer brings
+    both in (``brings_controls``).
 
     Hooks: ``page_template``, ``region_template``, ``bulk_actions`` (the bulk
-    bar's ``(action, label)`` pairs, in order), ``rows(user)`` (the
+    bar's ``(action, label)`` pairs, in order), ``create_action`` (the
+    action service's action behind "New <item>" at the end of the filter
+    row, or None for a tab that creates nothing), ``rows(user)`` (the
     ``rows`` callable for ``Listing.page``) and ``extra_context()``.
     """
 
@@ -142,6 +152,7 @@ class ListTabView(ProfileOwnerRequiredMixin, View):
     page_template: str
     region_template: str
     bulk_actions = ()
+    create_action = None
 
     def extra_context(self) -> dict:
         return {}
@@ -157,10 +168,12 @@ class ListTabView(ProfileOwnerRequiredMixin, View):
             "page": page,
             "frame": self.frame,
             "bulk_actions": self.bulk_actions,
+            "create_action": self.create_action,
             **self.extra_context(),
         }
         if is_htmx(request) and "HX-History-Restore-Request" not in request.headers:
             context["region_only"] = True
+            context["brings_controls"] = request.headers.get(WAS_EMPTY_HEADER) == "true"
             response = render(request, self.region_template, context)
             # The region re-fetching itself after an action changes nothing
             # the user navigated to, so it replaces the history entry rather
@@ -234,8 +247,10 @@ class ActionView(ProfileOwnerRequiredMixin, View):
     ``execute``, ``choice``, ``InvalidParameters`` and ``ActionRefused``),
     ``actions`` (the service's actions this tab offers; all by default, any
     other is a 404), ``dialog_template``, ``params`` (the parameters passed
-    to the service), ``dialog_context(check)``, ``done_detail(request,
-    outcome)``, ``is_forbidden(action, refusal)`` and ``is_unknown(check)``.
+    to the service), ``list_params`` (those of them that carry several
+    values, such as a set of checkboxes: passed as a list, empty when none
+    is sent), ``dialog_context(check)``, ``done_detail(request, outcome)``,
+    ``is_forbidden(action, refusal)`` and ``is_unknown(check)``.
     """
 
     frame: ListFrame
@@ -243,6 +258,7 @@ class ActionView(ProfileOwnerRequiredMixin, View):
     actions = None
     dialog_template: str
     params = ()
+    list_params = ()
 
     def dialog_context(self, check) -> dict:
         return {}
@@ -266,7 +282,10 @@ class ActionView(ProfileOwnerRequiredMixin, View):
         return data.getlist(self.frame.item) + joined(data, self.frame.items)
 
     def _params(self, data):
-        return {key: data.get(key, "") for key in self.params}
+        return {
+            key: data.getlist(key) if key in self.list_params else data.get(key, "")
+            for key in self.params
+        }
 
     def _dialog(self, request, check, status=200, **extra):
         if self.is_unknown(check):
@@ -337,7 +356,11 @@ class ActionView(ProfileOwnerRequiredMixin, View):
                 {self.frame.refused_event: {"message": refusal.message}}
             )
             return response
+        return self._done(request, outcome)
 
+    def _done(self, request, outcome):
+        """A done action: 204, and ``<items>-changed`` carrying
+        ``done_detail``."""
         response = HttpResponse(status=204)
         response["HX-Trigger"] = json.dumps(
             {self.frame.changed_event: self.done_detail(request, outcome)}

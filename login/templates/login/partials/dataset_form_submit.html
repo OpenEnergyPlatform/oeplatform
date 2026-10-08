@@ -1,0 +1,14 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+The Create and Edit form's submit button (dataset_form_dialog.html), with
+``label`` and ``enabled``. The name preview renders it too, with ``oob``, to
+replace the form's button: Create is enabled only while the name is
+available. The server refuses a taken name anyway.
+{% endcomment %}
+<button type="submit"
+        id="dataset-form-submit"
+        class="btn btn-primary"
+        {% if not enabled %}disabled{% endif %}
+        {% if oob %}hx-swap-oob="true"{% endif %}>{{ label }}</button>

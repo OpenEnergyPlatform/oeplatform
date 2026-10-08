@@ -1,0 +1,144 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+The datasets tab's Create and Edit form: the contents of #dataset-action-body
+for ``create`` and ``edit`` (login.views.DatasetActionView), one form for
+both. Title, description and Topics; the name is never a field.
+
+- Create: typing the title asks the server for the name it gives
+  (#dataset-form-name, login:dataset-name-preview) after a 300 ms pause, and
+  that answer also replaces the Create button (dataset_form_submit.html),
+  enabled only while the name is available. Topics are optional, with a note
+  that one is needed to publish.
+- Edit: the name is shown fixed, the stored Topics are ticked, and Save is
+  always enabled: a save that changes nothing writes nothing.
+
+A refused save (400) comes back here with what was typed (``values``) and
+each error beside its field (``errors``); a Topic offered nowhere is named in
+the Topics error and is not ticked again. A done save closes the dialog
+(``datasets-changed``). Bootstrap modals ignore ``autofocus``, so
+dash_list.js moves focus to the title once the dialog is shown.
+{% endcomment %}
+{% url 'login:dataset-action' profile_user.pk action as save_url %}
+<div class="modal-header">
+  <h2 class="modal-title h5 m-0" id="dataset-action-title">
+    {% if action == "create" %}
+      New dataset
+    {% else %}
+      Edit “{{ stored_title }}”
+    {% endif %}
+  </h2>
+  <button type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Cancel"></button>
+</div>
+<form id="dataset-form"
+      hx-post="{{ save_url }}"
+      hx-target="#dataset-action-body"
+      hx-swap="innerHTML"
+      hx-disabled-elt="#dataset-form-submit">
+  {% csrf_token %}
+  {% if dataset %}
+    <input type="hidden" name="dataset" value="{{ dataset.name }}" />
+  {% endif %}
+  <div class="modal-body">
+    {% if errors.datasets %}
+      <div id="dataset-form-error"
+           class="alert alert-danger"
+           role="alert">{{ errors.datasets }}</div>
+    {% endif %}
+    <div class="mb-3">
+      <label class="form-label" for="dataset-form-title">Title</label>
+      {% if action == "create" %}
+        {% url 'login:dataset-name-preview' profile_user.pk as preview_url %}
+        <input id="dataset-form-title"
+               name="title"
+               type="text"
+               class="form-control{% if errors.title %} is-invalid{% endif %}"
+               value="{{ values.title }}"
+               autocomplete="off"
+               required
+               autofocus
+               aria-describedby="dataset-form-name{% if errors.title %} dataset-form-title-error{% endif %}"
+               hx-get="{{ preview_url }}"
+               hx-trigger="input changed delay:300ms"
+               hx-target="#dataset-form-name"
+               hx-swap="innerHTML"
+               hx-sync="this:replace" />
+      {% else %}
+        <input id="dataset-form-title"
+               name="title"
+               type="text"
+               class="form-control{% if errors.title %} is-invalid{% endif %}"
+               value="{{ values.title }}"
+               autocomplete="off"
+               required
+               autofocus
+               aria-describedby="dataset-form-name{% if errors.title %} dataset-form-title-error{% endif %}" />
+      {% endif %}
+      {% if errors.title %}
+        <div id="dataset-form-title-error"
+             class="invalid-feedback">{{ errors.title }}</div>
+      {% endif %}
+      <div id="dataset-form-name" class="form-text" aria-live="polite">
+        {% if action == "create" %}
+          {% include "login/partials/dataset_name_preview.html" with in_form=True %}
+        {% else %}
+          Web address: <code>…/datasets/{{ dataset.name }}</code> (fixed)
+        {% endif %}
+      </div>
+    </div>
+    <div class="mb-3">
+      <label class="form-label"
+             for="dataset-form-description">Description</label>
+      <textarea id="dataset-form-description"
+                name="description"
+                rows="3"
+                class="form-control{% if errors.description %} is-invalid{% endif %}"
+                required
+                {% if errors.description %}aria-describedby="dataset-form-description-error" aria-invalid="true"{% endif %}>{{ values.description }}</textarea>
+      {% if errors.description %}
+        <div id="dataset-form-description-error"
+             class="invalid-feedback">{{ errors.description }}</div>
+      {% endif %}
+    </div>
+    <fieldset id="dataset-form-topics" class="mb-1">
+      <legend class="form-label fs-6 mb-1">
+        Topics
+        {% if action == "create" %}
+          <span class="text-muted small">(optional now; at least one is needed to publish)</span>
+        {% endif %}
+      </legend>
+      {% if errors.topics %}
+        <div id="dataset-form-topics-error"
+             class="text-danger small mb-1"
+             role="alert">{{ errors.topics }}</div>
+      {% endif %}
+      {% for topic in topics %}
+        <div class="form-check form-check-inline">
+          <input class="form-check-input"
+                 type="checkbox"
+                 name="topics"
+                 id="dataset-form-topic-{{ forloop.counter }}"
+                 value="{{ topic }}"
+                 {% if topic in values.topics %}checked{% endif %} />
+          <label class="form-check-label"
+                 for="dataset-form-topic-{{ forloop.counter }}">{{ topic }}</label>
+        </div>
+      {% endfor %}
+      <div class="form-text">Adding a table also adds its topics; removing a topic here keeps it removed.</div>
+    </fieldset>
+  </div>
+  <div class="modal-footer">
+    <button type="button"
+            class="btn btn-outline-secondary"
+            data-bs-dismiss="modal">Cancel</button>
+    {% if action == "create" %}
+      {% include "login/partials/dataset_form_submit.html" with label="Create" enabled=preview.available %}
+    {% else %}
+      {% include "login/partials/dataset_form_submit.html" with label="Save" enabled=True %}
+    {% endif %}
+  </div>
+</form>

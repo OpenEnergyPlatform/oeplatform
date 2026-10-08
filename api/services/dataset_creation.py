@@ -29,6 +29,14 @@ def name_taken_message(name: str) -> str:
     )
 
 
+def dataset_name_taken(name: str) -> bool:
+    """Whether a Dataset already has ``name``: any Dataset, whoever created
+    it and whether published or not, because the name is a permanent
+    identifier. What a create is refused on, and what the dashboard's name
+    preview says before it. One query."""
+    return Dataset.objects.filter(name=name).exists()
+
+
 def normalize_dataset_name(title: str) -> str | None:
     """Derive the permanent URL name from a human-styled title: lowercase,
     every run of non-alphanumeric characters becomes one underscore. The
@@ -75,7 +83,7 @@ def create_dataset(validated_data: dict[str, Any], creator) -> Dataset:
     ``modified_at`` is ``created_at``, to the microsecond.
     """
     name = validated_data["name"]
-    if Dataset.objects.filter(name=name).exists():
+    if dataset_name_taken(name):
         raise DatasetNameTaken(name_taken_message(name))
 
     metadata = assemble_dataset_metadata(validated_data)
@@ -140,9 +148,8 @@ def assign_table(dataset: Dataset, table: Table) -> None:
 def set_dataset_topics(dataset: Dataset, topic_names: list[str]) -> None:
     """Replace the creator-curated topic set. Unknown names are ignored and
     the draft pseudo-topic can never become a dataset topic: the Dataset
-    action service refuses both by name before it calls this
-    (``dataset_actions.validated_topics``); the old dashboard edit still
-    relies on the silence, until it moves onto the service (#2624)."""
+    action service, every caller's way here, refuses both by name before it
+    calls this (``dataset_actions.validated_topics``)."""
     topics = Topic.objects.filter(name__in=topic_names).exclude(name=PSEUDO_TOPIC_DRAFT)
     dataset.topics.set(topics)
 

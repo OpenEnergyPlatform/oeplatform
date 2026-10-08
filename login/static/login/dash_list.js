@@ -1143,6 +1143,19 @@ export function bindList(
     drawerOrigin = null;
   });
 
+  // Bootstrap's modal ignores `autofocus` and focuses itself: a dialog
+  // that is a form (Create and Edit) gets focus on the field marked so once
+  // it is shown; a confirmation keeps Bootstrap's focus
+  const onDialogShown = (event) => {
+    if (!event.target || event.target.id !== ids.dialog) {
+      return;
+    }
+    const field = event.target.querySelector("[autofocus]");
+    if (field) {
+      field.focus();
+    }
+  };
+
   const onHistoryRestore = () => {
     const region = doc.getElementById(ids.region);
     syncFilters(doc, config, region);
@@ -1161,6 +1174,7 @@ export function bindList(
     [config.refusedEvent, onRefused],
     ["click", onClick],
     ["change", onChange],
+    ["shown.bs.modal", onDialogShown],
   ];
   for (const [name, listener] of listeners) {
     doc.body.addEventListener(name, listener);

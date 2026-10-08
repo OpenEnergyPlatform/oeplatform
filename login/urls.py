@@ -14,6 +14,7 @@ from django.urls import path, re_path
 
 from login.views import (
     DatasetActionView,
+    DatasetNamePreviewView,
     DatasetsView,
     EditUserView,
     OrganizationListView,
@@ -55,6 +56,11 @@ urlpatterns = [
         r"^profile/(?P<user_id>[\d]+)/dataset-actions/(?P<action>[a-z_]+)$",
         DatasetActionView.as_view(),
         name="dataset-action",
+    ),
+    re_path(
+        r"^profile/(?P<user_id>[\d]+)/dataset-name-preview$",
+        DatasetNamePreviewView.as_view(),
+        name="dataset-name-preview",
     ),
     re_path(
         r"^profile/(?P<user_id>[\d]+)/tables$",

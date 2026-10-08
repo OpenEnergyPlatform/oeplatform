@@ -268,6 +268,8 @@ class ProfileRoutesTests(OwnerRuleFixture):
             ("login:profile", {}, 200),
             ("login:datasets", {}, 200),
             ("login:dataset-action", {"action": "publish"}, 200),
+            ("login:dataset-action", {"action": "create"}, 200),
+            ("login:dataset-name-preview", {}, 200),
             ("login:tables", {}, 200),
             ("login:table-names", {}, 200),
             (
@@ -290,6 +292,8 @@ class ProfileRoutesTests(OwnerRuleFixture):
         return [
             ("login:table-action-check", {"action": "publish"}),
             ("login:dataset-action", {"action": "delete"}),
+            ("login:dataset-action", {"action": "create"}),
+            ("login:dataset-action", {"action": "edit"}),
             ("login:edit", {}),
         ]
 
