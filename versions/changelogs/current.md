@@ -27,7 +27,7 @@ SPDX-License-Identifier: CC0-1.0
   "Reviewed" is a success badge. `.early-access`, `.success-badge`, the unused
   `tagged_field.html` and `oep-tags.js` (which only ticked the old tag
   checkboxes; the tick is CSS now) are gone. Both components have a catalogue
-  entry [(#PR)](https://github.com/OpenEnergyPlatform/oeplatform/pull/PR)
+  entry [(#2683)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2683)
 - A component catalogue at `/styleguide/` (public, not indexed, linked from no
   menu) shows every house component rendered from its entry template and as
   copyable source from the same file, under a table of every design token with
