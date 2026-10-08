@@ -164,7 +164,8 @@ stylesheet applies. A component that still shows an OEP colour there reads a
 literal or a Bootstrap palette variable (`--bs-gray-300`, ...) instead of a
 token, and an instance cannot restyle it.
 
-The catalogue check does the same mechanically. With a server running:
+The catalogue check does the same mechanically. `check_catalogue` renders the
+page itself; the scan needs a running server:
 
 ```sh
 python manage.py check_catalogue        # every component has an entry, both modes render

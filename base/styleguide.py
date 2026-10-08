@@ -202,8 +202,8 @@ def catalogue_problems(
         problems.append(
             f"the token {name} has no stock value in theming/stock_tokens.scss"
         )
-    undeclared = {n for n in in_theme if n.startswith("--oep-")} | in_stock
-    for name in sorted(undeclared - names):
+    declared = {n for n in in_theme if n.startswith("--oep-")} | in_stock
+    for name in sorted(declared - names):
         problems.append(
             f"the token {name} is missing from the catalogue's token table "
             "(TOKENS in base/styleguide.py)"

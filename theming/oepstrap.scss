@@ -3,7 +3,9 @@
 // components (#2632). Still compiled, so nothing renders differently; each one
 // leaves this layer in the ticket that turns it into a house component (with
 // its singular snake_case name and its catalogue entry), and the empty layer
-// goes in #2660. Nothing new is added here.
+// goes in #2660. Nothing new is added here. (The two layouts/ lines keep the
+// place in this order they had as components, so the compiled theme does not
+// move.)
 @use 'scss/legacy/alerts';
 @use 'scss/legacy/buttons';
 @use 'scss/legacy/cards';

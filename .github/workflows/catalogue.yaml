@@ -29,6 +29,7 @@ on:
       - "**/*.scss"
       - "theming/**"
       - "base/styleguide.py"
+      - "base/static/styleguide/**"
       - "base/management/commands/check_catalogue.py"
       - "package.json"
       - "package-lock.json"

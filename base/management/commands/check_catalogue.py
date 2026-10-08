@@ -46,7 +46,7 @@ def rendering_problems():
             continue
         page = response.content.decode()
         for name in names:
-            if f'id="{name}"' not in page:
+            if f'data-entry="{name}"' not in page:
                 problems.append(f"{url} does not render the entry {name}")
     return problems
 

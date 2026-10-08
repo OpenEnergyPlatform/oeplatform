@@ -9,8 +9,8 @@
 //
 // Built with the theme (`npm run build:theme`) into
 // base/static/styleguide/stock_tokens.css. Lists the same tokens as the
-// catalogue's token table (base/styleguide.py, TOKENS); a test holds the two
-// together.
+// catalogue's token table (base/styleguide.py, TOKENS); `manage.py
+// check_catalogue` fails when the two disagree.
 @import 'bootstrap/scss/functions';
 @import 'bootstrap/scss/variables';
 

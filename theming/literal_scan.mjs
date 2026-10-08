@@ -3,12 +3,13 @@
 //
 // It opens the component catalogue twice in headless Chrome:
 //
-// 1. as the instance ships it, to learn the OEP colours: every colour declared
+// 1. under ?tokens=bootstrap, to learn what the stock tokens produce, and then
+//    as the instance ships it, to learn the OEP colours: every colour declared
 //    at :root by the page's stylesheets (Bootstrap's palette and the tokens,
 //    -rgb twins included) plus every colour literal in theming/_variables.scss,
-//    minus the colours Bootstrap's stock tokens produce themselves (white, ...);
-// 2. under ?tokens=bootstrap, where every token carries Bootstrap 5.2's stock
-//    value, and lists each visible element inside a catalogue entry whose
+//    minus the colours the stock tokens produce themselves (white, ...);
+// 2. under ?tokens=bootstrap again, where every token carries Bootstrap 5.2's
+//    stock value, and lists each visible element inside a catalogue entry whose
 //    computed colour (text, background, borders, outline, SVG fill and stroke,
 //    shadows, ::before/::after) is one of those OEP colours.
 //
@@ -20,7 +21,7 @@
 //
 // Run it against a running server:
 //
-//   PUPPETEER=.../node_modules/puppeteer-core/lib/puppeteer/puppeteer-core.js \
+//   PUPPETEER=.../node_modules/puppeteer-core/lib/esm/puppeteer/puppeteer-core.js \
 //   CHROME=.../chrome-headless-shell \
 //   BASE=http://127.0.0.1:8000 \
 //   node theming/literal_scan.mjs
@@ -45,25 +46,32 @@ const literals = [
   ),
 ].map((match) => match[0]);
 
+// Runs in the page: every opaque-enough colour in a computed value, as
+// "r, g, b". Chrome writes most colours as rgb()/rgba(), and a color-mix() (the
+// re-map layer's shades) as color(srgb r g b) with channels from 0 to 1.
+function computedTriples(value) {
+  const found = [];
+  for (const m of value.matchAll(/rgba?\(([\d.]+), ([\d.]+), ([\d.]+)(?:, ([\d.]+))?\)/g)) {
+    if (m[4] === undefined || Number(m[4]) > 0) found.push([m[1], m[2], m[3]].map(Number));
+  }
+  for (const m of value.matchAll(/color\(srgb ([\d.e-]+) ([\d.e-]+) ([\d.e-]+)(?: \/ ([\d.]+))?\)/g)) {
+    if (m[4] === undefined || Number(m[4]) > 0) {
+      found.push([m[1], m[2], m[3]].map((c) => Number(c) * 255));
+    }
+  }
+  return found.map((rgb) => rgb.map((c) => Math.round(c)).join(", "));
+}
+
 // Runs in the page: the colours (as "r, g, b") declared at :root by every
 // stylesheet, or by the stock-token one only, plus `extra` literal values.
 function rootColours({ onlyStock, extra }) {
   const probe = document.createElement("i");
   document.body.append(probe);
   const triple = (value) => {
-    const candidates = /^\d+\s*,\s*\d+\s*,\s*\d+$/.test(value)
-      ? [`rgb(${value})`]
-      : [value];
-    for (const candidate of candidates) {
-      probe.style.color = "";
-      probe.style.color = candidate;
-      if (!probe.style.color) continue;
-      const parts = getComputedStyle(probe).color.match(/[\d.]+/g);
-      if (parts && (parts[3] === undefined || Number(parts[3]) > 0)) {
-        return parts.slice(0, 3).join(", ");
-      }
-    }
-    return null;
+    probe.style.color = "";
+    probe.style.color = /^\d+\s*,\s*\d+\s*,\s*\d+$/.test(value) ? `rgb(${value})` : value;
+    if (!probe.style.color) return null;
+    return computedTriples(getComputedStyle(probe).color)[0] || null;
   };
   const names = new Set();
   const visit = (rules) => {
@@ -98,10 +106,7 @@ function rootColours({ onlyStock, extra }) {
 // `colours`.
 function scan(colours) {
   const oep = new Set(colours);
-  const triples = (value) =>
-    [...value.matchAll(/rgba?\(([\d.]+), ([\d.]+), ([\d.]+)(?:, ([\d.]+))?\)/g)]
-      .filter((m) => m[4] === undefined || Number(m[4]) > 0)
-      .map((m) => `${m[1]}, ${m[2]}, ${m[3]}`);
+  const triples = computedTriples;
   const hits = [];
   const entries = [...document.querySelectorAll(".styleguide-preview")];
   const check = (el, style, where) => {
@@ -165,16 +170,21 @@ try {
   const page = await browser.newPage();
   await page.setViewport({ width: 1440, height: 900 });
 
-  const shipped = new URL("?tokens=theme", catalogue);
-  const response = await page.goto(shipped, { waitUntil: "networkidle0" });
-  if (!response.ok()) throw new Error(`${shipped} answers ${response.status()}`);
-  const ours = await page.evaluate(rootColours, { onlyStock: false, extra: literals });
-  const seen = await page.evaluate(scan, ours);
-
+  const open = async (url) => {
+    const response = await page.goto(url, { waitUntil: "networkidle0" });
+    if (!response.ok()) throw new Error(`${url} answers ${response.status()}`);
+    await page.addScriptTag({ content: computedTriples.toString() });
+  };
   const stock = new URL("?tokens=bootstrap", catalogue);
-  await page.goto(stock, { waitUntil: "networkidle0" });
+  const shipped = new URL("?tokens=theme", catalogue);
+
+  await open(stock);
   const theirs = new Set(await page.evaluate(rootColours, { onlyStock: true, extra: [] }));
+  await open(shipped);
+  const ours = await page.evaluate(rootColours, { onlyStock: false, extra: literals });
   const oep = ours.filter((colour) => !theirs.has(colour));
+  const seen = await page.evaluate(scan, oep);
+  await open(stock);
   const result = await page.evaluate(scan, oep);
 
   console.log(
