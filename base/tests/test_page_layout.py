@@ -219,7 +219,11 @@ class BlockChainTest(SimpleTestCase):
         root = Path(settings.BASE_DIR)
         for loader in engine.template_loaders:
             for directory in map(Path, loader.get_dirs()):
-                if not directory.is_relative_to(root) or not directory.exists():
+                if (
+                    not directory.is_relative_to(root)
+                    or "site-packages" in directory.parts  # a venv in the checkout
+                    or not directory.exists()
+                ):
                     continue  # a package's templates, not this repository's
                 for path in directory.rglob("*.html"):
                     yield engine, str(path.relative_to(directory))
