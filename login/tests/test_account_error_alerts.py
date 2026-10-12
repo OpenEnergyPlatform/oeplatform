@@ -8,7 +8,8 @@ Sign-up, set-password and reset-password used to put every field error in a
 green "success" alert, and the reset form looked for errors on a field it does
 not have (`login` instead of `email`), so its errors were never shown at all.
 Each test posts input that fails exactly one field and checks that this
-field's own message appears inside a red alert.
+field's own message appears as the field's error, below it in red (the house
+field's `invalid-feedback`, #2642).
 """  # noqa: 501
 
 import re
@@ -20,9 +21,7 @@ from django.utils.html import escape
 
 from login.tests.helpers import make_user
 
-DANGER_ALERT = re.compile(
-    r'<div class="login__alert login__alert--danger[^"]*">(.*?)</div>', re.S
-)
+FIELD_ERROR = re.compile(r'<div class="invalid-feedback d-block">(.*?)</div>', re.S)
 
 
 class AccountErrorAlertTest(TestCase):
@@ -30,13 +29,13 @@ class AccountErrorAlertTest(TestCase):
         self.assertEqual(response.status_code, 200)
         errors = response.context["form"].errors
         self.assertIn(field, errors, f"expected an error on {field!r}: {errors}")
-        alerts = DANGER_ALERT.findall(response.content.decode())
+        shown = FIELD_ERROR.findall(response.content.decode())
         for message in errors[field]:
             self.assertTrue(
-                any(escape(message) in alert for alert in alerts),
-                f"{message!r} is not inside a red alert: {alerts}",
+                any(escape(message) in error for error in shown),
+                f"{message!r} is not shown as a field error: {shown}",
             )
-        self.assertNotIn("login__alert--success", response.content.decode())
+        self.assertNotIn("alert-success", response.content.decode())
 
     def solved_captcha(self):
         key = CaptchaStore.generate_key()

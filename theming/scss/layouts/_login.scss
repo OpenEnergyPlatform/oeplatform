@@ -1,5 +1,7 @@
 @use '../base/' as *;
 @use '../base/mixins' as *;
+// `.login__field input` extends `.form-control`: the field's house look.
+@use '../components/field';
 
 .login {
   display: flex;
@@ -28,45 +30,6 @@
     text-align: center;
   }
 
-  &__alert {
-    width: 100%;
-    padding: 1rem 1rem 0.5rem;
-    margin-bottom: 1.5rem;
-    border-left-width: 2px;
-    border-left-style: solid;
-
-    &--info {
-      @extend .background-info;
-      border-left-color: $info;
-    }
-
-    &--success {
-      @extend .background-success;
-      border-left-color: $success;
-      color: $green-800;
-    }
-
-    &--warning {
-      @extend .background-warning;
-      border-left-color: $warning;
-      color: $yellow-900;
-    }
-
-    &--danger {
-      @extend .background-danger;
-      border-left-color: $danger;
-      color: $red-800;
-    }
-
-    &--100 {
-      text-align: center;
-    }
-  }
-
-  &__alert-heading {
-    font-weight: 700;
-  }
-
   &__field {
     padding-bottom: 1rem;
 
@@ -92,56 +55,6 @@
         text-decoration: none;
         font-weight: 700;
       }
-    }
-  }
-
-  &__button {
-    @extend .btn;
-    @extend .btn-primary;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    margin-bottom: 1rem;
-
-    &--outline-primary {
-      background-color: #FFF;
-      color: var(--bs-primary);
-      border: 1px solid var(--bs-primary);
-
-      &:hover,
-      &:active,
-      &:focus {
-        background-color: #FFF;
-        color: var(--bs-primary);
-        border: 1px solid var(--bs-primary);
-      }
-    }
-
-    &--outline-secondary {
-      background-color: #FFF;
-      color: $body-color;
-      border: 1px solid $gray-300;
-
-      &:hover,
-      &:active,
-      &:focus {
-        background-color: #FFF;
-        color: $body-color;
-        border: 1px solid $body-color;
-      }
-    }
-
-    &--warning {
-      @extend .btn-warning;
-    }
-
-    &--danger {
-      @extend .btn-danger;
-    }
-
-    span:has(svg) {
-      padding-right: 1rem;
     }
   }
 
