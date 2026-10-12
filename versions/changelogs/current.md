@@ -110,7 +110,7 @@ SPDX-License-Identifier: CC0-1.0
   are the band's description. `.main-header` and the legacy `.site-header` are
   gone, as are three ontology templates nothing rendered. New area icons for
   Database, Factsheets and Ontology. The homepage renders pixel for pixel as
-  before [(#2640)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2640)
+  before [(#2697)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2697)
 - A third-party instance restyles the platform without a fork. Two optional
   local settings: `INSTANCE_STYLESHEETS` (static paths, linked last in every
   page's head, after the platform's and the page's own stylesheets, and left out
