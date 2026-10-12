@@ -37,20 +37,22 @@
           </p>
           {% if datasets_paginated.paginator.num_pages > 1 %}
             <nav aria-label="Dataset list pagination">
-              <ul class="pagination pagination-sm mb-0">
+              <ul class="pagination mb-0">
                 {% if datasets_paginated.has_previous %}
                   <li class="page-item">
-                    <a class="page-link shadow-sm"
-                       href="?{{ params_wo_page }}&amp;page={{ datasets_paginated.previous_page_number }}">«</a>
+                    <a class="page-link"
+                       href="?{{ params_wo_page }}&amp;page={{ datasets_paginated.previous_page_number }}"
+                       aria-label="Previous page"><span aria-hidden="true">«</span></a>
                   </li>
                 {% endif %}
-                <li class="page-item">
-                  <span class="page-link shadow-sm">{{ datasets_paginated.number }} / {{ datasets_paginated.paginator.num_pages }}</span>
+                <li class="page-item active" aria-current="page">
+                  <span class="page-link">{{ datasets_paginated.number }} / {{ datasets_paginated.paginator.num_pages }}</span>
                 </li>
                 {% if datasets_paginated.has_next %}
                   <li class="page-item">
-                    <a class="page-link shadow-sm"
-                       href="?{{ params_wo_page }}&amp;page={{ datasets_paginated.next_page_number }}">»</a>
+                    <a class="page-link"
+                       href="?{{ params_wo_page }}&amp;page={{ datasets_paginated.next_page_number }}"
+                       aria-label="Next page"><span aria-hidden="true">»</span></a>
                   </li>
                 {% endif %}
               </ul>

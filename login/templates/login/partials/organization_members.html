@@ -58,7 +58,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
       {% endif %}
     {% endfor %}
     {% if error_message %}
-      <div style="display: block; color: red;">{{ error_message }}</div>
+      {% include "components/alert.html" with status="danger" text=error_message %}
     {% endif %}
     <div class="htmxComponentGroupMembership">
       <div class="profile-category__member-invite">

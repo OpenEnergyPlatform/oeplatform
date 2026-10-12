@@ -1,0 +1,69 @@
+// alert: a status message on the page (#2647). Bootstrap's `.alert` with one
+// status class (`alert-success`, `alert-info`, `alert-warning`,
+// `alert-danger`): a light status background, a 4px bar in the status colour
+// on the left, and the status icon. Catalogue entry:
+// base/templates/styleguide/entries/alert.html; the include
+// base/templates/components/alert.html writes one (the messages region uses
+// it).
+//
+// The look lives on Bootstrap's own status classes, not on a new name, so an
+// alert written by a script or a dialog (`alert alert-danger`) is the house
+// alert too, icon included: the icon is drawn here rather than written into
+// the markup. It is Font Awesome's solid set, which every page loads.
+//
+// Every colour is mixed by the browser from tokens, as the badge's are.
+@use '../base/' as *;
+
+// status: Font Awesome code point
+$alert-icons: (
+    success: '\f058',
+    info: '\f05a',
+    warning: '\f071',
+    danger: '\f06a',
+);
+
+// The radius is a restyle, not a re-map: the theme compiles alerts square
+// ($alert-border-radius: 0 in _variables.scss).
+.alert {
+    --bs-alert-padding-y: 0.75rem;
+    --bs-alert-padding-x: 1rem;
+    --bs-alert-border-radius: var(--bs-border-radius);
+}
+
+@each $status, $icon in $alert-icons {
+    .alert-#{$status} {
+        --oep-status: var(--bs-#{$status});
+        --bs-alert-color: var(--bs-body-color);
+        --bs-alert-bg: color-mix(in srgb, var(--bs-#{$status}) 10%, var(--oep-surface));
+        --bs-alert-border: 0 solid transparent;
+        --bs-alert-link-color: var(--bs-body-color);
+        border-left-width: 4px;
+        border-left-color: var(--oep-status);
+        padding-left: calc(var(--bs-alert-padding-x) + 1.75em);
+
+        // A float in the left padding sits on the first line whatever the
+        // alert's top padding is (a `py-2` alert included), and takes no
+        // room from the text.
+        &::before {
+            content: $icon;
+            content: $icon / '';
+            float: left;
+            width: 1.25em;
+            margin-left: -1.75em;
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            color: var(--oep-status);
+        }
+    }
+}
+
+// The close button sits on the first line at the house padding (Bootstrap
+// places it for a 1rem padding). Bootstrap compiles its `color` as the
+// theme's literal black; the X itself is Bootstrap's SVG background, so this
+// changes nothing visible, but the alert reads no colour a token does not
+// control.
+.alert-dismissible .btn-close {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    color: inherit;
+}

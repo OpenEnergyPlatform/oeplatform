@@ -1,0 +1,49 @@
+{# use: Any table of records (.table, plus .table-hover when a row is something to look at) or of labels and values (.table-pairs). Round corners and a border only through the .table-container wrapper, which also scrolls a wide table. DataTables draws the same table. #}
+<div class="d-grid gap-3">
+  <div class="table-container">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th scope="col">Table</th>
+          <th scope="col">Topic</th>
+          <th scope="col">Rows</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><a href="#table">wind_farm_capacity</a></td>
+          <td>Energy supply</td>
+          <td>4</td>
+        </tr>
+        <tr>
+          <td><a href="#table">heat_demand_2030</a></td>
+          <td>Demand</td>
+          <td>8,760</td>
+        </tr>
+        <tr>
+          <td><a href="#table">grid_nodes</a></td>
+          <td>Grid</td>
+          <td>1,204</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="table-container">
+    <table class="table table-pairs">
+      <tbody>
+        <tr>
+          <th scope="row">Finished</th>
+          <td>2026-10-12</td>
+        </tr>
+        <tr>
+          <th scope="row">Reviewer</th>
+          <td>A reviewer</td>
+        </tr>
+        <tr>
+          <th scope="row">Badge</th>
+          <td>Gold</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

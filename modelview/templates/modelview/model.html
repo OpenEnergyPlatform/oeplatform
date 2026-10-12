@@ -43,7 +43,7 @@
            href="#GeneralInformation">General Information</a>
       </div>
       <div id="GeneralInformation" class="card-body expand in in">
-        <table class="profiletable">
+        <table class="table table-pairs">
           {% include "modelview/model_snippet.html" with model=model field="model_name" %}
           {% include "modelview/model_snippet.html" with model=model field="acronym" %}
           <tr>
@@ -95,7 +95,7 @@
         <a data-bs-toggle="collapse" href="#Openness">Openness</a>
       </div>
       <div id="Openness" class="card-body collapse in">
-        <table class="profiletable">
+        <table class="table table-pairs">
           {% include "modelview/model_snippet.html" with model=model field="open_source" %}
           {% if not model.open_source %}
             {% include "modelview/model_snippet.html" with model=model field="open_up" %}
@@ -110,7 +110,7 @@
           {% endif %}
         </table>
         {% if model.gitHub %}
-          <table class="profiletable">
+          <table class="table table-pairs">
             <tr>
               <td class="sheetlabel">GitHub Organisation</td>
               <td>
@@ -132,7 +132,7 @@
         <a href="#Software" data-bs-toggle="collapse">Software</a>
       </div>
       <div id="Software" class="card-body collapse in">
-        <table class="profiletable">
+        <table class="table table-pairs">
           {% include "modelview/model_snippet.html" with model=model field="modelling_software" %}
           {% include "modelview/model_snippet.html" with model=model field="interal_data_processing_software" %}
           {% include "modelview/model_snippet.html" with model=model field="external_optimizer_yes_text" %}
@@ -146,7 +146,7 @@
         <a data-bs-toggle="collapse" href="#Coverage">Coverage</a>
       </div>
       <div id="Coverage" class="card-body collapse">
-        <table class="profiletable">
+        <table class="table table-pairs">
           <tr>
             <td class="sheetlabel">Modeled energy sectors (final energy)</td>
             <td>
@@ -169,7 +169,7 @@
               conversion
             </td>
             <td>
-              <table class="profiletable">
+              <table class="table table-pairs">
                 <tr>
                   <td class="sheetlabel">Renewables</td>
                   <td>
@@ -195,7 +195,7 @@
               grid
             </td>
             <td>
-              <table class="profiletable">
+              <table class="table table-pairs">
                 <tr>
                   <td class="sheetlabel">Electricity</td>
                   <td>
@@ -281,7 +281,7 @@
            href="#MathematicalProperties">Mathematical Properties</a>
       </div>
       <div id="MathematicalProperties" class="card-body collapse">
-        <table class="profiletable">
+        <table class="table table-pairs">
           <tr>
             <td class="sheetlabel">Model class (optimisation)</td>
             <td>
@@ -322,7 +322,7 @@
            href="#Integration">Model Integration</a>
       </div>
       <div id="Integration" class="card-body collapse in in">
-        <table class="profiletable">
+        <table class="table table-pairs">
           {% include "modelview/model_snippet.html" with model=model field="interfaces" %}
           {% include "modelview/model_snippet.html" with model=model field="model_file_format" add=model.model_file_format_other_text %}
           {% include "modelview/model_snippet.html" with model=model field="model_input" add=model.model_input_other_text %}
@@ -338,7 +338,7 @@
       </div>
       <div id="References" class="card-body collapse">
         <div>
-          <table class="profiletable">
+          <table class="table table-pairs">
             {% include "modelview/model_snippet.html" with model=model field="citation_reference" %}
             {% include "modelview/model_snippet.html" with model=model field="citation_DOI" %}
             {% include "modelview/model_snippet.html" with model=model field="references_to_reports_produced_using_the_model" %}

@@ -12,6 +12,26 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- One table, one alert and one pager across the platform. Tables are Bootstrap's
+  `.table` with the head row on the subtle surface and the dense size
+  (`.table-hover` for record lists, `.table-pairs` for labels and values), and
+  get their border and round corners only from a `.table-container` wrapper; the
+  global `table` radius rule and `profiletable` are gone, and the factsheet
+  detail pages, the table page's review facts and the metadata viewer's field
+  list use the house table. DataTables (table page, factsheet list) draws it
+  through its Bootstrap 5 styling (`dataTables.bootstrap5` 1.10.25 on the
+  vendored 1.10.20 core, plus `datatables_house.js`, which puts the table inside
+  the wrapper), so its pager is the house pager too; the stock
+  `jquery.dataTables.min.css` is deleted. Alerts are Bootstrap's
+  `alert-success|info|warning|danger` with a light status background, a 4px bar
+  and a status icon drawn by the theme, so an alert a script writes looks the
+  same; `components/alert.html` writes one, and every Django message, the table
+  page's review notices (formerly `alert-variant`) and the two inline red errors
+  on the organization page go through it. A message's extra tags no longer pick
+  its colour. The table and dataset lists' pagers lose their shadow and small
+  size. Catalogue entries `table`, `alert`, `pagination`
+  [(#2691)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2691)
+
 - Tabs look the same everywhere: the house component `tabs`, underline tabs with
   a primary bar under the active tab. It replaces Bootstrap's boxed tabs and the
   theme's three older tab rows on the table page (both rows), the two peer

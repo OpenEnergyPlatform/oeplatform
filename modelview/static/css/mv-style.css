@@ -25,16 +25,6 @@
   vertical-align: top;
 }
 
-.profiletable {
-  border-collapse: separate;
-  border: 1px;
-  width: 100%;
-}
-
-.profiletable td {
-  padding-bottom: 5px;
-}
-
 /* Icon when the collapsible content is shown */
 .panel-heading a:before {
   font-family: "Glyphicons Halflings";

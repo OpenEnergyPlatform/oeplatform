@@ -90,7 +90,7 @@
   {% endif %}
   {% if class_notes != "" %}
     {% for class_note in class_notes %}
-      <div class="alert alert-primary" role="alert">
+      <div class="alert alert-info" role="status">
         <h6>Editor note:</h6>
         <p>{{ class_note }}</p>
       </div>
@@ -133,7 +133,7 @@
               {% endif %}
               {% if sub_class.notes != "" %}
                 {% for note in sub_class.notes %}
-                  <div class="alert alert-primary" role="alert">
+                  <div class="alert alert-info" role="status">
                     <h6>Editor note:</h6>
                     {{ note }}
                   </div>

@@ -1,0 +1,7 @@
+{# use: A status message on the page: the result of an action, a warning about the page's subject, an error. Light background, a 4px bar and an icon in the status colour. Write it with the include; a script's `alert alert-<status>` gets the same look. #}
+<div class="d-grid gap-2">
+  {% include "components/alert.html" with status="success" text="Your profile was saved." %}
+  {% include "components/alert.html" with status="info" text="This table is a draft; only you can see it." %}
+  {% include "components/alert.html" with status="warning" text="The metadata does not name a license yet." %}
+  {% include "components/alert.html" with status="danger" text="The upload failed in line 12, column 3." dismissible=True %}
+</div>

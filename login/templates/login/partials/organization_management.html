@@ -40,7 +40,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
                   hx-headers='{"x-csrftoken": "{{ csrf_token }}"}'>
             Leave organization
           </button>
-          <div id="error-display" style="display: block; color: red"></div>
+          <div id="error-display"></div>
         </div>
         {% if is_admin %}
           <form id="delete-organization-form"

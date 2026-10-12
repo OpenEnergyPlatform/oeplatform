@@ -21,7 +21,9 @@ main.main {
 }
 
 // Tables keep the dense size (--oep-font-size-dense) now that body text is
-// 1rem. Zero specificity, so the table component (#2647) overrides it.
+// 1rem. The house table (components/_table.scss) sets it itself; this keeps
+// it on the tables that lay out a page rather than list data (the factsheet
+// editors, the contact form), which are not house tables. Zero specificity.
 :where(.content) table {
     font-size: var(--oep-font-size-dense);
 }
