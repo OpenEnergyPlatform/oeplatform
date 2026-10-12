@@ -47,14 +47,6 @@
 
 .confirm-dialog__typed {
     margin-top: 1rem;
-
-    // The theme compiles fields with literal colours; the field look on
-    // tokens is #2642's. Until then this one input reads tokens itself
-    // (the stronger border token, close to the field's grey).
-    .form-control {
-        color: var(--bs-body-color);
-        border-color: var(--oep-border-strong);
-    }
 }
 
 // The catalogue's copies: in the page's flow, always shown.

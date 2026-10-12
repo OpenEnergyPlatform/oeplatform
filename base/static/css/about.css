@@ -1,0 +1,83 @@
+/* The about page's logo grids (#2649, WF-13). Page CSS, not a house
+   component: only this page shows logos in a grid. It reads tokens only.
+
+   Equal tiles, each logo contained in its tile rather than stretched: four
+   columns for the partners, three for the research projects (six fill two
+   rows), one larger tile for the funder; two columns on a phone. */
+
+.logo-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.logo-grid--projects {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.logo-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 16 / 9;
+  padding: 0.75rem;
+  overflow: hidden;
+  background-color: var(--oep-surface);
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  box-shadow: var(--oep-shadow-sm);
+  text-align: center;
+}
+
+a.logo-tile:hover,
+a.logo-tile:focus-visible {
+  border-color: var(--bs-primary);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a.logo-tile {
+    transition: border-color var(--oep-transition);
+  }
+}
+
+.logo-tile img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* The funder's logo is square, with its name in small print: one larger
+   square tile. */
+.logo-grid--funder {
+  grid-template-columns: minmax(0, 12rem);
+}
+
+.logo-grid--funder .logo-tile {
+  aspect-ratio: 1;
+}
+
+/* The project images are 1200x480 banners with the logo in the middle: the
+   tile shows the middle and crops the empty margins. */
+.logo-grid--projects .logo-tile {
+  aspect-ratio: 3 / 2;
+  padding: 0;
+}
+
+.logo-grid--projects .logo-tile img {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  object-fit: cover;
+}
+
+@media (max-width: 575.98px) {
+  .logo-grid,
+  .logo-grid--projects {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+}

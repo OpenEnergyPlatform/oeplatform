@@ -1,0 +1,68 @@
+// toc: the "On this page" list of a long page (#2649). Include:
+// base/templates/components/toc.html; catalogue entry:
+// base/templates/styleguide/entries/toc.html.
+//
+// .toc-layout puts the list in a 15rem column on the left of the reading
+// column (--oep-measure) from lg up, where it stays in view while the text
+// scrolls; below lg it stacks above the text. The list is quiet: dense body
+// text marked off by a rule, not a card, so it does not compete with the text.
+@use '../base/' as *;
+
+.toc-layout {
+    @include media-breakpoint-up(lg) {
+        display: grid;
+        grid-template-columns: 15rem minmax(0, var(--oep-measure));
+        column-gap: 4rem;
+        align-items: start;
+    }
+
+    &__body {
+        min-width: 0;
+        max-width: var(--oep-measure);
+    }
+}
+
+.toc {
+    margin-bottom: 1.75rem;
+    padding-left: 1rem;
+    border-left: 2px solid var(--bs-border-color);
+    font-size: var(--oep-font-size-dense);
+
+    @include media-breakpoint-up(lg) {
+        position: sticky;
+        top: 1.5rem;
+        max-height: calc(100vh - 3rem);
+        overflow-y: auto;
+        margin-bottom: 0;
+    }
+
+    &__title {
+        margin-bottom: 0.5rem;
+        font-size: 0.75rem;
+        font-weight: var(--oep-heading-weight);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--oep-text-muted);
+    }
+
+    &__list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+
+        li {
+            margin-bottom: 0.375rem;
+        }
+
+        a {
+            color: var(--bs-body-color);
+            text-decoration: none;
+
+            &:hover,
+            &:focus-visible {
+                color: var(--bs-primary);
+                text-decoration: underline;
+            }
+        }
+    }
+}

@@ -386,6 +386,10 @@ TEMPLATES = [
 # touches Django is imported here.
 MESSAGE_TAGS = {40: "danger"}
 
+# The house field (#2642): a field that passed validation is not marked green
+# beside the one that failed.
+BOOTSTRAP5 = {"field_renderers": {"default": "base.forms.HouseFieldRenderer"}}
+
 CORS_ORIGIN_WHITELIST = ["http://localhost:3000", "http://127.0.0.1:3000"]
 
 GRAPHENE = {"SCHEMA": "factsheet.schema.schema"}

@@ -32,6 +32,35 @@ SPDX-License-Identifier: CC0-1.0
   `confirm_dialog`, `toast`
   [(#2696)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2696)
 
+- One field look and the account forms on house components. Every
+  `form-control`, `form-select` and `form-check-input` takes 4px corners, the
+  strong border and the surface from tokens (house component `field`, catalogue
+  entry with a narrow select under a long label); a Django form rendered with
+  django-bootstrap5 marks only the field in error, no longer every other one
+  green. allauth's `field`, `fields`, `form` and `button` elements are
+  overridden, so password change, password reset from key and social sign-up
+  show labelled house fields and a primary button instead of bare inputs. The
+  account pages use the button roles and the alert component instead of
+  `.login__button` and `.login__alert` (both deleted, with the unrendered
+  `account/_login.html` sample and `account/base.html`), all of them render in
+  one layout, and their logo comes from `brand/logo.html` (new argument
+  `on_light`), so an instance's logo replaces it there too
+  [(#2695)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2695)
+
+- The about page and the privacy policy get an "On this page" list: the house
+  component `toc`, a quiet list of the page's own headings that stays in view on
+  the left while the text scrolls and sits above the text on a narrow screen.
+  Both pages read in one 70ch column. On the about page the research projects
+  and the partners are their own sections beside "Supported By", and the funder,
+  project and partner logos sit in grids of equal tiles instead of inline widths
+  and margins, so the page no longer runs 3,474 px off a phone screen. Each
+  research project is listed once again: the page read its projects from the
+  collected static files, where every file also has a copy named after its
+  content. The privacy policy lists the rights of the data subject one article
+  at a time, shows the controller as an address and the cookie table as the
+  house table. No text changes apart from the list's label
+  [(#2694)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2694)
+
 - One table, one alert and one pager across the platform. Tables are Bootstrap's
   `.table` with the head row on the subtle surface and the dense size
   (`.table-hover` for record lists, `.table-pairs` for labels and values), and

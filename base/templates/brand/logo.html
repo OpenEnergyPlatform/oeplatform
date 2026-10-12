@@ -2,9 +2,11 @@
 {% comment %}
   The platform's logo (#2637). An instance replaces this file from a directory
   in INSTANCE_TEMPLATE_DIRS. Called with size, the square in px the slot is
-  drawn for, and alt, empty where the name stands beside the logo.
+  drawn for, alt, empty where the name stands beside the logo, and on_light,
+  true where the logo sits on the page's light surface (the sign-in and
+  account pages, #2642) rather than on the primary colour.
 {% endcomment %}
 <img width="{{ size }}"
      height="{{ size }}"
      alt="{{ alt }}"
-     src="{% static 'OpenEnergyFamily_Logo_OpenEnergyPlatform_untitled_white.svg' %}" />
+     src="{% if on_light %}{% static 'OEP_logo_2_no_text.svg' %}{% else %}{% static 'OpenEnergyFamily_Logo_OpenEnergyPlatform_untitled_white.svg' %}{% endif %}" />
