@@ -560,6 +560,9 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Documentation updates
 
+- The docs site builds again: a literal Django include tag on the design system
+  page stopped every docs deploy since 2026-10-08
+  [(#2688)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2688)
 - Reworked the pull request template: sections for testing, deploy notes and a
   new "For reviewers" block; the changelog line is now written only in the
   changelog; fixed the broken reviewer-guidelines link
