@@ -57,8 +57,8 @@ A house component has one name, snake_case and singular, in up to three places:
 
 The entry starts with a one-line when-to-use note, `{# use: ... #}`, followed by
 the example the catalogue renders and shows as source. For an include, the entry
-is the `{% include %}` call with example arguments. Files whose name starts with
-`_` are helpers an entry includes, not entries.
+is the template's `include` tag with example arguments. Files whose name starts
+with `_` are helpers an entry includes, not entries.
 
 The catalogue check workflow (`.github/workflows/catalogue.yaml`) fails a pull
 request when
