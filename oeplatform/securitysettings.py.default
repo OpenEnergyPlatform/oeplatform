@@ -76,6 +76,22 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = [Path(BASE_DIR, "assets")]
 
+# Theming an instance without forking the platform: see "Theming an instance"
+# in the docs (docs/installation/guides/instance-theming.md). Both are optional
+# and comma-separated, so a container sets them as environment variables, the
+# same at image build and at run time.
+# Static paths of your stylesheets, linked after every platform stylesheet on
+# every page; collectstatic must find each, e.g. in STATICFILES_DIRS
+# ("instance/theme.css" for assets/instance/theme.css):
+INSTANCE_STYLESHEETS = [
+    p.strip() for p in os.environ.get("OEP_INSTANCE_STYLESHEETS", "").split(",") if p.strip()
+]
+# Template directories searched before the platform's, for brand/logo.html,
+# brand/name.html, brand/title_prefix.html and the legal pages:
+INSTANCE_TEMPLATE_DIRS = [
+    p.strip() for p in os.environ.get("OEP_INSTANCE_TEMPLATE_DIRS", "").split(",") if p.strip()
+]
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 

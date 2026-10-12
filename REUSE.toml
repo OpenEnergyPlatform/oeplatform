@@ -3595,6 +3595,9 @@ path = [
   "theming/scss/components/_page_header.scss",
   "base/templates/components/**",
   "base/tests/page_texts/**",
+  "base/templates/brand/**",
+  "base/templates/base/_head.html",
+  "base/templates/base/_instance_stylesheets.html",
   "theming/stock_tokens.scss",
   "theming/literal_scan.mjs",
 ]
