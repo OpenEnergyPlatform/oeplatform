@@ -63,14 +63,14 @@
       <div class="row row-cols-1 row-cols-md-2 g-3">
         {% for dataset in datasets_paginated %}
           <div class="col">
-            <div class="card h-100">
+            <div class="card card--clickable h-100">
               <div class="card-body">
-                <h5 class="card-title mb-1">
-                  <a class="text-decoration-none stretched-link"
+                <h2 class="card-title mb-1">
+                  <a class="stretched-link"
                      href="{% url 'dataedit:dataset-detail' dataset_name=dataset.name %}"
                      target="_blank"
                      rel="noopener">{{ dataset.metadata.title|default:dataset.name }}</a>
-                </h5>
+                </h2>
                 <h6 class="card-subtitle text-muted mb-2">{{ dataset.name }}</h6>
                 {% if dataset.topics.all %}
                   <p class="mb-2">
@@ -94,14 +94,9 @@
       </div>
     {% else %}
       {% if is_draft_topic %}
-        <p class="mt-4">
-          Datasets are not listed under the draft topic. A dataset appears in
-          the topics of its member tables once it has topics assigned — switch
-          back to Tables to browse the drafts, or pick another topic to browse
-          datasets.
-        </p>
+        {% include "components/empty_state.html" with icon="fas fa-layer-group" title="Datasets are not listed under the draft topic." text="A dataset appears in the topics of its member tables once it has topics assigned — switch back to Tables to browse the drafts, or pick another topic to browse datasets." %}
       {% else %}
-        <p class="mt-4">No datasets have been published yet.</p>
+        {% include "components/empty_state.html" with icon="fas fa-layer-group" text="No datasets have been published yet." %}
       {% endif %}
     {% endif %}
   </div>

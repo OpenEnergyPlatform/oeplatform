@@ -46,7 +46,7 @@ the button's id, so focus stays on it), or reads "Already in" for a member.
           {% else %}
             <button type="button"
                     id="dataset-members-add-{{ row.table.pk }}"
-                    class="btn btn-outline-primary btn-sm"
+                    class="btn btn-outline-secondary btn-sm"
                     aria-label="Add {{ row.title }}"
                     hx-post="{{ members_url }}"
                     hx-vals='{"op": "add", "table": "{{ row.table.name|escapejs }}"}'
@@ -58,7 +58,7 @@ the button's id, so focus stays on it), or reads "Already in" for a member.
       {% endfor %}
     </ul>
   {% else %}
-    <p class="dash-muted">No table you could add matches.</p>
+    {% include "components/empty_state.html" with icon="fas fa-search" text="No table you could add matches." compact=True %}
   {% endif %}
   {% if candidates.pages > 1 %}
     <nav class="dash-members-pager" aria-label="Pages of tables to add">

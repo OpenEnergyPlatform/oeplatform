@@ -9,7 +9,7 @@
 {% block site-header %}
 {% endblock site-header %}
 {% block main %}
-  <main class="main">
+  <main class="main" id="main-content">
     <div id="opr-page-marker" data-opr-page="reviewer" style="display: none;">
     </div>
     <div class="main-header">
@@ -201,7 +201,7 @@
             </div>
             {% if review_id is not None and not review_finished %}
               <div class="review-bar__action review-bar__action--delete">
-                <button class="btn btn-dark"
+                <button class="btn btn-outline-danger"
                         id="peer_review-delete">Delete</button>
               </div>
             {% endif %}

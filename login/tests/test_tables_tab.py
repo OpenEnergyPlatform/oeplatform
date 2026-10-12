@@ -493,11 +493,13 @@ class RegionTests(TablesTabTestCase):
 
 class EmptyStateTests(TablesTabTestCase):
     def test_no_tables_at_all_explains_and_offers_two_ways_in(self):
+        # The wizard is the empty state's one action; the API is a link in
+        # its sentence (#2646).
         response = self.get()
         self.assertFalse(response.context["page"].has_any)
         self.assertNotContains(response, 'id="tables-search"')
         self.assertContains(response, reverse("dataedit:wizard_create"))
-        self.assertContains(response, "Upload via the API")
+        self.assertContains(response, "upload via the API")
 
     def test_a_filter_in_the_address_does_not_hide_that_there_are_none(self):
         page = self.page({"search": "wind", "status": "draft"})

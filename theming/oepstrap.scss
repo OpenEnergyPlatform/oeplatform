@@ -7,21 +7,20 @@
 // place in this order they had as components, so the compiled theme does not
 // move.)
 @use 'scss/legacy/alerts';
-@use 'scss/legacy/buttons';
-@use 'scss/legacy/cards';
 @use 'scss/layouts/collapses';
 @use 'scss/legacy/controls';
-@use 'scss/legacy/empty_states';
 @use 'scss/legacy/headers';
 @use 'scss/layouts/sidebars';
 @use 'scss/legacy/paginations';
 @use 'scss/legacy/tables';
-@use 'scss/legacy/tags';
 // House components: one partial per component, named as its catalogue entry
 // (base/templates/styleguide/entries/<name>.html). `manage.py check_catalogue`
 // fails for a partial here without an entry.
 @use 'scss/components/badge';
+@use 'scss/components/button';
+@use 'scss/components/card';
 @use 'scss/components/dropdown';
+@use 'scss/components/empty_state';
 @use 'scss/components/link_with_arrow';
 @use 'scss/components/page_header';
 @use 'scss/components/section_heading';

@@ -1,0 +1,7 @@
+{# use: Where a list or a search has nothing to show: a muted icon, one sentence saying so, at most one action (what makes the list fill). Compact inside a card or a drawer. #}
+{% include "components/empty_state.html" with icon="fas fa-layer-group" title="You have no datasets yet" text="A dataset collects tables under one title." action_template="styleguide/entries/_empty_state_action.html" %}
+<div class="card">
+  <div class="card-body">
+    {% include "components/empty_state.html" with icon="fas fa-table" text="No tables are assigned yet." compact=True %}
+  </div>
+</div>

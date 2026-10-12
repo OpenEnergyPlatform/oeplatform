@@ -1,5 +1,6 @@
 @use '../base/' as *;
 @use '../base/mixins' as *;
+@use '../components/button' as *;
 
 .review {
     @extend .row;

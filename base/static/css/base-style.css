@@ -93,11 +93,6 @@ i.default-user-icon {
   font-size: 8em !important;
 }
 
-/* show that topics are clickable (in dataedit/schemas) */
-.topic-card__header {
-  cursor: pointer;
-}
-
 /* The navbar is sized against the reader's default font size, never against
    the page's root.
    Every shell shares it with whatever renders below it, and the React apps

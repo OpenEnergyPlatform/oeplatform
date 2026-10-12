@@ -1,0 +1,52 @@
+// empty_state: what an empty list shows instead of nothing (#2646). A muted
+// icon, an optional title, one sentence, at most one action, centred where
+// the list would be. Include: base/templates/components/empty_state.html;
+// catalogue entry: base/templates/styleguide/entries/empty_state.html.
+//
+// --compact is the same thing inside something small (a card's list, a
+// drawer): less space around it and a smaller icon.
+@use '../base/' as *;
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding-top: 2.5rem;
+    padding-bottom: 2.5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    text-align: center;
+    color: var(--oep-text-muted);
+
+    &__icon {
+        font-size: 2rem;
+        line-height: 1;
+    }
+
+    &__title {
+        margin-bottom: 0;
+        font-weight: $font-weight-semibold;
+        color: var(--bs-body-color);
+    }
+
+    &__text {
+        max-width: var(--oep-measure);
+        margin-bottom: 0;
+    }
+
+    &__action {
+        margin-top: 0.5rem;
+    }
+
+    &--compact {
+        gap: 0.25rem;
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+        font-size: var(--oep-font-size-dense);
+
+        .empty-state__icon {
+            font-size: 1.25rem;
+        }
+    }
+}
