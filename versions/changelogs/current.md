@@ -31,7 +31,7 @@ SPDX-License-Identifier: CC0-1.0
   Sign up). A page lint test reads every restyled page and fails on a button
   without a role, a status colour used as an action, or a native `confirm()` or
   `alert()`. The homepage renders pixel for pixel as before
-  [(#2641)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2641)
+  [(#2687)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2687)
 - Pages without side content use the whole content width: the base templates no
   longer render an empty 21rem side column. A page with side content fills the
   new `side-column` block with `<aside class="content__side">`, and every page
