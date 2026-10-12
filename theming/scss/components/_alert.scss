@@ -22,6 +22,8 @@ $alert-icons: (
     danger: '\f06a',
 );
 
+// The radius is a restyle, not a re-map: the theme compiles alerts square
+// ($alert-border-radius: 0 in _variables.scss).
 .alert {
     --bs-alert-padding-y: 0.75rem;
     --bs-alert-padding-x: 1rem;

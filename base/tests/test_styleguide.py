@@ -31,7 +31,7 @@ STYLEGUIDE = reverse("base:styleguide")
 
 #: Buttons that belong to a house component rather than carrying a role of
 #: their own (spec #2632, "button": the component's own controls).
-HOUSE_CONTROLS = ("tag__remove",)
+HOUSE_CONTROLS = ("tag__remove", "btn-close")
 
 
 class CatalogueTest(TestCase):

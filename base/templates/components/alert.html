@@ -8,12 +8,13 @@
   dismissible  adds a close button
   id           optional, for a script or an htmx target that refers to it
 
-  A warning or an error is announced as it appears (role="alert"); success
-  and info wait their turn (role="status").
+  An error is announced as it appears (role="alert"); every other status
+  waits its turn (role="status"), so a warning that is part of the page, such
+  as "No metadata available", does not interrupt a screen reader.
 {% endcomment %}
 <div {% if id %}id="{{ id }}"{% endif %}
      class="alert alert-{{ status|default:'info' }}{% if dismissible %} alert-dismissible fade show{% endif %}"
-     role="{% if status == 'danger' or status == 'warning' %}alert{% else %}status{% endif %}">
+     role="{% if status == 'danger' %}alert{% else %}status{% endif %}">
   {{ text }}
   {% if dismissible %}
     <button type="button"

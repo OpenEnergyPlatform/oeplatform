@@ -5,8 +5,9 @@
 // Pure CSS, no include; DataTables' Bootstrap 5 pager is the same markup.
 // Catalogue entry: base/templates/styleguide/entries/pagination.html.
 //
-// Colours and radii come from the re-map layer (tokens/_remap.scss); this
-// adds the house look.
+// The active colours, focus ring and radii come from the re-map layer
+// (tokens/_remap.scss); the border, hover and disabled colours here are the
+// house look, from tokens.
 @use '../base/' as *;
 
 .pagination {
@@ -34,7 +35,10 @@
 }
 
 .page-item .page-link {
-    border-radius: var(--bs-pagination-border-radius);
+    border-top-left-radius: var(--bs-pagination-border-radius);
+    border-top-right-radius: var(--bs-pagination-border-radius);
+    border-bottom-right-radius: var(--bs-pagination-border-radius);
+    border-bottom-left-radius: var(--bs-pagination-border-radius);
 }
 
 .pagination__range {

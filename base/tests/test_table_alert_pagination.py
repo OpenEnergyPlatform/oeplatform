@@ -58,10 +58,10 @@ class AlertIncludeTest(SimpleTestCase):
     def test_without_a_status_it_is_information(self):
         self.assertIn('class="alert alert-info"', render_alert(text="x"))
 
-    def test_a_warning_or_an_error_is_announced_and_the_rest_waits(self):
+    def test_an_error_is_announced_and_the_rest_waits(self):
         for status, role in (
             ("danger", "alert"),
-            ("warning", "alert"),
+            ("warning", "status"),
             ("success", "status"),
             ("info", "status"),
         ):
@@ -209,7 +209,7 @@ class TablePageReviewTabTest(SidebarFixture):
 
         # The fixture's table has no metadata, so a review is not possible.
         self.assertIn(
-            '<div class="alert alert-warning" role="alert"> No metadata available.',
+            '<div class="alert alert-warning" role="status"> No metadata available.',
             html,
         )
         self.assertNotIn("alert-variant", html)
