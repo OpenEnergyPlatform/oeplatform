@@ -150,7 +150,9 @@ class PagesWithSideContentTest(SideColumnTestCase):
         )
 
     def test_catalogue(self):
-        self.assertSide("base:styleguide", None, says="On this page")
+        # Its own contents list; the toc entry in the main column also says
+        # "On this page".
+        self.assertSide("base:styleguide", None, says="styleguide-contents")
 
     def test_ontology(self):
         # Filled by htmx once the page has loaded.
