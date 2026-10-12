@@ -1,0 +1,34 @@
+{# use: Every action, in one of four roles on the element itself: primary for the one main action of a view or dialog, secondary for the rest, danger outlined on the button that opens a confirmation and solid only inside it, link for an action that reads as a link; on a blue band the light button. Green, cyan, yellow and black are status colours, never a button. #}
+<div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+  <button type="button" class="btn btn-primary">Save changes</button>
+  <button type="button" class="btn btn-secondary">Cancel</button>
+  <button type="button" class="btn btn-outline-danger">Delete…</button>
+  <button type="button" class="btn btn-danger">Delete table</button>
+  <button type="button" class="btn btn-link">Show details</button>
+</div>
+<div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+  <button type="button" class="btn btn-primary btn-sm">Small primary</button>
+  <button type="button"
+          class="btn btn-secondary btn-sm">Small secondary</button>
+  <button type="button"
+          class="btn btn-outline-danger btn-sm">Small danger</button>
+  <button type="button" class="btn btn-link btn-sm">Small link</button>
+</div>
+<div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+  <button type="button"
+          class="btn btn-primary"
+          disabled>Disabled primary</button>
+  <button type="button"
+          class="btn btn-secondary"
+          disabled>Disabled secondary</button>
+  <a class="btn btn-secondary disabled"
+     aria-disabled="true">Disabled link button</a>
+  <button type="button" class="btn btn-primary">
+    <span class="btn__icon fas fa-plus" aria-hidden="true"></span>With an icon
+  </button>
+</div>
+<div class="d-flex flex-wrap gap-2 align-items-center p-3 rounded"
+     style="background-color: var(--oep-surface-strong)">
+  <a class="btn btn-on-strong btn-sm" href="#">Sign up</a>
+  <a class="btn btn-on-strong" href="#">On a blue band</a>
+</div>

@@ -23,10 +23,9 @@
     margin-bottom: .25rem !important;
   }
 
+  // The sidebar's buttons carry their role on themselves (`btn btn-link
+  // btn-sm` here, #2641); these rules only lay them out.
   &__btn {
-    @extend .btn;
-    @extend .btn-link;
-    @extend .btn-sm;
     @extend .px-0;
     @extend .me-3;
     @extend .fw-semibold;
@@ -48,29 +47,11 @@
   }
 
   &__btn-info {
-    @extend .btn;
-    @extend .btn-outline-primary;
-    @extend .btn-sm;
     @extend .me-3;
   }
 
-  &__btn-danger {
-    @extend .btn;
-    @extend .btn-outline-danger;
-    @extend .btn-sm;
-  }
-
   &__btn-review {
-    @extend .btn;
     @extend .w-100;
-
-    &--request {
-      @extend .btn-primary;
-    }
-
-    &--start {
-      @extend .btn-outline-primary;
-    }
   }
 
   &__collapse {

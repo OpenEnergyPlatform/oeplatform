@@ -6,7 +6,6 @@
 // goes in #2660. Nothing new is added here. (The two layouts/ lines keep the
 // place in this order they had as components, so the compiled theme does not
 // move.)
-@use 'scss/legacy/buttons';
 @use 'scss/legacy/cards';
 @use 'scss/layouts/collapses';
 @use 'scss/legacy/controls';
@@ -20,6 +19,7 @@
 // fails for a partial here without an entry.
 @use 'scss/components/alert';
 @use 'scss/components/badge';
+@use 'scss/components/button';
 @use 'scss/components/link_with_arrow';
 @use 'scss/components/pagination';
 @use 'scss/components/page_header';

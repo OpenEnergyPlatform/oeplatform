@@ -12,7 +12,7 @@
   </h2>
 {% endblock site-header %}
 {% block main %}
-  <main class="main">
+  <main class="main" id="main-content">
     <div class="main-header">
       <h1 class="main-header__title">
         <i class="fa fa-tags d-none me-2" id="metaedit-icon"></i> Edit Metadata
@@ -58,14 +58,13 @@
             <div class="col">
               <span {% if not can_add %} data-bs-toggle="popover" title="You need write permissions on this table to upload meta data" {% endif %}>
                 <a href="#metaedit-submit"
-                   class="btn btn-sm btn-success me-2 {% if not can_add %}disabled{% endif %}"
+                   class="btn btn-sm btn-primary me-2 {% if not can_add %}disabled{% endif %}"
                    id="metaedit-submit"><span class="spinner-border text-light d-none me-2 spinner-border-sm"
       id="metaedit-submitting"></span>Submit</a>
               </span>
-              <button class="btn btn-sm btn-primary me-2" id="metaedit-cancel">
-                Cancel
-              </button>
-              <button class="btn btn-sm btn-primary me-2"
+              <button class="btn btn-sm btn-secondary me-2"
+                      id="metaedit-cancel">Cancel</button>
+              <button class="btn btn-sm btn-secondary me-2"
                       id="metaedit-download">Download</button>
             </div>
           </div>

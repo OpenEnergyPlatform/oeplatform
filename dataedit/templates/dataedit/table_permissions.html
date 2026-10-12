@@ -55,7 +55,7 @@
         <input type="hidden" name="confirm" value="yes" />
         <input type="submit"
                id="permission-confirm"
-               class="btn btn-warning"
+               class="btn btn-danger"
                value="Confirm" />
         <a id="permission-cancel"
            class="btn btn-outline-secondary"
@@ -85,7 +85,7 @@
               <select name="level" id="group_level_new" aria-label="Role">
                 {% for role in organization_roles %}<option value="{{ role.level }}">{{ role.label }}</option>{% endfor %}
               </select>
-              <input type="submit" value="Add" />
+              <input type="submit" class="btn btn-primary" value="Add" />
             </form>
           {% else %}
             <span style="position:absolute;
@@ -128,7 +128,7 @@
               <input type="hidden" name="mode" value="remove_group" />
               <input type="hidden" name="group_id" value="{{ holder.pk }}" />
               <input type="submit"
-                     class="btn btn-danger"
+                     class="btn btn-outline-danger"
                      value="Remove group" />
             </form>
           {% else %}
@@ -157,7 +157,7 @@
             <select name="level" id="user_level_new" aria-label="Role">
               {% for role in roles %}<option value="{{ role.level }}">{{ role.label }}</option>{% endfor %}
             </select>
-            <input type="submit" value="Add" />
+            <input type="submit" class="btn btn-primary" value="Add" />
           </form>
         </div>
       {% endif %}
@@ -194,7 +194,9 @@
               {% csrf_token %}
               <input type="hidden" name="mode" value="remove_user" />
               <input type="hidden" name="user_id" value="{{ holder.pk }}" />
-              <input type="submit" class="btn btn-danger" value="Remove user" />
+              <input type="submit"
+                     class="btn btn-outline-danger"
+                     value="Remove user" />
             </form>
           {% else %}
             {{ holder.name }}: {{ holder.role }}

@@ -15,7 +15,9 @@
             {% if token %}
               <div class="userApiToken">{{ token }}</div>
               <div>
-                <button hx-post="{% url 'login:reset-token' %}"
+                <button type="button"
+                        class="btn btn-outline-danger btn-sm"
+                        hx-post="{% url 'login:reset-token' %}"
                         hx-target=".userApiToken">Reset token</button>
                 <i>Resetting the token will affect your REST-API based requests.
                   In most cases it only makes sense to reset it in case it was

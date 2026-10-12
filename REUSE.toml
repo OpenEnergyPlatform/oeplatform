@@ -3139,12 +3139,12 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "theming/scss/legacy/_buttons.scss"
+path = "theming/scss/components/_button.scss"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
   "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
-  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2024-2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]

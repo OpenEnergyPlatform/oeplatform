@@ -84,7 +84,7 @@ the drawer's live region outside these contents).
         </p>
         <button type="button"
                 id="dataset-members-confirm"
-                class="btn btn-warning btn-sm"
+                class="btn btn-danger btn-sm"
                 hx-post="{{ members_url }}"
                 hx-vals='{"op": "remove", "table": "{{ ask_row.table.name|escapejs }}", "confirm": "yes", "at": "{{ ask_at|default:0 }}"}'
                 hx-include="#dataset-members-search, #dataset-members-page, #dataset-members-add-search, #dataset-members-add-page"

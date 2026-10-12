@@ -34,8 +34,3 @@
   -ms-user-select: none;
   user-select: none;
 }
-
-// Buttons
-.btn-secondary {
-  @include button-variant($gray-300, $gray-300);
-}
