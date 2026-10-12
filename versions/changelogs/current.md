@@ -625,6 +625,10 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Documentation updates
 
+- The docs deploy works again: `mkdocstrings` is allowed its 1.x line, which
+  works with `pymdown-extensions` 12.2 (0.30 does not), and a new "Docs build"
+  check builds the docs on pull requests that touch them
+  [(#PR)](https://github.com/OpenEnergyPlatform/oeplatform/pull/PR)
 - The docs site builds again: a literal Django include tag on the design system
   page stopped every docs deploy since 2026-10-08
   [(#2688)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2688)

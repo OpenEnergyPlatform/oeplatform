@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+# Builds the docs on a pull request, the same way deploy-docs.yaml does on
+# develop, but without publishing. Without it a broken page or a broken docs
+# dependency is found only after the merge, when the deploy fails: in October
+# 2026 every deploy failed for a week, first on a Django include tag in a page
+# and then on a release of pymdown-extensions.
+name: Docs build
+
+on:
+  pull_request:
+    paths:
+      - "docs/**"
+      - "mkdocs.yml"
+      - "requirements-docs.txt"
+      - ".github/workflows/docs-build.yaml"
+      - ".github/workflows/deploy-docs.yaml"
+      # pulled into the docs: mkdocstrings documents login/, and
+      # include-markdown embeds docker/README.md
+      - "login/**"
+      - "docker/README.md"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.x
+      - run: pip install --upgrade -r requirements-docs.txt
+      - run: mkdocs build
