@@ -12,6 +12,20 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- The about page and the privacy policy get an "On this page" list: the house
+  component `toc`, a quiet list of the page's own headings that stays in view on
+  the left while the text scrolls and sits above the text on a narrow screen.
+  Both pages read in one 70ch column. On the about page the research projects
+  and the partners are their own sections beside "Supported By", and the funder,
+  project and partner logos sit in grids of equal tiles instead of inline widths
+  and margins, so the page no longer runs 3,474 px off a phone screen. Each
+  research project is listed once again: the page read its projects from the
+  collected static files, where every file also has a copy named after its
+  content. The privacy policy lists the rights of the data subject one article
+  at a time, shows the controller as an address and the cookie table as the
+  house table. No text changes apart from the list's label
+  [(#2649)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2649)
+
 - One table, one alert and one pager across the platform. Tables are Bootstrap's
   `.table` with the head row on the subtle surface and the dense size
   (`.table-hover` for record lists, `.table-pairs` for labels and values), and

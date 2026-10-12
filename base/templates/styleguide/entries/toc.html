@@ -1,0 +1,13 @@
+{# use: The "On this page" list of a long text page (about, the legal pages): its entries are the page's own headings, in order, each linking to its heading's id. Put it first in a .toc-layout, the text in .toc-layout__body: a sticky column on the left from 992px up, above the text below that. One per page; not for short pages or lists. #}
+<div class="toc-layout">
+  {% include "components/toc.html" with entries="styleguide/entries/_toc_entries.html" %}
+  <div class="toc-layout__body">
+    <h3 id="toc-example-first">A first section</h3>
+    <p>
+      Running text, as wide as the reading measure. The list beside it repeats
+      this page's headings word for word.
+    </p>
+    <h3 id="toc-example-second">A second section with a longer heading that wraps</h3>
+    <p>A long entry wraps inside its column.</p>
+  </div>
+</div>

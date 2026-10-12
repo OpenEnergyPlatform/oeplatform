@@ -272,9 +272,11 @@ class PagesWithABandTest(TestViewsTestCase):
     def test_texts_are_unchanged(self):
         def borrowed(node):
             # The area line and the trail's links repeat navbar and footer
-            # labels; everything else on the page is the page's own text.
+            # labels, and an "On this page" list's links repeat the page's own
+            # headings (#2649); everything else is the page's own text.
             in_trail = any(a.has_class(TRAIL) for a in node.ancestors)
-            return node.has_class(AREA) or (node.tag == "a" and in_trail)
+            in_toc = any(a.has_class("toc__list") for a in node.ancestors)
+            return node.has_class(AREA) or (node.tag == "a" and (in_trail or in_toc))
 
         for slug in PAGES:
             with self.subTest(page=slug):
