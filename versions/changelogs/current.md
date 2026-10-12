@@ -27,7 +27,7 @@ SPDX-License-Identifier: CC0-1.0
   including the table page's menus, peer review history and the tag picker on
   the database pages, whose own buttons now carry a button role. Both have
   catalogue entries. The homepage renders pixel for pixel as before
-  [(#PR)](https://github.com/OpenEnergyPlatform/oeplatform/pull/PR)
+  [(#2690)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2690)
 - Pages that started with their title glued under the navbar get a header band:
   the house component `page_header`
   (`base/templates/components/page_header.html`), in the established area/trail
