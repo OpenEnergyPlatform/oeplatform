@@ -1,7 +1,10 @@
 {% extends "base/base.html" %}
 {% load django_bootstrap5 %}
+{% block site-header %}
+  {% url 'base:about' as about_url %}
+  {% include "components/page_header.html" with area="About" icon="icons/area_about.html" crumb_label="Overview" crumb_url=about_url title="Privacy policy" %}
+{% endblock site-header %}
 {% block main-content-body %}
-  <h1>Privacy policy</h1>
   <p>
     The OEP Community (“we”) operates the website Open Energy Platform (the
     “Site”), accessible at https://openenergyplatform.org/. With this privacy
