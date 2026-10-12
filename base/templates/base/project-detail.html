@@ -1,11 +1,13 @@
 {% extends "base/base.html" %}
 {% load django_bootstrap5 %}
+{% block site-header %}
+  {% url 'base:about' as about_url %}
+  {% include "components/page_header.html" with area="About" icon="icons/area_about.html" crumb_label="Overview" crumb_url=about_url title=project.fullTitle %}
+{% endblock site-header %}
 {% block main-content-body %}
   {% load static %}
   <div>
     <div class="d-flex justify-content-between flex-wrap">
-      <!-- full title and acronym -->
-      <h1>{{ project.fullTitle }}</h1>
       <!-- logo -->
       {% if project.logo %}
         <img class="flex-item"

@@ -3595,7 +3595,9 @@ path = [
   "theming/scss/components/_section_heading.scss",
   "theming/scss/components/_tag.scss",
   "theming/scss/components/_badge.scss",
+  "theming/scss/components/_page_header.scss",
   "base/templates/components/**",
+  "base/tests/page_texts/**",
   "base/templates/brand/**",
   "base/templates/base/_head.html",
   "base/templates/base/_instance_stylesheets.html",
@@ -3606,4 +3608,15 @@ precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
   "2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]
+
+[[annotations]]
+path = [
+  "base/templates/icons/area_about.html",
+  "base/templates/icons/area_account.html",
+]
+precedence = "override"
+SPDX-License-Identifier = "MIT"
+SPDX-FileCopyrightText = [
+  "2019-2024 The Bootstrap Authors",
 ]

@@ -83,9 +83,10 @@ Example Grid Platform
 name or a rule in your stylesheet, but is not supported: templates, class names
 and page structure change between releases without notice. Some places are not
 covered yet: the sign-in and account pages show the platform's own logo, the
-pages built with React (scenario bundles, the ontology browser) do not read the
-tokens, and the favicon is a static file (`favicon.ico`), which a file of that
-name in `STATICFILES_DIRS` replaces.
+navbar's Sign up and Sign in buttons keep a blue of their own, the pages built
+with React (scenario bundles, the ontology browser) do not read the tokens, and
+the favicon is a static file (`favicon.ico`), which a file of that name in
+`STATICFILES_DIRS` replaces.
 
 Compressed bundles are built ahead of time by `manage.py compress`, so a
 `{% compress %}` block in a template you override exists only once `compress`
