@@ -69,7 +69,7 @@ class TestTheTwoPagesAreOneFlow(TagPageTestCase):
         """Every other page in this app has one; the editor had none, which is
         what made it look like it belonged to a different site."""
         for html in (self.overview(), self.editor(), self.editor(self.tag)):
-            self.assertIn("main-header", html)
+            self.assertIn('class="page-header"', html)
 
     def test_the_editor_says_which_of_the_two_things_it_is_doing(self):
         self.assertIn("Create Tag", self.editor())

@@ -12,26 +12,13 @@
   {% endif %}
 {% endblock %}
 {% block site-header %}
-  <div class="main-header">
-    <h1 class="main-header__title">
-      <img src="{% static 'img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg' %}"
-           width="16"
-           height="16"
-           alt="OEO" />
-      Ontology
-    </h1>
-    <div class="main-header__wizard">
-      <a href="{% url 'ontology:index' %}">Overview</a> /
-      {% if term_id %}
-        <a href="{% url 'ontology:ontology-entity-search' ontology_id %}">
-          {{ ontology_id|upper }} Search
-        </a>
-        / Entity
-      {% else %}
-        {{ ontology_id|upper }} Search
-      {% endif %}
-    </div>
-  </div>
+  {% url 'ontology:index' as overview_url %}
+  {% if term_id %}
+    {% url 'ontology:ontology-entity-search' ontology_id as search_url %}
+    {% include "components/page_header.html" with area="Ontology" icon="icons/area_ontology.html" crumb_label="Overview" crumb_url=overview_url crumb2_label=ontology_id|upper|add:" Search" crumb2_url=search_url title="Entity" %}
+  {% else %}
+    {% include "components/page_header.html" with area="Ontology" icon="icons/area_ontology.html" crumb_label="Overview" crumb_url=overview_url title=ontology_id|upper|add:" Search" %}
+  {% endif %}
 {% endblock site-header %}
 {% block after-head %}
   {% vite_react_refresh nonce="{{ request.csp_nonce }}" %}

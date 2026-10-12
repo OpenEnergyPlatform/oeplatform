@@ -17,10 +17,7 @@
   {% endif %}
 {% endblock after-head %}
 {% block site-header %}
-  <div class="main-header">
-    <h1 class="main-header__title">Styleguide</h1>
-    <div class="main-header__wizard">Component catalogue</div>
-  </div>
+  {% include "components/page_header.html" with area="Styleguide" title="Component catalogue" %}
 {% endblock site-header %}
 {% block main-content-body %}
   <p class="styleguide-prose">

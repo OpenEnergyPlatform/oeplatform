@@ -10,13 +10,7 @@
   <style></style>
 {% endblock %}
 {% block site-header %}
-  <div class="main-header">
-    <h1 class="main-header__title">
-      {% include "modelview/partials/factsheet_icon.html" %}
-      {{ label }} Factsheets
-    </h1>
-    <div class="main-header__wizard">Overview</div>
-  </div>
+  {% include "components/page_header.html" with area=label|add:" Factsheets" icon="icons/area_factsheets.html" title="Overview" %}
 {% endblock site-header %}
 {% block side-column %}
   <aside class="content__side">

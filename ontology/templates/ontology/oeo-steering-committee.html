@@ -2,19 +2,8 @@
 {% load django_bootstrap5 %}
 {% load static %}
 {% block site-header %}
-  <div class="main-header">
-    <h1 class="main-header__title">
-      <img src="{% static 'img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg' %}"
-           width="16"
-           height="16"
-           alt="OEO" />
-      Ontology
-    </h1>
-    <div class="main-header__wizard">
-      <a href="{% url 'ontology:index' %}">Overview</a> / Steering Committee
-      (OEO-SC)
-    </div>
-  </div>
+  {% url 'ontology:index' as overview_url %}
+  {% include "components/page_header.html" with area="Ontology" icon="icons/area_ontology.html" crumb_label="Overview" crumb_url=overview_url title="Steering Committee (OEO-SC)" %}
 {% endblock site-header %}
 {% block main-content-body %}
   <h2>Open Energy Ontology Steering Committee (OEO-SC)</h2>

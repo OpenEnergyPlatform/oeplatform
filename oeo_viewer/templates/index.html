@@ -33,40 +33,38 @@
     }
   </style>
 {% endblock after-head %}
+{% block site-header %}
+  {% url 'ontology:index' as overview_url %}
+  {% include "components/page_header.html" with area="Ontology" icon="icons/area_ontology.html" crumb_label="Overview" crumb_url=overview_url title="Open Energy Ontology Viewer" %}
+{% endblock site-header %}
 {% block main %}
-  <div class="main-header">
-    <h1 class="main-header__title">
-      <img src="{% static 'img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg' %}"
-           width="16"
-           height="16"
-           alt="OEO" />
-      Open Energy Ontology Viewer
-    </h1>
-    <div class="main-header__wizard">
-      <a href="{% url 'ontology:index' %}">Open Energy Ontology</a> / OEO Viewer
-    </div>
-    <br />
-    <div class="oeo-viewer-intro">
-      <p>
-        The <strong>OEO Viewer</strong> serves as an interactive map for the Open Energy Ontology.
-        While our <a href="{% url 'ontology:oeo-class-detail' 'oeo' 'BFO_0000001' %}">Entity Lookup</a> pages are used for quick lookups,
-        this Viewer is built for experts to explore the <strong>structural context</strong> of the OEO—allowing you
-        to visualize complex dependencies in the Graph View and navigate the full asserted hierarchy.
-      </p>
-      <div class="oeo-resource-section">
-        <p style="margin-bottom: 0;">
-          <strong>External resources:</strong> The OEO is integrated into the NFDI4Energy terminology ecosystems.
-          The following platforms provide advanced features and API's that complement this viewer:
-        </p>
-        <div class="oeo-resource-links">
-          <a href="{{ tib_ts_oeo_link }}" target="_blank" rel="noopener">
-            <i class="fa fa-external-link"></i> TIB Terminology Service (Advanced Search & API)
-          </a>
-          <a href="{{ technoportal_link }}" target="_blank" rel="noopener">
-            <i class="fa fa-external-link"></i> Technoportal
-          </a>
+  {# the band's edges: the same gutters and width as the band above #}
+  <div class="content">
+    <div class="content__container">
+      <section class="content__main">
+        <div class="oeo-viewer-intro">
+          <p>
+            The <strong>OEO Viewer</strong> serves as an interactive map for the Open Energy Ontology.
+            While our <a href="{% url 'ontology:oeo-class-detail' 'oeo' 'BFO_0000001' %}">Entity Lookup</a> pages are used for quick lookups,
+            this Viewer is built for experts to explore the <strong>structural context</strong> of the OEO—allowing you
+            to visualize complex dependencies in the Graph View and navigate the full asserted hierarchy.
+          </p>
+          <div class="oeo-resource-section">
+            <p style="margin-bottom: 0;">
+              <strong>External resources:</strong> The OEO is integrated into the NFDI4Energy terminology ecosystems.
+              The following platforms provide advanced features and API's that complement this viewer:
+            </p>
+            <div class="oeo-resource-links">
+              <a href="{{ tib_ts_oeo_link }}" target="_blank" rel="noopener">
+                <i class="fa fa-external-link"></i> TIB Terminology Service (Advanced Search & API)
+              </a>
+              <a href="{{ technoportal_link }}" target="_blank" rel="noopener">
+                <i class="fa fa-external-link"></i> Technoportal
+              </a>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
     </div>
   </div>
   {% block main-content-body %}

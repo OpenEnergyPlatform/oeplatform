@@ -5,20 +5,18 @@
         href="{% static 'sparql_ui/vendor/yasgui-4.2.28/css/yasgui.min.css' %}" />
 {% endblock after-head %}
 {% block site-header %}
-  <div class="main-header">
-    <h1 class="main-header__title">
-      <img src="{% static 'img/welcome/OpenEnergyFamily_Logo_OpenEnergyOntology_icon.svg' %}"
-           width="16"
-           height="16"
-           alt="OEO" />
-      OEKG Sparql Query
-    </h1>
-    Here you can query the Open Energy Knowledge Graph (OEKG) using SPARQL. You
-    can also use our http api, have a look at the
-    <a href="{{ oekg_api }}" target="_blank">documentation</a>.
-  </div>
+  {% include "components/page_header.html" with area="Scenario Bundles" icon="icons/area_ontology.html" title="OEKG Sparql Query" %}
 {% endblock site-header %}
 {% block main-content-body %}
+  <div class="content">
+    <div class="content__container">
+      <p class="content__main">
+        Here you can query the Open Energy Knowledge Graph (OEKG) using SPARQL.
+        You can also use our http api, have a look at the
+        <a href="{{ oekg_api }}" target="_blank">documentation</a>.
+      </p>
+    </div>
+  </div>
   <div class="container" id="yasgui"></div>
   <style>
     .yasgui .autocompleteWrapper {

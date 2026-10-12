@@ -2,12 +2,9 @@
 {% load static %}
 {% block title %}- {{ topic }} datasets{% endblock %}
 {% block site-header %}
-  <div class="main-header">
-    <h1 class="main-header__title">Database</h1>
-    <div class="main-header__wizard">
-      <a href="{% url 'dataedit:topic-list' %}">Topics</a> / {{ topic }} / Datasets
-    </div>
-  </div>
+  {% url 'dataedit:topic-list' as topics_url %}
+  {% url 'dataedit:tables-in-topic' topic as topic_url %}
+  {% include "components/page_header.html" with area="Database" icon="icons/area_database.html" crumb_label="Topics" crumb_url=topics_url crumb2_label=topic crumb2_url=topic_url title="Datasets" %}
 {% endblock site-header %}
 {% block data_content %}
   <div id="dataset-list-container">

@@ -1,0 +1,1 @@
+One vocabulary, shared by database tables and by Model/Framework factsheets. Renaming or deleting a tag here affects both. Create new Tag Back to Database Current tags Search tags Sort tags By name Most used
