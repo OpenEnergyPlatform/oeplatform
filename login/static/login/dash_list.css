@@ -344,21 +344,6 @@
   color: var(--dash-muted);
 }
 
-.dash-empty {
-  padding: 3rem 1rem;
-  text-align: center;
-}
-
-.dash-empty--nomatch {
-  border: 1px solid #dee2e6;
-  border-radius: 6px;
-}
-
-.dash-empty__title {
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
 .dash-muted {
   color: var(--dash-muted);
   font-size: 0.8125rem;

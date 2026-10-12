@@ -51,9 +51,9 @@ login.dataset_members.MembersSlice; ``page`` travels with every change as
       {% endfor %}
     </ul>
   {% elif members.search %}
-    <p class="dash-muted">No table in this dataset matches.</p>
+    {% include "components/empty_state.html" with icon="fas fa-search" text="No table in this dataset matches." compact=True %}
   {% else %}
-    <p class="dash-muted">No tables yet.</p>
+    {% include "components/empty_state.html" with icon="fas fa-table" text="No tables yet." compact=True %}
   {% endif %}
   {% if members.pages > 1 %}
     <nav class="dash-members-pager" aria-label="Pages of member tables">

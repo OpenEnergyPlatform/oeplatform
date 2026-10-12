@@ -182,7 +182,8 @@ class Page:
 #: - dataedit:table-permission: an inline alert() (#2643);
 #: - login:tables, login:datasets: the dashboard's own cell, menu and filter
 #:   controls carry no role (#2659);
-#: - login:organizations: its buttons take a role by `@extend` (#2653);
+#: - login:organizations: Create Organization and the help toggle take their
+#:   look from container selectors (#2653); its cards' Edit has a role (#2646);
 #: - the peer review pages: buttons styled by container selectors (#2658);
 #: - dataedit/admin.html and login's activate, detach, generic_form and
 #:   oepuser_create_form: no view renders them (dead code, #2660).

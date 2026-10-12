@@ -28,7 +28,7 @@
     <div class="card-body">
       <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
         <div>
-          <h5 class="card-title mb-1">{{ dataset.metadata.title|default:dataset.name }}</h5>
+          <h2 class="card-title mb-1">{{ dataset.metadata.title|default:dataset.name }}</h2>
           <h6 class="card-subtitle text-muted mb-2">{{ dataset.name }}</h6>
         </div>
         {% if is_creator %}
@@ -99,7 +99,9 @@
             {% endif %}
           </a>
         {% empty %}
-          <div class="list-group-item text-muted">No tables assigned yet.</div>
+          <div class="list-group-item">
+            {% include "components/empty_state.html" with icon="fas fa-table" text="No tables assigned yet." compact=True %}
+          </div>
         {% endfor %}
       </div>
     </div>

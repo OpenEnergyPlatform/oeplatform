@@ -1,22 +1,36 @@
+// The topic list's cards (dataedit/partials/topic_card.html). Each is a house
+// card (components/_card.scss); this is only what sits inside one: the title
+// with its icon beside the table count, then the keywords.
 @use '../base/' as *;
-@use '../base/mixins' as *;
-@use '../legacy/cards' as *;
 
-.topics {
-    @include cards-layout($apply-2-cols-x4l-screens: false);
+.topic-card {
+    &__head {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: baseline;
+        column-gap: 1rem;
+        margin-bottom: 0.5rem;
+    }
 
-    .topic-card {
-        @include card-container;
+    &__title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0;
+    }
 
-        &__btn {
-            @include flex-row;
-            @extend .justify-content-end;
-            @extend .align-items-end;
-            width: 66%;
+    &__icon {
+        display: inline-flex;
+    }
 
-            @include media-breakpoint-down(lg) {
-                width: 100%;
-            }
-        }
+    &__count {
+        font-size: var(--oep-font-size-dense);
+        color: var(--oep-text-muted);
+        white-space: nowrap;
+    }
+
+    &__keywords {
+        margin-bottom: 0.75rem;
     }
 }

@@ -1,0 +1,47 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+One topic on the topic list (dataedit_topiclist.html), as a clickable house
+card: the title link opens the topic's tables and keeps the list's filters.
+The draft topic's card also offers the upload wizard, lifted above the link
+(card__control).
+
+topic, description, tables  one row of topics_descriptions_tablecounts
+{% endcomment %}
+{% url 'dataedit:tables-in-topic' topic=topic as topic_url %}
+<div class="card card--clickable topic-card h-100">
+  <div class="card-body">
+    <div class="topic-card__head">
+      <h2 class="card-title topic-card__title">
+        <span class="topic-card__icon" aria-hidden="true">
+          {% include "dataedit/partials/topic_icon.html" %}
+        </span>
+        <a class="stretched-link"
+           href="{{ topic_url }}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}">{{ topic }}</a>
+      </h2>
+      <span class="topic-card__count">{{ tables }} tables</span>
+    </div>
+    <div class="tag-group topic-card__keywords">
+      {% include "dataedit/partials/topic_keywords.html" %}
+    </div>
+    <p class="card-text">{{ description }}</p>
+    {% if topic == PSEUDO_TOPIC_DRAFT %}
+      <a class="btn btn-primary card__control"
+         href="{% url 'dataedit:wizard_create' %}">
+        <span class="btn__icon">
+          <svg width="16"
+               height="16"
+               version="1.1"
+               fill="currentColor"
+               viewBox="0 0 16 16"
+               aria-hidden="true"
+               xmlns="http://www.w3.org/2000/svg">
+            <path d="m14,9h-5v5h-2v-5H2v-2h5V2h2v5h5v2Z" />
+          </svg>
+        </span>
+        <span class="btn__text">Add data set</span>
+      </a>
+    {% endif %}
+  </div>
+</div>

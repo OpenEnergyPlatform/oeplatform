@@ -153,12 +153,7 @@ count, where the page renders them.
       {% include "login/partials/list_pager.html" %}
     {% else %}
       {% block nomatch %}
-        <div class="dash-empty dash-empty--nomatch">
-          <h3 class="dash-empty__title">No {{ page.listing.plural }} match these filters</h3>
-          <a class="btn btn-outline-secondary btn-sm"
-             id="nomatch-reset"
-             href="{{ page.reset_url }}">Reset filters</a>
-        </div>
+        {% include "components/empty_state.html" with icon="fas fa-search" text="No "|add:page.listing.plural|add:" match these filters." action_template="login/partials/list_nomatch_action.html" %}
       {% endblock nomatch %}
     {% endif %}
   {% endif %}

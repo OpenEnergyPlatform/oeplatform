@@ -12,6 +12,22 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- One card and one empty state. Every `.card` is the house card on tokens (the
+  in-page radius, the border colour, `--oep-shadow-sm`, 1.5rem padding, one
+  title size), and `card--clickable` is a card that is one link: its title link
+  stretches over it, and it takes a primary border on hover and focus without
+  lifting. The topic list, the dataset and table lists, the dataset page and the
+  organizations tab render their cards that way; a topic card's title is a real
+  link (it was an `onclick` on the header), its keywords are neutral tags, and
+  an organization's role is a badge. An empty list shows the include
+  `components/empty_state.html` (a muted icon, one sentence, at most one action)
+  on the dataset and table lists, the dataset page, the organizations tab and
+  organization page, the dashboard's tables and datasets tabs (empty and nothing
+  matching) and the dataset members drawer; the tables tab's "Upload via the
+  API" button became a link in its sentence. The card, empty-state and tag-mark
+  mixins and `.dash-empty` are gone; `card` and `empty_state` are in the
+  component catalogue. The homepage renders pixel for pixel as before
+  [(#2689)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2689)
 - Every action carries one of four button roles: primary (solid blue, the one
   main action of a view), secondary (a grey outline), danger (an outline on the
   button that opens a confirmation, solid inside it) and link. Green, cyan,

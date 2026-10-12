@@ -170,6 +170,8 @@ $focus-border: color-mix(in srgb, var(--bs-primary) 50%, white);
 // Cards and dialogs
 .card {
   --bs-card-bg: var(--oep-surface);
+  --bs-card-border-radius: var(--bs-border-radius);
+  --bs-card-inner-border-radius: calc(var(--bs-border-radius) - var(--bs-card-border-width));
 }
 
 .modal {
