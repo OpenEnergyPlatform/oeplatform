@@ -27,7 +27,7 @@ SPDX-License-Identifier: CC0-1.0
   API" button became a link in its sentence. The card, empty-state and tag-mark
   mixins and `.dash-empty` are gone; `card` and `empty_state` are in the
   component catalogue. The homepage renders pixel for pixel as before
-  [(#PR)](https://github.com/OpenEnergyPlatform/oeplatform/pull/PR)
+  [(#2689)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2689)
 - A third-party instance restyles the platform without a fork. Two optional
   local settings: `INSTANCE_STYLESHEETS` (static paths, linked last in every
   page's head, after the platform's and the page's own stylesheets, and left out
