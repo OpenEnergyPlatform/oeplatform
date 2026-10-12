@@ -4,9 +4,9 @@
 {% load modelview_extras %}
 {% block after-head %}
   <link rel="stylesheet" href="{% static 'css/mv-style.css' %}">
-  <link href="{% static 'dataedit/jquery.dataTables.min.css' %}"
+  <link href="{% static 'dataedit/dataTables.bootstrap5.min.css' %}"
         rel="stylesheet">
-  <!-- src: https://cdn.datatables.net/1.10.20/css/jimages/query.dataTables.min.css -->
+  <!-- src: https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap5.min.css -->
   <style></style>
 {% endblock %}
 {% block site-header %}
@@ -131,13 +131,13 @@
     </div>
     <br>
   {% endif %}
-  <div style="width:100%; overflow-y: auto; padding-bottom: 1em">
-    <table id="overview" class="display" style="width:100%;">
-    </table>
-  </div>
+  <table id="overview" class="table table-hover" style="width:100%;">
+  </table>
 {% endblock %}
 {% block after-body-bottom-js %}
   <script src="{% static 'dataedit/jquery.dataTables.min.js' %}"></script><!-- src: https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js -->
+  <script src="{% static 'dataedit/dataTables.bootstrap5.min.js' %}"></script><!-- src: https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.min.js -->
+  <script src="{% static 'dataedit/datatables_house.js' %}"></script>
   {# The rows come from the view; `modelview/list_payload.py` says why. JSON #}
   {# via `json_script`, never a JS literal: `json_script` escapes `<`, `>` #}
   {# and `&`, so no field value can close this element. #}

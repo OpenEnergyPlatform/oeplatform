@@ -1323,6 +1323,14 @@ class OrganizationsView(ProfileOwnerRequiredMixin, View):
         )
 
 
+def _leave_refused(request, reason: str) -> HttpResponse:
+    """Why a member cannot leave, as the house alert for the page's
+    `#error-display` (an htmx target)."""
+    return render(
+        request, "components/alert.html", {"status": "danger", "text": reason}
+    )
+
+
 # TODO: should be require_POST?
 @login_required
 def organization_leave_view(request, organization_id: int):
@@ -1335,8 +1343,8 @@ def organization_leave_view(request, organization_id: int):
         Membership.objects.filter(group=organization).exclude(user=user.pk).count()
     )
     if members == 0:
-        return HttpResponse(
-            "Please delete the organization instead (you are the only member)."
+        return _leave_refused(
+            request, "Please delete the organization instead (you are the only member)."
         )
 
     if membership.level >= ADMIN_PERM:
@@ -1346,7 +1354,7 @@ def organization_leave_view(request, organization_id: int):
             .count()
         )
         if admins == 0:
-            return HttpResponse("An organization needs at least one admin!")
+            return _leave_refused(request, "An organization needs at least one admin!")
 
     membership.delete()
     response = HttpResponse()
@@ -1367,7 +1375,6 @@ def organization_delete_view(request, organization_id: int):
         request,
         level=messages.INFO,
         message="Organization deleted!",
-        extra_tags="primary",
     )
     response = HttpResponse()
     response["HX-Redirect"] = reverse(
@@ -1502,7 +1509,6 @@ class OrganizationManagementView(LoginRequiredMixin, View):
             request,
             level=messages.INFO,
             message="Organization created! Edit the organization to invite members.",
-            extra_tags="primary",
         )
         response = HttpResponse()
         response["HX-Redirect"] = reverse(

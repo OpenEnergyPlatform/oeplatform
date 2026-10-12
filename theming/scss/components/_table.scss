@@ -1,0 +1,75 @@
+// table: every table on the platform (#2647). Bootstrap's `.table` with the
+// head row on the subtle surface, the dense text size and a hover tint on
+// rows; pure CSS, no include. Catalogue entry:
+// base/templates/styleguide/entries/table.html.
+//
+//   .table            a table of records; add `.table-hover` when a row is
+//                     something to look at or click
+//   .table-pairs      a list of labels and values (a factsheet's fields, a
+//                     review's facts): the label column is the `th` (or a
+//                     cell with its own label class), no head row
+//   .table-container  the one wrapper that draws a table's border and round
+//                     corners, and scrolls a wide table sideways. A table
+//                     never rounds its own corners: with collapsed borders a
+//                     radius on the table does nothing.
+//
+// Every value is a token. The rules set Bootstrap's own table variables where
+// one exists, so a page stylesheet can still override a cell at its own
+// specificity.
+@use '../base/' as *;
+
+.table {
+    --bs-table-hover-bg: var(--oep-surface-hover);
+    font-size: var(--oep-font-size-dense);
+}
+
+// The head row: Bootstrap paints a cell with --bs-table-bg, which the cell
+// inherits from here.
+.table > thead {
+    --bs-table-bg: var(--oep-surface-subtle);
+}
+
+.table > thead > tr > th {
+    font-weight: $font-weight-semibold;
+}
+
+.table-pairs > tbody > tr > th {
+    width: 34%;
+    font-weight: $font-weight-semibold;
+}
+
+// A list of pairs inside a cell of another (a factsheet's sub-fields).
+.table .table {
+    margin-bottom: 0;
+}
+
+.table-container {
+    overflow-x: auto;
+    border-width: 1px;
+    border-style: solid;
+    border-color: var(--bs-border-color);
+    border-radius: var(--bs-border-radius);
+}
+
+.table-container > .table {
+    margin-bottom: 0;
+}
+
+// The container draws the outer line; the last row's own would double it.
+.table-container > .table > :last-child > tr:last-child > * {
+    border-bottom-width: 0;
+}
+
+// DataTables draws the house table through its Bootstrap 5 styling
+// (dataTables.bootstrap5.min.css) and dataedit/datatables_house.js, which
+// puts the table, and its scroll head and body when it scrolls, inside a
+// `.table-container`. Its stylesheet gives every table a 6px margin with
+// `!important`; inside the container that would show as a gap.
+.table-container table.dataTable {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+.table-container .dataTables_scrollBody > table.dataTable > tbody > tr:last-child > * {
+    border-bottom-width: 0;
+}

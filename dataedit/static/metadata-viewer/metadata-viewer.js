@@ -509,8 +509,8 @@ function renderSchemaTab(metadata) {
           <input type="text" id="field-search-${resourceIndex}" class="form-control" placeholder="Search fields...">
         </div>
         
-        <div class="metadata-table-container">
-          <table class="table table-striped metadata-table" id="fields-table-${resourceIndex}">
+        <div class="table-container metadata-table-container">
+          <table class="table table-hover" id="fields-table-${resourceIndex}">
             <thead>
               <tr>
                 <th>Name ${createInfoIcon(

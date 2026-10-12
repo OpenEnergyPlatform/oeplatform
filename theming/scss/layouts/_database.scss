@@ -1,6 +1,5 @@
 @use '../base/' as *;
 @use '../base/mixins' as *;
-@use '../legacy/tables' as *;
 
 .content .tab-content {
     overflow: hidden;
@@ -76,17 +75,11 @@
         }
     }
 
-    .dataTables_scroll {
-        @extend .border;
-        @extend .rounded;
-    }
-
     .dataTables_length {
         @extend .mb-1;
     }
 
     .metadata {
-        @include table-variant--rounded;
         overflow-x: hidden;
 
         &__options {
@@ -106,22 +99,12 @@
                 @extend .me-3;
             }
         }
-
-        .table-container {
-            @include table-container;
-        }
     }
 
     .opr {
-        @include table-variant--rounded;
-
         &__info {
             @extend .pb-4;
             max-width: 64rem;
-        }
-
-        .table-container {
-            @include table-container;
         }
 
         tr th {

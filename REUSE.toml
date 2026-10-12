@@ -2242,11 +2242,14 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "dataedit/static/dataedit/jquery.dataTables.min.css"
+path = [
+  "dataedit/static/dataedit/dataTables.bootstrap5.min.css",
+  "dataedit/static/dataedit/dataTables.bootstrap5.min.js",
+]
 precedence = "override"
-SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-License-Identifier = "MIT"
 SPDX-FileCopyrightText = [
-  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
+  "2020 SpryMedia Ltd <https://datatables.net>",
 ]
 
 [[annotations]]
@@ -3127,7 +3130,7 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "theming/scss/legacy/_paginations.scss"
+path = "theming/scss/components/_pagination.scss"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
@@ -3155,7 +3158,7 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "theming/scss/legacy/_alerts.scss"
+path = "theming/scss/components/_alert.scss"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
@@ -3182,7 +3185,7 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "theming/scss/legacy/_tables.scss"
+path = "theming/scss/components/_table.scss"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [

@@ -33,29 +33,6 @@ def splitarray(field):
 
 
 @register.simple_tag
-def checktable(model, label, prefix, suffixes, separator="_"):
-    header = ""
-    data = ""
-    for s in suffixes.split(";"):
-        if model.__dict__["{0}{2}{1}".format(prefix, s, separator)]:
-            data = '<span class="fas fas-check"></span>'
-        else:
-            data = '<span class="fas fas-times"></span>'
-        header += "<td>{1} {0} </td>".format(s, data)
-    return """<tr>
-                <td valign="top"  class="rowlabel"> {0}</td>
-                <td>
-                    <table class="profiletable-checktable">
-                        <tr>
-                            {1}
-                        </tr>
-                        {2}
-                    </table>
-                </td>
-            </tr>""".format(label, header, "")
-
-
-@register.simple_tag
 def checklist(model, labels):
     s = ""
     first = True

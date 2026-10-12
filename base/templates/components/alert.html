@@ -1,0 +1,24 @@
+{% comment %}
+  alert (#2647): a status message on the page. Styles and icon:
+  theming/scss/components/_alert.scss; catalogue entry: styleguide/entries/alert.html.
+
+  status       success | info | warning | danger (default info); for a Django
+               message pass its `level_tag`, which MESSAGE_TAGS maps "error" to "danger"
+  text         the message; escaped unless it is already marked safe
+  dismissible  adds a close button
+  id           optional, for a script or an htmx target that refers to it
+
+  A warning or an error is announced as it appears (role="alert"); success
+  and info wait their turn (role="status").
+{% endcomment %}
+<div {% if id %}id="{{ id }}"{% endif %}
+     class="alert alert-{{ status|default:'info' }}{% if dismissible %} alert-dismissible fade show{% endif %}"
+     role="{% if status == 'danger' or status == 'warning' %}alert{% else %}status{% endif %}">
+  {{ text }}
+  {% if dismissible %}
+    <button type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"></button>
+  {% endif %}
+</div>

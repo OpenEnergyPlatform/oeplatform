@@ -1,0 +1,27 @@
+{# use: The pager under a paged list: separate buttons, the current page solid, an optional muted range at the end. DataTables draws the same pager. #}
+<nav aria-label="Pages">
+  <ul class="pagination mb-0">
+    <li class="page-item disabled">
+      <span class="page-link" aria-hidden="true">‹</span>
+    </li>
+    <li class="page-item active" aria-current="page">
+      <span class="page-link">1</span>
+    </li>
+    <li class="page-item">
+      <a class="page-link" href="#pagination" aria-label="Page 2">2</a>
+    </li>
+    <li class="page-item">
+      <a class="page-link" href="#pagination" aria-label="Page 3">3</a>
+    </li>
+    <li class="page-item disabled">
+      <span class="page-link" aria-hidden="true">…</span>
+    </li>
+    <li class="page-item">
+      <a class="page-link" href="#pagination" aria-label="Page 83">83</a>
+    </li>
+    <li class="page-item">
+      <a class="page-link" href="#pagination" aria-label="Next page">›</a>
+    </li>
+    <li class="pagination__range">1–25 of 2,068</li>
+  </ul>
+</nav>

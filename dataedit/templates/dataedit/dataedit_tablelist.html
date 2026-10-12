@@ -49,22 +49,22 @@
         {% endif %}
         {% if tables_paginated.has_other_pages %}
           <nav aria-label="Table navigation top">
-            <ul class="pagination pagination-sm mb-0">
+            <ul class="pagination mb-0">
               {% if tables_paginated.has_previous %}
                 <li class="page-item">
-                  <a class="page-link shadow-sm ajax-pagination"
+                  <a class="page-link ajax-pagination"
                      href="?{{ params_wo_page }}&page={{ tables_paginated.previous_page_number }}"
                      aria-label="Previous">
                     <span aria-hidden="true">«</span>
                   </a>
                 </li>
               {% endif %}
-              <li class="page-item active">
-                <span class="page-link shadow-sm">{{ tables_paginated.number }} / {{ tables_paginated.paginator.num_pages }}</span>
+              <li class="page-item active" aria-current="page">
+                <span class="page-link">{{ tables_paginated.number }} / {{ tables_paginated.paginator.num_pages }}</span>
               </li>
               {% if tables_paginated.has_next %}
                 <li class="page-item">
-                  <a class="page-link shadow-sm ajax-pagination"
+                  <a class="page-link ajax-pagination"
                      href="?{{ params_wo_page }}&page={{ tables_paginated.next_page_number }}"
                      aria-label="Next">
                     <span aria-hidden="true">»</span>
@@ -140,9 +140,7 @@
           </div>
         </div>
       {% empty %}
-        <div class="alert alert-info border-0 shadow-sm">
-          <i class="fas fa-info-circle me-2"></i> No tables found in this topic matching your filters.
-        </div>
+        {% include "components/alert.html" with status="info" text="No tables found in this topic matching your filters." %}
       {% endfor %}
       {% if tables_paginated.paginator.count > 0 %}
         <div class="d-flex flex-column align-items-center mt-4 mb-5">
@@ -151,16 +149,16 @@
               <ul class="pagination justify-content-center mb-2">
                 {% if tables_paginated.has_previous %}
                   <li class="page-item">
-                    <a class="page-link shadow-sm ajax-pagination"
+                    <a class="page-link ajax-pagination"
                        href="?{{ params_wo_page }}&page={{ tables_paginated.previous_page_number }}">Previous</a>
                   </li>
                 {% endif %}
-                <li class="page-item active">
-                  <span class="page-link shadow-sm">{{ tables_paginated.number }} of {{ tables_paginated.paginator.num_pages }}</span>
+                <li class="page-item active" aria-current="page">
+                  <span class="page-link">{{ tables_paginated.number }} of {{ tables_paginated.paginator.num_pages }}</span>
                 </li>
                 {% if tables_paginated.has_next %}
                   <li class="page-item">
-                    <a class="page-link shadow-sm ajax-pagination"
+                    <a class="page-link ajax-pagination"
                        href="?{{ params_wo_page }}&page={{ tables_paginated.next_page_number }}">Next</a>
                   </li>
                 {% endif %}

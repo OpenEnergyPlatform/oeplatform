@@ -42,7 +42,7 @@
       </div>
       <div id="Overview" class="card-body expand in in">
         <div class="container" style="padding:0">
-          <table class="profiletable">
+          <table class="table table-pairs">
             {% include "modelview/model_snippet.html" with model=model field="last_updated" %}
             {#            {% include 'modelview/model_snippet.html' with model=model field='version'  %} #}
             {% include "modelview/model_snippet.html" with model=model field="open_source" %}
@@ -70,7 +70,7 @@
       </div>
       <div id="GeneralInformation" class="card-body collapse in in">
         <div class="container" style="padding:0">
-          <table class="profiletable">
+          <table class="table table-pairs">
             {% include "modelview/model_snippet.html" with model=model field="model_name" fieldNameOverride="Framework Name" %}
             {% include "modelview/model_snippet.html" with model=model field="acronym" %}
             {% include "modelview/model_snippet.html" with model=model field="contact_email" %}
@@ -127,7 +127,7 @@
       </div>
       <div id="MathematicalDescription" class="card-body collapse in">
         <div class="container" style="padding:0">
-          <table class="profiletable">
+          <table class="table table-pairs">
             {% include "modelview/model_snippet.html" with model=model field="gui" %}
             <tr>
               <td class="sheetlabel">Programming Framework</td>
@@ -209,7 +209,7 @@
       </div>
       <div id="Openness" class="card-body collapse in">
         <div class="container" style="padding:0">
-          <table class="profiletable">
+          <table class="table table-pairs">
             {% include "modelview/model_snippet.html" with model=model field="open_source" %}
             {% if not model.open_source %}
               {% include "modelview/model_snippet.html" with model=model field="open_up" %}
@@ -250,7 +250,7 @@
       </div>
       <div id="ModelBuilding" class="card-body collapse">
         <div class="container" style="padding:0">
-          <table class="profiletable">
+          <table class="table table-pairs">
             {% include "modelview/model_snippet.html" with model=model field="fixed_units" %}
             <tr>
               <td class="sheetlabel">Renewable Technology Inclusion</td>
@@ -338,7 +338,7 @@
       </div>
       <div id="References" class="card-body collapse in">
         <div class="container" style="padding:0">
-          <table class="profiletable">
+          <table class="table table-pairs">
             {% include "modelview/model_snippet.html" with model=model field="references_to_reports_produced_using_the_model" %}
             {% include "modelview/model_snippet.html" with model=model field="citation_reference" %}
             {% include "modelview/model_snippet.html" with model=model field="how_to_cite" %}
