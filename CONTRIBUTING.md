@@ -185,10 +185,11 @@ that should be inherited by every new template. Be aware that some OEP-apps may
 implement their own base design (see `<app>/templates/<app>/base.html`)
 
 A page's content spans the whole content width. A page with side content (a
-filter list, actions, a table of contents) fills the `side-column` block of its
-base template with `<aside class="content__side">...</aside>`; a page without
-fills nothing and gets no side column. Section headings are plain `<h2>` and
-`<h3>` without a class: the theme gives them their size and spacing.
+filter list, actions) fills the `side-column` block of its base template with
+`<aside class="content__side">...</aside>`; a page without fills nothing and
+gets no side column. A long text page's "On this page" list is not side content:
+it is the `toc` component, inside the page's content. Section headings are plain
+`<h2>` and `<h3>` without a class: the theme gives them their size and spacing.
 
 Build pages from the house components in the component catalogue at
 `/styleguide/` (copy the source shown under each one). If none fits, add a

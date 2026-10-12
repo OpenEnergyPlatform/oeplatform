@@ -1,0 +1,18 @@
+{% comment %}
+  toc (#2649): the "On this page" list of a long page. Its entries are the
+  page's own headings, in page order, each a link to its heading's id. Styles:
+  theming/scss/components/_toc.scss; catalogue entry: styleguide/entries/toc.html.
+
+  entries   a template rendering the list's items, one
+            <li><a href="#<heading id>"><heading text></a></li> per heading
+
+  Placed as the first child of a .toc-layout whose second child, the
+  .toc-layout__body, holds the text: a sticky 15rem column on the left from
+  992px up, stacked above the text below that. One per page.
+{% endcomment %}
+<nav class="toc" aria-labelledby="toc-title">
+  <p class="toc__title" id="toc-title">On this page</p>
+  <ol class="toc__list">
+    {% include entries %}
+  </ol>
+</nav>
