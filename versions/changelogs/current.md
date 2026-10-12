@@ -30,7 +30,7 @@ SPDX-License-Identifier: CC0-1.0
   containers. Every Bootstrap modal takes the dialog's look (8px, large shadow),
   and the dashboard's two drawers its header. Catalogue entries
   `confirm_dialog`, `toast`
-  [(#2643)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2643)
+  [(#2696)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2696)
 
 - One table, one alert and one pager across the platform. Tables are Bootstrap's
   `.table` with the head row on the subtle surface and the dense size
