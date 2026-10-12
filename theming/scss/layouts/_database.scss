@@ -33,46 +33,15 @@
         }
     }
 
+    // The table's views (Table, Graphs, Maps): a label and a tab row.
     .data-view {
-        @include flex-row;
-        justify-content: center;
+        display: flex;
         align-items: center;
+        gap: 0.75rem;
 
-        &__label {
-            @extend .d-inline-block;
-            @extend .pe-2;
-        }
-
-        &__tabs {
-            @extend .border-0;
-            @include flex-row;
-            justify-content: center;
-        }
-
-        &__tab {
-            @extend .bg-light;
-            @extend .border;
-
-            &:first-of-type {
-                @extend .rounded-start;
-            }
-
-            &:last-of-type {
-                @extend .rounded-end;
-            }
-        }
-
-        &__link {
-            padding: 0.25rem 0.75rem 0.35rem;
-
-            svg {
-                @extend .me-1;
-                @include translateY(-1px);
-            }
-        }
-
-        .dropdown-menu {
-            @extend .fs-7;
+        .tabs {
+            flex: 1 1 auto;
+            min-width: 0;
         }
     }
 
@@ -181,5 +150,38 @@
     &.hidden {
         opacity: 0;
         display: none;
+    }
+}
+
+// The table page's bar (#2648, replacing the theme's old table tab row): the
+// tab row (Data, Meta information, Open Peer Review) and, beside it, the
+// button that hides the side column. It lines up with the main column: the
+// content width, minus the side column and its gap on the right while the
+// side column shows.
+.table-view-bar {
+    display: flex;
+    justify-content: center;
+    padding: $C--padding-standard $C--padding-standard 0;
+
+    // Positioned: the hide button sits at its top right, above the side
+    // column, out of the row's flow.
+    &__container {
+        position: relative;
+        display: flex;
+        width: 100%;
+        max-width: var(--oep-content-width);
+
+        @include media-breakpoint-up(md) {
+            padding-right: calc(#{$C--db-side-width} + #{$C--padding-large});
+        }
+
+        &.table-view-bar__container--wide {
+            padding-right: 0;
+        }
+    }
+
+    .tabs {
+        flex: 1 1 auto;
+        min-width: 0;
     }
 }

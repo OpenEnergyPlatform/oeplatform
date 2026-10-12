@@ -1,0 +1,92 @@
+// tabs: a row of underline tabs (#2648). The active tab is primary with a
+// primary bar under it, the others muted; one thin line runs under the row.
+// It replaces Bootstrap's boxed tabs and the theme's three older tab rows
+// (the table page's, the peer review pages' and the dashboard's). Pure CSS,
+// no include.
+// Catalogue entry: base/templates/styleguide/entries/tabs.html.
+//
+// Markup: `nav tabs` on the row, `nav-link` on each tab, `active` on the
+// current one (Bootstrap's tab script sets it for in-page panes; a row of
+// links to other pages renders it, with `aria-current="page"`). A row of
+// panes is a `ul[role=tablist]`; a row of pages is a `nav` with an
+// `aria-label`.
+//
+// A row holds tabs and at most one aside link at its end (`tabs__aside`): an
+// icon link to somewhere that is not a tab (the dashboard's Settings gear),
+// never active. An action never sits in a tab row; it goes beside or above.
+//
+// On a narrow screen the row scrolls sideways instead of wrapping. The aside
+// link stays pinned at the right edge with a fade in front of it, which is
+// also the hint that more tabs lie underneath. The fade blends into
+// `--tabs-bg`: a row on a band (the page header's) sets it to the band's
+// surface.
+//
+// A dropdown inside a row must be positioned against the window
+// (`data-bs-popper-config='{"strategy": "fixed"}'` on its toggle), or the
+// row's scrolling cuts it off.
+@use '../base/' as *;
+
+.tabs {
+    --tabs-bg: var(--oep-surface);
+    --bs-nav-link-padding-x: 0.25rem;
+    --bs-nav-link-padding-y: 0.625rem;
+    --bs-nav-link-font-weight: #{$font-weight-semibold};
+    --bs-nav-link-color: var(--oep-text-muted);
+    --bs-nav-link-hover-color: var(--bs-primary);
+    --bs-nav-link-disabled-color: var(--oep-text-muted);
+    display: flex;
+    flex-wrap: nowrap;
+    column-gap: 1.75rem;
+    margin-bottom: 0;
+    padding-left: 0;
+    list-style: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+    // The line under the row, drawn inside it so that the active bar, drawn
+    // inside the tab, covers it.
+    box-shadow: inset 0 -1px 0 var(--bs-border-color);
+
+    .nav-item {
+        flex: 0 0 auto;
+    }
+
+    .nav-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        white-space: nowrap;
+        background: none;
+        border: 0;
+        border-radius: 0;
+
+        &:hover {
+            box-shadow: inset 0 -2px 0 var(--oep-border-strong);
+        }
+
+        &.active {
+            color: var(--bs-primary);
+            box-shadow: inset 0 -3px 0 var(--bs-primary);
+        }
+    }
+
+    &__aside {
+        position: sticky;
+        right: 0;
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        margin-left: auto;
+        padding: var(--bs-nav-link-padding-y) 0 var(--bs-nav-link-padding-y) 1.5rem;
+        color: var(--oep-text-muted);
+        font-size: 1.125rem;
+        text-decoration: none;
+        background: linear-gradient(to right, transparent, var(--tabs-bg) 1.25rem);
+        box-shadow: inset 0 -1px 0 var(--bs-border-color);
+
+        &:hover,
+        &:focus-visible {
+            color: var(--bs-primary);
+        }
+    }
+}

@@ -1,0 +1,26 @@
+{# use: Switches between views of one thing (panes of a page, or the pages of one area); the current tab is marked, at most one icon link to somewhere else sits at the row's end, and an action never sits in the row. #}
+<nav class="nav tabs mb-4" aria-label="Tabs without an aside link">
+  <a class="nav-link active"
+     aria-current="page"
+     href="#tabs"><i class="fas fa-table" aria-hidden="true"></i> Tables</a>
+  <a class="nav-link"
+     href="#tabs"><i class="fas fa-database"
+   aria-hidden="true"></i> Datasets</a>
+  <a class="nav-link"
+     href="#tabs">Reviews <span class="badge badge--info">Early Access</span></a>
+  <a class="nav-link" href="#tabs">Organizations</a>
+</nav>
+<nav class="nav tabs" aria-label="Tabs with an aside link">
+  <a class="nav-link"
+     href="#tabs"><i class="fas fa-table"
+   aria-hidden="true"></i> Tables</a>
+  <a class="nav-link active"
+     aria-current="page"
+     href="#tabs"><i class="fas fa-database" aria-hidden="true"></i> Datasets</a>
+  <a class="nav-link" href="#tabs">Reviews</a>
+  <a class="nav-link" href="#tabs">Organizations</a>
+  <a class="tabs__aside"
+     href="#tabs"
+     aria-label="Settings"
+     title="Settings"><i class="fas fa-cog" aria-hidden="true"></i></a>
+</nav>

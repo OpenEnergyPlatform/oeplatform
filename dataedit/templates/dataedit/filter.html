@@ -242,8 +242,14 @@
 
     // Filter Initialization
     $(document).ready(function() {
-      // Initialize the Bootstrap Select Picker
+      // Initialize the Bootstrap Select Picker. Its menu takes the house
+      // dropdown's look from the theme; its own buttons come out in
+      // `btn-light`, which is not a button role, so they take the secondary
+      // one (the plugin has no option for it).
       $("#tag-select").selectpicker();
+      $("#tags .bs-actionsbox .btn-light")
+        .removeClass("btn-light")
+        .addClass("btn-secondary");
 
       // Initialize the Bootstrap Help Popover
       var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
