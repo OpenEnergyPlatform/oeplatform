@@ -108,14 +108,14 @@
             <form action="{{ permission_url }}"
                   method="post"
                   style="display:inline-block;
-                         float:right"
-                  {% if not holder.you %}onsubmit="return confirm('Are you sure you want to remove {{ holder.name|escapejs }} from {{ table|escapejs }} and retract all permissions?')"{% endif %}>
+                         float:right">
               {% csrf_token %}
               <input type="hidden" name="mode" value="remove_group" />
               <input type="hidden" name="group_id" value="{{ holder.pk }}" />
               <input type="submit"
                      class="btn btn-outline-danger"
-                     value="Remove group" />
+                     value="Remove group"
+                     {% if not holder.you %}data-confirm="{{ holder.name }} loses every permission on {{ table }}." data-confirm-title="Remove group?" data-confirm-verb="Remove group" data-confirm-danger{% endif %} />
             </form>
           {% else %}
             {{ holder.name }}: {{ holder.role }}
@@ -175,14 +175,14 @@
             <form action="{{ permission_url }}"
                   method="post"
                   style="display:inline-block;
-                         float:right"
-                  {% if not holder.you %}onsubmit="return confirm('Are you sure you want to remove {{ holder.name|escapejs }} from {{ table|escapejs }} and retract all permissions?')"{% endif %}>
+                         float:right">
               {% csrf_token %}
               <input type="hidden" name="mode" value="remove_user" />
               <input type="hidden" name="user_id" value="{{ holder.pk }}" />
               <input type="submit"
                      class="btn btn-outline-danger"
-                     value="Remove user" />
+                     value="Remove user"
+                     {% if not holder.you %}data-confirm="{{ holder.name }} loses every permission on {{ table }}." data-confirm-title="Remove user?" data-confirm-verb="Remove user" data-confirm-danger{% endif %} />
             </form>
           {% else %}
             {{ holder.name }}: {{ holder.role }}
@@ -224,9 +224,11 @@
           console.log(autocompleteSource, inputValue);
           if (!validSelection || !autocompleteSource.includes(inputValue)) {
             e.preventDefault(); // Prevent form submission
-            alert(
-              "Please select a valid user name from the list that appears after you start typing."
+            window.oep.toast(
+              "Choose a user name from the list that appears while you type.",
+              { status: "warning", title: "No such user" }
             );
+            $("#user_field").trigger("focus");
           }
         });
       });

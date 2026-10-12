@@ -199,6 +199,15 @@ class InstanceTemplatesTest(ShellPagesTestCase):
         self.assertNotIn("Open Energy Platform", html.split("<main")[0])
         self.assertNotIn("OpenEnergyFamily_Logo", html)
 
+    def test_the_account_pages_show_the_brand_s_logo(self):
+        # Their own logo file before #2642; the brand's name is its text.
+        with self.instance_templates():
+            html = self.page("account_login")
+        self.assertIn(
+            f'<img class="example-logo" alt="{self.NAME}" src="/example.svg" />', html
+        )
+        self.assertNotIn("OEP_logo_2_no_text", html)
+
     def test_the_name_is_text_escaped_alike_in_an_attribute_and_in_text(self):
         with tempfile.TemporaryDirectory() as directory:
             (Path(directory) / "brand").mkdir()

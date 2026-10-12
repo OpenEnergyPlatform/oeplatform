@@ -1,11 +1,11 @@
 {% extends "base/base-full.html" %}
 {% comment %}
-  Every allauth page the OEP does not override renders inside this layout:
-  the OEP header and messages, the narrow account column, and none of
-  allauth's own menu. Pages under account/ and socialaccount/ that the OEP
-  writes itself extend it too.
+  Every account page renders inside this layout: the OEP header and
+  messages, the centred account column with the brand's logo, and none of
+  allauth's own menu. allauth's own pages get it as their layout; the pages
+  under account/ and socialaccount/ that the OEP writes itself extend it.
 {% endcomment %}
-{% load static %}
+{% load instance_theming %}
 {% block title %}
   - {% block head_title %}{% endblock head_title %}
 {% endblock title %}
@@ -13,7 +13,8 @@
   <div class="login">
     <div class="login__wrap">
       <div class="login__logo">
-        <img src="{% static 'OEP_logo_2_no_text.svg' %}" alt="OEP Logo" />
+        {% brand_name as name %}
+        {% include "brand/logo.html" with size=72 alt=name on_light=True %}
       </div>
       {% block content %}
       {% endblock content %}

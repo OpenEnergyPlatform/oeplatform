@@ -10,9 +10,7 @@
     <form method="post" action="{% url 'socialaccount_connections' %}">
       {% csrf_token %}
       {% for error in form.non_field_errors %}
-        <div class="login__alert login__alert--danger">
-          <p>{{ error }}</p>
-        </div>
+        {% include "components/alert.html" with status="danger" text=error %}
       {% endfor %}
       <div class="mb-3">
         {% for acc in form.fields.account.choices %}
@@ -34,18 +32,15 @@
         {% endfor %}
       </div>
       <button type="submit"
-              class="login__button login__button--danger">{% trans "Disconnect" %}</button>
+              class="btn btn-outline-danger w-100 mb-3">{% trans "Disconnect" %}</button>
     </form>
   {% else %}
     <p>{% trans "No account from another sign-in service is connected." %}</p>
   {% endif %}
   {% if not request.user.has_usable_password %}
-    <div class="login__alert login__alert--info">
-      <p>
-        {% url 'account_set_password' as set_password_url %}
-        {% blocktrans %}Your account has no password yet. To sign in with your email address and a password instead of another service, first <a href="{{ set_password_url }}">set a password</a>. You can then disconnect the other service.{% endblocktrans %}
-      </p>
-    </div>
+    {% url 'account_set_password' as set_password_url %}
+    {% blocktrans asvar text %}Your account has no password yet. To sign in with your email address and a password instead of another service, first <a href="{{ set_password_url }}">set a password</a>. You can then disconnect the other service.{% endblocktrans %}
+    {% include "components/alert.html" with status="info" text=text %}
   {% endif %}
   <h2 class="login__heading">{% trans "Connect an account" %}</h2>
   {% get_providers as socialaccount_providers %}
@@ -53,8 +48,7 @@
     <form method="post"
           action="{% provider_login_url provider.id process='connect' %}">
       {% csrf_token %}
-      <button type="submit"
-              class="login__button login__button--outline-secondary">
+      <button type="submit" class="btn btn-secondary w-100 mb-3">
         {% blocktrans with name=provider.name %}Connect {{ name }}{% endblocktrans %}
       </button>
     </form>

@@ -1,6 +1,8 @@
 @use '../base/' as *;
 @use '../base/mixins' as *;
 @use '../components/button' as *;
+// `.profile-category__input` extends the field classes: their house look.
+@use '../components/field';
 
 // The profile shell puts its side column (the profile sidebar) on the left.
 // The column's text box keeps the width it had beside the 1.5rem gap; the

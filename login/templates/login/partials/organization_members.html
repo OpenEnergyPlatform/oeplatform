@@ -46,14 +46,19 @@ SPDX-License-Identifier: AGPL-3.0-or-later
       {% if can_delete or is_admin %}
         <form hx-post="{% url 'login:partial-organization-membership' organization_id=organization.id %}"
               hx-target=".htmxComponentGroupMembership"
-              hx-confirm="Are you sure you want to remove {{ membership.user.name }} from {{ organization.name }} and retract all permissions?"
+              hx-confirm="{{ membership.user.name }} leaves {{ organization.name }} and loses every permission the organization gave them."
+              data-confirm-title="Remove member?"
+              data-confirm-verb="Remove member"
+              data-confirm-danger
               hx-swap="outerHTML">
           {% csrf_token %}
           <input type="hidden" name="mode" value="remove_user" />
           <input type="hidden"
                  name="user_id"
                  value="{{ membership.user.id }}" />
-          <input type="submit" class="btn btn-danger" value="Remove user" />
+          <input type="submit"
+                 class="btn btn-outline-danger"
+                 value="Remove user" />
         </form>
       {% endif %}
     {% endfor %}

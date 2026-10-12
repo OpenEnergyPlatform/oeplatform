@@ -638,7 +638,11 @@
         {% if can_add %}
           {% if not table_obj.is_publish %}
             <button class="btn btn-outline-danger btn-sm {% if not can_add %}disabled{% endif %}"
-                    id="dataview-table-delete">
+                    id="dataview-table-delete"
+                    data-confirm="The table {{ table }}, its data and its metadata are deleted. This cannot be undone."
+                    data-confirm-title="Delete table?"
+                    data-confirm-verb="Delete table"
+                    data-confirm-danger>
               <svg xmlns="http://www.w3.org/2000/svg"
                    width="14"
                    height="14"
@@ -673,22 +677,6 @@
   <!-- src: https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap5.min.css -->
 {% endblock after-head %}
 {% block after-body-bottom-js %}
-  <!-- dialog: keep outside of main container -->
-  <div id="dataview-confirm-delete" class="modal fade">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          Do you want to delete the table (including data and metadata)?
-        </div>
-        <div class="modal-body">
-          <button class="btn btn-sm btn-danger me-2"
-                  id="dataview-confirm-delete-delete">delete</button>
-          <button class="btn btn-sm btn-secondary"
-                  id="dataview-confirm-delete-cancel">cancel</button>
-        </div>
-      </div>
-    </div>
-  </div>
   {% compress js %}
     <script src="{% static 'dataedit/jquery.dataTables.min.js' %}"></script>
     <!-- src: https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js -->

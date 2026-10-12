@@ -12,6 +12,55 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- One confirm dialog and one toast region replace every native browser dialog.
+  Every shell renders the house component `confirm_dialog` (a title naming the
+  action, what will happen, Cancel and a button labelled with the verb, solid
+  red when it cannot be undone, optionally a typed confirmation) and a toast
+  region (`toast`: polite for news, assertive for errors), driven by one ES
+  module, `base/static/base/dialogs.js`. Every `hx-confirm` now opens the dialog
+  and sends its request only on confirm; a plain button asks with
+  `data-confirm`; a script calls `window.oep.confirm(...)` and
+  `window.oep.toast(...)`. Escape and the close button cancel; focus starts on
+  Cancel for a destructive action, in the input for a typed one, and returns to
+  the opener. Replaced: the factsheet, organization and member deletes, the
+  permission page's two removes, the tag editor's delete (now asked also for an
+  unused tag), the table view's delete (its modal is deleted, as is the wizard's
+  unused one), the peer review delete and every `alert()` (query builder,
+  metadata editor, peer review, the permission page), and the four inline toast
+  containers. Every Bootstrap modal takes the dialog's look (8px, large shadow),
+  and the dashboard's two drawers its header. Catalogue entries
+  `confirm_dialog`, `toast`
+  [(#2696)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2696)
+
+- One field look and the account forms on house components. Every
+  `form-control`, `form-select` and `form-check-input` takes 4px corners, the
+  strong border and the surface from tokens (house component `field`, catalogue
+  entry with a narrow select under a long label); a Django form rendered with
+  django-bootstrap5 marks only the field in error, no longer every other one
+  green. allauth's `field`, `fields`, `form` and `button` elements are
+  overridden, so password change, password reset from key and social sign-up
+  show labelled house fields and a primary button instead of bare inputs. The
+  account pages use the button roles and the alert component instead of
+  `.login__button` and `.login__alert` (both deleted, with the unrendered
+  `account/_login.html` sample and `account/base.html`), all of them render in
+  one layout, and their logo comes from `brand/logo.html` (new argument
+  `on_light`), so an instance's logo replaces it there too
+  [(#2695)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2695)
+
+- The about page and the privacy policy get an "On this page" list: the house
+  component `toc`, a quiet list of the page's own headings that stays in view on
+  the left while the text scrolls and sits above the text on a narrow screen.
+  Both pages read in one 70ch column. On the about page the research projects
+  and the partners are their own sections beside "Supported By", and the funder,
+  project and partner logos sit in grids of equal tiles instead of inline widths
+  and margins, so the page no longer runs 3,474 px off a phone screen. Each
+  research project is listed once again: the page read its projects from the
+  collected static files, where every file also has a copy named after its
+  content. The privacy policy lists the rights of the data subject one article
+  at a time, shows the controller as an address and the cookie table as the
+  house table. No text changes apart from the list's label
+  [(#2694)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2694)
+
 - One table, one alert and one pager across the platform. Tables are Bootstrap's
   `.table` with the head row on the subtle surface and the dense size
   (`.table-hover` for record lists, `.table-pairs` for labels and values), and

@@ -410,9 +410,11 @@ window.MetaEdit = function (config) {
           window.location = config.url_view_table;
         })
         .catch(function (err) {
-          // TODO evaluate error, show user message
           $("#metaedit-submitting").addClass("d-none");
-          alert(getErrorMsg(err));
+          window.oep.toast(getErrorMsg(err), {
+            status: "danger",
+            title: "Not saved",
+          });
         });
     });
 

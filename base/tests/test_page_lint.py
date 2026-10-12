@@ -153,6 +153,19 @@ class LintTest(SimpleTestCase):
 
         self.assertEqual(lint(html), [])
 
+    def test_hx_confirm_and_data_confirm_ask_the_house_dialog(self):
+        self.assertEqual(
+            lint(
+                page(
+                    '<a class="btn btn-outline-danger" hx-delete="/x" '
+                    'hx-confirm="It is deleted.">Delete</a>'
+                    '<button class="btn btn-outline-danger" '
+                    'data-confirm="It is deleted.">Delete</button>'
+                )
+            ),
+            [],
+        )
+
     def test_the_navbar_is_not_the_pages_own_content(self):
         # The navbar's Sign Up is cyan until the user menu (#2644).
         self.assertEqual(lint(page("")), [])
@@ -178,7 +191,6 @@ class Page:
 #: as the owner of the fixture, which shows the most of them.
 #:
 #: Pages #2641 touched that are NOT here yet, and the ticket that brings them:
-#: - dataedit:table-permission: an inline alert() (#2643);
 #: - login:tables, login:datasets: the dashboard's own cell, menu and filter
 #:   controls carry no role (#2659);
 #: - login:organizations: Create Organization and the help toggle take their
@@ -212,7 +224,6 @@ RESTYLED_PAGES = (
     Page("base:contact"),
     Page("base:styleguide"),
     Page("login:settings", {"user_id": "{user}"}, logged_in=True),
-    # dataedit:table-permission joins when its alert() goes (#2643).
     Page("dataedit:topic-list"),
     Page("dataedit:datasets-in-topic", {"topic": settings.PSEUDO_TOPIC_DRAFT}),
     Page("dataedit:meta_edit", {"table": "{table}"}, logged_in=True),
@@ -235,8 +246,8 @@ RESTYLED_PAGES = (
         logged_in=True,
     ),
     # #2640: the page header on every page that had a main-header (the others
-    # it moved are listed above; the peer review pages and the permission
-    # page wait for the tickets named in the comment above this tuple)
+    # it moved are listed above or below; the peer review pages wait for
+    # #2658, named in the comment above this tuple)
     Page("dataedit:table-map", {"table": "{table}", "maptype": "latlon"}, True),
     Page("dataedit:tags-new", logged_in=True),
     Page("dataedit:tags-edit", {"tag_pk": "{tag}"}, logged_in=True),
@@ -248,6 +259,31 @@ RESTYLED_PAGES = (
     Page("ontology:oeo-class-detail", {"ontology": "oeo", "term_id": "BFO_0000001"}),
     Page("oeo_viewer:index"),
     Page("oekg:main", logged_in=True),
+    # #2643: the confirm dialog; its other pages are listed above (the table
+    # page, the tag editor, both factsheets)
+    Page("dataedit:table-permission", {"table": "{table}"}, logged_in=True),
+    # #2642: fields and the account pages. Set password needs a user without
+    # one, social sign-up a sign-in in progress; their forms are read in
+    # login/tests/test_account_forms.py and test_account_error_alerts.py. The
+    # third-party login failure answers 401 and has no action to lint.
+    Page("account_login"),
+    Page("account_signup"),
+    Page("account_reset_password"),
+    Page("account_reset_password_done"),
+    Page(
+        "account_reset_password_from_key",
+        {"uidb36": "0", "key": "set-password"},
+    ),
+    Page("account_inactive"),
+    Page("account_email_verification_sent"),
+    Page("account_reset_password_from_key_done"),
+    Page("account_confirm_email", {"key": "no-such-key"}),
+    Page("socialaccount_login_cancelled"),
+    Page("account_change_password", logged_in=True),
+    Page("account_email", logged_in=True),
+    Page("account_reauthenticate", logged_in=True),
+    Page("account_logout", logged_in=True),
+    Page("socialaccount_connections", logged_in=True),
     # #2648: underline tabs and dropdowns. Its other pages are listed above
     # (the table page, both factsheet editors, Settings, Reviews) or wait for
     # the tickets named in the comment above this tuple (peer review, the

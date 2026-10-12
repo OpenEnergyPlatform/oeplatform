@@ -6,6 +6,15 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 from captcha.fields import CaptchaField
 from django import forms
+from django_bootstrap5.renderers import FieldRenderer
+
+
+class HouseFieldRenderer(FieldRenderer):
+    """django-bootstrap5's field, marking an error only: a bound field without
+    one stays as it was instead of turning green (`is-valid`)."""
+
+    def get_server_side_validation_classes(self):
+        return "is-invalid" if self.field_errors else ""
 
 
 class ContactForm(forms.Form):
