@@ -217,10 +217,10 @@
                   <div class="panel-body">
                     <div id="builder" style="width: 100%"></div>
                     <button id="btn-set"
-                            class="btn btn-success set-json"
+                            class="btn btn-primary set-json"
                             bs-target="basic">Set rules</button>
                     <button id="btn-download-view"
-                            class="btn btn-success set-json"
+                            class="btn btn-secondary set-json"
                             data-bs-target="basic">Download View</button>
                   </div>
                 </div>
@@ -402,7 +402,7 @@
             <div class="table-sidebar__section">
               {% if opr.opr_enabled %}
                 <button type="button"
-                        class="table-sidebar__btn-review table-sidebar__btn-review--start"
+                        class="btn btn-secondary table-sidebar__btn-review"
                         id="opr-button-start"
                         data-url="{% url 'dataedit:peer_review_create' table=table %}">
                   <svg height="16"
@@ -427,7 +427,7 @@
             <!-- TODO: Remove style="display: none;" once the request view is implemented -->
             <div class="table-sidebar__section" style="display: none;">
               <button type="button"
-                      class="table-sidebar__btn-review table-sidebar__btn-review--request"
+                      class="btn btn-primary table-sidebar__btn-review"
                       id="opr-button-request"
                       data-url="">
                 <svg height="16"
@@ -449,7 +449,7 @@
           {% if opr.contributor.id == user.id and opr.opr_current_reviewer == "contributor" %}
             <div class="table-sidebar__section">
               <button type="button"
-                      class="table-sidebar__btn-review table-sidebar__btn-review--start"
+                      class="btn btn-secondary table-sidebar__btn-review"
                       id="opr-button-contributor-continue"
                       data-url="{% url 'dataedit:peer_review_contributor' table=table review_id=opr.opr_id %}">
                 <svg height="16"
@@ -467,7 +467,7 @@
           {% if opr.reviewer.id == user.id and opr.opr_current_reviewer == "reviewer" %}
             <div class="table-sidebar__section">
               <button type="button"
-                      class="table-sidebar__btn-review table-sidebar__btn-review--start"
+                      class="btn btn-secondary table-sidebar__btn-review"
                       id="opr-button-reviewer-continue"
                       data-url="{% url 'dataedit:peer_review_reviewer' table=table review_id=opr.opr_id %}">
                 <svg height="16"
@@ -561,7 +561,7 @@
         <h2 class="table-sidebar__heading">Downloads</h2>
         <a href="{% url 'api:api_rows' table=table %}?form=csv"
            type="button"
-           class="table-sidebar__btn">
+           class="btn btn-link btn-sm table-sidebar__btn">
           <svg width="14"
                height="14"
                version="1.1"
@@ -575,7 +575,7 @@
         </a>
         <a href="{% url 'api:api_rows' table=table %}?form=datapackage"
            type="button"
-           class="table-sidebar__btn">
+           class="btn btn-link btn-sm table-sidebar__btn">
           <svg width="14"
                height="14"
                version="1.1"
@@ -593,7 +593,7 @@
           <h2 class="table-sidebar__heading">Uploads</h2>
           <span class="mb-2"
                 {% if not can_add %} data-bs-toggle="tooltip" title="You need write permissions on this table to upload data" {% endif %}>
-            <a class="table-sidebar__btn {% if not can_add %}disabled{% endif %}"
+            <a class="btn btn-link btn-sm table-sidebar__btn {% if not can_add %}disabled{% endif %}"
                href="{% url 'dataedit:wizard_upload' table=table %}">
               <svg width="14"
                    height="14"
@@ -611,7 +611,7 @@
       {% endif %}
       <div class="table-sidebar__section">
         <h2 class="table-sidebar__heading">API Usage</h2>
-        <a class="table-sidebar__btn"
+        <a class="btn btn-link btn-sm table-sidebar__btn"
            id="collapseApiBtn"
            data-bs-toggle="collapse"
            href="#collapseApi"
@@ -630,7 +630,9 @@
           </span>
           View
         </a>
-        <button type="button" id="copyApiBtn" class="table-sidebar__btn">
+        <button type="button"
+                id="copyApiBtn"
+                class="btn btn-link btn-sm table-sidebar__btn">
           <span id="copyApiBtnIcon">
             <svg xmlns="http://www.w3.org/2000/svg"
                  width="14"
@@ -659,7 +661,7 @@
       <div class="table-sidebar__section">
         <a href="{{ table }}/permissions"
            type="button"
-           class="table-sidebar__btn-info">
+           class="btn btn-secondary btn-sm table-sidebar__btn-info">
           <svg width="14"
                height="14"
                version="1.1"
@@ -675,7 +677,7 @@
         </a>
         {% if can_add %}
           {% if not table_obj.is_publish %}
-            <button class="table-sidebar__btn-danger {% if not can_add %}disabled{% endif %}"
+            <button class="btn btn-outline-danger btn-sm {% if not can_add %}disabled{% endif %}"
                     id="dataview-table-delete">
               <svg xmlns="http://www.w3.org/2000/svg"
                    width="14"
@@ -719,9 +721,9 @@
           Do you want to delete the table (including data and metadata)?
         </div>
         <div class="modal-body">
-          <button class="btn btn-sm btn-dark me-2"
+          <button class="btn btn-sm btn-danger me-2"
                   id="dataview-confirm-delete-delete">delete</button>
-          <button class="btn btn-sm btn-light"
+          <button class="btn btn-sm btn-secondary"
                   id="dataview-confirm-delete-cancel">cancel</button>
         </div>
       </div>

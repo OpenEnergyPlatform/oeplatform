@@ -50,7 +50,7 @@
                        value="{{ value.new|get_item:'c_table' }}" />
                 <button type="submit"
                         value="apply"
-                        class="btn btn-success"
+                        class="btn btn-primary"
                         style="margin-right: 20px">Apply</button>
               </form>
               <form action="{% url 'dataedit:admin-columns' %}" method="post">
@@ -105,7 +105,7 @@
                 <input type="hidden" name="table" value="{{ value.c_table }}" />
                 <button type="submit"
                         value="apply"
-                        class="btn btn-success"
+                        class="btn btn-primary"
                         style="margin-right: 20px">Apply</button>
               </form>
               <form action="{% url 'dataedit:admin-contraints' %}"

@@ -94,3 +94,10 @@ main.main {
         }
     }
 }
+
+// The footer is the platform's blue band (#2641). It used to read
+// `bg-secondary`, which was blue while the secondary colour was; that colour
+// is the grey of the secondary button role now.
+.footer {
+    background-color: var(--oep-surface-strong);
+}

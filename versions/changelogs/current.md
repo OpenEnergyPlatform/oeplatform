@@ -12,6 +12,26 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- Every action carries one of four button roles: primary (solid blue, the one
+  main action of a view), secondary (a grey outline), danger (an outline on the
+  button that opens a confirmation, solid inside it) and link. Green, cyan,
+  yellow and black are no longer button colours: every `btn-success`, `btn-info`
+  and `btn-dark` action outside the navbar became primary (or secondary where a
+  view already had its primary), and `btn-light` and `btn-outline-primary` used
+  for a less important action became secondary. The secondary colour is grey
+  (`--bs-secondary` gray-600) instead of a second primary blue; the footer stays
+  the blue band (it reads `--oep-surface-strong` instead of `bg-secondary`), and
+  the other uses of the secondary colour that meant blue (active tabs, a
+  heading, the login page's outline button) now read the primary colour. The
+  contact form's Submit, Settings' Reset token, the table permissions' Add
+  buttons and the database introduction's toggle had no class and now carry a
+  role, and so do the table page's sidebar buttons, which took their look from
+  sidebar classes. `button` is a house component with a catalogue entry, which
+  also shows `btn-on-strong`, the light button for a blue band (for the navbar's
+  Sign up). A page lint test reads every restyled page and fails on a button
+  without a role, a status colour used as an action, or a native `confirm()` or
+  `alert()`. The homepage renders pixel for pixel as before
+  [(#2641)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2641)
 - Pages without side content use the whole content width: the base templates no
   longer render an empty 21rem side column. A page with side content fills the
   new `side-column` block with `<aside class="content__side">`, and every page

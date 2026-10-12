@@ -1,6 +1,6 @@
 @use '../base/' as *;
 @use '../base/mixins' as *;
-@use '../legacy/buttons' as *;
+@use '../components/button' as *;
 @use '../legacy/cards' as *;
 @use '../legacy/empty_states' as *;
 
@@ -316,6 +316,21 @@ main.main .content .content__container.content__container--profile {
     }
 }
 
+// The link back to the organizations list, above an organization's page.
+.backlink {
+    @extend .pb-2;
+
+    a {
+        @extend .text-decoration-none;
+        @extend .fw-semibold;
+    }
+
+    svg {
+        @extend .me-1;
+        @include translateY(-2px);
+    }
+}
+
 .organization-management {
     @extend .mb-4;
 
@@ -380,8 +395,9 @@ main.main .content .content__container.content__container--profile {
 
             &__btn {
                 @extend .btn;
-                @extend .btn--xs;
+                @extend .py-0;
                 @extend .ms-3;
+                height: 1.75rem;
 
                 @include media-breakpoint-down(lg) {
                     margin-left: 0.5rem !important;
@@ -403,7 +419,7 @@ main.main .content .content__container.content__container--profile {
             }
 
             &__btn--edit {
-                @extend .btn-outline-info;
+                @extend .btn-outline-secondary;
             }
 
             &__btn--accept {

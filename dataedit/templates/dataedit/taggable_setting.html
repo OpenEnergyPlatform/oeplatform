@@ -14,9 +14,13 @@
     {% endfor %}
   </div>
   {% if is_admin %}
-    <button data-bs-toggle="collapse"
+    <button type="button"
+            data-bs-toggle="collapse"
             data-bs-target="#tag_handler"
-            class="btn btn-add btn-circle">{% fa5_icon 'plus' 'fas' %}</button>
+            aria-controls="tag_handler"
+            aria-expanded="false"
+            aria-label="Choose tags to attach"
+            class="btn btn-secondary btn-sm">{% fa5_icon 'plus' 'fas' %}</button>
     <div id="tag_handler" class="collapse">
       <form action="{% url 'dataedit:tags-add' %}" method="post">
         {% csrf_token %}
@@ -36,9 +40,9 @@
         {% if table %}
           <input type="hidden" name="table" value="{{ table }}" />
         {% endif %}
-        <input type="submit" class="btn btn-success" value="Apply" />
+        <input type="submit" class="btn btn-primary" value="Apply" />
         <a type="button"
-           class="btn btn-info"
+           class="btn btn-secondary"
            href="{% url 'dataedit:topic-list' %}">Edit</a>
       </form>
     </div>
