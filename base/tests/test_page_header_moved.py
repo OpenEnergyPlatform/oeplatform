@@ -440,5 +440,6 @@ def unordered(node):
 
 def normalised(text):
     # Values the fixture makes anew on every run (primary keys, the corpus's
-    # numbered names, dates) are not words the templates write.
-    return re.sub(r"\d+", "#", text)
+    # numbered names, dates) and the installed OEO's release ("2.13.0") are
+    # not words the templates write.
+    return re.sub(r"\d+(?:\.\d+)*", "#", text)
