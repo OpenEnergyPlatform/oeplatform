@@ -90,6 +90,17 @@ class PagesWithoutSideContentTest(SideColumnTestCase):
         _main, sides = self.split(response.content.decode())
         self.assertEqual(sides, [])
 
+    def test_factsheet_detail_pages_render_no_side_column(self):
+        # Their actions and tags moved into the record toolbar (#2655).
+        for sheettype, pk in self.factsheets.items():
+            with self.subTest(sheettype=sheettype):
+                _main, sides = self.columns(
+                    "modelview:show-factsheet",
+                    {"sheettype": sheettype, "pk": pk},
+                    logged_in=True,
+                )
+                self.assertEqual(sides, [])
+
     def test_factsheet_edit_pages_render_no_side_column(self):
         for sheettype, pk in self.factsheets.items():
             with self.subTest(sheettype=sheettype):
@@ -118,15 +129,6 @@ class PagesWithSideContentTest(SideColumnTestCase):
     def opens(self, html, css_class):
         """Where the first element carrying `css_class` starts."""
         return re.search(r'class="(?:[^"]*\s)?%s[\s"]' % css_class, html).start()
-
-    def test_factsheet_detail(self):
-        for sheettype, pk in self.factsheets.items():
-            with self.subTest(sheettype=sheettype):
-                self.assertSide(
-                    "modelview:show-factsheet",
-                    {"sheettype": sheettype, "pk": pk},
-                    says="Actions",
-                )
 
     def test_factsheet_list(self):
         self.assertSide("modelview:modellist", {"sheettype": "model"}, says="Tags")

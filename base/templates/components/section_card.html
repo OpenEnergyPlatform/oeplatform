@@ -1,0 +1,27 @@
+{% comment %}
+  section_card (#2655): one section of a record page, a card whose header is a
+  real button that shows and hides the section's body. Every section starts
+  open. Styles: theming/scss/components/_section_card.scss; catalogue entry:
+  styleguide/entries/section_card.html.
+
+  id     the section's id, unique on the page (an anchor lands on it); the body
+         is <id>-body
+  title  the section's heading, an h2
+  body   a template rendering the section's content
+{% endcomment %}
+<section class="card section-card" id="{{ id }}">
+  <h2 class="section-card__heading">
+    <button type="button"
+            class="section-card__toggle"
+            data-bs-toggle="collapse"
+            data-bs-target="#{{ id }}-body"
+            aria-expanded="true"
+            aria-controls="{{ id }}-body">
+      {{ title }}
+      {% include "icons/chevron_down.html" %}
+    </button>
+  </h2>
+  <div class="collapse show" id="{{ id }}-body">
+    <div class="card-body">{% include body %}</div>
+  </div>
+</section>

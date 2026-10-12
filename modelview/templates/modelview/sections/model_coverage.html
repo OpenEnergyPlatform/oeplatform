@@ -1,0 +1,128 @@
+{% load modelview_extras %}
+<table class="table table-pairs">
+  <tr>
+    <td class="sheetlabel">Modeled energy sectors (final energy)</td>
+    <td>
+      <table>
+        {% checklist model "energy_sectors_electricity,energy_sectors_heat,energy_sectors_others=energy_sectors_others_text" %}
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td class="sheetlabel">Modeled demand sectors</td>
+    <td>
+      <table>
+        {% checklist model "demand_sectors_households,demand_sectors_industry,demand_sectors_commercial_sector,demand_sectors_transport" %}
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td class="sheetlabel">
+      Modeled technologies: components for power generation or
+      conversion
+    </td>
+    <td>
+      <table class="table table-pairs">
+        <tr>
+          <td class="sheetlabel">Renewables</td>
+          <td>
+            <table>
+              {% checklist model "generation_renewables_PV,generation_renewables_wind,generation_renewables_hydro,generation_renewables_bio,generation_renewables_solar_thermal,generation_renewables_geothermal" %}
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td class="sheetlabel">Conventional</td>
+          <td>
+            <table>
+              {% checklist model "generation_conventional_gas,generation_conventional_lignite,generation_conventional_hard_coal,generation_conventional_oil,generation_conventional_liquid_fuels,generation_conventional_nuclear" %}
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td class="sheetlabel">
+      Modeled technologies: components for transfer, infrastructure or
+      grid
+    </td>
+    <td>
+      <table class="table table-pairs">
+        <tr>
+          <td class="sheetlabel">Electricity</td>
+          <td>
+            <table>
+              {% checklist model "transfer_electricity_distribution,transfer_electricity_transition" %}
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td class="sheetlabel">Gas</td>
+          <td>
+            <table>
+              {% checklist model "transfer_gas_distribution,transfer_gas_transition" %}
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td class="sheetlabel">Heat</td>
+          <td>
+            <table>
+              {% checklist model "transfer_heat_distribution,transfer_heat_transition" %}
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td class="sheetlabel">Properties electrical grid</td>
+    <td>
+      <table>
+        {% checklist model "network_coverage_AC,network_coverage_DC,network_coverage_TM,network_coverage_SN,network_coverage_other=network_coverage_other_text" %}
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td class="sheetlabel">Modeled technologies: components for storage</td>
+    <td>
+      <table>
+        {% checklist model "storage_electricity_battery,storage_electricity_kinetic,storage_electricity_CAES,storage_electricity_PHS,storage_electricity_chemical,storage_heat,storage_gas" %}
+      </table>
+    </td>
+  </tr>
+  {% include "modelview/model_snippet.html" with model=model field="user_behaviour" add=model.user_behaviour_yes_text %}
+  {% include "modelview/model_snippet.html" with model=model field="changes_in_efficiency" %}
+  {% include "modelview/model_snippet.html" with model=model field="market_models" %}
+  {% include "modelview/model_snippet.html" with model=model field="geographical_coverage" %}
+  <tr>
+    <td class="sheetlabel">Geographic (spatial) resolution</td>
+    <td>
+      <table>
+        {% checklist model "geo_resolution_global,geo_resolution_continents,geo_resolution_national_states,geo_resolution_TSO_regions,geo_resolution_federal_states,geo_resolution_regions,geo_resolution_NUTS_3,geo_resolution_municipalities,geo_resolution_districts,geo_resolution_households,geo_resolution_power_stations,geo_resolution_others=geo_resolution_others_text" %}
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td class="sheetlabel">Time resolution</td>
+    <td>
+      {% checklist model "time_resolution_anual,time_resolution_hour,time_resolution_15_min,time_resolution_1_min,time_resolution_other=time_resolution_other_text" %}
+    </td>
+  </tr>
+  {% include "modelview/model_snippet.html" with model=model field="comment_on_geo_resolution" %}
+  <tr>
+    <td class="sheetlabel">Observation period</td>
+    <td>
+      {% checklist model "observation_period_less_1_year,observation_period_1_year,observation_period_more_1_year,observation_period_other=observation_period_other_text" %}
+    </td>
+  </tr>
+  <tr>
+    <td class="sheetlabel">Additional dimensions (sector)</td>
+    <td>
+      <table>
+        {% checklist model "additional_dimensions_sector_ecological,additional_dimensions_sector_ecological_text,additional_dimensions_sector_economic,additional_dimensions_sector_economic_text,additional_dimensions_sector_social,additional_dimensions_sector_social_text,additional_dimensions_sector_others=additional_dimensions_sector_others_text" %}
+      </table>
+    </td>
+  </tr>
+</table>

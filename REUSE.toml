@@ -564,7 +564,10 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "modelview/templates/modelview/model.html"
+path = [
+  "modelview/templates/modelview/model.html",
+  "modelview/templates/modelview/sections/model_*.html",
+]
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
@@ -613,7 +616,10 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "modelview/templates/modelview/framework.html"
+path = [
+  "modelview/templates/modelview/framework.html",
+  "modelview/templates/modelview/sections/framework_*.html",
+]
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
@@ -3552,6 +3558,8 @@ path = [
   "theming/scss/components/_toast.scss",
   "theming/scss/components/_field.scss",
   "theming/scss/components/_toc.scss",
+  "theming/scss/components/_section_card.scss",
+  "theming/scss/components/_field_help.scss",
   "base/templates/components/**",
   "base/templates/base/toc/**",
   "base/static/css/about.css",
@@ -3574,6 +3582,8 @@ path = [
   "base/templates/icons/area_about.html",
   "base/templates/icons/area_account.html",
   "base/templates/icons/area_database.html",
+  "base/templates/icons/chevron_down.html",
+  "base/templates/icons/question_circle.html",
 ]
 precedence = "override"
 SPDX-License-Identifier = "MIT"
