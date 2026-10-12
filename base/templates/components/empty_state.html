@@ -1,0 +1,33 @@
+{% comment %}
+  empty_state (#2646): what an empty list shows instead of nothing. A muted
+  icon, an optional title, one sentence, at most one action. Styles:
+  theming/scss/components/_empty_state.scss; catalogue entry:
+  styleguide/entries/empty_state.html.
+
+  text             the one sentence (required, unless text_template)
+  text_template    a template rendering that sentence instead, for one that
+                   needs markup (a link); rendered in the caller's context
+  title            optional, a short line above the sentence
+  icon             Font Awesome classes for the icon (default "fas fa-inbox");
+                   it is decoration, hidden from assistive technology
+  action_template  optional, a template rendering the one action (a primary
+                   button or link, with its own ids and htmx attributes)
+  compact          inside something small (a card's list, a drawer)
+  id               optional id on the container
+{% endcomment %}
+<div class="empty-state{% if compact %} empty-state--compact{% endif %}"
+     {% if id %}id="{{ id }}"{% endif %}>
+  <span class="empty-state__icon {{ icon|default:'fas fa-inbox' }}"
+        aria-hidden="true"></span>
+  {% if title %}<p class="empty-state__title">{{ title }}</p>{% endif %}
+  <p class="empty-state__text">
+    {% if text_template %}
+      {% include text_template %}
+    {% else %}
+      {{ text }}
+    {% endif %}
+  </p>
+  {% if action_template %}
+    <div class="empty-state__action">{% include action_template %}</div>
+  {% endif %}
+</div>

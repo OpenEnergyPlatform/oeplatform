@@ -1,0 +1,56 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+The keywords of one topic on the topic list (dataedit_topiclist.html), as
+neutral tags: words that say what the topic holds, not Tags of the platform.
+{% endcomment %}
+{% if topic == PSEUDO_TOPIC_DRAFT %}
+  {% include "components/tag.html" with name="various data" %}
+  {% include "components/tag.html" with name="draft" %}
+  {% include "components/tag.html" with name="not reviewed" %}
+{% elif topic == TOPIC_SCENARIO %}
+  {% include "components/tag.html" with name="input" %}
+  {% include "components/tag.html" with name="output" %}
+{% endif %}
+{% if topic == "boundaries" %}
+  {% include "components/tag.html" with name="polygons" %}
+{% endif %}
+{% if topic == "climate" %}
+  {% include "components/tag.html" with name="climate" %}
+{% endif %}
+{% if topic == "demand" %}
+  {% include "components/tag.html" with name="commodities" %}
+  {% include "components/tag.html" with name="services" %}
+{% endif %}
+{% if topic == "economy" %}
+  {% include "components/tag.html" with name="prices" %}
+  {% include "components/tag.html" with name="GDP" %}
+{% endif %}
+{% if topic == "environment" %}
+  {% include "components/tag.html" with name="environment" %}
+  {% include "components/tag.html" with name="resources" %}
+  {% include "components/tag.html" with name="protection" %}
+{% endif %}
+{% if topic == "grid" %}
+  {% include "components/tag.html" with name="energy" %}
+  {% include "components/tag.html" with name="services" %}
+{% endif %}
+{% if topic == "openstreetmap" %}
+  {% include "components/tag.html" with name="OSM" %}
+{% endif %}
+{% if topic == "policy" %}
+  {% include "components/tag.html" with name="laws" %}
+{% endif %}
+{% if topic == "reference" %}
+  {% include "components/tag.html" with name="sources" %}
+  {% include "components/tag.html" with name="literature" %}
+{% endif %}
+{% if topic == "society" %}
+  {% include "components/tag.html" with name="demography" %}
+  {% include "components/tag.html" with name="society" %}
+{% endif %}
+{% if topic == "supply" %}
+  {% include "components/tag.html" with name="commodity" %}
+  {% include "components/tag.html" with name="services" %}
+{% endif %}

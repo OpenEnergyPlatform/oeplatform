@@ -99,7 +99,9 @@
             {% endif %}
           </a>
         {% empty %}
-          <div class="list-group-item text-muted">No tables assigned yet.</div>
+          <div class="list-group-item">
+            {% include "components/empty_state.html" with icon="fas fa-table" text="No tables assigned yet." compact=True %}
+          </div>
         {% endfor %}
       </div>
     </div>

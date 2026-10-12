@@ -15,8 +15,6 @@ SPDX-License-Identifier: AGPL-3.0-or-later
       {% endfor %}
     </div>
   {% else %}
-    <div class="profile-category__no_organization_table">
-      No tables are assigned to this organization.
-    </div>
+    {% include "components/empty_state.html" with icon="fas fa-table" text="No tables are assigned to this organization." compact=True %}
   {% endif %}
 </section>
