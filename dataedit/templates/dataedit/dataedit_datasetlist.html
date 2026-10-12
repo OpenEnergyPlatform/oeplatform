@@ -65,12 +65,12 @@
           <div class="col">
             <div class="card card--clickable h-100">
               <div class="card-body">
-                <h5 class="card-title mb-1">
-                  <a class="text-decoration-none stretched-link"
+                <h2 class="card-title mb-1">
+                  <a class="stretched-link"
                      href="{% url 'dataedit:dataset-detail' dataset_name=dataset.name %}"
                      target="_blank"
                      rel="noopener">{{ dataset.metadata.title|default:dataset.name }}</a>
-                </h5>
+                </h2>
                 <h6 class="card-subtitle text-muted mb-2">{{ dataset.name }}</h6>
                 {% if dataset.topics.all %}
                   <p class="mb-2">

@@ -2,13 +2,6 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-.resource-card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.resource-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 .5rem 1rem rgba(0,0,0,.08)!important;
-}
 .table-link:hover {
   color: #3B77A0 !important;
 }

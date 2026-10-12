@@ -16,8 +16,6 @@
 @use '../base/' as *;
 
 .card {
-    --bs-card-border-radius: var(--bs-border-radius);
-    --bs-card-inner-border-radius: calc(var(--bs-border-radius) - var(--bs-card-border-width));
     --bs-card-border-color: var(--bs-border-color);
     --bs-card-spacer-y: 1.5rem;
     --bs-card-spacer-x: 1.5rem;

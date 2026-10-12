@@ -13,10 +13,8 @@
   action_template  optional, a template rendering the one action (a primary
                    button or link, with its own ids and htmx attributes)
   compact          inside something small (a card's list, a drawer)
-  id               optional id on the container
 {% endcomment %}
-<div class="empty-state{% if compact %} empty-state--compact{% endif %}"
-     {% if id %}id="{{ id }}"{% endif %}>
+<div class="empty-state{% if compact %} empty-state--compact{% endif %}">
   <span class="empty-state__icon {{ icon|default:'fas fa-inbox' }}"
         aria-hidden="true"></span>
   {% if title %}<p class="empty-state__title">{{ title }}</p>{% endif %}

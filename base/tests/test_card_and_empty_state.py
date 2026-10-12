@@ -266,7 +266,10 @@ class DatasetPagesTest(TestCase):
         table.topics.add(self.topic)
         page = self.get("dataedit:tables-in-topic", topic="energy")
         (card,) = [c for c in elements_with_class(page, "card") if table.name in c]
-        self.assertEqual(classes_of(card), ["card", "w-100"])
+        # `resource-card` is not a style any more but the hook tablelist.js
+        # fills each card's metadata and size through.
+        self.assertEqual(classes_of(card), ["card", "resource-card", "w-100"])
+        self.assertIn("metadata-injection-zone", card)
 
     def test_a_dataset_without_tables_says_so_compactly(self):
         self.dataset("cards_empty_ds")
