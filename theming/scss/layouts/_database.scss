@@ -38,11 +38,6 @@
         display: flex;
         align-items: center;
         gap: 0.75rem;
-
-        .tabs {
-            flex: 1 1 auto;
-            min-width: 0;
-        }
     }
 
     .dataTables_scroll {
@@ -178,10 +173,5 @@
         &.table-view-bar__container--wide {
             padding-right: 0;
         }
-    }
-
-    .tabs {
-        flex: 1 1 auto;
-        min-width: 0;
     }
 }

@@ -37,6 +37,10 @@
     display: flex;
     flex-wrap: nowrap;
     column-gap: 1.75rem;
+    // Inside a flex bar beside other things, the row takes the room left
+    // and scrolls rather than pushing them out.
+    flex: 1 1 auto;
+    min-width: 0;
     margin-bottom: 0;
     padding-left: 0;
     list-style: none;
@@ -56,8 +60,8 @@
         align-items: center;
         gap: 0.5rem;
         white-space: nowrap;
-        background: none;
-        border: 0;
+        background-color: transparent;
+        border-width: 0;
         border-radius: 0;
 
         &:hover {

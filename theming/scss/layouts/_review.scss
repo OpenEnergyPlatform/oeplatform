@@ -328,11 +328,6 @@
         max-width: var(--oep-content-width);
     }
 
-    .tabs {
-        flex: 1 1 auto;
-        min-width: 0;
-    }
-
     // A category's progress dot: summary.js sets `status`, and `status--done`
     // once every field of the category is answered.
     .nav-link.status {

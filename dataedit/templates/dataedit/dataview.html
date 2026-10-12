@@ -115,9 +115,10 @@
       {% else %}
         <div class="data-view">
           <span class="data-view__label">View</span>
-          <ul class="nav tabs">
+          <ul class="nav tabs" aria-label="Views">
             <li class="nav-item">
               <a class="nav-link {% if current_view.type == 'table' %}active{% endif %}"
+                 {% if current_view.type == 'table' %} aria-current="page"{% endif %}
                  href="{% url 'dataedit:view' table=table %}">
                 <svg xmlns="http://www.w3.org/2000/svg"
                      width="16"
@@ -133,6 +134,7 @@
             </li>
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle {% if current_view.type == 'graph' %}active{% endif %}"
+                 {% if current_view.type == 'graph' %} aria-current="page"{% endif %}
                  data-bs-toggle="dropdown"
                  data-bs-popper-config='{"strategy": "fixed"}'
                  href="#"
@@ -165,6 +167,7 @@
             </li>
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle {% if current_view.type == 'map' %}active{% endif %}"
+                 {% if current_view.type == 'map' %} aria-current="page"{% endif %}
                  data-bs-toggle="dropdown"
                  data-bs-popper-config='{"strategy": "fixed"}'
                  href="#"
