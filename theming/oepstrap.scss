@@ -13,17 +13,18 @@
 @use 'scss/layouts/sidebars';
 @use 'scss/legacy/paginations';
 @use 'scss/legacy/tables';
-@use 'scss/legacy/tabs';
 // House components: one partial per component, named as its catalogue entry
 // (base/templates/styleguide/entries/<name>.html). `manage.py check_catalogue`
 // fails for a partial here without an entry.
 @use 'scss/components/badge';
 @use 'scss/components/button';
 @use 'scss/components/card';
+@use 'scss/components/dropdown';
 @use 'scss/components/empty_state';
 @use 'scss/components/link_with_arrow';
 @use 'scss/components/page_header';
 @use 'scss/components/section_heading';
+@use 'scss/components/tabs';
 @use 'scss/components/tag';
 @use 'scss/layouts/login';
 @use 'scss/layouts/database';

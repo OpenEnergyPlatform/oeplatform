@@ -12,6 +12,22 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- Tabs look the same everywhere: the house component `tabs`, underline tabs with
+  a primary bar under the active tab. It replaces Bootstrap's boxed tabs and the
+  theme's three older tab rows on the table page (both rows), the two peer
+  review pages, the factsheet editors, the dashboard and the metadata viewer. A
+  tab row holds tabs and at most one aside link at its end (an icon link, not a
+  tab), scrolls sideways on a narrow screen instead of wrapping, and keeps the
+  aside link in view with a fade while it scrolls. The dashboard marks its
+  current tab in the page itself instead of by script after loading. The peer
+  review pages' actions and the table page's "Hide options" sit beside their tab
+  row, not in it; the factsheet editors' "Submit all" leaves it with the
+  factsheet edit rework. Every dropdown takes the navbar dropdown's look (the
+  house component `dropdown`: large radius and shadow, dense size, hover tint),
+  including the table page's menus, peer review history and the tag picker on
+  the database pages, whose own buttons now carry a button role. Both have
+  catalogue entries. The homepage renders pixel for pixel as before
+  [(#2690)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2690)
 - One card and one empty state. Every `.card` is the house card on tokens (the
   in-page radius, the border colour, `--oep-shadow-sm`, 1.5rem padding, one
   title size), and `card--clickable` is a card that is one link: its title link

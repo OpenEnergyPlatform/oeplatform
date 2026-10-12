@@ -115,7 +115,9 @@
     &__tabs {
         flex-basis: 100%;
 
-        .nav-tabs {
+        // The aside link's fade blends into the band, not the page.
+        .tabs {
+            --tabs-bg: var(--oep-surface-subtle);
             margin-bottom: -1px;
         }
     }

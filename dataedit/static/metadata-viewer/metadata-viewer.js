@@ -1477,7 +1477,7 @@ function renderMetadataViewer(metadata, container) {
       </div>
       
       <!-- Tabs -->
-      <ul class="nav nav-tabs mb-4" id="metadataTabs" role="tablist">
+      <ul class="nav tabs mb-4" id="metadataTabs" role="tablist">
         <li class="nav-item" role="presentation">
           <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab" aria-controls="overview" aria-selected="true">Overview</button>
         </li>

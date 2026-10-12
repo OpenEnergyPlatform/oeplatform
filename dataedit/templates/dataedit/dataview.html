@@ -28,9 +28,9 @@
       {% endif %}
     </div>
   </div>
-  <div class="table-tabs">
-    <div class="table-tabs__container" id="tableTabsContainer">
-      <ul class="nav nav-tabs" id="tableTabs" role="tablist">
+  <div class="table-view-bar">
+    <div class="table-view-bar__container" id="tableTabsContainer">
+      <ul class="nav tabs" id="tableTabs" role="tablist">
         <li class="nav-item" role="presentation">
           <button class="nav-link active"
                   id="table-tab"
@@ -115,9 +115,10 @@
       {% else %}
         <div class="data-view">
           <span class="data-view__label">View</span>
-          <ul class="nav nav-tabs data-view__tabs">
-            <li class="nav-item data-view__tab">
-              <a class="nav-link data-view__link {% if current_view.type == 'table' %}active{% endif %}"
+          <ul class="nav tabs" aria-label="Views">
+            <li class="nav-item">
+              <a class="nav-link {% if current_view.type == 'table' %}active{% endif %}"
+                 {% if current_view.type == 'table' %} aria-current="page"{% endif %}
                  href="{% url 'dataedit:view' table=table %}">
                 <svg xmlns="http://www.w3.org/2000/svg"
                      width="16"
@@ -131,9 +132,11 @@
                 Table
               </a>
             </li>
-            <li class="nav-item dropdown data-view__tab">
-              <a class="nav-link data-view__link dropdown-toggle {% if current_view.type == 'graph' %}active{% endif %}"
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle {% if current_view.type == 'graph' %}active{% endif %}"
+                 {% if current_view.type == 'graph' %} aria-current="page"{% endif %}
                  data-bs-toggle="dropdown"
+                 data-bs-popper-config='{"strategy": "fixed"}'
                  href="#"
                  role="button"
                  aria-haspopup="true"
@@ -162,9 +165,11 @@
                 {% endif %}
               </div>
             </li>
-            <li class="nav-item dropdown data-view__tab">
-              <a class="nav-link data-view__link dropdown-toggle {% if current_view.type == 'map' %}active{% endif %}"
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle {% if current_view.type == 'map' %}active{% endif %}"
+                 {% if current_view.type == 'map' %} aria-current="page"{% endif %}
                  data-bs-toggle="dropdown"
+                 data-bs-popper-config='{"strategy": "fixed"}'
                  href="#"
                  role="button"
                  aria-haspopup="true"

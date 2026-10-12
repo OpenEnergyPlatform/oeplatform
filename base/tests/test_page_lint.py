@@ -235,6 +235,10 @@ RESTYLED_PAGES = (
         {"sheettype": "framework", "pk": "{framework}"},
         logged_in=True,
     ),
+    # #2648: underline tabs and dropdowns. Its other pages are listed above
+    # (the table page, both factsheet editors, Settings, Reviews) or wait for
+    # the tickets named in the comment above this tuple (peer review, the
+    # dashboard's tables, datasets and organizations tabs).
 )
 
 
@@ -353,9 +357,10 @@ class FooterTest(PageFixture):
 
 #: The status colours this ticket took off every action. Yellow and light grey
 #: are status colours too (`page_lint.STATUS_COLOURS`), but the peer review
-#: pages' yellow saves are toggled by their script (#2658) and the dropdowns'
-#: light grey is bootstrap-select's default (#2648), so the scan over every
-#: template holds only these three; the page lint holds all five.
+#: pages' yellow saves are toggled by their script and their bar's Quit still
+#: extends `.btn-light` (#2658; bootstrap-select's light grey buttons are
+#: swapped by script since #2648), so the scan over every template holds only
+#: these three; the page lint holds all five.
 GONE_COLOURS = status_button(("success", "info", "dark"))
 
 #: Templates that still carry a status colour as an action, and the ticket
