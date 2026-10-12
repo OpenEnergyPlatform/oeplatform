@@ -28,7 +28,7 @@ SPDX-License-Identifier: CC0-1.0
   finder has stops `manage.py` commands (check `base.E001`), because it would
   fail every page. The operator docs are the new page "Theming an instance". The
   homepage renders pixel for pixel as before
-  [(#PR)](https://github.com/OpenEnergyPlatform/oeplatform/pull/PR)
+  [(#2685)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2685)
 - Pages without side content use the whole content width: the base templates no
   longer render an empty 21rem side column. A page with side content fills the
   new `side-column` block with `<aside class="content__side">`, and every page
