@@ -34,14 +34,11 @@ from django.test import SimpleTestCase
 from django.urls import reverse
 
 from base.tests.html_tree import parse
+from base.tests.test_page_header import AREA, BAND, SNAPSHOTS, TRAIL
 from base.tests.test_page_lint import NOT_TEMPLATES, Page, PageFixture
 from dataedit.models import PeerReview, PeerReviewManager
 
-BAND = "page-header"
-AREA = "page-header__area"
-TRAIL = "page-header__trail"
 DESCRIPTION = "page-header__description"
-SNAPSHOTS = Path(__file__).parent / "page_texts"
 
 DRAFT = settings.PSEUDO_TOPIC_DRAFT
 TABLE = {"table": "{table}"}
@@ -382,6 +379,20 @@ class MovedPagesTest(PageFixture):
                 if content is not None:  # the React shell has none
                     order = list(main.iter())
                     self.assertLess(order.index(band), order.index(content))
+
+    def test_the_react_shell_pages_keep_their_apps(self):
+        # The band goes above the app; the app's mount point is still there.
+        for slug, mount in (
+            ("oeo_search", "main"),
+            ("oeo_entity", "main"),
+            ("oeo_viewer", "main"),
+            ("oekg", "yasgui"),
+        ):
+            with self.subTest(page=slug):
+                mounts = [
+                    n for n in self.root(slug).iter() if n.attrs.get("id") == mount
+                ]
+                self.assertEqual(len(mounts), 1)
 
     def test_no_page_keeps_an_old_header(self):
         for slug in MOVED:

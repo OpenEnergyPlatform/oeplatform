@@ -5,7 +5,7 @@
 {% block site-header %}
   {% url 'dataedit:topic-list' as topics_url %}
   {% url 'dataedit:view' table=table as table_url %}
-  {% include "components/page_header.html" with area="Database" icon="icons/area_database.html" crumb_label="Topics" crumb_url=topics_url crumb2_label=table crumb2_url=table_url title="Permissions" %}
+  {% include "components/page_header.html" with area="Database" icon="icons/area_database.html" crumb_label="Topics" crumb_url=topics_url crumb2_label=table_label|default:table crumb2_url=table_url title="Permissions" %}
 {% endblock site-header %}
 {% block side-column %}
   <aside class="content__side">

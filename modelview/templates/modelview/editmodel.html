@@ -1,7 +1,7 @@
 {% extends "modelview/base.html" %}
 {% load modelview_extras %}
 {% block site-header %}
-  {# The grey band every page is getting, and the way back out of a form #}
+  {# The page header, and the way back out of a form #}
   {# that is 171 fields long: an edit page reached from the overview had no #}
   {# link back to it, and no heading outside the form's own content. #}
   {% url 'modelview:modellist' 'model' as list_url %}
