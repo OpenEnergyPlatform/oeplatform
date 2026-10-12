@@ -32,7 +32,7 @@
           <h6 class="card-subtitle text-muted mb-2">{{ dataset.name }}</h6>
         </div>
         {% if is_creator %}
-          <a class="btn btn-sm btn-outline-primary"
+          <a class="btn btn-sm btn-secondary"
              href="{% url 'login:datasets' user_id=dataset.creator.id %}">Manage on your dashboard</a>
         {% endif %}
       </div>

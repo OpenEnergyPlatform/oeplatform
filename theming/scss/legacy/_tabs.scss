@@ -56,8 +56,8 @@
         }
 
         .nav-link.active {
-            color: $secondary;
-            border-bottom-color: $secondary;
+            color: var(--bs-primary);
+            border-bottom-color: var(--bs-primary);
         }
 
         .nav-link svg {
@@ -66,7 +66,7 @@
         }
 
         .nav-link.active svg {
-            fill: $secondary;
+            fill: var(--bs-primary);
         }
 
         .nav-link.status::after {
@@ -164,7 +164,7 @@
 
     a {
         @extend .pb-2;
-        @extend .text-secondary;
+        @extend .text-primary;
         @extend .fw-bold;
         @extend .fs-6;
         @extend .text-decoration-none;
@@ -172,7 +172,7 @@
 
         &.active {
             @extend .border-bottom;
-            @extend .border-secondary;
+            @extend .border-primary;
             @extend .border-4;
         }
     }
