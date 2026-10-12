@@ -113,7 +113,7 @@ actions has no bar and offers no selection.
           {% url frame.check_url user_id=profile_user.pk action=verb as check_url %}
           <button type="button"
                   id="bulk-{{ verb }}"
-                  class="btn {% if verb == "delete" %}btn-outline-danger{% else %}btn-outline-primary{% endif %} btn-sm"
+                  class="btn {% if verb == "delete" %}btn-outline-danger{% else %}btn-outline-secondary{% endif %} btn-sm"
                   hx-post="{{ check_url }}"
                   hx-target="#{{ frame.dialog }}-body"
                   hx-swap="innerHTML"
@@ -125,7 +125,7 @@ actions has no bar and offers no selection.
       <div class="dropdown dash-bulk__menu">
         <button type="button"
                 id="bulk-menu"
-                class="btn btn-outline-primary btn-sm dropdown-toggle"
+                class="btn btn-outline-secondary btn-sm dropdown-toggle"
                 data-bs-toggle="dropdown"
                 aria-expanded="false">Actions</button>
         <ul class="dropdown-menu" aria-labelledby="bulk-menu">

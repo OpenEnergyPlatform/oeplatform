@@ -7,7 +7,6 @@
 // place in this order they had as components, so the compiled theme does not
 // move.)
 @use 'scss/legacy/alerts';
-@use 'scss/legacy/buttons';
 @use 'scss/layouts/collapses';
 @use 'scss/legacy/controls';
 @use 'scss/legacy/headers';
@@ -19,6 +18,7 @@
 // (base/templates/styleguide/entries/<name>.html). `manage.py check_catalogue`
 // fails for a partial here without an entry.
 @use 'scss/components/badge';
+@use 'scss/components/button';
 @use 'scss/components/card';
 @use 'scss/components/empty_state';
 @use 'scss/components/link_with_arrow';

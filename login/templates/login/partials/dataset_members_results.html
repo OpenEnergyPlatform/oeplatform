@@ -46,7 +46,7 @@ the button's id, so focus stays on it), or reads "Already in" for a member.
           {% else %}
             <button type="button"
                     id="dataset-members-add-{{ row.table.pk }}"
-                    class="btn btn-outline-primary btn-sm"
+                    class="btn btn-outline-secondary btn-sm"
                     aria-label="Add {{ row.title }}"
                     hx-post="{{ members_url }}"
                     hx-vals='{"op": "add", "table": "{{ row.table.name|escapejs }}"}'
