@@ -1,0 +1,22 @@
+{% load static %}
+{% comment %}
+  The shell's dialog and toasts (#2643), included once by every shell after
+  the footer, outside every block, so no page can drop them. One confirm
+  dialog, one toast region (polite for news, assertive for errors), the toast
+  template a script clones, and the module that drives them. A page asks for
+  a confirmation with `hx-confirm` or `data-confirm`; a script uses
+  `window.oep.confirm(...)` and `window.oep.toast(...)` (base/static/base/dialogs.js).
+{% endcomment %}
+{% include "components/confirm_dialog.html" %}
+<div class="toast-region" data-toast-region>
+  <div id="toasts-polite" role="status" aria-live="polite"></div>
+  <div id="toasts-assertive" role="alert" aria-live="assertive"></div>
+</div>
+<template id="toast-template">
+  {% include "components/toast.html" %}
+</template>
+<script type="module">
+  import { bindDialogs } from "{% static 'base/dialogs.js' %}";
+
+  bindDialogs(document);
+</script>

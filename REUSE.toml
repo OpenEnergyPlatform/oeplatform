@@ -3579,6 +3579,8 @@ path = [
   "theming/scss/components/_page_header.scss",
   "theming/scss/components/_dropdown.scss",
   "theming/scss/components/_tabs.scss",
+  "theming/scss/components/_confirm_dialog.scss",
+  "theming/scss/components/_toast.scss",
   "theming/scss/components/_field.scss",
   "theming/scss/components/_toc.scss",
   "base/templates/components/**",
@@ -3588,6 +3590,7 @@ path = [
   "base/templates/brand/**",
   "base/templates/base/_head.html",
   "base/templates/base/_instance_stylesheets.html",
+  "base/templates/base/_feedback.html",
   "theming/stock_tokens.scss",
   "theming/literal_scan.mjs",
 ]

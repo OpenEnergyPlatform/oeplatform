@@ -153,6 +153,19 @@ class LintTest(SimpleTestCase):
 
         self.assertEqual(lint(html), [])
 
+    def test_hx_confirm_and_data_confirm_ask_the_house_dialog(self):
+        self.assertEqual(
+            lint(
+                page(
+                    '<a class="btn btn-outline-danger" hx-delete="/x" '
+                    'hx-confirm="It is deleted.">Delete</a>'
+                    '<button class="btn btn-outline-danger" '
+                    'data-confirm="It is deleted.">Delete</button>'
+                )
+            ),
+            [],
+        )
+
     def test_the_navbar_is_not_the_pages_own_content(self):
         # The navbar's Sign Up is cyan until the user menu (#2644).
         self.assertEqual(lint(page("")), [])
@@ -179,7 +192,6 @@ class Page:
 #: ticket 8 of the spec (#2640) join when it lands.
 #:
 #: Pages #2641 touched that are NOT here yet, and the ticket that brings them:
-#: - dataedit:table-permission: an inline alert() (#2643);
 #: - login:tables, login:datasets: the dashboard's own cell, menu and filter
 #:   controls carry no role (#2659);
 #: - login:organizations: Create Organization and the help toggle take their
@@ -213,7 +225,6 @@ RESTYLED_PAGES = (
     Page("base:contact"),
     Page("base:styleguide"),
     Page("login:settings", {"user_id": "{user}"}, logged_in=True),
-    # dataedit:table-permission joins when its alert() goes (#2643).
     Page("dataedit:topic-list"),
     Page("dataedit:datasets-in-topic", {"topic": settings.PSEUDO_TOPIC_DRAFT}),
     Page("dataedit:meta_edit", {"table": "{table}"}, logged_in=True),
@@ -235,6 +246,9 @@ RESTYLED_PAGES = (
         {"sheettype": "framework", "pk": "{framework}"},
         logged_in=True,
     ),
+    # #2643: the confirm dialog; its other pages are listed above (the table
+    # page, the tag editor, both factsheets)
+    Page("dataedit:table-permission", {"table": "{table}"}, logged_in=True),
     # #2642: fields and the account pages. Set password needs a user without
     # one, social sign-up a sign-in in progress; their forms are read in
     # login/tests/test_account_forms.py and test_account_error_alerts.py. The

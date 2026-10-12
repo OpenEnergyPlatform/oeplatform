@@ -22,9 +22,8 @@ export function finishPeerReview() {
       window.location = config.url_table;
     })
     .catch(function (err) {
-      // TODO evaluate error, show user message
       $("#peer_review-submitting").addClass("d-none");
-      alert(getErrorMsg(err));
+      showToast("Not finished", getErrorMsg(err), "error");
     });
 }
 export function check_if_review_finished() {

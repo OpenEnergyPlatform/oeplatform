@@ -197,7 +197,7 @@ export function savePeerReview() {
     })
     .catch(function (err) {
       $("#peer_review-save").addClass("d-none");
-      alert(getErrorMsg(err));
+      showToast("Not saved", getErrorMsg(err), "error");
     });
 }
 
@@ -209,7 +209,7 @@ export function submitPeerReview() {
     })
     .catch(function (err) {
       $("#peer_review-submitting").addClass("d-none");
-      alert(getErrorMsg(err));
+      showToast("Not submitted", getErrorMsg(err), "error");
     });
 }
 
@@ -265,14 +265,10 @@ export function getCategoryToTabIdMapping() {
   };
 }
 
+// The shell's toast region (base/static/base/dialogs.js).
 export function showToast(title, message, type) {
-  var toast = document.getElementById("liveToast");
-  var toastTitle = document.getElementById("toastTitle");
-  var toastBody = document.getElementById("toastBody");
-
-  toast.className = `toast hide ${type === "error" ? "bg-danger" : "bg-success"}`;
-  toastTitle.textContent = title;
-  toastBody.textContent = message;
-
-  new bootstrap.Toast(toast).show();
+  window.oep.toast(message, {
+    title,
+    status: type === "error" ? "danger" : "success",
+  });
 }
