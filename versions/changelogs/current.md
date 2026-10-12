@@ -25,7 +25,7 @@ SPDX-License-Identifier: CC0-1.0
   `account/_login.html` sample and `account/base.html`), all of them render in
   one layout, and their logo comes from `brand/logo.html` (new argument
   `on_light`), so an instance's logo replaces it there too
-  [(#2642)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2642)
+  [(#2695)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2695)
 
 - One table, one alert and one pager across the platform. Tables are Bootstrap's
   `.table` with the head row on the subtle surface and the dense size
