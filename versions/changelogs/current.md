@@ -24,7 +24,7 @@ SPDX-License-Identifier: CC0-1.0
   content. The privacy policy lists the rights of the data subject one article
   at a time, shows the controller as an address and the cookie table as the
   house table. No text changes apart from the list's label
-  [(#2649)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2649)
+  [(#2694)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2694)
 
 - One table, one alert and one pager across the platform. Tables are Bootstrap's
   `.table` with the head row on the subtle surface and the dense size
