@@ -488,6 +488,8 @@ def update_tags_from_keywords(table: str, keywords: list[str]) -> list[str]:
     table_obj.tags.clear()
     keywords_new = set()
     for keyword in keywords:
+        if not Tag.get_name_normalized(keyword):
+            continue  # e.g. "", which the oemetadata v2 template ships
         tag = Tag.get_or_create_from_name(keyword)
         table_obj.tags.add(tag)
         keywords_new.add(tag.name_normalized)

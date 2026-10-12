@@ -63,6 +63,13 @@ class TestPut(APITestCaseWithTable):
         meta = deepcopy(OEMETADATA_V20_EXAMPLE)
         self.metadata_roundtrip(meta)
 
+    def test_keywords_that_cannot_become_tags_are_skipped(self):
+        """The oemetadata v2 template ships keywords [""] (#2698)."""
+        meta = deepcopy(OEMETADATA_V20_EXAMPLE)
+        meta["resources"][0]["keywords"] = ["", "---", "wind"]
+        saved = self.api_req("post", path="meta/", data=meta)
+        self.assertEqual(saved["resources"][0]["keywords"], ["wind"])
+
     def test_column_sync_preserves_annotations(self):
         """
         Verify that the backend sync function correctly enforces physical DB constraints
