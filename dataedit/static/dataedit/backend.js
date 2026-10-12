@@ -545,7 +545,10 @@ function parse_download() {
   };
   var rules = $("#builder").queryBuilder("getRules");
   if (rules == null) {
-    window.alert("Please check for invalid Rules");
+    window.oep.toast("A filter rule is incomplete or invalid; fix it first.", {
+      status: "warning",
+      title: "Invalid filter",
+    });
     return;
   }
   base_query.where = parse_filter(rules);

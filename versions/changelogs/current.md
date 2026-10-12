@@ -12,6 +12,26 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- One confirm dialog and one toast region replace every native browser dialog.
+  Every shell renders the house component `confirm_dialog` (a title naming the
+  action, what will happen, Cancel and a button labelled with the verb, solid
+  red when it cannot be undone, optionally a typed confirmation) and a toast
+  region (`toast`: polite for news, assertive for errors), driven by one ES
+  module, `base/static/base/dialogs.js`. Every `hx-confirm` now opens the dialog
+  and sends its request only on confirm; a plain button asks with
+  `data-confirm`; a script calls `window.oep.confirm(...)` and
+  `window.oep.toast(...)`. Escape and the close button cancel; focus starts on
+  Cancel for a destructive action, in the input for a typed one, and returns to
+  the opener. Replaced: the factsheet, organization and member deletes, the
+  permission page's two removes, the tag editor's delete (now asked also for an
+  unused tag), the table view's delete (its modal is deleted, as is the wizard's
+  unused one), the peer review delete and every `alert()` (query builder,
+  metadata editor, peer review, the permission page), and the four inline toast
+  containers. Every Bootstrap modal takes the dialog's look (8px, large shadow),
+  and the dashboard's two drawers its header. Catalogue entries
+  `confirm_dialog`, `toast`
+  [(#2643)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2643)
+
 - One table, one alert and one pager across the platform. Tables are Bootstrap's
   `.table` with the head row on the subtle surface and the dense size
   (`.table-hover` for record lists, `.table-pairs` for labels and values), and

@@ -68,7 +68,10 @@
                name="submit_delete"
                class="btn btn-outline-danger float-end"
                value="Delete"
-               {% if editing.usage.total %} onclick="return confirm('This removes the tag from {{ editing.usage.total }} object(s). Continue?')"{% endif %} />
+               data-confirm="{% if editing.usage.total %}The tag is removed from {{ editing.usage.total }} object(s) on the whole platform, then deleted.{% else %}The tag is deleted. No table or factsheet carries it.{% endif %}"
+               data-confirm-title="Delete tag?"
+               data-confirm-verb="Delete tag"
+               data-confirm-danger />
       {% endif %}
     </form>
   </div>

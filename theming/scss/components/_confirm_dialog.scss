@@ -1,0 +1,75 @@
+// confirm_dialog: the one confirmation on the platform (#2643). One instance
+// in every shell (base/templates/components/confirm_dialog.html, included by
+// base/_feedback.html), filled and driven by base/static/base/dialogs.js.
+// Catalogue entry: base/templates/styleguide/entries/confirm_dialog.html.
+//
+// Its look is the modal look, and that applies to every Bootstrap modal on
+// the platform (the tables tab's action dialog, a page's own): the large
+// radius, the large shadow, borders in the border colour. A restyle, not a
+// re-map: the theme compiles modals square ($modal-content-border-radius: 0)
+// and Bootstrap draws no modal shadow without $enable-shadows. The surface
+// colour is re-mapped in scss/tokens/_remap.scss.
+@use '../base/' as *;
+
+.modal {
+    --bs-modal-border-color: var(--bs-border-color);
+    --bs-modal-border-radius: var(--bs-border-radius-lg);
+    --bs-modal-inner-border-radius: calc(var(--bs-border-radius-lg) - 1px);
+    --bs-modal-header-border-color: var(--bs-border-color);
+    --bs-modal-footer-border-color: var(--bs-border-color);
+    --bs-modal-color: var(--bs-body-color);
+}
+
+.modal-content {
+    box-shadow: var(--oep-shadow-lg);
+}
+
+// The title names the action in sentence case, one size whatever its level.
+// A drawer (the dashboard's access and members drawers) opens with the same
+// header: the title, the close button, a line below.
+.modal-title,
+.offcanvas-title {
+    font-size: 1.125rem;
+    font-weight: var(--oep-heading-weight);
+}
+
+.offcanvas-header {
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+// Bootstrap compiles the close button's `color` as a literal; the X is its
+// SVG background, so this changes nothing visible (as in the alert).
+.modal-header .btn-close,
+.offcanvas-header .btn-close {
+    color: inherit;
+}
+
+.confirm-dialog__text:last-child {
+    margin-bottom: 0;
+}
+
+.confirm-dialog__typed {
+    margin-top: 1rem;
+
+    // The theme compiles fields with literal colours; the field look on
+    // tokens is #2642's. Until then this one input reads tokens itself
+    // (the stronger border token, close to the field's grey).
+    .form-control {
+        color: var(--bs-body-color);
+        border-color: var(--oep-border-strong);
+    }
+}
+
+// The catalogue's copies: in the page's flow, always shown.
+.confirm-dialog--example {
+    position: static;
+    display: block;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    z-index: auto;
+
+    .modal-dialog {
+        margin: 0;
+    }
+}

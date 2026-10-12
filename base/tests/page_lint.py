@@ -20,9 +20,10 @@ buttons. A page without `#main-content` is refused rather than passed. An
 htmx fragment has no shell, so `fragment=True` reads all of it. Inline
 scripts are read wherever they are on the page.
 
-`hx-confirm` is not a native dialog here, although htmx answers it with the
-browser's own `confirm()` today: templates keep the attribute, and the
-confirm dialog (#2643) routes every one of them through the house dialog.
+`hx-confirm` is not a native dialog: templates keep the attribute, and the
+shell's confirm dialog (#2643, `base/static/base/dialogs.js`) answers every
+one of them in place of htmx's own `confirm()`. A plain button asks the same
+dialog with `data-confirm`.
 
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later

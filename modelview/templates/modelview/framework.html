@@ -11,28 +11,15 @@
     {% if can_delete %}
       <a class="btn btn-outline-danger"
          hx-delete="{% url 'modelview:delete-factsheet' sheettype='framework' pk=model.pk %}"
-         hx-confirm="Are you sure you want to delete this entry?">Delete</a>
+         hx-confirm="The factsheet {{ model.model_name }} is deleted for everyone. This cannot be undone."
+         data-confirm-title="Delete factsheet?"
+         data-confirm-verb="Delete factsheet"
+         data-confirm-danger
+         hx-swap="none">Delete</a>
     {% endif %}
   {% endif %}
 {% endblock factsheet-actions %}
 {% block factsheets_content %}
-  <!-- Bootstrap 5 Toast Container -->
-  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-    <div id="liveToast"
-         class="toast hide"
-         role="alert"
-         aria-live="assertive"
-         aria-atomic="true">
-      <div class="toast-header">
-        <strong class="me-auto" id="toastTitle"></strong>
-        <button type="button"
-                class="btn-close"
-                data-bs-dismiss="toast"
-                aria-label="Close"></button>
-      </div>
-      <div class="toast-body" id="toastBody"></div>
-    </div>
-  </div>
   <div class="card-container">
     <div class="card">
       <div class="card-header">
@@ -357,21 +344,11 @@
       event.detail.headers["X-CSRFToken"] = "{{ csrf_token }}";
     });
 
-    document.addEventListener("htmx:responseError", function (event) {
-      var target = event.detail.target;
-      var messageContainer = document.getElementById("toastBody");
-      var toastTitle = document.getElementById("toastTitle");
-      var liveToast = new bootstrap.Toast(document.getElementById("liveToast"));
-
-      // Show error message in the toast
-      toastTitle.innerHTML = "Error";
-      messageContainer.innerHTML =
-        "Error deleting entry. You have to be logged in!";
-
-      // Set red color to the toast
-      liveToast._element.classList.add("bg-danger", "text-white");
-
-      liveToast.show();
+    document.addEventListener("htmx:responseError", function () {
+      window.oep.toast("The factsheet was not deleted. Reload the page and try again.", {
+        status: "danger",
+        title: "Delete failed",
+      });
     });
   </script>
   {% compress js %}
