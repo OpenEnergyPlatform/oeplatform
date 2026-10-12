@@ -3579,6 +3579,7 @@ path = [
   "theming/scss/components/_page_header.scss",
   "theming/scss/components/_dropdown.scss",
   "theming/scss/components/_tabs.scss",
+  "theming/scss/components/_field.scss",
   "base/templates/components/**",
   "base/tests/page_texts/**",
   "base/templates/brand/**",

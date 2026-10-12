@@ -1,0 +1,20 @@
+{% load allauth %}
+{% comment %}
+  allauth's button (#2642), in one of the house roles, chosen from allauth's
+  tags: danger (outlined: allauth acts at once, with no confirmation to be
+  solid in), link, secondary (allauth's "secondary" or "outline"), and
+  primary for the rest. allauth marks only what is NOT its page's main action,
+  so an untagged button is the primary one.
+{% endcomment %}
+{% comment %} djlint:off {% endcomment %}
+<{% if attrs.href %}a href="{{ attrs.href }}"{% else %}button{% endif %}
+class="btn {% if 'danger' in attrs.tags %}btn-outline-danger{% elif 'link' in attrs.tags %}btn-link{% elif 'secondary' in attrs.tags or 'outline' in attrs.tags %}btn-secondary{% else %}btn-primary{% endif %}"
+{% if attrs.form %}form="{{ attrs.form }}"{% endif %}
+{% if attrs.id %}id="{{ attrs.id }}"{% endif %}
+{% if attrs.name %}name="{{ attrs.name }}"{% endif %}
+{% if attrs.value %}value="{{ attrs.value }}"{% endif %}
+{% if attrs.type %}type="{{ attrs.type }}"{% endif %}
+>
+{% slot %}
+{% endslot %}
+</{% if attrs.href %}a{% else %}button{% endif %}>

@@ -10,9 +10,7 @@
     {% csrf_token %}
     {{ redirect_field }}
     {% for error in form.non_field_errors %}
-      <div class="login__alert login__alert--danger">
-        <p>{{ error }}</p>
-      </div>
+      {% include "components/alert.html" with status="danger" text=error %}
     {% endfor %}
     <div class="login__field">
       <label for="{{ form.password.auto_id }}">{% trans "Password" %}</label>
@@ -24,6 +22,7 @@
              autofocus />
       {% for error in form.password.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
     </div>
-    <button type="submit" class="login__button">{% trans "Confirm" %}</button>
+    <button type="submit"
+            class="btn btn-primary w-100 mb-3">{% trans "Confirm" %}</button>
   </form>
 {% endblock content %}

@@ -44,11 +44,11 @@ changelog when one has to change:
 - **the design tokens**, in your stylesheet (below);
 - **the brand**, three templates under `brand/`:
 
-  | Template                  | What it holds                                                                                                                                                                                                                         |
-  | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-  | `brand/logo.html`         | The logo, as markup. It is called with `size`, the square in px the place is drawn for (45 in the navbar, 32 in the homepage footer), and `alt`, empty where the name stands beside it. The navbar's logo sits on the primary colour. |
-  | `brand/name.html`         | The platform's name, one line of plain text (not markup: it is escaped where it is shown): the navbar logo's link text, the homepage footer.                                                                                          |
-  | `brand/title_prefix.html` | What every page title starts with, one line of text (`OEP`).                                                                                                                                                                          |
+  | Template                  | What it holds                                                                                                                                                                                                                                                                                                                                                                                            |
+  | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+  | `brand/logo.html`         | The logo, as markup. It is called with `size`, the square in px the place is drawn for (45 in the navbar, 32 in the homepage footer), `alt`, empty where the name stands beside it, and `on_light`, true on the sign-in and account pages (72), where the logo sits on the light page instead of the primary colour of the navbar and footer: a replacement that ignores it shows its navbar logo there. |
+  | `brand/name.html`         | The platform's name, one line of plain text (not markup: it is escaped where it is shown): the navbar logo's link text, the homepage footer.                                                                                                                                                                                                                                                             |
+  | `brand/title_prefix.html` | What every page title starts with, one line of text (`OEP`).                                                                                                                                                                                                                                                                                                                                             |
 
 - **the legal pages**, `base/privacy_policy.html` and `base/terms_of_use.html`.
   Every instance has to replace these: they describe the Open Energy Platform's
@@ -82,11 +82,10 @@ Example Grid Platform
 **Everything else** can be overridden the same way, by a template of the same
 name or a rule in your stylesheet, but is not supported: templates, class names
 and page structure change between releases without notice. Some places are not
-covered yet: the sign-in and account pages show the platform's own logo, the
-navbar's Sign up and Sign in buttons keep a blue of their own, the pages built
-with React (scenario bundles, the ontology browser) do not read the tokens, and
-the favicon is a static file (`favicon.ico`), which a file of that name in
-`STATICFILES_DIRS` replaces.
+covered yet: the navbar's Sign up and Sign in buttons keep a blue of their own,
+the pages built with React (scenario bundles, the ontology browser) do not read
+the tokens, and the favicon is a static file (`favicon.ico`), which a file of
+that name in `STATICFILES_DIRS` replaces.
 
 Compressed bundles are built ahead of time by `manage.py compress`, so a
 `{% compress %}` block in a template you override exists only once `compress`

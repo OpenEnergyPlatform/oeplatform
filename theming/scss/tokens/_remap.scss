@@ -121,6 +121,22 @@ $focus-border: color-mix(in srgb, var(--bs-primary) 50%, white);
   box-shadow: $focus-ring;
 }
 
+// A field in error, its focus ring and its message, in the danger colour. A
+// field that passed is not marked (base.forms.HouseFieldRenderer).
+.form-control.is-invalid,
+.form-select.is-invalid {
+  border-color: var(--bs-danger);
+
+  &:focus {
+    border-color: var(--bs-danger);
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-danger-rgb), 0.25);
+  }
+}
+
+.invalid-feedback {
+  color: var(--bs-danger);
+}
+
 .form-check-input:checked,
 .form-check-input[type="checkbox"]:indeterminate {
   background-color: var(--bs-primary);

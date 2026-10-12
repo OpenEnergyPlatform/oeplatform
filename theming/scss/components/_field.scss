@@ -1,0 +1,58 @@
+// field: every form field (#2642).
+//
+// Bootstrap's own `form-control`, `form-select` and `form-check-input`,
+// restyled through tokens only: 4px corners, the strong border, the surface
+// behind the text. The primary focus ring and the checked state are in
+// scss/tokens/_remap.scss, and so are the error's colours. One layout: the label above (`form-label`), muted
+// help below (`form-text`), the error below (`invalid-feedback`), never a
+// table. A Django form renders through django-bootstrap5
+// (`{% bootstrap_field %}`), allauth's through the element overrides in
+// login/templates/allauth/elements/.
+//
+// House rule: longhands, never shorthands, on Bootstrap's components. A
+// `padding` shorthand on `.form-select` deletes the room Bootstrap keeps on
+// its right for the arrow (the catalogue entry's narrow select shows it), a
+// `background` shorthand its arrow. `border-color` and `border-radius` set
+// all four sides of exactly what they name, so they stay.
+// A partial that `@extend`s `.form-control` or `.form-select` must `@use`
+// this file to get this look. Catalogue entry:
+// base/templates/styleguide/entries/field.html.
+@use '../base/' as *;
+
+.form-control,
+.form-select {
+    color: var(--bs-body-color);
+    background-color: var(--oep-surface);
+    border-color: var(--oep-border-strong);
+    border-radius: var(--bs-border-radius);
+
+    &::placeholder {
+        color: var(--oep-text-muted);
+    }
+
+    &:disabled {
+        background-color: var(--oep-surface-subtle);
+    }
+}
+
+.form-control-sm,
+.form-select-sm {
+    border-radius: var(--bs-border-radius-sm);
+}
+
+.form-control-lg,
+.form-select-lg {
+    border-radius: var(--bs-border-radius-lg);
+}
+
+// The outline of an unchecked box or radio: the secondary grey, which keeps
+// the 3:1 a control's edge needs (the field border is lighter, but a field
+// has its label and text to be found by).
+.form-check-input {
+    background-color: var(--oep-surface);
+    border-color: var(--bs-secondary);
+}
+
+.form-text {
+    color: var(--oep-text-muted);
+}

@@ -1,0 +1,14 @@
+{% load allauth %}
+{% comment %}
+  allauth's form (#2642). The actions fill the narrow account column, as the
+  account pages' own buttons do.
+{% endcomment %}
+<form method="{{ attrs.method }}"
+      {% if attrs.action %}action="{{ attrs.action }}"{% endif %}>
+  {% slot body %}
+{% endslot %}
+<div class="d-grid gap-2 mb-3">
+  {% slot actions %}
+{% endslot %}
+</div>
+</form>
