@@ -1,4 +1,4 @@
-{% load static i18n fontawesome_5 django_bootstrap5 %}
+{% load static i18n fontawesome_5 django_bootstrap5 instance_theming %}
 <button class="navbar-toggler"
         type="button"
         data-bs-toggle="collapse"
@@ -9,10 +9,8 @@
   <span class="navbar-toggler-icon"></span>
 </button>
 <a class="navbar-brand" href="{% url 'base:home' %}">
-  <img width="45"
-       height="45"
-       alt="Open Energy Platform home"
-       src="{% static 'OpenEnergyFamily_Logo_OpenEnergyPlatform_untitled_white.svg' %}" />
+  {% brand_name as name %}
+  {% include "brand/logo.html" with size=45 alt=name|add:" home" %}
 </a>
 <div class="collapse navbar-collapse" id="navbarSupportedContent">
   <ul class="navbar-nav">
