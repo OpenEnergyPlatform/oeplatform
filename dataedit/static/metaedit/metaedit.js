@@ -495,7 +495,6 @@ window.MetaEdit = function (config) {
 
         // all done
         $("#metaedit-loading").addClass("d-none");
-        $("#metaedit-icon").removeClass("d-none");
         $("#metaedit-controls").removeClass("d-none");
 
         // TODO catch init error
@@ -618,7 +617,6 @@ window.MetaEdit = function (config) {
 
         // all done
         $("#metaedit-loading").addClass("d-none");
-        $("#metaedit-icon").removeClass("d-none");
         $("#metaedit-controls").removeClass("d-none");
 
         // TODO catch init error

@@ -5,8 +5,8 @@ being rolled out across the platform -- and the edit and create pages did not.
 They opened straight into a 171-field form with an `<h1>` inside the content
 and no way back to the list they were reached from.
 
-The band's `__wizard` slot is styled for links, so it is where the breadcrumb
-belongs.
+The band is the house `page_header` (#2640): its trail is where the way
+back belongs.
 
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
@@ -48,12 +48,12 @@ class TestTheGreyBand(EditHeaderTestCase):
     def test_the_edit_page_carries_it(self):
         for sheettype in SHEETTYPES:
             with self.subTest(sheettype=sheettype):
-                self.assertIn('class="main-header"', self.edit_html(sheettype))
+                self.assertIn('class="page-header"', self.edit_html(sheettype))
 
     def test_the_create_page_carries_it(self):
         for sheettype in SHEETTYPES:
             with self.subTest(sheettype=sheettype):
-                self.assertIn('class="main-header"', self.add_html(sheettype))
+                self.assertIn('class="page-header"', self.add_html(sheettype))
 
     def test_the_heading_is_not_repeated_inside_the_form(self):
         """The band carries the heading now; the old one sat in the content."""

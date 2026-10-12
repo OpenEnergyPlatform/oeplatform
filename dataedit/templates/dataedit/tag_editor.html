@@ -1,16 +1,8 @@
 {% extends "dataedit/base.html" %}
 {% load static %}
 {% block site-header %}
-  <div class="main-header">
-    <h1 class="main-header__title">Database</h1>
-    <div class="main-header__wizard">
-      {% if editing.pk %}
-        Edit Tag
-      {% else %}
-        Create Tag
-      {% endif %}
-    </div>
-  </div>
+  {% url 'dataedit:tags' as tags_url %}
+  {% include "components/page_header.html" with area="Database" icon="icons/area_database.html" crumb_label="Tags" crumb_url=tags_url title=editing.pk|yesno:"Edit Tag,Create Tag" %}
 {% endblock site-header %}
 {% block data_content %}
   {# The standalone page: the same partial the overview's panel loads. #}

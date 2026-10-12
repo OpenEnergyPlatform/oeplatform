@@ -831,7 +831,11 @@ class TableCreateGraphView(View):
         columns = [(c, c) for c in describe_columns(table_obj).keys()]
         formset = GraphViewForm(columns=columns)
 
-        return render(request, "dataedit/tablegraph_form.html", {"formset": formset})
+        return render(
+            request,
+            "dataedit/tablegraph_form.html",
+            {"formset": formset, "table": table},
+        )
 
     def post(self, request: HttpRequest, table: str) -> HttpResponse:
         table_obj = table_or_404(table=table)
@@ -872,7 +876,9 @@ class TableCreateMapView(View):
         else:
             raise Http404
 
-        return render(request, "dataedit/tablemap_form.html", {"form": form})
+        return render(
+            request, "dataedit/tablemap_form.html", {"form": form, "table": table}
+        )
 
     def post(self, request: HttpRequest, table: str, maptype: str) -> HttpResponse:
         table_obj = table_or_404(table=table)

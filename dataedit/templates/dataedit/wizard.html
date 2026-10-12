@@ -9,42 +9,31 @@
   {% endcompress %}
 {% endblock after-head %}
 {% block site-header %}
-  <div class="main-header">
-    {% if table %}
-      <h1 class="main-header__title">
-        <i class="fa fa-table me-2"></i>Upload data from csv
-      </h1>
-      <div class="main-header__wizard">
-        Tables /
-        {% if table_label %}
-          <a href="{% url 'dataedit:view' table=table %}">{{ table_label }}</a>
-        {% else %}
-          <a href="{% url 'dataedit:view' table=table %}">{{ table }}</a>
-        {% endif %}
-        <!-- Indicate weather the user got permissions fot this table -->
-      </div>
-      <div>
-        In the academy you can learn about how to
-        <a href="{{ create_database_conform_data }}"
-           target="_blank">create database conform CSV data</a>
-        and how to work with the
-        <a href="{{ wizard_academy_link }}{% if can_add %}#upload-a-csv-file-using-the-wizard{% endif %}"
-           target="_blank">upload wizard</a>.
-      </div>
-    {% else %}
-      <h1 class="main-header__title">
-        <i class="fa fa-table me-2"></i>Create table
-      </h1>
-      <div class="main-header__wizard"></div>
-      <div>
-        In the academy you can learn about how to
-        how to work create new tables using the <a href="{{ wizard_academy_link }}{% if can_add %}#upload-a-csv-file-using-the-wizard{% endif %}"
-    target="_blank">wizard</a>.
-      </div>
-    {% endif %}
-  </div>
+  {% if table %}
+    {% url 'dataedit:topic-list' as topics_url %}
+    {% url 'dataedit:view' table=table as table_url %}
+    {% include "components/page_header.html" with area="Database" icon="icons/area_database.html" crumb_label="Topics" crumb_url=topics_url crumb2_label=table_label|default:table crumb2_url=table_url title="Upload data from csv" %}
+  {% else %}
+    {% include "components/page_header.html" with area="Database" icon="icons/area_database.html" title="Create table" %}
+  {% endif %}
 {% endblock site-header %}
 {% block data_content %}
+  {% if table %}
+    <p>
+      In the academy you can learn about how to
+      <a href="{{ create_database_conform_data }}"
+         target="_blank">create database conform CSV data</a>
+      and how to work with the
+      <a href="{{ wizard_academy_link }}{% if can_add %}#upload-a-csv-file-using-the-wizard{% endif %}"
+         target="_blank">upload wizard</a>.
+    </p>
+  {% else %}
+    <p>
+      In the academy you can learn about how to
+      how to work create new tables using the <a href="{{ wizard_academy_link }}{% if can_add %}#upload-a-csv-file-using-the-wizard{% endif %}"
+    target="_blank">wizard</a>.
+    </p>
+  {% endif %}
   <!-- inside bootstrap column -->
   <div class="content">
     <div class="content__container">

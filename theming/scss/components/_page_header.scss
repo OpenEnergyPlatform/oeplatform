@@ -8,9 +8,6 @@
 // --oep-content-width as the content under it, so their left and right edges
 // line up at every width. It gives the space under the navbar; the content
 // keeps its own space under the band.
-//
-// The legacy .main-header (scss/legacy/_headers.scss) stays until #2640 moves
-// its pages here.
 @use '../base/' as *;
 
 .page-header {
@@ -44,7 +41,9 @@
         line-height: 1.2;
         color: var(--bs-body-color);
 
-        svg {
+        // An area's icon is inline SVG, or the area's own logo as an image.
+        svg,
+        img {
             flex-shrink: 0;
             width: 1rem;
             height: 1rem;

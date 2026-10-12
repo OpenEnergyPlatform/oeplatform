@@ -8,12 +8,8 @@
         href="{% static 'metadata-viewer/metadata-viewer.css' %}" />
 {% endblock after-head %}
 {% block site-header %}
-  <div class="main-header">
-    <h1 class="main-header__title">{{ dataset.metadata.title|default:dataset.name }}</h1>
-    <div class="main-header__wizard">
-      <a href="{% url 'dataedit:topic-list' %}">Topics</a> / Dataset / {{ dataset.name }}
-    </div>
-  </div>
+  {% url 'dataedit:topic-list' as topics_url %}
+  {% include "components/page_header.html" with area="Database" icon="icons/area_database.html" crumb_label="Topics" crumb_url=topics_url title=dataset.metadata.title|default:dataset.name %}
 {% endblock site-header %}
 {% block data_content %}
   {% if not dataset.is_published %}

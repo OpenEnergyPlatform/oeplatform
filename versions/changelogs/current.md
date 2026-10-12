@@ -146,6 +146,20 @@ SPDX-License-Identifier: CC0-1.0
   `base/templates/icons/`. Account and error pages keep no band. The homepage
   renders pixel for pixel as before
   [(#2686)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2686)
+- Every other page header is the house `page_header` too: the database pages
+  (topics, tables, datasets, the table page and its permissions, metadata
+  editor, graph and map forms, tags, upload wizard, peer review), the factsheet
+  list, detail, edit and create pages, the ontology pages, the OEO viewer, the
+  OEKG query page and the component catalogue. The area ("Database", "Ontology",
+  "Model Factsheets") is no longer the page's `h1`; the page's subject is, as
+  the trail's last part. The factsheet detail page shows one header instead of
+  two, and the dataset metadata viewer's heading is an `h2`. Introductions that
+  sat in the old header (upload wizard, metadata editor, OEO viewer, OEKG) open
+  the page instead; "You can edit this table" and "You can edit the metadata"
+  are the band's description. `.main-header` and the legacy `.site-header` are
+  gone, as are three ontology templates nothing rendered. New area icons for
+  Database, Factsheets and Ontology. The homepage renders pixel for pixel as
+  before [(#2697)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2697)
 - A third-party instance restyles the platform without a fork. Two optional
   local settings: `INSTANCE_STYLESHEETS` (static paths, linked last in every
   page's head, after the platform's and the page's own stylesheets, and left out

@@ -188,8 +188,7 @@ class Page:
 
 #: Every page that has moved onto the house components, by the ticket that
 #: moved it. A page whose actions depend on who is asking is read signed in
-#: as the owner of the fixture, which shows the most of them. The pages of
-#: ticket 8 of the spec (#2640) join when it lands.
+#: as the owner of the fixture, which shows the most of them.
 #:
 #: Pages #2641 touched that are NOT here yet, and the ticket that brings them:
 #: - login:tables, login:datasets: the dashboard's own cell, menu and filter
@@ -246,6 +245,20 @@ RESTYLED_PAGES = (
         {"sheettype": "framework", "pk": "{framework}"},
         logged_in=True,
     ),
+    # #2640: the page header on every page that had a main-header (the others
+    # it moved are listed above or below; the peer review pages wait for
+    # #2658, named in the comment above this tuple)
+    Page("dataedit:table-map", {"table": "{table}", "maptype": "latlon"}, True),
+    Page("dataedit:tags-new", logged_in=True),
+    Page("dataedit:tags-edit", {"tag_pk": "{tag}"}, logged_in=True),
+    Page("dataedit:oemetabuilder"),
+    Page("modelview:modeladd", {"sheettype": "framework"}, logged_in=True),
+    Page("ontology:index"),
+    Page("ontology:oeo-s-c"),
+    Page("ontology:ontology-entity-search", {"ontology": "oeo"}),
+    Page("ontology:oeo-class-detail", {"ontology": "oeo", "term_id": "BFO_0000001"}),
+    Page("oeo_viewer:index"),
+    Page("oekg:main", logged_in=True),
     # #2643: the confirm dialog; its other pages are listed above (the table
     # page, the tag editor, both factsheets)
     Page("dataedit:table-permission", {"table": "{table}"}, logged_in=True),
@@ -324,6 +337,7 @@ class PageFixture(TestViewsTestCase):
             "framework": self.framework.pk,
             "dataset": self.dataset.name,
             "user": self.user.pk,
+            "tag": tag.pk,
         }
 
     def html(self, restyled: Page) -> str:

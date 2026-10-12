@@ -6,47 +6,29 @@
 {% block after-head %}
   <link href="{% static 'metaedit/metaedit.css' %}" rel="stylesheet" />
 {% endblock after-head %}
-{% block site-header %}
-  <h2 class="site-header">
-    <i class="fa fa-tags d-none me-2" id="metaedit-icon"></i>
-  </h2>
-{% endblock site-header %}
 {% block main %}
   <main class="main" id="main-content">
-    <div class="main-header">
-      <h1 class="main-header__title">
-        <i class="fa fa-tags d-none me-2" id="metaedit-icon"></i> Edit Metadata
-      </h1>
-      <div class="main-header__wizard">
-        {% if table %}
-          {% if table_label %}
-            <a href="{% url 'dataedit:view' table=table %}">{{ table_label }}</a>
-          {% else %}
-            <a href="{% url 'dataedit:view' table=table %}">{{ table }}</a>
-          {% endif %}
-          /
-        {% else %}
-          Standalone (no data table attached)
-        {% endif %}
-        OEMetaBuilder
-        <!-- Indicate weather the user got permissions fot this table -->
-        {% if can_add %}
-          <span class="badge badge--success">You can edit the metadata.</span>
-        {% endif %}
-      </div>
-      <div class="mt-3">
-        Find a detailed description for all fields of the OEMetaData visible on
-        <a href="{{ oem_key_desc }}" target="_blank">GitHub</a>. For a brief
-        introduction on how to work with the oemetadata and the
-        <a href="{{ oemetabuilder_tutorial }}" target="_blank">OEMetaBuilder</a>
-        tool find our
-        <a href="{{ oemetadata_tutorial }}" target="_blank">tutorial</a> in the
-        academy.
-      </div>
-    </div>
+    {% if table %}
+      {% url 'dataedit:topic-list' as topics_url %}
+      {% url 'dataedit:view' table=table as table_url %}
+      {% include "components/page_header.html" with area="Database" icon="icons/area_database.html" crumb_label="Topics" crumb_url=topics_url crumb2_label=table_label|default:table crumb2_url=table_url title="Edit Metadata" description=can_add|yesno:"You can edit the metadata.," %}
+    {% else %}
+      {% include "components/page_header.html" with area="Metadata" title="Edit Metadata" description="Standalone (no data table attached)" %}
+    {% endif %}
     <div class="content">
       <div class="content__container">
         <section class="content__fullwidth">
+          <p>
+            Find a detailed description for all fields of the OEMetaData visible on
+            <a href="{{ oem_key_desc }}" target="_blank">GitHub</a>. For a brief
+            introduction on how to work with the oemetadata and the
+            <a href="{{ oemetabuilder_tutorial }}"
+               target="_blank">OEMetaBuilder</a>
+            tool find our
+            <a href="{{ oemetadata_tutorial }}"
+               target="_blank">tutorial</a> in the
+            academy.
+          </p>
           <div class="d-flex justify-content-center">
             <div class="spinner-border text-primary m-5 d-none"
                  role="status"

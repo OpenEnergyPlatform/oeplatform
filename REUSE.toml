@@ -2018,14 +2018,6 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "ontology/templates/ontology/partial_ontology_full.html"
-precedence = "override"
-SPDX-License-Identifier = "AGPL-3.0-or-later"
-SPDX-FileCopyrightText = [
-  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-]
-
-[[annotations]]
 path = "ontology/templates/ontology/partial_ontology_content.html"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
@@ -2069,32 +2061,6 @@ SPDX-FileCopyrightText = [
   "2020 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2021 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2023 Christian Hofmann <https://github.com/christian-rli> © Reiner Lemoine Institut © Reiner Lemoine Institut",
-  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
-]
-
-[[annotations]]
-path = "ontology/templates/ontology/oeo.html"
-precedence = "override"
-SPDX-License-Identifier = "AGPL-3.0-or-later"
-SPDX-FileCopyrightText = [
-  "2020 Martin Glauer <https://github.com/MGlauer> © Otto-von-Guericke-Universität Magdeburg",
-  "2021 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
-  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
-  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
-  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-]
-
-[[annotations]]
-path = "ontology/templates/ontology/class.html"
-precedence = "override"
-SPDX-License-Identifier = "AGPL-3.0-or-later"
-SPDX-FileCopyrightText = [
-  "2021 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
-  "2022 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
-  "2022 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
-  "2023 Adel Memariani <https://github.com/adelmemariani> © Otto-von-Guericke-Universität Magdeburg",
   "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
   "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
 ]
@@ -3553,7 +3519,10 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "modelview/templates/modelview/partials/factsheet_icon.html"
+path = [
+  "base/templates/icons/area_factsheets.html",
+  "base/templates/icons/area_ontology.html",
+]
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
@@ -3604,6 +3573,7 @@ SPDX-FileCopyrightText = [
 path = [
   "base/templates/icons/area_about.html",
   "base/templates/icons/area_account.html",
+  "base/templates/icons/area_database.html",
 ]
 precedence = "override"
 SPDX-License-Identifier = "MIT"

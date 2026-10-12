@@ -1462,9 +1462,9 @@ function renderMetadataViewer(metadata, container) {
     <div class="metadata-container">
       <!-- Header with title and download button -->
       <div class="d-flex justify-content-between align-items-center metadata-header">
-        <h1>Dataset: ${
+        <h2>Dataset: ${
           metadata.title || metadata.name || "Metadata Specification"
-        }</h1>
+        }</h2>
         <!-- 
         <button id="download-json" class="btn btn-primary">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download me-2" viewBox="0 0 16 16">
