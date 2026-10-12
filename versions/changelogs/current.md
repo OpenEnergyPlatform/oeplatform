@@ -28,6 +28,19 @@ SPDX-License-Identifier: CC0-1.0
   mixins and `.dash-empty` are gone; `card` and `empty_state` are in the
   component catalogue. The homepage renders pixel for pixel as before
   [(#2689)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2689)
+- Pages that started with their title glued under the navbar get a header band:
+  the house component `page_header`
+  (`base/templates/components/page_header.html`), in the established area/trail
+  form: the area with its icon on a light line, then a breadcrumb trail of up to
+  two links ending in the page's subject, which is now the page's one `h1`.
+  Optional slots for a muted description, actions and a tab row. The band shares
+  `--oep-content-width` with the content, so their edges line up at every width.
+  About, the steering committee, contact, the privacy policy, the terms of use
+  (which gains the title "Terms of Use"), FAQ, discussion, the project pages and
+  the profile edit page have it; their texts are unchanged. Area icons live in
+  `base/templates/icons/`. Account and error pages keep no band. The homepage
+  renders pixel for pixel as before
+  [(#2686)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2686)
 - A third-party instance restyles the platform without a fork. Two optional
   local settings: `INSTANCE_STYLESHEETS` (static paths, linked last in every
   page's head, after the platform's and the page's own stylesheets, and left out
@@ -576,6 +589,9 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Documentation updates
 
+- The docs site builds again: a literal Django include tag on the design system
+  page stopped every docs deploy since 2026-10-08
+  [(#2688)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2688)
 - Reworked the pull request template: sections for testing, deploy notes and a
   new "For reviewers" block; the changelog line is now written only in the
   changelog; fixed the broken reviewer-guidelines link

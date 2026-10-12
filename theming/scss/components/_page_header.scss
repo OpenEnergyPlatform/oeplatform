@@ -1,0 +1,122 @@
+// page_header: the band under the navbar, in the platform's area/trail form
+// (#2639). Include: base/templates/components/page_header.html; catalogue
+// entry: base/templates/styleguide/entries/page_header.html.
+//
+// The area on a light line of its own, then a breadcrumb trail of semibold
+// links ending in the page's subject, its h1, set as plain trail text. The
+// band and its inner box take the same side gutters and the same
+// --oep-content-width as the content under it, so their left and right edges
+// line up at every width. It gives the space under the navbar; the content
+// keeps its own space under the band.
+//
+// The legacy .main-header (scss/legacy/_headers.scss) stays until #2640 moves
+// its pages here.
+@use '../base/' as *;
+
+.page-header {
+    display: flex;
+    justify-content: center;
+    padding: $C--padding-standard;
+    background-color: var(--oep-surface-subtle);
+    border-bottom: 1px solid var(--bs-border-color);
+
+    &__inner {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: 0.75rem $C--padding-standard;
+        width: 100%;
+        max-width: var(--oep-content-width);
+    }
+
+    &__text {
+        flex: 1 1 24rem;
+        min-width: 0;
+    }
+
+    &__area {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0 0 0.375rem;
+        font-size: 1.25rem;
+        font-weight: $font-weight-light;
+        line-height: 1.2;
+        color: var(--bs-body-color);
+
+        svg {
+            flex-shrink: 0;
+            width: 1rem;
+            height: 1rem;
+        }
+    }
+
+    &__trail {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 0 0.375rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+
+        > li {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 0.375rem;
+            min-width: 0;
+        }
+
+        // The separator belongs to the part before it, so a wrapped trail
+        // never starts a line with one.
+        > li:not(:last-child)::after {
+            content: "/";
+            color: var(--oep-text-muted);
+        }
+
+        a {
+            font-weight: $font-weight-semibold;
+            text-decoration: none;
+
+            &:hover,
+            &:focus-visible {
+                text-decoration: underline;
+            }
+        }
+    }
+
+    // The page's h1, read as the trail's last part: not a big title.
+    &__title {
+        margin: 0;
+        font-size: var(--bs-body-font-size);
+        font-weight: $font-weight-normal;
+        line-height: $line-height-base;
+        color: var(--bs-body-color);
+        overflow-wrap: anywhere;
+    }
+
+    &__description {
+        margin: 0.375rem 0 0;
+        color: var(--oep-text-muted);
+    }
+
+    &__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    // Tabs sit on the band's lower edge: the band has no padding under them,
+    // and the tab row covers the band's border.
+    &--tabs {
+        padding-bottom: 0;
+    }
+
+    &__tabs {
+        flex-basis: 100%;
+
+        .nav-tabs {
+            margin-bottom: -1px;
+        }
+    }
+}

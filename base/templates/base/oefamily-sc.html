@@ -2,12 +2,10 @@
 {% load django_bootstrap5 %}
 {% load static %}
 {% block site-header %}
-  <div class="main-header">
-    <h1 class="main-header__title">Open Energy Family Steering Committee</h1>
-  </div>
+  {% url 'base:about' as about_url %}
+  {% include "components/page_header.html" with area="About" icon="icons/area_about.html" crumb_label="Overview" crumb_url=about_url title="Open Energy Family Steering Committee" %}
 {% endblock site-header %}
 {% block main-content-body %}
-  <br />
   <h3 id="oeo-sc">What is the Steering Committee?</h3>
   <p>
     The OEFamily-SC is responsible for the overall development and strategic direction of the Open Energy Family framework.
