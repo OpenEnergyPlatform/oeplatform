@@ -14,7 +14,6 @@ $toast-statuses: success, info, warning, danger;
 
 .toast {
     --oep-status: var(--bs-info);
-    --bs-toast-color: var(--bs-body-color);
     --bs-toast-bg: var(--oep-surface);
     --bs-toast-border-color: var(--bs-border-color);
     --bs-toast-border-radius: var(--bs-border-radius-lg);
@@ -45,7 +44,7 @@ $toast-statuses: success, info, warning, danger;
     position: fixed;
     right: 0;
     bottom: 0;
-    z-index: 1090;
+    z-index: 1090; // Bootstrap's $zindex-toast
     display: flex;
     flex-direction: column;
     gap: 0.5rem;

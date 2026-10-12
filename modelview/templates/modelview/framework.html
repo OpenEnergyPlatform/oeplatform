@@ -9,13 +9,14 @@
     <a class="btn btn-primary"
        href="{% url 'modelview:edit' 'framework' model.pk %}">Edit</a>
     {% if can_delete %}
-      <a class="btn btn-outline-danger"
-         hx-delete="{% url 'modelview:delete-factsheet' sheettype='framework' pk=model.pk %}"
-         hx-confirm="The factsheet {{ model.model_name }} is deleted for everyone. This cannot be undone."
-         data-confirm-title="Delete factsheet?"
-         data-confirm-verb="Delete factsheet"
-         data-confirm-danger
-         hx-swap="none">Delete</a>
+      <button type="button"
+              class="btn btn-outline-danger"
+              hx-delete="{% url 'modelview:delete-factsheet' sheettype='framework' pk=model.pk %}"
+              hx-confirm="The factsheet {{ model.model_name }} is deleted for everyone. This cannot be undone."
+              data-confirm-title="Delete factsheet?"
+              data-confirm-verb="Delete factsheet"
+              data-confirm-danger
+              hx-swap="none">Delete</button>
     {% endif %}
   {% endif %}
 {% endblock factsheet-actions %}
@@ -344,7 +345,8 @@
       event.detail.headers["X-CSRFToken"] = "{{ csrf_token }}";
     });
 
-    document.addEventListener("htmx:responseError", function () {
+    document.addEventListener("htmx:responseError", function (event) {
+      if (!event.detail.elt.hasAttribute("hx-delete")) return;
       window.oep.toast("The factsheet was not deleted. Reload the page and try again.", {
         status: "danger",
         title: "Delete failed",

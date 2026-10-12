@@ -231,6 +231,82 @@ describe("confirmAction", () => {
     expect(await second).toBe(true);
   });
 
+  describe("while Bootstrap fades the dialog in or out", () => {
+    // Bootstrap's modal ignores show() and hide() during its fade, and sends
+    // its event only when the fade ends (`finish`).
+    function fadingModal() {
+      const element = dialog();
+      let fading = null;
+      return {
+        show() {
+          if (fading || element.classList.contains("show")) return;
+          fading = "shown";
+          element.classList.add("show");
+        },
+        hide() {
+          if (fading || !element.classList.contains("show")) return;
+          fading = "hidden";
+          element.classList.remove("show");
+        },
+        finish() {
+          const event = fading;
+          fading = null;
+          element.dispatchEvent(new Event(`${event}.bs.modal`));
+        },
+        get fading() {
+          return fading;
+        },
+      };
+    }
+
+    it("closes once open when answered while still opening", async () => {
+      const modal = fadingModal();
+      const answer = ask({ modal });
+      pressEscape();
+      expect(await answer).toBe(false);
+
+      modal.finish(); // shown: now it can close
+      expect(modal.fading).toBe("hidden");
+      modal.finish();
+      expect(dialog().classList.contains("show")).toBe(false);
+    });
+
+    it("waits for one answered while it still fades in before opening the next", async () => {
+      const modal = fadingModal();
+      const first = ask({ modal });
+      cancel().click(); // answered mid fade-in
+      const second = ask({ modal, title: "Second?" });
+      expect(await first).toBe(false);
+
+      modal.finish(); // the first is shown, and starts to close
+      expect(modal.fading).toBe("hidden");
+      modal.finish(); // closed: the second opens
+      expect(modal.fading).toBe("shown");
+      modal.finish();
+      expect(dialog().querySelector("[data-confirm-title]").textContent).toBe(
+        "Second?"
+      );
+      accept().click();
+      expect(await second).toBe(true);
+    });
+
+    it("opens the next once the last has closed, and the last's close does not answer it", async () => {
+      const modal = fadingModal();
+      const first = ask({ modal });
+      modal.finish();
+      cancel().click(); // fading out
+      const second = ask({ modal, title: "Second?" });
+      expect(await first).toBe(false);
+
+      modal.finish(); // hidden: the second opens now
+      expect(modal.fading).toBe("shown");
+      modal.finish();
+      expect(dialog().classList.contains("show")).toBe(true);
+      accept().click();
+      expect(await second).toBe(true);
+    });
+  });
+
   it("answers false without a dialog on the page", async () => {
     document.body.innerHTML = "";
 

@@ -39,6 +39,48 @@ function bootstrapModal(element) {
   return { show: () => modal().show(), hide: () => modal().hide() };
 }
 
+// Bootstrap's modal ignores show() and hide() while it fades, so an answer
+// given while the dialog fades in, or a confirmation asked while the last
+// one fades out, would be lost: each waits for the fade it falls into.
+function after(element, flag, event, action) {
+  if (element[flag]) {
+    element.addEventListener(event, action, { once: true });
+  } else {
+    action();
+  }
+}
+
+// `onShown` runs once this show has happened, not on the shown event of an
+// earlier one still fading in.
+function showDialog(element, modal, onShown) {
+  after(element, "oepHiding", "hidden.bs.modal", () => {
+    element.oepShowing = true;
+    element.addEventListener(
+      "shown.bs.modal",
+      () => {
+        element.oepShowing = false;
+        onShown();
+      },
+      { once: true }
+    );
+    modal.show();
+  });
+}
+
+function hideDialog(element, modal) {
+  // Closing counts from now, even while it still fades in, so a
+  // confirmation asked meanwhile waits for it.
+  element.oepHiding = true;
+  after(element, "oepShowing", "shown.bs.modal", () => {
+    element.addEventListener(
+      "hidden.bs.modal",
+      () => (element.oepHiding = false),
+      { once: true }
+    );
+    modal.hide();
+  });
+}
+
 /**
  * Ask in the shell's confirm dialog.
  *
@@ -87,10 +129,13 @@ export function confirmAction({
     target.addEventListener(type, handler, { signal: listening.signal });
 
   return new Promise((resolve) => {
-    const settle = (answer) => {
+    // `closed`: Bootstrap has closed the dialog already (the backdrop).
+    const settle = (answer, closed = false) => {
       listening.abort();
       element.oepSettle = null;
-      modal.hide();
+      if (!closed) {
+        hideDialog(element, modal);
+      }
       if (opener && opener !== doc.body && opener.isConnected) {
         opener.focus();
       }
@@ -115,15 +160,20 @@ export function confirmAction({
     on(input, "input", () => {
       accept.disabled = input.value !== typed;
     });
-    // Bootstrap closing the dialog by itself (the backdrop) is a "no" too.
-    on(element, "hidden.bs.modal", () => settle(false));
-
     // Focus: in the input for a typed confirmation, on Cancel for a
     // destructive one, otherwise on the confirm button. Bootstrap focuses
     // the dialog itself once shown, so this runs again then.
     const focus = () => (typed ? input : danger ? cancel : accept).focus();
-    on(element, "shown.bs.modal", focus);
-    modal.show();
+    showDialog(element, modal, () => {
+      if (listening.signal.aborted) {
+        return; // answered before it had finished opening
+      }
+      focus();
+      // Bootstrap closing the dialog by itself (the backdrop) is a "no" too;
+      // listened for only once this one is open, so the close of the last
+      // one cannot answer it.
+      on(element, "hidden.bs.modal", () => settle(false, true));
+    });
     focus();
   });
 }
