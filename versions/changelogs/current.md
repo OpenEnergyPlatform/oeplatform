@@ -20,8 +20,9 @@ SPDX-License-Identifier: CC0-1.0
   them from `OEP_INSTANCE_STYLESHEETS` and `OEP_INSTANCE_TEMPLATE_DIRS`. The
   five base templates share one head (`base/_head.html`), so all of them load
   the same compressed stylesheet bundle, with jquery-ui's stylesheet now on the
-  React pages too (its rules only touch `.ui-*` elements). The platform's name,
-  logo and title prefix moved out of the base templates and the navbar into
+  React pages too (its rules only touch `.ui-*` elements) and Vite's HMR client
+  in dev mode on the pages of `base.html` too. The platform's name, logo and
+  title prefix moved out of the base templates and the navbar into
   `brand/name.html`, `brand/logo.html` and `brand/title_prefix.html`, which an
   instance replaces like the two legal pages. A stylesheet no static files
   finder has stops `manage.py` commands (check `base.E001`), because it would

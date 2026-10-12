@@ -7,23 +7,21 @@ fork, read where the platform renders it.
 
 The brand is three templates under ``brand/``, so an instance overrides it from
 a directory in ``INSTANCE_TEMPLATE_DIRS``: ``logo.html`` is markup and is
-included; ``name.html`` and ``title_prefix.html`` are a line of text each,
-read through ``brand_name`` and ``brand_title_prefix``, which strip the line
-end a template file carries, so the text fits inside an attribute.
+included; ``name.html`` and ``title_prefix.html`` are a line of plain text
+each, not markup, read through ``brand_name`` and ``brand_title_prefix``. Those
+strip the line end a template file carries and return the text unmarked, so it
+is escaped wherever it is output, the same in an attribute as in a paragraph.
 """  # noqa: 501
 
 from django import template
 from django.conf import settings
 from django.template.loader import render_to_string
-from django.utils.safestring import mark_safe
 
 register = template.Library()
 
 
 def _brand_text(name):
-    # A template's text is markup its author wrote, so it is output as written,
-    # as any template's is; strip() returns a plain str, which would be escaped.
-    return mark_safe(render_to_string(f"brand/{name}.html").strip())
+    return render_to_string(f"brand/{name}.html").strip()
 
 
 @register.simple_tag

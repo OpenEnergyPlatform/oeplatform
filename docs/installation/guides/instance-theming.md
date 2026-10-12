@@ -47,7 +47,7 @@ changelog when one has to change:
   | Template                  | What it holds                                                                                                                                                                                                                         |
   | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
   | `brand/logo.html`         | The logo, as markup. It is called with `size`, the square in px the place is drawn for (45 in the navbar, 32 in the homepage footer), and `alt`, empty where the name stands beside it. The navbar's logo sits on the primary colour. |
-  | `brand/name.html`         | The platform's name, one line of text: the navbar logo's link text, the homepage footer.                                                                                                                                              |
+  | `brand/name.html`         | The platform's name, one line of plain text (not markup: it is escaped where it is shown): the navbar logo's link text, the homepage footer.                                                                                          |
   | `brand/title_prefix.html` | What every page title starts with, one line of text (`OEP`).                                                                                                                                                                          |
 
 - **the legal pages**, `base/privacy_policy.html` and `base/terms_of_use.html`.

@@ -98,6 +98,7 @@ class ShellPagesTestCase(InstanceStaticFiles, SidebarFixture):
 
 
 class InstanceStylesheetTest(ShellPagesTestCase):
+    @override_settings(INSTANCE_STYLESHEETS=[])
     def test_unset_a_page_links_no_instance_stylesheet(self):
         for shell, view_name, kwargs, logged_in in self.pages():
             with self.subTest(shell=shell):
@@ -198,6 +199,18 @@ class InstanceTemplatesTest(ShellPagesTestCase):
         self.assertNotIn("Open Energy Platform", html.split("<main")[0])
         self.assertNotIn("OpenEnergyFamily_Logo", html)
 
+    def test_the_name_is_text_escaped_alike_in_an_attribute_and_in_text(self):
+        with tempfile.TemporaryDirectory() as directory:
+            (Path(directory) / "brand").mkdir()
+            (Path(directory) / "brand" / "name.html").write_text("R&D <Grid>\n")
+            templates = [{**settings.TEMPLATES[0], "DIRS": [directory]}]
+            with override_settings(TEMPLATES=templates):
+                html = self.page("base:home")
+        self.assertIn('alt="R&amp;D &lt;Grid&gt; home"', html)
+        self.assertIn(
+            '<p class="index-footer-brand-name">R&amp;D &lt;Grid&gt;</p>', html
+        )
+
     def test_every_shell_s_title_starts_with_the_prefix(self):
         with self.instance_templates():
             for shell, view_name, kwargs, logged_in in self.pages():
@@ -214,7 +227,8 @@ class InstanceTemplatesTest(ShellPagesTestCase):
         self.assertIn("<h1>Example terms</h1>", terms)
 
     def test_without_them_the_platform_s_brand_shows(self):
-        html = self.page("base:home")
+        with override_settings(TEMPLATES=[{**settings.TEMPLATES[0], "DIRS": []}]):
+            html = self.page("base:home")
         self.assertEqual(self.title(html).split()[0], "OEP")
         self.assertIn('alt="Open Energy Platform home"', html)
 

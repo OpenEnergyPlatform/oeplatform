@@ -112,11 +112,12 @@ class DeploySequenceTest(SimpleTestCase):
 
         cls.collected = cls._run("manage.py", "collectstatic", "--noinput")
         cls.compressed = cls._run("manage.py", "compress", "--force")
-        rendered = cls._run(
+        cls.rendered = cls._run(
             "-c", textwrap.dedent(RENDER_THE_SHELLS.format(shells=SHELLS))
         )
-        cls.rendered = rendered
-        cls.shells = json.loads(rendered.stdout) if rendered.returncode == 0 else {}
+        cls.shells = (
+            json.loads(cls.rendered.stdout) if cls.rendered.returncode == 0 else {}
+        )
 
     @classmethod
     def _run(cls, *arguments):

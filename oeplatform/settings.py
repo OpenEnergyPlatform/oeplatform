@@ -348,8 +348,9 @@ DOCUMENTATION_LINKS = {
 SITE_ID = 1
 
 # The instance theming contract (#2637, docs/installation/guides/instance-theming.md).
-# Both are read from securitysettings.py and optional there, so an instance
-# that sets neither looks exactly like the platform.
+# Both are read from securitysettings.py and optional there (hence getattr
+# rather than the import list above, which every local settings file must
+# satisfy), so an instance that sets neither looks exactly like the platform.
 #
 # INSTANCE_STYLESHEETS: static paths, linked after every platform stylesheet
 # on every page (base/templates/base/_instance_stylesheets.html), so an
