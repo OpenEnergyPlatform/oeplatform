@@ -13,22 +13,7 @@ selection slot (empty until the tab offers bulk actions) and the row's ⋯ menu
 ``datasets_tab.css``.
 {% endcomment %}
 {% block empty %}
-  <div class="dash-empty">
-    <h3 class="dash-empty__title">You have no datasets yet</h3>
-    <p>
-      A dataset is a collection of tables, yours or other people's, under one
-      title. It stays a private draft until you publish it.
-    </p>
-    {% url 'login:dataset-action' profile_user.pk "create" as create_url %}
-    <button type="button"
-            id="datasets-create"
-            class="btn btn-primary"
-            hx-get="{{ create_url }}"
-            hx-target="#dataset-action-body"
-            hx-swap="innerHTML"
-            hx-sync="this:replace"
-            data-action-origin="datasets-create">Create a dataset</button>
-  </div>
+  {% include "components/empty_state.html" with icon="fas fa-layer-group" title="You have no datasets yet" text="A dataset is a collection of tables, yours or other people's, under one title. It stays a private draft until you publish it." action_template="login/partials/datasets_empty_action.html" %}
 {% endblock empty %}
 {% block head_cells %}
   {% include "login/partials/list_sort_header.html" with link=page.sort_links.dataset cell="c-dataset" %}

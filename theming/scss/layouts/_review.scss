@@ -307,3 +307,70 @@
         word-wrap: break-word;
     }
 }
+
+// The peer review pages' bar (#2648, replacing the old full-width tab row):
+// the category tabs on the left and, beside them rather than in the tab row,
+// the review's actions. The actions' button roles are the peer review
+// ticket's (#2658).
+.review-bar {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    // No side padding: the page around it already has the gutters.
+    padding-top: $C--padding-standard;
+
+    &__container {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 0.75rem $C--padding-standard;
+        width: 100%;
+        max-width: var(--oep-content-width);
+    }
+
+    // A category's progress dot: summary.js sets `status`, and `status--done`
+    // once every field of the category is answered.
+    .nav-link.status {
+        position: relative;
+
+        &::after {
+            content: "";
+            position: absolute;
+            top: 0.5rem;
+            right: -0.625rem;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: var(--bs-danger);
+        }
+
+        &.status--done::after {
+            background-color: var(--bs-success);
+        }
+    }
+
+    &__actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+
+    &__action--summary button {
+        @extend .btn;
+        @extend .btn-primary;
+    }
+
+    &__action--save button,
+    &__action--save a {
+        @extend .btn;
+        @extend .btn-outline-primary;
+    }
+
+    &__action--quit button {
+        @extend .btn;
+        @extend .btn-light;
+    }
+}

@@ -8,21 +8,7 @@ columns. Each cell type is its own partial under ``cells/``; the container
 queries that collapse the columns are in ``tables_tab.css``.
 {% endcomment %}
 {% block empty %}
-  <div class="dash-empty">
-    <h3 class="dash-empty__title">You have no tables yet</h3>
-    <p>
-      Tables you create, or that someone shares with you or with one of your
-      organizations, appear here.
-    </p>
-    <a class="btn btn-primary"
-       id="empty-create"
-       href="{% url 'dataedit:wizard_create' %}"
-       hx-boost="false">Create a table</a>
-    <a class="btn btn-outline-secondary"
-       id="empty-api"
-       href="{{ EXTERNAL_URLS.tutorials_api_upload }}"
-       hx-boost="false">Upload via the API</a>
-  </div>
+  {% include "components/empty_state.html" with icon="fas fa-table" title="You have no tables yet" text_template="login/partials/tables_empty_text.html" action_template="login/partials/tables_empty_action.html" %}
 {% endblock empty %}
 {% block head_cells %}
   {% include "login/partials/list_sort_header.html" with link=page.sort_links.table cell="c-table" %}

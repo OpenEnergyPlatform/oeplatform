@@ -146,17 +146,6 @@
   align-items: center;
 }
 
-/* Enhanced Topic Cards */
-.topic-card--featured {
-  border: 2px solid #c1d9eb;
-  box-shadow: 0 4px 16px rgba(41, 114, 166, 0.12);
-}
-
-.topic-card--featured:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(41, 114, 166, 0.18);
-}
-
 /* Responsive Design */
 @media (max-width: 768px) {
   .info-banner__header {

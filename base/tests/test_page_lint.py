@@ -182,7 +182,8 @@ class Page:
 #: - dataedit:table-permission: an inline alert() (#2643);
 #: - login:tables, login:datasets: the dashboard's own cell, menu and filter
 #:   controls carry no role (#2659);
-#: - login:organizations: its buttons take a role by `@extend` (#2653);
+#: - login:organizations: Create Organization and the help toggle take their
+#:   look from container selectors (#2653); its cards' Edit has a role (#2646);
 #: - the peer review pages: buttons styled by container selectors (#2658);
 #: - dataedit/admin.html and login's activate, detach, generic_form and
 #:   oepuser_create_form: no view renders them (dead code, #2660).
@@ -234,6 +235,10 @@ RESTYLED_PAGES = (
         {"sheettype": "framework", "pk": "{framework}"},
         logged_in=True,
     ),
+    # #2648: underline tabs and dropdowns. Its other pages are listed above
+    # (the table page, both factsheet editors, Settings, Reviews) or wait for
+    # the tickets named in the comment above this tuple (peer review, the
+    # dashboard's tables, datasets and organizations tabs).
 )
 
 
@@ -352,9 +357,10 @@ class FooterTest(PageFixture):
 
 #: The status colours this ticket took off every action. Yellow and light grey
 #: are status colours too (`page_lint.STATUS_COLOURS`), but the peer review
-#: pages' yellow saves are toggled by their script (#2658) and the dropdowns'
-#: light grey is bootstrap-select's default (#2648), so the scan over every
-#: template holds only these three; the page lint holds all five.
+#: pages' yellow saves are toggled by their script and their bar's Quit still
+#: extends `.btn-light` (#2658; bootstrap-select's light grey buttons are
+#: swapped by script since #2648), so the scan over every template holds only
+#: these three; the page lint holds all five.
 GONE_COLOURS = status_button(("success", "info", "dark"))
 
 #: Templates that still carry a status colour as an action, and the ticket

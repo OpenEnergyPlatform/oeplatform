@@ -156,12 +156,6 @@ $focus-border: color-mix(in srgb, var(--bs-primary) 50%, white);
   --bs-pagination-border-radius: var(--bs-border-radius-sm);
 }
 
-// Tabs
-.nav-tabs {
-  --bs-nav-tabs-link-active-color: var(--bs-body-color);
-  --bs-nav-tabs-link-active-bg: var(--oep-surface);
-}
-
 .nav-pills {
   --bs-nav-pills-link-active-color: var(--oep-on-strong);
   --bs-nav-pills-link-active-bg: var(--bs-primary);
@@ -170,6 +164,8 @@ $focus-border: color-mix(in srgb, var(--bs-primary) 50%, white);
 // Cards and dialogs
 .card {
   --bs-card-bg: var(--oep-surface);
+  --bs-card-border-radius: var(--bs-border-radius);
+  --bs-card-inner-border-radius: calc(var(--bs-border-radius) - var(--bs-card-border-width));
 }
 
 .modal {

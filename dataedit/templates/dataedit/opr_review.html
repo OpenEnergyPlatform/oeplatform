@@ -119,10 +119,10 @@
           </div>
         </div>
       </div>
-      <div class="fullwidth-tabs">
-        <div class="fullwidth-tabs__container">
-          <ul class="nav nav-tabs sticky-top" id="myTab" role="tablist">
-            <li class="nav-item show active" role="presentation">
+      <div class="review-bar">
+        <div class="review-bar__container">
+          <ul class="nav tabs sticky-top" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
               <button class="nav-link active"
                       id="general-tab"
                       data-bs-toggle="tab"
@@ -173,8 +173,8 @@
                       aria-selected="false">Summary</button>
             </li>
           </ul>
-          <div class="fullwidth-tabs__save-btns" id="peer_review-controls">
-            <div class="fullwidth-tabs__save-btn fullwidth-tabs__save-btn--summary">
+          <div class="review-bar__actions" id="peer_review-controls">
+            <div class="review-bar__action review-bar__action--summary">
               <button id="submit_summary" class="disabled">
                 <span class="btn__icon">
                   <svg width="16"
@@ -193,14 +193,14 @@
                  data-placement="top"
                  title="After submitting your work, please note that it may take some time for the contributor to respond and for the peer review process to continue. Please be patient while waiting for their feedback."></i>
             </div>
-            <div class="fullwidth-tabs__save-btn fullwidth-tabs__save-btn--save">
+            <div class="review-bar__action review-bar__action--save">
               <button id="peer_review-save">Save Progress</button>
             </div>
-            <div class="fullwidth-tabs__save-btn fullwidth-tabs__save-btn--quit">
+            <div class="review-bar__action review-bar__action--quit">
               <button id="peer_review-cancel">Quit</button>
             </div>
             {% if review_id is not None and not review_finished %}
-              <div class="fullwidth-tabs__save-btn fullwidth-tabs__save-btn--delete">
+              <div class="review-bar__action review-bar__action--delete">
                 <button class="btn btn-outline-danger"
                         id="peer_review-delete">Delete</button>
               </div>

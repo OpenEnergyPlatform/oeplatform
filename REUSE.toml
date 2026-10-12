@@ -3118,18 +3118,6 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "theming/scss/legacy/_tabs.scss"
-precedence = "override"
-SPDX-License-Identifier = "AGPL-3.0-or-later"
-SPDX-FileCopyrightText = [
-  "2023 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
-  "2023 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-  "2024 Christian Winger <https://github.com/wingechr> © Öko-Institut e.V.",
-]
-
-[[annotations]]
 path = "theming/scss/components/_pagination.scss"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
@@ -3177,11 +3165,12 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "theming/scss/legacy/_empty_states.scss"
+path = "theming/scss/components/_empty_state.scss"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
   "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
+  "2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
@@ -3194,21 +3183,13 @@ SPDX-FileCopyrightText = [
 ]
 
 [[annotations]]
-path = "theming/scss/legacy/_cards.scss"
+path = "theming/scss/components/_card.scss"
 precedence = "override"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
   "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
   "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
-]
-
-[[annotations]]
-path = "theming/scss/legacy/_tags.scss"
-precedence = "override"
-SPDX-License-Identifier = "AGPL-3.0-or-later"
-SPDX-FileCopyrightText = [
-  "2024 Bryan Lancien <https://github.com/bmlancien> © Reiner Lemoine Institut",
-  "2024 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+  "2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
 
 [[annotations]]
@@ -3596,6 +3577,8 @@ path = [
   "theming/scss/components/_tag.scss",
   "theming/scss/components/_badge.scss",
   "theming/scss/components/_page_header.scss",
+  "theming/scss/components/_dropdown.scss",
+  "theming/scss/components/_tabs.scss",
   "base/templates/components/**",
   "base/tests/page_texts/**",
   "base/templates/brand/**",

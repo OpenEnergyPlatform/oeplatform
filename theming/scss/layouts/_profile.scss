@@ -1,8 +1,6 @@
 @use '../base/' as *;
 @use '../base/mixins' as *;
 @use '../components/button' as *;
-@use '../legacy/cards' as *;
-@use '../legacy/empty_states' as *;
 
 // The profile shell puts its side column (the profile sidebar) on the left.
 // The column's text box keeps the width it had beside the 1.5rem gap; the
@@ -263,10 +261,6 @@ main.main .content .content__container.content__container--profile {
         }
     }
 
-    &__empty-state {
-        @include empty-state;
-    }
-
     &__members {
         width: 100%;
 
@@ -331,139 +325,41 @@ main.main .content .content__container.content__container--profile {
     }
 }
 
-.organization-management {
-    @extend .mb-4;
-
-    @include cards-layout {
-        &__col {
-            margin-bottom: 0.75rem !important;
-        }
+// The organizations tab's cards (login/partials/organizations.html). Each is
+// a house card (components/_card.scss); this is only what sits inside one:
+// the name with its role badge, beside the member count and Edit.
+.organization-card {
+    &__head {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.5rem 1rem;
     }
 
-    .organization-card {
-        @include card-container {
-            &__header-top {
-                @extend .align-items-center;
-                padding-bottom: 0;
-            }
-
-            &__tag {
-                @extend .border;
-                @extend .fw-normal;
-                @extend .py-0;
-                @extend .ms-1;
-                margin-bottom: 0;
-
-                &--admin {
-                    background-color: $purple-100;
-                    border-color: $purple-200 !important;
-                    color: $purple-700;
-                }
-
-                &--member {
-                    background-color: $yellow-100;
-                    border-color: $yellow-300 !important;
-                    color: $yellow-800;
-                }
-            }
-
-            &__top-end {
-                @extend .d-flex;
-                @extend .flex-row;
-                @extend .justify-content-end;
-            }
-
-            &__members {
-                @extend .d-flex;
-                @extend .flex-row;
-                @extend .align-items-center;
-                @extend .fs-7;
-                @extend .fw-normal;
-
-                svg {
-                    @extend .me-2;
-                }
-
-                @include media-breakpoint-down(lg) {
-                    font-size: 0.75rem !important;
-
-                    svg {
-                        display: none !important;
-                    }
-                }
-            }
-
-            &__btn {
-                @extend .btn;
-                @extend .py-0;
-                @extend .ms-3;
-                height: 1.75rem;
-
-                @include media-breakpoint-down(lg) {
-                    margin-left: 0.5rem !important;
-                    font-size: 0.75rem !important;
-
-                    svg {
-                        display: none !important;
-                    }
-                }
-            }
-
-            &__btn--invite {
-                @extend .btn-link;
-                @extend .text-decoration-none;
-
-                svg {
-                    @extend .me-1;
-                }
-            }
-
-            &__btn--edit {
-                @extend .btn-outline-secondary;
-            }
-
-            &__btn--accept {
-                @extend .btn-primary;
-            }
-        }
-    }
-}
-
-.profile-tables {
-    @include cards-layout {
-        &__col {
-            margin-bottom: 0.75rem !important;
-        }
+    &__title {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0;
     }
 
-    .profile-table-card {
-        @include card-simple-container {
-            margin-bottom: 0.75rem !important;
+    &__meta {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
 
-            .profile-table-card__tag {
-                @extend .mb-0;
-            }
+    &__members {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: var(--oep-font-size-dense);
+        color: var(--oep-text-muted);
+    }
 
-            .profile-table-card__tag.profile-table-card__tag--warning,
-            .profile-table-card__tag.profile-table-card__tag--success {
-                @extend .ms-0;
-                @extend .me-3;
-                @extend .px-1;
-                @extend .text-center;
-            }
-
-            &__btn {
-                @extend .btn;
-                @extend .btn-primary;
-                @extend .fw-semibold;
-                @extend .py-0;
-                @extend .px-4;
-                @extend .ms-3;
-            }
-
-            &__btn--sm {
-                height: 1.5rem;
-            }
-        }
+    .card-text {
+        margin-top: 0.75rem;
     }
 }

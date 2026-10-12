@@ -163,14 +163,12 @@ $custom-font-sizes: (
 $font-sizes: map-merge($font-sizes, $custom-font-sizes);
 
 //// Others
-$card-border-radius: 0;
 $input-border-radius: 0;
 $input-border-radius-lg: 0;
 $dropdown-inner-border-radius: 0;
 $modal-content-border-radius: 0;
 $breadcrumb-border-radius: 0;
 $list-group-border-radius: 0;
-$card-inner-border-radius: 0;
 $thumbnail-border-radius: 0;
 $nav-pills-border-radius: 0;
 $progress-border-radius: 0;
@@ -199,7 +197,6 @@ $btn-font-weight: 600;
 $border-radius: 4px;
 $border-radius-lg: 8px;
 $border-radius-sm: 2px;
-$card-border-color: $gray-300;
 $card-cap-padding-y: 0.75rem;
 $alert-bg-scale: -90%;
 
