@@ -24,7 +24,7 @@ SPDX-License-Identifier: CC0-1.0
   the profile edit page have it; their texts are unchanged. Area icons live in
   `base/templates/icons/`. Account and error pages keep no band. The homepage
   renders pixel for pixel as before
-  [(#XXXX)](https://github.com/OpenEnergyPlatform/oeplatform/pull/XXXX)
+  [(#2686)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2686)
 - Pages without side content use the whole content width: the base templates no
   longer render an empty 21rem side column. A page with side content fills the
   new `side-column` block with `<aside class="content__side">`, and every page
