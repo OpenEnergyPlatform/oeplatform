@@ -30,7 +30,7 @@ SPDX-License-Identifier: CC0-1.0
   on the organization page go through it. A message's extra tags no longer pick
   its colour. The table and dataset lists' pagers lose their shadow and small
   size. Catalogue entries `table`, `alert`, `pagination`
-  ([(#2691)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2691))
+  [(#2691)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2691)
 
 - Pages that started with their title glued under the navbar get a header band:
   the house component `page_header`
