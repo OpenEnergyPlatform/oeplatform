@@ -32,6 +32,36 @@ SPDX-License-Identifier: CC0-1.0
   without a role, a status colour used as an action, or a native `confirm()` or
   `alert()`. The homepage renders pixel for pixel as before
   [(#2687)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2687)
+- Pages that started with their title glued under the navbar get a header band:
+  the house component `page_header`
+  (`base/templates/components/page_header.html`), in the established area/trail
+  form: the area with its icon on a light line, then a breadcrumb trail of up to
+  two links ending in the page's subject, which is now the page's one `h1`.
+  Optional slots for a muted description, actions and a tab row. The band shares
+  `--oep-content-width` with the content, so their edges line up at every width.
+  About, the steering committee, contact, the privacy policy, the terms of use
+  (which gains the title "Terms of Use"), FAQ, discussion, the project pages and
+  the profile edit page have it; their texts are unchanged. Area icons live in
+  `base/templates/icons/`. Account and error pages keep no band. The homepage
+  renders pixel for pixel as before
+  [(#2686)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2686)
+- A third-party instance restyles the platform without a fork. Two optional
+  local settings: `INSTANCE_STYLESHEETS` (static paths, linked last in every
+  page's head, after the platform's and the page's own stylesheets, and left out
+  of the catalogue under `?tokens=bootstrap`) and `INSTANCE_TEMPLATE_DIRS`
+  (searched before the platform's templates). The default settings file fills
+  them from `OEP_INSTANCE_STYLESHEETS` and `OEP_INSTANCE_TEMPLATE_DIRS`. The
+  five base templates share one head (`base/_head.html`), so all of them load
+  the same compressed stylesheet bundle, with jquery-ui's stylesheet now on the
+  React pages too (its rules only touch `.ui-*` elements) and Vite's HMR client
+  in dev mode on the pages of `base.html` too. The platform's name, logo and
+  title prefix moved out of the base templates and the navbar into
+  `brand/name.html`, `brand/logo.html` and `brand/title_prefix.html`, which an
+  instance replaces like the two legal pages. A stylesheet no static files
+  finder has stops `manage.py` commands (check `base.E001`), because it would
+  fail every page. The operator docs are the new page "Theming an instance". The
+  homepage renders pixel for pixel as before
+  [(#2685)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2685)
 - Pages without side content use the whole content width: the base templates no
   longer render an empty 21rem side column. A page with side content fills the
   new `side-column` block with `<aside class="content__side">`, and every page

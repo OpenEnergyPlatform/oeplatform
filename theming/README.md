@@ -115,6 +115,9 @@ back to transparent rather than to Bootstrap's shade.
 An instance's stylesheet must set a colour **and** its `-rgb` twin
 (`--bs-primary` and `--bs-primary-rgb`): Bootstrap's utilities, among them the
 navbar's `bg-primary`, read the twin, and CSS cannot derive one from the other.
+How an instance adds its stylesheet, its brand and its legal pages is in
+[docs/installation/guides/instance-theming.md](../docs/installation/guides/instance-theming.md);
+it checks the result on its own `/styleguide/`.
 
 ## Check the homepage
 

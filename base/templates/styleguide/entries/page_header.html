@@ -1,0 +1,5 @@
+{# use: The band under the navbar on every page except the account and error pages: the area with its icon, then the trail back (at most two links) ending in the page's subject, its one h1. Optional: one muted line, the page's actions (at most one primary), a tab row on its lower edge (no example until the tabs are on tokens, #2648). On a page the title is its h1; here, `as_example` keeps the catalogue's one h1. #}
+<div class="d-grid gap-3">
+  {% include "components/page_header.html" with area="About" icon="icons/area_about.html" crumb_label="Overview" crumb_url="#page_header" title="Open Energy Family Steering Committee" as_example=True %}
+  {% include "components/page_header.html" with area="Account" icon="icons/area_account.html" crumb_label="Dashboard" crumb_url="#page_header" crumb2_label="Settings" crumb2_url="#page_header" title="Update account profile" description="One muted line, when the page has one." actions="styleguide/entries/_page_header_actions.html" as_example=True %}
+</div>

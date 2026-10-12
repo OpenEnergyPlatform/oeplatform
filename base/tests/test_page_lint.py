@@ -176,7 +176,7 @@ class Page:
 #: Every page that has moved onto the house components, by the ticket that
 #: moved it. A page whose actions depend on who is asking is read signed in
 #: as the owner of the fixture, which shows the most of them. The pages of
-#: tickets 7 and 8 of the spec (#2639, #2640) join when they land.
+#: ticket 8 of the spec (#2640) join when it lands.
 #:
 #: Pages #2641 touched that are NOT here yet, and the ticket that brings them:
 #: - dataedit:table-permission: an inline alert() (#2643);
@@ -199,6 +199,15 @@ RESTYLED_PAGES = (
     Page("dataedit:view", {"table": "{table}"}, logged_in=True),
     Page("dataedit:tags", logged_in=True),
     Page("dataedit:dataset-detail", {"dataset_name": "{dataset}"}),
+    # #2639: the page header on pages that had none (contact and profile edit
+    # are #2641's below too)
+    Page("base:about"),
+    Page("base:oefamily-sc"),
+    Page("base:legal-privacy-policy"),
+    Page("base:legal-tou"),
+    Page("base:faq"),
+    Page("base:discussion"),
+    Page("base:project_detail", {"project_id": "open_ego"}),
     # #2641: button roles
     Page("base:contact"),
     Page("base:styleguide"),

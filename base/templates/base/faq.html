@@ -1,6 +1,6 @@
 {% extends "base/base.html" %}
 {% load django_bootstrap5 %}
-{% block main-content-body %}
-  <h3>Frequently Asked Questions (FAQ)</h3>
-  <br />
-{% endblock %}
+{% block site-header %}
+  {% url 'base:about' as about_url %}
+  {% include "components/page_header.html" with area="About" icon="icons/area_about.html" crumb_label="Overview" crumb_url=about_url title="Frequently Asked Questions (FAQ)" %}
+{% endblock site-header %}

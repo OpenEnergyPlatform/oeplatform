@@ -2,10 +2,10 @@
 {% load django_bootstrap5 %}
 {% load static %}
 {# Important for using the *static* tag #}
-{% block site-header %}<br />{% endblock %}
+{% block site-header %}
+  {% include "components/page_header.html" with area="About" icon="icons/area_about.html" title="Open Energy Family and Open Energy Platform" %}
+{% endblock site-header %}
 {% block main-content-body %}
-  <h2>Open Energy Family and Open Energy Platform</h2>
-  <br />
   <a href="{% static 'img/about/OpenEnergyFamily_GroupPhoto2.png' %}">
     <img style="width:50%"
          class="mx-auto d-block"

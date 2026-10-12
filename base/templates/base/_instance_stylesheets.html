@@ -1,0 +1,14 @@
+{% load static instance_theming %}
+{% comment %}
+  The instance stylesheet slot (#2637): the stylesheets INSTANCE_STYLESHEETS
+  names, last in every shell's head, so an instance's values win over the
+  platform's and over a page's own. Not on the catalogue under
+  ?tokens=bootstrap (stock_tokens), which shows Bootstrap's stock values and
+  nothing else.
+{% endcomment %}
+{% if not stock_tokens %}
+  {% instance_stylesheets as paths %}
+  {% for path in paths %}
+    <link rel="stylesheet" href="{% static path %}" />
+  {% endfor %}
+{% endif %}
