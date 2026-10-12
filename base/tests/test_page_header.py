@@ -38,6 +38,7 @@ from base.tests.html_tree import parse
 BAND = "page-header"
 AREA = "page-header__area"
 TRAIL = "page-header__trail"
+TOC_LIST = "toc__list"
 COMPONENT = "components/page_header.html"
 
 # What each page's text read as before this ticket (main element, whitespace
@@ -275,7 +276,7 @@ class PagesWithABandTest(TestViewsTestCase):
             # labels, and an "On this page" list's links repeat the page's own
             # headings (#2649); everything else is the page's own text.
             in_trail = any(a.has_class(TRAIL) for a in node.ancestors)
-            in_toc = any(a.has_class("toc__list") for a in node.ancestors)
+            in_toc = any(a.has_class(TOC_LIST) for a in node.ancestors)
             return node.has_class(AREA) or (node.tag == "a" and (in_trail or in_toc))
 
         for slug in PAGES:
