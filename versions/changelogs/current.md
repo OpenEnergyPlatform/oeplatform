@@ -22,7 +22,7 @@ SPDX-License-Identifier: CC0-1.0
   no profile sidebar. Resetting the API token asks the confirm dialog first. On
   the organizations tab, Create Organization is the page's primary button and
   the help toggle a link button. The page header's catalogue entry shows the tab
-  slot [(#2653)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2653)
+  slot [(#2700)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2700)
 
 - One confirm dialog and one toast region replace every native browser dialog.
   Every shell renders the house component `confirm_dialog` (a title naming the
