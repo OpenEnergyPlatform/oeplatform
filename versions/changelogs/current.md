@@ -170,7 +170,7 @@ SPDX-License-Identifier: CC0-1.0
   Bootstrap 3 panel, and the vendored query builder draws Font Awesome icons (it
   drew invisible glyphicons) and house buttons: secondary to add, outline red to
   delete, an outline toggle for AND/OR. The homepage renders pixel for pixel as
-  before [(#NNNN)](https://github.com/OpenEnergyPlatform/oeplatform/pull/NNNN)
+  before [(#2702)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2702)
 - A third-party instance restyles the platform without a fork. Two optional
   local settings: `INSTANCE_STYLESHEETS` (static paths, linked last in every
   page's head, after the platform's and the page's own stylesheets, and left out
