@@ -1,0 +1,26 @@
+{% extends "base/base.html" %}
+{% load static %}
+{% block site-header %}
+  {% url 'base:about' as about_url %}
+  {% include "components/page_header.html" with area="About" icon="icons/area_about.html" crumb_label="Overview" crumb_url=about_url title="What's new" description="What changed for you in each release of the platform." %}
+{% endblock site-header %}
+{% block after-head %}
+  <link rel="stylesheet" href="{% static 'css/static_pages.css' %}" />
+{% endblock after-head %}
+{% block main-content-body %}
+  <div class="reading-column">
+    {% for release in releases %}
+      <section aria-labelledby="v{{ release.version|slugify }}">
+        <h2 id="v{{ release.version|slugify }}">Version {{ release.version }}</h2>
+        {# The changelogs are written in this repository, so their HTML is trusted. #}
+        {{ release.html|safe }}
+        <a class="link-with-arrow" href="{{ release.changelog_url }}">
+          <span>Full changelog of {{ release.version }}</span>
+          {% include "icons/arrow_right.html" %}
+        </a>
+      </section>
+    {% empty %}
+      {% include "components/empty_state.html" with text="No release highlights yet." %}
+    {% endfor %}
+  </div>
+{% endblock main-content-body %}

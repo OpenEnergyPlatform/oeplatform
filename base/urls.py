@@ -21,6 +21,7 @@ from base.views import (
     redirect_tutorial_view,
     reverse_url_view,
     robot_view,
+    whats_new_view,
 )
 
 app_name = "base"
@@ -40,6 +41,7 @@ urlpatterns = [
         name="project_detail",
     ),
     re_path(r"^contact/$", ContactView.as_view(), name="contact"),
+    path("whats-new/", whats_new_view, name="whats-new"),
     re_path(r"^faq/$", redir_view, {"target": "faq"}, name="faq"),
     re_path(r"^discussion/$", redir_view, {"target": "discussion"}, name="discussion"),
     re_path(
