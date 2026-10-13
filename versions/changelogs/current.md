@@ -598,6 +598,11 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
+- Saving a table's metadata no longer fails with 400 when a keyword cannot
+  become a tag, such as the empty keyword the oemetadata v2 template ships; that
+  keyword is skipped
+  [(#2698)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2698)
+
 - Six small defects found while rendering the platform for the design work: an
   unknown research project page answers 404 instead of a server error; an
   unknown factsheet type (`/factsheets/<anything>s/` and every page under it)
