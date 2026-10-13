@@ -7,7 +7,6 @@
   <link href="{% static 'dataedit/dataTables.bootstrap5.min.css' %}"
         rel="stylesheet">
   <!-- src: https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap5.min.css -->
-  <style></style>
 {% endblock %}
 {% block site-header %}
   {% include "components/page_header.html" with area=label|add:" Factsheets" icon="icons/area_factsheets.html" title="Overview" %}
@@ -40,13 +39,13 @@
              href="#{{ heading.split|join:'_' }}">{{ heading }}</a>
           <div id="{{ heading.split|join:'_' }}" class="collapse">
             {% for key,value in d.items %}
-              <div style="display: flex;flex-flow: nowrap;align-items: center">
-                <input type="checkbox"
+              <div class="form-check">
+                <input class="form-check-input"
+                       type="checkbox"
                        onchange="apply_filter(event.target)"
                        id="{{ key }}"
                        {% if key.split|join:'_' in default %}checked="checked"{% endif %}>
-                <label class="form-label"
-                       style="margin: 0"
+                <label class="form-check-label"
                        for="{{ key }}">{{ key }}</label>
               </div>
             {% endfor %}

@@ -82,7 +82,7 @@ export function check_if_review_finished() {
       "<p>The review is complete. Please award a badge and finish the review.</p>"
     );
     var finishButton = $(
-      '<button type="button" id="review-finish-button">Finish</button>'
+      '<button type="button" class="btn btn-primary" id="review-finish-button">Finish</button>'
     );
 
     reviewerDiv.append(reviewText);

@@ -4,7 +4,7 @@
 // SPDX-FileCopyrightText: 2026 Vismaya Jochem <https://github.com/vismayajochem> © Reiner Lemoine Institut
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { current_review, selectedState } from "../core/peer_review.js";
+import { current_review } from "../core/peer_review.js";
 import { getFieldState } from "../core/state_current_review.js";
 import {
   isEmptyValue,
@@ -88,14 +88,14 @@ export function renderSummaryPageFields() {
   });
 
   // ---- Render: condensed, grouped overview of the review state ----------
-  injectSummaryStyles();
-
+  // Styles: theming/scss/layouts/_review.scss; `badge` is the house badge's
+  // status for the row's state.
   const STATUS_META = {
-    Accepted: { cls: "ok", label: "Accepted" },
-    Suggested: { cls: "suggestion", label: "Suggested" },
-    Rejected: { cls: "rejected", label: "Rejected" },
-    Missing: { cls: "missing", label: "To review" },
-    Empty: { cls: "empty", label: "Empty" },
+    Accepted: { cls: "ok", label: "Accepted", badge: "success" },
+    Suggested: { cls: "suggestion", label: "Suggested", badge: "warning" },
+    Rejected: { cls: "rejected", label: "Rejected", badge: "danger" },
+    Missing: { cls: "missing", label: "To review", badge: "neutral" },
+    Empty: { cls: "empty", label: "Empty", badge: "neutral" },
   };
   // Within a category, surface the items needing attention first.
   const STATUS_ORDER = ["Rejected", "Suggested", "Missing", "Accepted"];
@@ -183,19 +183,6 @@ export function renderSummaryPageFields() {
 
   updateTabProgressIndicatorClasses();
   updatePercentageDisplay();
-}
-
-export function updateSubmitButtonColor() {
-  // Color Save comment / new value
-  $(submitButton).removeClass("btn-warning");
-  $(submitCommentButton).removeClass("btn-warning");
-  $(submitButton).removeClass("btn-danger");
-  $(submitCommentButton).removeClass("btn-danger");
-  if (selectedState === "suggestion") {
-    $(submitButton).addClass("btn-warning");
-  } else {
-    $(submitCommentButton).addClass("btn-danger");
-  }
 }
 
 function getOprRole() {
@@ -308,7 +295,11 @@ function formatFieldName(name) {
 // field name + current value, the proposed value (for suggestions) and any
 // comment. Colors mirror the field-state borders (green/yellow/red).
 function summaryRowHtml(f, META) {
-  const m = META[f.fieldStatus] || { cls: "empty", label: f.fieldStatus };
+  const m = META[f.fieldStatus] || {
+    cls: "empty",
+    label: f.fieldStatus,
+    badge: "neutral",
+  };
   const showSugg = f.fieldStatus === "Suggested" && f.fieldSuggestion;
   const value = f.fieldValue
     ? `<span class="opr-summary__value">${escapeHtml(f.fieldValue)}</span>`
@@ -327,57 +318,9 @@ function summaryRowHtml(f, META) {
     `<div class="opr-summary__line">` +
     `<span class="opr-summary__field">${name}</span>${value}` +
     `</div>${sugg}${comment}</div>` +
-    `<span class="opr-summary__status opr-summary__status--${m.cls}">${escapeHtml(m.label)}</span>` +
+    `<span class="badge badge--${m.badge} opr-summary__status">${escapeHtml(m.label)}</span>` +
     `</li>`
   );
-}
-
-// Inject the summary stylesheet once. The widget is rendered from JS and shared
-// by the reviewer and contributor pages, so keeping its CSS here avoids
-// duplicating it across both templates.
-function injectSummaryStyles() {
-  if (document.getElementById("opr-summary-styles")) return;
-  const style = document.createElement("style");
-  style.id = "opr-summary-styles";
-  style.textContent = `
-  .opr-summary { font-size: 0.9rem; color: #2b3b46; padding-bottom: 1rem; }
-  .opr-summary__overview { position: sticky; top: 0; z-index: 2; background: #fff; padding: 0.75rem 0 0.9rem; margin-bottom: 1.1rem; border-bottom: 1px solid #e3e8ec; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.4rem 0.8rem; }
-  .opr-summary__filter-label { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; color: #9aa7b0; }
-  .opr-summary__stats { list-style: none; display: flex; flex-wrap: wrap; gap: 0.4rem 1.4rem; margin: 0; padding: 0; }
-  .opr-summary__stat { display: inline-flex; align-items: center; gap: 0.45rem; font-weight: 600; font-size: 0.85rem; }
-  .opr-summary__dot { width: 10px; height: 10px; border-radius: 50%; background: #ced4da; flex: 0 0 auto; }
-  .opr-summary__stat--ok .opr-summary__dot, .opr-summary__row--ok > .opr-summary__dot { background: #21A179; }
-  .opr-summary__stat--suggestion .opr-summary__dot, .opr-summary__row--suggestion > .opr-summary__dot { background: #F0C808; }
-  .opr-summary__stat--rejected .opr-summary__dot, .opr-summary__row--rejected > .opr-summary__dot { background: #CD4759; }
-  .opr-summary__stat--missing .opr-summary__dot, .opr-summary__row--missing > .opr-summary__dot { background: #fff; box-shadow: inset 0 0 0 2px #adb5bd; }
-  .opr-summary__stat--empty .opr-summary__dot { background: #e3e8ec; }
-  .opr-summary__section { margin-bottom: 1.3rem; }
-  .opr-summary__cat { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; color: #6c757d; font-weight: 700; margin: 0 0 0.4rem; }
-  .opr-summary__list { list-style: none; margin: 0; padding: 0; }
-  .opr-summary__row { display: flex; align-items: flex-start; gap: 0.65rem; padding: 0.6rem 0.25rem; border-bottom: 1px solid #f0f3f5; }
-  .opr-summary__row:last-child { border-bottom: 0; }
-  .opr-summary__row > .opr-summary__dot { margin-top: 0.4rem; }
-  .opr-summary__body { flex: 1 1 auto; min-width: 0; }
-  .opr-summary__line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.2rem 0.7rem; }
-  .opr-summary__field { font-weight: 600; }
-  .opr-summary__value { color: #6c757d; word-break: break-word; }
-  .opr-summary__suggestion { color: #9a7d00; font-weight: 600; margin-top: 0.2rem; word-break: break-word; }
-  .opr-summary__comment { font-style: italic; color: #56636b; margin-top: 0.2rem; word-break: break-word; }
-  .opr-summary__status { flex: 0 0 auto; align-self: center; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 700; padding: 0.12rem 0.55rem; border-radius: 0.8rem; white-space: nowrap; }
-  .opr-summary__status--ok { background: #e7f6f0; color: #13825F; }
-  .opr-summary__status--suggestion { background: #fdf6cf; color: #7a6600; }
-  .opr-summary__status--rejected { background: #fbe3e7; color: #a32f3e; }
-  .opr-summary__status--missing { background: #eef1f3; color: #56636b; }
-  .opr-summary__note { color: #6c757d; padding: 0.5rem 0.25rem; }
-  .opr-summary__stat--filterable { cursor: pointer; border: 1px solid transparent; border-radius: 1rem; padding: 0.12rem 0.6rem; transition: background 0.12s ease, opacity 0.12s ease; }
-  .opr-summary__stat--filterable:hover { background: #f0f3f5; }
-  .opr-summary__stat--filterable:focus-visible { outline: 2px solid #2972A6; outline-offset: 1px; }
-  .opr-summary__stat--filterable.is-active { background: #eef3f7; border-color: #cdd8e0; }
-  .opr-summary__stat--filterable.is-dimmed { opacity: 0.4; }
-  .opr-summary__stat--zero { opacity: 0.45; }
-  .opr-summary__stat--zero.is-active { opacity: 1; }
-  `;
-  document.head.appendChild(style);
 }
 
 // Selected review states to show in the summary. Empty set = show all. Module
