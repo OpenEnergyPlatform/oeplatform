@@ -23,7 +23,7 @@ SPDX-License-Identifier: CC0-1.0
   secondary. On the Reviews tab the statuses are badges, the empty lists the
   house empty state, and "Show history" a secondary button without its
   placeholder menu
-  [(#2658)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2658)
+  [(#2706)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2706)
 
 - The terms of use take the about page's layout and show one language at a time:
   an "English | Deutsch" switch above the "On this page" list, the page title
@@ -659,7 +659,7 @@ SPDX-License-Identifier: CC0-1.0
   page's script, which logged five errors there. Its "All reviews" list shows
   the user's reviews again; it had been empty since the groups were renamed to
   organizations
-  [(#2674)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2674)
+  [(#2706)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2706)
 - Saving a table's metadata no longer fails with 400 when a keyword cannot
   become a tag, such as the empty keyword the oemetadata v2 template ships; that
   keyword is skipped
