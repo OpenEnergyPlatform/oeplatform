@@ -12,6 +12,12 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- The profile is edited in place on Settings: Edit turns the Manage Profile card
+  into the form and Cancel or Submit turn it back, without leaving the page;
+  focus moves into the form and back to Edit, and a save shows a toast. The edit
+  address still works as its own page in the Settings layout.
+  [(#2712)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2712)
+
 - The topic list's cards have their top section back: title, icon, table count
   and keywords on a tinted header above the description. Draft and scenario stay
   full width with "Add data set" beside the text; the other topics stay three
