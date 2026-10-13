@@ -15,6 +15,7 @@ SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: E501
 
+from django.template.loader import render_to_string
 from django.urls import reverse
 
 from base.tests import TestViewsTestCase
@@ -552,3 +553,17 @@ class TestTheDatabasePagesLinkToTheTagManager(TagPageTestCase):
         page, _ = self.actions()
 
         self.assertEqual(1, page.count(f'href="{reverse("dataedit:tags")}"'))
+
+    def test_the_table_pages_edit_button_opens_the_tag_manager(self):
+        # It linked to the topic list, which edits no tag.
+        form = render_to_string(
+            "dataedit/taggable_setting.html",
+            {"is_admin": True, "selected": [], "table": "a_table"},
+        )
+        edit = form[
+            form.index('href="', form.index("btn btn-secondary", form.index("Apply"))) :
+        ]
+
+        self.assertTrue(
+            edit.startswith(f'href="{reverse("dataedit:tags")}"'), edit[:80]
+        )

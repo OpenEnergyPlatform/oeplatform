@@ -1,9 +1,15 @@
 // The topic list's cards (dataedit/partials/topic_card.html). Each is a house
-// card (components/_card.scss); this is only what sits inside one: the title
-// with its icon beside the table count, then the keywords.
+// card (components/_card.scss); this is only what sits inside one. A header
+// on the card's subtle surface carries the title with its icon beside the
+// table count, then the keywords; the body carries the description. The
+// three-per-row cards are the compact ones; the full-width cards (draft,
+// scenario: .topic-card--wide) keep the house title size and, from lg, put
+// the draft's wizard beside the text, as the topic list always has.
 @use '../base/' as *;
 
 .topic-card {
+    --bs-card-cap-padding-y: 1rem;
+
     &__head {
         display: flex;
         flex-wrap: wrap;
@@ -13,11 +19,12 @@
         margin-bottom: 0.5rem;
     }
 
-    &__title {
+    .card-title {
         display: flex;
         align-items: center;
         gap: 0.5rem;
         margin-bottom: 0;
+        font-size: 1rem;
     }
 
     &__icon {
@@ -26,11 +33,41 @@
 
     &__count {
         font-size: var(--oep-font-size-dense);
+        font-weight: var(--oep-heading-weight);
         color: var(--oep-text-muted);
         white-space: nowrap;
     }
 
-    &__keywords {
-        margin-bottom: 0.75rem;
+    &__body {
+        font-size: var(--oep-font-size-dense);
+
+        .card-text:last-child {
+            margin-bottom: 0;
+        }
+    }
+
+    &--wide {
+        .card-title {
+            font-size: 1.125rem;
+        }
+
+        .topic-card__body {
+            font-size: inherit;
+
+            @include media-breakpoint-up(lg) {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-end;
+                gap: 1.5rem;
+
+                .card-text {
+                    margin-bottom: 0;
+                }
+
+                .btn {
+                    flex-shrink: 0;
+                }
+            }
+        }
     }
 }

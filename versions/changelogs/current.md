@@ -12,6 +12,12 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- The topic list's cards have their top section back: title, icon, table count
+  and keywords on a tinted header above the description. Draft and scenario stay
+  full width with "Add data set" beside the text; the other topics stay three
+  per row with a smaller title.
+  [(#2708)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2708)
+
 - The navbar's account corner is one user menu. Signed in, the user's name opens
   a menu with Dashboard, Settings and Sign out (clicking the name no longer goes
   straight to Settings); signed out, "Sign in" is a plain link and "Sign up" the
@@ -682,12 +688,17 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
+- The Edit button in a table page's tag chooser opens the tag manager instead of
+  the topic list
+  [(#2708)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2708)
+
 - The Reviews tab's Delete works: it asks the confirm dialog and deletes the
   active review, instead of doing nothing. The tab no longer loads the review
   page's script, which logged five errors there. Its "All reviews" list shows
   the user's reviews again; it had been empty since the groups were renamed to
   organizations
   [(#2706)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2706)
+
 - Saving a table's metadata no longer fails with 400 when a keyword cannot
   become a tag, such as the empty keyword the oemetadata v2 template ships; that
   keyword is skipped
