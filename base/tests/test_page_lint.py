@@ -26,8 +26,15 @@ from rest_framework.authtoken.models import Token
 from base.tests import TestViewsTestCase
 from base.tests.page_lint import ROLES, lint, status_button
 from dataedit.metadata import load_metadata_from_db
-from dataedit.models import Dataset, PeerReview, PeerReviewManager, Table, Tag
-from login.models import myuser
+from dataedit.models import (
+    Dataset,
+    PeerReview,
+    PeerReviewManager,
+    Table,
+    Tag,
+    Topic,
+)
+from login.models import ADMIN_PERM, UserPermission, myuser
 from modelview.tests.corpus import seed_corpus
 from modelview.tests.html import element_markup, elements_with_class
 
@@ -197,8 +204,6 @@ class Page:
 #: as the owner of the fixture, which shows the most of them.
 #:
 #: Pages #2641 touched that are NOT here yet, and the ticket that brings them:
-#: - login:tables, login:datasets: the dashboard's own cell, menu and filter
-#:   controls carry no role (#2659);
 #: - dataedit/admin.html and login's activate, detach, generic_form and
 #:   oepuser_create_form: no view renders them (dead code, #2660).
 RESTYLED_PAGES = (
@@ -288,8 +293,7 @@ RESTYLED_PAGES = (
     Page("socialaccount_connections", logged_in=True),
     # #2648: underline tabs and dropdowns. Its other pages are listed above
     # (the table page, both factsheet editors, Settings, Reviews, peer review)
-    # or wait for the tickets named in the comment above this tuple (the
-    # dashboard's tables and datasets tabs).
+    # or are #2659's (the dashboard's tables and datasets tabs, below).
     # #2653: Settings as the account page (listed above with #2641) and the
     # organizations tab, whose Create Organization and help toggle carry
     # their roles on themselves now
@@ -307,6 +311,10 @@ RESTYLED_PAGES = (
         {"table": "{table}", "review_id": "{review}"},
         logged_in=True,
     ),
+    # #2659: the dashboard's list tabs on house tokens, tags, badges, the
+    # dropdown, the pager and the shell's toasts
+    Page("login:tables", {"user_id": "{user}"}, logged_in=True),
+    Page("login:datasets", {"user_id": "{user}"}, logged_in=True),
 )
 
 
@@ -387,11 +395,29 @@ class PageFixture(TestViewsTestCase):
 
 
 class RestyledPagesTest(PageFixture):
+    def setUp(self):
+        super().setUp()
+        # The dashboard's tables tab lists no sandbox Table: two it lists, a
+        # draft in the dataset and a published one under more topics than a
+        # row shows, so every cell, the segment and the row menu render. Here
+        # only, so the pages other tests read word for word stay as they were.
+        topics = list(Topic.objects.all()[:3])
+        for name, published, under in (
+            ("page_lint_draft", False, topics[:1]),
+            ("page_lint_published", True, topics),
+        ):
+            listed = Table.objects.create(name=name, is_publish=published)
+            listed.topics.set(under)
+            UserPermission.objects.create(
+                holder=self.user, table=listed, level=ADMIN_PERM
+            )
+            self.dataset.tables.add(listed)
+
     def test_every_restyled_page_keeps_the_button_rule(self):
         for restyled in RESTYLED_PAGES:
             with self.subTest(page=restyled.label()):
                 problems = lint(self.html(restyled), fragment=restyled.fragment)
-                self.assertEqual(problems, [])
+                self.assertEqual(problems, [], "\n".join(problems))
 
 
 def classes_of(markup: str) -> set[str]:

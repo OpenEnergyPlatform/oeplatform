@@ -12,6 +12,16 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { DIALOG_CLOSED, bindList, listConfig } from "../dash_list.js";
 
+/** The shell's toast region and template (base/_feedback.html, #2643). */
+const SHELL_TOASTS = `
+    <div id="toasts-polite" role="status"></div>
+    <div id="toasts-assertive" role="alert"></div>
+    <template id="toast-template"><div class="toast show toast--info"><div
+      class="d-flex"><div class="toast-body"><strong class="toast__title"
+      hidden></strong><span class="toast__text"></span></div><button
+      type="button" class="btn-close" aria-label="Close"
+      data-toast-close></button></div></div></template>`;
+
 const WIDGETS = listConfig({
   plural: "widgets",
   singular: "widget",
@@ -42,10 +52,7 @@ function renderPage({ scope = "" } = {}) {
     </div>
     <div id="widget-action"><div id="widget-action-body"></div></div>
     <div id="widget-members"><div id="widget-members-body"></div></div>
-    <div id="widgets-toasts-polite"></div>
-    <div id="widgets-toasts-assertive"></div>
-    <div id="tables-toasts-polite"></div>
-    <div id="tables-toasts-assertive"></div>`;
+    ${SHELL_TOASTS}`;
 }
 
 function region(scope, announcement = "2 widgets") {
@@ -179,7 +186,7 @@ describe("bindList with another list's config", () => {
   it("follows the list's changed event, not the tables tab's", () => {
     fire("tables-changed", { message: "Not for this list." });
     expect(dialog.closed).toBe(0);
-    expect($("widgets-toasts-polite").children).toHaveLength(0);
+    expect($("toasts-polite").children).toHaveLength(0);
 
     fire("widgets-changed", {
       message: "Deleted 2 widgets.",
@@ -187,21 +194,20 @@ describe("bindList with another list's config", () => {
       gone: ["alpha"],
     });
     expect(dialog.closed).toBe(1);
-    const toast = $("widgets-toasts-polite").firstElementChild;
+    const toast = $("toasts-polite").firstElementChild;
     expect(toast.textContent).toContain("Deleted 2 widgets.");
     // a batch's items are listed under the list's own noun
     expect(toast.querySelector("button").textContent).toBe("Show widgets");
     expect(
       [...toast.querySelectorAll("li")].map((li) => li.textContent)
     ).toEqual(["alpha", "beta"]);
-    expect($("tables-toasts-polite").children).toHaveLength(0);
   });
 
   it("follows the list's refused event, not the tables tab's", () => {
     fire("tables-refused", { message: "Not for this list." });
-    expect($("widgets-toasts-assertive").children).toHaveLength(0);
+    expect($("toasts-assertive").children).toHaveLength(0);
     fire("widgets-refused", { message: "Nothing was changed." });
-    expect($("widgets-toasts-assertive").textContent).toContain(
+    expect($("toasts-assertive").textContent).toContain(
       "Nothing was changed."
     );
   });
@@ -226,7 +232,7 @@ describe("bindList with another list's config", () => {
 
   it("links a 401 to the login page the list's tab names", () => {
     fire("htmx:responseError", { xhr: { status: 401 } });
-    const link = $("widgets-toasts-assertive").querySelector("a");
+    const link = $("toasts-assertive").querySelector("a");
     expect(link.getAttribute("href")).toMatch(/^\/login\/\?next=/);
   });
 });

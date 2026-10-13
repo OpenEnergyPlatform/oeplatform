@@ -4,10 +4,11 @@
  *
  * A profile dashboard list (spec #2551, made generic for spec #2613 in
  * #2617): the filter bar and its fold, the chips, the status segment, the
- * table, the cells' popovers, the selection, the bulk bar, the ⋯ menu, the
- * action dialog, the toasts and the status badges. Plain CSS beside the
- * page rather than in the theme build, so a tab can change without a
- * rebuild of bootstrap.min.css.
+ * table, the cells' popovers, the selection, the bulk bar, the ⋯ menu and
+ * the action dialog. Plain CSS beside the page rather than in the theme
+ * build, so a tab can change without a rebuild of bootstrap.min.css. Page
+ * CSS reads the house tokens only (spec #2632, #2659); tags, badges, the
+ * dropdown, the pager and the toasts are the house components.
  *
  * Nothing here knows a tab's columns: a column's class (`c-…`) and the
  * container queries that hide and place columns by it belong to the tab's
@@ -18,9 +19,6 @@
  */
 
 .dash {
-  --dash-muted: #6c757d;
-  --dash-primary: #2972a6;
-  --dash-secondary: #1f567d;
   container-type: inline-size;
   /* A list is dense. The page around it is body size since #2638, and the
      column thresholds in the tabs' stylesheets were measured at this size. */
@@ -80,8 +78,8 @@
   gap: 0.75rem 1.5rem;
   margin-top: 0.1rem;
   padding: 0.5rem 0.75rem;
-  border: 1px solid #dee2e6;
-  border-radius: 6px;
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
 }
 
 .dash-more[hidden] {
@@ -160,15 +158,15 @@
   align-items: center;
   gap: 0.15rem;
   padding: 0.05rem 0.2rem 0.05rem 0.6rem;
-  border-radius: 1rem;
-  background: #e7f0f7;
-  color: var(--dash-secondary);
+  border-radius: var(--bs-border-radius-pill);
+  background: var(--oep-surface-hover);
+  color: var(--bs-primary);
   font-size: 0.8125rem;
 }
 
 .dash-chip--stale {
-  background: #f1f1f1;
-  color: var(--dash-muted);
+  background: var(--oep-surface-subtle);
+  color: var(--oep-text-muted);
   font-style: italic;
 }
 
@@ -216,7 +214,7 @@
 .dash-sortby__label {
   margin: 0;
   font-size: 0.875rem;
-  color: var(--dash-muted);
+  color: var(--oep-text-muted);
   white-space: nowrap;
 }
 
@@ -237,14 +235,8 @@
 
 .dash-summary {
   margin-left: auto;
-  color: var(--dash-muted);
+  color: var(--oep-text-muted);
   font-size: 0.875rem;
-}
-
-.dash-table-wrap {
-  overflow-x: auto;
-  border: 1px solid #dee2e6;
-  border-radius: 6px;
 }
 
 .dash-table {
@@ -255,8 +247,8 @@
 .dash-table th {
   white-space: nowrap;
   font-weight: 600;
-  color: #495057;
-  background: #f8f9fa;
+  color: var(--bs-body-color);
+  background: var(--oep-surface-subtle);
   vertical-align: middle;
 }
 
@@ -272,7 +264,7 @@
 
 .dash-sort:hover,
 .dash-sort--active {
-  color: var(--dash-primary);
+  color: var(--bs-primary);
 }
 
 .dash-title {
@@ -281,31 +273,11 @@
   overflow-wrap: anywhere;
 }
 
-.dash-badge--draft {
-  background: #e9ecef;
-  color: #495057;
-}
-
-.dash-badge--published {
-  background: #d1e7dd;
-  color: #0f5132;
-}
-
-.dash-badge--embargoed {
-  background: #fff3cd;
-  color: #664d03;
-}
-
 .dash-until {
   display: block;
   font-size: 0.6875rem;
-  color: #664d03;
+  color: var(--oep-text-muted);
   white-space: nowrap;
-}
-
-/* "since ‹date›" beneath Published, in the badge's colour */
-.dash-since {
-  color: #0f5132;
 }
 
 /* Modified: the date, unbroken, and beneath it "data" when only the data
@@ -317,63 +289,30 @@
 .dash-half {
   display: block;
   font-size: 0.6875rem;
-  color: var(--dash-muted);
+  color: var(--oep-text-muted);
   cursor: help;
 }
 
 .dash-pager {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem;
-  align-items: center;
   margin-top: 0.5rem;
 }
 
-.dash-pager .btn {
-  min-width: 2.2rem;
-}
-
-.dash-pager__gap {
-  padding: 0 0.25rem;
-  color: var(--dash-muted);
-}
-
-.dash-pager__range {
-  margin-left: 0.5rem;
-  font-size: 0.875rem;
-  color: var(--dash-muted);
-}
-
 .dash-muted {
-  color: var(--dash-muted);
+  color: var(--oep-text-muted);
   font-size: 0.8125rem;
   white-space: nowrap;
 }
 
-/* Datasets and the Topics' "+n": a count that opens a popover */
+/* Datasets and the Topics' "+n": a count that opens a popover, a link
+   button tightened to the cell */
 .dash-count {
-  padding: 0.1rem 0.4rem;
-  background: none;
-  border: 0;
-  border-radius: 4px;
-}
-
-.dash-count--small {
-  font-size: 0.75rem;
+  --bs-btn-padding-x: 0.4rem;
+  --bs-btn-padding-y: 0.1rem;
+  --bs-btn-border-width: 0;
 }
 
 .dash-count:hover {
-  background: #eef2f5;
-}
-
-.dash-tchip {
-  display: inline-block;
-  margin: 1px 2px 1px 0;
-  padding: 0 0.35rem;
-  font-size: 0.75rem;
-  white-space: nowrap;
-  background: #f1f3f5;
-  border-radius: 3px;
+  background: var(--oep-surface-hover);
 }
 
 /* a cell's popover, placed beside its button by list_popovers.js */
@@ -382,14 +321,14 @@
   max-width: 22rem;
   padding: 0.5rem 0.7rem;
   font-size: 0.8125rem;
-  background: #fff;
-  border: 1px solid #ced4da;
-  border-radius: 6px;
-  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15);
+  background: var(--oep-surface);
+  border: 1px solid var(--oep-border-strong);
+  border-radius: var(--bs-border-radius-lg);
+  box-shadow: var(--oep-shadow-lg);
 }
 
 .dash-pop:focus {
-  outline: 2px solid var(--dash-primary);
+  outline: 2px solid var(--bs-primary);
 }
 
 .dash-pop__title {
@@ -429,19 +368,19 @@
   min-height: 2.5rem;
   margin-bottom: 0.4rem;
   padding: 0.2rem 0.5rem;
-  background: #fff;
-  border-radius: 6px;
+  background: var(--oep-surface);
+  border-radius: var(--bs-border-radius);
   font-size: 0.875rem;
 }
 
 .dash-bulk__idle,
 .dash-bulk__note {
   margin: 0;
-  color: var(--dash-muted);
+  color: var(--oep-text-muted);
 }
 
 .dash-bulk:has(.dash-bulk__bar:not([hidden])) {
-  background: #eef4f9;
+  background: var(--oep-surface-hover);
 }
 
 .dash-bulk__bar {
@@ -477,8 +416,8 @@
 .dash-selectall {
   margin-bottom: 0.5rem;
   padding: 0.35rem 0.6rem;
-  background: #eef4f9;
-  border-radius: 4px;
+  background: var(--oep-surface-hover);
+  border-radius: var(--bs-border-radius);
   font-size: 0.875rem;
 }
 
@@ -488,26 +427,18 @@
 }
 
 .dash-menu__toggle {
-  padding: 0 0.5rem;
+  --bs-btn-padding-x: 0.5rem;
+  --bs-btn-padding-y: 0;
   font-size: 1.1rem;
   line-height: 1.4;
 }
 
-.dash-menu__list {
-  font-size: 0.875rem;
-}
-
 /* an action above the user's role: still focusable, so the reason is
    reachable by keyboard; aria-disabled, not Bootstrap's .disabled */
-/* Delete, last in the menu */
-.dash-menu__danger {
-  color: #b02a37;
-}
-
 .dash-menu__off,
 .dash-menu__off:hover,
 .dash-menu__off:focus {
-  color: var(--dash-muted);
+  color: var(--oep-text-muted);
   cursor: not-allowed;
   background: transparent;
 }
@@ -527,35 +458,8 @@
   overflow-y: auto;
 }
 
-/* messages after an action */
-.dash-toasts {
-  z-index: 1090;
-}
-
-.dash-toast {
-  margin-top: 0.5rem;
-  background: #fff;
-}
-
-.dash-toast--ok {
-  border-left: 4px solid #198754;
-}
-
-.dash-toast--error {
-  border-left: 4px solid #dc3545;
-}
-
-/* done, but not cleanly: a delete whose database table stayed behind */
-.dash-toast--warning {
-  border-left: 4px solid #ffc107;
-}
-
-.dash-toast .toast-body a {
-  font-weight: 600;
-}
-
-/* a bulk success: "Show tables" (the list's noun) opens the list of what
-   it changed */
+/* A bulk success's toast in the shell's region (#2643): "Show tables"
+   (the list's noun) opens the list of what it changed */
 .dash-toast__more {
   padding: 0;
   vertical-align: baseline;

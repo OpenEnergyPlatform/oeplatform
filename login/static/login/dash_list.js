@@ -153,8 +153,10 @@ export function listConfig({
     tab: own("tab"),
     dialog: `${singular}-action`,
     dialogBody: `${singular}-action-body`,
-    toastsPolite: own("toasts-polite"),
-    toastsAssertive: own("toasts-assertive"),
+    // the shell's toast region and template (base/_feedback.html, #2643)
+    toastsPolite: "toasts-polite",
+    toastsAssertive: "toasts-assertive",
+    toastTemplate: "toast-template",
     bulkIdle: own("bulk-idle"),
     bulkNote: own("bulk-note"),
     bulkBar: own("bulk-bar"),
@@ -431,9 +433,12 @@ export function isUnavailable(target) {
 }
 
 /**
- * Add a message to the page's toast region. A success goes to the polite
+ * Add a message to the shell's toast region (#2643), in the house toast:
+ * a clone of the shell's toast template. A success goes to the polite
  * region and removes itself after `timeout`; an error or a warning goes to
- * the assertive one and stays until dismissed.
+ * the assertive one and stays until dismissed. It is the shell's
+ * `window.oep.toast` plus what a list's message carries beyond text: a link
+ * and a bulk success's details.
  *
  * A bulk success passes what it changed as `details`: "Show tables" (the
  * list's noun) lists them, and a message the user has opened that way, or
@@ -446,7 +451,7 @@ export function isUnavailable(target) {
  * @param {object} options `error`, `warning`, an optional `link`
  *     ({href, text}), `details` (strings listed under "Show tables"),
  *     `timeout` and `schedule` (setTimeout, a test seam).
- * @return {Element|null} the toast, or null without a toast region.
+ * @return {Element|null} the toast, or null without the shell's region.
  */
 export function showToast(
   doc,
@@ -465,21 +470,18 @@ export function showToast(
   const region = doc.getElementById(
     lasting ? config.ids.toastsAssertive : config.ids.toastsPolite
   );
-  if (!region) {
+  const template = doc.getElementById(config.ids.toastTemplate);
+  if (!region || !template) {
     return null;
   }
-  const toast = doc.createElement("div");
-  const kind = error
-    ? "dash-toast--error"
-    : warning
-      ? "dash-toast--warning"
-      : "dash-toast--ok";
-  toast.className = `toast show dash-toast ${kind}`;
-  const row = doc.createElement("div");
-  row.className = "d-flex";
-  const body = doc.createElement("div");
-  body.className = "toast-body";
-  body.textContent = message;
+  const toast = template.content.firstElementChild.cloneNode(true);
+  toast.classList.remove("toast--info");
+  toast.classList.add(
+    error ? "toast--danger" : warning ? "toast--warning" : "toast--success"
+  );
+  toast.querySelector(".toast__text").textContent = message;
+  // the link and the details sit beside the text, in the toast's body
+  const body = toast.querySelector(".toast-body");
   if (link) {
     const anchor = doc.createElement("a");
     anchor.href = link.href;
@@ -509,13 +511,9 @@ export function showToast(
     });
     body.append(" ", toggle, list);
   }
-  const close = doc.createElement("button");
-  close.type = "button";
-  close.className = "btn-close me-2 m-auto";
-  close.setAttribute("aria-label", "Dismiss");
-  close.addEventListener("click", () => toast.remove());
-  row.append(body, close);
-  toast.append(row);
+  toast
+    .querySelector("[data-toast-close]")
+    .addEventListener("click", () => toast.remove());
   region.append(toast);
   if (!lasting && timeout) {
     schedule(() => {

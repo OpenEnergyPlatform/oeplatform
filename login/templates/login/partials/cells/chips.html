@@ -2,31 +2,41 @@
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
 
-Cell type "chip list with +n": the row's Topics, the first two as chips
+Cell type "tags with +n": the row's Topics, the first two as tags
 and the rest behind "+n". Reads ``row.key``, ``row.title``, ``row.topics``,
 ``row.shown_topics`` and ``row.more_topics``. With ``needed`` (a draft whose
 Publish gate asks for a Topic), an empty cell reads "– needed to publish".
 {% endcomment %}
 {% if row.topics %}
-  {% for topic in row.shown_topics %}<span class="dash-tchip">{{ topic }}</span>{% endfor %}
+  <div class="tag-group">
+    {% for topic in row.shown_topics %}
+      {% include "components/tag.html" with name=topic %}
+    {% endfor %}
+    {% if row.more_topics %}
+      {% with more=row.more_topics|length %}
+        <button type="button"
+                id="tp-{{ row.key }}"
+                class="btn btn-link btn-sm dash-count"
+                aria-expanded="false"
+                aria-controls="tp-{{ row.key }}-pop"
+                aria-label="{{ more }} more topic{{ more|pluralize }}. Show {{ more|pluralize:'it,them' }}"
+                data-dash-popover>+{{ more }}</button>
+      {% endwith %}
+    {% endif %}
+  </div>
   {% if row.more_topics %}
-    {% with more=row.more_topics|length %}
-      <button type="button"
-              id="tp-{{ row.key }}"
-              class="dash-count dash-count--small"
-              aria-expanded="false"
-              aria-controls="tp-{{ row.key }}-pop"
-              aria-label="{{ more }} more topic{{ more|pluralize }}. Show {{ more|pluralize:'it,them' }}"
-              data-dash-popover>+{{ more }}</button>
-      <div id="tp-{{ row.key }}-pop"
-           class="dash-pop"
-           role="dialog"
-           aria-label="Topics of {{ row.title }}"
-           tabindex="-1"
-           hidden>
-        {% for topic in row.topics %}<span class="dash-tchip">{{ topic }}</span>{% endfor %}
+    <div id="tp-{{ row.key }}-pop"
+         class="dash-pop"
+         role="dialog"
+         aria-label="Topics of {{ row.title }}"
+         tabindex="-1"
+         hidden>
+      <div class="tag-group">
+        {% for topic in row.topics %}
+          {% include "components/tag.html" with name=topic %}
+        {% endfor %}
       </div>
-    {% endwith %}
+    </div>
   {% endif %}
 {% elif needed %}
   {% include "login/partials/cells/needed.html" with what="topics" %}

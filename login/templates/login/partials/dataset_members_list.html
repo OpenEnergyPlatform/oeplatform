@@ -21,9 +21,9 @@ login.dataset_members.MembersSlice; ``page`` travels with every change as
           <div class="dash-members-row__what">
             <a href="{% url 'dataedit:view' table=row.table.name %}">{{ row.title }}</a>
             {% if row.status == "draft" %}
-              <span class="badge dash-badge dash-badge--draft">Draft</span>
+              <span class="badge badge--warning">Draft</span>
             {% elif row.status == "embargoed" %}
-              <span class="badge dash-badge dash-badge--embargoed">Embargoed</span>
+              <span class="badge badge--danger">Embargoed</span>
             {% endif %}
             <div class="dash-tname">{{ row.table.name }}</div>
           </div>

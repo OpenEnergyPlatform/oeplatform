@@ -18,7 +18,7 @@ empty draft reads "– needed to publish".
   {% if count %}
     <button type="button"
             id="mb-{{ row.key }}"
-            class="dash-count"
+            class="btn btn-link btn-sm dash-count"
             aria-expanded="false"
             aria-controls="mb-{{ row.key }}-pop"
             aria-label="{{ row.count_label }}. Show {{ count|pluralize:'it,them' }}"
@@ -36,9 +36,9 @@ empty draft reads "– needed to publish".
             <a href="{% url 'dataedit:view' table=member.name %}"
                hx-boost="false">{{ member.title }}</a>
             {% if member.status == "draft" %}
-              <span class="badge dash-badge dash-badge--draft">Draft</span>
+              <span class="badge badge--warning">Draft</span>
             {% elif member.status == "embargoed" %}
-              <span class="badge dash-badge dash-badge--embargoed">Embargoed</span>
+              <span class="badge badge--danger">Embargoed</span>
             {% endif %}
           </li>
         {% endfor %}

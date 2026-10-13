@@ -10,7 +10,7 @@ people's are named with their owner; another user's draft never appears.
   {% if count %}
     <button type="button"
             id="ds-{{ row.key }}"
-            class="dash-count"
+            class="btn btn-link btn-sm dash-count"
             aria-expanded="false"
             aria-controls="ds-{{ row.key }}-pop"
             aria-label="In {{ count }} dataset{{ count|pluralize }}. Show {{ count|pluralize:'it,them' }}"

@@ -31,9 +31,9 @@ the button's id, so focus stays on it), or reads "Already in" for a member.
           <div class="dash-members-row__what">
             {{ row.title }}
             {% if row.status == "draft" %}
-              <span class="badge dash-badge dash-badge--draft">Draft</span>
+              <span class="badge badge--warning">Draft</span>
             {% elif row.status == "embargoed" %}
-              <span class="badge dash-badge dash-badge--embargoed">Embargoed</span>
+              <span class="badge badge--danger">Embargoed</span>
             {% endif %}
             <div class="dash-tname">{{ row.table.name }}</div>
           </div>

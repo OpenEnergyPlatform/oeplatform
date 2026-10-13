@@ -8,11 +8,11 @@ an embargo, and ``since``, when a published item was published, which reads
 "since ‹date›" beside the badge.
 {% endcomment %}
 {% if status == "draft" %}
-  <span class="badge dash-badge dash-badge--draft">Draft</span>
+  <span class="badge badge--warning">Draft</span>
 {% elif status == "embargoed" %}
-  <span class="badge dash-badge dash-badge--embargoed">Embargoed</span>
+  <span class="badge badge--danger">Embargoed</span>
   <span class="dash-until">until {{ until|date:"j M Y" }}</span>
 {% else %}
-  <span class="badge dash-badge dash-badge--published">Published</span>
-  {% if since %}<span class="dash-until dash-since">since {{ since|date:"j M Y" }}</span>{% endif %}
+  <span class="badge badge--success">Published</span>
+  {% if since %}<span class="dash-until">since {{ since|date:"j M Y" }}</span>{% endif %}
 {% endif %}

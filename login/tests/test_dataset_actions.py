@@ -96,9 +96,7 @@ class MenuTests(DatasetActionTestCase):
         self.assertIn("Publish…", row)
         self.assertNotIn("Unpublish", row)
         self.assertLess(row.index("Publish…"), row.index("Delete…"))
-        self.assertIn(
-            "dash-menu__danger", element_markup(row, f"menu-{dataset.pk}-delete")
-        )
+        self.assertIn("text-danger", element_markup(row, f"menu-{dataset.pk}-delete"))
 
     def test_a_published_dataset_offers_unpublish(self):
         dataset = self.ready("ds_menu_published", published=timezone.now())

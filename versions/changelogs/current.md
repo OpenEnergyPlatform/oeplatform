@@ -12,6 +12,22 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- The dashboard's Tables and Datasets tabs use the house components and read the
+  house tokens; their own colour set (`--dash-*`) and every colour written out
+  in their stylesheets are gone. Topics are tags, the statuses and the review
+  are status badges (Published green, Draft yellow, Embargoed red, as on the
+  dataset page; the review badge names its level instead of a medal colour), the
+  row menu is the house dropdown, the pager the house pagination and the table
+  sits in the house table frame. Messages after an action appear in the page's
+  one toast region in the house toast, keeping their link and "Show tables"
+  list. Every control in the list carries a button role: the status segment and
+  the Topic/Tag filters are secondary buttons, the cells that open a popover or
+  the access drawer and the row's ⋯ are link buttons. The access drawer's empty
+  lists are the house empty state. The tables tab's columns collapse a little
+  earlier (every column below 1,340 px of list, Review and Datasets below 860),
+  because the tags are wider than the old chips
+  [(#2659)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2659)
+
 - The navbar's account corner is one user menu. Signed in, the user's name opens
   a menu with Dashboard, Settings and Sign out (clicking the name no longer goes
   straight to Settings); signed out, "Sign in" is a plain link and "Sign up" the

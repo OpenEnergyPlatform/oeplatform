@@ -66,19 +66,6 @@ queries that collapse them, loaded after the generic dash_list.css).
   </div>
   {% block drawers %}
   {% endblock drawers %}
-  {% comment %}
-  Messages after an action. Two persistent live regions, so a message is
-  announced when it is added: success politely (and it dismisses itself),
-  refusals and failures assertively (and they stay until dismissed).
-  {% endcomment %}
-  <div class="toast-container position-fixed bottom-0 end-0 p-3 dash-toasts">
-    <div id="{{ frame.items }}-toasts-polite"
-         aria-live="polite"
-         aria-atomic="false"></div>
-    <div id="{{ frame.items }}-toasts-assertive"
-         aria-live="assertive"
-         aria-atomic="false"></div>
-  </div>
 {% endblock main-content-body %}
 {% block after-body-bottom-js %}
   {% compress js %}

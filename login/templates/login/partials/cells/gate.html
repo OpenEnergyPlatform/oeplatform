@@ -11,7 +11,7 @@ disagree it shows the live result (see ``TableRow.publishable``).
 {% endcomment %}
 <button type="button"
         id="pub-{{ row.key }}"
-        class="dash-gate {% if row.publishable %}dash-gate--ok{% else %}dash-gate--bad{% endif %}"
+        class="btn btn-link btn-sm dash-gate {% if row.publishable %}dash-gate--ok{% else %}dash-gate--bad{% endif %}"
         aria-expanded="false"
         aria-controls="pub-{{ row.key }}-pop"
         data-dash-popover>

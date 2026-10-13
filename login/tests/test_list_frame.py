@@ -59,7 +59,11 @@ class TheBasesNameNoTableTests(SimpleTestCase):
                 r"{% comment %}.*?{% endcomment %}", "", path.read_text(), flags=re.S
             )
             # the HTML element and its classes are not a Table
-            for markup in ('class="table dash-table"', "dash-table-wrap"):
+            for markup in (
+                'class="table dash-table"',
+                "table-container",
+                "dash-table-wrap",
+            ):
                 source = source.replace(markup, "")
             source = re.sub(r"</?table>?", "", source)
             with self.subTest(template=path.name):

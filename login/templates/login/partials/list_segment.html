@@ -10,7 +10,7 @@ filters change.
   {% for link in links %}
     <a id="{{ link.id }}"
        href="{{ link.url }}"
-       class="btn btn-sm {% if link.active %}btn-primary active{% else %}btn-outline-primary{% endif %}{% if not link.count %} dash-seg--zero{% endif %}"
+       class="btn btn-sm {% if link.active %}btn-primary active{% else %}btn-secondary{% endif %}{% if not link.count %} dash-seg--zero{% endif %}"
        {% if link.active %}aria-current="true"{% endif %}>{{ link.label }} <span class="dash-seg__count">({{ link.count }})</span></a>
   {% endfor %}
 </div>
