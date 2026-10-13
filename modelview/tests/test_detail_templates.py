@@ -26,7 +26,7 @@ from modelview.tests.html import table_rows
 SHEETTYPES = ("model", "framework")
 
 #: The shell's set-up of every field help's tooltip (base/_feedback.html).
-TOOLTIP_SETUP = "Tooltip.getOrCreateInstance(help)"
+TOOLTIP_SETUP = 'root.querySelectorAll(".field-help")'
 
 
 class DetailPageTestCase(TestViewsTestCase):

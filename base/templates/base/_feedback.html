@@ -6,8 +6,8 @@
   template a script clones, and the module that drives them. A page asks for
   a confirmation with `hx-confirm` or `data-confirm`; a script uses
   `window.oep.confirm(...)` and `window.oep.toast(...)` (base/static/base/dialogs.js).
-  It also opens every field help's tooltip (components/field_help.html), so a
-  page that includes one has nothing to set up.
+  It also sets up every field help's tooltip (components/field_help.html), on
+  the page and in content htmx loads later, so a page has nothing to set up.
 {% endcomment %}
 {% include "components/confirm_dialog.html" %}
 <div class="toast-region" data-toast-region>
@@ -21,7 +21,15 @@
   import { bindDialogs } from "{% static 'base/dialogs.js' %}";
 
   bindDialogs(document);
-  for (const help of document.querySelectorAll(".field-help")) {
-    window.bootstrap.Tooltip.getOrCreateInstance(help);
-  }
+</script>
+<script type="module">
+  // On its own, so the tooltips do not depend on the dialogs; again for
+  // whatever htmx brings in later.
+  const setUp = (root) => {
+    for (const help of root.querySelectorAll(".field-help")) {
+      window.bootstrap.Tooltip.getOrCreateInstance(help);
+    }
+  };
+  setUp(document);
+  document.addEventListener("htmx:load", (event) => setUp(event.detail.elt));
 </script>

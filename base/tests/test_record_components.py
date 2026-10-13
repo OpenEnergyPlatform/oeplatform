@@ -59,14 +59,15 @@ class FieldHelpTest(SimpleTestCase):
 
 
 class NoOldVariantTest(SimpleTestCase):
-    """No template draws the old "?" icon or a Bootstrap 3 open collapse."""
+    """No template draws the old "?" icon or the Bootstrap 3 open collapse
+    (`collapse in`, or `expand in` where a section had no collapse at all)."""
 
-    OLD = re.compile(r"fa-question\"|\bcollapse in\b|\bexpand in\b")
+    RETIRED_MARKUP = re.compile(r"fa-question\"|\bcollapse in\b|\bexpand in\b")
 
     def test_no_template_keeps_an_old_variant(self):
         offenders = [
             str(path.relative_to(settings.BASE_DIR))
             for path in Path(settings.BASE_DIR).glob("*/templates/**/*.html")
-            if self.OLD.search(path.read_text(encoding="utf-8"))
+            if self.RETIRED_MARKUP.search(path.read_text(encoding="utf-8"))
         ]
         self.assertEqual(offenders, [])

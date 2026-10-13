@@ -7,7 +7,9 @@
       {% get_field_attr model 'methodical_focus_1' 'verbose_name' as label %}
       {% get_field_attr model 'methodical_focus_1' 'help_text' as help %}
       {{ label }}
-      {% include "components/field_help.html" with label=label text=help %}
+      {% if help %}
+        {% include "components/field_help.html" with label=label text=help %}
+      {% endif %}
     </td>
     <td>
       {{ model.methodical_focus_1 }}
