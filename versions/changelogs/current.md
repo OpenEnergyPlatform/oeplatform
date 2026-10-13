@@ -213,7 +213,7 @@ SPDX-License-Identifier: CC0-1.0
   buttons with a name for screen readers. The "Others" field under modeled
   renewables could never be shown and now opens like its neighbours. On the
   factsheet lists the column toggles are house checks. The homepage is untouched
-  [(#2656)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2656)
+  [(#2705)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2705)
 - A third-party instance restyles the platform without a fork. Two optional
   local settings: `INSTANCE_STYLESHEETS` (static paths, linked last in every
   page's head, after the platform's and the page's own stylesheets, and left out
