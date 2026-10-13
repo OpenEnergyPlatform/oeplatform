@@ -20,7 +20,7 @@ SPDX-License-Identifier: CC0-1.0
   sentence. A project page reads at the reading width, and its partners are the
   about page's logo tiles, a partner without a logo showing its name in the same
   tile; "Funding" is a section heading like the others.
-  [(#PR_NUMBER)](https://github.com/OpenEnergyPlatform/oeplatform/pull/PR_NUMBER)
+  [(#2709)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2709)
 
 - The navbar's account corner is one user menu. Signed in, the user's name opens
   a menu with Dashboard, Settings and Sign out (clicking the name no longer goes
