@@ -193,6 +193,29 @@ class TopicListTest(TestCase):
             reverse("dataedit:tables-in-topic", kwargs={"topic": "supply"}),
         )
 
+    def test_a_card_has_a_header_above_its_body(self):
+        # The header holds the title, the count and the keywords; the body
+        # holds the description (and the draft's wizard).
+        # From the page, not from a card's markup: re-parsing that markup
+        # closes the header early at the icon's self-closing <path />.
+        page = self.page()
+        header = next(
+            h for h in elements_with_class(page, "card-header") if "supply" in text(h)
+        )
+        body = elements_with_class(page, "topic-card__body")[-1]  # supply comes last
+
+        self.assertIn("supply", text(header))
+        self.assertIn("tables", text(header))
+        self.assertIn("commodity", text(header))
+        self.assertNotIn("commodity", text(body))
+
+    def test_the_draft_card_is_wide_and_a_topic_card_is_not(self):
+        draft = next(c for c in self.cards() if PSEUDO_TOPIC_DRAFT in text(c))
+        supply = next(c for c in self.cards() if "supply" in text(c))
+
+        self.assertIn("topic-card--wide", classes_of(draft))
+        self.assertNotIn("topic-card--wide", classes_of(supply))
+
     def test_the_keywords_are_neutral_tags(self):
         card = next(c for c in self.cards() if "supply" in text(c))
         self.assertRegex(card, r'<span class="tag"\s*>commodity</span>')
