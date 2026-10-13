@@ -1,4 +1,4 @@
-"""The "What's new" page (#2382): each released changelog's `## Highlights`.
+"""The "What's new" page (#2382): the newest released changelog's `## Highlights`.
 
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
@@ -8,10 +8,11 @@ import tempfile
 from pathlib import Path
 from unittest import mock
 
+from django.conf import settings
 from django.test import SimpleTestCase, TestCase
 from django.urls import reverse
 
-from base.helper import release_highlights
+from base.helper import latest_release_highlights
 
 CHANGELOG = """# Changes to the oeplatform code
 
@@ -24,77 +25,63 @@ CHANGELOG = """# Changes to the oeplatform code
 - an internal change users never see
 """
 
-RELEASE = {
-    "version": "1.11.0",
-    "html": "<ul><li>Datasets start as drafts</li></ul>",
-    "changelog_url": "https://example.org/1_11_0.md",
-}
+HIGHLIGHTS = "<ul><li>Datasets start as drafts</li></ul>"
+VERSION = Path(settings.BASE_DIR, "VERSION").read_text().strip()
 
 
-class ReleaseHighlightsTest(SimpleTestCase):
+class LatestReleaseHighlightsTest(SimpleTestCase):
     def highlights(self, **files):
         with tempfile.TemporaryDirectory() as directory:
             for name, highlights in files.items():
                 Path(directory, name).write_text(CHANGELOG.format(highlights))
             # The cache keys on the directory, and every one here is new.
-            return release_highlights(directory)
+            return latest_release_highlights(directory)
 
-    def test_released_versions_newest_first_by_number(self):
-        releases = self.highlights(
+    def test_the_newest_release_by_number_wins(self):
+        html = self.highlights(
             **{"1_9_0.md": "- nine", "1_10_0.md": "- ten", "1_2_0.md": "- two"}
         )
-        self.assertEqual(
-            [release["version"] for release in releases], ["1.10.0", "1.9.0", "1.2.0"]
-        )
+        self.assertEqual(html.strip(), "<ul>\n<li>ten</li>\n</ul>")
 
     def test_only_the_highlights_section_is_shown(self):
-        (release,) = self.highlights(**{"1_10_0.md": "- **New** list"})
+        html = self.highlights(**{"1_10_0.md": "- **New** list"})
         self.assertEqual(
-            release["html"].strip(), "<ul>\n<li><strong>New</strong> list</li>\n</ul>"
-        )
-        self.assertTrue(
-            release["changelog_url"].endswith(
-                "/blob/v1.10.0/versions/changelogs/1_10_0.md"
-            )
+            html.strip(), "<ul>\n<li><strong>New</strong> list</li>\n</ul>"
         )
 
-    def test_a_release_without_highlights_is_left_out(self):
-        releases = self.highlights(
+    def test_a_release_without_highlights_is_skipped(self):
+        html = self.highlights(
             **{
                 "1_10_0.md": "- ten",
                 "1_10_1.md": "",
                 "1_10_2.md": "<!-- the template's comment, never filled -->",
             }
         )
-        self.assertEqual([release["version"] for release in releases], ["1.10.0"])
+        self.assertEqual(html.strip(), "<ul>\n<li>ten</li>\n</ul>")
 
     def test_the_next_release_is_not_out_yet(self):
-        self.assertEqual(self.highlights(**{"current.md": "- coming"}), [])
-
-    def test_the_repositorys_changelogs_parse(self):
-        for release in release_highlights():
-            self.assertTrue(release["html"].strip())
+        self.assertEqual(self.highlights(**{"current.md": "- coming"}), "")
 
 
 class WhatsNewPagesTest(TestCase):
-    def test_the_page_lists_each_release_with_its_changelog(self):
-        with mock.patch("base.views.release_highlights", return_value=[RELEASE]):
-            page = self.client.get(reverse("base:whats-new")).content.decode()
-        self.assertIn("Version 1.11.0", page)
+    def get(self, name, highlights):
+        with mock.patch(
+            "base.views.latest_release_highlights", return_value=highlights
+        ):
+            return self.client.get(reverse(name)).content.decode()
+
+    def test_the_page_shows_the_highlights(self):
+        page = self.get("base:whats-new", HIGHLIGHTS)
         self.assertIn("<li>Datasets start as drafts</li>", page)
-        self.assertIn('href="https://example.org/1_11_0.md"', page)
 
-    def test_the_page_without_releases_says_so(self):
-        with mock.patch("base.views.release_highlights", return_value=[]):
-            page = self.client.get(reverse("base:whats-new")).content.decode()
-        self.assertIn("No release highlights yet.", page)
+    def test_the_page_without_highlights_says_so(self):
+        self.assertIn("No release highlights yet.", self.get("base:whats-new", ""))
 
-    def test_the_homepage_links_the_newest_release(self):
-        with mock.patch("base.views.release_highlights", return_value=[RELEASE]):
-            page = self.client.get(reverse("base:home")).content.decode()
-        self.assertIn("What's new in version 1.11.0", page)
+    def test_the_homepage_links_the_page_when_there_is_news(self):
+        self.assertIn("See what's new", self.get("base:home", HIGHLIGHTS))
+        self.assertNotIn("See what's new", self.get("base:home", ""))
 
-    def test_the_homepage_has_no_link_without_a_release(self):
-        with mock.patch("base.views.release_highlights", return_value=[]):
-            page = self.client.get(reverse("base:home")).content.decode()
-        self.assertNotIn("What's new in version", page)
+    def test_no_page_names_the_running_release(self):
+        # The pages do not tell a visitor which release production runs.
+        for name in ("base:home", "base:whats-new"):
+            self.assertNotIn(VERSION, self.get(name, HIGHLIGHTS), name)

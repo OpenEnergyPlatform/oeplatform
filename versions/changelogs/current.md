@@ -14,8 +14,9 @@ SPDX-License-Identifier: CC0-1.0
 
 <!--
 Three to five short points for users, shown on the platform's "What's new"
-page (base:whats-new) and linked from the homepage. Plain words, no internals.
-A release that leaves this section empty is not listed there.
+page (base:whats-new) and linked from the homepage, without the version number.
+Plain words, no internals. Left empty (as in a patch release), the page keeps
+the previous release's highlights.
 -->
 
 - **A new homepage and a consistent look:** the start page is redesigned, and
@@ -704,9 +705,10 @@ A release that leaves this section empty is not listed there.
   table with no Admin at all
   [(#2595)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2595)
 
-- A "What's new" page lists each release's highlights for users, linked from the
-  homepage's hero and footer. A changelog's new `## Highlights` section is its
-  source [(#2382)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2382)
+- A "What's new" page shows the latest release's highlights for users, linked
+  from the homepage's hero and footer, without naming the version. A changelog's
+  new `## Highlights` section is its source
+  [(#2382)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2382)
 
 ## Bugs
 

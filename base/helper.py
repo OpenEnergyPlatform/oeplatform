@@ -20,8 +20,6 @@ from functools import lru_cache
 
 import markdown2
 
-from oeplatform.settings import EXTERNAL_URLS
-
 logger = logging.getLogger("oeplatform")
 SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
 
@@ -33,42 +31,27 @@ COMMENT = re.compile(r"<!--.*?-->", re.S)
 
 
 @lru_cache(maxsize=None)
-def release_highlights(directory=CHANGELOG_DIR) -> list:
-    """The `## Highlights` of every released changelog, newest first.
+def latest_release_highlights(directory=CHANGELOG_DIR) -> str:
+    """HTML of the newest released changelog's `## Highlights`, or "".
 
     A released changelog is named `<major>_<minor>_<patch>.md` (`current.md` is
     the next release, not yet out). A release without highlights, as a patch
-    release usually is, is left out, so the newest entry is the newest release
-    that has something to tell users. Cached for the process: changelogs only
-    change with a release, which restarts it.
-
-    Returns:
-        list of dicts with `version` ("1.11.0"), `html` and `changelog_url`
+    release usually is, is skipped. The version is deliberately not returned:
+    the platform's pages do not say which release it runs. Cached for the
+    process: changelogs only change with a release, which restarts it.
     """
-    releases = []
+    released = []
     for name in os.listdir(directory):
         match = RELEASED_CHANGELOG.fullmatch(name)
-        if not match:
-            continue
+        if match:
+            released.append((tuple(int(part) for part in match.groups()), name))
+    for _version, name in sorted(released, reverse=True):
         with open(os.path.join(directory, name), encoding="utf-8") as file:
             section = HIGHLIGHTS.search(file.read())
         text = COMMENT.sub("", section.group(1)).strip() if section else ""
-        if not text:
-            continue
-        version = ".".join(match.groups())
-        releases.append(
-            {
-                "key": tuple(int(part) for part in match.groups()),
-                "version": version,
-                "html": markdown2.markdown(text),
-                "changelog_url": "{}/blob/v{}/versions/changelogs/{}".format(
-                    EXTERNAL_URLS["github_openenergyplatform_oeplatform"],
-                    version,
-                    name,
-                ),
-            }
-        )
-    return sorted(releases, key=lambda release: release["key"], reverse=True)
+        if text:
+            return markdown2.markdown(text)
+    return ""
 
 
 def get_json_content(path, json_id=None):

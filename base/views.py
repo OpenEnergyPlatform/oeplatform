@@ -22,7 +22,7 @@ from django.urls import reverse
 from django.views.generic import View
 
 from base.forms import ContactForm
-from base.helper import get_json_content, release_highlights
+from base.helper import get_json_content, latest_release_highlights
 from oeplatform.settings import (
     CONTACT_ADDRESSES,
     DEFAULT_FROM_EMAIL,
@@ -34,13 +34,13 @@ logger = logging.getLogger("oeplatform")
 
 class WelcomeView(View):
     def get(self, request):
-        releases = release_highlights()
-        latest_release = releases[0] if releases else None
-        return render(request, "base/index.html", {"latest_release": latest_release})
+        highlights = latest_release_highlights()
+        return render(request, "base/index.html", {"highlights": highlights})
 
 
 def whats_new_view(request):
-    return render(request, "base/whats_new.html", {"releases": release_highlights()})
+    highlights = latest_release_highlights()
+    return render(request, "base/whats_new.html", {"highlights": highlights})
 
 
 def redir_view(request, target):

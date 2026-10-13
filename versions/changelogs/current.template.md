@@ -12,8 +12,9 @@ SPDX-License-Identifier: CC0-1.0
 
 <!--
 Three to five short points for users, shown on the platform's "What's new"
-page (base:whats-new) and linked from the homepage. Plain words, no internals.
-A release that leaves this section empty is not listed there.
+page (base:whats-new) and linked from the homepage, without the version number.
+Plain words, no internals. Left empty (as in a patch release), the page keeps
+the previous release's highlights.
 -->
 
 ## Changes
