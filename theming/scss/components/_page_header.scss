@@ -113,6 +113,9 @@
 
     &__tabs {
         flex-basis: 100%;
+        // Without it the slot is as wide as all its tabs, so on a phone the
+        // page scrolls sideways instead of the tab row.
+        min-width: 0;
 
         // The aside link's fade blends into the band, not the page.
         .tabs {

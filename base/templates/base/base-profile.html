@@ -26,6 +26,14 @@
     {% block main %}
       <main class="main" id="main-content">
         {% block site-header %}
+          {% comment %}
+            The dashboard's one header (#2653): every tab of it extends this
+            shell, so the tabs are drawn here and nowhere else. Without a
+            profile_user (the shell rendered bare) there is no one to name.
+          {% endcomment %}
+          {% if profile_user %}
+            {% include "components/page_header.html" with area="Dashboard" icon="icons/area_dashboard.html" title=profile_user.name tabs="login/user_nav.html" %}
+          {% endif %}
         {% endblock site-header %}
         <div class="content">
           <div class="content__container content__container--profile">
