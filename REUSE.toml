@@ -3571,6 +3571,7 @@ path = [
   "base/templates/base/_head.html",
   "base/templates/base/_instance_stylesheets.html",
   "base/templates/base/_feedback.html",
+  "base/templates/base/_notice.html",
   "theming/stock_tokens.scss",
   "theming/literal_scan.mjs",
 ]
