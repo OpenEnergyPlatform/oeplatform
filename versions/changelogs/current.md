@@ -12,6 +12,12 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- The topic list's cards have their top section back: title, icon, table count
+  and keywords on a tinted header above the description. Draft and scenario stay
+  full width with "Add data set" beside the text; the other topics stay three
+  per row with a smaller title.
+  [(#2708)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2708)
+
 - The steering committee and contact pages take WF-13's layouts. The steering
   committee reads in a reading column with its 16 members in text columns (three
   on a desktop, one on a phone), names bold and institutions muted. The contact
@@ -648,6 +654,10 @@ SPDX-License-Identifier: CC0-1.0
   [(#2595)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2595)
 
 ## Bugs
+
+- The Edit button in a table page's tag chooser opens the tag manager instead of
+  the topic list
+  [(#2708)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2708)
 
 - Saving a table's metadata no longer fails with 400 when a keyword cannot
   become a tag, such as the empty keyword the oemetadata v2 template ships; that
