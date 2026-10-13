@@ -26,7 +26,7 @@ SPDX-License-Identifier: CC0-1.0
   drawer's empty lists are the house empty state. The tables tab's columns
   collapse a little earlier (every column below 1,340 px of list, Review and
   Datasets below 860), because the tags are wider than the old chips
-  [(#2659)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2659)
+  [(#2711)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2711)
 
 - The topic list's cards have their top section back: title, icon, table count
   and keywords on a tinted header above the description. Draft and scenario stay
