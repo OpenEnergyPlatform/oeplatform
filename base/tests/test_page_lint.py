@@ -204,10 +204,6 @@ class Page:
 #: Every page that has moved onto the house components, by the ticket that
 #: moved it. A page whose actions depend on who is asking is read signed in
 #: as the owner of the fixture, which shows the most of them.
-#:
-#: Pages #2641 touched that are NOT here yet, and the ticket that brings them:
-#: - dataedit/admin.html and login's activate, detach, generic_form and
-#:   oepuser_create_form: no view renders them (dead code, #2660).
 RESTYLED_PAGES = (
     # #2645: one tag and status badges
     Page(

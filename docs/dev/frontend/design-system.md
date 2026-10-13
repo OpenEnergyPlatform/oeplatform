@@ -72,10 +72,6 @@ request when
 How to build the theme and where the tokens are defined is in the
 [theming README :fontawesome-solid-arrow-up-right-from-square:](https://github.com/OpenEnergyPlatform/oeplatform/tree/develop/theming){:target="\_blank"}.
 
-The theme's component partials from before the catalogue sit in
-`theming/scss/legacy/`. Each one moves into `theming/scss/components/`, with its
-entry, when it becomes a house component; add nothing new there.
-
 ## Figma is the design tool
 
 New components and pages are drawn in

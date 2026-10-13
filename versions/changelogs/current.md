@@ -869,3 +869,13 @@ SPDX-License-Identifier: CC0-1.0
   that the coming datasets tab subclasses instead of copying, and the list
   mechanics (`login/listing.py`) have their own tests. Nothing visible changes
   [(#2616)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2616)
+- Design system: the theme's legacy layer (`theming/scss/legacy/`) is gone, and
+  with it its last partial, `.controls-container`, whose one class still in a
+  template had no effect there. Deleted as dead code rather than restyled: 13
+  templates no view renders (login `activate`, `detach`, `generic_form`,
+  `oepuser_create_form`, `delete_account` and the view class that would have
+  rendered it; modelview `overview`, `form_element_factory` and three widget
+  templates; dataedit `admin`, `url_list_field`, `tag_form`), the unloaded
+  `custom_alert.css`, the factsheet stylesheet's Bootstrap 3 `.panel-heading`
+  rules and an unused mixin. Nothing visible changes
+  [(#2660)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2660)

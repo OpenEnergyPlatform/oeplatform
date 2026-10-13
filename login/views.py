@@ -30,13 +30,12 @@ from django.http import (
     HttpResponseNotAllowed,
 )
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.text import capfirst
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 from django.views.generic import RedirectView, TemplateView, View
-from django.views.generic.edit import DeleteView
 from rest_framework.authtoken.models import Token
 
 from api.services import dataset_actions, table_actions
@@ -1666,24 +1665,10 @@ class UserRedirectView(LoginRequiredMixin, RedirectView):
 user_redirect_view = UserRedirectView.as_view()
 
 
-class AccountDeleteView_TODO_UNUSED(LoginRequiredMixin, DeleteView):
-    """
-    TODO: implement tests before we allow user deletion
-    see: https://github.com/OpenEnergyPlatform/oeplatform/pull/1181
-    """
-
-    model = OepUser
-    template_name = "login/delete_account.html"
-    success_url = reverse_lazy("logout")
-
-    def get(self, request, user_id):
-        user = get_object_or_404(OepUser, pk=user_id)
-        return render(request, "login/delete_account.html", {"profile_user": user})
-
-
 @profile_owner_required
 def account_delete_view(request, profile_user):
-    """Account deletion is not offered yet (see AccountDeleteView_TODO_UNUSED).
+    """Account deletion is not offered yet: it needs tests first (see
+    https://github.com/OpenEnergyPlatform/oeplatform/pull/1181).
 
     The route exists so its link resolves; it answers 404, to its owner too.
     """
