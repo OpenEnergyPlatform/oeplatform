@@ -19,7 +19,7 @@ SPDX-License-Identifier: CC0-1.0
   sentence case, and on a phone the items are a section of the collapsed menu
   instead of a second row under the logo. Sign out posts a form. Buttons take
   their font size from the dense type token, at the same size as before.
-  [(#PRNUM)](https://github.com/OpenEnergyPlatform/oeplatform/pull/PRNUM)
+  [(#2707)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2707)
 
 - The steering committee and contact pages take WF-13's layouts. The steering
   committee reads in a reading column with its 16 members in text columns (three
