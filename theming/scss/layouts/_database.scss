@@ -1,5 +1,7 @@
 @use '../base/' as *;
 @use '../base/mixins' as *;
+@use '../components/button';
+@use '../components/field';
 
 .content .tab-content {
     overflow: hidden;
@@ -156,5 +158,41 @@
         &.table-view-bar__container--wide {
             padding-right: 0;
         }
+    }
+}
+
+// The table page's filter (#2657): the vendored jQuery QueryBuilder
+// (dataedit/query-builder.*) writes Bootstrap 3 markup. Its controls take the
+// house roles here, so the vendored files stay as they came: adding a rule or
+// a group is secondary, deleting one an outline danger (it asks nothing), the
+// AND/OR choice a segmented toggle, its selects house selects.
+.query-builder {
+    .btn-success,
+    .btn-info {
+        @extend .btn-secondary;
+    }
+
+    // An outline variant sets no background; these classes' own solid one
+    // would show through.
+    .btn-danger {
+        @extend .btn-outline-danger;
+        --bs-btn-bg: transparent;
+    }
+
+    .group-conditions .btn-primary {
+        @extend .btn-outline-primary;
+        --bs-btn-bg: transparent;
+    }
+
+    .btn-xs {
+        @extend .btn-sm;
+    }
+
+    .pull-right {
+        @extend .float-end;
+    }
+
+    select.form-control {
+        @extend .form-select;
     }
 }
