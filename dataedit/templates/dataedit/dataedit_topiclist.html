@@ -7,12 +7,16 @@
   <div class="row g-3 topics">
     {% for topic, description, tables in topics_descriptions_tablecounts %}
       {% if topic == PSEUDO_TOPIC_DRAFT %}
-        <div class="col-12">{% include "dataedit/partials/topic_card.html" %}</div>
+        <div class="col-12">
+          {% include "dataedit/partials/topic_card.html" with wide=True %}
+        </div>
       {% endif %}
     {% endfor %}
     {% for topic, description, tables in topics_descriptions_tablecounts %}
       {% if topic == TOPIC_SCENARIO %}
-        <div class="col-12">{% include "dataedit/partials/topic_card.html" %}</div>
+        <div class="col-12">
+          {% include "dataedit/partials/topic_card.html" with wide=True %}
+        </div>
       {% endif %}
     {% endfor %}
     {% for topic, description, tables in topics_descriptions_tablecounts %}

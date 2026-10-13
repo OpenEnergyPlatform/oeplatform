@@ -4,16 +4,19 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 One topic on the topic list (dataedit_topiclist.html), as a clickable house
 card: the title link opens the topic's tables and keeps the list's filters.
-The draft topic's card also offers the upload wizard, lifted above the link
-(card__control).
+A header on the subtle surface holds title, count and keywords; the body holds
+the description. The draft topic's card also offers the upload wizard, lifted
+above the link (card__control).
 
 topic, description, tables  one row of topics_descriptions_tablecounts
+wide                        the full-width cards (draft, scenario): larger
+                            title, the wizard beside the text from lg
 {% endcomment %}
 {% url 'dataedit:tables-in-topic' topic=topic as topic_url %}
-<div class="card card--clickable topic-card h-100">
-  <div class="card-body">
+<div class="card card--clickable topic-card{% if wide %} topic-card--wide{% endif %} h-100">
+  <div class="card-header">
     <div class="topic-card__head">
-      <h2 class="card-title topic-card__title">
+      <h2 class="card-title">
         <span class="topic-card__icon" aria-hidden="true">
           {% include "dataedit/partials/topic_icon.html" %}
         </span>
@@ -22,9 +25,11 @@ topic, description, tables  one row of topics_descriptions_tablecounts
       </h2>
       <span class="topic-card__count">{{ tables }} tables</span>
     </div>
-    <div class="tag-group topic-card__keywords">
+    <div class="tag-group">
       {% include "dataedit/partials/topic_keywords.html" %}
     </div>
+  </div>
+  <div class="card-body topic-card__body">
     <p class="card-text">{{ description }}</p>
     {% if topic == PSEUDO_TOPIC_DRAFT %}
       <a class="btn btn-primary card__control"
