@@ -1,0 +1,58 @@
+/* The steering committee and contact pages (#2651, WF-13). Page CSS, not a
+   house component: nothing else lays out a member list or a captcha. It reads
+   tokens only.
+
+   A reading column at the platform's measure; the committee's members in text
+   columns of at least 16rem (three on a desktop, one on a phone), each a bold
+   name and a muted institution; the captcha image beside its input, wrapping
+   below it when the row is too narrow for both. */
+
+.reading-column {
+  max-width: var(--oep-measure);
+}
+
+.member-list {
+  columns: 3 16rem;
+  column-gap: 3rem;
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.member-list > li {
+  break-inside: avoid;
+  margin-bottom: 0.5rem;
+}
+
+.member-list__name {
+  font-weight: 600;
+}
+
+.member-list__institution {
+  color: var(--oep-text-muted);
+}
+
+.captcha-field {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* The label and any error message keep a line of their own. */
+.captcha-field > .form-label,
+.captcha-field > .invalid-feedback {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+.captcha-field > img.captcha {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--oep-border-strong);
+  border-radius: var(--bs-border-radius);
+}
+
+.captcha-field > .form-control {
+  flex: 1 1 12rem;
+  width: auto;
+}
