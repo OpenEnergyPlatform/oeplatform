@@ -193,8 +193,6 @@ class Page:
 #: Pages #2641 touched that are NOT here yet, and the ticket that brings them:
 #: - login:tables, login:datasets: the dashboard's own cell, menu and filter
 #:   controls carry no role (#2659);
-#: - login:organizations: Create Organization and the help toggle take their
-#:   look from container selectors (#2653); its cards' Edit has a role (#2646);
 #: - the peer review pages: buttons styled by container selectors (#2658);
 #: - dataedit/admin.html and login's activate, detach, generic_form and
 #:   oepuser_create_form: no view renders them (dead code, #2660).
@@ -287,7 +285,11 @@ RESTYLED_PAGES = (
     # #2648: underline tabs and dropdowns. Its other pages are listed above
     # (the table page, both factsheet editors, Settings, Reviews) or wait for
     # the tickets named in the comment above this tuple (peer review, the
-    # dashboard's tables, datasets and organizations tabs).
+    # dashboard's tables and datasets tabs).
+    # #2653: Settings as the account page (listed above with #2641) and the
+    # organizations tab, whose Create Organization and help toggle carry
+    # their roles on themselves now
+    Page("login:organizations", {"user_id": "{user}"}, logged_in=True),
 )
 
 
@@ -377,8 +379,7 @@ class ClasslessActionsTest(PageFixture):
         self.assertLessEqual({"btn", "btn-primary"}, classes_of(submit[0]))
 
     def test_reset_token_is_a_danger_outline(self):
-        # Destructive; the confirm dialog goes in front of it with Settings
-        # (#2653).
+        # Destructive, so the confirm dialog goes in front of it (#2653).
         html = self.html(Page("login:settings", {"user_id": "{user}"}, True))
 
         url = reverse("login:reset-token")

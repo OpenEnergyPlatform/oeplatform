@@ -240,7 +240,6 @@ class DashboardTabsTest(TabRowAssertions, TestViewsTestCase):
         ("tables", "tables"),
         ("reviews", "reviews"),
         ("organizations", "organizations"),
-        ("settings", "settings"),
     )
 
     def page(self, name):

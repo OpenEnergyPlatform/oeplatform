@@ -80,6 +80,13 @@ class PagesWithoutSideContentTest(SideColumnTestCase):
                 _main, sides = self.columns(view_name, kwargs)
                 self.assertEqual(sides, [])
 
+    def test_settings_renders_no_side_column(self):
+        # The account page, not a dashboard tab: no profile sidebar (#2653).
+        _main, sides = self.columns(
+            "login:settings", {"user_id": self.user.pk}, logged_in=True
+        )
+        self.assertEqual(sides, [])
+
     def test_the_tag_overview_renders_no_side_column(self):
         _main, sides = self.columns("dataedit:tags", logged_in=True)
         self.assertEqual(sides, [])
@@ -89,6 +96,17 @@ class PagesWithoutSideContentTest(SideColumnTestCase):
         self.assertEqual(response.status_code, 404)
         _main, sides = self.split(response.content.decode())
         self.assertEqual(sides, [])
+
+    def test_factsheet_detail_pages_render_no_side_column(self):
+        # Their actions and tags moved into the record toolbar (#2655).
+        for sheettype, pk in self.factsheets.items():
+            with self.subTest(sheettype=sheettype):
+                _main, sides = self.columns(
+                    "modelview:show-factsheet",
+                    {"sheettype": sheettype, "pk": pk},
+                    logged_in=True,
+                )
+                self.assertEqual(sides, [])
 
     def test_factsheet_edit_pages_render_no_side_column(self):
         for sheettype, pk in self.factsheets.items():
@@ -118,15 +136,6 @@ class PagesWithSideContentTest(SideColumnTestCase):
     def opens(self, html, css_class):
         """Where the first element carrying `css_class` starts."""
         return re.search(r'class="(?:[^"]*\s)?%s[\s"]' % css_class, html).start()
-
-    def test_factsheet_detail(self):
-        for sheettype, pk in self.factsheets.items():
-            with self.subTest(sheettype=sheettype):
-                self.assertSide(
-                    "modelview:show-factsheet",
-                    {"sheettype": sheettype, "pk": pk},
-                    says="Actions",
-                )
 
     def test_factsheet_list(self):
         self.assertSide("modelview:modellist", {"sheettype": "model"}, says="Tags")
@@ -164,7 +173,6 @@ class PagesWithSideContentTest(SideColumnTestCase):
             "login:tables",
             "login:reviews",
             "login:organizations",
-            "login:settings",
         ):
             with self.subTest(page=view_name):
                 self.assertSide(
@@ -187,7 +195,9 @@ class SectionHeadingTest(SideColumnTestCase):
 
     def test_profile_section_headings_carry_no_class(self):
         for view_name, heading in (
-            ("login:settings", "<h2>Your Security Information</h2>"),
+            # Settings' headings are card titles (the card component's own
+            # class), so it carries one; the old classes stay gone (#2653).
+            ("login:settings", 'id="security-heading">Your Security Information</h2>'),
             ("login:reviews", "<h2>Active Open Peer Reviews</h2>"),
             ("login:organizations", "<h3>Memberships</h3>"),
         ):
