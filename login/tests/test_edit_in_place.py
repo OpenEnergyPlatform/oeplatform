@@ -14,6 +14,7 @@ from django.urls import reverse
 
 from base.tests import TestViewsTestCase
 from base.tests.html_tree import parse
+from base.tests.page_lint import lint
 from base.tests.test_page_header import AREA, bands_of, trail_items
 
 HTMX = {"HTTP_HX_REQUEST": "true"}
@@ -47,7 +48,7 @@ class EditInPlaceTest(TestViewsTestCase):
         self.assertEqual(edit.text(), "Edit")
         self.assertEqual(edit.attrs["href"], self.url("edit"))
         self.assertEqual(edit.attrs["hx-get"], self.url("edit"))
-        self.assertEqual(classes_of(edit), {"btn", "btn-primary"})
+        self.assertEqual(set(edit.classes), {"btn", "btn-primary"})
 
     def test_an_htmx_edit_request_answers_the_form_fragment(self):
         response = self.send("get", "edit", htmx=True)
@@ -62,15 +63,19 @@ class EditInPlaceTest(TestViewsTestCase):
         self.assertEqual(form.attrs["action"], self.url("edit"))
         self.assertEqual(form.attrs["enctype"], "multipart/form-data")
 
+    def test_the_fragment_passes_the_page_lint(self):
+        html = self.send("get", "edit", htmx=True).content.decode()
+        self.assertEqual(lint(html, fragment=True), [])
+
     def test_the_form_has_cancel_and_submit_and_house_fields(self):
         card = self.card(self.send("get", "edit", htmx=True).content.decode())
         cancel, submit = card.find("form").find_all(css_class="btn")
         self.assertEqual(cancel.text(), "Cancel")
-        self.assertEqual(classes_of(cancel), {"btn", "btn-secondary"})
+        self.assertEqual(set(cancel.classes), {"btn", "btn-secondary"})
         self.assertEqual(cancel.attrs["href"], self.url("settings"))
         self.assertEqual(cancel.attrs["hx-get"], self.url("settings"))
         self.assertEqual(submit.text(), "Submit")
-        self.assertEqual(classes_of(submit), {"btn", "btn-primary"})
+        self.assertEqual(set(submit.classes), {"btn", "btn-primary"})
         # {% bootstrap_field %}: the label above its own field.
         label = first(card, tag="label", **{"for": "id_fullname"})
         self.assertEqual(label.attrs.get("class"), "form-label")
@@ -97,7 +102,7 @@ class EditInPlaceTest(TestViewsTestCase):
         card = self.card(html)
         self.assertIsNotNone(card.find("form"))
         field = first(card, tag="input", name="linkedin")
-        self.assertIn("is-invalid", classes_of(field))
+        self.assertIn("is-invalid", field.classes)
         self.assertIsNotNone(card.find(css_class="invalid-feedback"))
         self.user.refresh_from_db()
         self.assertIsNone(self.user.linkedin)
@@ -121,16 +126,12 @@ class EditInPlaceTest(TestViewsTestCase):
         self.assertIsNotNone(first(root, id=CARD).find("form"))
 
 
-def classes_of(element):
-    return set(element.classes)
-
-
 def first(root, tag=None, **attrs):
-    """The first element under `root` (itself included) carrying `attrs`."""
+    """The first element below `root` carrying `attrs` (a bare attribute: None)."""
     for node in root.iter():
         if (tag is None or node.tag == tag) and all(
-            node.attrs.get(name) == value for name, value in attrs.items()
+            name in node.attrs and node.attrs[name] == value
+            for name, value in attrs.items()
         ):
-            if all(name in node.attrs for name in attrs):
-                return node
+            return node
     return None

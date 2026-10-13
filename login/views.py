@@ -1631,7 +1631,7 @@ class EditUserView(ProfileOwnerRequiredMixin, View):
 
     @method_decorator(never_cache)
     def get(self, request, user_id):
-        return self.card(request, EditUserForm(instance=request.user))
+        return self.render_card(request, EditUserForm(instance=request.user))
 
     def post(self, request, user_id):
         form = EditUserForm(
@@ -1644,10 +1644,10 @@ class EditUserView(ProfileOwnerRequiredMixin, View):
             if is_htmx(request):
                 return redirect("login:settings", request.user.id)
             return redirect("login:profile", request.user.id)
-        return self.card(request, form)
+        return self.render_card(request, form)
 
     @staticmethod
-    def card(request, form):
+    def render_card(request, form):
         template = (
             "login/partials/profile_card.html"
             if is_htmx(request)

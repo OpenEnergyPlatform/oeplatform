@@ -35,8 +35,7 @@ function swap(body, verb, { invalid = false } = {}) {
     <div id="profile-card" data-edit-in-place
          data-edit-in-place-saved="Profile saved.">
       ${body.replace("INVALID", invalid ? "is-invalid" : "")}
-    </div>
-    <button id="elsewhere">Elsewhere</button>`;
+    </div>`;
   const card = document.getElementById("profile-card");
   card.dispatchEvent(
     new CustomEvent("htmx:afterSettle", {

@@ -17,7 +17,7 @@
 const FIELD = "input:not([type=hidden]), select, textarea";
 
 /** Focus the card that htmx has just swapped in; `verb` is the request's. */
-export function settle(card, verb, toast) {
+function settle(card, verb, toast) {
   const form = card.querySelector("form");
   if (form) {
     (form.querySelector(".is-invalid") ?? form.querySelector(FIELD))?.focus();
