@@ -3563,6 +3563,7 @@ path = [
   "base/templates/components/**",
   "base/templates/base/toc/**",
   "base/static/css/about.css",
+  "base/static/css/static_pages.css",
   "base/tests/page_texts/**",
   "base/templates/brand/**",
   "base/templates/base/_head.html",
