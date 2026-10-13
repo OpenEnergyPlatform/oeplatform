@@ -626,6 +626,11 @@
         font-weight: 600;
     }
 
+    // The badge's warning text colour (components/_badge.scss).
+    &__suggestion {
+        color: color-mix(in srgb, var(--bs-warning) 30%, var(--bs-body-color));
+    }
+
     &__value,
     &__note {
         color: var(--oep-text-muted);

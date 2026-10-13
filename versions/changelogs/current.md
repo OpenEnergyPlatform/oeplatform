@@ -16,12 +16,13 @@ SPDX-License-Identifier: CC0-1.0
   components. The reviewer and contributor pages lose their two copies of one
   stylesheet (and the Summary tab the one its script injected): the styles live
   in the theme on tokens, and the Summary tab's states are status badges. Every
-  action carries its button role itself: Submit and the field saves are primary
-  (the saves no longer turn yellow or red with the chosen state), Save Progress,
-  Quit, Accept, Suggest, Deny and the field arrows (now named "Previous field"
-  and "Next field" for screen readers) secondary. On the Reviews tab the
-  statuses are badges, the empty lists the house empty state, and "Show history"
-  a secondary button without its placeholder menu
+  action carries its button role itself: Submit (and Finish, which replaces it)
+  is primary; the field saves (which no longer turn yellow or red with the
+  chosen state), Save Progress, Quit, Accept, Suggest, Deny and the field arrows
+  (now named "Previous field" and "Next field" for screen readers) are
+  secondary. On the Reviews tab the statuses are badges, the empty lists the
+  house empty state, and "Show history" a secondary button without its
+  placeholder menu
   [(#2658)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2658)
 
 - The terms of use take the about page's layout and show one language at a time:

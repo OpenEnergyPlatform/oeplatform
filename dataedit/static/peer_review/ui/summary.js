@@ -4,7 +4,7 @@
 // SPDX-FileCopyrightText: 2026 Vismaya Jochem <https://github.com/vismayajochem> © Reiner Lemoine Institut
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import { current_review, selectedState } from "../core/peer_review.js";
+import { current_review } from "../core/peer_review.js";
 import { getFieldState } from "../core/state_current_review.js";
 import {
   isEmptyValue,

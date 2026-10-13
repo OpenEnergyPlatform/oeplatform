@@ -278,7 +278,7 @@
       <button type="button"
               class="btn btn-link"
               data-bs-toggle="popover"
-              data-trigger="focus"
+              data-bs-trigger="focus"
               title="Review cards"
               aria-label="About the review cards"
               data-bs-content="The listed reviews are either ongoing or completed. You can click the topic - table name link to either open the dataview page or access the review, depending on the status of the review. If the review is ongoing and it is currently your turn, you will be able to access the review. However, if you have been the last user to submit a review, you will have to wait for the other participant to submit or finish the review before you can access it.">
@@ -445,23 +445,25 @@
     // comes with the page: nothing else here sets the CSRF cookie.
     const deleteButton = document.getElementById("peer_review-delete");
     deleteButton?.addEventListener("click", async () => {
-      const response = await fetch("{% url 'login:delete_peer_review_simple' %}", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": "{{ csrf_token }}",
-        },
-        body: JSON.stringify({ review_id: deleteButton.dataset.reviewId }),
-      });
-      if (response.ok) {
-        window.location.reload();
-        return;
+      let error = "The review was not deleted.";
+      try {
+        const response = await fetch("{% url 'login:delete_peer_review_simple' %}", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}",
+          },
+          body: JSON.stringify({ review_id: deleteButton.dataset.reviewId }),
+        });
+        if (response.ok) {
+          window.location.reload();
+          return;
+        }
+        error = (await response.json().catch(() => ({}))).error || error;
+      } catch {
+        // offline or refused: the default sentence says what happened
       }
-      const body = await response.json().catch(() => ({}));
-      window.oep.toast(body.error || "The review was not deleted.", {
-        status: "danger",
-        title: "Not deleted",
-      });
+      window.oep.toast(error, { status: "danger", title: "Not deleted" });
     });
   </script>
   <script>
