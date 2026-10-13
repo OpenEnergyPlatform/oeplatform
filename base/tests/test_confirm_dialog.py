@@ -224,10 +224,11 @@ class FormerNativeDialogsTest(PageFixture):
             Page("dataedit:table-permission", {"table": "{table}"}, logged_in=True)
         )
 
+        # every removal asks, the viewer's own included (#2657)
         removes = select(html, "input", value="Remove user")
-        asking = [r for r in removes if "data-confirm" in r.attrs]
-        self.assertEqual(len(asking), 1)
-        self.assertIn("other_holder", asking[0].attrs["data-confirm"])
+        self.assertEqual(len(removes), 2)
+        self.assertTrue(all("data-confirm" in r.attrs for r in removes))
+        self.assertTrue(any("other_holder" in r.attrs["data-confirm"] for r in removes))
         self.assertNotIn("onsubmit", html)
 
     def test_deleting_a_tag_asks_the_dialog(self):

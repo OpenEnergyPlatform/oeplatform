@@ -18,17 +18,17 @@
     {% if is_admin %}
       <b> You are allowed to administrate this table </b>
     {% else %}
-      <div class="alert alert-danger" role="alert">
-        You do not have permissions to alter these settings
-      </div>
+      {% include "components/alert.html" with status="danger" text="You do not have permissions to alter these settings" %}
     {% endif %}
   </aside>
 {% endblock side-column %}
 {% block data_content %}
   {% load dataedit.taghandler %}
   {% url 'dataedit:table-permission' table=table as permission_url %}
-  <h3>Manage permissions on {{ table }}</h3>
+  <h2>Manage permissions on {{ table }}</h2>
   {% if confirm %}
+    {# The service's question about the viewer's own role. Its Confirm opens #}
+    {# the house dialog, and is clicked on load so the dialog asks at once.  #}
     <div id="permission-confirm-box" class="alert alert-warning" role="alert">
       <p id="permission-confirm-text">{{ confirm }}</p>
       <form action="{{ permission_url }}" method="post">
@@ -41,158 +41,107 @@
         <input type="hidden" name="confirm" value="yes" />
         <input type="submit"
                id="permission-confirm"
-               class="btn btn-danger"
-               value="Confirm" />
+               class="btn btn-outline-danger"
+               value="Confirm"
+               data-confirm="{{ confirm }}"
+               {% if "remove" in pending.mode %}data-confirm-title="Remove your own role?" data-confirm-verb="Remove"{% else %}data-confirm-title="Change your own role?" data-confirm-verb="Change role"{% endif %}
+               data-confirm-danger />
         <a id="permission-cancel"
-           class="btn btn-outline-secondary"
+           class="btn btn-secondary"
            href="{{ permission_url }}">Cancel</a>
       </form>
     </div>
   {% endif %}
-  <div class="card">
-    <div class="card-header">
+  <section class="card mb-4" aria-labelledby="group-permissions-title">
+    <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
+      <h3 class="card-title mb-0"
+          id="group-permissions-title">Group Permissions</h3>
       {% if is_admin %}
-        <div style="position:relative;">
-          {% if access.shareable %}
-            <form id="addGroupForm"
-                  style="position:absolute;
-                         right: 0%"
-                  action="{{ permission_url }}"
-                  method="post">
-              {% csrf_token %}
-              <input type="hidden" name="mode" value="add_group" />
-              <select name="organization"
-                      id="group_field"
-                      aria-label="Organization to add">
-                {% for organization in access.shareable %}
-                  <option value="{{ organization.pk }}">{{ organization.name }}</option>
-                {% endfor %}
-              </select>
-              <select name="level" id="group_level_new" aria-label="Role">
-                {% for role in organization_roles %}<option value="{{ role.level }}">{{ role.label }}</option>{% endfor %}
-              </select>
-              <input type="submit" class="btn btn-primary" value="Add" />
-            </form>
-          {% else %}
-            <span style="position:absolute;
-                         right: 0%"
-                  class="text-muted">None of your organizations is left to share with.</span>
-          {% endif %}
-        </div>
-      {% endif %}
-      <div>
-        <h4>Group Permissions</h4>
-      </div>
-    </div>
-    {% if not access.organizations %}No permissions for groups set, yet.{% endif %}
-    {% for holder in access.organizations %}
-      <div class="card-body">
-        <div>
-          {% if is_admin %}
-            <label class="form-label"
-                   for="group_level_{{ holder.pk }}">{{ holder.name }}</label>
-            <form class="form-inline"
-                  action="{{ permission_url }}"
-                  method="post"
-                  style="display:inline-block">
-              {% csrf_token %}
-              <input type="hidden" name="mode" value="alter_group" />
-              <input type="hidden" name="group_id" value="{{ holder.pk }}" />
-              <select class="form-control"
-                      id="group_level_{{ holder.pk }}"
-                      name="level"
-                      onchange="this.form.submit()">
-                {% include "dataedit/partials/permission_role_options.html" %}
-              </select>
-            </form>
-            <form action="{{ permission_url }}"
-                  method="post"
-                  style="display:inline-block;
-                         float:right">
-              {% csrf_token %}
-              <input type="hidden" name="mode" value="remove_group" />
-              <input type="hidden" name="group_id" value="{{ holder.pk }}" />
-              <input type="submit"
-                     class="btn btn-outline-danger"
-                     value="Remove group"
-                     {% if not holder.you %}data-confirm="{{ holder.name }} loses every permission on {{ table }}." data-confirm-title="Remove group?" data-confirm-verb="Remove group" data-confirm-danger{% endif %} />
-            </form>
-          {% else %}
-            {{ holder.name }}: {{ holder.role }}
-          {% endif %}
-        </div>
-      </div>
-    {% endfor %}
-  </div>
-  <br />
-  <div class="card">
-    <div class="card-header">
-      {% if is_admin %}
-        <div style="position:relative;">
-          <form id="addUserForm"
-                style="position:absolute;
-                       right: 0%"
+        {% if access.shareable %}
+          <form id="addGroupForm"
+                class="d-flex flex-wrap align-items-center gap-2"
                 action="{{ permission_url }}"
                 method="post">
             {% csrf_token %}
-            <input type="hidden" name="mode" value="add_user" />
-            <input name="name"
-                   type="text"
-                   placeholder="Add an user"
-                   id="user_field" />
-            <select name="level" id="user_level_new" aria-label="Role">
-              {% for role in roles %}<option value="{{ role.level }}">{{ role.label }}</option>{% endfor %}
+            <input type="hidden" name="mode" value="add_group" />
+            <select name="organization"
+                    id="group_field"
+                    class="form-select form-select-sm w-auto"
+                    aria-label="Organization to add">
+              {% for organization in access.shareable %}
+                <option value="{{ organization.pk }}">{{ organization.name }}</option>
+              {% endfor %}
             </select>
-            <input type="submit" class="btn btn-primary" value="Add" />
+            <select name="level"
+                    id="group_level_new"
+                    class="form-select form-select-sm w-auto"
+                    aria-label="Role">
+              {% for role in organization_roles %}<option value="{{ role.level }}">{{ role.label }}</option>{% endfor %}
+            </select>
+            <input type="submit" class="btn btn-primary btn-sm" value="Add" />
           </form>
-        </div>
+        {% else %}
+          <span class="text-muted">None of your organizations is left to share with.</span>
+        {% endif %}
       {% endif %}
-      <div>
-        <h4>User Permissions</h4>
-      </div>
     </div>
-    {% if not access.users %}No permissions for users set, yet.{% endif %}
-    {% for holder in access.users %}
-      <div class="card-body">
-        <div>
-          {% if is_admin %}
-            <label class="form-label"
-                   for="user_level_{{ holder.pk }}">{{ holder.name }}</label>
-            <form class="form-inline"
-                  action="{{ permission_url }}"
-                  method="post"
-                  style="display:inline-block">
-              {% csrf_token %}
-              <input type="hidden" name="mode" value="alter_user" />
-              <input type="hidden" name="user_id" value="{{ holder.pk }}" />
-              <select class="form-control"
-                      id="user_level_{{ holder.pk }}"
-                      name="level"
-                      onchange="this.form.submit()">
-                {% include "dataedit/partials/permission_role_options.html" %}
-              </select>
-            </form>
-            <form action="{{ permission_url }}"
-                  method="post"
-                  style="display:inline-block;
-                         float:right">
-              {% csrf_token %}
-              <input type="hidden" name="mode" value="remove_user" />
-              <input type="hidden" name="user_id" value="{{ holder.pk }}" />
-              <input type="submit"
-                     class="btn btn-outline-danger"
-                     value="Remove user"
-                     {% if not holder.you %}data-confirm="{{ holder.name }} loses every permission on {{ table }}." data-confirm-title="Remove user?" data-confirm-verb="Remove user" data-confirm-danger{% endif %} />
-            </form>
-          {% else %}
-            {{ holder.name }}: {{ holder.role }}
-          {% endif %}
-        </div>
-      </div>
-    {% endfor %}
-  </div>
+    <div class="card-body">
+      {% for holder in access.organizations %}
+        {% include "dataedit/partials/permission_holder.html" with mode="group" remove_label="Remove group" %}
+      {% empty %}
+        {% include "components/empty_state.html" with text="No permissions for groups set, yet." icon="fas fa-users" compact=True %}
+      {% endfor %}
+    </div>
+  </section>
+  <section class="card" aria-labelledby="user-permissions-title">
+    <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
+      <h3 class="card-title mb-0"
+          id="user-permissions-title">User Permissions</h3>
+      {% if is_admin %}
+        <form id="addUserForm"
+              class="d-flex flex-wrap align-items-center gap-2"
+              action="{{ permission_url }}"
+              method="post">
+          {% csrf_token %}
+          <input type="hidden" name="mode" value="add_user" />
+          <input name="name"
+                 type="text"
+                 class="form-control form-control-sm w-auto"
+                 placeholder="Add an user"
+                 aria-label="User name"
+                 id="user_field" />
+          <select name="level"
+                  id="user_level_new"
+                  class="form-select form-select-sm w-auto"
+                  aria-label="Role">
+            {% for role in roles %}<option value="{{ role.level }}">{{ role.label }}</option>{% endfor %}
+          </select>
+          <input type="submit" class="btn btn-primary btn-sm" value="Add" />
+        </form>
+      {% endif %}
+    </div>
+    <div class="card-body">
+      {% for holder in access.users %}
+        {% include "dataedit/partials/permission_holder.html" with mode="user" remove_label="Remove user" %}
+      {% empty %}
+        {% include "components/empty_state.html" with text="No permissions for users set, yet." icon="fas fa-user" compact=True %}
+      {% endfor %}
+    </div>
+  </section>
 {% endblock %}
 {% block after-body-bottom-js %}
+  {% if confirm %}
+    <script>
+      // The dialog module binds before DOMContentLoaded, so this click is
+      // held back and asked in the dialog. Without the module (it failed to
+      // load) the click would submit the change unasked: leave it to the box.
+      document.addEventListener("DOMContentLoaded", () => {
+        if (window.oep) {
+          document.getElementById("permission-confirm").click();
+        }
+      });
+    </script>
+  {% endif %}
   {% if is_admin %}
     <script>
       /*
