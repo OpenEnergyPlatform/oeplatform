@@ -24,6 +24,11 @@
 //   tint are in the navbar's styles, not on the page at rest);
 // - burger-<auth>-390.png: the window with the collapsed menu open.
 //
+// Beside each shot it writes <shot>.mask.json: where the navbar's user area
+// was (the user menu, #2644), which changes on purpose with who is signed in
+// and how long their name is. `diff` ignores the pixels inside the masks of
+// either side, and only those.
+//
 // The screenshots are taken with prefers-reduced-motion, so the homepage's
 // scroll fade-in shows every section at once instead of only those scrolled
 // past. The server should serve the source stylesheets, not a compressed
@@ -32,7 +37,8 @@
 //
 // `diff` compares every PNG of the first directory with its namesake in the
 // second, prints one line per shot, writes a diff image (changed pixels in
-// red over a faded copy) for each that differs, and exits 1 if any differs.
+// red over a faded copy, masked pixels left out) for each that differs, and
+// exits 1 if any differs.
 // It decodes the PNGs in the browser (CHROME and PUPPETEER), so it
 // needs no image library.
 
@@ -66,6 +72,25 @@ const launch = () =>
     executablePath: process.env.CHROME,
     args: ["--no-sandbox"],
   });
+
+// The navbar's user area: the user menu, and the corner it replaced (#2644),
+// so that a before shot of a branch older than the menu masks the same area.
+const USER_AREA = ".user-menu, .index-navbar .container-fluid > .ms-auto";
+
+async function mask(page, path) {
+  const rects = await page.$$eval(USER_AREA, (areas) =>
+    areas
+      .map((area) => area.getBoundingClientRect())
+      .filter((r) => r.width && r.height)
+      .map((r) => ({
+        x: r.x + window.scrollX,
+        y: r.y + window.scrollY,
+        width: r.width,
+        height: r.height,
+      }))
+  );
+  writeFileSync(path.replace(/\.png$/, ".mask.json"), JSON.stringify(rects));
+}
 
 async function settle(page) {
   await page.evaluate(async () => {
@@ -107,10 +132,9 @@ async function shoot(out) {
   for (const [auth, session] of auths) {
     for (const width of [1440, 390]) {
       const page = await open(width, session);
-      await page.screenshot({
-        path: join(out, `home-${auth}-${width}.png`),
-        fullPage: true,
-      });
+      const path = join(out, `home-${auth}-${width}.png`);
+      await page.screenshot({ path, fullPage: true });
+      await mask(page, path);
       await page.close();
     }
 
@@ -120,13 +144,17 @@ async function shoot(out) {
       '[aria-labelledby="navbarDropdownDatabase"] .dropdown-item:nth-child(2)'
     );
     await new Promise((done) => setTimeout(done, 500));
-    await page.screenshot({ path: join(out, `menu-${auth}-1440.png`) });
+    const menu = join(out, `menu-${auth}-1440.png`);
+    await page.screenshot({ path: menu });
+    await mask(page, menu);
     await page.close();
 
     page = await open(390, session);
     await page.click(".navbar-toggler");
     await new Promise((done) => setTimeout(done, 800));
-    await page.screenshot({ path: join(out, `burger-${auth}-390.png`) });
+    const burger = join(out, `burger-${auth}-390.png`);
+    await page.screenshot({ path: burger });
+    await mask(page, burger);
     await page.close();
   }
   await browser.close();
@@ -156,8 +184,12 @@ async function diff(before, after) {
       console.log(`${name}: identical (byte for byte)`);
       continue;
     }
+    const masks = [before, after].flatMap((dir) => {
+      const path = join(dir, name.replace(/\.png$/, ".mask.json"));
+      return existsSync(path) ? JSON.parse(readFileSync(path, "utf-8")) : [];
+    });
     const result = await page.evaluate(
-      async (srcA, srcB) => {
+      async (srcA, srcB, masks) => {
         const load = (src) =>
           new Promise((done, fail) => {
             const img = new Image();
@@ -180,6 +212,11 @@ async function diff(before, after) {
         const pa = pixels(imgA).data;
         const imageB = pixels(imgB);
         const pb = imageB.data;
+        const masked = (x, y) =>
+          masks.some(
+            (r) =>
+              x >= r.x && x < r.x + r.width && y >= r.y && y < r.y + r.height
+          );
         let changed = 0;
         let top = Infinity;
         let bottom = -1;
@@ -190,7 +227,7 @@ async function diff(before, after) {
             pa[i + 2] === pb[i + 2] &&
             pa[i + 3] === pb[i + 3];
           const y = Math.floor(i / 4 / imgA.width);
-          if (same) {
+          if (same || masked((i / 4) % imgA.width, y)) {
             pb[i] = 255 - (255 - pb[i]) / 4;
             pb[i + 1] = 255 - (255 - pb[i + 1]) / 4;
             pb[i + 2] = 255 - (255 - pb[i + 2]) / 4;
@@ -215,14 +252,18 @@ async function diff(before, after) {
         };
       },
       `data:image/png;base64,${a.toString("base64")}`,
-      `data:image/png;base64,${b.toString("base64")}`
+      `data:image/png;base64,${b.toString("base64")}`,
+      masks
     );
     if (result.size) {
       console.log(`${name}: DIFFERENT size, ${result.size}`);
       differs += 1;
     } else if (!result.changed) {
       console.log(
-        `${name}: identical (pixel for pixel; the files differ only in encoding)`
+        `${name}: identical (pixel for pixel` +
+          (masks.length
+            ? ", outside the navbar's user area)"
+            : "; the files differ only in encoding)")
       );
     } else {
       mkdirSync(outDir, { recursive: true });

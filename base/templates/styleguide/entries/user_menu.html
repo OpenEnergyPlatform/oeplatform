@@ -1,0 +1,15 @@
+{# use: The navbar's account corner, once per page, last in the navbar's collapse; signed in a menu under the user's name, signed out Sign in and the bar's one Sign up. Never anywhere else. #}
+<div class="d-flex flex-column gap-3">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary index-navbar"
+       aria-label="Signed in">
+    <div class="container-fluid">
+      {% include "components/user_menu.html" with user=example_user id="catalogueUserMenu" %}
+    </div>
+  </nav>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary index-navbar"
+       aria-label="Signed out">
+    <div class="container-fluid">
+      {% include "components/user_menu.html" with user=None %}
+    </div>
+  </nav>
+</div>

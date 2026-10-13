@@ -12,6 +12,15 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- The navbar's account corner is one user menu. Signed in, the user's name opens
+  a menu with Dashboard, Settings and Sign out (clicking the name no longer goes
+  straight to Settings); signed out, "Sign in" is a plain link and "Sign up" the
+  bar's one light button. The cyan and red buttons are gone, the labels are in
+  sentence case, and on a phone the items are a section of the collapsed menu
+  instead of a second row under the logo. Sign out posts a form. Buttons take
+  their font size from the dense type token, at the same size as before.
+  [(#2707)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2707)
+
 - The peer review pages and the dashboard's Reviews tab use the house
   components. The reviewer and contributor pages lose their two copies of one
   stylesheet (and the Summary tab the one its script injected): the styles live

@@ -3560,6 +3560,7 @@ path = [
   "theming/scss/components/_toc.scss",
   "theming/scss/components/_section_card.scss",
   "theming/scss/components/_field_help.scss",
+  "theming/scss/components/_user_menu.scss",
   "base/templates/components/**",
   "base/templates/base/toc/**",
   "base/static/css/about.css",

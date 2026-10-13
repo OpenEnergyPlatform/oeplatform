@@ -35,7 +35,8 @@ from modelview.tests.html import element_markup, elements_with_class
 def page(body: str) -> str:
     """A whole page whose own content is `body`."""
     return (
-        '<html><body><nav class="navbar"><a class="btn btn-info">Sign Up</a></nav>'
+        '<html><body><nav class="navbar index-navbar">'
+        '<a class="btn btn-on-strong btn-sm" href="#">Sign up</a></nav>'
         f'<main id="main-content">{body}</main></body></html>'
     )
 
@@ -168,9 +169,12 @@ class LintTest(SimpleTestCase):
             [],
         )
 
-    def test_the_navbar_is_not_the_pages_own_content(self):
-        # The navbar's Sign Up is cyan until the user menu (#2644).
-        self.assertEqual(lint(page("")), [])
+    def test_the_navbar_is_read_too(self):
+        html = page("").replace("btn-on-strong", "btn-info")
+
+        problems = lint(html)
+        self.assertEqual(len(problems), 1)
+        self.assertIn("btn-info", problems[0])
 
 
 @dataclass
@@ -439,13 +443,6 @@ class FooterTest(PageFixture):
 #: grey buttons are swapped by script (#2648), out of this scan's sight.
 GONE_COLOURS = status_button()
 
-#: Templates that still carry a status colour as an action, and the ticket
-#: that removes it. Nothing else may.
-STATUS_COLOURS_LEFT = {
-    # Sign Up and Sign In are cyan until the navbar's user menu.
-    "base/templates/base/_header.html": "#2644",
-}
-
 #: Template directories this scan does not read: the React apps' own (out of
 #: scope, spec #2632) and anything installed.
 NOT_TEMPLATES = ("node_modules", "site-packages", "/frontend/", "/static/")
@@ -460,8 +457,6 @@ class NoStatusColourAsAnActionTest(SimpleTestCase):
         for path in sorted(root.rglob("*.html")):
             relative = path.relative_to(root).as_posix()
             if any(part in "/" + relative for part in NOT_TEMPLATES):
-                continue
-            if relative in STATUS_COLOURS_LEFT:
                 continue
             for value in re.findall(r'class="([^"]*)"', path.read_text("utf-8")):
                 tokens = " ".join(re.split(r"{%.*?%}|\s+", value))
@@ -481,13 +476,6 @@ class NoStatusColourAsAnActionTest(SimpleTestCase):
             and GONE_COLOURS.match(found.group(1))
         ]
         self.assertEqual(offenders, [])
-
-    def test_the_templates_left_still_need_their_ticket(self):
-        # When the user menu lands, its ticket deletes the entry above.
-        root = Path(settings.BASE_DIR)
-        for template in STATUS_COLOURS_LEFT:
-            with self.subTest(template=template):
-                self.assertRegex((root / template).read_text("utf-8"), r"\bbtn-info\b")
 
 
 class CatalogueEntryTest(SimpleTestCase):

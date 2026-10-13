@@ -77,6 +77,7 @@ class DashboardHeaderTest(TestViewsTestCase):
             a
             for a in root.find("nav", "navbar").find_all("a")
             if a.attrs.get("href", "").strip() == self.settings_url()
+            and "dropdown-item" in a.attrs.get("class", "").split()
         ]
         gear = root.find("a", "tabs__aside")
         self.assertEqual(len(menu), 1)
