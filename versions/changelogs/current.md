@@ -12,6 +12,15 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- The terms of use take the about page's layout and show one language at a time:
+  an "English | Deutsch" switch above the "On this page" list, the page title
+  following the language, and `#de` opening the German version directly. Without
+  JavaScript both languages stay on the page one after the other. The only text
+  changes are the accepted ones: "~Deutsche Version weiter unten~" and the flag
+  emojis go, and the sentence pointing to the translation now reads "There is
+  however a courtesy translation in German."
+  [(#2703)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2703)
+
 - Settings becomes the account page and the dashboard gets one header. Every
   dashboard tab (Datasets, Tables, Reviews, Organizations) is drawn under one
   page header: area "Dashboard", the user's name, and the tabs on the band's

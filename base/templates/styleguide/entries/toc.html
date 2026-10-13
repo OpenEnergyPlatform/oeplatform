@@ -1,4 +1,4 @@
-{# use: The "On this page" list of a long text page (about, the legal pages): its entries are the page's own headings, in order, each linking to its heading's id. Put it first in a .toc-layout, the text in .toc-layout__body: a sticky column on the left from 992px up, above the text below that. One per page; not for short pages or lists. #}
+{# use: The "On this page" list of a long text page (about, the legal pages): its entries are the page's own headings, in order, each linking to its heading's id. Put it first in a .toc-layout, the text in .toc-layout__body: a sticky column on the left from 992px up, above the text below that. One per page; not for short pages or lists. Something that belongs above the list (the terms of use's language switch) goes with it into a .toc-layout__side, which then takes the list's place. #}
 <div class="toc-layout">
   {% include "components/toc.html" with entries="styleguide/entries/_toc_entries.html" %}
   <div class="toc-layout__body">

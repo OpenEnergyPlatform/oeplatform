@@ -8,12 +8,28 @@
 // text marked off by a rule, not a card, so it does not compete with the text.
 @use '../base/' as *;
 
+// Where the list, or the column it shares (.toc-layout__side), sticks.
+$sticky-top: 1.5rem;
+
 .toc-layout {
     @include media-breakpoint-up(lg) {
         display: grid;
         grid-template-columns: 15rem minmax(0, var(--oep-measure));
         column-gap: 4rem;
         align-items: start;
+    }
+
+    // The left column when something sits above the list (the terms of use's
+    // language switch): the two stick as one, so the list itself does not.
+    &__side {
+        @include media-breakpoint-up(lg) {
+            position: sticky;
+            top: $sticky-top;
+
+            .toc {
+                position: static;
+            }
+        }
     }
 
     &__body {
@@ -30,7 +46,7 @@
 
     @include media-breakpoint-up(lg) {
         position: sticky;
-        top: 1.5rem;
+        top: $sticky-top;
         max-height: calc(100vh - 3rem);
         overflow-y: auto;
         margin-bottom: 0;
