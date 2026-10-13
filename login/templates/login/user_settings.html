@@ -100,11 +100,7 @@
       </div>
     </section>
     <section class="card" aria-labelledby="profile-heading">
-      <div class="card-body">
-        <h2 class="card-title" id="profile-heading">Manage Profile</h2>
-        <a href="{% url 'login:edit' request.user.id %}"
-           class="btn btn-primary">Edit</a>
-      </div>
+      {% include "login/partials/profile_card.html" %}
     </section>
   </div>
 {% endblock main-content-body %}
@@ -116,5 +112,10 @@
     document.body.addEventListener("htmx:configRequest", (event) => {
       event.detail.headers["X-CSRFToken"] = "{{ csrf_token }}";
     });
+  </script>
+  <script type="module">
+    import { bindEditInPlace } from "{% static 'base/edit_in_place.js' %}";
+
+    bindEditInPlace(document);
   </script>
 {% endblock after-body-bottom-js %}

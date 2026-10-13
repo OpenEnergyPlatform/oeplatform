@@ -12,6 +12,12 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- The profile is edited in place on Settings: Edit turns the Manage Profile card
+  into the form and Cancel or Submit turn it back, without leaving the page;
+  focus moves into the form and back to Edit, and a save shows a toast. The edit
+  address still works as its own page in the Settings layout.
+  [(#2712)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2712)
+
 - The dashboard's Tables and Datasets tabs use the house components and read the
   house tokens; their own colour set (`--dash-*`) and every colour written out
   in their stylesheets are gone. Topics are tags, the statuses and the review
