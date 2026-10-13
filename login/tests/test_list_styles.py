@@ -139,12 +139,35 @@ class GenericStylesheetTests(SimpleTestCase):
             (
                 (),
                 (".dash",),
-                "--dash-muted: #6c757d; --dash-primary: #2972a6; "
-                "--dash-secondary: #1f567d; container-type: inline-size; "
+                "container-type: inline-size; "
                 "font-size: var(--oep-font-size-dense);",
             ),
             self.generic,
         )
+
+
+#: A colour written out rather than read from a token: a hex value or an
+#: rgb()/rgba()/hsl() call.
+LITERAL_COLOUR = re.compile(r"#[0-9a-fA-F]{3,8}\b|\b(?:rgba?|hsla?)\(")
+
+
+class HouseTokenTests(SimpleTestCase):
+    """The lists' page CSS reads the house tokens only (spec #2632, #2659):
+    the dashboard's own colour set, `--dash-*`, is retired, and no colour is
+    written out, so an instance's tokens recolour the dashboard too."""
+
+    SHEETS = ("dash_list.css", "tables_tab.css", "datasets_tab.css")
+
+    def test_no_stylesheet_defines_or_reads_a_dash_token(self):
+        for path in sorted(STATIC.glob("*.css")):
+            with self.subTest(stylesheet=path.name):
+                self.assertNotIn("--dash-", path.read_text())
+
+    def test_no_list_stylesheet_writes_a_colour_out(self):
+        for name in self.SHEETS:
+            for _, selectors, declarations in rules(stylesheet(name)):
+                with self.subTest(stylesheet=name, selectors=selectors):
+                    self.assertIsNone(LITERAL_COLOUR.search(declarations))
 
 
 class TabPageTests(SimpleTestCase):

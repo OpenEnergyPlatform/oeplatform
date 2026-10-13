@@ -1,6 +1,8 @@
 {% comment %}
   empty_state (#2646): what an empty list shows instead of nothing. A muted
-  icon, an optional title, one sentence, at most one action. Styles:
+  icon, an optional title, one sentence, at most one action. An error page
+  (#2652) is the same thing at page size: an image instead of the icon, and
+  the title as the page's heading. Styles:
   theming/scss/components/_empty_state.scss; catalogue entry:
   styleguide/entries/empty_state.html.
 
@@ -10,14 +12,29 @@
   title            optional, a short line above the sentence
   icon             Font Awesome classes for the icon (default "fas fa-inbox");
                    it is decoration, hidden from assistive technology
+  image            an image address, shown above the title instead of the
+                   icon (build it with {% static … as x %})
+  image_alt        the image's text alternative (required with image)
+  heading          the title is the page's one h1, not a line of text: for
+                   a page that is nothing but this (the error pages)
+  as_example       with heading: the same look without the h1, for showing it
+                   inside a page that has its own (the catalogue)
   action_template  optional, a template rendering the one action (a primary
                    button or link, with its own ids and htmx attributes)
   compact          inside something small (a card's list, a drawer)
 {% endcomment %}
 <div class="empty-state{% if compact %} empty-state--compact{% endif %}">
-  <span class="empty-state__icon {{ icon|default:'fas fa-inbox' }}"
-        aria-hidden="true"></span>
-  {% if title %}<p class="empty-state__title">{{ title }}</p>{% endif %}
+  {% if image %}
+    <img class="empty-state__image" src="{{ image }}" alt="{{ image_alt }}" />
+  {% else %}
+    <span class="empty-state__icon {{ icon|default:'fas fa-inbox' }}"
+          aria-hidden="true"></span>
+  {% endif %}
+  {% if title and heading and not as_example %}
+    <h1 class="empty-state__title empty-state__title--page">{{ title }}</h1>
+  {% elif title %}
+    <p class="empty-state__title{% if heading %} empty-state__title--page{% endif %}">{{ title }}</p>
+  {% endif %}
   <p class="empty-state__text">
     {% if text_template %}
       {% include text_template %}

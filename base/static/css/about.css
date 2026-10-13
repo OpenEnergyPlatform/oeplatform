@@ -1,5 +1,6 @@
 /* The about page's logo grids (#2649, WF-13). Page CSS, not a house
-   component: only this page shows logos in a grid. It reads tokens only.
+   component: only this page and a research project's page (#2652, its
+   partners) show logos in a grid. It reads tokens only.
 
    Equal tiles, each logo contained in its tile rather than stretched: four
    columns for the partners, three for the research projects (six fill two

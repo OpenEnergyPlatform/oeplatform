@@ -41,7 +41,7 @@ queries that collapse the columns are in ``tables_tab.css``.
     {% comment %}Opens the access drawer (#table-access), outside the tab, so its request is synced only with itself.{% endcomment %}
     <button type="button"
             id="acc-{{ row.key }}"
-            class="dash-access"
+            class="btn btn-link btn-sm dash-access"
             hx-get="{% url 'login:table-access' user_id=profile_user.pk table_name=row.table.name %}"
             hx-target="#table-access-body"
             hx-swap="innerHTML"

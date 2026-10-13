@@ -107,7 +107,7 @@ control has a stable id, so focus can be put back after a swap.
         {% endfor %}
       </ul>
     {% else %}
-      <p class="dash-muted">Nobody holds a role of their own.</p>
+      {% include "components/empty_state.html" with icon="fas fa-user" text="Nobody holds a role of their own." compact=True %}
     {% endif %}
     <h3 class="h6 mt-3">Organizations</h3>
     {% if access.organizations %}
@@ -117,7 +117,7 @@ control has a stable id, so focus can be put back after a swap.
         {% endfor %}
       </ul>
     {% else %}
-      <p class="dash-muted">Not shared with any organization.</p>
+      {% include "components/empty_state.html" with icon="fas fa-users" text="Not shared with any organization." compact=True %}
     {% endif %}
     {% if access.can_manage %}
       <form id="table-access-add-user"

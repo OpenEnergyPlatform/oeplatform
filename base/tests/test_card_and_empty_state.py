@@ -98,6 +98,35 @@ class EmptyStateIncludeTest(SimpleTestCase):
         self.assertIn('id="empty-api"', markup)
         self.assertIn("appear here", text(markup))
 
+    def test_an_image_takes_the_icons_place_above_the_title(self):
+        markup = render_empty_state(
+            text="x", title="Lost", image="/static/p.png", image_alt="OEPlatypus"
+        )
+
+        self.assertNotIn("empty-state__icon", markup)
+        self.assertIn(
+            '<img class="empty-state__image" src="/static/p.png" alt="OEPlatypus" />',
+            markup,
+        )
+        self.assertLess(markup.index("<img"), markup.index("Lost"))
+
+    def test_heading_makes_the_title_the_pages_h1(self):
+        self.assertIn(
+            '<h1 class="empty-state__title empty-state__title--page">Lost</h1>',
+            render_empty_state(text="x", title="Lost", heading=True),
+        )
+        self.assertNotIn("<h1", render_empty_state(text="x", title="Lost"))
+
+    def test_an_example_heading_has_the_look_without_the_h1(self):
+        # The catalogue shows it inside a page with its own h1.
+        markup = render_empty_state(
+            text="x", title="Lost", heading=True, as_example=True
+        )
+        self.assertNotIn("<h1", markup)
+        self.assertIn(
+            '<p class="empty-state__title empty-state__title--page">Lost</p>', markup
+        )
+
     def test_compact_is_a_modifier(self):
         self.assertEqual(
             classes_of(render_empty_state(text="x", compact=True)),
