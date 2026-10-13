@@ -17,6 +17,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 from captcha.models import CaptchaStore
 from django.core import mail
 
+from base.forms import ContactForm
 from base.tests import TestViewsTestCase
 from base.tests.html_tree import parse
 from oeplatform.settings import CONTACT_ADDRESSES
@@ -89,6 +90,18 @@ class ContactPageTest(TestViewsTestCase):
         row = next(a for a in name.ancestors if a.has_class("row"))
         self.assertTrue(email.within(row))
         self.assertFalse(topic.within(row))
+
+    def test_every_field_of_the_form_renders(self):
+        # The template names the fields one by one, so a field added to the
+        # form must be added there too, or the form could never validate.
+        form = self.page().find("form")
+        rendered = {n.attrs.get("name") or "" for n in form.iter()}
+        for name in ContactForm.base_fields:
+            with self.subTest(field=name):
+                # A multi-part field (the captcha) renders as name_0, name_1.
+                self.assertTrue(
+                    any(r == name or r.startswith(name + "_") for r in rendered)
+                )
 
     def test_the_captcha_image_and_its_input_are_one_field(self):
         form = self.page().find("form")

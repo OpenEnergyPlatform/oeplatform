@@ -1,7 +1,6 @@
 {% extends "base/base.html" %}
 {% load django_bootstrap5 %}
 {% load static %}
-{% load i18n %}
 {% block site-header %}
   {% url 'base:about' as about_url %}
   {% include "components/page_header.html" with area="About" icon="icons/area_about.html" crumb_label="Overview" crumb_url=about_url title="OEP - Contact" %}
@@ -13,8 +12,7 @@
   <form class="reading-column" action="" method="post">
     {% csrf_token %}
     {% if success %}
-      {% blocktrans asvar sent %}<strong>Success!</strong> Your message has been sent.{% endblocktrans %}
-      {% include "components/alert.html" with status="success" text=sent %}
+      {% include "components/alert.html" with status="success" text="Success! Your message has been sent." %}
     {% endif %}
     {% bootstrap_field form.contact_category %}
     <div class="row">
