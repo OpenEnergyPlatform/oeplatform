@@ -12,6 +12,22 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- The dashboard's Tables and Datasets tabs use the house components and read the
+  house tokens; their own colour set (`--dash-*`) and every colour written out
+  in their stylesheets are gone. Topics are tags, the statuses and the review
+  are status badges (Published green and Draft yellow as on the dataset page,
+  Embargoed blue; the review badge names its level instead of a medal colour),
+  the row menu is the house dropdown, the pager the house pagination and the
+  table sits in the house table frame. Messages after an action appear in the
+  page's one toast region in the house toast, keeping their link and "Show
+  tables" list. Every control in the list carries a button role: the status
+  segment and the Topic/Tag filters are secondary buttons, the cells that open a
+  popover or the access drawer and the row's ⋯ are link buttons. The access
+  drawer's empty lists are the house empty state. The tables tab's columns
+  collapse a little earlier (every column below 1,340 px of list, Review and
+  Datasets below 860), because the tags are wider than the old chips
+  [(#2711)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2711)
+
 - The error pages and the research project pages take WF-13's layouts. A 404 and
   a 500 are the house empty state at page size: the platypus above the title,
   the title as the page's heading, no page header band, and no centring by
