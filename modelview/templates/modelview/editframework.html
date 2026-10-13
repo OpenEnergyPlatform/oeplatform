@@ -132,10 +132,7 @@
         <table class="formtable">
           <th>
             Geographical Scope
-            <a data-bs-toggle="tooltip"
-               title="What geographical scope was modelled with the framework?">
-              <span class="fas fa-question"></span>
-            </a>
+            {% include "components/field_help.html" with label="Geographical Scope" text="What geographical scope was modelled with the framework?" %}
           </th>
           <td>
             <table class="checktable" align="center">
@@ -151,10 +148,7 @@
         <table class="formtable">
           <th>
             Sectoral Scope
-            <a data-bs-toggle="tooltip"
-               title="What sectoral scope was modelled with the framework?">
-              <span class="fas fa-question"></span>
-            </a>
+            {% include "components/field_help.html" with label="Sectoral Scope" text="What sectoral scope was modelled with the framework?" %}
           </th>
           <td>
             <table class="checktable" align="center">
@@ -170,10 +164,7 @@
         <table class="formtable">
           <th>
             General Problem Scope
-            <a data-bs-toggle="tooltip"
-               title="What is the primary purpose of the framework?">
-              <span class="fas fa-question"></span>
-            </a>
+            {% include "components/field_help.html" with label="General Problem Scope" text="What is the primary purpose of the framework?" %}
           </th>
           <td>
             <table class="checktable" align="center">
@@ -187,10 +178,7 @@
         <table class="formtable">
           <th>
             Specific Problem Scope
-            <a data-bs-toggle="tooltip"
-               title="What is/are the specific purpose(s) of the framework?">
-              <span class="fas fa-question"></span>
-            </a>
+            {% include "components/field_help.html" with label="Specific Problem Scope" text="What is/are the specific purpose(s) of the framework?" %}
           </th>
           <td>
             <table class="checktable" align="center">
@@ -244,10 +232,7 @@
           <table class="formtable">
             <th>
               Programming Framework
-              <a data-bs-toggle="tooltip"
-                 title="Which programming framework/language is used to develop the framework?">
-                <span class="fas fa-question"></span>
-              </a>
+              {% include "components/field_help.html" with label="Programming Framework" text="Which programming framework/language is used to develop the framework?" %}
             </th>
             <td>
               <table class="checktable" align="center">
@@ -270,10 +255,7 @@
           <table class="formtable">
             <th>
               External Solver
-              <a data-bs-toggle="tooltip"
-                 title="Which external solver(s) can the framework apply? Please list!">
-                <span class="fas fa-question"></span>
-              </a>
+              {% include "components/field_help.html" with label="External Solver" text="Which external solver(s) can the framework apply? Please list!" %}
             </th>
             <td>
               <table class="checktable" align="center">
@@ -289,10 +271,7 @@
           <table class="formtable">
             <th>
               Input Data Format
-              <a data-bs-toggle="tooltip"
-                 title="Which input format(s) can the framework apply? Please list!">
-                <span class="fas fa-question"></span>
-              </a>
+              {% include "components/field_help.html" with label="Input Data Format" text="Which input format(s) can the framework apply? Please list!" %}
             </th>
             <td>
               <table class="checktable" align="center">
@@ -316,10 +295,7 @@
           <table class="formtable">
             <th>
               Output Data Format
-              <a data-bs-toggle="tooltip"
-                 title="Which output format(s) can the framework apply? Please list!">
-                <span class="fas fa-question"></span>
-              </a>
+              {% include "components/field_help.html" with label="Output Data Format" text="Which output format(s) can the framework apply? Please list!" %}
             </th>
             <td>
               <table class="checktable" align="center">
@@ -343,10 +319,7 @@
           <table class="formtable">
             <th>
               The analytical approach
-              <a data-bs-toggle="tooltip"
-                 title="What is the analytical approach that the framework applies?">
-                <span class="fas fa-question"></span>
-              </a>
+              {% include "components/field_help.html" with label="The analytical approach" text="What is the analytical approach that the framework applies?" %}
             </th>
             <td>
               <table class="checktable" align="center">
@@ -363,10 +336,7 @@
             <table class="formtable">
               <th>
                 The mathematical approach
-                <a data-bs-toggle="tooltip"
-                   title="What is the mathematical approach that the framework applies?">
-                  <span class="fas fa-question"></span>
-                </a>
+                {% include "components/field_help.html" with label="The mathematical approach" text="What is the mathematical approach that the framework applies?" %}
               </th>
               <td>
                 <table class="checktable" align="center">
@@ -382,10 +352,7 @@
             <table class="formtable">
               <th>
                 The underlying methodology
-                <a data-bs-toggle="tooltip"
-                   title="What underlying methodology(-y/-ies) is the framework based on?">
-                  <span class="fas fa-question"></span>
-                </a>
+                {% include "components/field_help.html" with label="The underlying methodology" text="What underlying methodology(-y/-ies) is the framework based on?" %}
               </th>
               <td>
                 <table class="checktable" align="center">
@@ -407,10 +374,7 @@
             <table class="formtable">
               <th>
                 Objective function type
-                <a data-bs-toggle="tooltip"
-                   title="If the framework is applying optimization, what objectives are commonly formulated?">
-                  <span class="fas fa-question"></span>
-                </a>
+                {% include "components/field_help.html" with label="Objective function type" text="If the framework is applying optimization, what objectives are commonly formulated?" %}
               </th>
               <td>
                 <table class="checktable" align="center">
@@ -449,10 +413,7 @@
         <table class="formtable">
           <th>
             Support
-            <a data-bs-toggle="tooltip"
-               title="Click the check box if there is a support or Q and A Forum for the Model">
-              <span class="fas fa-question"></span>
-            </a>
+            {% include "components/field_help.html" with label="Support" text="Click the check box if there is a support or Q and A Forum for the Model" %}
           </th>
           <td>
             <table class="checktable" align="center">
@@ -490,10 +451,7 @@
         <table class="formtable">
           <th>
             Renewable Technology Inclusion
-            <a data-bs-toggle="tooltip"
-               title="Which renewable energy technologies are already modelled with the framework?">
-              <span class="fas fa-question"></span>
-            </a>
+            {% include "components/field_help.html" with label="Renewable Technology Inclusion" text="Which renewable energy technologies are already modelled with the framework?" %}
           </th>
           <td>
             <table class="checktable" align="center">
@@ -510,10 +468,7 @@
         <table class="formtable">
           <th>
             Storage Technology Inclusion
-            <a data-bs-toggle="tooltip"
-               title="Which storage technologies are already modelled with the framework?">
-              <span class="fas fa-question"></span>
-            </a>
+            {% include "components/field_help.html" with label="Storage Technology Inclusion" text="Which storage technologies are already modelled with the framework?" %}
           </th>
           <td>
             <table class="checktable" align="center">
@@ -527,10 +482,7 @@
         <table class="formtable">
           <th>
             Transport Demand
-            <a data-bs-toggle="tooltip"
-               title="Which transportation demands were already modelled with the framework?">
-              <span class="fas fa-question"></span>
-            </a>
+            {% include "components/field_help.html" with label="Transport Demand" text="Which transportation demands were already modelled with the framework?" %}
           </th>
           <td>
             <table class="checktable" align="center">
@@ -546,10 +498,7 @@
         <table class="formtable">
           <th>
             Residential Demand
-            <a data-bs-toggle="tooltip"
-               title="Which residential demands are already modelled with the framework?">
-              <span class="fas fa-question"></span>
-            </a>
+            {% include "components/field_help.html" with label="Residential Demand" text="Which residential demands are already modelled with the framework?" %}
           </th>
           <td>
             <table class="checktable" align="center">
@@ -564,10 +513,7 @@
         <table class="formtable">
           <th>
             Commercial Demand
-            <a data-bs-toggle="tooltip"
-               title="Which commercial demands are already modelled with the framework?">
-              <span class="fas fa-question"></span>
-            </a>
+            {% include "components/field_help.html" with label="Commercial Demand" text="Which commercial demands are already modelled with the framework?" %}
           </th>
           <td>
             <table class="checktable" align="center">
@@ -583,10 +529,7 @@
         <table class="formtable">
           <th>
             Grid model
-            <a data-bs-toggle="tooltip"
-               title="How is the (power) grid modelled?">
-              <span class="fas fa-question"></span>
-            </a>
+            {% include "components/field_help.html" with label="Grid model" text="How is the (power) grid modelled?" %}
           </th>
           <td>
             <table class="checktable" align="center">
@@ -599,10 +542,7 @@
         <table class="formtable">
           <th>
             Cost Inclusion
-            <a data-bs-toggle="tooltip"
-               title="Which cost types are already modelled are the framework?">
-              <span class="fas fa-question"></span>
-            </a>
+            {% include "components/field_help.html" with label="Cost Inclusion" text="Which cost types are already modelled are the framework?" %}
           </th>
           <td>
             <table class="checktable" align="center">
@@ -623,10 +563,7 @@
         <table class="formtable">
           <th>
             Commonly used time step
-            <a data-bs-toggle="tooltip"
-               title="What is/are commonly used time step(s) that are already modelled with the framework?">
-              <span class="fas fa-question"></span>
-            </a>
+            {% include "components/field_help.html" with label="Commonly used time step" text="What is/are commonly used time step(s) that are already modelled with the framework?" %}
           </th>
           <td>
             <table class="checktable" align="center">
@@ -642,10 +579,7 @@
         <table class="formtable">
           <th>
             Commonly modelled time horizon
-            <a data-bs-toggle="tooltip"
-               title="What is/are commonly used time horizon(S) that are already modelled with the framework?">
-              <span class="fas fa-question"></span>
-            </a>
+            {% include "components/field_help.html" with label="Commonly modelled time horizon" text="What is/are commonly used time horizon(S) that are already modelled with the framework?" %}
           </th>
           <td>
             <table class="checktable" align="center">
@@ -672,10 +606,6 @@
 {% endblock %}
 {% block after-body-bottom-js %}
   <script>
-    $(document).ready(function () {
-      $('[data-bs-toggle="tooltip"]').tooltip();
-    });
-
     var confirmOnLeave = function (msg) {
       window.onbeforeunload = function (e) {
         e = e || window.event;

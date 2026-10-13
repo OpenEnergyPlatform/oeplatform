@@ -139,10 +139,7 @@
             <th class="formlabel">
               {% bootstrap_label form.methodical_focus_1.label %}*
               {% if form.methodical_focus_1.help_text != "" %}
-                <i data-bs-toggle="tooltip"
-                   title="{{ form.methodical_focus_1.help_text }}">
-                  <span class="fas fa-question"></span>
-                </i>
+                {% include "components/field_help.html" with label=form.methodical_focus_1.label text=form.methodical_focus_1.help_text %}
               {% endif %}
             </th>
             <td>

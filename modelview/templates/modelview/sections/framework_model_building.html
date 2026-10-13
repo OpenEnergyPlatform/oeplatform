@@ -1,0 +1,80 @@
+{% load modelview_extras %}
+<table class="table table-pairs">
+  {% include "modelview/model_snippet.html" with model=model field="fixed_units" %}
+  <tr>
+    <td class="sheetlabel">Renewable Technology Inclusion</td>
+    <td>
+      <table>
+        {% checklist model "Hydro,Solar,Geothermal,Wind,Wave,Biomass,Tidal" %}
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td class="sheetlabel">Storage Technology Inclusion</td>
+    <td>
+      <table>
+        {% checklist model "st_hydro,st_battery,st_air,st_hydrogen" %}
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td class="sheetlabel">Transport Demand</td>
+    <td>
+      <table>
+        {% checklist model "dc_combustion,dc_battery,dc_v2grid,dc_hydrogen,dc_rail,dc_aviation" %}
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td class="sheetlabel">Residential Demand</td>
+    <td>
+      <table>
+        {% checklist model "rd_Heating,rd_Lighting,rd_Cooking,rd_ApplianceUsage,rd_SmartAppliances" %}
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td class="sheetlabel">Commercial Demand</td>
+    <td>
+      <table>
+        {% checklist model "cd_Offices,cd_Warehouses,cd_Retail" %}
+      </table>
+    </td>
+  </tr>
+  {% include "modelview/model_snippet.html" with model=model field="agricultural_demand" %}
+  <tr>
+    <td class="sheetlabel">Grid model</td>
+    <td>
+      <table>
+        {% checklist model "gm_singleNode,gm_TranshipmentModel,gm_LinearOptimal" %}
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td class="sheetlabel">Cost Inclusion</td>
+    <td>
+      <table>
+        {% checklist model "ci_FuelPrices,ci_FuelHandling,ci_Investment,ci_FixedOperation,ci_VariableOperation,ci_CO2" %}
+      </table>
+    </td>
+  </tr>
+  {% include "modelview/model_snippet.html" with model=model field="new_components" %}
+  {% include "modelview/model_snippet.html" with model=model field="variable_time_step" %}
+  {% include "modelview/model_snippet.html" with model=model field="variable_rolling_horizon" %}
+  <tr>
+    <td class="sheetlabel">Commonly used time step</td>
+    <td>
+      <table>
+        {% checklist model "ts_Minutely,ts_Hourly,ts_Monthly,ts_Yearly,ts_FiveYearly,ts_other=ts_other" %}
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td class="sheetlabel">Commonly modelled time horizon</td>
+    <td>
+      <table>
+        {% checklist model "th_st,th_mt,th_lt,th_other=th_other" %}
+      </table>
+    </td>
+  </tr>
+</table>

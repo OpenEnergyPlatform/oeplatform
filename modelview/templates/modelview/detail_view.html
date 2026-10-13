@@ -1,7 +1,12 @@
 {% extends "modelview/base.html" %}
-{% load django_bootstrap5 %}
 {% load static %}
-{% load modelview_extras %}
+{% load compress %}
+{% comment %}
+  A factsheet's record page, the same for every sheet type: the page header
+  (where you are and what you read), the record toolbar (the tags, then
+  Delete and Edit), and the sections, each a section_card, all open. A sheet
+  type's template fills `sections`.
+{% endcomment %}
 {% block after-head %}
   <link rel="stylesheet" href="{% static 'css/mv-style.css' %}" />
 {% endblock after-head %}
@@ -15,24 +20,61 @@
     {% include "components/page_header.html" with area=displaySheetType|add:" Factsheets" icon="icons/area_factsheets.html" crumb_label="Overview" crumb_url=list_url title=model.model_name %}
   {% endif %}
 {% endblock site-header %}
-{% block side-column %}
-  <aside class="content__side">
-    <hr />
-    <h3>Actions</h3>
-    {% block factsheet-actions %}
-    {% endblock factsheet-actions %}
-    <hr />
-    <h3>Tags</h3>
-    {# Each tag links to this sheet type's list, filtered by it. #}
-    {% url 'modelview:modellist' displaySheetType|lower as list_url %}
-    <div class="tag-group">
-      {% for t in model.tags.all %}
-        {% with pk=t.pk|urlencode %}
-          {% with filtered=list_url|add:"?tags="|add:pk %}
-            {% include "components/tag.html" with name=t.name color=t.color_hex href=filtered title="Filter by "|add:t.name %}
-          {% endwith %}
-        {% endwith %}
-      {% endfor %}
-    </div>
-  </aside>
-{% endblock side-column %}
+{% block factsheets_content %}
+  {% with tags=model.tags.all sheettype=displaySheetType|lower %}
+    {% if tags or user.is_authenticated %}
+      <div class="record-toolbar">
+        {% if tags %}
+          {# Each tag links to this sheet type's list, filtered by it. #}
+          {% url 'modelview:modellist' sheettype as list_url %}
+          <div class="tag-group">
+            {% for t in tags %}
+              {% with pk=t.pk|urlencode %}
+                {% with filtered=list_url|add:"?tags="|add:pk %}
+                  {% include "components/tag.html" with name=t.name color=t.color_hex href=filtered title="Filter by "|add:t.name %}
+                {% endwith %}
+              {% endwith %}
+            {% endfor %}
+          </div>
+        {% endif %}
+        {% if user.is_authenticated %}
+          <div class="record-toolbar__actions">
+            {% if can_delete %}
+              <button type="button"
+                      class="btn btn-outline-danger"
+                      hx-delete="{% url 'modelview:delete-factsheet' sheettype=sheettype pk=model.pk %}"
+                      hx-confirm="The factsheet {{ model.model_name }} is deleted for everyone. This cannot be undone."
+                      data-confirm-title="Delete factsheet?"
+                      data-confirm-verb="Delete factsheet"
+                      data-confirm-danger
+                      hx-swap="none">Delete</button>
+            {% endif %}
+            <a class="btn btn-primary"
+               href="{% url 'modelview:edit' sheettype model.pk %}">Edit</a>
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+  {% endwith %}
+  {% block sections %}
+  {% endblock sections %}
+{% endblock factsheets_content %}
+{% block after-body-bottom-js %}
+  {{ block.super }}
+  <script>
+    document.body.addEventListener("htmx:configRequest", (event) => {
+      event.detail.headers["X-CSRFToken"] = "{{ csrf_token }}";
+    });
+
+    document.addEventListener("htmx:responseError", function (event) {
+      if (!event.detail.elt.hasAttribute("hx-delete")) return;
+      window.oep.toast("The factsheet was not deleted. Reload the page and try again.", {
+        status: "danger",
+        title: "Delete failed",
+      });
+    });
+  </script>
+  {% compress js %}
+    <script src="{% static 'modelview/htmx.min.js' %}"></script>
+  {% endcompress %}
+{% endblock after-body-bottom-js %}
