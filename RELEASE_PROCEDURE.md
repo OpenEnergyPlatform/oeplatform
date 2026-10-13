@@ -56,6 +56,10 @@ Before see How to
 1. Update the oeplatform/versions/changelogs/
    [`current.md`](https://github.com/OpenEnergyPlatform/oeplatform/blob/develop/versions/changelogs/current.md)
    (see the examples of previous releases)
+   - Write its `## Highlights`: three to five points for users. The platform's
+     "What's new" page, linked from the homepage, shows them without the version
+     number. A release without highlights (usually a patch) keeps the previous
+     release's highlights there.
    - Change filename to release version (x_x_x.md)
    - Copy template to `current.md`
    - Update version with `bumpversion --allow-dirty [minor|patch]`

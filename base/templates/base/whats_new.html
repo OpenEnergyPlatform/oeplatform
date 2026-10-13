@@ -1,0 +1,19 @@
+{% extends "base/base.html" %}
+{% load static %}
+{% block site-header %}
+  {% url 'base:home' as home_url %}
+  {% include "components/page_header.html" with area="About" icon="icons/area_about.html" crumb_label="Home" crumb_url=home_url title="What's new" description="What changed for you in the platform's latest release." %}
+{% endblock site-header %}
+{% block after-head %}
+  <link rel="stylesheet" href="{% static 'css/static_pages.css' %}" />
+{% endblock after-head %}
+{% block main-content-body %}
+  <div class="reading-column">
+    {% if highlights %}
+      {# The changelogs are written in this repository, so their HTML is trusted. #}
+      {{ highlights|safe }}
+    {% else %}
+      {% include "components/empty_state.html" with text="No release highlights yet." %}
+    {% endif %}
+  </div>
+{% endblock main-content-body %}

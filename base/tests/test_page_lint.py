@@ -225,6 +225,7 @@ RESTYLED_PAGES = (
     # are #2641's below too)
     Page("base:about"),
     Page("base:oefamily-sc"),
+    Page("base:whats-new"),
     Page("base:legal-privacy-policy"),
     Page("base:legal-tou"),
     Page("base:faq"),

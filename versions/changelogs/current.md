@@ -10,6 +10,25 @@ SPDX-License-Identifier: CC0-1.0
 
 # Changes to the oeplatform code
 
+## Highlights
+
+<!--
+Three to five short points for users, shown on the platform's "What's new"
+page (base:whats-new) and linked from the homepage, without the version number.
+Plain words, no internals. Left empty (as in a patch release), the page keeps
+the previous release's highlights.
+-->
+
+- **A new homepage and a consistent look:** the start page is redesigned, and
+  pages across the platform share the same buttons, forms, cards and headers.
+- **All your tables in one list:** the tables tab of your dashboard shows drafts
+  and published tables together, with filters, sorting and actions on many
+  tables at once.
+- **Manage access in place:** see and change who can access a table from a side
+  drawer in the tables tab.
+- **Datasets start as drafts:** a dataset is published when it is ready, and the
+  new datasets tab manages your datasets and their tables.
+
 ## Changes
 
 - The profile is edited in place on Settings: Edit turns the Manage Profile card
@@ -721,6 +740,11 @@ SPDX-License-Identifier: CC0-1.0
 - Show a notice band above the navbar on every page asking users who noticed
   recent problems with the platform to write via the contact form; the band
   lives in `base/templates/base/_notice.html`, which is emptied to retire it
+
+- A "What's new" page shows the latest release's highlights for users, linked
+  from the homepage's hero and footer, without naming the version. A changelog's
+  new `## Highlights` section is its source
+  [(#2382)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2382)
 
 ## Bugs
 

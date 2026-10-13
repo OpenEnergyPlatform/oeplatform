@@ -114,6 +114,16 @@
   padding: 24px 0;
 }
 
+.index-hero-news {
+  color: var(--oep-on-strong);
+}
+
+.index-hero-news:hover,
+.index-hero-news:focus-visible {
+  color: var(--oep-on-strong);
+  text-decoration: underline;
+}
+
 .index-hero-btn {
   display: inline-flex;
   align-items: center;

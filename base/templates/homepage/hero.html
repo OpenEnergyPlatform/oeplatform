@@ -28,5 +28,12 @@
       <a class="index-hero-btn index-hero-btn-outline"
          href="{{ EXTERNAL_URLS.mkdocs }}">View Documentation</a>
     </div>
+    {% if highlights %}
+      <a class="link-with-arrow index-hero-news"
+         href="{% url 'base:whats-new' %}">
+        <span>See what's new</span>
+        {% include "icons/arrow_right.html" %}
+      </a>
+    {% endif %}
   </div>
 </div>
