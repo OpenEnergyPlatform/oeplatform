@@ -3563,6 +3563,7 @@ path = [
   "theming/scss/components/_user_menu.scss",
   "base/templates/components/**",
   "base/templates/base/toc/**",
+  "base/templates/base/partials/error_text.html",
   "base/static/css/about.css",
   "base/static/css/static_pages.css",
   "base/tests/page_texts/**",
