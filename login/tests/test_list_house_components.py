@@ -15,6 +15,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
+from base.tests.test_page_lint import classes_of as classes
 from dataedit.models import Dataset, Table, Topic
 from login.listing import PAGE_SIZE
 from login.models import ADMIN_PERM, UserPermission
@@ -23,12 +24,6 @@ from modelview.tests.html import element_markup
 
 #: A static tag (components/tag.html) and its name.
 TAG = re.compile(r'<span class="tag"\s*>([^<]*)</span>')
-
-
-def classes(markup):
-    """The classes of the first element in ``markup``."""
-    found = re.search(r'\bclass="([^"]*)"', markup)
-    return set(found.group(1).split()) if found else set()
 
 
 class ListTabTestCase(TestCase):
@@ -104,7 +99,7 @@ class TablesTabTests(ListTabTestCase):
     def test_the_pager_is_the_house_pagination(self):
         html = self.page("tables")
         self.assertIn('<ul class="pagination', html)
-        self.assertIn('<li class="page-item active" aria-current="page">', html)
+        self.assertRegex(html, r'<li class="page-item active"\s+aria-current="page">')
         self.assertEqual(classes(element_markup(html, "pg-2")), {"page-link"})
         self.assertIn('<li class="pagination__range">', html)
 

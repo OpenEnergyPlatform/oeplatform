@@ -105,6 +105,10 @@
  * Nothing in the list scrolls sideways at any of them; at 1024 the page
  * does, by the site header's user name and Sign Out, on every profile tab
  * alike.
+ *
+ * Re-measured 2026-10-13 (#2659) with Topics as house tags and the statuses
+ * as house badges: 916 / 808 / 658, bar 627. Topics keeps its 150 px (the
+ * tags wrap within it), so every threshold holds.
  * ---------------------------------------------------------------------- */
 
 @container (width < 920px) {

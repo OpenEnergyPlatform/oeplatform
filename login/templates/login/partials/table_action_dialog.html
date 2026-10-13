@@ -159,7 +159,7 @@ three and never the control the user is on.
               {% for table in check.eligible %}
                 <li>
                   {{ table.human_readable_name|default:table.name }}
-                  {% if check.action == "delete" and table.is_publish %}<span class="badge badge--success">published</span>{% endif %}
+                  {% if check.action == "delete" and table.is_publish %}<span class="badge badge--warning">published</span>{% endif %}
                 </li>
               {% endfor %}
             </ul>

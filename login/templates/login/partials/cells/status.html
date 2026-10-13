@@ -10,7 +10,7 @@ an embargo, and ``since``, when a published item was published, which reads
 {% if status == "draft" %}
   <span class="badge badge--warning">Draft</span>
 {% elif status == "embargoed" %}
-  <span class="badge badge--danger">Embargoed</span>
+  <span class="badge badge--info">Embargoed</span>
   <span class="dash-until">until {{ until|date:"j M Y" }}</span>
 {% else %}
   <span class="badge badge--success">Published</span>

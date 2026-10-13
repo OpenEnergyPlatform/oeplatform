@@ -202,7 +202,7 @@ class ColumnTests(DatasetsTabTestCase):
         self.assertLess(text(popover).index("A published"), text(popover).index("B"))
         self.assertIn(reverse("dataedit:view", kwargs={"table": "t_a_pub"}), popover)
         self.assertEqual(popover.count("badge--warning"), 2)
-        self.assertEqual(popover.count("badge--danger"), 1)
+        self.assertEqual(popover.count("badge--info"), 1)
         self.assertNotIn("more", text(popover))
 
     def test_the_mix_names_only_the_parts_there_are(self):

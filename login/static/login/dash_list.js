@@ -475,10 +475,13 @@ export function showToast(
     return null;
   }
   const toast = template.content.firstElementChild.cloneNode(true);
-  toast.classList.remove("toast--info");
+  toast.classList.remove(
+    ...["success", "info", "warning", "danger"].map((name) => `toast--${name}`)
+  );
   toast.classList.add(
     error ? "toast--danger" : warning ? "toast--warning" : "toast--success"
   );
+  toast.querySelector(".toast__title").hidden = true;
   toast.querySelector(".toast__text").textContent = message;
   // the link and the details sit beside the text, in the toast's body
   const body = toast.querySelector(".toast-body");

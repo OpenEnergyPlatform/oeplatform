@@ -25,15 +25,9 @@ Hidden when everything fits on one page. The house pagination (#2647).
           <li class="page-item disabled">
             <span class="page-link" aria-hidden="true">…</span>
           </li>
-        {% elif item.current %}
-          <li class="page-item active" aria-current="page">
-            <a id="pg-{{ item.number }}"
-               class="page-link"
-               href="{{ item.url }}"
-               aria-label="Page {{ item.number }}">{{ item.number }}</a>
-          </li>
         {% else %}
-          <li class="page-item">
+          <li class="page-item{% if item.current %} active{% endif %}"
+              {% if item.current %}aria-current="page"{% endif %}>
             <a id="pg-{{ item.number }}"
                class="page-link"
                href="{{ item.url }}"

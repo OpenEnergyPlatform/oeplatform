@@ -11,15 +11,15 @@ disagree it shows the live result (see ``TableRow.publishable``).
 {% endcomment %}
 <button type="button"
         id="pub-{{ row.key }}"
-        class="btn btn-link btn-sm dash-gate {% if row.publishable %}dash-gate--ok{% else %}dash-gate--bad{% endif %}"
+        class="btn btn-link btn-sm dash-gate"
         aria-expanded="false"
         aria-controls="pub-{{ row.key }}-pop"
         data-dash-popover>
   {% if row.publishable %}
-    <span aria-hidden="true">✓</span><span class="visually-hidden">Publishable. Show the publish checks</span>
+    <span class="dash-gate--ok" aria-hidden="true">✓</span><span class="visually-hidden">Publishable. Show the publish checks</span>
   {% else %}
     <span class="visually-hidden">Not publishable:</span>
-    <span aria-hidden="true">✗</span> {{ row.failed_label }}<span class="visually-hidden">. Show the publish checks</span>
+    <span class="dash-gate--bad" aria-hidden="true">✗</span> {{ row.failed_label }}<span class="visually-hidden">. Show the publish checks</span>
   {% endif %}
 </button>
 <div id="pub-{{ row.key }}-pop"

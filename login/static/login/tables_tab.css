@@ -55,25 +55,21 @@
 }
 
 /* Publishable: the Publish gate's result, a link button tightened to the
-   cell, in the status colour of its verdict */
+   cell. Only its mark is in the verdict's status colour: a status colour
+   is never a button's (theming/scss/components/_button.scss). */
 .dash-gate {
   --bs-btn-padding-x: 0.3rem;
   --bs-btn-padding-y: 0.1rem;
   --bs-btn-border-width: 0;
+  --bs-btn-hover-bg: var(--oep-surface-hover);
   white-space: nowrap;
 }
 
 .dash-gate--ok {
-  --bs-btn-color: var(--bs-success);
-  --bs-btn-hover-color: var(--bs-success);
-  --bs-btn-active-color: var(--bs-success);
   color: var(--bs-success);
 }
 
 .dash-gate--bad {
-  --bs-btn-color: var(--bs-danger);
-  --bs-btn-hover-color: var(--bs-danger);
-  --bs-btn-active-color: var(--bs-danger);
   color: var(--bs-danger);
 }
 
@@ -92,13 +88,9 @@
   --bs-btn-padding-x: 0;
   --bs-btn-padding-y: 0;
   --bs-btn-border-width: 0;
+  --bs-btn-hover-bg: var(--oep-surface-hover);
   display: inline-block;
   text-align: left;
-}
-
-.dash-gate:hover,
-.dash-access:hover {
-  background: var(--oep-surface-hover);
 }
 
 /* the select column (#2564): a checkbox per row, the page's in the header */

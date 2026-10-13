@@ -33,7 +33,7 @@ the button's id, so focus stays on it), or reads "Already in" for a member.
             {% if row.status == "draft" %}
               <span class="badge badge--warning">Draft</span>
             {% elif row.status == "embargoed" %}
-              <span class="badge badge--danger">Embargoed</span>
+              <span class="badge badge--info">Embargoed</span>
             {% endif %}
             <div class="dash-tname">{{ row.table.name }}</div>
           </div>
