@@ -1622,10 +1622,16 @@ class OrganizationMembersView(LoginRequiredMixin, TemplateView):
 
 
 class EditUserView(ProfileOwnerRequiredMixin, View):
+    """The Manage Profile card's edit state (the edit-in-place card, #2654).
+
+    From Settings, htmx asks for the card alone and gets it back with its
+    errors; a valid htmx save goes back to Settings, whose reading card the
+    request selects. Without htmx it is a page of its own, as before.
+    """
+
     @method_decorator(never_cache)
     def get(self, request, user_id):
-        form = EditUserForm(instance=request.user)
-        return render(request, "login/oepuser_edit_form.html", {"form": form})
+        return self.render_card(request, EditUserForm(instance=request.user))
 
     def post(self, request, user_id):
         form = EditUserForm(
@@ -1635,9 +1641,19 @@ class EditUserView(ProfileOwnerRequiredMixin, View):
         )
         if form.is_valid():
             form.save()
+            if is_htmx(request):
+                return redirect("login:settings", request.user.id)
             return redirect("login:profile", request.user.id)
-        else:
-            return render(request, "login/oepuser_edit_form.html", {"form": form})
+        return self.render_card(request, form)
+
+    @staticmethod
+    def render_card(request, form):
+        template = (
+            "login/partials/profile_card.html"
+            if is_htmx(request)
+            else "login/oepuser_edit_form.html"
+        )
+        return render(request, template, {"form": form})
 
 
 class UserRedirectView(LoginRequiredMixin, RedirectView):

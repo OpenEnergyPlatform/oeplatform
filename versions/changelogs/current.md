@@ -31,6 +31,38 @@ the previous release's highlights.
 
 ## Changes
 
+- The profile is edited in place on Settings: Edit turns the Manage Profile card
+  into the form and Cancel or Submit turn it back, without leaving the page;
+  focus moves into the form and back to Edit, and a save shows a toast. The edit
+  address still works as its own page in the Settings layout.
+  [(#2712)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2712)
+
+- The dashboard's Tables and Datasets tabs use the house components and read the
+  house tokens; their own colour set (`--dash-*`) and every colour written out
+  in their stylesheets are gone. Topics are tags, the statuses and the review
+  are status badges (Published green and Draft yellow as on the dataset page,
+  Embargoed blue; the review badge names its level instead of a medal colour),
+  the row menu is the house dropdown, the pager the house pagination and the
+  table sits in the house table frame. Messages after an action appear in the
+  page's one toast region in the house toast, keeping their link and "Show
+  tables" list. Every control in the list carries a button role: the status
+  segment and the Topic/Tag filters are secondary buttons, the cells that open a
+  popover or the access drawer and the row's ⋯ are link buttons. The access
+  drawer's empty lists are the house empty state. The tables tab's columns
+  collapse a little earlier (every column below 1,340 px of list, Review and
+  Datasets below 860), because the tags are wider than the old chips
+  [(#2711)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2711)
+
+- The error pages and the research project pages take WF-13's layouts. A 404 and
+  a 500 are the house empty state at page size: the platypus above the title,
+  the title as the page's heading, no page header band, and no centring by
+  markup or inline widths. The only text change is the accepted one:
+  "OEPlatypus:" becomes "OEPlatypus.", since the platypus now stands above the
+  sentence. A project page reads at the reading width, and its partners are the
+  about page's logo tiles, a partner without a logo showing its name in the same
+  tile; "Funding" is a section heading like the others.
+  [(#2709)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2709)
+
 - The topic list's cards have their top section back: title, icon, table count
   and keywords on a tinted header above the description. Draft and scenario stay
   full width with "Add data set" beside the text; the other topics stay three
@@ -704,6 +736,10 @@ the previous release's highlights.
   grant that is the table's only Admin is now refused instead of leaving the
   table with no Admin at all
   [(#2595)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2595)
+
+- Show a notice band above the navbar on every page asking users who noticed
+  recent problems with the platform to write via the contact form; the band
+  lives in `base/templates/base/_notice.html`, which is emptied to retire it
 
 - A "What's new" page shows the latest release's highlights for users, linked
   from the homepage's hero and footer, without naming the version. A changelog's

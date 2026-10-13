@@ -33,6 +33,16 @@ import {
   visiblePageBox,
 } from "../tables_tab.js";
 
+/** The shell's toast region and template (base/_feedback.html, #2643). */
+const SHELL_TOASTS = `
+    <div id="toasts-polite" role="status"></div>
+    <div id="toasts-assertive" role="alert"></div>
+    <template id="toast-template"><div class="toast show toast--info"><div
+      class="d-flex"><div class="toast-body"><strong class="toast__title"
+      hidden></strong><span class="toast__text"></span></div><button
+      type="button" class="btn-close" aria-label="Close"
+      data-toast-close></button></div></div></template>`;
+
 /** The region, its `data-filters` written the way Django escapes it. */
 const REGION = (announcement, filters = {}, body = "", more = 0, folded = 0) => `
   <div id="tables-results" data-announce="${announcement}"
@@ -472,7 +482,7 @@ const ROW_MENU = (pk) => `
   <button id="menu-${pk}-unpublish" type="button" aria-disabled="true">
     Unpublish <span>Only Table admins can unpublish</span></button>`;
 
-/** The page around the region: dialog body and the two toast regions. */
+/** The page around the region: dialog body and the shell's toast region. */
 function renderActionPage(region) {
   renderPage(region);
   const tab = document.getElementById("tables-tab");
@@ -480,8 +490,7 @@ function renderActionPage(region) {
   document.body.insertAdjacentHTML(
     "beforeend",
     `<div id="table-action"><div id="table-action-body"></div></div>
-     <div id="tables-toasts-polite" aria-live="polite"></div>
-     <div id="tables-toasts-assertive" aria-live="assertive"></div>`,
+     ${SHELL_TOASTS}`,
   );
 }
 
@@ -570,7 +579,7 @@ describe("showToast", () => {
         later = [callback, ms];
       },
     });
-    const polite = document.getElementById("tables-toasts-polite");
+    const polite = document.getElementById("toasts-polite");
     expect(polite.contains(toast)).toBe(true);
     expect(toast.textContent).toContain("Published “Go” under climate.");
     expect(later[1]).toBe(5000);
@@ -584,10 +593,10 @@ describe("showToast", () => {
       error: true,
       schedule,
     });
-    const assertive = document.getElementById("tables-toasts-assertive");
+    const assertive = document.getElementById("toasts-assertive");
     expect(assertive.contains(toast)).toBe(true);
     expect(schedule).not.toHaveBeenCalled();
-    toast.querySelector('button[aria-label="Dismiss"]').click();
+    toast.querySelector("[data-toast-close]").click();
     expect(toast.isConnected).toBe(false);
   });
 
@@ -597,9 +606,9 @@ describe("showToast", () => {
       warning: true,
       schedule,
     });
-    const assertive = document.getElementById("tables-toasts-assertive");
+    const assertive = document.getElementById("toasts-assertive");
     expect(assertive.contains(toast)).toBe(true);
-    expect(toast.classList.contains("dash-toast--warning")).toBe(true);
+    expect(toast.classList.contains("toast--warning")).toBe(true);
     expect(schedule).not.toHaveBeenCalled();
   });
 
@@ -688,7 +697,7 @@ describe("bindTablesTab, actions", () => {
     });
     expect(dialog.closed).toBe(1);
     expect(
-      document.getElementById("tables-toasts-polite").textContent,
+      document.getElementById("toasts-polite").textContent,
     ).toContain("Published “Go” under climate.");
     // the dialog's own button held focus; the region comes back without it
     swapRegion(REGION("1 table", {}, ROW_MENU(7)));
@@ -749,10 +758,10 @@ describe("bindTablesTab, actions", () => {
       warning: true,
     });
     expect(dialog.closed).toBe(1);
-    const assertive = document.getElementById("tables-toasts-assertive");
+    const assertive = document.getElementById("toasts-assertive");
     expect(assertive.textContent).toContain("could not");
-    expect(assertive.querySelector(".dash-toast--warning")).not.toBeNull();
-    expect(document.getElementById("tables-toasts-polite").textContent).toBe(
+    expect(assertive.querySelector(".toast--warning")).not.toBeNull();
+    expect(document.getElementById("toasts-polite").textContent).toBe(
       "",
     );
   });
@@ -761,7 +770,7 @@ describe("bindTablesTab, actions", () => {
     serverTrigger(document.body, "tables-refused", {
       message: "Nothing was changed: Already published (“t”).",
     });
-    const assertive = document.getElementById("tables-toasts-assertive");
+    const assertive = document.getElementById("toasts-assertive");
     expect(assertive.textContent).toContain("Nothing was changed");
     expect(dialog.closed).toBe(0);
   });
@@ -775,7 +784,7 @@ describe("bindTablesTab, actions", () => {
         detail: { xhr: { status: 401 } },
       }),
     );
-    const toast = document.getElementById("tables-toasts-assertive");
+    const toast = document.getElementById("toasts-assertive");
     expect(toast.textContent).toContain(LOGGED_OUT);
     expect(toast.querySelector("a").getAttribute("href")).toBe(
       "/user/login/?next=%2Fuser%2Fprofile%2F3%2Ftables%3Fstatus%3Ddraft",
@@ -790,7 +799,7 @@ describe("bindTablesTab, actions", () => {
       }),
     );
     expect(
-      document.getElementById("tables-toasts-assertive").textContent,
+      document.getElementById("toasts-assertive").textContent,
     ).toContain(SERVER_FAILED);
   });
 
@@ -799,7 +808,7 @@ describe("bindTablesTab, actions", () => {
       new CustomEvent("htmx:sendError", { bubbles: true, detail: {} }),
     );
     expect(
-      document.getElementById("tables-toasts-assertive").textContent,
+      document.getElementById("toasts-assertive").textContent,
     ).toContain(UNREACHABLE);
   });
 });
@@ -956,7 +965,7 @@ describe("bindTablesTab, access drawer", () => {
     expect(drawer.closed).toBe(0);
     expect(dialog.closed).toBe(0);
     expect(
-      document.getElementById("tables-toasts-polite").textContent,
+      document.getElementById("toasts-polite").textContent,
     ).toContain("AccessAlice is now Admin");
     // the list re-fetches behind the drawer and leaves focus where it is
     swapRegion(REGION("2 tables", {}, ROW_ACCESS(7) + ROW_ACCESS(8)));
@@ -1295,7 +1304,7 @@ describe("bindTablesTab, selection", () => {
     tick(document.getElementById("tables-select-matching"));
     await nextTick();
     expect(
-      document.getElementById("tables-toasts-assertive").textContent,
+      document.getElementById("toasts-assertive").textContent,
     ).toContain(LOGGED_OUT);
     expect(document.getElementById("tables-bulk-count").textContent).toBe(
       "4 selected",
@@ -1367,7 +1376,7 @@ describe("bindTablesTab, selection", () => {
       message: "Published 2 tables under climate.",
       tables: ["“A”", "“B”"],
     });
-    const toast = document.querySelector("#tables-toasts-polite .dash-toast");
+    const toast = document.querySelector("#toasts-polite .toast");
     expect(toast.textContent).toContain("Published 2 tables under climate.");
     const more = toast.querySelector(".dash-toast__more");
     const list = toast.querySelector(".dash-toast__list");

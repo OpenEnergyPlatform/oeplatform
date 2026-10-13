@@ -12,6 +12,16 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { DATASETS, bindDatasetsTab } from "../datasets_tab.js";
 
+/** The shell's toast region and template (base/_feedback.html, #2643). */
+const SHELL_TOASTS = `
+    <div id="toasts-polite" role="status"></div>
+    <div id="toasts-assertive" role="alert"></div>
+    <template id="toast-template"><div class="toast show toast--info"><div
+      class="d-flex"><div class="toast-body"><strong class="toast__title"
+      hidden></strong><span class="toast__text"></span></div><button
+      type="button" class="btn-close" aria-label="Close"
+      data-toast-close></button></div></div></template>`;
+
 function renderPage() {
   document.body.innerHTML = `
     <div id="datasets-tab" class="dash" data-login-url="/login/">
@@ -32,8 +42,7 @@ function renderPage() {
       ${region()}
     </div>
     <div id="dataset-action"><div id="dataset-action-body"></div></div>
-    <div id="datasets-toasts-polite"></div>
-    <div id="datasets-toasts-assertive"></div>`;
+    ${SHELL_TOASTS}`;
 }
 
 function region({ announcement = "2 datasets", filters = "{}", more = 0 } = {}) {
@@ -212,13 +221,13 @@ describe("bindDatasetsTab", () => {
 
   it("follows the datasets tab's events, not the tables tab's", () => {
     fire("tables-changed", { message: "Not for this list." });
-    expect($("datasets-toasts-polite").children).toHaveLength(0);
+    expect($("toasts-polite").children).toHaveLength(0);
     fire("datasets-changed", { message: "Published “Wind atlas”." });
-    expect($("datasets-toasts-polite").textContent).toContain(
+    expect($("toasts-polite").textContent).toContain(
       "Published “Wind atlas”."
     );
     fire("datasets-refused", { message: "Nothing was changed." });
-    expect($("datasets-toasts-assertive").textContent).toContain(
+    expect($("toasts-assertive").textContent).toContain(
       "Nothing was changed."
     );
   });
@@ -342,7 +351,7 @@ describe("Create and Edit (#2624)", () => {
       focus: "menu-new",
     });
     expect(dialog.closed).toBe(1);
-    expect($("datasets-toasts-polite").textContent).toContain("Wind atlas");
+    expect($("toasts-polite").textContent).toContain("Wind atlas");
     swapRegion(
       region().replace(
         '<td class="c-menu"></td>',

@@ -2,12 +2,12 @@
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
 
-Cell type "review pill": Reviewed as a pill showing the badge level, linked
-to the finished review; In review and Not reviewed as muted text.
+Cell type "review badge": Reviewed as a success badge naming the badge
+level, linked to the finished review; In review and Not reviewed as muted text.
 {% endcomment %}
 {% if row.review_state == "reviewed" %}
   <a id="rev-{{ row.key }}"
-     class="badge rounded-pill dash-pill dash-pill--{{ row.review_badge|lower|default:'none' }}"
+     class="badge badge--success dash-review"
      href="{% url 'dataedit:peer_review_reviewer' table=row.table.name review_id=row.review_id %}"
      hx-boost="false"
      aria-label="Reviewed{% if row.review_badge %}, badge {{ row.review_badge }}{% endif %}. Open the review">{{ row.review_badge|default:"Reviewed" }}</a>
