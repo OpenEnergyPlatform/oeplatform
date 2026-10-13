@@ -80,6 +80,13 @@ class PagesWithoutSideContentTest(SideColumnTestCase):
                 _main, sides = self.columns(view_name, kwargs)
                 self.assertEqual(sides, [])
 
+    def test_settings_renders_no_side_column(self):
+        # The account page, not a dashboard tab: no profile sidebar (#2653).
+        _main, sides = self.columns(
+            "login:settings", {"user_id": self.user.pk}, logged_in=True
+        )
+        self.assertEqual(sides, [])
+
     def test_the_tag_overview_renders_no_side_column(self):
         _main, sides = self.columns("dataedit:tags", logged_in=True)
         self.assertEqual(sides, [])
@@ -164,7 +171,6 @@ class PagesWithSideContentTest(SideColumnTestCase):
             "login:tables",
             "login:reviews",
             "login:organizations",
-            "login:settings",
         ):
             with self.subTest(page=view_name):
                 self.assertSide(
@@ -187,7 +193,9 @@ class SectionHeadingTest(SideColumnTestCase):
 
     def test_profile_section_headings_carry_no_class(self):
         for view_name, heading in (
-            ("login:settings", "<h2>Your Security Information</h2>"),
+            # Settings' headings are card titles (the card component's own
+            # class), so it carries one; the old classes stay gone (#2653).
+            ("login:settings", 'id="security-heading">Your Security Information</h2>'),
             ("login:reviews", "<h2>Active Open Peer Reviews</h2>"),
             ("login:organizations", "<h3>Memberships</h3>"),
         ):

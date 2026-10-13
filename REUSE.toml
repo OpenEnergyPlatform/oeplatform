@@ -3573,6 +3573,7 @@ SPDX-FileCopyrightText = [
 path = [
   "base/templates/icons/area_about.html",
   "base/templates/icons/area_account.html",
+  "base/templates/icons/area_dashboard.html",
   "base/templates/icons/area_database.html",
 ]
 precedence = "override"

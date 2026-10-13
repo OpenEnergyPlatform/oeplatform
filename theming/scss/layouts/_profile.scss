@@ -257,10 +257,6 @@ main.main .content .content__container.content__container--profile {
             @extend .btn-danger;
             min-width: 10rem;
         }
-
-        &--add {
-            @extend .btn-link;
-        }
     }
 
     &__members {
@@ -364,4 +360,13 @@ main.main .content .content__container.content__container--profile {
     .card-text {
         margin-top: 0.75rem;
     }
+}
+
+// Settings, the account page (#2653): its cards in one column at the reading
+// width, not spread across the content area.
+.account-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-width: var(--oep-measure);
 }

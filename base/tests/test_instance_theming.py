@@ -87,7 +87,12 @@ class ShellPagesTestCase(InstanceStaticFiles, SidebarFixture):
         return (
             ("base.html", "base:home", None, False),
             ("base-full.html", "base:about", None, False),
-            ("base-profile.html", "login:settings", {"user_id": self.user.pk}, True),
+            (
+                "base-profile.html",
+                "login:organizations",
+                {"user_id": self.user.pk},
+                True,
+            ),
             ("base-sidebar.html", "dataedit:view", {"table": self.table_name}, False),
             ("base-wide-react.html", "factsheet:factsheets_index", None, False),
         )

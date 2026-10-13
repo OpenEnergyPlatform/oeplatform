@@ -26,6 +26,16 @@
     {% block main %}
       <main class="main" id="main-content">
         {% block site-header %}
+          {% comment %}
+            The dashboard's one header (#2653): every tab of it extends this
+            shell, so the tabs are drawn here and nowhere else. Only the
+            owner's own dashboard names them: the owner rule already refuses
+            everyone else, this keeps a slip there from showing a stranger's
+            name (and a bare render of the shell from failing).
+          {% endcomment %}
+          {% if profile_user and profile_user == request.user %}
+            {% include "components/page_header.html" with area="Dashboard" icon="icons/area_dashboard.html" title=profile_user.name tabs="login/user_nav.html" %}
+          {% endif %}
         {% endblock site-header %}
         <div class="content">
           <div class="content__container content__container--profile">
