@@ -187,6 +187,9 @@ class Page:
     logged_in: bool = False
     #: An htmx fragment, which has no shell and so no #main-content.
     fragment: bool = False
+    #: The status the page answers with: an error page is read through a
+    #: URL that names nothing.
+    status: int = 200
 
     def label(self):
         return " ".join([self.name, *map(str, self.kwargs.values())])
@@ -223,6 +226,10 @@ RESTYLED_PAGES = (
     Page("base:faq"),
     Page("base:discussion"),
     Page("base:project_detail", {"project_id": "open_ego"}),
+    # #2652: the 404 (the 500 is linted in test_error_pages), and the project
+    # whose partners mix logos and names
+    Page("base:project_detail", {"project_id": "no-such-project"}, status=404),
+    Page("base:project_detail", {"project_id": "open_modex"}),
     # #2641: button roles
     Page("base:contact"),
     Page("base:styleguide"),
@@ -382,7 +389,7 @@ class PageFixture(TestViewsTestCase):
             restyled.name,
             kwargs=kwargs,
             logged_in=restyled.logged_in,
-            expect_status=200,
+            expect_status=restyled.status,
         ).content.decode()
 
 

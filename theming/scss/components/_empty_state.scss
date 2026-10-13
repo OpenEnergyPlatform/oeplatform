@@ -3,6 +3,9 @@
 // the list would be. Include: base/templates/components/empty_state.html;
 // catalogue entry: base/templates/styleguide/entries/empty_state.html.
 //
+// An error page (#2652) is one at page size: an image above the title, and
+// the title as the page's h1, at the size of a section heading.
+//
 // --compact is the same thing inside something small (a card's list, a
 // drawer): less space around it and a smaller icon.
 @use '../base/' as *;
@@ -24,10 +27,20 @@
         line-height: 1;
     }
 
+    &__image {
+        width: min(16rem, 60%);
+        height: auto;
+        margin-bottom: 1rem;
+    }
+
     &__title {
         margin-bottom: 0;
         font-weight: $font-weight-semibold;
         color: var(--bs-body-color);
+    }
+
+    &__title--page {
+        font-size: 1.5rem;
     }
 
     &__text {

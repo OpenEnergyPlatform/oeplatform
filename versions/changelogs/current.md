@@ -12,6 +12,16 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- The error pages and the research project pages take WF-13's layouts. A 404 and
+  a 500 are the house empty state at page size: the platypus above the title,
+  the title as the page's heading, no page header band, and no centring by
+  markup or inline widths. The only text change is the accepted one:
+  "OEPlatypus:" becomes "OEPlatypus.", since the platypus now stands above the
+  sentence. A project page reads at the reading width, and its partners are the
+  about page's logo tiles, a partner without a logo showing its name in the same
+  tile; "Funding" is a section heading like the others.
+  [(#PR_NUMBER)](https://github.com/OpenEnergyPlatform/oeplatform/pull/PR_NUMBER)
+
 - The navbar's account corner is one user menu. Signed in, the user's name opens
   a menu with Dashboard, Settings and Sign out (clicking the name no longer goes
   straight to Settings); signed out, "Sign in" is a plain link and "Sign up" the
