@@ -12,6 +12,19 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- The peer review pages and the dashboard's Reviews tab use the house
+  components. The reviewer and contributor pages lose their two copies of one
+  stylesheet (and the Summary tab the one its script injected): the styles live
+  in the theme on tokens, and the Summary tab's states are status badges. Every
+  action carries its button role itself: Submit (and Finish, which replaces it)
+  is primary; the field saves (which no longer turn yellow or red with the
+  chosen state), Save Progress, Quit, Accept, Suggest, Deny and the field arrows
+  (now named "Previous field" and "Next field" for screen readers) are
+  secondary. On the Reviews tab the statuses are badges, the empty lists the
+  house empty state, and "Show history" a secondary button without its
+  placeholder menu
+  [(#2706)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2706)
+
 - The steering committee and contact pages take WF-13's layouts. The steering
   committee reads in a reading column with its 16 members in text columns (three
   on a desktop, one on a phone), names bold and institutions muted. The contact
@@ -660,6 +673,12 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
+- The Reviews tab's Delete works: it asks the confirm dialog and deletes the
+  active review, instead of doing nothing. The tab no longer loads the review
+  page's script, which logged five errors there. Its "All reviews" list shows
+  the user's reviews again; it had been empty since the groups were renamed to
+  organizations
+  [(#2706)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2706)
 - Saving a table's metadata no longer fails with 400 when a keyword cannot
   become a tag, such as the empty keyword the oemetadata v2 template ships; that
   keyword is skipped

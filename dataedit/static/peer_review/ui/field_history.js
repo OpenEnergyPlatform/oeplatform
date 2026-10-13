@@ -92,7 +92,7 @@ export function renderAllFieldHistories() {
     const wrapper = document.createElement("div");
     wrapper.className = "opr-history";
     wrapper.innerHTML =
-      `<button class="opr-history__toggle" type="button" ` +
+      `<button class="btn btn-link btn-sm p-0 opr-history__toggle" type="button" ` +
       `data-bs-toggle="collapse" data-bs-target="#${panelId}" ` +
       `aria-expanded="false" aria-controls="${panelId}">` +
       `<span class="opr-history__caret" aria-hidden="true">›</span> ` +
