@@ -29,6 +29,7 @@ literal scan (``theming/literal_scan.mjs``) fails on.
 import re
 from dataclasses import dataclass
 from pathlib import Path
+from types import SimpleNamespace
 
 from django.template.loader import render_to_string
 from django.views.generic import TemplateView
@@ -224,6 +225,10 @@ def render_entries(request, context, entries=ENTRIES):
         )
 
 
+#: The signed-in user the user menu's entry shows, whoever reads the page.
+EXAMPLE_USER = SimpleNamespace(pk=1, name="Ada Lovelace", is_authenticated=True)
+
+
 class StyleguideView(TemplateView):
     """The catalogue: public, ``noindex``, linked from no menu.
 
@@ -241,5 +246,6 @@ class StyleguideView(TemplateView):
         context["token_modes"] = TOKEN_MODES
         context["stock_tokens"] = context["token_mode"] == "bootstrap"
         context["tokens"] = TOKENS
+        context["example_user"] = EXAMPLE_USER
         context["entries"] = list(render_entries(self.request, context))
         return context

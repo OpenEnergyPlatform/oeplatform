@@ -43,20 +43,25 @@ $focus-border: color-mix(in srgb, var(--bs-primary) 50%, white);
   --bs-code-color: var(--bs-body-color);
 }
 
-// Buttons: the radius scale, then the colour roles. The sizes come after
-// `.btn` because they set the same variable with the same specificity.
+// Buttons: the radius and type scale, then the colour roles. The sizes come
+// after `.btn` because they set the same variables with the same specificity.
+// A button is set in the dense size (spec #2632's token table), a large one in
+// the body size.
 .btn {
   --bs-btn-border-radius: var(--bs-border-radius);
+  --bs-btn-font-size: var(--oep-font-size-dense);
 }
 
 .btn-lg,
 .btn-group-lg > .btn {
   --bs-btn-border-radius: var(--bs-border-radius-lg);
+  --bs-btn-font-size: var(--bs-body-font-size);
 }
 
 .btn-sm,
 .btn-group-sm > .btn {
   --bs-btn-border-radius: var(--bs-border-radius-sm);
+  --bs-btn-font-size: var(--oep-font-size-dense);
 }
 
 @mixin solid-button($token, $on) {
