@@ -7,7 +7,6 @@
 import { check_if_review_finished } from "../roles/opr_reviewer_logic.js";
 import {
   renderSummaryPageFields,
-  updateSubmitButtonColor,
   updateTabProgressIndicatorClasses,
 } from "../ui/summary.js";
 import { selectNextField, updatePercentageDisplay } from "../ui/navigation.js";
@@ -103,23 +102,14 @@ export function initializeEventBindings(saveEntrancesFn) {
   $("#peer_review-save").off("click").on("click", savePeerReview);
   $("#peer_review-cancel").off("click").on("click", cancelPeerReview);
 
-  // Button State Toggles (Visual)
+  // State buttons
   $("#suggestion-button")
     .off("click")
-    .on("click", () => {
-      selectState("suggestion");
-      updateSubmitButtonColor();
-    });
+    .on("click", () => selectState("suggestion"));
   $("#rejected-button")
     .off("click")
-    .on("click", () => {
-      selectState("rejected");
-      updateSubmitButtonColor();
-    });
-  $("#ok-button").on("click", () => {
-    selectState("ok");
-    updateSubmitButtonColor();
-  });
+    .on("click", () => selectState("rejected"));
+  $("#ok-button").on("click", () => selectState("ok"));
 
   $(".nav-link").click(clearInputFields);
 }

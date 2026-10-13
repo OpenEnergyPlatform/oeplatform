@@ -14,9 +14,9 @@ rendered page and answers what on it breaks the rule:
   black or light grey), which is never an action's colour;
 - a native `confirm(` or `alert(` in an inline script or event handler.
 
-It reads the page's own content, `#main-content`, for the first three: the
-navbar is the shell's, and the user menu (#2644) moves its last coloured
-buttons. A page without `#main-content` is refused rather than passed. An
+It reads the page's own content, `#main-content`, and the navbar above it
+for the first three; the navbar has carried no coloured button since the user
+menu (#2644). A page without `#main-content` is refused rather than passed. An
 htmx fragment has no shell, so `fragment=True` reads all of it. Inline
 scripts are read wherever they are on the page.
 
@@ -32,7 +32,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 import re
 from html.parser import HTMLParser
 
-from modelview.tests.html import element_markup
+from modelview.tests.html import element_markup, elements_with_class
 
 #: The four roles (spec #2632, "button"), as classes. `btn-outline-secondary`
 #: is Bootstrap's own name for the secondary role and looks the same;
@@ -139,6 +139,8 @@ def lint(html: str, fragment: bool = False) -> list[str]:
     content = html if fragment else element_markup(html, "main-content")
     if not content:
         raise ValueError("no #main-content: not a page, or a shell without one")
+    if not fragment:
+        content += "".join(elements_with_class(html, "index-navbar"))
     for tag, attrs in _parse(content).elements:
         classes = set((attrs.get("class") or "").split())
         statuses = sorted(c for c in classes if STATUS_BUTTON.match(c))

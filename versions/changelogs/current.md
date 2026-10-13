@@ -18,6 +18,28 @@ SPDX-License-Identifier: CC0-1.0
   per row with a smaller title.
   [(#2708)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2708)
 
+- The navbar's account corner is one user menu. Signed in, the user's name opens
+  a menu with Dashboard, Settings and Sign out (clicking the name no longer goes
+  straight to Settings); signed out, "Sign in" is a plain link and "Sign up" the
+  bar's one light button. The cyan and red buttons are gone, the labels are in
+  sentence case, and on a phone the items are a section of the collapsed menu
+  instead of a second row under the logo. Sign out posts a form. Buttons take
+  their font size from the dense type token, at the same size as before.
+  [(#2707)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2707)
+
+- The peer review pages and the dashboard's Reviews tab use the house
+  components. The reviewer and contributor pages lose their two copies of one
+  stylesheet (and the Summary tab the one its script injected): the styles live
+  in the theme on tokens, and the Summary tab's states are status badges. Every
+  action carries its button role itself: Submit (and Finish, which replaces it)
+  is primary; the field saves (which no longer turn yellow or red with the
+  chosen state), Save Progress, Quit, Accept, Suggest, Deny and the field arrows
+  (now named "Previous field" and "Next field" for screen readers) are
+  secondary. On the Reviews tab the statuses are badges, the empty lists the
+  house empty state, and "Show history" a secondary button without its
+  placeholder menu
+  [(#2706)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2706)
+
 - The steering committee and contact pages take WF-13's layouts. The steering
   committee reads in a reading column with its 16 members in text columns (three
   on a desktop, one on a phone), names bold and institutions muted. The contact
@@ -217,6 +239,17 @@ SPDX-License-Identifier: CC0-1.0
   drew invisible glyphicons) and house buttons: secondary to add, outline red to
   delete, an outline toggle for AND/OR. The homepage renders pixel for pixel as
   before [(#2702)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2702)
+- The model and framework factsheet editors put each label above its field
+  instead of in a table column that wrapped long labels into several lines. A
+  group of checkboxes is a fieldset whose options flow into columns, every
+  checkbox is a house check with its label beside it, and each field has one
+  label that points at it. "Submit all" left the tab row: it is a primary button
+  in a bar that stays at the bottom of the screen while the form is on it. The
+  green "+" and red "x" on list fields (institutions, authors, ...) are house
+  buttons with a name for screen readers. The "Others" field under modeled
+  renewables could never be shown and now opens like its neighbours. On the
+  factsheet lists the column toggles are house checks. The homepage is untouched
+  [(#2705)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2705)
 - A third-party instance restyles the platform without a fork. Two optional
   local settings: `INSTANCE_STYLESHEETS` (static paths, linked last in every
   page's head, after the platform's and the page's own stylesheets, and left out
@@ -658,6 +691,13 @@ SPDX-License-Identifier: CC0-1.0
 - The Edit button in a table page's tag chooser opens the tag manager instead of
   the topic list
   [(#2708)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2708)
+
+- The Reviews tab's Delete works: it asks the confirm dialog and deletes the
+  active review, instead of doing nothing. The tab no longer loads the review
+  page's script, which logged five errors there. Its "All reviews" list shows
+  the user's reviews again; it had been empty since the groups were renamed to
+  organizations
+  [(#2706)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2706)
 
 - Saving a table's metadata no longer fails with 400 when a keyword cannot
   become a tag, such as the empty keyword the oemetadata v2 template ships; that
