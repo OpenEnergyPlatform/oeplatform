@@ -181,6 +181,17 @@ SPDX-License-Identifier: CC0-1.0
   gone, as are three ontology templates nothing rendered. New area icons for
   Database, Factsheets and Ontology. The homepage renders pixel for pixel as
   before [(#2697)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2697)
+- Model and framework factsheets share one record layout: the page header, then
+  a toolbar with the factsheet's tags and its Delete and Edit buttons (which
+  wraps on a phone), then the sections, every one open. The side column with
+  "Actions" and "Tags" is gone. A section's header is a button that shows and
+  hides it, with a chevron, and works from the keyboard; the Bootstrap 3
+  collapse links are gone, which Bootstrap 5 read as closed: only the first
+  section of each page used to start open. The "?" beside a field, on the detail
+  and the edit pages, is a button whose help opens on hover and on keyboard
+  focus. Two new house components, `section_card` and `field_help`, with
+  catalogue entries. The homepage renders pixel for pixel as before
+  [(#2701)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2701)
 - A third-party instance restyles the platform without a fork. Two optional
   local settings: `INSTANCE_STYLESHEETS` (static paths, linked last in every
   page's head, after the platform's and the page's own stylesheets, and left out

@@ -70,15 +70,20 @@
   margin: 10 px;
 }
 
-.card-container > *:not(:first-child) {
-  margin-top: 0.5em;
+/* The record toolbar of a factsheet's page (#2655): its tags at the start,
+   Delete and Edit at the end, wrapping onto lines of their own on a phone.
+   Page CSS until a second record page needs it. */
+.record-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
-.card-container .card-header {
-  background: unset;
-  border: unset;
-}
-
-.card-container .card-body {
-  padding-top: 0.5em;
+.record-toolbar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-left: auto;
 }

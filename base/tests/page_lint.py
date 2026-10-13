@@ -54,7 +54,15 @@ ROLES = frozenset(
 #: item, a tag's remove button. A component ticket that adds a control of its
 #: own (the section card's header, field help) adds its class here.
 HOUSE_CONTROLS = frozenset(
-    {"btn-close", "navbar-toggler", "nav-link", "dropdown-item", "tag__remove"}
+    {
+        "btn-close",
+        "navbar-toggler",
+        "nav-link",
+        "dropdown-item",
+        "tag__remove",
+        "section-card__toggle",
+        "field-help",
+    }
 )
 
 #: Bootstrap's status colours, which are never a button's (an outline in one

@@ -13,9 +13,7 @@
       *
     {% endif %}
     {% if field.help_text and field.help_text != "" %}
-      <i data-bs-toggle="tooltip" title="{{ field.help_text }}">
-        <span class="fas fa-question"></span>
-      </i>
+      {% include "components/field_help.html" with label=field.label text=field.help_text %}
     {% endif %}
   </th>
   <td>
