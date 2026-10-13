@@ -160,6 +160,17 @@ SPDX-License-Identifier: CC0-1.0
   gone, as are three ontology templates nothing rendered. New area icons for
   Database, Factsheets and Ontology. The homepage renders pixel for pixel as
   before [(#2697)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2697)
+- The table permission page and the table view use the house components. On the
+  permission page every select and the user name field are house fields, each
+  section's add form sits beside its heading instead of floating above it, every
+  holder is one row (name, role, Remove), an empty list is the house empty
+  state, and the question about your own role ("You will no longer be able to
+  manage this table's access") opens in the confirm dialog at once. On the table
+  page the filter is a "Filter dataset" button over a card instead of a
+  Bootstrap 3 panel, and the vendored query builder draws Font Awesome icons (it
+  drew invisible glyphicons) and house buttons: secondary to add, outline red to
+  delete, an outline toggle for AND/OR. The homepage renders pixel for pixel as
+  before [(#NNNN)](https://github.com/OpenEnergyPlatform/oeplatform/pull/NNNN)
 - A third-party instance restyles the platform without a fork. Two optional
   local settings: `INSTANCE_STYLESHEETS` (static paths, linked last in every
   page's head, after the platform's and the page's own stylesheets, and left out

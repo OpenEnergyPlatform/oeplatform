@@ -1,0 +1,41 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+One Holder on the Table's permission page, in one row: an admin changes the
+role in a select (sent on change) and removes the Holder through the confirm
+dialog; anyone else reads name and role. Removing your own role is not asked
+here: the service asks that question itself (``confirm`` on the page).
+Expects ``holder``, ``mode`` ("user" or "group"), ``remove_label`` and
+``permission_url``.
+{% endcomment %}
+<div class="d-flex flex-wrap align-items-center gap-2 py-2{% if not forloop.first %} border-top{% endif %}">
+  {% if is_admin %}
+    <form class="d-flex flex-wrap align-items-center gap-2 me-auto"
+          action="{{ permission_url }}"
+          method="post">
+      {% csrf_token %}
+      <input type="hidden" name="mode" value="alter_{{ mode }}" />
+      <input type="hidden" name="{{ mode }}_id" value="{{ holder.pk }}" />
+      <label class="form-label mb-0"
+             for="{{ mode }}_level_{{ holder.pk }}">{{ holder.name }}</label>
+      <select class="form-select form-select-sm w-auto"
+              id="{{ mode }}_level_{{ holder.pk }}"
+              name="level"
+              onchange="this.form.submit()">
+        {% include "dataedit/partials/permission_role_options.html" %}
+      </select>
+    </form>
+    <form action="{{ permission_url }}" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="mode" value="remove_{{ mode }}" />
+      <input type="hidden" name="{{ mode }}_id" value="{{ holder.pk }}" />
+      <input type="submit"
+             class="btn btn-outline-danger btn-sm"
+             value="{{ remove_label }}"
+             {% if not holder.you %}data-confirm="{{ holder.name }} loses every permission on {{ table }}." data-confirm-title="{{ remove_label }}?" data-confirm-verb="{{ remove_label }}" data-confirm-danger{% endif %} />
+    </form>
+  {% else %}
+    {{ holder.name }}: {{ holder.role }}
+  {% endif %}
+</div>

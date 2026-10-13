@@ -525,8 +525,18 @@ function load_view(table, csrftoken, current_view) {
           searching: false,
           search: {},
         });
+        // The vendored builder defaults to Bootstrap 3's glyphicons, which
+        // the platform does not load; its buttons get their roles in
+        // theming/scss/layouts/_database.scss.
         query_builder = $("#builder").queryBuilder({
           filters: filters,
+          icons: {
+            add_group: "fas fa-plus-circle",
+            add_rule: "fas fa-plus",
+            remove_group: "fas fa-times",
+            remove_rule: "fas fa-times",
+            error: "fas fa-exclamation-triangle",
+          },
         });
         $("#btn-set").on("click", apply_filters);
         $("#btn-download-view").on("click", parse_download);
