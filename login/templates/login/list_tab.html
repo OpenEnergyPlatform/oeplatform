@@ -33,7 +33,6 @@ queries that collapse them, loaded after the generic dash_list.css).
   </aside>
 {% endblock side-column %}
 {% block main-content-body %}
-  {% include "login/user_nav.html" %}
   <div id="{{ frame.items }}-tab"
        class="dash"
        data-login-url="{% url 'account_login' %}"

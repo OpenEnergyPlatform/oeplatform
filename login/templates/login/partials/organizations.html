@@ -12,51 +12,51 @@ SPDX-License-Identifier: AGPL-3.0-or-later
   <div class="htmxReplacementBox">
     <div class="row">
       <h2>User Organizations</h2>
-      <div class="collapse-container collapse-container--right">
-        <div class="collapse-container__button collapse-container__button--right">
-          <button type="button"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#collapseGroupUse"
-                  aria-expanded="false"
-                  aria-controls="collapseGroupUse">
-            <svg xmlns="http://www.w3.org/2000/svg"
-                 width="14"
-                 height="14"
-                 fill="currentColor"
-                 class="bi bi-caret-right-fill"
-                 viewBox="0 0 16 16">
-              <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z" />
-            </svg>
-            How to use Organizations on the Open Energy Platform?
-          </button>
-        </div>
-        <div class="collapse" id="collapseGroupUse">
-          <div class="card card-body">
-            <strong>User Organization management:</strong> On the profile page, you can
-            oversee and control your organizations, including those you are part of. If
-            you're an admin or owner, you have the authority to invite users,
-            assigning them specific permissions to assist in organization management.
-            To maintain user privacy, we currently require you to personally
-            know and seek consent from individuals you wish to invite by
-            requesting their usernames.
-            <br />
-            <br />
-            <strong>User object permissions:</strong> Organizations on the Open Energy
-            Platform serve a singular purpose: simplifying object-level
-            permissions. This functionality currently is particularly relevant
-            for data tables that users create in the database section of the
-            platform. To grant permissions, visit the detail view of the table
-            where, as the owner or creator, you'll find the permissions button
-            on the right side. From there, you can add individual users with
-            specific permissions or include an organization to grant identical
-            permissions to all its members.
-          </div>
+      <div class="d-flex justify-content-end mb-2">
+        <button type="button"
+                class="btn btn-link fw-bold text-decoration-none"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapseGroupUse"
+                aria-expanded="false"
+                aria-controls="collapseGroupUse">
+          <svg xmlns="http://www.w3.org/2000/svg"
+               width="14"
+               height="14"
+               fill="currentColor"
+               class="bi bi-caret-right-fill"
+               viewBox="0 0 16 16">
+            <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z" />
+          </svg>
+          How to use Organizations on the Open Energy Platform?
+        </button>
+      </div>
+      <div class="collapse" id="collapseGroupUse">
+        <div class="card card-body">
+          <strong>User Organization management:</strong> On the profile page, you can
+          oversee and control your organizations, including those you are part of. If
+          you're an admin or owner, you have the authority to invite users,
+          assigning them specific permissions to assist in organization management.
+          To maintain user privacy, we currently require you to personally
+          know and seek consent from individuals you wish to invite by
+          requesting their usernames.
+          <br />
+          <br />
+          <strong>User object permissions:</strong> Organizations on the Open Energy
+          Platform serve a singular purpose: simplifying object-level
+          permissions. This functionality currently is particularly relevant
+          for data tables that users create in the database section of the
+          platform. To grant permissions, visit the detail view of the table
+          where, as the owner or creator, you'll find the permissions button
+          on the right side. From there, you can add individual users with
+          specific permissions or include an organization to grant identical
+          permissions to all its members.
         </div>
       </div>
     </div>
     <section class="profile-category">
       <h3>Memberships</h3>
-      <button class="profile-category__btn profile-category__btn--add"
+      <button type="button"
+              class="btn btn-primary mb-3"
               hx-get="{% url 'login:organization-create' %}"
               hx-target=".htmxReplacementBox"
               hx-push-url="true"

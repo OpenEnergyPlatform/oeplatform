@@ -140,7 +140,6 @@
 {% endblock side-column %}
 {% block main-content-body %}
   {% if profile_user == request.user %}
-    {% include "login/user_nav.html" %}
     <h2>Active Open Peer Reviews</h2>
     <p>
       This section displays the review with the latest activity, where you are
