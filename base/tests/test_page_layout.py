@@ -193,6 +193,9 @@ class SectionHeadingTest(SideColumnTestCase):
 
     def test_profile_section_headings_carry_no_class(self):
         for view_name, heading in (
+            # Settings' headings are card titles (the card component's own
+            # class), so it carries one; the old classes stay gone (#2653).
+            ("login:settings", 'id="security-heading">Your Security Information</h2>'),
             ("login:reviews", "<h2>Active Open Peer Reviews</h2>"),
             ("login:organizations", "<h3>Memberships</h3>"),
         ):

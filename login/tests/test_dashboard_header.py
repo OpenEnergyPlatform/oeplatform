@@ -5,7 +5,10 @@ once: area "Dashboard", the user's name as the h1, the four tabs on the
 band's lower edge and a gear aside link to Settings. Settings is not a tab: it
 has its own header (Account / Dashboard / Settings), a column of cards, no
 tabs and no profile sidebar.
-"""
+
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+"""  # noqa: 501
 
 from django.urls import reverse
 
