@@ -1,8 +1,8 @@
 {% extends "base/base.html" %}
 {% load static %}
 {% block site-header %}
-  {% url 'base:about' as about_url %}
-  {% include "components/page_header.html" with area="About" icon="icons/area_about.html" crumb_label="Overview" crumb_url=about_url title="What's new" description="What changed for you in the platform's latest release." %}
+  {% url 'base:home' as home_url %}
+  {% include "components/page_header.html" with area="About" icon="icons/area_about.html" crumb_label="Home" crumb_url=home_url title="What's new" description="What changed for you in the platform's latest release." %}
 {% endblock site-header %}
 {% block after-head %}
   <link rel="stylesheet" href="{% static 'css/static_pages.css' %}" />
