@@ -74,7 +74,6 @@ are still printed.
 | `scss/tokens/_root.scss`           | Emits the `--oep-*` design tokens at `:root`.                                                                         |
 | `scss/tokens/_remap.scss`          | The re-map layer: Bootstrap's component variables pointed at the tokens.                                              |
 | `scss/components/`                 | House components only, one partial per component, each with its catalogue entry.                                      |
-| `scss/legacy/`                     | The component partials from before the catalogue (buttons, cards, tags, ...). Still compiled; add nothing here.       |
 | `scss/layouts/`                    | Page layouts (database, profile, review, ...) and the collapse and sidebar rules.                                     |
 | `stock_tokens.scss`                | Every token at Bootstrap 5.2's stock value, for the catalogue's `?tokens=bootstrap`.                                  |
 | `literal_scan.mjs`                 | The literal scan the catalogue check runs.                                                                            |
@@ -153,11 +152,6 @@ with `@use '../base/' as *;` like its neighbours, add
 `@use 'scss/components/<name>';` to `oepstrap.scss`, and rebuild. A partial in
 `scss/components/` is a house component: give it a catalogue entry,
 `base/templates/styleguide/entries/<name>.html`, or the catalogue check fails.
-
-The partials in `scss/legacy/` predate the catalogue. A ticket that turns one
-into a house component moves it to `scss/components/` under its singular
-snake_case name (`_alerts` becomes `_alert`) and adds its entry; the empty layer
-is deleted at the end (#2660).
 
 ## Check a component
 
