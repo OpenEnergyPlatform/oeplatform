@@ -12,10 +12,7 @@ checked in the browser rather than here.
 Every dropdown takes the navbar dropdown's look from the theme's
 `.dropdown-menu`; there is no markup to assert beyond the catalogue entry.
 
-The dashboard's tables tab keeps its own list controls (#2659), and the
-factsheet editor's "Submit all" still sits in its tab row until the factsheet
-edit ticket (#2656) moves it: an exemption below, with a test that fails once
-it is no longer needed.
+The dashboard's tables tab keeps its own list controls (#2659).
 
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
@@ -39,11 +36,6 @@ RETIRED = ("nav-tabs", "table-tabs", "fullwidth-tabs", "pages-nav-tabs")
 _RETIRED = re.compile(r"(?<![\w-])(%s)(?![\w-])" % "|".join(RETIRED))
 _OPENING = re.compile(r"<(a|button|input)\b[^>]*>", re.IGNORECASE)
 _CLASS = re.compile(r'class="([^"]*)"')
-
-#: Tab rows that still hold an action, and the ticket that moves it out.
-HOLDS_AN_ACTION = {
-    "modelview:edit": "#2656 moves Submit all out of the factsheet editor's tab row",
-}
 
 
 def classes(opening_tag):
@@ -116,13 +108,12 @@ class NoRetiredTabClassTest(SimpleTestCase):
 class TabRowAssertions:
     """What every tab row promises, whatever page it is on."""
 
-    def assert_house_tab_row(self, row, view_name=None):
+    def assert_house_tab_row(self, row):
         opening = row[: row.index(">") + 1]
         self.assertIn("nav", classes(opening))
         self.assertTrue(tabs(row), "a tab row without a tab")
         self.assertLessEqual(len(active(row)), 1)
-        if view_name not in HOLDS_AN_ACTION:
-            self.assertEqual(others(row), [], "an action sits in the tab row")
+        self.assertEqual(others(row), [], "an action sits in the tab row")
         self.assertLessEqual(len(asides(row)), 1)
         for aside in asides(row):
             self.assertNotIn('role="tab"', aside)
@@ -216,19 +207,7 @@ class FactsheetEditTabsTest(TabRowAssertions, TestViewsTestCase):
                 rows = tab_rows(html)
 
                 self.assertEqual(len(rows), 1)
-                self.assert_house_tab_row(rows[0], "modelview:edit")
-
-    def test_the_exemption_is_still_needed(self):
-        """Fails once #2656 has moved "Submit all" out of the tab row: then
-        delete the exemption and this test."""
-        sheet = seed_corpus(sheettype="model", factsheets=1, corrupted=0)
-        html = self.get(
-            "modelview:edit",
-            kwargs={"sheettype": "model", "pk": sheet.factsheets[0].pk},
-            logged_in=True,
-        ).content.decode()
-
-        self.assertTrue(others(tab_rows(html)[0]))
+                self.assert_house_tab_row(rows[0])
 
 
 class DashboardTabsTest(TabRowAssertions, TestViewsTestCase):

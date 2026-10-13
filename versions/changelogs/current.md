@@ -203,6 +203,17 @@ SPDX-License-Identifier: CC0-1.0
   drew invisible glyphicons) and house buttons: secondary to add, outline red to
   delete, an outline toggle for AND/OR. The homepage renders pixel for pixel as
   before [(#2702)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2702)
+- The model and framework factsheet editors put each label above its field
+  instead of in a table column that wrapped long labels into several lines. A
+  group of checkboxes is a fieldset whose options flow into columns, every
+  checkbox is a house check with its label beside it, and each field has one
+  label that points at it. "Submit all" left the tab row: it is a primary button
+  in a bar that stays at the bottom of the screen while the form is on it. The
+  green "+" and red "x" on list fields (institutions, authors, ...) are house
+  buttons with a name for screen readers. The "Others" field under modeled
+  renewables could never be shown and now opens like its neighbours. On the
+  factsheet lists the column toggles are house checks. The homepage is untouched
+  [(#2656)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2656)
 - A third-party instance restyles the platform without a fork. Two optional
   local settings: `INSTANCE_STYLESHEETS` (static paths, linked last in every
   page's head, after the platform's and the page's own stylesheets, and left out
