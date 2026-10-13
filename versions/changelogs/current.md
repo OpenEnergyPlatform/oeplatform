@@ -686,6 +686,10 @@ SPDX-License-Identifier: CC0-1.0
   table with no Admin at all
   [(#2595)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2595)
 
+- Show a notice band above the navbar on every page asking users who noticed
+  recent problems with the platform to write via the contact form; the band
+  lives in `base/templates/base/_notice.html`, which is emptied to retire it
+
 ## Bugs
 
 - The Edit button in a table page's tag chooser opens the tag manager instead of

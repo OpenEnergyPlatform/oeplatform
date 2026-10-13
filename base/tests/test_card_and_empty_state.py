@@ -282,7 +282,8 @@ class DatasetPagesTest(TestCase):
         self.assertEqual(
             text(empty), "No tables found in this topic matching your filters."
         )
-        self.assertNotIn("alert-info", page)
+        # Read after <main>: the platform notice above the navbar is an alert.
+        self.assertNotIn("alert-info", page.split('id="main-content"', 1)[1])
 
     def test_a_table_in_the_list_is_a_house_card(self):
         table = Table.objects.create(name="cards_listed_table", is_publish=True)

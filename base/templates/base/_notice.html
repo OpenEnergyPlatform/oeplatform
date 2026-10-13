@@ -1,0 +1,10 @@
+{% comment %}
+  Platform notice: one band above the navbar on every page, included by all
+  five shells. To retire a notice, empty this file; the includes stay as the
+  slot for the next one.
+{% endcomment %}
+<aside class="alert alert-info rounded-0 mb-0 py-2"
+       aria-label="Platform notice">
+  Noticed problems with the platform recently? Please let us know via the
+  <a href="{% url 'base:contact' %}">contact form</a>.
+</aside>
