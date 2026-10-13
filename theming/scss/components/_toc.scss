@@ -16,6 +16,19 @@
         align-items: start;
     }
 
+    // The left column when something sits above the list (the terms of use's
+    // language switch): the two stick as one, so the list itself does not.
+    &__side {
+        @include media-breakpoint-up(lg) {
+            position: sticky;
+            top: 1.5rem;
+
+            .toc {
+                position: static;
+            }
+        }
+    }
+
     &__body {
         min-width: 0;
         max-width: var(--oep-measure);
