@@ -14,22 +14,22 @@
   Placed last inside the navbar's .navbar-collapse. Below lg the collapsed menu
   shows the same items as its own section instead of a menu in a menu.
 {% endcomment %}
-<ul class="navbar-nav ms-lg-auto align-items-lg-center user-menu"
-    data-navbar-user>
+<ul class="navbar-nav ms-lg-auto align-items-lg-center user-menu">
   {% if user.is_authenticated %}
     {% url 'login:profile' user.pk as dashboard_url %}
     {% url 'login:settings' user.pk as settings_url %}
     {% url 'account_logout' as logout_url %}
+    {% firstof id "navbarDropdownUser" as toggle_id %}
     <li class="nav-item dropdown d-none d-lg-block">
       <a class="nav-link dropdown-toggle"
          href="#"
-         id="{{ id|default:'navbarDropdownUser' }}"
+         id="{{ toggle_id }}"
          role="button"
          data-bs-toggle="dropdown"
          aria-haspopup="true"
          aria-expanded="false">{% fa5_icon 'user' 'fas' %} {{ user.name }}</a>
       <ul class="dropdown-menu dropdown-menu-end"
-          aria-labelledby="{{ id|default:'navbarDropdownUser' }}">
+          aria-labelledby="{{ toggle_id }}">
         <li>
           <a class="dropdown-item"
              href="{{ dashboard_url }}">{% translate "Dashboard" %}</a>

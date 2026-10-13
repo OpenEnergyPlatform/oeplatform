@@ -10,6 +10,8 @@ platform admin, because the rule has no admin exemption and that is the case
 most likely to be added back by accident.
 """  # noqa: 501
 
+import re
+
 from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase
 from django.urls import reverse
@@ -28,6 +30,12 @@ def make_user(name, **extra):
         **extra,
     )
     return user
+
+
+def without_csrf(response):
+    """The page without its CSRF token, which is masked anew on every response
+    (the signed-in navbar's Sign out is a form, #2644)."""
+    return re.sub(rb'name="csrfmiddlewaretoken" value="[^"]*"', b"", response.content)
 
 
 class LifecycleFixture(TestCase):
@@ -147,7 +155,7 @@ class SingleReadTests(LifecycleFixture):
                     draft = self.get(route, "own_draft")
                     unknown = self.get(route, "no_such_dataset")
                     self.assertEqual(draft.status_code, 404)
-                    self.assertEqual(draft.content, unknown.content)
+                    self.assertEqual(without_csrf(draft), without_csrf(unknown))
 
     def test_an_ownerless_draft_is_read_by_nobody(self):
         for who in self.readers():

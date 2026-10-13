@@ -75,8 +75,7 @@ const launch = () =>
 
 // The navbar's user area: the user menu, and the corner it replaced (#2644),
 // so that a before shot of a branch older than the menu masks the same area.
-const USER_AREA =
-  "[data-navbar-user], .index-navbar .container-fluid > .ms-auto";
+const USER_AREA = ".user-menu, .index-navbar .container-fluid > .ms-auto";
 
 async function mask(page, path) {
   const rects = await page.$$eval(USER_AREA, (areas) =>
@@ -145,15 +144,17 @@ async function shoot(out) {
       '[aria-labelledby="navbarDropdownDatabase"] .dropdown-item:nth-child(2)'
     );
     await new Promise((done) => setTimeout(done, 500));
-    await page.screenshot({ path: join(out, `menu-${auth}-1440.png`) });
-    await mask(page, join(out, `menu-${auth}-1440.png`));
+    const menu = join(out, `menu-${auth}-1440.png`);
+    await page.screenshot({ path: menu });
+    await mask(page, menu);
     await page.close();
 
     page = await open(390, session);
     await page.click(".navbar-toggler");
     await new Promise((done) => setTimeout(done, 800));
-    await page.screenshot({ path: join(out, `burger-${auth}-390.png`) });
-    await mask(page, join(out, `burger-${auth}-390.png`));
+    const burger = join(out, `burger-${auth}-390.png`);
+    await page.screenshot({ path: burger });
+    await mask(page, burger);
     await page.close();
   }
   await browser.close();

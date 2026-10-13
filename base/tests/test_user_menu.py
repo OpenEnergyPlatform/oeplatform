@@ -18,18 +18,18 @@ from django.urls import reverse
 from base.tests import TestViewsTestCase
 from modelview.tests.html import elements_with_class, text
 
-#: Pages in two shells: the homepage (base.html) and a dashboard tab
-#: (base-profile.html). Every shell includes the same navbar.
-PAGES = (("base:home", {}), ("login:organizations", {"user_id": None}))
+#: Pages in two shells, by URL name and whether it is the signed-in user's
+#: own: the homepage (base.html) and a dashboard tab (base-profile.html).
+#: Every shell includes the same navbar.
+PAGES = (("base:home", False), ("login:organizations", True))
 
 
 class UserMenuTest(TestViewsTestCase):
     def pages(self, logged_in):
-        for name, kwargs in PAGES:
-            if "user_id" in kwargs:
-                if not logged_in:
-                    continue
-                kwargs = {"user_id": self.user.pk}
+        for name, own in PAGES:
+            if own and not logged_in:
+                continue
+            kwargs = {"user_id": self.user.pk} if own else {}
             with self.subTest(page=name):
                 yield self.get(
                     name, kwargs=kwargs, logged_in=logged_in

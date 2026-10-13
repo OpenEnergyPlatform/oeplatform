@@ -225,8 +225,9 @@ def render_entries(request, context, entries=ENTRIES):
         )
 
 
-#: The signed-in user the user menu's entry shows, whoever reads the page.
-EXAMPLE_USER = SimpleNamespace(pk=1, name="Ada Lovelace", is_authenticated=True)
+#: The signed-in user the user menu's entry shows, whoever reads the page
+#: (pk 0: no account has it, so its links lead to nobody's dashboard).
+EXAMPLE_USER = SimpleNamespace(pk=0, name="Ada Lovelace", is_authenticated=True)
 
 
 class StyleguideView(TemplateView):
