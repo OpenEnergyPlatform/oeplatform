@@ -170,7 +170,7 @@ SPDX-License-Identifier: CC0-1.0
   and the edit pages, is a button whose help opens on hover and on keyboard
   focus. Two new house components, `section_card` and `field_help`, with
   catalogue entries. The homepage renders pixel for pixel as before
-  [(#PRNUM)](https://github.com/OpenEnergyPlatform/oeplatform/pull/PRNUM)
+  [(#2701)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2701)
 - A third-party instance restyles the platform without a fork. Two optional
   local settings: `INSTANCE_STYLESHEETS` (static paths, linked last in every
   page's head, after the platform's and the page's own stylesheets, and left out
