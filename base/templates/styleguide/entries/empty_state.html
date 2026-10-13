@@ -1,7 +1,10 @@
-{# use: Where a list or a search has nothing to show: a muted icon, one sentence saying so, at most one action (what makes the list fill). Compact inside a card or a drawer. #}
+{# use: Where a list or a search has nothing to show: a muted icon, one sentence saying so, at most one action (what makes the list fill). Compact inside a card or a drawer. An error page is one at page size: an image (image, image_alt) instead of the icon, and with heading the title is the page's one h1. #}
+{% load static %}
 {% include "components/empty_state.html" with icon="fas fa-layer-group" title="You have no datasets yet" text="A dataset collects tables under one title." action_template="styleguide/entries/_empty_state_action.html" %}
 <div class="card">
   <div class="card-body">
     {% include "components/empty_state.html" with icon="fas fa-table" text="No tables are assigned yet." compact=True %}
   </div>
 </div>
+{% static 'img/OpenEnergyFamily_OEPlatypus.png' as platypus %}
+{% include "components/empty_state.html" with image=platypus image_alt="OEPlatypus" heading=True as_example=True title="This page could not be found!" text="It might be an old link or maybe the data moved." %}

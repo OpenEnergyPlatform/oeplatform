@@ -12,6 +12,16 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- The error pages and the research project pages take WF-13's layouts. A 404 and
+  a 500 are the house empty state at page size: the platypus above the title,
+  the title as the page's heading, no page header band, and no centring by
+  markup or inline widths. The only text change is the accepted one:
+  "OEPlatypus:" becomes "OEPlatypus.", since the platypus now stands above the
+  sentence. A project page reads at the reading width, and its partners are the
+  about page's logo tiles, a partner without a logo showing its name in the same
+  tile; "Funding" is a section heading like the others.
+  [(#2709)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2709)
+
 - The topic list's cards have their top section back: title, icon, table count
   and keywords on a tinted header above the description. Draft and scenario stay
   full width with "Add data set" beside the text; the other topics stay three

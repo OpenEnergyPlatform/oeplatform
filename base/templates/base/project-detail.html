@@ -1,53 +1,45 @@
 {% extends "base/base.html" %}
-{% load django_bootstrap5 %}
+{% load static %}
+{% block after-head %}
+  {# The partners are tiles like the about page's (#2652); the text keeps the reading width. #}
+  <link rel="stylesheet" href="{% static 'css/about.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/static_pages.css' %}" />
+{% endblock after-head %}
 {% block site-header %}
   {% url 'base:about' as about_url %}
   {% include "components/page_header.html" with area="About" icon="icons/area_about.html" crumb_label="Overview" crumb_url=about_url title=project.fullTitle %}
 {% endblock site-header %}
 {% block main-content-body %}
-  {% load static %}
-  <div>
+  <div class="reading-column">
     <div class="d-flex justify-content-between flex-wrap">
-      <!-- logo -->
       {% if project.logo %}
-        <img class="flex-item"
-             src="{% static 'logos/project/'|add:project.logo %}"
+        <img src="{% static 'logos/project/'|add:project.logo %}"
              alt="{{ project.fullTitle }}"
-             width="200"
-             border="0" />
+             width="200" />
       {% endif %}
       <p>last updated on: {{ project.meta.lastUpdated }}</p>
     </div>
-    <!-- general -->
     <h2>General</h2>
     <p>{{ project.general }}</p>
-    <!-- tasks -->
     <h2>Tasks</h2>
-    {% if entry in project.tasks %}
-      {% for task in project.tasks %}<li>{{ task }}</li>{% endfor %}
-    {% else %}
-      {{ project.tasks }}
-    {% endif %}
-    <!-- Partners -->
+    <p>{{ project.tasks }}</p>
     <h2>Partners</h2>
-    {% for partner in project.partners %}
-      <ul>
-        <div class="d-flex flex-wrap">
-          <!-- <li>{{ partner.name }}</li> -->
-          {% if partner.logo %}
-            <img src="{% static 'logos/partner/'|add:partner.logo %}"
-                 alt="{{ partner.name }}"
-                 width="200"
-                 border="0" />
-          {% else %}
-            {{ partner.name }}
-          {% endif %}
-        </div>
-      </ul>
-    {% endfor %}
-    <!-- Funding -->
-    <h3>Funding</h3>
-    Grant number: {{ project.funding }}
-    <!-- Meta -->
+    {# One tile per partner: its logo, or its name where there is none. #}
+    <ul class="logo-grid">
+      {% for partner in project.partners %}
+        <li>
+          <span class="logo-tile">
+            {% if partner.logo %}
+              <img src="{% static 'logos/partner/'|add:partner.logo %}"
+                   alt="{{ partner.name }}" />
+            {% else %}
+              {{ partner.name }}
+            {% endif %}
+          </span>
+        </li>
+      {% endfor %}
+    </ul>
+    <h2>Funding</h2>
+    <p>Grant number: {{ project.funding }}</p>
   </div>
 {% endblock main-content-body %}
