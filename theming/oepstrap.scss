@@ -1,6 +1,6 @@
 @use 'scss/tokens/root';
-// These two layouts keep the place they had before the house components
-// (#2632), so the compiled theme does not move.
+// Before the components on purpose: moving these two would reorder the
+// compiled theme's rules.
 @use 'scss/layouts/collapses';
 @use 'scss/layouts/sidebars';
 // House components: one partial per component, named as its catalogue entry
