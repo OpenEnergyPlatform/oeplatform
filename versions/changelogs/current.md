@@ -878,4 +878,4 @@ SPDX-License-Identifier: CC0-1.0
   templates; dataedit `admin`, `url_list_field`, `tag_form`), the unloaded
   `custom_alert.css`, the factsheet stylesheet's Bootstrap 3 `.panel-heading`
   rules and an unused mixin. Nothing visible changes
-  [(#2660)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2660)
+  [(#2715)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2715)
