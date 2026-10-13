@@ -13,7 +13,7 @@ import { bindLanguageSwitch, languageAt } from "../language_switch.js";
 // The page as base/terms_of_use.html renders it, shortened.
 function renderPage() {
   document.body.innerHTML = `
-    <h1>Terms of Use</h1>
+    <h1 class="page-header__title">Terms of Use</h1>
     <div role="radiogroup" data-language-switch hidden>
       <input type="radio" class="btn-check" name="language" id="language-en"
              value="en" checked>
@@ -130,6 +130,23 @@ describe("bindLanguageSwitch", () => {
     window.dispatchEvent(new Event("hashchange"));
     expect(shown()).toEqual(["de", "de"]);
     expect(scroll).toHaveBeenCalled();
+  });
+
+  it("opens a language's own address at the top", () => {
+    renderPage();
+    at("#de");
+    const scroll = vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+    bindLanguageSwitch(document);
+    expect(scroll).toHaveBeenCalledWith(0, 0);
+    scroll.mockRestore();
+  });
+
+  it("falls back to English on an address that does not decode", () => {
+    renderPage();
+    at("#%E0");
+    bindLanguageSwitch(document);
+    expect(shown()).toEqual(["en", "en"]);
+    expect(title().textContent).toBe("Terms of Use");
   });
 
   it("does nothing on a page without a switch", () => {
