@@ -19,7 +19,7 @@ from django.conf import settings
 
 from base.tests.test_confirm_dialog import select
 from base.tests.test_page_lint import Page, PageFixture
-from login.models import UserPermission
+from login.models import GroupPermission, Membership, Organization, UserPermission
 from login.models import myuser as User
 from login.permissions import ADMIN_PERM, WRITE_PERM
 from modelview.tests.html import element_markup
@@ -71,7 +71,7 @@ class PermissionPageTest(PageFixture):
         # the owner holds Admin, so the user list is not empty
         self.assertNotIn("No permissions for users set, yet.", main)
 
-    def test_removing_someone_else_asks_the_dialog(self):
+    def test_every_removal_asks_the_dialog_your_own_included(self):
         UserPermission.objects.create(
             table=self.table,
             holder=User.objects.create_user(
@@ -79,17 +79,27 @@ class PermissionPageTest(PageFixture):
             ),
             level=ADMIN_PERM,
         )
+        # The viewer's own organization, while they hold Admin directly: the
+        # permission service asks nothing about removing it.
+        own = Organization.objects.create(name="Own Org")
+        Membership.objects.create(user=self.user, group=own)
+        GroupPermission.objects.create(table=self.table, holder=own, level=WRITE_PERM)
         main = self.main(self.html(PERMISSIONS))
 
-        (remove,) = [
-            r
-            for r in select(main, "input", value="Remove user")
-            if "data-confirm" in r.attrs
-        ]
-        self.assertIn("other_admin", remove.attrs["data-confirm"])
-        self.assertEqual(remove.attrs["data-confirm-verb"], "Remove user")
-        self.assertIn("data-confirm-danger", remove.attrs)
-        self.assertLessEqual({"btn", "btn-outline-danger"}, set(remove.classes))
+        for label, holders in (
+            ("Remove user", {"other_admin", self.user.name}),
+            ("Remove group", {"Own Org"}),
+        ):
+            removes = select(main, "input", value=label)
+            self.assertEqual(len(removes), len(holders), label)
+            for remove in removes:
+                self.assertEqual(remove.attrs["data-confirm-verb"], label)
+                self.assertIn("data-confirm-danger", remove.attrs)
+                self.assertLessEqual({"btn", "btn-outline-danger"}, set(remove.classes))
+            self.assertEqual(
+                {r.attrs["data-confirm"].split(" loses")[0] for r in removes},
+                holders,
+            )
 
     def test_the_services_question_about_your_own_role_is_asked_in_the_dialog(
         self,
@@ -124,9 +134,12 @@ class PermissionPageTest(PageFixture):
                     {"btn", "btn-outline-danger"}, set(confirm.classes)
                 )
                 # asked at once, not after a second click
+                # but only through the dialog: without its module the click
+                # would submit the change unasked
                 self.assertRegex(
                     html,
-                    r'getElementById\("permission-confirm"\)\.click\(\)',
+                    r"if \(window\.oep\) \{\s*"
+                    r'document\.getElementById\("permission-confirm"\)\.click\(\)',
                 )
 
     def test_no_question_no_script_that_asks_it(self):

@@ -4,10 +4,12 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 One Holder on the Table's permission page, in one row: an admin changes the
 role in a select (sent on change) and removes the Holder through the confirm
-dialog; anyone else reads name and role. Removing your own role is not asked
-here: the service asks that question itself (``confirm`` on the page).
-Expects ``holder``, ``mode`` ("user" or "group"), ``remove_label`` and
-``permission_url``.
+dialog, their own grants included (the service may then ask its own question
+about losing Admin or access, ``confirm`` on the page); anyone else reads name
+and role. Rendered inside the page's loop over Holders.
+
+Reads ``holder``, ``mode`` ("user" or "group"), ``remove_label``,
+``permission_url``, ``is_admin``, ``table`` and ``forloop``.
 {% endcomment %}
 <div class="d-flex flex-wrap align-items-center gap-2 py-2{% if not forloop.first %} border-top{% endif %}">
   {% if is_admin %}
@@ -33,7 +35,10 @@ Expects ``holder``, ``mode`` ("user" or "group"), ``remove_label`` and
       <input type="submit"
              class="btn btn-outline-danger btn-sm"
              value="{{ remove_label }}"
-             {% if not holder.you %}data-confirm="{{ holder.name }} loses every permission on {{ table }}." data-confirm-title="{{ remove_label }}?" data-confirm-verb="{{ remove_label }}" data-confirm-danger{% endif %} />
+             data-confirm="{{ holder.name }} loses every permission on {{ table }}."
+             data-confirm-title="{{ remove_label }}?"
+             data-confirm-verb="{{ remove_label }}"
+             data-confirm-danger />
     </form>
   {% else %}
     {{ holder.name }}: {{ holder.role }}

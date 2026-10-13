@@ -54,7 +54,8 @@
   {% endif %}
   <section class="card mb-4" aria-labelledby="group-permissions-title">
     <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
-      <h3 class="h5 mb-0" id="group-permissions-title">Group Permissions</h3>
+      <h3 class="card-title mb-0"
+          id="group-permissions-title">Group Permissions</h3>
       {% if is_admin %}
         {% if access.shareable %}
           <form id="addGroupForm"
@@ -94,7 +95,8 @@
   </section>
   <section class="card" aria-labelledby="user-permissions-title">
     <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
-      <h3 class="h5 mb-0" id="user-permissions-title">User Permissions</h3>
+      <h3 class="card-title mb-0"
+          id="user-permissions-title">User Permissions</h3>
       {% if is_admin %}
         <form id="addUserForm"
               class="d-flex flex-wrap align-items-center gap-2"
@@ -131,10 +133,13 @@
   {% if confirm %}
     <script>
       // The dialog module binds before DOMContentLoaded, so this click is
-      // held back and asked in the dialog.
-      document.addEventListener("DOMContentLoaded", () =>
-        document.getElementById("permission-confirm").click()
-      );
+      // held back and asked in the dialog. Without the module (it failed to
+      // load) the click would submit the change unasked: leave it to the box.
+      document.addEventListener("DOMContentLoaded", () => {
+        if (window.oep) {
+          document.getElementById("permission-confirm").click();
+        }
+      });
     </script>
   {% endif %}
   {% if is_admin %}
