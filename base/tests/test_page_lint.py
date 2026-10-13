@@ -187,8 +187,7 @@ class Page:
     logged_in: bool = False
     #: An htmx fragment, which has no shell and so no #main-content.
     fragment: bool = False
-    #: The status the page answers with: an error page is read through a
-    #: URL that names nothing.
+    #: The status the page is expected to answer with (404 for an error page).
     status: int = 200
 
     def label(self):

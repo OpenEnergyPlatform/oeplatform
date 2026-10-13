@@ -39,10 +39,6 @@ urlpatterns = platform_urlpatterns + [path("boom/", boom)]
 handler500 = "base.views.handler500"
 
 
-def accepted(before):
-    return before.replace("OEPlatypus:", "OEPlatypus.")
-
-
 @override_settings(DEBUG=False)
 class ErrorPageTest(TestCase):
     def missing_page(self):
@@ -59,20 +55,22 @@ class ErrorPageTest(TestCase):
         return self.client.get("/boom/")
 
     def pages(self):
-        """(label, response, snapshot) for each way to reach an error page."""
+        """(label, response, status, snapshot) for each way to reach an error
+        page. A snapshot is the page's text from before #2652 with the one
+        accepted change made: "OEPlatypus:" became "OEPlatypus."."""
         return (
-            ("missing page", self.missing_page(), "error_404"),
-            ("unknown project", self.unknown_project(), "error_404"),
-            ("server error", self.server_error(), "error_500"),
+            ("missing page", self.missing_page(), 404, "error_404"),
+            ("unknown project", self.unknown_project(), 404, "error_404"),
+            ("server error", self.server_error(), 500, "error_500"),
         )
 
     def test_the_status(self):
-        for label, response, snapshot in self.pages():
+        for label, response, status, _ in self.pages():
             with self.subTest(page=label):
-                self.assertEqual(response.status_code, int(snapshot[-3:]))
+                self.assertEqual(response.status_code, status)
 
     def test_one_empty_state_with_the_platypus_above_the_one_h1(self):
-        for label, response, _ in self.pages():
+        for label, response, _, _ in self.pages():
             with self.subTest(page=label):
                 main = parse(response.content.decode()).find("main")
                 [state] = main.find_all(css_class="empty-state")
@@ -83,7 +81,7 @@ class ErrorPageTest(TestCase):
                 self.assertLess(state.elements.index(image), state.elements.index(h1))
 
     def test_no_band_and_no_layout_by_markup(self):
-        for label, response, _ in self.pages():
+        for label, response, _, _ in self.pages():
             with self.subTest(page=label):
                 root = parse(response.content.decode())
                 self.assertEqual(root.find_all("header", "page-header"), [])
@@ -94,11 +92,11 @@ class ErrorPageTest(TestCase):
                 self.assertEqual(styled, [])
 
     def test_texts_are_unchanged_but_for_the_platypus(self):
-        for label, response, snapshot in self.pages():
+        for label, response, _, snapshot in self.pages():
             with self.subTest(page=label):
                 main = parse(response.content.decode()).find("main")
-                before = (SNAPSHOTS / f"{snapshot}.txt").read_text().strip()
-                self.assertEqual(main.text(), accepted(before))
+                expected = (SNAPSHOTS / f"{snapshot}.txt").read_text().strip()
+                self.assertEqual(main.text(), expected)
 
     def test_the_server_error_keeps_the_button_rule(self):
         self.assertEqual(lint(self.server_error().content.decode()), [])
