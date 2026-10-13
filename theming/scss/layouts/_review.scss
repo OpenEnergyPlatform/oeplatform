@@ -1,6 +1,5 @@
 @use '../base/' as *;
 @use '../base/mixins' as *;
-@use '../components/button' as *;
 
 .review {
     @extend .row;
@@ -194,12 +193,6 @@
 
     &__btn {
         @extend .col-4;
-
-        button {
-            @extend .btn;
-            @extend .btn-secondary;
-            @extend .w-100;
-        }
     }
 
     &__remarks {
@@ -223,20 +216,6 @@
     &__description {
         @extend .mb-3;
         @extend .text-end;
-
-        button {
-            @extend .btn;
-            @extend .btn-light;
-            @extend .btn-sm;
-            @extend .text-primary;
-            @extend .p-0;
-            @extend .border-0;
-
-            &:hover {
-                @extend .bg-transparent;
-                @extend .border-0;
-            }
-        }
     }
 
     &__btn-nav {
@@ -248,19 +227,6 @@
         top: 3.75rem;
         left: $C--padding-standard;
         width: calc(100% - 2 * #{$C--padding-standard});
-
-        button {
-            @extend .btn;
-            @extend .px-0;
-
-            &:first-of-type {
-                @extend .btn-light;
-            }
-
-            &:last-of-type {
-                @extend .btn-outline-primary;
-            }
-        }
     }
 
     &__infos {
@@ -310,8 +276,7 @@
 
 // The peer review pages' bar (#2648, replacing the old full-width tab row):
 // the category tabs on the left and, beside them rather than in the tab row,
-// the review's actions. The actions' button roles are the peer review
-// ticket's (#2658).
+// the review's actions, each carrying its button role itself (#2658).
 .review-bar {
     display: flex;
     justify-content: center;
@@ -357,20 +322,337 @@
         gap: 0.5rem;
         padding-bottom: 0.5rem;
     }
+}
 
-    &__action--summary button {
-        @extend .btn;
-        @extend .btn-primary;
+// What the two peer review templates and the Summary tab's script each carried
+// as their own <style> (#2658): the progress ring, the "NEW" mark on a
+// suggestion, a field's review history and the Summary tab. On tokens; the
+// review states are the status colours.
+.ok-progress-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.25rem;
+}
+
+.ok-progress-circle {
+    position: relative;
+    width: 130px;
+    height: 130px;
+
+    svg {
+        width: 130px;
+        height: 130px;
+        transform: rotate(-90deg);
     }
 
-    &__action--save button,
-    &__action--save a {
-        @extend .btn;
-        @extend .btn-outline-primary;
+    circle {
+        fill: none;
+        stroke-width: 10;
+
+        &.bg {
+            stroke: var(--bs-border-color);
+        }
+
+        // navigation.js sets the offset from the share of accepted fields.
+        &.progress {
+            stroke: var(--bs-success);
+            stroke-linecap: round;
+            stroke-dasharray: 326.72;
+            stroke-dashoffset: 326.72;
+            transition: stroke-dashoffset 0.4s ease;
+        }
+    }
+}
+
+.percentage-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.375rem;
+    font-weight: var(--oep-heading-weight);
+}
+
+// The badge's warning look (components/_badge.scss), on a pseudo-element.
+.field-suggestion .suggestion--highlight:not(:empty)::before {
+    content: "NEW";
+    display: inline-block;
+    margin-right: 0.4rem;
+    padding: 0.05rem 0.35rem;
+    border: 1px solid color-mix(in srgb, var(--bs-warning) 45%, var(--oep-surface));
+    border-radius: var(--bs-border-radius-sm);
+    background-color: color-mix(in srgb, var(--bs-warning) 15%, var(--oep-surface));
+    color: color-mix(in srgb, var(--bs-warning) 30%, var(--bs-body-color));
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    vertical-align: middle;
+}
+
+// field_history.js: a field's earlier rounds, behind a btn-link toggle.
+.opr-history {
+    margin-top: 0.75rem;
+    padding: 0.5rem 1rem 0.25rem;
+    border-top: 1px dashed var(--bs-border-color);
+
+    &__caret {
+        display: inline-block;
+        transition: transform var(--oep-transition);
     }
 
-    &__action--quit button {
-        @extend .btn;
-        @extend .btn-light;
+    &__toggle[aria-expanded="true"] &__caret {
+        transform: rotate(90deg);
+    }
+
+    &__list {
+        margin: 0.6rem 0 0;
+        padding: 0 0 0 0.25rem;
+        list-style: none;
+    }
+
+    &__item {
+        margin-bottom: 0.6rem;
+        padding: 0.45rem 0 0.45rem 0.75rem;
+        border-left: 3px solid var(--oep-border-strong);
+        font-size: var(--oep-font-size-dense);
+        line-height: 1.45;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+
+        &--ok {
+            border-left-color: var(--bs-success);
+        }
+
+        &--suggestion {
+            border-left-color: var(--bs-warning);
+        }
+
+        &--rejected {
+            border-left-color: var(--bs-danger);
+        }
+    }
+
+    &__role {
+        font-weight: 600;
+        text-transform: capitalize;
+    }
+
+    &__state {
+        color: var(--oep-text-muted);
+        text-transform: capitalize;
+    }
+
+    &__previous {
+        margin-top: 0.2rem;
+        color: var(--oep-text-muted);
+    }
+
+    &__value {
+        margin-top: 0.1rem;
+        font-weight: 600;
+    }
+
+    &__comment {
+        margin-top: 0.15rem;
+        color: var(--oep-text-muted);
+        font-style: italic;
+    }
+
+    &__time {
+        display: block;
+        margin-top: 0.25rem;
+        color: var(--oep-text-muted);
+        font-size: 0.75rem;
+    }
+}
+
+// summary.js: the Summary tab. Its statuses are house badges.
+.opr-summary {
+    padding-bottom: 1rem;
+    font-size: var(--oep-font-size-dense);
+
+    &__overview {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 0.4rem 0.8rem;
+        margin-bottom: 1.1rem;
+        padding: 0.75rem 0 0.9rem;
+        border-bottom: 1px solid var(--bs-border-color);
+        background-color: var(--oep-surface);
+    }
+
+    &__filter-label,
+    &__cat {
+        color: var(--oep-text-muted);
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    &__cat {
+        margin: 0 0 0.4rem;
+    }
+
+    &__stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem 1.4rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    &__stat {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        font-weight: 600;
+
+        &--filterable {
+            padding: 0.12rem 0.6rem;
+            border: 1px solid transparent;
+            border-radius: var(--bs-border-radius);
+            cursor: pointer;
+            transition: background-color var(--oep-transition), opacity var(--oep-transition);
+
+            &:hover,
+            &.is-active {
+                background-color: var(--oep-surface-hover);
+            }
+
+            &:focus-visible {
+                outline: 2px solid var(--bs-primary);
+                outline-offset: 1px;
+            }
+
+            &.is-active {
+                border-color: var(--oep-border-strong);
+            }
+
+            &.is-dimmed {
+                opacity: 0.4;
+            }
+        }
+
+        &--zero {
+            opacity: 0.45;
+
+            &.is-active {
+                opacity: 1;
+            }
+        }
+    }
+
+    &__dot {
+        flex: 0 0 auto;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: var(--oep-border-strong);
+    }
+
+    &__stat--ok &__dot,
+    &__row--ok > &__dot {
+        background-color: var(--bs-success);
+    }
+
+    &__stat--suggestion &__dot,
+    &__row--suggestion > &__dot {
+        background-color: var(--bs-warning);
+    }
+
+    &__stat--rejected &__dot,
+    &__row--rejected > &__dot {
+        background-color: var(--bs-danger);
+    }
+
+    &__stat--missing &__dot,
+    &__row--missing > &__dot {
+        background-color: var(--oep-surface);
+        box-shadow: inset 0 0 0 2px var(--oep-border-strong);
+    }
+
+    &__stat--empty &__dot {
+        background-color: var(--bs-border-color);
+    }
+
+    &__section {
+        margin-bottom: 1.3rem;
+    }
+
+    &__list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    &__row {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.65rem;
+        padding: 0.6rem 0.25rem;
+        border-bottom: 1px solid var(--bs-border-color);
+
+        &:last-child {
+            border-bottom: 0;
+        }
+
+        > .opr-summary__dot {
+            margin-top: 0.4rem;
+        }
+    }
+
+    &__body {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    &__line {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 0.2rem 0.7rem;
+    }
+
+    &__field,
+    &__suggestion {
+        font-weight: 600;
+    }
+
+    &__value,
+    &__note {
+        color: var(--oep-text-muted);
+    }
+
+    &__value,
+    &__suggestion,
+    &__comment {
+        word-break: break-word;
+    }
+
+    &__suggestion,
+    &__comment {
+        margin-top: 0.2rem;
+    }
+
+    &__comment {
+        color: var(--oep-text-muted);
+        font-style: italic;
+    }
+
+    &__status {
+        flex: 0 0 auto;
+        align-self: center;
+    }
+
+    &__note {
+        padding: 0.5rem 0.25rem;
     }
 }

@@ -155,7 +155,7 @@
                 <!-- placeholder type: contributor or reviewer -->
                 <div class="profile-rvw__item-type">Participating as Reviewer</div>
                 <!-- placeholder status: saved, submitted, finished -->
-                <div class="profile-rvw__item-status">
+                <div class="badge badge--neutral text-lowercase">
                   {{ reviewer_reviewed.latest_status }}
                 </div>
               </div>
@@ -178,32 +178,21 @@
                    class="btn btn-primary">
                   {{ reviewer_reviewed.latest_active.table }}
                 </a>
-                <button class="btn btn-outline-danger"
-                        id="peer_review-delete">Delete</button>
+                <button type="button"
+                        class="btn btn-outline-danger"
+                        id="peer_review-delete"
+                        data-review-id="{{ reviewer_reviewed.latest_active.id }}"
+                        data-confirm="The review and every comment in it are deleted. This cannot be undone."
+                        data-confirm-title="Delete review?"
+                        data-confirm-verb="Delete review"
+                        data-confirm-danger>Delete</button>
               </div>
               <div class="profile-rvw__item-history">
-                <!-- remove button wrapper div once history dropdown is implemented -->
-                <div data-bs-toggle="dropdown tooltip"
-                     aria-expanded="false"
-                     title="This feature is not implemented yet.">
+                <div title="This feature is not implemented yet.">
                   <button type="button"
-                          id="dropdownMenuButton1"
-                          data-bs-toggle="dropdown"
-                          aria-expanded="false"
+                          class="btn btn-secondary btn-sm"
                           disabled>Show history</button>
                 </div>
-                <ul class="dropdown-menu dropdown-menu-end"
-                    aria-labelledby="dropdownMenuButton1">
-                  <li>
-                    <a class="dropdown-item" href="#">Action</a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item" href="#">Another action</a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item" href="#">Something else here</a>
-                  </li>
-                </ul>
               </div>
             </div>
           </div>
@@ -234,7 +223,7 @@
               <!-- placeholder type: contributor or reviewer -->
               <div class="profile-rvw__item-type">Participating as Data Publisher</div>
               <!-- placeholder status: saved, done, etc -->
-              <div class="profile-rvw__item-status">
+              <div class="badge badge--neutral text-lowercase">
                 {{ contributor_reviewed.latest_status }}
               </div>
             </div>
@@ -259,28 +248,11 @@
               </a>
             </div>
             <div class="profile-rvw__item-history">
-              <!-- remove button wrapper div once history dropdown is implemented -->
-              <div data-bs-toggle="dropdown tooltip"
-                   aria-expanded="false"
-                   title="This feature is not implemented yet.">
+              <div title="This feature is not implemented yet.">
                 <button type="button"
-                        id="dropdownMenuButton2"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false"
+                        class="btn btn-secondary btn-sm"
                         disabled>Show history</button>
               </div>
-              <ul class="dropdown-menu dropdown-menu-end"
-                  aria-labelledby="dropdownMenuButton2">
-                <li>
-                  <a class="dropdown-item" href="#">Action</a>
-                </li>
-                <li>
-                  <a class="dropdown-item" href="#">Another action</a>
-                </li>
-                <li>
-                  <a class="dropdown-item" href="#">Something else here</a>
-                </li>
-              </ul>
             </div>
           </div>
         </div>
@@ -294,7 +266,7 @@
         <div class="profile-rvw__item profile-rvw__item--highlight profile-rvw__item--contributor">
           <ul class="profile-rvw__list">
             <li>
-              <span>{{ contributor_reviewed_active.latest.table }}</span>
+              <span>{{ contributor_reviewed.latest_active.table }}</span>
               waits for the Reviewer to submit the review.
             </li>
           </ul>
@@ -308,9 +280,9 @@
               data-bs-toggle="popover"
               data-trigger="focus"
               title="Review cards"
-              data-bs-content="The listed reviews are either ongoing or completed. You can click the topic - table name link to either open the dataview page or access the review, depending on the status of the review. If the review is ongoing and it is currently your turn, you will be able to access the review. However, if you have been the last user to submit a review, you will have to wait for the other participant to submit or finish the review before you can access it."
-              style="margin-left: 10px">
-        <i class="fas fa-info-circle" style="color: #3B77A0;"></i>
+              aria-label="About the review cards"
+              data-bs-content="The listed reviews are either ongoing or completed. You can click the topic - table name link to either open the dataview page or access the review, depending on the status of the review. If the review is ongoing and it is currently your turn, you will be able to access the review. However, if you have been the last user to submit a review, you will have to wait for the other participant to submit or finish the review before you can access it.">
+        <i class="fas fa-info-circle" aria-hidden="true"></i>
       </button>
     </h2>
     <p>This section lists all available reviews.</p>
@@ -331,7 +303,7 @@
                   <!-- placeholder type: contributor or reviewer -->
                   <div class="profile-rvw__item-type">Participated as Reviewer</div>
                   <!-- placeholder status: saved, submitted, finished -->
-                  <div class="profile-rvw__item-status profile-rvw__item-status--done">
+                  <div class="badge {% if review.is_finished %}badge--success{% else %}badge--info{% endif %}">
                     {% if review.is_finished == True %}
                       Completed
                     {% else %}
@@ -364,28 +336,11 @@
                   {% endif %}
                 </div>
                 <div class="profile-rvw__item-history">
-                  <!-- remove button wrapper div once history dropdown is implemented -->
-                  <div data-bs-toggle="dropdown tooltip"
-                       aria-expanded="false"
-                       title="This feature is not implemented yet.">
+                  <div title="This feature is not implemented yet.">
                     <button type="button"
-                            id="dropdownMenuButton1"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false"
+                            class="btn btn-secondary btn-sm"
                             disabled>Show history</button>
                   </div>
-                  <ul class="dropdown-menu dropdown-menu-end"
-                      aria-labelledby="dropdownMenuButton1">
-                    <li>
-                      <a class="dropdown-item" href="#">Action</a>
-                    </li>
-                    <li>
-                      <a class="dropdown-item" href="#">Another action</a>
-                    </li>
-                    <li>
-                      <a class="dropdown-item" href="#">Something else here</a>
-                    </li>
-                  </ul>
                 </div>
               </div>
             </div>
@@ -404,9 +359,7 @@
         </div>
       {% endfor %}
     {% else %}
-      <ul>
-        <li>You have not participated in a review yet.</li>
-      </ul>
+      {% include "components/empty_state.html" with text="You have not participated in a review yet." compact=True %}
     {% endif %}
     {% if contributor_reviewed.latest is not None %}
       {% for table_name, reviews in contributor_reviewed_grouped.items %}
@@ -419,7 +372,7 @@
                   <!-- placeholder type: contributor or reviewer -->
                   <div class="profile-rvw__item-type">Participated as Data Publisher</div>
                   <!-- placeholder status: saved, submitted, finished -->
-                  <div class="profile-rvw__item-status profile-rvw__item-status--done">
+                  <div class="badge {% if review.is_finished %}badge--success{% else %}badge--info{% endif %}">
                     {% if review.is_finished == True %}
                       Completed
                     {% else %}
@@ -454,28 +407,11 @@
                   {% endif %}
                 </div>
                 <div class="profile-rvw__item-history">
-                  <!-- remove button wrapper div once history dropdown is implemented -->
-                  <div data-bs-toggle="dropdown tooltip"
-                       aria-expanded="false"
-                       title="This feature is not implemented yet.">
+                  <div title="This feature is not implemented yet.">
                     <button type="button"
-                            id="dropdownMenuButton1"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false"
+                            class="btn btn-secondary btn-sm"
                             disabled>Show history</button>
                   </div>
-                  <ul class="dropdown-menu dropdown-menu-end"
-                      aria-labelledby="dropdownMenuButton1">
-                    <li>
-                      <a class="dropdown-item" href="#">Action</a>
-                    </li>
-                    <li>
-                      <a class="dropdown-item" href="#">Another action</a>
-                    </li>
-                    <li>
-                      <a class="dropdown-item" href="#">Something else here</a>
-                    </li>
-                  </ul>
                 </div>
               </div>
             </div>
@@ -499,26 +435,35 @@
         </div>
       {% endfor %}
     {% else %}
-      <ul>
-        <li>No reviews available for your published data.</li>
-      </ul>
+      {% include "components/empty_state.html" with text="No reviews available for your published data." compact=True %}
     {% endif %}
   {% endif %}
 {% endblock %}
 {% block after-body-bottom-js %}
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      config.redirectUrl = window.location.href; // redirect to the same page
-      config.url_table = window.location.href; // url for redirect
+  <script type="module">
+    // #2674: the house dialog holds the click until it is confirmed. The token
+    // comes with the page: nothing else here sets the CSRF cookie.
+    const deleteButton = document.getElementById("peer_review-delete");
+    deleteButton?.addEventListener("click", async () => {
+      const response = await fetch("{% url 'login:delete_peer_review_simple' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": "{{ csrf_token }}",
+        },
+        body: JSON.stringify({ review_id: deleteButton.dataset.reviewId }),
+      });
+      if (response.ok) {
+        window.location.reload();
+        return;
+      }
+      const body = await response.json().catch(() => ({}));
+      window.oep.toast(body.error || "The review was not deleted.", {
+        status: "danger",
+        title: "Not deleted",
+      });
     });
-
-    var config = {
-      url_peer_review: "{% url 'login:delete_peer_review_simple' %}",
-      review_id: "{{ latest_review_id }}",
-    };
   </script>
-  <script type="module"
-          src="{% static 'peer_review/roles/opr_reviewer.js' %}"></script>
   <script>
     $(function () {
       $('[data-bs-toggle="popover"]').popover();

@@ -12,6 +12,18 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Changes
 
+- The peer review pages and the dashboard's Reviews tab use the house
+  components. The reviewer and contributor pages lose their two copies of one
+  stylesheet (and the Summary tab the one its script injected): the styles live
+  in the theme on tokens, and the Summary tab's states are status badges. Every
+  action carries its button role itself: Submit and the field saves are primary
+  (the saves no longer turn yellow or red with the chosen state), Save Progress,
+  Quit, Accept, Suggest, Deny and the field arrows (now named "Previous field"
+  and "Next field" for screen readers) secondary. On the Reviews tab the
+  statuses are badges, the empty lists the house empty state, and "Show history"
+  a secondary button without its placeholder menu
+  [(#2658)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2658)
+
 - The terms of use take the about page's layout and show one language at a time:
   an "English | Deutsch" switch above the "On this page" list, the page title
   following the language, and `#de` opening the German version directly. Without
@@ -641,6 +653,12 @@ SPDX-License-Identifier: CC0-1.0
 
 ## Bugs
 
+- The Reviews tab's Delete works: it asks the confirm dialog and deletes the
+  active review, instead of doing nothing. The tab no longer loads the review
+  page's script, which logged five errors there. Its "All reviews" list shows
+  the user's reviews again; it had been empty since the groups were renamed to
+  organizations
+  [(#2674)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2674)
 - Saving a table's metadata no longer fails with 400 when a keyword cannot
   become a tag, such as the empty keyword the oemetadata v2 template ships; that
   keyword is skipped

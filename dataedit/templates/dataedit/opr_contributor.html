@@ -18,7 +18,7 @@
     {% include "components/page_header.html" with area="Database" icon="icons/area_database.html" crumb_label="Topics" crumb_url=topics_url crumb2_label=table_label|default:table crumb2_url=table_url title="Review" %}
     <div class="content">
       <div class="content__container">
-        <div class="alert alert-warning" style="width:100%" role="alert">
+        <div class="alert alert-warning" role="status">
           This feature is now in its second phase of implementation. Errors are still expected to occur. In general, the feature is much more stable now. Please share your experience in this
           <a href="{{ EXTERNAL_URLS.github_openenergyplatform_oeplatform_discussions_1268 }}">discussion on GitHub</a>
           (login required).
@@ -26,37 +26,11 @@
       </div>
     </div>
     <div class="content content-finish-review">
-      <style>
-      .ok-progress-wrapper { display: flex; justify-content: center; margin-top: 20px; }
-      .ok-progress-circle { width: 130px; height: 130px; position: relative; }
-      .ok-progress-circle svg { width: 130px; height: 130px; transform: rotate(-90deg); }
-      .ok-progress-circle circle { fill: none; stroke-width: 10; r: 52; cx: 65; cy: 65; }
-      .ok-progress-circle circle.bg { stroke: #e6e6e6; }
-      .ok-progress-circle circle.progress { stroke: #4caf50; stroke-linecap: round; stroke-dasharray: 326.72; stroke-dashoffset: 326.72; transition: stroke-dashoffset 0.4s ease; }
-      .percentage-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 22px; font-weight: bold; }
-      .field-suggestion .suggestion--highlight:not(:empty)::before { content: "NEW"; display: inline-block; background: #f0ad4e; color: #fff; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.04em; padding: 0.05rem 0.35rem; border-radius: 0.6rem; margin-right: 0.4rem; vertical-align: middle; }
-      .opr-history { margin-top: 0.75rem; padding: 0.5rem 1rem 0.25rem 1rem; border-top: 1px dashed #e3e8ec; }
-      .opr-history__toggle { background: none; border: none; padding: 0; font-size: 0.8rem; color: #2972A6; cursor: pointer; }
-      .opr-history__toggle:hover { text-decoration: underline; }
-      .opr-history__caret { display: inline-block; transition: transform 0.2s ease; }
-      .opr-history__toggle[aria-expanded="true"] .opr-history__caret { transform: rotate(90deg); }
-      .opr-history__list { list-style: none; margin: 0.6rem 0 0; padding: 0 0 0 0.25rem; }
-      .opr-history__item { border-left: 3px solid #ced4da; padding: 0.45rem 0 0.45rem 0.75rem; margin-bottom: 0.6rem; font-size: 0.82rem; line-height: 1.45; }
-      .opr-history__item:last-child { margin-bottom: 0; }
-      .opr-history__item--ok { border-left-color: #4caf50; }
-      .opr-history__item--suggestion { border-left-color: #f0ad4e; }
-      .opr-history__item--rejected { border-left-color: #d9534f; }
-      .opr-history__role { font-weight: 600; text-transform: capitalize; }
-      .opr-history__state { color: #6c757d; text-transform: capitalize; }
-      .opr-history__previous { color: #6c757d; margin-top: 0.2rem; }
-      .opr-history__value { font-weight: 600; margin-top: 0.1rem; }
-      .opr-history__comment { font-style: italic; color: #495057; margin-top: 0.15rem; }
-      .opr-history__time { display: block; font-size: 0.72rem; color: #adb5bd; margin-top: 0.25rem; }
-      </style>
       <div class="ok-progress-wrapper">
         <div class="ok-progress-circle">
-          <svg>
-            <circle class="bg"></circle><circle class="progress" id="okProgressCircle"></circle>
+          <svg viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg">
+            <circle class="bg" cx="65" cy="65" r="52"></circle>
+            <circle class="progress" id="okProgressCircle" cx="65" cy="65" r="52"></circle>
           </svg>
           <div class="percentage-text" id="okPercentageText">0%</div>
         </div>
@@ -146,7 +120,7 @@
           </ul>
           <div class="review-bar__actions" id="peer_review-controls">
             <div class="review-bar__action review-bar__action--summary">
-              <button id="submit_summary" class="disabled">
+              <button id="submit_summary" class="btn btn-primary disabled">
                 <span class="btn__icon">
                   <svg width="16"
                        height="16"
@@ -163,10 +137,12 @@
                  title="After submitting your work, please note that it may take some time for the reviewer to respond and for the peer review process to continue. Please be patient while waiting for their feedback."></i>
             </div>
             <div class="review-bar__action review-bar__action--save">
-              <button id="peer_review-save">Save Progress</button>
+              <button id="peer_review-save"
+                      class="btn btn-secondary">Save Progress</button>
             </div>
             <div class="review-bar__action review-bar__action--quit">
-              <button id="peer_review-cancel">Quit</button>
+              <button id="peer_review-cancel"
+                      class="btn btn-secondary">Quit</button>
             </div>
           </div>
         </div>
@@ -228,22 +204,35 @@
               </div>
               <div class="review__description" id="review-info">
                 <button type="button"
+                        class="btn btn-link btn-sm p-0"
                         data-bs-toggle="modal"
                         data-bs-target="#myModal">
                   Open Peer Review process <i class="fas fa-info-circle"></i>
                 </button>
               </div>
               <div class="review__btn-nav">
-                <button type="button" onclick="selectPreviousField()">
+                <button type="button"
+                        class="btn btn-secondary btn-sm"
+                        aria-label="Previous field"
+                        onclick="selectPreviousField()">
                   <span class="btn__icon">
-                    <svg width="16" height="16" fill="currentColor">
+                    <svg width="16"
+                         height="16"
+                         fill="currentColor"
+                         viewBox="0 0 16 16">
                       <path d="M7.35,0 L8.06,0.71 L1.41,7.35 L8.06,14 L7.35,14.71 L0,7.35 L7.35,0" />
                     </svg>
                   </span>
                 </button>
-                <button type="button" onclick="selectNextField()">
+                <button type="button"
+                        class="btn btn-secondary btn-sm"
+                        aria-label="Next field"
+                        onclick="selectNextField()">
                   <span class="btn__icon">
-                    <svg width="16" height="16" fill="currentColor">
+                    <svg width="16"
+                         height="16"
+                         fill="currentColor"
+                         viewBox="0 0 16 16">
                       <path d="M5.35,15.35 L4.65,14.65 L11.29,8 L4.65,1.35 L5.35,0.65 L12.71,8 L5.35,15.35" />
                     </svg>
                   </span>
@@ -255,11 +244,13 @@
                 <div class="review__btns" role="group">
                   <div class="review__btn review__btn--success">
                     <button type="button"
+                            class="btn btn-secondary w-100"
                             id="ok-button"
                             onclick="selectState('ok');">Accept</button>
                   </div>
                   <div class="review__btn review__btn--suggested">
                     <button type="button"
+                            class="btn btn-secondary w-100"
                             id="suggestion-button"
                             onclick="selectState('suggestion');">
                       Suggest
@@ -267,6 +258,7 @@
                   </div>
                   <div class="review__btn review__btn--denied">
                     <button type="button"
+                            class="btn btn-secondary w-100"
                             id="rejected-button"
                             onclick="selectState('rejected');">Deny</button>
                   </div>
@@ -288,7 +280,7 @@
                               placeholder="Comment here if you want to explain your suggestion"></textarea>
                   </div>
                   <button type="button"
-                          class="btn btn-warning review__field-save"
+                          class="btn btn-primary review__field-save"
                           id="submitButton">Save comment/new value</button>
                 </div>
                 <div class="d-none review__comments" id="reviewer_comments">
@@ -300,7 +292,7 @@
                               placeholder="Comment here if you want to explain why you deny this field"></textarea>
                   </div>
                   <button type="button"
-                          class="btn btn-warning review__field-save"
+                          class="btn btn-primary review__field-save"
                           id="submitCommentButton">Save comment</button>
                 </div>
               </div>

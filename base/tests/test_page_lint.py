@@ -25,7 +25,9 @@ from rest_framework.authtoken.models import Token
 
 from base.tests import TestViewsTestCase
 from base.tests.page_lint import ROLES, lint, status_button
-from dataedit.models import Dataset, Table, Tag
+from dataedit.metadata import load_metadata_from_db
+from dataedit.models import Dataset, PeerReview, PeerReviewManager, Table, Tag
+from login.models import myuser
 from modelview.tests.corpus import seed_corpus
 from modelview.tests.html import element_markup, elements_with_class
 
@@ -193,7 +195,6 @@ class Page:
 #: Pages #2641 touched that are NOT here yet, and the ticket that brings them:
 #: - login:tables, login:datasets: the dashboard's own cell, menu and filter
 #:   controls carry no role (#2659);
-#: - the peer review pages: buttons styled by container selectors (#2658);
 #: - dataedit/admin.html and login's activate, detach, generic_form and
 #:   oepuser_create_form: no view renders them (dead code, #2660).
 RESTYLED_PAGES = (
@@ -244,8 +245,7 @@ RESTYLED_PAGES = (
         logged_in=True,
     ),
     # #2640: the page header on every page that had a main-header (the others
-    # it moved are listed above or below; the peer review pages wait for
-    # #2658, named in the comment above this tuple)
+    # it moved are listed above or below)
     Page("dataedit:table-map", {"table": "{table}", "maptype": "latlon"}, True),
     Page("dataedit:tags-new", logged_in=True),
     Page("dataedit:tags-edit", {"tag_pk": "{tag}"}, logged_in=True),
@@ -283,19 +283,33 @@ RESTYLED_PAGES = (
     Page("account_logout", logged_in=True),
     Page("socialaccount_connections", logged_in=True),
     # #2648: underline tabs and dropdowns. Its other pages are listed above
-    # (the table page, both factsheet editors, Settings, Reviews) or wait for
-    # the tickets named in the comment above this tuple (peer review, the
+    # (the table page, both factsheet editors, Settings, Reviews, peer review)
+    # or wait for the tickets named in the comment above this tuple (the
     # dashboard's tables and datasets tabs).
     # #2653: Settings as the account page (listed above with #2641) and the
     # organizations tab, whose Create Organization and help toggle carry
     # their roles on themselves now
     Page("login:organizations", {"user_id": "{user}"}, logged_in=True),
+    # #2658: the peer review pages. The Reviews tab is listed above with #2641;
+    # the fixture's review is what gives it its buttons.
+    Page("dataedit:peer_review_create", {"table": "{table}"}, logged_in=True),
+    Page(
+        "dataedit:peer_review_reviewer",
+        {"table": "{table}", "review_id": "{review}"},
+        logged_in=True,
+    ),
+    Page(
+        "dataedit:peer_review_contributor",
+        {"table": "{table}", "review_id": "{review}"},
+        logged_in=True,
+    ),
 )
 
 
 class PageFixture(TestViewsTestCase):
     """One of each thing a restyled page shows: a table the user owns, a
-    model and a framework factsheet with a tag, a published dataset."""
+    model and a framework factsheet with a tag, a published dataset, an open
+    peer review of the table by the user."""
 
     table_name = "test_page_lint_table"
 
@@ -333,6 +347,18 @@ class PageFixture(TestViewsTestCase):
             published_at=timezone.now(),
         )
         self.dataset.tables.add(self.table)
+        publisher = myuser.objects.create_user(
+            name="page_lint_publisher", email="publisher@test.test", affiliation="x"
+        )
+        # A review holds the table's metadata as it was when the review began.
+        self.peer_review = PeerReview.objects.create(
+            table=self.table_name,
+            reviewer=self.user,
+            contributor=publisher,
+            review={},
+            oemetadata=load_metadata_from_db(self.table_name),
+        )
+        PeerReviewManager.objects.create(opr=self.peer_review)
         self.names = {
             "table": self.table_name,
             "model": self.model.pk,
@@ -340,6 +366,7 @@ class PageFixture(TestViewsTestCase):
             "dataset": self.dataset.name,
             "user": self.user.pk,
             "tag": tag.pk,
+            "review": self.peer_review.pk,
         }
 
     def html(self, restyled: Page) -> str:
@@ -406,13 +433,11 @@ class FooterTest(PageFixture):
         self.assertNotIn("bg-secondary", footers[0])
 
 
-#: The status colours this ticket took off every action. Yellow and light grey
-#: are status colours too (`page_lint.STATUS_COLOURS`), but the peer review
-#: pages' yellow saves are toggled by their script and their bar's Quit still
-#: extends `.btn-light` (#2658; bootstrap-select's light grey buttons are
-#: swapped by script since #2648), so the scan over every template holds only
-#: these three; the page lint holds all five.
-GONE_COLOURS = status_button(("success", "info", "dark"))
+#: The status colours taken off every action: green, cyan and black by #2641,
+#: yellow and light grey by the peer review pages (#2658), the last templates
+#: and theme rules that drew an action in them. bootstrap-select's own light
+#: grey buttons are swapped by script (#2648), out of this scan's sight.
+GONE_COLOURS = status_button()
 
 #: Templates that still carry a status colour as an action, and the ticket
 #: that removes it. Nothing else may.
@@ -427,9 +452,9 @@ NOT_TEMPLATES = ("node_modules", "site-packages", "/frontend/", "/static/")
 
 
 class NoStatusColourAsAnActionTest(SimpleTestCase):
-    """No template draws an action green, cyan or black."""
+    """No template draws an action in a status colour."""
 
-    def test_no_template_uses_success_info_or_dark_on_a_button(self):
+    def test_no_template_uses_a_status_colour_on_a_button(self):
         root = Path(settings.BASE_DIR)
         offenders = []
         for path in sorted(root.rglob("*.html")):

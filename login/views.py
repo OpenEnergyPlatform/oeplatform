@@ -1166,7 +1166,7 @@ class ReviewsView(ProfileOwnerRequiredMixin, View):
         # Sort the reviews by table name
         sorted_reviews = sorted(peer_review_reviews, key=lambda x: x.table)
         # Group the reviews by table name
-        organizationed_reviews = {
+        grouped_reviews = {
             k: list(v) for k, v in groupby(sorted_reviews, key=lambda x: x.table)
         }
 
@@ -1241,10 +1241,9 @@ class ReviewsView(ProfileOwnerRequiredMixin, View):
         # Sort the reviews by table name
         sorted_contributions = sorted(peer_review_contributions, key=lambda x: x.table)
         # Group the reviews by table name
-        organizationed_contributions = {
+        grouped_contributions = {
             k: list(v) for k, v in groupby(sorted_contributions, key=lambda x: x.table)
         }
-        latest_review_id = latest_review.pk if latest_review is not None else None
 
         return render(
             request,
@@ -1252,10 +1251,9 @@ class ReviewsView(ProfileOwnerRequiredMixin, View):
             {
                 "profile_user": user,
                 "reviewer_reviewed": reviewed_context,
-                "reviewer_reviewed_organizationed": organizationed_reviews,
+                "reviewer_reviewed_grouped": grouped_reviews,
                 "contributor_reviewed": reviewed_contributions_context,
-                "contributor_reviewed_organizationed": organizationed_contributions,
-                "latest_review_id": latest_review_id,
+                "contributor_reviewed_grouped": grouped_contributions,
             },
         )
 
