@@ -1,29 +1,38 @@
 {% extends "base/base.html" %}
 {% load django_bootstrap5 %}
+{% load static %}
 {% block site-header %}
   {% url 'base:about' as about_url %}
   {% include "components/page_header.html" with area="About" icon="icons/area_about.html" crumb_label="Overview" crumb_url=about_url title="OEP - Contact" %}
 {% endblock site-header %}
+{% block after-head %}
+  <link rel="stylesheet" href="{% static 'css/static_pages.css' %}" />
+{% endblock after-head %}
 {% block main-content-body %}
-  {% load static %}
-  <div style="padding:10px">
-    <form class="form form-horizontal" action="" method="post">
-      {% csrf_token %}
-      {% if success %}
-        <div class="alert alert-success">
-          <strong>Success!</strong> Your message has been sent.
-        </div>
-      {% endif %}
-      <table>
-        {% bootstrap_form form %}
-      </table>
-      <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
-  </div>
-  <br />
-  Or use the issue tracking system on
-  <a href="{{ EXTERNAL_URLS.github_openenergyplatform_oeplatform }}">GitHub</a>.
-  <br />
-  <br />
-  <div class="well"></div>
-{% endblock %}
+  <form class="reading-column" action="" method="post">
+    {% csrf_token %}
+    {% if success %}
+      {% include "components/alert.html" with status="success" text="Success! Your message has been sent." %}
+    {% endif %}
+    {% bootstrap_field form.contact_category %}
+    <div class="row">
+      <div class="col-sm-6">{% bootstrap_field form.contact_name %}</div>
+      <div class="col-sm-6">{% bootstrap_field form.contact_email %}</div>
+    </div>
+    {% bootstrap_field form.contact_topic %}
+    {% bootstrap_field form.content %}
+    {% bootstrap_field form.captcha wrapper_class="mb-3 captcha-field" %}
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+{% endblock main-content-body %}
+{% block side-column %}
+  {# Below the form on a phone, so it needs space above it there. #}
+  <aside class="content__side mt-4 mt-md-0">
+    <div class="card">
+      <div class="card-body">
+        Or use the issue tracking system on
+        <a href="{{ EXTERNAL_URLS.github_openenergyplatform_oeplatform }}">GitHub</a>.
+      </div>
+    </div>
+  </aside>
+{% endblock side-column %}

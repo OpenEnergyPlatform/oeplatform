@@ -65,7 +65,6 @@ class SideColumnTestCase(SidebarFixture):
 
 class PagesWithoutSideContentTest(SideColumnTestCase):
     PAGES = (
-        ("base:contact", None),
         ("base:legal-privacy-policy", None),
         ("base:legal-tou", None),
         ("base:faq", None),
@@ -162,6 +161,10 @@ class PagesWithSideContentTest(SideColumnTestCase):
         # Its own contents list; the toc entry in the main column also says
         # "On this page".
         self.assertSide("base:styleguide", None, says="styleguide-contents")
+
+    def test_contact(self):
+        # The GitHub line as a card beside the form (#2651).
+        self.assertSide("base:contact", None, says="issue tracking system")
 
     def test_ontology(self):
         # Filled by htmx once the page has loaded.

@@ -1,38 +1,74 @@
 {% extends "base/base.html" %}
-{% load django_bootstrap5 %}
 {% load static %}
 {% block site-header %}
   {% url 'base:about' as about_url %}
   {% include "components/page_header.html" with area="About" icon="icons/area_about.html" crumb_label="Overview" crumb_url=about_url title="Open Energy Family Steering Committee" %}
 {% endblock site-header %}
+{% block after-head %}
+  <link rel="stylesheet" href="{% static 'css/static_pages.css' %}" />
+{% endblock after-head %}
 {% block main-content-body %}
-  <h3 id="oeo-sc">What is the Steering Committee?</h3>
-  <p>
-    The OEFamily-SC is responsible for the overall development and strategic direction of the Open Energy Family framework.
-    The committee works closely with the core development team to ensure that the framework meets the needs of its users and
-    remains aligned with the goals of the project. It meets regularly via conference calls and in-person meetings to exchange
-    information and review planned and completed tasks.
-  </p>
-  <h3 id="oeo-sc-members">Who is involved?</h3>
-  <p>
-    The Steering Committee is coordinated by the NFDI4energy project team. The members are:
-  </p>
-  <ul>
-    <li>Alexander Rakic (FZ Jülich)</li>
-    <li>Astrid Nieße (Uni Oldenburg, OFFIS)</li>
-    <li>Berit Müller (Deutsche Gesellschaft Sonnenenergie)</li>
-    <li>Christian Winger (Öko-Institut)</li>
-    <li>Carsten Hoyer-Klick (DLR)</li>
-    <li>Daniel Huppmann (IIASA)</li>
-    <li>Gerald Boogaart (TU Freiberg)</li>
-    <li>Hannah Förster (Öko-Institut)</li>
-    <li>Jonas Huber (RLI)</li>
-    <li>Julia Köhlke (OFFIS)</li>
-    <li>Ludwig Hülk (RLI)</li>
-    <li>Mirjam Stappel (Uni Osnabrück)</li>
-    <li>Robbie Morrison</li>
-    <li>Sebastian Hellmann (Uni Leipzig)</li>
-    <li>Stephan Ferenz (Uni Oldenburg, OFFIS)</li>
-    <li>Till Mossakowski (Uni Osnabrück)</li>
+  <div class="reading-column">
+    <h2 id="oeo-sc">What is the Steering Committee?</h2>
+    <p>
+      The OEFamily-SC is responsible for the overall development and strategic direction of the Open Energy Family framework.
+      The committee works closely with the core development team to ensure that the framework meets the needs of its users and
+      remains aligned with the goals of the project. It meets regularly via conference calls and in-person meetings to exchange
+      information and review planned and completed tasks.
+    </p>
+    <h2 id="oeo-sc-members">Who is involved?</h2>
+    <p>
+      The Steering Committee is coordinated by the NFDI4energy project team. The members are:
+    </p>
+  </div>
+  <ul class="member-list">
+    <li>
+      <span class="member-list__name">Alexander Rakic</span> <span class="member-list__institution">(FZ Jülich)</span>
+    </li>
+    <li>
+      <span class="member-list__name">Astrid Nieße</span> <span class="member-list__institution">(Uni Oldenburg, OFFIS)</span>
+    </li>
+    <li>
+      <span class="member-list__name">Berit Müller</span> <span class="member-list__institution">(Deutsche Gesellschaft Sonnenenergie)</span>
+    </li>
+    <li>
+      <span class="member-list__name">Christian Winger</span> <span class="member-list__institution">(Öko-Institut)</span>
+    </li>
+    <li>
+      <span class="member-list__name">Carsten Hoyer-Klick</span> <span class="member-list__institution">(DLR)</span>
+    </li>
+    <li>
+      <span class="member-list__name">Daniel Huppmann</span> <span class="member-list__institution">(IIASA)</span>
+    </li>
+    <li>
+      <span class="member-list__name">Gerald Boogaart</span> <span class="member-list__institution">(TU Freiberg)</span>
+    </li>
+    <li>
+      <span class="member-list__name">Hannah Förster</span> <span class="member-list__institution">(Öko-Institut)</span>
+    </li>
+    <li>
+      <span class="member-list__name">Jonas Huber</span> <span class="member-list__institution">(RLI)</span>
+    </li>
+    <li>
+      <span class="member-list__name">Julia Köhlke</span> <span class="member-list__institution">(OFFIS)</span>
+    </li>
+    <li>
+      <span class="member-list__name">Ludwig Hülk</span> <span class="member-list__institution">(RLI)</span>
+    </li>
+    <li>
+      <span class="member-list__name">Mirjam Stappel</span> <span class="member-list__institution">(Uni Osnabrück)</span>
+    </li>
+    <li>
+      <span class="member-list__name">Robbie Morrison</span>
+    </li>
+    <li>
+      <span class="member-list__name">Sebastian Hellmann</span> <span class="member-list__institution">(Uni Leipzig)</span>
+    </li>
+    <li>
+      <span class="member-list__name">Stephan Ferenz</span> <span class="member-list__institution">(Uni Oldenburg, OFFIS)</span>
+    </li>
+    <li>
+      <span class="member-list__name">Till Mossakowski</span> <span class="member-list__institution">(Uni Osnabrück)</span>
+    </li>
   </ul>
 {% endblock main-content-body %}

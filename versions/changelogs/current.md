@@ -21,6 +21,14 @@ SPDX-License-Identifier: CC0-1.0
   their font size from the dense type token, at the same size as before.
   [(#PRNUM)](https://github.com/OpenEnergyPlatform/oeplatform/pull/PRNUM)
 
+- The steering committee and contact pages take WF-13's layouts. The steering
+  committee reads in a reading column with its 16 members in text columns (three
+  on a desktop, one on a phone), names bold and institutions muted. The contact
+  form sits at reading width with Name and E-Mail on one row, the captcha image
+  beside its input and the GitHub line as a card beside the form; the empty
+  panel, the table wrapper and the inline padding are gone. No text changed.
+  [(#2704)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2704)
+
 - The terms of use take the about page's layout and show one language at a time:
   an "English | Deutsch" switch above the "On this page" list, the page title
   following the language, and `#de` opening the German version directly. Without
