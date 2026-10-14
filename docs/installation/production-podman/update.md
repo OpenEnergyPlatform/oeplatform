@@ -25,7 +25,11 @@ git fetch --all --tags
 git checkout <tag-or-branch>
 git pull
 
-# 2. Rebuild the application image (runs collectstatic + asset compression)
+# 2. Keep the running image under a second name, to roll back to
+podman tag ghcr.io/openenergyplatform/oeplatform-production:latest \
+  ghcr.io/openenergyplatform/oeplatform-production:previous
+
+#    Rebuild the application image (runs collectstatic + asset compression)
 #    Build under the ghcr name the unit references (see Install) — no re-tag needed.
 podman build -t ghcr.io/openenergyplatform/oeplatform-production:latest -f podman/Dockerfile .
 
@@ -57,6 +61,20 @@ Release steps run **inside the container** automatically on start — you do
     Django + Alembic migrations execute on app-container start. Before deploying a
     release that includes migrations, make sure you have a **current database
     backup** (see **[Maintenance](maintenance.md)**).
+
+### Roll back
+
+If the new image does not come up, put the previous one back under the name the
+unit starts and restart:
+
+```sh
+podman tag ghcr.io/openenergyplatform/oeplatform-production:previous \
+  ghcr.io/openenergyplatform/oeplatform-production:latest
+systemctl --user restart oep-oeplatform
+```
+
+This returns the code only. Migrations the new image already applied stay in the
+database; undoing them needs the backup taken before the update.
 
 ## Once: move Fuseki's data into its volume
 
