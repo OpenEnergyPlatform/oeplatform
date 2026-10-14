@@ -766,7 +766,7 @@ the previous release's highlights.
   root, so `podman/quadlets/oep.env` with its credentials reached
   `/app/podman/quadlets/` in the image. The Podman update guide now keeps the
   running image as `:previous` and says how to roll back to it
-  [(#PR)](https://github.com/OpenEnergyPlatform/oeplatform/pull/PR)
+  [(#2724)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2724)
 - Fuseki keeps the OEKG across restarts. The Podman unit and both compose files
   mounted its volume at a path Fuseki never uses, so the data lived in an
   anonymous volume and a restart of the Podman unit deleted it. A host set up
