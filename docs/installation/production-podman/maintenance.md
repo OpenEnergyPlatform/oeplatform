@@ -209,5 +209,6 @@ are `enable`d (`systemctl --user enable oep-*`).
 
 That's the full production deployment path: **[Overview](index.md) →
 [Install](install.md) → [Ontop](ontop.md) → [Update](update.md) → Maintenance**.
-For the OEP team's concrete server values, see the internal runbook (kept
-outside this public documentation).
+Optional next: **[Monitoring](monitoring.md)**. For the OEP team's concrete
+server values, see the internal runbook (kept outside this public
+documentation).

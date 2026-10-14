@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Stores the metrics. Localhost only: reach it with an SSH tunnel.
+# @@OEP_REPO@@ is replaced with the checkout path by install.sh.
+
+[Unit]
+Description=OEP monitoring: Prometheus
+
+[Container]
+Image=docker.io/prom/prometheus:v3.15.0
+ContainerName=oep-mon-prometheus
+Volume=@@OEP_REPO@@/podman/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+Volume=oep-mon-prometheus.volume:/prometheus
+Exec=--config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus --storage.tsdb.retention.time=30d
+PublishPort=127.0.0.1:9090:9090
+Network=oep.network
+
+[Service]
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

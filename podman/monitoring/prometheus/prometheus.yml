@@ -1,0 +1,48 @@
+# SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Every target is a container name on the oep network.
+
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs: [{ targets: ["localhost:9090"] }]
+  - job_name: node
+    static_configs: [{ targets: ["oep-mon-node:9100"] }]
+  - job_name: podman
+    static_configs: [{ targets: ["oep-mon-podman:9882"] }]
+  - job_name: postgres
+    static_configs: [{ targets: ["oep-mon-postgres:9187"] }]
+
+  # The app. "probe=blackbox" lets the usage figures leave these requests out.
+  - job_name: probe_oeplatform
+    metrics_path: /probe
+    params: { module: [http_oep] }
+    static_configs:
+      - targets:
+          - http://oeplatform/?probe=blackbox
+          # Cheap, and present in old app images as well as current ones.
+          - http://oeplatform/api/v0/factsheet/frameworks/?probe=blackbox
+    # The blackbox exporter probes the address in __param_target; the series
+    # keeps that address as its instance label. Reused below as *probe.
+    relabel_configs: &probe
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: oep-mon-blackbox:9115
+  - job_name: probe_fuseki
+    metrics_path: /probe
+    params: { module: [http_2xx] }
+    static_configs: [{ targets: ["http://fuseki:3030/$/ping"] }]
+    relabel_configs: *probe
+  - job_name: probe_tcp
+    metrics_path: /probe
+    params: { module: [tcp_connect] }
+    static_configs:
+      [{ targets: ["ontop:8080", "lookup:8082", "postgres:5432"] }]
+    relabel_configs: *probe

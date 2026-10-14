@@ -3432,3 +3432,15 @@ SPDX-License-Identifier = "MIT"
 SPDX-FileCopyrightText = [
   "2019-2024 The Bootstrap Authors",
 ]
+
+[[annotations]]
+path = [
+  "podman/monitoring/grafana/dashboards/oep-overview.json",
+  "podman/monitoring/usage/testdata/access.log",
+  "podman/monitoring/usage/testdata/expected.prom",
+]
+precedence = "override"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-FileCopyrightText = [
+  "2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
+]

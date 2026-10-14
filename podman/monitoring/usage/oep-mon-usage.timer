@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+[Unit]
+Description=OEP monitoring: usage figures, every hour
+
+[Timer]
+OnCalendar=hourly
+# Catches up on a run missed while the host was down.
+Persistent=true
+
+[Install]
+WantedBy=timers.target

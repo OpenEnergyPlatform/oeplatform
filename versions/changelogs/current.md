@@ -31,6 +31,13 @@ the previous release's highlights.
 
 ## Changes
 
+- A first monitoring stack for the Podman deployment, under
+  `podman/monitoring/`: Prometheus and Grafana with one provisioned overview
+  dashboard, probes of every app container, host, container and database
+  metrics, and hourly usage figures (counts only) from the access log. Separate
+  Quadlet units beside the app's, reachable from the host only; the app's
+  containers are unchanged. Documented as the guide's new Monitoring page
+  [(#2412)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2412)
 - The profile is edited in place on Settings: Edit turns the Manage Profile card
   into the form and Cancel or Submit turn it back, without leaving the page;
   focus moves into the form and back to Edit, and a save shows a toast. The edit

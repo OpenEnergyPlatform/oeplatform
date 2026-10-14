@@ -1,0 +1,18 @@
+10.88.0.1 - - [13/Oct/2026:10:00:00 +0000] "GET / HTTP/1.1" 200 5120 "Mozilla/5.0" 882
+10.88.0.1 - - [13/Oct/2026:10:00:01 +0000] "GET /database/ HTTP/1.1" 200 4000 "Mozilla/5.0" 500
+10.88.0.1 - - [13/Oct/2026:10:00:02 +0000] "GET /database/ HTTP/1.1" 304 - "Mozilla/5.0" 100
+10.88.0.1 - - [13/Oct/2026:10:00:03 +0000] "GET /missing HTTP/1.1" 404 - "Mozilla/5.0" 90
+10.88.0.1 - - [13/Oct/2026:10:00:04 +0000] "GET /?probe=blackbox HTTP/1.1" 200 5120 "Blackbox Exporter/0.29.0" 300
+10.88.0.1 - - [13/Oct/2026:10:00:05 +0000] "GET /api/v0/datasets/?page_size=1&probe=blackbox HTTP/1.1" 200 99 "Blackbox Exporter/0.29.0" 300
+10.88.0.1 - - [13/Oct/2026:10:00:06 +0000] "GET /factsheets/models/ HTTP/1.1" 200 9000 "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)" 400
+10.88.0.1 - - [13/Oct/2026:10:00:07 +0000] "GET /api/v0/tables/wind/rows/?form=csv HTTP/1.1" 200 900000 "python-requests/2.32" 2000
+10.88.0.1 - - [13/Oct/2026:10:00:08 +0000] "GET /api/v0/schema/scenario/tables/wind/rows/?form=datapackage HTTP/1.1" 200 1200 "Mozilla/5.0" 2100
+10.88.0.1 - - [13/Oct/2026:10:00:09 +0000] "GET /api/v0/tables/gone/rows/?form=csv HTTP/1.1" 404 30 "Mozilla/5.0" 50
+10.88.0.1 - - [13/Oct/2026:10:00:10 +0000] "GET /api/v0/tables/wind/rows/?form=evil HTTP/1.1" 200 10 "Mozilla/5.0" 50
+10.88.0.1 - - [13/Oct/2026:10:00:11 +0000] "POST /accounts/login/ HTTP/1.1" 302 0 "Mozilla/5.0" 700
+10.88.0.1 - - [13/Oct/2026:10:00:12 +0000] "POST /accounts/login/ HTTP/1.1" 200 3000 "Mozilla/5.0" 650
+10.88.0.1 - - [13/Oct/2026:10:00:13 +0000] "GET /static/css/base.css HTTP/1.1" 200 800 "Mozilla/5.0" 5
+10.88.0.1 - - [13/Oct/2026:10:00:14 +0000] "GET /about/ HTTP/1.1" 200 2000 "Mozilla/5.0 \"quoted\"" 60
+[Tue Oct 13 10:00:15.000 2026] [wsgi:error] [pid 42] Exception in "GET /x" 500
+10.88.0.1 - - [13/Oct/2026:10:00:16 +0000] "GET /ontology/oeo/ HTTP/1.1" 200 700
+10.88.0.1 - - [13/Oct/2026:10:00:17 +0000] "GET /database/tables HTTP/1.1" 500 300 "Mozilla/5.0" 9000
