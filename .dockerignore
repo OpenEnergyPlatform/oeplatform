@@ -6,6 +6,10 @@ env*
 
 # local secrets / generated config
 oeplatform/securitysettings.py
+# A filled-in environment file next to its example (the units read
+# ~/.config/oeplatform/, but a copy in the checkout would end up in the image)
+**/oep.env
+**/monitoring.env
 
 # node deps (installed inside the image / named volume)
 node_modules/
