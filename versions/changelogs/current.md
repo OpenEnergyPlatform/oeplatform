@@ -755,6 +755,13 @@ the previous release's highlights.
 
 ## Bugs
 
+- Fuseki keeps the OEKG across restarts. The Podman unit and both compose files
+  mounted its volume at a path Fuseki never uses, so the data lived in an
+  anonymous volume and a restart of the Podman unit deleted it. A host set up
+  with the old unit must copy the data over once before restarting; the update
+  page has the steps
+  [(#2720)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2720)
+
 - The Edit button in a table page's tag chooser opens the tag manager instead of
   the topic list
   [(#2708)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2708)
