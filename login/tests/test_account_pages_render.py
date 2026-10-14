@@ -58,6 +58,6 @@ class AccountPagesRenderTest(TestCase):
         (app,) = providers["openid_connect"]["APPS"]
         self.assertEqual(app["client_id"], "client")
         self.assertEqual(app["settings"]["server_url"], REGAPP["OEP_REGAPP_SERVER_URL"])
-        self.assertTrue(app["settings"]["verified_email"])
+        self.assertNotIn("verified_email", app["settings"])
         response = self.assert_pages_render(providers)
         self.assertContains(response, "/accounts/oidc/RegApp/login/")

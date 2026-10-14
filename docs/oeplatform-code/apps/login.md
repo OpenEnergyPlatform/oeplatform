@@ -37,8 +37,9 @@ allauth:
 The template configures the NFDI RegApp AAI from three environment variables,
 `OEP_REGAPP_CLIENT_ID`, `OEP_REGAPP_SECRET` and `OEP_REGAPP_SERVER_URL`, and
 offers no provider while the client id is unset. Per app, allauth reads only
-`name`, `provider_id`, `client_id`, `secret`, `key` and `settings`, so switches
-such as `verified_email` go into `settings`, in lower case:
+`name`, `provider_id`, `client_id`, `secret`, `key` and `settings`; switches
+such as `verified_email` go into `settings`, in lower case. The template sets
+none, so an address counts as verified only when the provider says so:
 
 ```python
 SOCIALACCOUNT_PROVIDERS = {
@@ -49,11 +50,7 @@ SOCIALACCOUNT_PROVIDERS = {
                 "name": "NFDI-RegApp AAI",
                 "client_id": os.environ["OEP_REGAPP_CLIENT_ID"],
                 "secret": os.environ["OEP_REGAPP_SECRET"],
-                "settings": {
-                    "server_url": os.environ["OEP_REGAPP_SERVER_URL"],
-                    "verified_email": True,
-                    "email_authentication": True,
-                },
+                "settings": {"server_url": os.environ["OEP_REGAPP_SERVER_URL"]},
             }
         ]
         if os.environ.get("OEP_REGAPP_CLIENT_ID")

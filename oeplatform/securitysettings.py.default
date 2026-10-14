@@ -152,12 +152,10 @@ SOCIALACCOUNT_PROVIDERS = {
                 "name": "NFDI-RegApp AAI",
                 "client_id": os.environ["OEP_REGAPP_CLIENT_ID"],
                 "secret": os.environ["OEP_REGAPP_SECRET"],
-                # allauth reads these per app only in lower case, from "settings".
-                "settings": {
-                    "server_url": os.environ["OEP_REGAPP_SERVER_URL"],
-                    "verified_email": True,
-                    "email_authentication": True,
-                },
+                # No "verified_email": an address counts as verified only when
+                # the provider says so (its email_verified claim).
+                # Email authentication is on for every provider in settings.py.
+                "settings": {"server_url": os.environ["OEP_REGAPP_SERVER_URL"]},
             }
         ]
         if os.environ.get("OEP_REGAPP_CLIENT_ID")
