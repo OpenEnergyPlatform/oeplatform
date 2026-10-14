@@ -35,14 +35,16 @@ scrape_configs:
         target_label: instance
       - target_label: __address__
         replacement: oep-mon-blackbox:9115
-  - job_name: probe_fuseki
-    metrics_path: /probe
-    params: { module: [http_2xx] }
-    static_configs: [{ targets: ["http://fuseki:3030/$/ping"] }]
-    relabel_configs: *probe
   - job_name: probe_tcp
     metrics_path: /probe
     params: { module: [tcp_connect] }
+    # Fuseki by TCP only: an HTTP probe of /$/ping every 15 s made Fuseki 5.1's
+    # Java heap grow by ~1.2 GiB per hour (measured on the test server, 2026-10-14).
     static_configs:
-      [{ targets: ["ontop:8080", "lookup:8082", "postgres:5432"] }]
+      [
+        {
+          targets:
+            ["fuseki:3030", "ontop:8080", "lookup:8082", "postgres:5432"],
+        },
+      ]
     relabel_configs: *probe
