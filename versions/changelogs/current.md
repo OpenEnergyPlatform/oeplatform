@@ -31,6 +31,12 @@ the previous release's highlights.
 
 ## Changes
 
+- The Podman monitoring stack also watches security: failed logins, rejected
+  requests (401/403) and requests to typical attack paths are counted from the
+  access log every minute, four alert rules (service down, disk filling up,
+  failed-login wave, scanner wave) are evaluated by Prometheus, and the
+  dashboard gains a Security row
+  [(#2412)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2412)
 - A first monitoring stack for the Podman deployment, under
   `podman/monitoring/`: Prometheus and Grafana with one provisioned overview
   dashboard, probes of every app container, host, container and database

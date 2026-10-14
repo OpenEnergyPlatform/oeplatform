@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-or-later
 #
-# Usage figures from the app's access log. Only counts leave this script: no
+# Usage and security figures from the app's access log. Only counts leave this script: no
 # address, no user name, no query string. Run hourly by oep-mon-usage.timer:
 #   - textfile/oep_usage.prom: the last 24 hours, read by the node exporter;
 #   - usage.csv: one block per day, appended once for yesterday. Prometheus
@@ -28,10 +28,14 @@ count() {
             ua = substr($0, RSTART + RLENGTH); sub(/" [0-9]+$/, "", ua)
         }
         if (path ~ /[?&]probe=blackbox/ || ua ~ /Blackbox Exporter/) next
+        base = path; sub(/\?.*/, "", base)
+        # Security figures count every client, crawlers included: attacks often say "bot".
+        if (method == "POST" && base ~ /^\/accounts\/login\/?$/ && status == 200) failed_logins++
+        if (status == 401 || status == 403) rejected++
+        if (tolower(base) ~ /(^|\/)(\.env|\.git|\.aws|wp-admin|wp-login|wp-content|phpmyadmin|cgi-bin|xmlrpc\.php|actuator)/) scanner++
         if (tolower(ua) ~ /bot|crawl|spider/) { bots++; next }
 
         requests[substr(status, 1, 1) "xx"]++
-        base = path; sub(/\?.*/, "", base)
         if (base ~ /^\/api\//) api++
         if (method == "POST" && base ~ /^\/accounts\/login\/?$/ && status == 302) logins++
         if (status !~ /^2/) next
@@ -46,6 +50,7 @@ count() {
         # A fixed list, so every series exists from the first run on.
         split("2xx 3xx 4xx 5xx", c, " "); for (i = 1; i <= 4; i++) printf "oep_usage_requests{class=\"%s\"} %d\n", c[i], requests[c[i]]
         printf "oep_usage_bot_requests %d\noep_usage_api_requests %d\noep_usage_logins %d\n", bots, api, logins
+        printf "oep_usage_failed_logins %d\noep_usage_rejected_requests %d\noep_usage_scanner_requests %d\n", failed_logins, rejected, scanner
         printf "oep_usage_downloads{format=\"csv\"} %d\noep_usage_downloads{format=\"datapackage\"} %d\n", downloads["csv"], downloads["datapackage"]
         n = split("home database factsheets scenario-bundles ontology viewer oekg user accounts other", a, " ")
         for (i = 1; i <= n; i++) printf "oep_usage_pageviews{area=\"%s\"} %d\n", a[i], pageviews[a[i]]
@@ -58,11 +63,12 @@ journal() { journalctl --user -u oep-oeplatform -o cat --since "$1" ${2:+--until
 if [ "${1:-}" = count ]; then count; exit; fi
 
 if [ "${1:-}" = minute ]; then
-    # Requests of the last minute, run every minute by oep-mon-usage-minute.timer.
+    # Requests and security figures of the last minute, every minute (oep-mon-usage-minute.timer).
     # shortcut: a fixed window per run, so a request at the edge can be counted
     # twice or not at all; exact live rates need Apache's mod_status (#2412).
     mkdir -p "$STATE/textfile"
-    journal -1min | count | sed -n 's/^oep_usage_requests/oep_usage_requests_last_minute/p' \
+    journal -1min | count \
+        | sed -nE 's/^oep_usage_(requests|failed_logins|rejected_requests|scanner_requests)([{ ])/oep_usage_\1_last_minute\2/p' \
         > "$STATE/textfile/oep_usage_minute.prom.tmp"
     mv "$STATE/textfile/oep_usage_minute.prom.tmp" "$STATE/textfile/oep_usage_minute.prom"
     exit

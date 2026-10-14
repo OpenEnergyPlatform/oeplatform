@@ -1,0 +1,40 @@
+# SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Evaluated by Prometheus and shown on its Alerts page and in Grafana. Nothing
+# sends them anywhere yet (#2667). The thresholds are starting values for a
+# quiet platform; tune them once there is a few weeks of history.
+
+groups:
+  - name: oep
+    rules:
+      - alert: ServiceDown
+        expr: probe_success == 0
+        for: 2m
+        labels: { severity: critical }
+        annotations:
+          summary: "{{ $labels.instance }} does not answer"
+
+      - alert: DiskFillingUp
+        expr: >
+          100 * (1 - node_filesystem_avail_bytes{fstype=~"xfs|ext4|btrfs"} /
+          node_filesystem_size_bytes{fstype=~"xfs|ext4|btrfs"}) > 85
+        for: 10m
+        labels: { severity: warning }
+        annotations:
+          summary: "{{ $labels.mountpoint }} is more than 85 % full"
+
+      - alert: FailedLoginWave
+        expr: oep_usage_failed_logins_last_minute > 10
+        for: 2m
+        labels: { severity: warning }
+        annotations:
+          summary: "More than 10 failed logins per minute (password guessing?)"
+
+      - alert: ScannerWave
+        expr: oep_usage_scanner_requests_last_minute > 30
+        for: 2m
+        labels: { severity: warning }
+        annotations:
+          summary: "More than 30 requests per minute to typical attack paths"
