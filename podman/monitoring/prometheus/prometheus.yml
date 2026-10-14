@@ -24,7 +24,8 @@ scrape_configs:
     static_configs:
       - targets:
           - http://oeplatform/?probe=blackbox
-          - http://oeplatform/api/v0/datasets/?page_size=1&probe=blackbox
+          # Cheap, and present in old app images as well as current ones.
+          - http://oeplatform/api/v0/factsheet/frameworks/?probe=blackbox
     # The blackbox exporter probes the address in __param_target; the series
     # keeps that address as its instance label. Reused below as *probe.
     relabel_configs: &probe
