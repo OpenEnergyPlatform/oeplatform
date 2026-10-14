@@ -917,3 +917,8 @@ the previous release's highlights.
   `custom_alert.css`, the factsheet stylesheet's Bootstrap 3 `.panel-heading`
   rules and an unused mixin. Nothing visible changes
   [(#2715)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2715)
+- Design system: deleted `dataedit/static/dataedit/metadata.js`, which nothing
+  loaded, and the theme's dead dropdown radius variables, which the house
+  dropdown overrides everywhere. `$nav-tabs-*` and the `.nav-pills` remap stay:
+  the metadata editor draws both. Nothing visible changes
+  [(#2718)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2718)
