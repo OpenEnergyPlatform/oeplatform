@@ -11,7 +11,8 @@ Description=OEP monitoring: Prometheus
 [Container]
 Image=docker.io/prom/prometheus:v3.15.0
 ContainerName=oep-mon-prometheus
-Volume=@@OEP_REPO@@/podman/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+# The whole directory: the scrape config and the alert rules.
+Volume=@@OEP_REPO@@/podman/monitoring/prometheus:/etc/prometheus:ro
 Volume=oep-mon-prometheus.volume:/prometheus
 Exec=--config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus --storage.tsdb.retention.time=30d
 PublishPort=127.0.0.1:9090:9090

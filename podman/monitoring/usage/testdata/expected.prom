@@ -1,10 +1,13 @@
 oep_usage_requests{class="2xx"} 9
 oep_usage_requests{class="3xx"} 2
-oep_usage_requests{class="4xx"} 2
+oep_usage_requests{class="4xx"} 4
 oep_usage_requests{class="5xx"} 1
-oep_usage_bot_requests 1
+oep_usage_bot_requests 2
 oep_usage_api_requests 4
 oep_usage_logins 1
+oep_usage_failed_logins 1
+oep_usage_rejected_requests 1
+oep_usage_scanner_requests 2
 oep_usage_downloads{format="csv"} 1
 oep_usage_downloads{format="datapackage"} 1
 oep_usage_pageviews{area="home"} 1

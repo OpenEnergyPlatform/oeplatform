@@ -14,13 +14,14 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 The monitoring answers five questions:
 
-| Question                                           | Source                                            |
-| -------------------------------------------------- | ------------------------------------------------- |
-| Is each service up, and how fast does it answer?   | `oep-mon-blackbox` probes the app containers      |
-| Is the host healthy (CPU, memory, load, disk)?     | `oep-mon-node` (node exporter)                    |
-| Is each container healthy (CPU, memory, restarts)? | `oep-mon-podman` (podman exporter)                |
-| Is the database healthy (connections, size)?       | `oep-mon-postgres` (postgres exporter)            |
-| How is the platform used?                          | `oep-mon-usage.timer`, counts from the access log |
+| Question                                           | Source                                                                            |
+| -------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Is each service up, and how fast does it answer?   | `oep-mon-blackbox` probes the app containers                                      |
+| Is the host healthy (CPU, memory, load, disk)?     | `oep-mon-node` (node exporter)                                                    |
+| Is each container healthy (CPU, memory, restarts)? | `oep-mon-podman` (podman exporter)                                                |
+| Is the database healthy (connections, size)?       | `oep-mon-postgres` (postgres exporter)                                            |
+| How is the platform used?                          | `oep-mon-usage.timer`, counts from the access log                                 |
+| Is someone attacking it?                           | the same timers: failed logins, rejected requests, attack paths; four alert rules |
 
 Prometheus (`oep-mon-prometheus`) stores the figures for 30 days, Grafana
 (`oep-mon-grafana`) shows them in the dashboard **OEP / OEP overview**. Every
@@ -92,6 +93,35 @@ Check the counting rules against the sample log:
 ```sh
 podman/monitoring/usage/oep-usage.sh count < podman/monitoring/usage/testdata/access.log \
   | diff - podman/monitoring/usage/testdata/expected.prom
+```
+
+## Security figures and alerts
+
+The same script counts, every minute and for the last 24 hours:
+
+- **failed logins**: `POST /accounts/login/` answered 200 (the form shown
+  again);
+- **rejected requests**: answers 401 and 403;
+- **requests to attack paths**: `.env`, `.git`, `.aws`, `wp-admin`, `wp-login`,
+  `wp-content`, `phpmyadmin`, `cgi-bin`, `xmlrpc.php`, `actuator`, which this
+  platform does not serve and scanners try everywhere.
+
+Unlike the usage figures these include crawlers, because attacks often call
+themselves bots.
+
+Prometheus evaluates four alert rules from
+`podman/monitoring/prometheus/rules.yml`: `ServiceDown` (a probe failing for 2
+minutes), `DiskFillingUp` (over 85 % for 10 minutes), `FailedLoginWave` (over 10
+failed logins per minute for 2 minutes) and `ScannerWave` (over 30 requests to
+attack paths per minute for 2 minutes). The thresholds are starting values.
+Firing alerts show on Prometheus' **Alerts** page and in the dashboard's
+**Security** row; nothing sends them anywhere yet. After changing a rule, run
+its test:
+
+```sh
+cd podman/monitoring/prometheus
+podman run --rm -v "$PWD:/t:ro" -w /t --entrypoint promtool \
+  docker.io/prom/prometheus:v3.15.0 test rules rules.test.yml
 ```
 
 ## Add a source

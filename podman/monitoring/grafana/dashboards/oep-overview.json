@@ -122,13 +122,192 @@
     },
     {
       "type": "row",
-      "title": "Host",
+      "title": "Security",
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
         "y": 8
+      },
+      "panels": []
+    },
+    {
+      "type": "stat",
+      "title": "Firing alerts",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 0,
+        "y": 9
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A",
+          "expr": "count(ALERTS{alertstate=\"firing\"}) or vector(0)",
+          "legendFormat": "firing"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "description": "Alert rules from podman/monitoring/prometheus/rules.yml; details on Prometheus' Alerts page.",
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"]
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Failed logins, rejected requests, scanners (per minute)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 18,
+        "x": 6,
+        "y": 9
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A",
+          "expr": "oep_usage_failed_logins_last_minute",
+          "legendFormat": "failed logins"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "B",
+          "expr": "oep_usage_rejected_requests_last_minute",
+          "legendFormat": "rejected (401/403)"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "C",
+          "expr": "oep_usage_scanner_requests_last_minute",
+          "legendFormat": "attack paths"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80
+          }
+        },
+        "overrides": []
+      },
+      "description": "Counted every minute from the access log, crawlers included. Attack paths: .env, .git, wp-admin, phpmyadmin, cgi-bin and similar."
+    },
+    {
+      "type": "stat",
+      "title": "Last 24 hours",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 16
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A",
+          "expr": "oep_usage_failed_logins",
+          "legendFormat": "failed logins"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "B",
+          "expr": "oep_usage_rejected_requests",
+          "legendFormat": "rejected (401/403)"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "C",
+          "expr": "oep_usage_scanner_requests",
+          "legendFormat": "attack paths"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "D",
+          "expr": "oep_usage_requests{class=\"5xx\"}",
+          "legendFormat": "server errors (5xx)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "graphMode": "none",
+        "colorMode": "value",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"]
+        }
+      }
+    },
+    {
+      "type": "row",
+      "title": "Host",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 21
       },
       "panels": []
     },
@@ -143,7 +322,7 @@
         "h": 7,
         "w": 6,
         "x": 0,
-        "y": 9
+        "y": 22
       },
       "targets": [
         {
@@ -193,7 +372,7 @@
         "h": 7,
         "w": 6,
         "x": 6,
-        "y": 9
+        "y": 22
       },
       "targets": [
         {
@@ -243,7 +422,7 @@
         "h": 7,
         "w": 6,
         "x": 12,
-        "y": 9
+        "y": 22
       },
       "targets": [
         {
@@ -272,7 +451,7 @@
         "h": 7,
         "w": 6,
         "x": 18,
-        "y": 9
+        "y": 22
       },
       "targets": [
         {
@@ -320,7 +499,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 16
+        "y": 29
       },
       "panels": []
     },
@@ -335,7 +514,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 17
+        "y": 30
       },
       "targets": [
         {
@@ -366,7 +545,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 17
+        "y": 30
       },
       "targets": [
         {
@@ -397,7 +576,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 17
+        "y": 30
       },
       "targets": [
         {
@@ -444,7 +623,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 24
+        "y": 37
       },
       "panels": []
     },
@@ -459,7 +638,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 25
+        "y": 38
       },
       "targets": [
         {
@@ -498,7 +677,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 25
+        "y": 38
       },
       "targets": [
         {
@@ -526,7 +705,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 32
+        "y": 45
       },
       "panels": []
     },
@@ -541,7 +720,7 @@
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 33
+        "y": 46
       },
       "targets": [
         {
@@ -579,7 +758,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 40
+        "y": 53
       },
       "targets": [
         {
@@ -615,7 +794,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 40
+        "y": 53
       },
       "targets": [
         {
@@ -668,7 +847,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 40
+        "y": 53
       },
       "targets": [
         {
@@ -703,7 +882,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 47
+        "y": 60
       },
       "targets": [
         {

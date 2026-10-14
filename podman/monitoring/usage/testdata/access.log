@@ -16,3 +16,6 @@
 [Tue Oct 13 10:00:15.000 2026] [wsgi:error] [pid 42] Exception in "GET /x" 500
 10.88.0.1 - - [13/Oct/2026:10:00:16 +0000] "GET /ontology/oeo/ HTTP/1.1" 200 700
 10.88.0.1 - - [13/Oct/2026:10:00:17 +0000] "GET /database/tables HTTP/1.1" 500 300 "Mozilla/5.0" 9000
+10.88.0.1 - - [13/Oct/2026:10:00:19 +0000] "GET /.env HTTP/1.1" 404 196 "Mozilla/5.0 zgrab/0.x" 40
+10.88.0.1 - - [13/Oct/2026:10:00:20 +0000] "GET /wp-login.php HTTP/1.1" 404 196 "Mozilla/5.0 (compatible; scanbot/1.0)" 40
+10.88.0.1 - - [13/Oct/2026:10:00:21 +0000] "GET /database/tables/secret/permissions/ HTTP/1.1" 403 50 "Mozilla/5.0" 30
