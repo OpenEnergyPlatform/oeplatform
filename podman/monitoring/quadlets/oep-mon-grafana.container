@@ -1,0 +1,31 @@
+# SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Shows the metrics. Localhost only: reach it with an SSH tunnel.
+# The admin password comes from monitoring.env; datasource and dashboards are
+# provisioned from the repository, so nothing is set up by clicking.
+
+[Unit]
+Description=OEP monitoring: Grafana
+After=oep-mon-prometheus.service
+
+[Container]
+Image=docker.io/grafana/grafana:13.2.4
+ContainerName=oep-mon-grafana
+EnvironmentFile=%h/.config/oeplatform/monitoring.env
+Environment=GF_ANALYTICS_REPORTING_ENABLED=false
+Environment=GF_ANALYTICS_CHECK_FOR_UPDATES=false
+Environment=GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES=false
+Volume=oep-mon-grafana.volume:/var/lib/grafana
+Volume=@@OEP_REPO@@/podman/monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+Volume=@@OEP_REPO@@/podman/monitoring/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+Volume=@@OEP_REPO@@/podman/monitoring/grafana/dashboards:/var/lib/grafana-dashboards:ro
+PublishPort=127.0.0.1:3000:3000
+Network=oep.network
+
+[Service]
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
