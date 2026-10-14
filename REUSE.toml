@@ -3444,3 +3444,9 @@ SPDX-License-Identifier = "AGPL-3.0-or-later"
 SPDX-FileCopyrightText = [
   "2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut",
 ]
+
+[[annotations]]
+path = "patches/@elastic+eui+*.patch"
+precedence = "override"
+SPDX-License-Identifier = "SSPL-1.0 OR Elastic-2.0"
+SPDX-FileCopyrightText = "Elasticsearch B.V."

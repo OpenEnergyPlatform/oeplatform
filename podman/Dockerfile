@@ -7,8 +7,11 @@ FROM node:25.2.1 AS vite-build
 
 WORKDIR /app
 
-# Install deps first for better layer caching
+# Install deps first for better layer caching. npm ci runs patch-package
+# ("prepare"), so the patches must be there first: without patches/ EUI's icons
+# are not bundled and every icon 404s.
 COPY package*.json ./
+COPY patches ./patches
 RUN npm ci
 
 COPY . .

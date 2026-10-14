@@ -129,8 +129,6 @@ site/
 /apache-jena-fuseki*/
 /apache-jena-fuseki*.tar.gz*
 
-# NPM & VITE
-patches/
 
 # other git repos
 oedialect/

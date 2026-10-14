@@ -768,6 +768,13 @@ the previous release's highlights.
 
 ## Bugs
 
+- The OEO viewer and the ontology pages work in a production build again: the
+  terminology service address and ontology default to the TIB service and `oeo`
+  when no `VITE_TSS_*` variable is set at build time (they were empty, so every
+  request went to a relative `v2/ontologies/`), and the EUI patch that bundles
+  the icons is committed and applied in the image build (`patches/` was ignored,
+  so every icon 404ed)
+  [(#PR)](https://github.com/OpenEnergyPlatform/oeplatform/pull/PR)
 - A filled-in `oep.env` or `monitoring.env` inside the checkout is no longer
   copied into the production image: `.dockerignore`'s `env*` matched only at the
   root, so `podman/quadlets/oep.env` with its credentials reached
