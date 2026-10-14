@@ -421,7 +421,7 @@ the previous release's highlights.
   `oep.env`), and offers no third-party sign-in otherwise. The app's
   `verified_email` and `email_authentication` switches now sit in its
   `settings`, the only place allauth reads them for one app
-  [(#PR)](https://github.com/OpenEnergyPlatform/oeplatform/pull/PR)
+  [(#2723)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2723)
 - The profile's datasets tab is one dense list of your own Datasets, replacing
   the cards: Dataset (title linked to its page, the name beneath), Status
   (Draft, or Published since a date), Tables (a count whose popover names the
