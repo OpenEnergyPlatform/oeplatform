@@ -34,21 +34,30 @@ allauth:
 
     Filling out the values in the dictionary depends on your Provider. They should provide documentation or provide you with the relevant credentials. In some cases the provider_id must be in line with the specification of the provider in others you can choose your own name here. The client_id & secret should also be provided as well as the server_url.
 
+The template configures the NFDI RegApp AAI from three environment variables,
+`OEP_REGAPP_CLIENT_ID`, `OEP_REGAPP_SECRET` and `OEP_REGAPP_SERVER_URL`, and
+offers no provider while the client id is unset. Per app, allauth reads only
+`name`, `provider_id`, `client_id`, `secret`, `key` and `settings`, so switches
+such as `verified_email` go into `settings`, in lower case:
+
 ```python
 SOCIALACCOUNT_PROVIDERS = {
     "openid_connect": {
-        # For each OAuth based provider, either add a ``SocialApp``
-        # (``socialaccount`` app) containing the required client
-        # credentials, or list them here:
-        "APPS": [{
-            "provider_id": "",
-            "name": "",
-            "client_id": "",
-            "secret": "",
-            "VERIFIED_EMAIL": True,
-            "EMAIL_AUTHENTICATION": True,
-            "settings": {"server_url": ""},
-        }]
+        "APPS": [
+            {
+                "provider_id": "RegApp",
+                "name": "NFDI-RegApp AAI",
+                "client_id": os.environ["OEP_REGAPP_CLIENT_ID"],
+                "secret": os.environ["OEP_REGAPP_SECRET"],
+                "settings": {
+                    "server_url": os.environ["OEP_REGAPP_SERVER_URL"],
+                    "verified_email": True,
+                    "email_authentication": True,
+                },
+            }
+        ]
+        if os.environ.get("OEP_REGAPP_CLIENT_ID")
+        else [],
     }
 }
 ```

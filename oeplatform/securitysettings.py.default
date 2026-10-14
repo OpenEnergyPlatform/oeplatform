@@ -138,24 +138,30 @@ CORS_ORIGIN_ALLOW_ALL = True
 DJANGO_VITE = {"default": {"dev_mode": os.environ.get("VITE_DEV_MODE", DEBUG), "manifest_path": Path(BASE_DIR, "assets", "manifest.json")}}
 VITE_DEV_SERVER_URL = os.environ.get("VITE_DEV_SERVER_URL" "http://vite:5173")
 
+# Sign-in through the NFDI RegApp AAI (OpenID Connect). Offered only when
+# OEP_REGAPP_CLIENT_ID is set; register
+# https://<OEP_URL>/accounts/oidc/RegApp/login/callback/ as the redirect URI.
+# OEP_REGAPP_SERVER_URL is "<issuer>/.well-known/openid-configuration".
+# Never list an app with an empty "provider_id": no login URL can be built for
+# it, and the sign-in and sign-up pages fail.
 SOCIALACCOUNT_PROVIDERS = {
     "openid_connect": {
-        # For each OAuth based provider, either add a ``SocialApp``
-        # (``socialaccount`` app) containing the required client
-        # credentials, or list them here. Leave the list empty when there is
-        # none: an entry with an empty "provider_id" makes the sign-in and
-        # sign-up pages fail, because no login URL can be built for it.
-        # Example:
-        # {
-        #     "provider_id": "RegApp",
-        #     "name": "NFDI-RegApp AAI",
-        #     "client_id": "<client id>",
-        #     "secret": "<secret>",
-        #     "VERIFIED_EMAIL": True,
-        #     "EMAIL_AUTHENTICATION": True,
-        #     "settings": {"server_url": "<issuer>/.well-known/openid-configuration"},
-        # },
-        "APPS": [],
+        "APPS": [
+            {
+                "provider_id": "RegApp",
+                "name": "NFDI-RegApp AAI",
+                "client_id": os.environ["OEP_REGAPP_CLIENT_ID"],
+                "secret": os.environ["OEP_REGAPP_SECRET"],
+                # allauth reads these per app only in lower case, from "settings".
+                "settings": {
+                    "server_url": os.environ["OEP_REGAPP_SERVER_URL"],
+                    "verified_email": True,
+                    "email_authentication": True,
+                },
+            }
+        ]
+        if os.environ.get("OEP_REGAPP_CLIENT_ID")
+        else [],
     }
 }
 

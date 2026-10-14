@@ -201,6 +201,22 @@ re-run it after changing the domain or config. To override the domain:
     steps (1–5) as the service user and only this nginx step via `sudo`. The script
     handles being run as root.
 
+### 6c. Sign-in through the NFDI RegApp (optional)
+
+Register the platform as a client at the RegApp with the redirect URI
+`https://your-domain.org/accounts/oidc/RegApp/login/callback/`, then fill in the
+three keys in `~/.config/oeplatform/oep.env`:
+
+```sh
+OEP_REGAPP_CLIENT_ID=<client id>
+OEP_REGAPP_SECRET=<secret>
+OEP_REGAPP_SERVER_URL=<issuer>/.well-known/openid-configuration
+```
+
+Restart the app (`systemctl --user restart oep-oeplatform`). The sign-in page
+then offers "NFDI-RegApp AAI"; with `OEP_REGAPP_CLIENT_ID` empty it offers no
+third-party sign-in.
+
 ## 7. Make services survive logout and reboot
 
 Rootless `--user` services stop when the user logs out unless **linger** is
