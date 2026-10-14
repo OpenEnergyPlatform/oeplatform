@@ -52,7 +52,7 @@ Start everything:
 ```sh
 systemctl --user start oep-mon-prometheus oep-mon-grafana oep-mon-blackbox \
   oep-mon-node oep-mon-podman oep-mon-postgres
-systemctl --user enable --now oep-mon-usage.timer
+systemctl --user enable --now oep-mon-usage.timer oep-mon-usage-minute.timer
 ```
 
 The container units start again after a reboot by themselves (as the app's do,
@@ -70,6 +70,10 @@ Then open `http://localhost:3000` (user `admin`, password from
 `monitoring.env`). Prometheus' **Status → Targets** page on
 `http://localhost:9090` shows whether every source is reachable.
 
+The first number of each `-L` is the port on your machine. If something there
+already uses 3000 or 9090, pick any free one, e.g. `-L 13000:127.0.0.1:3000` and
+then `http://localhost:13000`.
+
 ## Usage figures and privacy
 
 Every hour, `podman/monitoring/usage/oep-usage.sh` reads the last 24 hours of
@@ -78,9 +82,10 @@ status class, API requests, successful logins, CSV and datapackage downloads,
 and page views per area. No address, user name or query string is stored. The
 monitoring's own probes (`?probe=blackbox`) and crawlers (a user agent
 containing bot, crawl or spider) are left out; crawlers are counted on their
-own. Once a day it also appends the day before to
-`~/.local/state/oep-monitoring/usage.csv`, which keeps the figures beyond
-Prometheus' 30 days.
+own. A second timer counts the requests of the last minute, every minute, for
+the dashboard's **Requests per minute**. Once a day the hourly run also appends
+the day before to `~/.local/state/oep-monitoring/usage.csv`, which keeps the
+figures beyond Prometheus' 30 days.
 
 Check the counting rules against the sample log:
 

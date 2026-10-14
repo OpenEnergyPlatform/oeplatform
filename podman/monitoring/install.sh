@@ -23,8 +23,8 @@ fi
 echo "Installing monitoring units…"
 mkdir -p "${QUADLET_DIR}" "${UNIT_DIR}" "${HOME}/.local/state/oep-monitoring/textfile"
 cp "${SCRIPT_DIR}"/quadlets/* "${QUADLET_DIR}/"
-cp "${SCRIPT_DIR}"/usage/oep-mon-usage.service "${SCRIPT_DIR}"/usage/oep-mon-usage.timer "${UNIT_DIR}/"
-sed -i "s|@@OEP_REPO@@|${REPO_ROOT}|g" "${QUADLET_DIR}"/oep-mon-*.container "${UNIT_DIR}/oep-mon-usage.service"
+cp "${SCRIPT_DIR}"/usage/oep-mon-usage*.service "${SCRIPT_DIR}"/usage/oep-mon-usage*.timer "${UNIT_DIR}/"
+sed -i "s|@@OEP_REPO@@|${REPO_ROOT}|g" "${QUADLET_DIR}"/oep-mon-*.container "${UNIT_DIR}"/oep-mon-usage*.service
 
 # The probes must send the host name Django accepts.
 OEP_URL="$(sed -n 's/^OEP_URL=//p' "${ENV_DIR}/oep.env" | tail -1)"
@@ -47,4 +47,4 @@ echo "  1. Fill in ${ENV_DIR}/monitoring.env."
 echo "  2. Create the read-only database role oep_monitoring with that password."
 echo "  3. systemctl --user start oep-mon-prometheus oep-mon-grafana oep-mon-blackbox \\"
 echo "       oep-mon-node oep-mon-podman oep-mon-postgres"
-echo "     systemctl --user enable --now oep-mon-usage.timer"
+echo "     systemctl --user enable --now oep-mon-usage.timer oep-mon-usage-minute.timer"

@@ -520,7 +520,7 @@
     },
     {
       "type": "row",
-      "title": "Usage (last 24 hours)",
+      "title": "Usage",
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -531,8 +531,46 @@
       "panels": []
     },
     {
+      "type": "timeseries",
+      "title": "Requests per minute",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 33
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "refId": "A",
+          "expr": "sum by (class) (oep_usage_requests_last_minute)",
+          "legendFormat": "{{class}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "stacking": {
+              "mode": "normal"
+            },
+            "fillOpacity": 80
+          }
+        },
+        "overrides": []
+      },
+      "description": "Requests of the last minute, counted every minute from the access log. Probes and crawlers left out."
+    },
+    {
       "type": "stat",
-      "title": "Requests",
+      "title": "Requests (last 24 hours)",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -541,7 +579,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 33
+        "y": 40
       },
       "targets": [
         {
@@ -577,7 +615,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 33
+        "y": 40
       },
       "targets": [
         {
@@ -630,7 +668,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 33
+        "y": 40
       },
       "targets": [
         {
@@ -665,7 +703,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 40
+        "y": 47
       },
       "targets": [
         {

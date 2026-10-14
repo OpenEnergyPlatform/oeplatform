@@ -9,6 +9,7 @@
 #   - textfile/oep_usage.prom: the last 24 hours, read by the node exporter;
 #   - usage.csv: one block per day, appended once for yesterday. Prometheus
 #     keeps 30 days; this is the record kept beyond that.
+# `oep-usage.sh minute` (every minute) writes the requests of the last minute.
 # `oep-usage.sh count < access.log` prints the figures of a log on stdin.
 
 set -euo pipefail
@@ -55,6 +56,17 @@ count() {
 journal() { journalctl --user -u oep-oeplatform -o cat --since "$1" ${2:+--until "$2"}; }
 
 if [ "${1:-}" = count ]; then count; exit; fi
+
+if [ "${1:-}" = minute ]; then
+    # Requests of the last minute, run every minute by oep-mon-usage-minute.timer.
+    # shortcut: a fixed window per run, so a request at the edge can be counted
+    # twice or not at all; exact live rates need Apache's mod_status (#2412).
+    mkdir -p "$STATE/textfile"
+    journal -1min | count | sed -n 's/^oep_usage_requests/oep_usage_requests_last_minute/p' \
+        > "$STATE/textfile/oep_usage_minute.prom.tmp"
+    mv "$STATE/textfile/oep_usage_minute.prom.tmp" "$STATE/textfile/oep_usage_minute.prom"
+    exit
+fi
 
 mkdir -p "$STATE/textfile"
 journal -24h | count > "$STATE/textfile/oep_usage.prom.tmp"
