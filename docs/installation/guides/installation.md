@@ -237,9 +237,9 @@ system like GitHub.
 - copy the file `securitysettings.py.default` and rename it to
   `securitysettings.py`
 
-!!! danger
+!!! note
 
-    You must remove or fill placeholder in SOCIALACCOUNT_PROVIDERS in order to avoid an error due to empty provider ID when trying to login.
+    Third-party sign-in through the NFDI RegApp is off unless `OEP_REGAPP_CLIENT_ID`, `OEP_REGAPP_SECRET` and `OEP_REGAPP_SERVER_URL` are set in the environment. Never add an app with an empty `provider_id` to `SOCIALACCOUNT_PROVIDERS`: the sign-in and sign-up pages then fail.
 
 ??? note "How to configure securitysettings.py"
 

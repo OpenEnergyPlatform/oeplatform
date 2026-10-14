@@ -415,6 +415,13 @@ the previous release's highlights.
   the `Authorization` header are deliberately not logged. The maintenance guide
   documents the fields and a one-liner ranking paths by total server time
   [(#2670)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2670)
+- Sign-in through the NFDI RegApp AAI is configured from the environment: the
+  `securitysettings.py` template offers it when `OEP_REGAPP_CLIENT_ID`,
+  `OEP_REGAPP_SECRET` and `OEP_REGAPP_SERVER_URL` are set (on a Podman server in
+  `oep.env`), and offers no third-party sign-in otherwise. The template's
+  upper-case `VERIFIED_EMAIL`/`EMAIL_AUTHENTICATION` keys are gone: allauth
+  never read them on an app, so sign-in behaves as before
+  [(#2723)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2723)
 - The profile's datasets tab is one dense list of your own Datasets, replacing
   the cards: Dataset (title linked to its page, the name beneath), Status
   (Draft, or Published since a date), Tables (a count whose popover names the
