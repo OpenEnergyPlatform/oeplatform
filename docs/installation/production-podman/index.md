@@ -51,6 +51,9 @@ supported production path.
 | **lookup**     | Term autocomplete / lookup — see below.                                                                  |
 | **nginx**      | Host package (not a container): terminates backend TLS on `:443` and proxies to the app.                 |
 
+Monitoring (Prometheus, Grafana and exporters) runs beside these services in its
+own containers and changes none of them; see **[Monitoring](monitoring.md)**.
+
 ### The lookup service
 
 The **lookup** service runs
