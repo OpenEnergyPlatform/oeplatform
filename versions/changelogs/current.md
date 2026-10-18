@@ -31,6 +31,12 @@ the previous release's highlights.
 
 ## Changes
 
+- The Podman deployment guide, reviewed: the Ontop page builds under the image
+  name the unit starts (it named the one that fails with exit code 125), the
+  install page lists `RDF_DATABASE_HOST` and says `FUSEKI_ADMIN_PASSWORD` is not
+  read yet, the backups include the Fuseki volume, and volume names carry
+  Quadlet's `systemd-` prefix
+  [(#2412)](https://github.com/OpenEnergyPlatform/oeplatform/issues/2412)
 - The Podman monitoring stack also watches security: failed logins, rejected
   requests (401/403) and requests to typical attack paths are counted from the
   access log every minute, four alert rules (service down, disk filling up,

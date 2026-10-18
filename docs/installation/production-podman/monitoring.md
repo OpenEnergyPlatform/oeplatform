@@ -12,7 +12,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
     **[Maintenance](maintenance.md)**. It adds monitoring beside a running
     installation without changing the app's containers.
 
-The monitoring answers five questions:
+The monitoring answers six questions:
 
 | Question                                           | Source                                                                            |
 | -------------------------------------------------- | --------------------------------------------------------------------------------- |

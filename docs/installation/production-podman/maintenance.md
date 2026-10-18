@@ -80,19 +80,22 @@ skips error-log lines, which share the journal.
 ## Backups
 
 Persistent state is in named volumes (physically under the service user's home).
-At minimum, back up the **Postgres** data and the **media** volume regularly,
-and always before a release that runs migrations. List volumes and their
-locations:
+At minimum, back up the **Postgres** data, the **Fuseki** volume (the OEKG) and
+the **media** volume regularly, and always before a release that runs
+migrations. List volumes and their locations:
 
 ```sh
 podman volume ls
-podman volume inspect pgdata
+podman volume inspect systemd-pgdata
 ```
 
+Quadlet prefixes every volume name with `systemd-`.
+
 Use `pg_dump` from inside/against the postgres container for logical database
-backups, and snapshot the media volume for uploaded files. (Physical volume
-placement per server is a separate storage-configuration concern, out of scope
-for this generic guide.)
+backups, and snapshot the media and Fuseki volumes. Stop `oep-oeplatform`, the
+only writer, while copying the Fuseki volume, so the copy is consistent.
+(Physical volume placement per server is a separate storage-configuration
+concern, out of scope for this generic guide.)
 
 ## Reset the database (destructive)
 
@@ -100,7 +103,7 @@ This **deletes all database data**. Only for a throwaway/dev-like environment.
 
 ```sh
 systemctl --user stop oep-oeplatform oep-postgres
-podman volume rm pgdata        # confirm the exact name with: podman volume ls
+podman volume rm systemd-pgdata   # confirm the exact name with: podman volume ls
 systemctl --user start oep-postgres oep-oeplatform
 ```
 
