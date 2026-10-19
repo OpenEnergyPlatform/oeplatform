@@ -80,9 +80,8 @@ from dataedit.helper import (
 )
 from dataedit.metadata import has_valid_filled_metadata, load_metadata_from_db
 from dataedit.metadata.widget import MetaDataWidget
-from dataedit.models import Dataset, Embargo
+from dataedit.models import Dataset, Embargo, PeerReview, PeerReviewManager, Tag, Topic
 from dataedit.models import Filter as DBFilter
-from dataedit.models import PeerReview, PeerReviewManager, Tag, Topic
 from dataedit.models import View as DBView
 from dataedit.models import View as DataViewModel
 from dataedit.peer_review.metadata_serializer import (

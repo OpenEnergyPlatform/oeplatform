@@ -9,9 +9,8 @@ import logging
 import re
 from typing import Iterable
 
-from sqlalchemy import MetaData
+from sqlalchemy import MetaData, text
 from sqlalchemy import Table as SATable
-from sqlalchemy import text
 
 from login.permissions import ADMIN_PERM, DELETE_PERM, NO_PERM
 from oedb.connection import _SA_METADATA, _get_engine, _get_inspector

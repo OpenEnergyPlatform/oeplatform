@@ -13,8 +13,7 @@ from typing import Any, Iterable, Iterator, List, Optional, Protocol
 
 from sqlalchemy import MetaData, create_engine, inspect
 from sqlalchemy.engine import ResultProxy
-from sqlalchemy.engine.base import Connection  # from engine.connect()
-from sqlalchemy.engine.base import Engine
+from sqlalchemy.engine.base import Connection, Engine  # from engine.connect()
 from sqlalchemy.engine.reflection import Inspector
 from sqlalchemy.orm.session import Session, sessionmaker
 from sqlalchemy.pool.base import (
