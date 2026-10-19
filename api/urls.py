@@ -19,6 +19,12 @@ from drf_spectacular.views import (
     SpectacularSwaggerView,
 )
 
+from api.table_permission_views import (
+    OrganizationRemoveAPIView,
+    OrganizationShareAPIView,
+    TableHolderAPIView,
+    TablePermissionsAPIView,
+)
 from api.views import (
     AdvancedCloseAllAPIView,
     AdvancedConnectionCloseAPIView,
@@ -54,8 +60,10 @@ from api.views import (
     AllTableSizesAPIView,
     AssignDatasetTables,
     DatasetManager,
+    DatasetPublish,
     DatasetsListCreate,
     DatasetsListResources,
+    DatasetUnpublish,
     EnergyframeworkFactsheetListAPIView,
     EnergymodelFactsheetListAPIView,
     ManageOekgScenarioDatasetsAPIView,
@@ -70,7 +78,7 @@ from api.views import (
     TableRowsAPIView,
     TableUnpublishAPIView,
     UnassignDatasetTables,
-    grpprop_api_view,
+    groupprop_api_view,
     oeo_search_api_view,
     oevkg_query_api_view,
     table_approx_row_count_view,
@@ -296,6 +304,29 @@ urlpatterns_v0 = [
         r"^schema/{qual}/tables/".format(qual=pgsql_qualifier),
         include(urlpatterns_v0_schema_table),
     ),
+    # A Table's Holders. Only at this spelling: the schema-qualified one above
+    # is superseded, and an endpoint that never had it should not gain it.
+    re_path(
+        r"^tables/(?P<table>[\w\d_\s]+)/permissions/$",
+        TablePermissionsAPIView.as_view(),
+        name="table-permissions",
+    ),
+    re_path(
+        r"^tables/(?P<table>[\w\d_\s]+)/permissions/(?P<holder>[^/]+)/$",
+        TableHolderAPIView.as_view(),
+        name="table-holder",
+    ),
+    # Many Tables, one Organization (#2595).
+    path(
+        "organizations/<int:organization>/table-permissions/share/",
+        OrganizationShareAPIView.as_view(),
+        name="organization-table-permissions-share",
+    ),
+    path(
+        "organizations/<int:organization>/table-permissions/remove/",
+        OrganizationRemoveAPIView.as_view(),
+        name="organization-table-permissions-remove",
+    ),
     path("tables/", include(urlpatterns_v0_schema_table)),
     path("advanced/", include(urlpatterns_v0_advanced)),
     re_path(
@@ -396,6 +427,16 @@ urlpatterns_v0 = [
         name="dataset-list-create",
     ),
     path(
+        "datasets/<str:dataset_name>/publish/",
+        DatasetPublish.as_view(),
+        name="dataset-publish",
+    ),
+    path(
+        "datasets/<str:dataset_name>/unpublish/",
+        DatasetUnpublish.as_view(),
+        name="dataset-unpublish",
+    ),
+    path(
         "datasets/<str:dataset_name>/assign-tables/",
         AssignDatasetTables.as_view(),
         name="dataset-assign-tables",
@@ -422,7 +463,7 @@ urlpatterns_v0 = [
 urlpatterns = [
     path("v0/", include(urlpatterns_v0)),
     path("usrprop/", usrprop_api_view, name="usrprop"),
-    path("grpprop/", grpprop_api_view, name="grpprop"),
+    path("groupprop/", groupprop_api_view, name="groupprop"),
     path("oeo-search", oeo_search_api_view, name="oeo-search"),
     path("oevkg-query", oevkg_query_api_view, name="oevkg-query"),
 ]

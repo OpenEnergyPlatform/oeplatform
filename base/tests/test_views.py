@@ -27,6 +27,7 @@ class TestViewsBase(TestViewsTestCase):
         self.get("base:legal-tou")
         self.get("base:robots")
         self.get("base:tutorials")
+        self.get("base:whats-new")
         self.get("base:project_detail", kwargs={"project_id": "sirop"})
 
     def test_urls_in_templates(self):

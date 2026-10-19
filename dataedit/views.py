@@ -21,8 +21,8 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 import csv
 import json
+from functools import wraps
 from io import TextIOWrapper
-from itertools import chain
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -82,7 +82,7 @@ from dataedit.metadata import has_valid_filled_metadata, load_metadata_from_db
 from dataedit.metadata.widget import MetaDataWidget
 from dataedit.models import Dataset, Embargo
 from dataedit.models import Filter as DBFilter
-from dataedit.models import PeerReview, PeerReviewManager, Table, Tag, Topic
+from dataedit.models import PeerReview, PeerReviewManager, Tag, Topic
 from dataedit.models import View as DBView
 from dataedit.models import View as DataViewModel
 from dataedit.peer_review.metadata_serializer import (
@@ -92,11 +92,13 @@ from dataedit.peer_review.metadata_serializer import (
 from dataedit.peer_review.projection import field_history
 from dataedit.peer_review.service import (
     ContributorNotFoundError,
+    MetadataRefusedError,
     NotYourTurnError,
     ReviewFinishedError,
     ReviewService,
 )
 from login import models as login_models
+from login import table_roles
 from oeplatform.settings import (
     DOCUMENTATION_LINKS,
     EXTERNAL_URLS,
@@ -547,10 +549,11 @@ def tables_view(request: HttpRequest, topic: str) -> HttpResponse:
 
 @never_cache
 def datasets_view(request: HttpRequest, topic: str) -> HttpResponse:
-    """Public, paginated card list of the datasets in one topic: name,
-    description, resource count and combined size of the member tables.
-    Datasets never list under the draft pseudo-topic — it stays
-    tables-only (dataset drafts become private with the publish PR)."""
+    """Public, paginated card list of the published datasets in one topic:
+    name, description, resource count and combined size of the member
+    tables. A draft Dataset is never listed here, not even to its creator,
+    so the catalogue reads the same for everyone. Datasets never list under
+    the draft pseudo-topic; it stays tables-only."""
     is_draft_topic = topic == PSEUDO_TOPIC_DRAFT
     if not is_draft_topic:
         get_object_or_404(Topic, name=topic)
@@ -565,7 +568,7 @@ def datasets_view(request: HttpRequest, topic: str) -> HttpResponse:
 
     Tag.increment_usage_count_many(searched_tag_ids)
 
-    datasets = Dataset.objects.filter(topics__name=topic)
+    datasets = Dataset.objects.published().filter(topics__name=topic)
     if searched_query_string:
         datasets = datasets.filter(
             Q(name__icontains=searched_query_string)
@@ -609,11 +612,11 @@ def datasets_view(request: HttpRequest, topic: str) -> HttpResponse:
 def dataset_detail_view(request: HttpRequest, dataset_name: str) -> HttpResponse:
     """Public read view for one dataset. Deliberately not topic-bound
     (datasets carry several topics); linked from the cards and the
-    dashboard, opening in a new tab."""
-    dataset = get_object_or_404(
-        Dataset.objects.prefetch_related("tables__topics", "topics"),
-        name=dataset_name,
-    )
+    dashboard, opening in a new tab. A draft is readable by its creator
+    only, with a banner; anyone else gets the 404 of an unknown name."""
+    dataset = Dataset.objects.prefetch_related(
+        "tables__topics", "topics"
+    ).readable_or_404(request.user, dataset_name)
     resources = dataset.tables.all().order_by("name")
 
     sizes = {row["table_name"]: row["total_bytes"] for row in list_table_sizes()}
@@ -643,14 +646,54 @@ def dataset_detail_view(request: HttpRequest, dataset_name: str) -> HttpResponse
 def dataset_metadata_json_view(request: HttpRequest, dataset_name: str) -> JsonResponse:
     """The dataset's oemetadata document with live resources, as plain
     JSON: feeds the metadata viewer on the detail page and doubles as
-    the raw-JSON download."""
-    dataset = get_object_or_404(Dataset, name=dataset_name)
+    the raw-JSON download. Read by the detail page's rule."""
+    dataset = Dataset.objects.readable_or_404(request.user, dataset_name)
     metadata = dict(dataset.metadata)
     metadata["resources"] = dataset.resource_entries()
     return JsonResponse(metadata)
 
 
+def view_name_taken(
+    request: HttpRequest, table: str, view_type: str, name: str
+) -> HttpResponse:
+    """Refuse a view name the table already uses for that type of view.
+
+    Names are unique per (table, type) since #2217. Shows the existing view, so
+    the user sees what holds the name.
+    """
+    messages.error(
+        request,
+        f'This table already has a {view_type} view named "{name}". '
+        "Please choose another name.",
+    )
+    existing = DBView.objects.filter(table=table, type=view_type, name=name).first()
+    url = reverse("dataedit:view", kwargs={"table": table})
+    return redirect(f"{url}?view={existing.pk}" if existing else url)
+
+
+def require_table_write(view):
+    """Login, then write permission on the table the URL names.
+
+    For the views that create or change a table's saved views (graph and map
+    views, the default view). Those are shown to every visitor of the table, so
+    changing them is changing the table's page: an anonymous caller is sent to
+    log in, and a logged-in caller without write permission gets a 403.
+    """
+
+    @login_required
+    @wraps(view)
+    def guarded(request: HttpRequest, *args, table: str, **kwargs):
+        table_obj = table_or_404(table=table)
+        user: login_models.myuser = request.user  # type: ignore
+        if user.get_table_permission_level(table_obj) < login.permissions.WRITE_PERM:
+            raise PermissionDenied
+        return view(request, *args, table=table, **kwargs)
+
+    return guarded
+
+
 @require_POST
+@require_table_write
 def table_view_save_view(request: HttpRequest, table: str) -> HttpResponse:
     table_obj = table_or_404(table=table)
 
@@ -687,7 +730,8 @@ def table_view_save_view(request: HttpRequest, table: str) -> HttpResponse:
 
     # update or create corresponding view
     if post_id:
-        update_view = DBView.objects.filter(id=post_id).get()
+        # only a view of this table: the id alone would reach any table's view
+        update_view = get_object_or_404(DBView, id=post_id, table=table_obj.name)
         if post_name:
             update_view.name = post_name
         update_view.options = post_options
@@ -696,7 +740,13 @@ def table_view_save_view(request: HttpRequest, table: str) -> HttpResponse:
             name=post_name, type=post_type, options=post_options, table=table_obj.name
         )
 
-    update_view.save()
+    try:
+        with transaction.atomic():
+            update_view.save()
+    except IntegrityError:
+        return view_name_taken(
+            request, table_obj.name, update_view.type, update_view.name
+        )
 
     # create and update filters
     post_filter_json = request.POST.get("filter")
@@ -741,33 +791,37 @@ def table_view_save_view(request: HttpRequest, table: str) -> HttpResponse:
     )
 
 
-def table_view_set_default_view(request: HttpRequest, table: str) -> HttpResponse:
+@require_POST
+@require_table_write
+def table_view_set_default_view(
+    request: HttpRequest, table: str, view_id: str
+) -> HttpResponse:
     table_obj = table_or_404(table=table)
+    # re_path passes the id as a string; compare as a number, explicitly
+    view = get_object_or_404(DBView, pk=int(view_id), table=table_obj.name)
 
-    # TODO: shouldnt this be POST only?
-    post_id = request.GET.get("id")
-
-    for view in DBView.objects.filter(table=table_obj.name):
-        if str(view.pk) == post_id:
-            view.is_default = True
-        else:
-            view.is_default = False
-        view.save()
+    with transaction.atomic():
+        DBView.objects.filter(table=table_obj.name).exclude(pk=view.pk).update(
+            is_default=False
+        )
+        DBView.objects.filter(pk=view.pk).update(is_default=True)
     return redirect("dataedit:view", table=table_obj.name)
 
 
-def table_view_delete_view(request: HttpRequest, table: str) -> HttpResponse:
+@require_POST
+@require_table_write
+def table_view_delete_view(
+    request: HttpRequest, table: str, view_id: str
+) -> HttpResponse:
     table_obj = table_or_404(table=table)
 
-    # TODO: shouldnt this be POST only?
-    post_id = request.GET.get("id")
-
-    view = DBView.objects.get(id=post_id, table=table_obj.name)
+    view = get_object_or_404(DBView, pk=int(view_id), table=table_obj.name)
     view.delete()
 
     return redirect("dataedit:view", table=table_obj.name)
 
 
+@method_decorator(require_table_write, name="dispatch")
 class TableCreateGraphView(View):
     @method_decorator(never_cache)
     def get(self, request: HttpRequest, table: str) -> HttpResponse:
@@ -777,7 +831,11 @@ class TableCreateGraphView(View):
         columns = [(c, c) for c in describe_columns(table_obj).keys()]
         formset = GraphViewForm(columns=columns)
 
-        return render(request, "dataedit/tablegraph_form.html", {"formset": formset})
+        return render(
+            request,
+            "dataedit/tablegraph_form.html",
+            {"formset": formset, "table": table},
+        )
 
     def post(self, request: HttpRequest, table: str) -> HttpResponse:
         table_obj = table_or_404(table=table)
@@ -785,14 +843,18 @@ class TableCreateGraphView(View):
         # save an instance of View, look at GraphViewForm fields in forms.py
         # for information to the options
         opt = dict(x=request.POST.get("column_x"), y=request.POST.get("column_y"))
-        gview = DataViewModel.objects.create(
-            name=request.POST.get("name"),
-            table=table_obj.name,
-            type="graph",
-            options=opt,
-            is_default=request.POST.get("is_default", False),
-        )
-        gview.save()
+        name = request.POST.get("name")
+        try:
+            with transaction.atomic():
+                gview = DataViewModel.objects.create(
+                    name=name,
+                    table=table_obj.name,
+                    type="graph",
+                    options=opt,
+                    is_default=request.POST.get("is_default", False),
+                )
+        except IntegrityError:
+            return view_name_taken(request, table_obj.name, "graph", name)
 
         return redirect(
             reverse("dataedit:view", kwargs={"table": table_obj.name})
@@ -800,6 +862,7 @@ class TableCreateGraphView(View):
         )
 
 
+@method_decorator(require_table_write, name="dispatch")
 class TableCreateMapView(View):
     @method_decorator(never_cache)
     def get(self, request: HttpRequest, table: str, maptype: str) -> HttpResponse:
@@ -813,7 +876,9 @@ class TableCreateMapView(View):
         else:
             raise Http404
 
-        return render(request, "dataedit/tablemap_form.html", {"form": form})
+        return render(
+            request, "dataedit/tablemap_form.html", {"form": form, "table": table}
+        )
 
     def post(self, request: HttpRequest, table: str, maptype: str) -> HttpResponse:
         table_obj = table_or_404(table=table)
@@ -831,7 +896,11 @@ class TableCreateMapView(View):
         form.table = table
         form.options = options
         if form.is_valid():
-            view_id = form.save(commit=True)
+            try:
+                with transaction.atomic():
+                    view_id = form.save(commit=True)
+            except IntegrityError:
+                return view_name_taken(request, table, "map", request.POST.get("name"))
             return redirect(
                 reverse("dataedit:view", kwargs={"table": table}) + f"?view={view_id}"
             )
@@ -896,7 +965,7 @@ class TableDataView(View):
         table_label = table_obj.human_readable_name
 
         table_views = DBView.objects.filter(table=table)
-        default = DBView(name="default", type="table", table=table)
+        default_view = DBView.get_or_create_default(table=table)
         view_id = request.GET.get("view")
 
         embargo = Embargo.objects.filter(table=table_obj).first()
@@ -909,18 +978,14 @@ class TableDataView(View):
         else:
             embargo_time_left = "No embargo data available"
 
-        if view_id == "default":
-            current_view = default
-            current_view.save()
-        else:
-            try:
-                # at first, try to use the view, that is passed as get argument
-                current_view = table_views.get(id=view_id)
-            except ObjectDoesNotExist:
-                current_view = default
-                current_view.save()
+        try:
+            # at first, try to use the view, that is passed as get argument
+            current_view = table_views.get(id=view_id)
+        except (ObjectDoesNotExist, ValueError):
+            # no ?view=, an unknown one, or one that is not an id at all
+            current_view = default_view
 
-        table_views = list(chain((default,), table_views))
+        table_views = [default_view, *table_views.exclude(pk=default_view.pk)]
 
         #########################################################
         #   Get open peer review process related metadata       #
@@ -983,6 +1048,13 @@ class TableDataView(View):
             "kinds": ["table", "map", "graph"],
             "table": table,
             "table_obj": table_obj,
+            # the sidebar's Datasets: published ones plus the viewer's own
+            # drafts, which the template marks (spec #2613)
+            "table_datasets": list(
+                Dataset.objects.visible_to(request.user)
+                .filter(tables=table_obj)
+                .order_by("name")
+            ),
             "is_in_scenario": table_obj.topics.contains(
                 Topic.objects.get(name=TOPIC_SCENARIO)
             ),
@@ -1035,150 +1107,106 @@ class TableDataView(View):
 
 
 class TablePermissionView(View):
-    """This method handles the GET requests for the main page of data edit.
-    Initialises the session data (if necessary)
+    """The Table's own permission page: who holds which Table role on it.
+    Anyone may read it; a Table admin changes it here. Every change goes
+    through the permission service (``login.table_roles``), the same as the
+    dashboard's access drawer and the REST API, so the rules are the same
+    everywhere: a role is chosen when adding, Organizations stop at Data
+    maintainer and are shared only by their members, the last user with
+    direct Admin cannot lose it, and losing your own Admin is confirmed.
+
+    POST takes ``mode``: ``add_user`` (``name``, ``level``), ``add_group``
+    (``organization``, the id of one of the user's own Organizations, and
+    ``level``), ``alter_user`` / ``remove_user`` (``user_id``, and ``level``
+    to alter), ``alter_group`` / ``remove_group`` (``group_id``, likewise);
+    ``confirm=yes`` once the user has confirmed.
+
+    - done: a redirect back here, the change named in a message;
+    - nothing to change (the Holder already holds that role): a redirect
+      back here, saying so;
+    - needs confirmation: 200, the page asking, nothing written;
+    - unusable request: 400, not a Table admin: 403, the last user with
+      direct Admin would lose it: 409; each the page with the reason as a
+      message and nothing written. An anonymous POST is a 403.
     """
 
-    @method_decorator(never_cache)
-    def get(self, request: HttpRequest, table: str) -> HttpResponse:
-        table_obj = table_or_404(table=table)
+    VIA = "table-page"
+    MODES = {
+        "add_user": (table_roles.ADD, table_roles.USER),
+        "alter_user": (table_roles.CHANGE, table_roles.USER),
+        "remove_user": (table_roles.REMOVE, table_roles.USER),
+        "add_group": (table_roles.ADD, table_roles.ORGANIZATION),
+        "alter_group": (table_roles.CHANGE, table_roles.ORGANIZATION),
+        "remove_group": (table_roles.REMOVE, table_roles.ORGANIZATION),
+    }
+    FIELDS = ("mode", "name", "organization", "user_id", "group_id", "level")
 
-        user_perms = login_models.UserPermission.objects.filter(table=table_obj)
-        group_perms = login_models.GroupPermission.objects.filter(table=table_obj)
-        is_admin = False
-        can_add = False
-        can_remove = False
-        level = login.permissions.NO_PERM
-        user: login_models.myuser = request.user  # type: ignore
-        if not user.is_anonymous:
-            level = user.get_table_permission_level(table_obj)
-            is_admin = level >= login.permissions.ADMIN_PERM
-            can_add = level >= login.permissions.WRITE_PERM
-            can_remove = level >= login.permissions.DELETE_PERM
+    def _page(self, request, table_obj, status=200, **extra):
+        access = table_roles.table_access(request.user, table_obj)
         return render(
             request,
             "dataedit/table_permissions.html",
             {
-                "table": table,
-                "user_perms": user_perms,
-                "group_perms": group_perms,
-                "choices": login_models.TablePermission.choices,
-                "can_add": can_add,
-                "can_remove": can_remove,
-                "is_admin": is_admin,
-                "own_level": level,
+                "table": table_obj.name,
+                "access": access,
+                "is_admin": access.can_manage,
+                "roles": table_roles.ROLES,
+                "organization_roles": table_roles.ORGANIZATION_ROLES,
+                **extra,
             },
+            status=status,
+        )
+
+    @method_decorator(never_cache)
+    def get(self, request: HttpRequest, table: str) -> HttpResponse:
+        return self._page(request, table_or_404(table=table))
+
+    def _write(self, user, table_obj, data):
+        try:
+            op, kind = self.MODES[data.get("mode", "")]
+        except KeyError:
+            raise table_roles.InvalidRequest("Choose a change to make.", "mode")
+        user_kind = kind == table_roles.USER
+        level = data.get("level")
+        confirmed = data.get("confirm") == "yes"
+        if op == table_roles.ADD:
+            who = data.get("name" if user_kind else "organization")
+            return table_roles.add(user, table_obj, kind, who, level, via=self.VIA)
+        key = f"{kind}:{data.get('user_id' if user_kind else 'group_id', '')}"
+        if op == table_roles.CHANGE:
+            return table_roles.change(
+                user, table_obj, key, level, via=self.VIA, confirmed=confirmed
+            )
+        return table_roles.remove(
+            user, table_obj, key, via=self.VIA, confirmed=confirmed
         )
 
     def post(self, request: HttpRequest, table: str) -> HttpResponse:
         table_obj = table_or_404(table=table)
-
         user: login_models.myuser = request.user  # type: ignore
-        if (
-            user.is_anonymous
-            or user.get_table_permission_level(table_obj) < login.permissions.ADMIN_PERM
-        ):
+        if user.is_anonymous:
             raise PermissionDenied
-        if request.POST["mode"] == "add_user":
-            return self.__add_user(request, table_obj)
-        if request.POST["mode"] == "alter_user":
-            return self.__change_user(request, table_obj)
-        if request.POST["mode"] == "remove_user":
-            return self.__remove_user(request, table_obj)
-        if request.POST["mode"] == "add_group":
-            return self.__add_group(request, table_obj)
-        if request.POST["mode"] == "alter_group":
-            return self.__change_group(request, table_obj)
-        if request.POST["mode"] == "remove_group":
-            return self.__remove_group(request, table_obj)
+        try:
+            change = self._write(user, table_obj, request.POST)
+        except table_roles.ConfirmationNeeded as question:
+            pending = {key: request.POST.get(key, "") for key in self.FIELDS}
+            return self._page(
+                request, table_obj, confirm=question.message, pending=pending
+            )
+        except table_roles.InvalidRequest as error:
+            messages.error(request, error.message)
+            return self._page(request, table_obj, status=400)
+        except table_roles.NotAllowed as refusal:
+            messages.error(request, refusal.message)
+            return self._page(request, table_obj, status=403)
+        except table_roles.LastAdmin as refusal:
+            messages.error(request, refusal.message)
+            return self._page(request, table_obj, status=409)
+        if change is None:
+            messages.info(request, "Nothing changed: they already hold that role.")
         else:
-            raise NotImplementedError()
-
-    def __add_user(self, request: HttpRequest, table_obj: Table):
-        user_name = request.POST.get("name")
-        # Check if the user name is empty
-        if not user_name:
-            # Return an HTTP 400 Bad Request response
-            return HttpResponseBadRequest("User name is required.")
-
-        user = login_models.myuser.objects.filter(name=user_name).first()
-
-        p, _ = login_models.UserPermission.objects.get_or_create(
-            holder=user, table=table_obj
-        )
-        p.save()
-        return self.get(request, table=table_obj.name)
-
-    def __change_user(self, request: HttpRequest, table_obj: Table):
-        user_id = request.POST.get("user_id")
-        # Check if the user id is empty
-        if not user_id:
-            # Return an HTTP 400 Bad Request response
-            return HttpResponseBadRequest("User id is required.")
-
-        user = login_models.myuser.objects.filter(id=user_id).first()
-
-        p = get_object_or_404(login_models.UserPermission, holder=user, table=table_obj)
-        p.level = int(request.POST["level"])
-        p.save()
-        return self.get(request, table=table_obj.name)
-
-    def __remove_user(self, request: HttpRequest, table_obj: Table):
-        user_id = request.POST.get("user_id")
-        # Check if the user id is empty
-        if not user_id:
-            # Return an HTTP 400 Bad Request response
-            return HttpResponseBadRequest("User id is required.")
-
-        user = get_object_or_404(login_models.myuser, id=user_id)
-
-        p = get_object_or_404(login_models.UserPermission, holder=user, table=table_obj)
-        p.delete()
-        return self.get(request, table=table_obj.name)
-
-    def __add_group(self, request: HttpRequest, table_obj: Table):
-        group_name = request.POST.get("name")
-        # Check if the group name is empty
-        if not group_name:
-            # Return an HTTP 400 Bad Request response
-            return HttpResponseBadRequest("Group name is required.")
-
-        group = get_object_or_404(login_models.UserGroup, name=group_name)
-
-        p, _ = login_models.GroupPermission.objects.get_or_create(
-            holder=group, table=table_obj
-        )
-        p.save()
-        return self.get(request, table=table_obj.name)
-
-    def __change_group(self, request: HttpRequest, table_obj: Table):
-        group_id = request.POST.get("group_id")
-        if not group_id:
-            # Return an HTTP 400 Bad Request response
-            return HttpResponseBadRequest("Group id is required.")
-
-        group = get_object_or_404(login_models.UserGroup, id=group_id)
-
-        p = get_object_or_404(
-            login_models.GroupPermission, holder=group, table=table_obj
-        )
-        p.level = int(request.POST["level"])
-        p.save()
-        return self.get(request, table=table_obj.name)
-
-    def __remove_group(self, request: HttpRequest, table_obj: Table):
-        group_id = request.POST.get("group_id")
-        if not group_id:
-            # Return an HTTP 400 Bad Request response
-            return HttpResponseBadRequest("Group id is required.")
-
-        group = get_object_or_404(login_models.UserGroup, id=group_id)
-
-        p = get_object_or_404(
-            login_models.GroupPermission, holder=group, table=table_obj
-        )
-        p.delete()
-        return self.get(request, table=table_obj.name)
+            messages.success(request, change.message)
+        return redirect("dataedit:table-permission", table=table_obj.name)
 
 
 class TableWizardView(LoginRequiredMixin, View):
@@ -1460,12 +1488,12 @@ class TablePeerReviewView(LoginRequiredMixin, View):
         # The delete path is handled directly (unified into ReviewService in a
         # later step); everything else is orchestrated by the service.
         if review_data.get("reviewType") == "delete":
-            return delete_peer_review(review_id)
+            return delete_peer_review(review_id, request.user)
 
         service = ReviewService(table_name=table_obj.name, actor=request.user)
         try:
             service.submit_reviewer_review(review_data, review_id=review_id)
-        except ContributorNotFoundError as exc:
+        except (ContributorNotFoundError, MetadataRefusedError) as exc:
             return JsonResponse({"error": str(exc)}, status=400)
         except (ReviewFinishedError, NotYourTurnError) as exc:
             return JsonResponse({"error": str(exc)}, status=409)
@@ -1575,6 +1603,8 @@ class TablePeerReviewContributorView(TablePeerReviewView):
         service = ReviewService(table_name=table, actor=request.user)
         try:
             service.submit_contributor_review(review_data, review_id=review_id)
+        except MetadataRefusedError as exc:
+            return JsonResponse({"error": str(exc)}, status=400)
         except (ReviewFinishedError, NotYourTurnError) as exc:
             return JsonResponse({"error": str(exc)}, status=409)
         return JsonResponse({"status": "success"}, status=200)

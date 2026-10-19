@@ -1,0 +1,25 @@
+{# use: One item of a list or grid (a dataset, a topic, an organization) or one block of a page. Clickable when the whole card leads to one page: its title link is a stretched link, and nothing else in it is a link. #}
+<div class="row g-3">
+  <div class="col-12 col-md-6">
+    <div class="card h-100">
+      <div class="card-body">
+        <h3 class="card-title">A plain card</h3>
+        <p class="card-text">
+          Holds what belongs together: a title, a sentence or two, and the links of its own.
+        </p>
+        <a href="#card">A link of its own</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-md-6">
+    <div class="card card--clickable h-100">
+      <div class="card-body">
+        <h3 class="card-title">
+          <a class="stretched-link"
+             href="{% url 'dataedit:topic-list' %}">A clickable card</a>
+        </h3>
+        <p class="card-text">The whole card opens the page its title names.</p>
+      </div>
+    </div>
+  </div>
+</div>

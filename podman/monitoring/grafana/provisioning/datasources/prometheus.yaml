@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+apiVersion: 1
+datasources:
+  - name: Prometheus
+    uid: prometheus
+    type: prometheus
+    url: http://oep-mon-prometheus:9090
+    isDefault: true
+    editable: false

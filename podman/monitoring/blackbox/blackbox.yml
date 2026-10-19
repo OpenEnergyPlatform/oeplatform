@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Template: install.sh copies it to ~/.config/oeplatform/blackbox.yml and puts
+# OEP_URL from oep.env in place of @@OEP_URL@@. Django refuses a request whose
+# Host is not in OEP_ALLOWED_HOSTS, so a probe by container name must send it.
+
+modules:
+  http_oep:
+    prober: http
+    timeout: 10s
+    http:
+      headers:
+        Host: "@@OEP_URL@@"
+      valid_status_codes: [200]
+      preferred_ip_protocol: ip4
+  http_2xx:
+    prober: http
+    timeout: 5s
+    http:
+      preferred_ip_protocol: ip4
+  tcp_connect:
+    prober: tcp
+    timeout: 5s
+    tcp:
+      preferred_ip_protocol: ip4

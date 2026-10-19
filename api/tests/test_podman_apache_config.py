@@ -124,3 +124,55 @@ class PodmanApacheConfigTest(SimpleTestCase):
         # the config explains in prose why it is absent, and a bare substring
         # search matches that explanation.
         self.assertNotIn("request-timeout=", directives(self.text))
+
+
+# The access log's start is a contract with whatever reads it (the usage
+# figures of #2412 parse it as Common Log Format), so new fields go at the end.
+COMMON_LOG_FORMAT = r"%h %l %u %t \"%r\" %>s %b"
+
+
+def access_log_format(text):
+    """The format string the access log is written with, or None."""
+    custom = re.search(r"^\s*CustomLog\s+(\S+)\s+(\S+)", directives(text), re.M)
+    if not custom:
+        return None
+    nickname = custom.group(2)
+    for match in re.finditer(
+        r'^\s*LogFormat\s+"((?:[^"\\]|\\.)*)"\s+(\S+)', text, re.M
+    ):
+        if match.group(2) == nickname:
+            return match.group(1)
+    return None
+
+
+class PodmanAccessLogTest(SimpleTestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.text = CONFIG.read_text()
+        # "" rather than None, so a missing format fails each assertion
+        # with its own message instead of an AttributeError
+        cls.format = access_log_format(cls.text) or ""
+
+    def test_the_access_log_goes_to_stdout_in_a_named_format(self):
+        # TransferLog would fall back to plain CLF and silently drop the fields
+        # below; stdout is what journald collects from the container
+        self.assertNotIn("TransferLog", directives(self.text))
+        self.assertRegex(directives(self.text), r"(?m)^\s*CustomLog\s+/dev/stdout\s")
+        self.assertTrue(self.format, "CustomLog names no LogFormat defined here")
+
+    def test_the_line_still_starts_as_common_log_format(self):
+        self.assertTrue(
+            self.format.startswith(COMMON_LOG_FORMAT),
+            f"{self.format!r} must start with {COMMON_LOG_FORMAT!r}; "
+            "parsers of the access log read it as CLF",
+        )
+
+    def test_duration_and_user_agent_are_recorded(self):
+        # the duration is the last field, so a reader takes it as $NF
+        self.assertTrue(self.format.endswith("%D"), self.format)
+        self.assertIn(r"\"%{User-Agent}i\"", self.format)
+
+    def test_no_credentials_or_cookies_are_logged(self):
+        for header in ("Cookie", "Authorization", "Referer"):
+            self.assertNotIn(f"%{{{header}}}i", self.format)

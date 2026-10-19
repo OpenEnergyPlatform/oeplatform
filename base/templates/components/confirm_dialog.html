@@ -1,0 +1,63 @@
+{% comment %}
+  confirm_dialog (#2643): the one confirmation on the platform. Styles:
+  theming/scss/components/_confirm_dialog.scss; behaviour: base/static/base/dialogs.js;
+  catalogue entry: styleguide/entries/confirm_dialog.html.
+
+  Every shell includes it once, with no arguments (base/_feedback.html), and
+  dialogs.js fills it for each confirmation. A page never includes it: it asks
+  for a confirmation with `hx-confirm` or `data-confirm` on the opener, plus
+  `data-confirm-title`, `-verb`, `-danger` and `-typed` (see dialogs.js).
+
+  title       names the action ("Delete table?")
+  text        says what will happen
+  verb        the confirm button's label ("Delete table", never "OK")
+  danger      the confirm button is solid danger: the action cannot be undone
+  typed       the text the user must type before the button enables
+  as_example  a static, visible copy for the catalogue: no ids, no `fade`
+{% endcomment %}
+<div {% if not as_example %}id="confirm-dialog"{% endif %}
+     class="modal confirm-dialog{% if as_example %} confirm-dialog--example{% else %} fade{% endif %}"
+     {% if not as_example %}tabindex="-1" aria-labelledby="confirm-dialog-title" aria-describedby="confirm-dialog-text" aria-hidden="true"{% endif %}
+     data-confirm-dialog>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title"
+            {% if not as_example %}id="confirm-dialog-title"{% endif %}
+            data-confirm-title>{{ title }}</h2>
+        <button type="button"
+                class="btn-close"
+                aria-label="Cancel"
+                data-confirm-cancel></button>
+      </div>
+      <div class="modal-body">
+        <p class="confirm-dialog__text"
+           {% if not as_example %}id="confirm-dialog-text"{% endif %}
+           data-confirm-text>{{ text }}</p>
+        <div class="confirm-dialog__typed"
+             data-confirm-typed
+             {% if not typed %}hidden{% endif %}>
+          <label class="form-label"
+                 {% if not as_example %}for="confirm-dialog-input"{% endif %}>
+            Type <strong data-confirm-expected>{{ typed }}</strong> to confirm
+          </label>
+          <input class="form-control"
+                 type="text"
+                 {% if not as_example %}id="confirm-dialog-input"{% endif %}
+                 autocomplete="off"
+                 spellcheck="false"
+                 data-confirm-input />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button"
+                class="btn btn-secondary"
+                data-confirm-cancel>Cancel</button>
+        <button type="button"
+                class="btn {% if danger %}btn-danger{% else %}btn-primary{% endif %}"
+                {% if typed %}disabled{% endif %}
+                data-confirm-accept>{{ verb|default:"Confirm" }}</button>
+      </div>
+    </div>
+  </div>
+</div>

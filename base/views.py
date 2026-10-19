@@ -16,18 +16,17 @@ import logging
 import os
 
 from django.core.mail import send_mail
-from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.http import Http404, HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.generic import View
 
 from base.forms import ContactForm
-from base.helper import get_json_content, read_version_changes
+from base.helper import get_json_content, latest_release_highlights
 from oeplatform.settings import (
     CONTACT_ADDRESSES,
     DEFAULT_FROM_EMAIL,
     EXTERNAL_URLS,
-    STATIC_ROOT,
 )
 
 logger = logging.getLogger("oeplatform")
@@ -35,8 +34,13 @@ logger = logging.getLogger("oeplatform")
 
 class WelcomeView(View):
     def get(self, request):
-        context = read_version_changes()
-        return render(request, "base/index.html", context)
+        highlights = latest_release_highlights()
+        return render(request, "base/index.html", {"highlights": highlights})
+
+
+def whats_new_view(request):
+    highlights = latest_release_highlights()
+    return render(request, "base/whats_new.html", {"highlights": highlights})
 
 
 def redir_view(request, target):
@@ -93,8 +97,11 @@ def handler404(request, exception):
 
 class AboutPageView(View):
 
-    projects_content_static = "project_detail_pages_content"
-    projects_content_path = os.path.join(STATIC_ROOT, projects_content_static)
+    # The app's own files, not STATIC_ROOT: collectstatic keeps a hashed copy
+    # beside every file there (#2604), which listed each project twice.
+    projects_content_path = os.path.join(
+        os.path.dirname(__file__), "static", "project_detail_pages_content"
+    )
 
     def get(self, request, projects_content_path=projects_content_path):
         projects = get_json_content(path=projects_content_path)
@@ -106,6 +113,8 @@ class AboutProjectDetailView(AboutPageView):
 
     def get(self, request, project_id):
         project = get_json_content(path=self.projects_content_path, json_id=project_id)
+        if project is None:
+            raise Http404("No such project.")
 
         return render(request, "base/project-detail.html", {"project": project})
 

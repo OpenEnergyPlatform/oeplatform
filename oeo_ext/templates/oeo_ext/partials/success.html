@@ -42,12 +42,10 @@
       // Visual Feedback: Change button text
       const originalHtml = btnElement.innerHTML;
       btnElement.innerHTML = '<i class="fa fa-check"></i> Copied!';
-      btnElement.classList.replace('btn-outline-secondary', 'btn-success');
 
       // Revert back after 2 seconds
       setTimeout(() => {
         btnElement.innerHTML = originalHtml;
-        btnElement.classList.replace('btn-success', 'btn-outline-secondary');
       }, 2000);
 
     }).catch(err => {

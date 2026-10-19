@@ -1,0 +1,25 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+Cell type "modified date": the date, its exact time on hover. A muted "data"
+beneath it marks a date known only from the data half; "–" means no change
+recorded.
+Each says why on hover, and gives a screen reader the same sentence as text.
+{% endcomment %}
+{% if row.modified %}
+  <time class="dash-date"
+        datetime="{{ row.modified|date:'c' }}"
+        title="{{ row.modified|date:'j M Y, H:i:s T' }}">{{ row.modified|date:"j M Y" }}</time>
+  {% if row.data_only %}
+    <span class="dash-half"
+          title="{{ row.modified_note }}"
+          aria-hidden="true">data</span>
+    <span class="visually-hidden">{{ row.modified_note }}</span>
+  {% endif %}
+{% else %}
+  <span class="dash-muted"
+        title="{{ row.modified_note }}"
+        aria-hidden="true">–</span>
+  <span class="visually-hidden">{{ row.modified_note }}</span>
+{% endif %}

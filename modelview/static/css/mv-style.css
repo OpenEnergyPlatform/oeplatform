@@ -25,37 +25,6 @@
   vertical-align: top;
 }
 
-.profiletable {
-  border-collapse: separate;
-  border: 1px;
-  width: 100%;
-}
-
-.profiletable td {
-  padding-bottom: 5px;
-}
-
-/* Icon when the collapsible content is shown */
-.panel-heading a:before {
-  font-family: "Glyphicons Halflings";
-  content: "\e114";
-}
-
-.panel-heading a {
-  display: block;
-  text-decoration: none;
-}
-
-.panel-heading in a {
-  width: 0%;
-  content: "\e080";
-}
-
-/* Icon when the collapsible content is hidden */
-.panel-heading a.collapsed:before {
-  content: "\e080";
-}
-
 .sheetlabel {
   font-weight: bold;
   padding-right: 2em;
@@ -80,54 +49,20 @@
   margin: 10 px;
 }
 
-.card-container > *:not(:first-child) {
-  margin-top: 0.5em;
-}
-
-.card-container .card-header {
-  background: unset;
-  border: unset;
-}
-
-.card-container .card-body {
-  padding-top: 0.5em;
-}
-
-/* The factsheet editor's tag picker.
- *
- * The pills used to carry two `class` attributes -- `form-label` and
- * `btn tag` -- and a duplicate attribute is dropped by the parser, so the
- * second never applied: no padding, no height, just a coloured rectangle
- * jammed against its neighbours. These rules replace what `.tag` was meant to
- * give them, and add the spacing and the selected state the widget needs.
- *
- * The selected state used to be `border: 3px solid` from an inline <style> on
- * each edit page, which pushed the pill's neighbours around every time one was
- * clicked. An inset outline changes nothing about the box. */
-.tag-picker {
+/* The record toolbar of a factsheet's page (#2655): its tags at the start,
+   Delete and Edit at the end, wrapping onto lines of their own on a phone.
+   Page CSS until a second record page needs it. */
+.record-toolbar {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4em;
   align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
-.tag-picker__pill {
-  display: inline-flex;
-  align-items: center;
-  height: auto;
-  padding: 0.25em 0.6em;
-  margin: 0;
-  border-radius: 0.5em;
-  cursor: pointer;
-  line-height: 1.3;
-}
-
-.tag-checkbox:checked + .tag-picker__pill {
-  font-weight: 600;
-  box-shadow: inset 0 0 0 2px currentColor;
-}
-
-.tag-checkbox:focus-visible + .tag-picker__pill {
-  outline: 2px solid #2972a6;
-  outline-offset: 2px;
+.record-toolbar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-left: auto;
 }

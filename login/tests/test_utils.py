@@ -9,9 +9,9 @@ from dataedit.models import Table
 from login.models import (
     NO_PERM,
     WRITE_PERM,
-    GroupMembership,
     GroupPermission,
-    UserGroup,
+    Membership,
+    Organization,
     UserPermission,
 )
 from login.models import myuser as User
@@ -26,12 +26,12 @@ class TestUtils(TestCase):
             name="B", email="b@test.test", affiliation="test"
         )
 
-        group_1 = UserGroup.objects.create(name="G1")
-        group_2 = UserGroup.objects.create(name="G2")
+        organization_1 = Organization.objects.create(name="G1")
+        organization_2 = Organization.objects.create(name="G2")
 
-        GroupMembership.objects.create(user=user_a, group=group_1)
-        GroupMembership.objects.create(user=user_a, group=group_2)
-        GroupMembership.objects.create(user=user_b, group=group_2)
+        Membership.objects.create(user=user_a, group=organization_1)
+        Membership.objects.create(user=user_a, group=organization_2)
+        Membership.objects.create(user=user_b, group=organization_2)
 
         table_a = Table.objects.create(name="ta")
         table_b = Table.objects.create(name="tb")
@@ -41,8 +41,12 @@ class TestUtils(TestCase):
         UserPermission.objects.create(holder=user_a, table=table_a, level=WRITE_PERM)
         UserPermission.objects.create(holder=user_b, table=table_b, level=WRITE_PERM)
         UserPermission.objects.create(holder=user_a, table=table_1a, level=WRITE_PERM)
-        GroupPermission.objects.create(holder=group_1, table=table_1a, level=WRITE_PERM)
-        GroupPermission.objects.create(holder=group_2, table=table_2, level=NO_PERM)
+        GroupPermission.objects.create(
+            holder=organization_1, table=table_1a, level=WRITE_PERM
+        )
+        GroupPermission.objects.create(
+            holder=organization_2, table=table_2, level=NO_PERM
+        )
 
         tables_a = user_a.get_tables_queryset().all().order_by("name")
         # testing: only tb is missing, t1a not duplicated
@@ -53,5 +57,5 @@ class TestUtils(TestCase):
             .all()
             .order_by("name")
         )
-        # we only get "tb", because group levels for t2 are too low
+        # we only get "tb", because organization levels for t2 are too low
         self.assertListEqual([t.name for t in tables_b.all()], ["tb"])

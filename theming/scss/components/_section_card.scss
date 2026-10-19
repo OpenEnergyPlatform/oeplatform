@@ -1,0 +1,64 @@
+// section_card: one section of a record page (#2655). Include:
+// base/templates/components/section_card.html; catalogue entry:
+// base/templates/styleguide/entries/section_card.html.
+//
+// A house card whose header is the section's heading, and that heading is a
+// button: the whole header row shows and hides the body, the chevron says
+// which way. Sections stack with the card's own spacing between them. The
+// header's bottom line shows only while the body is open, so a closed
+// section is one row with the card's corners.
+@use '../base/' as *;
+
+.section-card {
+    margin-bottom: 1rem;
+
+    &__heading {
+        margin: 0;
+        font-size: 1.125rem;
+        font-weight: var(--oep-heading-weight);
+    }
+
+    &__toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        width: 100%;
+        padding: var(--bs-card-cap-padding-y) var(--bs-card-cap-padding-x);
+        border: 0;
+        border-radius: var(--bs-card-inner-border-radius);
+        background-color: var(--bs-card-cap-bg);
+        color: var(--oep-heading-color);
+        font: inherit;
+        text-align: left;
+
+        &[aria-expanded="true"] {
+            border-bottom: var(--bs-card-border-width) solid var(--bs-card-border-color);
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        &:hover {
+            background-color: var(--oep-surface-hover);
+        }
+
+        &:focus-visible {
+            outline: 0;
+            box-shadow: 0 0 0 #{$input-btn-focus-width} rgba(var(--bs-primary-rgb), 0.25);
+        }
+
+        svg {
+            flex-shrink: 0;
+        }
+
+        &[aria-expanded="false"] svg {
+            transform: rotate(-90deg);
+        }
+    }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .section-card__toggle svg {
+        transition: transform var(--oep-transition);
+    }
+}

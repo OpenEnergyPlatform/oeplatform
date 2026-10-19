@@ -7,8 +7,9 @@ SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> Â© Ã
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
-from django.urls import path
+from django.urls import path, register_converter
 
+from modelview.helper import SHEET_TYPES
 from modelview.views import (
     FSAddView,
     edit_model_view,
@@ -21,25 +22,42 @@ from modelview.views import (
 
 app_name = "modelview"
 
+
+class SheetTypeConverter:
+    """One of `SHEET_TYPES`. Any other type does not resolve, so every route
+    below answers 404 for it, the list included -- which used to render an
+    empty list for any word ending in `s`."""
+
+    regex = "|".join(SHEET_TYPES)
+
+    def to_python(self, value):
+        return value
+
+    def to_url(self, value):
+        return value
+
+
+register_converter(SheetTypeConverter, "sheettype")
+
 urlpatterns = [
-    path("<str:sheettype>s/", list_sheets_view, name="modellist"),
+    path("<sheettype:sheettype>s/", list_sheets_view, name="modellist"),
     path(
-        "<str:sheettype>s/add/",
+        "<sheettype:sheettype>s/add/",
         FSAddView.as_view(),
         {"method": "add"},
         name="modeladd",
     ),
     path(
-        "<str:sheettype>s/delete/<int:pk>/",
+        "<sheettype:sheettype>s/delete/<int:pk>/",
         fs_delete_view,
         name="delete-factsheet",
     ),
-    path("<str:sheettype>s/download/", model_to_csv_view, name="download"),
-    path("<str:sheettype>s/payload/", list_payload_view, name="list-payload"),
-    path("<str:sheettype>s/<int:pk>/", show_view, name="show-factsheet"),
-    path("<str:sheettype>s/<int:pk>/edit/", edit_model_view, name="edit"),
+    path("<sheettype:sheettype>s/download/", model_to_csv_view, name="download"),
+    path("<sheettype:sheettype>s/payload/", list_payload_view, name="list-payload"),
+    path("<sheettype:sheettype>s/<int:pk>/", show_view, name="show-factsheet"),
+    path("<sheettype:sheettype>s/<int:pk>/edit/", edit_model_view, name="edit"),
     path(
-        "<str:sheettype>s/<int:pk>/update/",
+        "<sheettype:sheettype>s/<int:pk>/update/",
         FSAddView.as_view(),
         {"method": "update"},
         name="update",

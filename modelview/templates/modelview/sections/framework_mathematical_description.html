@@ -1,0 +1,74 @@
+{% load modelview_extras %}
+<table class="table table-pairs">
+  {% include "modelview/model_snippet.html" with model=model field="gui" %}
+  <tr>
+    <td class="sheetlabel">Programming Framework</td>
+    <td>
+      <table>
+        {% checklist model "pf_Python,pf_C,pf_PHP,pf_GNU,pf_R,pf_VBA,pf_Java,pf_Fortran,pf_Modelica,pf_Matlab,pf_Ruby,pf_GAMS,pf_other=pf_other" %}
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td class="sheetlabel">External Solver</td>
+    <td>
+      <table>
+        {% checklist model "es_CPLEX,es_Gurobi,es_Coin,es_GLPK,es_MOSEK,es_other=es_other" %}
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td class="sheetlabel">Input Data Format</td>
+    <td>
+      <table>
+        {% checklist model "idf_Python_dicts,idf_XLSX,idf_Plots,idf_CSV,idf_XML,idf_txt,idf_db,idf_GAMS,idf_other=idf_other" %}
+      </table>
+    </td>
+  </tr>
+  {% include "modelview/model_snippet.html" with model=model field="auto_model_generator" %}
+  {% include "modelview/model_snippet.html" with model=model field="data_preprocessing" add=model.data_preprocessing_other %}
+  <tr>
+    <td class="sheetlabel">Output Data Format</td>
+    <td>
+      <table>
+        {% checklist model "odf_Python_dicts,odf_XLSX,odf_Plots,odf_CSV,odf_XML,odf_txt,odf_db,odf_GAMS,odf_other=odf_other" %}
+      </table>
+    </td>
+  </tr>
+  {% include "modelview/model_snippet.html" with model=model field="data_postprocessing" add=model.data_postprocessing_other %}
+  {% include "modelview/model_snippet.html" with model=model field="plotting_functionalities" %}
+  <tr>
+    <td class="sheetlabel">The analytical approach</td>
+    <td>
+      <table>
+        {% checklist model "ap_TopDown,ap_BottomUp,ap_Hybrid,ap_Other=ap_Other" %}
+      </table>
+    </td>
+  </tr>
+  {% include "modelview/model_snippet.html" with model=model field="additional_software" %}
+  {% include "modelview/model_snippet.html" with model=model field="interfaces" %}
+  <tr>
+    <td class="sheetlabel">The mathematical approach</td>
+    <td>
+      <table>
+        {% checklist model "ma_mip,ma_dp,ma_fl,ma_abp,ma_lp,ma_other=ma_other" %}
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td class="sheetlabel">The underlying methodology</td>
+    <td>
+      <table>
+        {% checklist model "um_econometric,um_me,um_ee,um_optimization,um_simulation,um_stochastic,um_gis,um_st,um_bc,um_mc,um_Accounting,um_other=um_other" %}
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td class="sheetlabel">Objective function type</td>
+    <td>
+      <table>
+        {% checklist model "oft_mtsc,oft_mce,oft_mlce,oft_msw,oft_other=oft_other" %}
+      </table>
+    </td>
+  </tr>
+</table>

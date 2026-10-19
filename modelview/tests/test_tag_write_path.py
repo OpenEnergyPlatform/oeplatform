@@ -21,6 +21,7 @@ from modelview.tests.corpus import seed_corpus
 from modelview.tests.form_data import as_post_data, form_values
 from modelview.tests.html import (
     checked_values,
+    element_markup,
     element_with_id,
     offered_values,
 )
@@ -28,7 +29,7 @@ from modelview.tests.html import (
 SHEETTYPES = ("model", "framework")
 
 #: The tag selector's checkboxes, which post one multi-valued `tags` field.
-TAG_CHECKBOX = "tag-checkbox"
+TAG_CHECKBOX = "tag__check"
 
 
 def offered_tag_pks(html: str) -> list[str]:
@@ -41,8 +42,11 @@ def checked_tag_pks(html: str) -> set[str]:
 
 def current_tag_pills(html: str) -> list[str]:
     """The tag names shown in the "Current tags" block, in render order."""
-    block = re.search(r'<span id="current-tags">(.*?)</span>', html, re.DOTALL)
-    return re.findall(r">([^<>]+)</a>", block.group(1)) if block else []
+    block = element_markup(html, "current-tags")
+    return [
+        name.strip()
+        for name in re.findall(r'<span class="tag__name">([^<>]*)</span>', block)
+    ]
 
 
 class FactsheetWriteTestCase(TestViewsTestCase):
@@ -264,33 +268,52 @@ class TestTheFullFormRoundTrip(FactsheetWriteTestCase):
 
 
 class TestTheTagPickerMarkup(FactsheetWriteTestCase):
-    """The pill has to actually carry its pill classes.
+    """Every tag in the pick list is the `tag` component's toggle (#2645).
 
-    It used to be written with TWO `class` attributes -- `form-label` and
-    `btn tag`. A duplicate attribute is dropped by the HTML parser, so the
+    It used to be a label written with TWO `class` attributes -- `form-label`
+    and `btn tag`. A duplicate attribute is dropped by the HTML parser, so the
     second never applied and every tag rendered as a bare coloured rectangle
     with no padding, jammed against its neighbours.
     """
 
     def pill(self, html):
-        found = re.search(r'<label[^>]*for="select_[^"]*"[^>]*>', html)
-        self.assertIsNotNone(found, msg="no tag pill on the page")
+        found = re.search(
+            r'<label[^>]*class="tag tag--toggle"[^>]*>\s*<input[^>]*id="select_',
+            html,
+        )
+        self.assertIsNotNone(found, msg="no tag toggle around a tag checkbox")
         return found.group(0)
 
     def test_a_pill_carries_exactly_one_class_attribute(self):
         for sheettype in SHEETTYPES:
             with self.subTest(sheettype=sheettype):
-                pill = self.pill(self.edit_page(sheettype, self.sheet(sheettype).pk))
+                html = self.edit_page(sheettype, self.sheet(sheettype).pk)
+                label = self.pill(html).split(">")[0]
 
-                self.assertEqual(pill.count("class="), 1)
+                self.assertEqual(label.count("class="), 1)
 
-    def test_that_one_class_attribute_carries_the_pill_styling(self):
+    def test_no_pill_is_a_button_with_an_inline_background(self):
         for sheettype in SHEETTYPES:
             with self.subTest(sheettype=sheettype):
-                pill = self.pill(self.edit_page(sheettype, self.sheet(sheettype).pk))
+                html = self.edit_page(sheettype, self.sheet(sheettype).pk)
 
-                self.assertIn("tag-picker__pill", pill)
-                self.assertIn("tag", pill)
+                self.assertNotIn("btn tag", html)
+                self.assertNotIn("background:", element_markup(html, "Tags"))
+
+    def test_the_current_tags_are_removable(self):
+        for sheettype in SHEETTYPES:
+            with self.subTest(sheettype=sheettype):
+                sheet = self.sheet(sheettype)
+                sheet.tags.add(*self.vocabulary(sheettype)[:2])
+                html = self.edit_page(sheettype, sheet.pk)
+                block = element_markup(html, "current-tags")
+                attached = list(sheet.tags.values_list("pk", flat=True))
+
+                self.assertEqual(
+                    block.count('class="tag tag--removable"'), len(attached)
+                )
+                for pk in attached:
+                    self.assertIn(f'data-tag-remove="{pk}"', block)
 
     def test_the_selected_state_no_longer_resizes_the_pill(self):
         """It was a 3px border in an inline style block, so selecting a tag

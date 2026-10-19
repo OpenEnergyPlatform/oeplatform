@@ -1,0 +1,34 @@
+// field_help: the "?" beside a field's label (#2655). Include:
+// base/templates/components/field_help.html; catalogue entry:
+// base/templates/styleguide/entries/field_help.html.
+//
+// A quiet icon button the size of the text around it: muted, primary on
+// hover and while its tooltip is open from the keyboard.
+@use '../base/' as *;
+
+.field-help {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: -0.125em;
+    padding: 0.125rem;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: var(--oep-text-muted);
+    line-height: 1;
+
+    svg {
+        width: 1em;
+        height: 1em;
+    }
+
+    &:hover,
+    &:focus-visible {
+        color: var(--bs-primary);
+    }
+
+    &:focus-visible {
+        outline: 0;
+        box-shadow: 0 0 0 #{$input-btn-focus-width} rgba(var(--bs-primary-rgb), 0.25);
+    }
+}

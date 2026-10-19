@@ -46,9 +46,9 @@
     input.addEventListener("keyup", function () {
       const query = this.value;
       if (query.length > 0) {
-        // use static path here to always use the open (data seeded) endpoint for
-        // all (local, deployed) client executions
-        fetch(`https://openenergyplatform.org/api/oeo-search?query=${query}`, {
+        // EXTERNAL_URLS.oeo_search: this instance's own search if it has one,
+        // otherwise the public endpoint (see settings.py)
+        fetch(`{{ EXTERNAL_URLS.oeo_search|escapejs }}?query=${encodeURIComponent(query)}`, {
           mode: "cors",
         })
           .then((response) => response.json())

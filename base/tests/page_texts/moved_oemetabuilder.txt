@@ -1,0 +1,1 @@
+Find a detailed description for all fields of the OEMetaData visible on GitHub . For a brief introduction on how to work with the oemetadata and the OEMetaBuilder tool find our tutorial in the academy. Loading... Submit Cancel Download Add your custom units as extension to the oeo: Close

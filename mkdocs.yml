@@ -84,12 +84,14 @@ nav:
       - Installation Guide: installation/guides/installation-docker-dev.md
       - Development setup: installation/guides/development-setup.md
       - Manual Installation Guide: installation/guides/installation.md
+      - Theming an instance: installation/guides/instance-theming.md
       - Production deployment (Podman):
           - installation/production-podman/index.md
           - Install: installation/production-podman/install.md
           - Ontop: installation/production-podman/ontop.md
           - Update: installation/production-podman/update.md
           - Maintenance & troubleshooting: installation/production-podman/maintenance.md
+          - Monitoring: installation/production-podman/monitoring.md
   - Development:
       - dev/index.md
 

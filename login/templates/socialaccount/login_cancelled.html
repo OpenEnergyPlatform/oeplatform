@@ -1,0 +1,12 @@
+{% extends "allauth/layouts/base.html" %}
+{% load i18n %}
+{% block head_title %}
+  {% trans "Sign-in cancelled" %}
+{% endblock head_title %}
+{% block content %}
+  <h1 class="login__heading">{% trans "Sign-in cancelled" %}</h1>
+  <p>
+    {% url 'account_login' as login_url %}
+    {% blocktrans %}You cancelled signing in with another service. If this was a mistake, <a href="{{ login_url }}">sign in again</a>.{% endblocktrans %}
+  </p>
+{% endblock content %}

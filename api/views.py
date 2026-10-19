@@ -41,6 +41,7 @@ import json
 import logging
 import re
 import time
+from contextlib import contextmanager
 from copy import deepcopy
 
 import geoalchemy2  # noqa:F401 Although this import seems unused is has to be here
@@ -49,9 +50,8 @@ import zipstream
 from django.conf import settings as django_settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import TrigramSimilarity
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.http import Http404, HttpRequest, JsonResponse
-from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from drf_spectacular.types import OpenApiTypes
@@ -67,8 +67,17 @@ from oemetadata.latest.example import OEMETADATA_LATEST_EXAMPLE
 from oemetadata.latest.template import OEMETADATA_LATEST_TEMPLATE
 from rest_framework import generics, status
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.exceptions import PermissionDenied, ValidationError
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.exceptions import (
+    NotAuthenticated,
+    PermissionDenied,
+    ValidationError,
+)
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import (
+    AllowAny,
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
+)
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -76,7 +85,6 @@ from rest_framework.views import APIView
 import login.models as login_models
 from api import bulk_upload_guard, sessions
 from api.actions import (
-    apply_changes,
     bulk_upload_csv,
     close_cursor,
     close_raw_connection,
@@ -116,7 +124,6 @@ from api.actions import (
     has_schema,
     has_table,
     list_table_sizes,
-    move_publish,
     open_cursor,
     open_raw_connection,
     queue_column_change,
@@ -135,6 +142,12 @@ from api.actions import (
 from api.api_description import (
     ADVANCED_SESSION_NOTE,
     ALWAYS,
+    DATASET_ANY_ACCOUNT,
+    DATASET_CREATOR,
+    DATASET_LIST_PUBLIC,
+    DATASET_LIST_REFUSALS,
+    DATASET_PAGE_NOT_FOUND,
+    DATASET_PUBLIC,
     DELIMITER,
     IS_SANDBOX,
     OPENS_SESSION,
@@ -147,12 +160,16 @@ from api.api_description import (
     TABLE,
     USES_POOL,
     AdvancedRequestSerializer,
+    DatasetAssignedSerializer,
+    DatasetUnassignedSerializer,
     QueryWrappedSerializer,
+    RefusalSerializer,
     RowDeleteSerializer,
     RowSerializer,
     SparqlSerializer,
     TableAlterSerializer,
     TableCreateSerializer,
+    dataset_responses,
     describes,
     responses,
 )
@@ -200,20 +217,17 @@ from api.parser import (
 from api.serializers import (
     DatasetAssignTablesSerializer,
     DatasetCreateSerializer,
+    DatasetListFiltersSerializer,
+    DatasetPatchSerializer,
     DatasetReadSerializer,
     DatasetResourceSerializer,
+    DatasetSummarySerializer,
     EnergyframeworkSerializer,
     EnergymodelSerializer,
     ScenarioBundleScenarioDatasetSerializer,
     ScenarioDataTablesSerializer,
 )
-from api.services.dataset_creation import (
-    DatasetNameTaken,
-    assemble_dataset_metadata,
-    assign_table,
-    create_dataset,
-    user_may_assign_table,
-)
+from api.services import dataset_actions, table_actions
 from api.services.embargo import (
     EmbargoValidationError,
     apply_embargo,
@@ -230,7 +244,7 @@ from api.validators.column import validate_column_names
 from api.validators.identifier import (
     assert_valid_table_name,
 )
-from dataedit.models import BulkLoadEvent, Dataset, Table
+from dataedit.models import DATASET_NOT_FOUND, BulkLoadEvent, Dataset, Table
 from factsheet.permission_decorator import post_only_if_user_is_owner_of_scenario_bundle
 from modelview.models import Energyframework, Energymodel
 from oekg.utils import (
@@ -358,107 +372,180 @@ class TableMetadataAPIView(APIView):
             raise APIError(error)
 
 
-def assert_dataset_ownership(user, dataset: Dataset) -> None:
-    """Datasets are creator-owned: only the creator may modify one."""
-    if dataset.creator is None or dataset.creator != user:
-        raise PermissionDenied("Only the dataset creator may modify this dataset.")
+# What a write on a Dataset the user may read but did not create is told.
+NOT_THE_CREATOR = "Only the dataset creator may modify this dataset."
 
 
-def load_owned_dataset_from_request(request, dataset_name: str):
-    """Shared prologue of the dataset membership endpoints: validate the
-    table list, load the dataset and enforce ownership.
+@contextmanager
+def answered_as_a_read():
+    """Answer the Dataset action service's refusals of a Dataset as this
+    API answers a read, so a write never tells more than a read: a Dataset
+    the user may not read (a foreign draft, or no such name) is 404 in the
+    words every read uses, one they may read but did not create 403, and an
+    unusable parameter (the member ceiling among them) 400 in DRF's field
+    map. Any other refusal passes through as the service raised it."""
+    try:
+        yield
+    except dataset_actions.InvalidParameters as error:
+        errors = {key: [message] for key, message in error.errors.items()}
+        raise ValidationError(errors) from error
+    except dataset_actions.DatasetNotFound as error:
+        raise Http404(DATASET_NOT_FOUND) from error
+    except dataset_actions.NotYourDataset as error:
+        raise PermissionDenied(NOT_THE_CREATOR) from error
+    except dataset_actions.ActionRefused as refused:
+        if refused.not_found:
+            raise Http404(DATASET_NOT_FOUND) from refused
+        if refused.for_role:
+            raise PermissionDenied(NOT_THE_CREATOR) from refused
+        raise
 
-    Returns (dataset, table_refs) or (error_response, None) when the
-    dataset does not exist.
-    """
+
+def dataset_action(user, action, names, params):
+    """Do ``action`` through the Dataset action service, the path the
+    dashboard takes (spec #2613), with ``via="api"``."""
+    with answered_as_a_read():
+        return dataset_actions.execute(user, action, names, params, via="api")
+
+
+def dataset_body(user, dataset_name) -> dict:
+    """The read body of the Dataset ``dataset_name``, as ``user`` may read it:
+    what a write answers with, so a client sees the state it left."""
+    dataset = Dataset.objects.readable_or_404(user, dataset_name)
+    return DatasetReadSerializer(dataset).data
+
+
+def change_dataset_members(request, dataset_name, action):
+    """The prologue both membership endpoints share: the table list
+    validated, then the change made through the Dataset action service
+    (``dataset_action``). Returns the table references sent and the
+    ``Outcome``."""
     serializer = DatasetAssignTablesSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
+    refs = serializer.validated_data["tables"]
+    names = [ref["name"] for ref in refs]
+    outcome = dataset_action(request.user, action, names, {"dataset": dataset_name})
+    return refs, outcome
 
-    try:
-        dataset = Dataset.objects.get(name=dataset_name)
-    except Dataset.DoesNotExist:
-        return (
-            Response({"error": "Dataset not found"}, status=status.HTTP_404_NOT_FOUND),
-            None,
-        )
 
-    assert_dataset_ownership(request.user, dataset)
-    return dataset, serializer.validated_data["tables"]
+DATASET_NAME = OpenApiParameter(
+    name="dataset_name",
+    location=OpenApiParameter.PATH,
+    required=True,
+    type=str,
+    description=(
+        "The dataset's name: its permanent identifier, fixed at creation. "
+        "Names are global and are never reused."
+    ),
+)
+
+
+class DatasetPagination(PageNumberPagination):
+    """A ceiling, not a default: neither Dataset list has an unbounded mode.
+    `page` and `page_size`, as every collection of the OEKG API pages. A
+    class of its own rather than one of theirs, so a change to how an OEKG
+    collection pages can not move this API's documented default."""
+
+    page_size = 20
+    page_size_query_param = "page_size"
+    page_size_query_description = "How many per page: 20 if left out, at most 100."
+    max_page_size = 100
+
+
+# What `?mine=true` without a login is told.
+MINE_NEEDS_A_LOGIN = "`mine=true` lists the caller's own datasets and needs a login."
 
 
 @extend_schema(tags=[DATASETS])
 @extend_schema_view(
-    post=extend_schema(
-        summary="Create dataset",
-        description="Creates a new dataset.",
-        request=DatasetCreateSerializer,
-        responses={
-            201: OpenApiResponse(description="Dataset created"),
-            400: OpenApiResponse(description="The payload was rejected."),
-        },
-        examples=[
-            OpenApiExample(
-                "Dataset Example",
-                summary="Example request body for " "creating a dataset",
-                description=(
-                    "Use this JSON object to create a new dataset. "
-                    "The `at_id` field is optional and can contain "
-                    "a persistent identifier."
-                ),
-                value={
-                    "name": "test_dataset",
-                    "title": "Wind Power Dataset Germany",
-                    "description": (
-                        "Contains hourly wind generation " "data for Germany."
-                    ),
-                    "at_id": "https://example.org/datasets/test_dataset",
-                },
-                request_only=True,
-            )
-        ],
-    )
-)
-@extend_schema_view(
     get=extend_schema(
         summary="List datasets",
         description=(
-            "Every dataset on the platform, each with its metadata. The "
-            "`resources` of a dataset are assembled from its member tables at "
-            "read time rather than stored, so this never reports a resource "
-            "the dataset no longer holds. Public."
+            "Every published dataset on the platform, plus the caller's own "
+            "drafts, by name, a page at a time. `mine` and `published` narrow "
+            "that and never widen it: `mine=true&published=false` lists the "
+            "caller's drafts. Each item is a summary: the dataset's read body "
+            "without `metadata.resources`, plus `resource_count`. The "
+            "resources themselves are on the dataset's own read and its "
+            "`resources/`. " + DATASET_LIST_PUBLIC
+        ),
+        parameters=[DatasetListFiltersSerializer],
+        responses=dataset_responses(
+            {200: DatasetSummarySerializer(many=True)},
+            400,
+            401,
+            404,
+            also=DATASET_LIST_REFUSALS,
         ),
     ),
     post=extend_schema(
         summary="Create a dataset",
         description=(
             "Creates a catalogue entry that tables can then be assigned to. "
-            "The name must be free; a taken one is refused naming the field."
+            "The name must be free; a taken one is refused naming the field. "
+            "`topics` must name existing topics, and never the draft "
+            "pseudo-topic; a 400 names any that do not. " + DATASET_ANY_ACCOUNT
         ),
+        request=DatasetCreateSerializer,
+        responses=dataset_responses({201: DatasetReadSerializer}, 400, 401),
+        examples=[
+            OpenApiExample(
+                "Dataset Example",
+                summary="Example request body for creating a dataset",
+                description=(
+                    "Use this JSON object to create a new dataset. "
+                    "The `at_id` field is optional and can contain "
+                    "a persistent identifier; `topics` is optional too."
+                ),
+                value={
+                    "name": "test_dataset",
+                    "title": "Wind Power Dataset Germany",
+                    "description": (
+                        "Contains hourly wind generation data for Germany."
+                    ),
+                    "at_id": "https://example.org/datasets/test_dataset",
+                    "topics": ["energy"],
+                },
+                request_only=True,
+            )
+        ],
     ),
 )
 class DatasetsListCreate(generics.ListCreateAPIView):
-    queryset = Dataset.objects.prefetch_related("tables")
     permission_classes = [IsAuthenticatedOrReadOnly]
+    pagination_class = DatasetPagination
+
+    def get_queryset(self):
+        """What the caller may see (``visible_to``), narrowed by the filters.
+        A page costs the same queries however many Datasets or members there
+        are: the count, the page, the Topics."""
+        filters = DatasetListFiltersSerializer(data=self.request.query_params)
+        filters.is_valid(raise_exception=True)
+        user = self.request.user
+        if filters.only_mine and not user.is_authenticated:
+            raise NotAuthenticated(MINE_NEEDS_A_LOGIN)
+        return (
+            filters.narrowed(Dataset.objects.visible_to(user), user)
+            .select_related("creator")
+            .prefetch_related("topics")
+            .annotate(resource_count=Count("tables"))
+            .order_by("name")
+        )
 
     def get_serializer_class(self):
         if self.request.method == "POST":
             return DatasetCreateSerializer
-        return DatasetReadSerializer
+        return DatasetSummarySerializer
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
-        try:
-            dataset = create_dataset(serializer.validated_data, creator=request.user)
-        except DatasetNameTaken as error:
-            raise ValidationError({"name": str(error)})
-
+        data = serializer.validated_data
+        outcome = dataset_action(
+            request.user, dataset_actions.CREATE, [data["name"]], data
+        )
         return Response(
-            {
-                "id": dataset.pk,
-                "metadata": DatasetReadSerializer(dataset).data["metadata"],
-            },
+            DatasetReadSerializer(outcome.datasets[0]).data,
             status=status.HTTP_201_CREATED,
         )
 
@@ -467,40 +554,62 @@ class DatasetsListCreate(generics.ListCreateAPIView):
 @extend_schema_view(
     get=extend_schema(
         summary="List dataset resources",
-        description="Returns the tables/resources that belong to a dataset.",
-        responses=DatasetResourceSerializer(many=True),
+        description=(
+            "Returns the tables/resources that belong to a dataset, by name, "
+            "a page at a time. " + DATASET_PUBLIC
+        ),
+        parameters=[DATASET_NAME],
+        responses=dataset_responses(
+            {200: DatasetResourceSerializer(many=True)},
+            404,
+            also=DATASET_PAGE_NOT_FOUND,
+        ),
     )
 )
 class DatasetsListResources(generics.ListAPIView):
     serializer_class = DatasetResourceSerializer
+    # declared, not inherited: REST_FRAMEWORK sets no default, and the draft
+    # rule below is what keeps a draft's members private
+    permission_classes = [AllowAny]
+    pagination_class = DatasetPagination
 
     def get_queryset(self):
         dataset_name = self.kwargs["dataset_name"]
-        dataset = get_object_or_404(Dataset, name=dataset_name)
-        return dataset.tables.all()
+        dataset = Dataset.objects.readable_or_404(self.request.user, dataset_name)
+        return dataset.tables.order_by("name")
 
 
 @extend_schema(tags=[DATASETS])
 @extend_schema_view(
     get=extend_schema(
         summary="Get dataset",
-        description="Returns metadata for a single dataset.",
-        responses=DatasetReadSerializer,
+        description="Returns a single dataset with its metadata. " + DATASET_PUBLIC,
+        parameters=[DATASET_NAME],
+        responses=dataset_responses({200: DatasetReadSerializer}, 404),
     ),
-    put=extend_schema(
+    patch=extend_schema(
         summary="Update dataset",
-        description="Updates metadata for an existing dataset.",
-        request=DatasetCreateSerializer,
-        responses={200: OpenApiResponse(description="Dataset updated")},
+        description=(
+            "Changes the dataset's title, description, `at_id` or topics. A "
+            "key left out is left as it is: `topics` replaces the whole set "
+            "(`[]` empties it), and an omitted `at_id` keeps the stored one. "
+            "`name` is fixed at creation, so sending it is a 400, even "
+            "unchanged. Topics must exist and may not be the draft "
+            "pseudo-topic; a 400 names any that do not. An update that "
+            "changes nothing writes nothing and leaves `modified_at` as it "
+            "was. Answers with the dataset as it now is. `PUT` is not "
+            "offered and answers 405. " + DATASET_CREATOR
+        ),
+        parameters=[DATASET_NAME],
+        request=DatasetPatchSerializer,
+        responses=dataset_responses({200: DatasetReadSerializer}, 400, 401, 403, 404),
         examples=[
             OpenApiExample(
                 "Update dataset example",
-                summary="Example request body for updating a dataset",
+                summary="Change the title and replace the topics",
                 value={
-                    "name": "test_dataset",
                     "title": "Updated Wind Power Dataset Germany",
-                    "description": "Updated description with more details.",
-                    "at_id": "https://example.org/datasets/test_dataset",
+                    "topics": ["energy"],
                 },
                 request_only=True,
             )
@@ -508,8 +617,18 @@ class DatasetsListResources(generics.ListAPIView):
     ),
     delete=extend_schema(
         summary="Delete dataset",
-        description="Deletes the specified dataset.",
-        responses={204: OpenApiResponse(description="Dataset deleted")},
+        description=(
+            "Deletes the dataset. Its member tables are not deleted; they "
+            "only leave it. The address is the confirmation a published "
+            "dataset asks for, and a repeated delete is a 404. " + DATASET_CREATOR
+        ),
+        parameters=[DATASET_NAME],
+        responses=dataset_responses(
+            {204: OpenApiResponse(description="Deleted. The body is empty.")},
+            401,
+            403,
+            404,
+        ),
     ),
 )
 class DatasetManager(APIView):
@@ -521,33 +640,111 @@ class DatasetManager(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request, dataset_name):
-        dataset = get_object_or_404(Dataset, name=dataset_name)
+        dataset = Dataset.objects.readable_or_404(request.user, dataset_name)
         serializer = DatasetReadSerializer(dataset)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def put(self, request, dataset_name):
-        dataset = get_object_or_404(Dataset, name=dataset_name)
-        assert_dataset_ownership(request.user, dataset)
-        serializer = DatasetCreateSerializer(data=request.data)
+    def patch(self, request, dataset_name):
+        serializer = DatasetPatchSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
-        if serializer.validated_data["name"] != dataset.name:
-            raise ValidationError(
-                {"name": "The dataset name is fixed at creation and can not change."}
-            )
-
-        dataset.metadata = assemble_dataset_metadata(serializer.validated_data)
-        dataset.save()
-        return Response({"message": "Dataset updated"}, status=status.HTTP_200_OK)
+        dataset_action(
+            request.user,
+            dataset_actions.EDIT,
+            [dataset_name],
+            serializer.validated_data,
+        )
+        return Response(dataset_body(request.user, dataset_name))
 
     def delete(self, request, dataset_name):
-        dataset = get_object_or_404(Dataset, name=dataset_name)
-        assert_dataset_ownership(request.user, dataset)
-        dataset.delete()
-        return Response(
-            {"message": "Dataset deleted"},
-            status=status.HTTP_204_NO_CONTENT,
+        # the address is the typed confirmation a published Dataset asks for
+        dataset_action(
+            request.user,
+            dataset_actions.DELETE,
+            [dataset_name],
+            {"confirm": dataset_name},
         )
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class DatasetTransition(APIView):
+    """Publish or unpublish one Dataset (``transition``) through the Dataset
+    action service. No body is read. Answers 200 with the Dataset as it now
+    is, also when nothing had to change (unpublishing a draft). ``params``
+    are the service parameters the transition always sends."""
+
+    permission_classes = [IsAuthenticated]
+    transition = None
+    params = {}
+
+    def post(self, request, dataset_name):
+        try:
+            dataset_action(
+                request.user, self.transition, [dataset_name], dict(self.params)
+            )
+        except dataset_actions.ActionRefused as refused:
+            # a Dataset not there or not the user's has been answered as a
+            # read already (``answered_as_a_read``): what is left is the
+            # Dataset's own state, the publish gate, which only a publish
+            # can fail
+            if not refused.failed_checks:
+                raise
+            reasons = "; ".join(group.reason for group in refused.refused)
+            return Response(
+                {
+                    "detail": (
+                        "Not published: the dataset does not pass the publish "
+                        f"gate ({reasons}). Nothing was changed."
+                    ),
+                    "failed": refused.failed_checks,
+                },
+                status=status.HTTP_409_CONFLICT,
+            )
+        return Response(dataset_body(request.user, dataset_name))
+
+
+@extend_schema(tags=[DATASETS])
+@extend_schema_view(
+    post=extend_schema(
+        summary="Publish a dataset",
+        description=(
+            "Publishes the dataset: it enters the catalogue and anyone may "
+            "read it. The publish gate runs now and needs at least one member "
+            "table and at least one topic; a dataset failing it is a 409 "
+            "listing the failed checks in `failed`, and nothing is written. "
+            "Members may be drafts or under embargo. Publishing a published "
+            "dataset republishes it: the gate runs again and `published_at` "
+            "becomes now. Never moves `modified_at`. No request body. "
+            + DATASET_CREATOR
+        ),
+        parameters=[DATASET_NAME],
+        request=None,
+        responses=dataset_responses({200: DatasetReadSerializer}, 401, 403, 404, 409),
+    )
+)
+class DatasetPublish(DatasetTransition):
+    transition = dataset_actions.PUBLISH
+    # the API republishes a published Dataset; the dashboard never does
+    params = {"republish": True}
+
+
+@extend_schema(tags=[DATASETS])
+@extend_schema_view(
+    post=extend_schema(
+        summary="Unpublish a dataset",
+        description=(
+            "Returns the dataset to draft: it leaves the catalogue, other "
+            "users get 404 for it, and scenario citations of it stop "
+            "resolving. Always allowed for the creator; unpublishing a draft "
+            "succeeds and writes nothing. Never moves `modified_at`. No "
+            "request body. " + DATASET_CREATOR
+        ),
+        parameters=[DATASET_NAME],
+        request=None,
+        responses=dataset_responses({200: DatasetReadSerializer}, 401, 403, 404),
+    )
+)
+class DatasetUnpublish(DatasetTransition):
+    transition = dataset_actions.UNPUBLISH
 
 
 @extend_schema(tags=[DATASETS])
@@ -561,28 +758,35 @@ class AssignDatasetTables(APIView):
     @extend_schema(
         summary="Assign tables to dataset",
         description=(
-            "Assigns existing OEP tables to an existing dataset. "
-            "The dataset must already exist and the referenced "
-            "tables must already exist. After assignment, the "
-            "dataset resources are updated from the table metadata."
+            "Assigns existing OEP tables to an existing dataset; the tables' "
+            "topics are added to the dataset's. Any published table not under "
+            "embargo may be assigned; a draft or embargoed table needs Data "
+            "editor on it, and one that does not qualify refuses the whole "
+            "request. A name that is no table is reported in `missing` rather "
+            "than refused. At most 2,500 tables in one call. " + DATASET_CREATOR
         ),
-        parameters=[
-            OpenApiParameter(
-                name="dataset_name",
-                type=str,
-                location=OpenApiParameter.PATH,
-                required=True,
-                description=(
-                    "Name of the dataset to which the tables should be assigned. "
-                    "Example: `test_dataset`."
-                ),
-            )
-        ],
+        parameters=[DATASET_NAME],
         request=DatasetAssignTablesSerializer,
-        responses={
-            200: OpenApiResponse(description="Tables were assigned to the dataset."),
-            404: OpenApiResponse(description="Dataset was not found."),
-        },
+        responses=dataset_responses(
+            {200: DatasetAssignedSerializer},
+            401,
+            404,
+            also={
+                400: describes(
+                    "The table list is unusable, or names more than 2,500: "
+                    "DRF's map of each field to what is wrong with it."
+                ),
+                403: OpenApiResponse(
+                    response=RefusalSerializer,
+                    description=(
+                        "Authenticated, but the dataset is somebody else's, or "
+                        "a table named is a draft or under embargo and the "
+                        "account holds no Data editor on it. Nothing was "
+                        "assigned."
+                    ),
+                ),
+            },
+        ),
         examples=[
             OpenApiExample(
                 "Assign tables example",
@@ -598,40 +802,33 @@ class AssignDatasetTables(APIView):
         ],
     )
     def post(self, request, dataset_name):
-        dataset, table_refs = load_owned_dataset_from_request(request, dataset_name)
-        if table_refs is None:
-            return dataset
-
-        missing = []
-        tables = []
-
-        for table_ref in table_refs:
-            try:
-                tables.append(Table.load(table_ref["name"]))
-            except Table.DoesNotExist:
-                missing.append(table_ref)
-
-        forbidden = [
-            table.name
-            for table in tables
-            if not user_may_assign_table(request.user, table)
-        ]
-        if forbidden:
-            raise PermissionDenied(
-                "Draft or embargoed tables require write permission on the "
-                f"table to be assigned: {', '.join(forbidden)}."
+        try:
+            refs, outcome = change_dataset_members(
+                request, dataset_name, dataset_actions.MEMBERS_ADD
             )
+        except dataset_actions.ActionRefused as refused:
+            forbidden = [name for group in refused.refused for name in group.names]
+            raise PermissionDenied(
+                "Draft or embargoed tables require Data editor on the table, "
+                "directly or through an organization, to be assigned: "
+                f"{', '.join(forbidden)}."
+            ) from refused
 
-        added_tables = []
-        for table in tables:
-            assign_table(dataset, table)
-            added_tables.append(table.name)
-
+        missing = {
+            name
+            for group in outcome.left_out
+            if group.reason == dataset_actions.NO_SUCH_TABLE
+            for name in group.names
+        }
+        # A Table the Dataset holds already is reported as added, as it
+        # always was: after the call it is in the Dataset, so a repeated
+        # call answers as the first did.
+        added_tables = [ref["name"] for ref in refs if ref["name"] not in missing]
         return Response(
             {
                 "message": f"Added {len(added_tables)} tables.",
                 "added": added_tables,
-                "missing": missing,
+                "missing": [ref for ref in refs if ref["name"] in missing],
             },
             status=status.HTTP_200_OK,
         )
@@ -650,42 +847,31 @@ class UnassignDatasetTables(APIView):
             "deleted -- a dataset is a catalogue entry, and leaving it is not "
             "leaving the platform. A name the dataset does not hold is "
             "reported in `missing` rather than refused, so a repeated call is "
-            "safe."
+            "safe. The dataset's topics stay as they are. At most 2,500 "
+            "tables in one call. " + DATASET_CREATOR
         ),
-        parameters=[
-            OpenApiParameter(
-                name="dataset_name",
-                location=OpenApiParameter.PATH,
-                required=True,
-                type=str,
-                description="The dataset's name.",
-            )
-        ],
+        parameters=[DATASET_NAME],
         request=DatasetAssignTablesSerializer,
-        responses=responses(
-            {
-                200: describes(
-                    "`removed` names what was detached and `missing` what the "
-                    "dataset did not hold."
+        responses=dataset_responses(
+            {200: DatasetUnassignedSerializer},
+            401,
+            403,
+            404,
+            also={
+                400: describes(
+                    "The table list is unusable, or names more than 2,500: "
+                    "DRF's map of each field to what is wrong with it."
                 )
-            }
+            },
         ),
     )
     def post(self, request, dataset_name):
-        dataset, table_refs = load_owned_dataset_from_request(request, dataset_name)
-        if table_refs is None:
-            return dataset
-
-        missing = []
-        removed_tables = []
-
-        for table_ref in table_refs:
-            table = dataset.tables.filter(name=table_ref["name"]).first()
-            if table is None:
-                missing.append(table_ref)
-            else:
-                dataset.tables.remove(table)
-                removed_tables.append(table.name)
+        refs, outcome = change_dataset_members(
+            request, dataset_name, dataset_actions.MEMBERS_REMOVE
+        )
+        removed = {table.name for table in outcome.tables}
+        removed_tables = [ref["name"] for ref in refs if ref["name"] in removed]
+        missing = [ref for ref in refs if ref["name"] not in removed]
 
         return Response(
             {
@@ -952,8 +1138,22 @@ class TableAPIView(APIView):
     @api_exception
     @require_delete_permission
     def delete(self, request: Request, table: str) -> JsonLikeResponse:
-        table_obj = table_or_404(table=table)
-        table_obj.delete()
+        # The address names the Table, which is all the dashboard's typed
+        # confirmation asks for. Whether the API should guard deleting a
+        # published Table is a platform rule outside spec #2551.
+        outcome = table_action(
+            request.user, table_actions.DELETE, table, {"confirm": table}
+        )
+        if outcome and outcome.drop_failed:
+            # The record is gone (a retry is a 404), its data is not.
+            return JsonResponse(
+                {
+                    "reason": f"The table {table} was deleted, but its data "
+                    "could not be removed from the database. This is logged; "
+                    "please tell the platform's operators."
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
         return JsonResponse({}, status=status.HTTP_200_OK)
 
 
@@ -1045,6 +1245,43 @@ class TableColumnAPIView(APIView):
         return JsonResponse({}, status=201)
 
 
+_ROLE_REFUSALS = frozenset(gate.refusal for gate in table_actions.ROLE_GATES.values())
+
+
+def table_action(user, action, table, params=None, holds_already=None):
+    """Do ``action`` on the one Table ``table`` through the table action
+    service, the path the dashboard takes (spec #2551), and answer its
+    refusals as this API answers the same situations elsewhere.
+
+    The permission decorators have checked the Table and the role already;
+    the service checks both again under a row lock, so a refusal there means
+    something changed in between: a Table gone is a 404, a role gone a 403
+    (the service says "Not one of your tables" for both, and the API tells
+    them apart, as its decorators do). Anything else the service refuses,
+    and every unusable parameter, is a 400 naming why. ``holds_already`` is
+    a refusal that means the request's outcome holds already: it answers
+    success, with nothing written, and returns None.
+
+    Never called inside a transaction: a delete's is durable, and the
+    service refuses to run it nested. ``ATOMIC_REQUESTS`` is off.
+    """
+    try:
+        return table_actions.execute(user, action, [table], params, via="api")
+    except table_actions.InvalidParameters as error:
+        raise APIError(str(error), 400) from error
+    except table_actions.ActionRefused as refused:
+        reasons = {group.reason for group in refused.refused}
+        if reasons == {holds_already}:
+            return None
+        if table_actions.NOT_YOURS in reasons:
+            if not Table.objects.filter(name=table).exists():
+                raise APIError("Table does not exist", 404) from refused
+            raise APIError("Permission denied", 403) from refused
+        if reasons & _ROLE_REFUSALS:
+            raise APIError("Permission denied", 403) from refused
+        raise APIError(refused.message, 400) from refused
+
+
 @extend_schema(tags=[TABLES])
 class TableMovePublishAPIView(APIView):
     @extend_schema(
@@ -1071,16 +1308,25 @@ class TableMovePublishAPIView(APIView):
     @api_exception
     @require_admin_permission
     def post(self, request: Request, table: str, topic: str) -> JsonLikeResponse:
-        table_obj = table_or_404(table=table)
-
         # Make payload more friendly as users tend to use the query wrapper in payload
         request_data_dict = get_request_data_dict(request)
         payload_query = request_data_dict.get("query", {})
         embargo_period = request_data_dict.get("embargo", {}).get(
             "duration", None
         ) or payload_query.get("embargo", {}).get("duration", None)
-        move_publish(table_obj, topic, embargo_period)
-
+        # A published Table is published again (one more Topic, the embargo
+        # given), and an omitted embargo leaves it as it is: what this
+        # endpoint has always done, unlike the dashboard's publish.
+        table_action(
+            request.user,
+            table_actions.PUBLISH,
+            table,
+            {
+                "topic": topic,
+                "embargo": embargo_period or table_actions.KEEP_EMBARGO,
+                "republish": True,
+            },
+        )
         return JsonResponse({}, status=status.HTTP_200_OK)
 
 
@@ -1103,9 +1349,13 @@ class TableUnpublishAPIView(APIView):
     @require_admin_permission
     def post(self, request: HttpRequest, table: str) -> JsonLikeResponse:
         """Set table to `not published`"""
-        table_obj = table_or_404(table=table)
-        table_obj.is_publish = False
-        table_obj.save()
+        # a draft is unpublished already: success, as it has always been
+        table_action(
+            request.user,
+            table_actions.UNPUBLISH,
+            table,
+            holds_already=table_actions.NOT_PUBLISHED,
+        )
         return JsonResponse({}, status=status.HTTP_200_OK)
 
 
@@ -1350,7 +1600,6 @@ class TableRowsAPIView(APIView):
                 status_code = status.HTTP_201_CREATED
             else:
                 response = self.__update_rows(request, table_obj, payload_query, None)
-        apply_changes(table_obj)
         return stream(response, status_code=status_code)
 
     @extend_schema(
@@ -1424,11 +1673,9 @@ class TableRowsAPIView(APIView):
         exists = table_has_row_with_id(table_obj, id=row_id) if row_id else False
         if exists:
             response = self.__update_rows(request, table_obj, payload_query, row_id)
-            apply_changes(table_obj)
             return JsonResponse(response)
         else:
             result = self.__insert_row(request, table_obj, payload_query, row_id)
-            apply_changes(table_obj)
             return JsonResponse(result, status=status.HTTP_201_CREATED)
 
     @extend_schema(
@@ -1468,7 +1715,6 @@ class TableRowsAPIView(APIView):
             )
 
         result = self.__delete_rows(request, table_obj, row_id)
-        apply_changes(table_obj)
         return JsonResponse(result)
 
     @load_cursor()
@@ -1844,6 +2090,7 @@ class TableBulkUploadAPIView(APIView):
             )
             raise
 
+        table_obj.stamp_data_modified()
         event = _record_bulk_load_event(
             table_obj,
             request.user,
@@ -1914,9 +2161,9 @@ def usrprop_api_view(request: Request) -> JsonLikeResponse:
 
 @never_cache
 @api_exception
-def grpprop_api_view(request: Request) -> JsonLikeResponse:
+def groupprop_api_view(request: Request) -> JsonLikeResponse:
     """
-    Return all Groups where this user is a member that match
+    Return all groups where this user is a member that match
     the current query. The query is input by the User.
     """
     try:
@@ -1932,18 +2179,18 @@ def grpprop_api_view(request: Request) -> JsonLikeResponse:
     groups = [g.group for g in user_groups]
 
     # Assuming 'name' is the field you want to search against
-    similar_groups = (
-        login_models.Group.objects.annotate(
+    similar_organizations = (
+        login_models.Organization.objects.annotate(
             similarity=TrigramSimilarity("name", query),
         )
         .filter(
             similarity__gt=0.2,  # Adjust the threshold as needed
-            id__in=[group.pk for group in groups],
+            id__in=[organization.pk for organization in groups],
         )
         .order_by("-similarity")[:5]
     )
 
-    group_names = [group.name for group in similar_groups]
+    group_names = [group.name for group in similar_organizations]
 
     return JsonResponse(group_names, safe=False)
 

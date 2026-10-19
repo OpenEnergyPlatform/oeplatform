@@ -1,0 +1,49 @@
+// user_menu: the navbar's account corner (#2644). Include:
+// base/templates/components/user_menu.html; catalogue entry:
+// base/templates/styleguide/entries/user_menu.html.
+//
+// Signed in, a navbar dropdown under the user's name; below lg, where the
+// navbar collapses, the same items as a section of the collapsed menu, marked
+// off by a rule. Signed out, a nav link and the bar's one light button
+// (`btn-on-strong`). The dropdown and the links take the navbar's own look
+// (base-style.css, sized by --navbar-rem); this holds only what the corner
+// adds to it.
+@use '../base/' as *;
+
+$navbar-rem: var(--navbar-rem, 1rem);
+
+.user-menu {
+    @include media-breakpoint-down(lg) {
+        margin-top: calc(0.5 * #{$navbar-rem});
+        padding-top: calc(0.5 * #{$navbar-rem});
+        border-top: 1px solid color-mix(in srgb, var(--oep-on-strong) 25%, transparent);
+    }
+
+    form {
+        margin: 0;
+    }
+
+    // Sign out posts a form, so it is a button looking like its neighbours.
+    button.nav-link {
+        width: 100%;
+        background: none;
+        border: 0;
+        text-align: start;
+    }
+
+    &__name {
+        display: block;
+        color: var(--oep-on-strong);
+        font-weight: 600;
+    }
+
+    &__sign-up {
+        @include media-breakpoint-down(lg) {
+            margin: calc(0.25 * #{$navbar-rem}) 0 calc(0.5 * #{$navbar-rem});
+        }
+
+        @include media-breakpoint-up(lg) {
+            margin-left: calc(0.5 * #{$navbar-rem});
+        }
+    }
+}

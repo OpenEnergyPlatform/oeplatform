@@ -1,0 +1,84 @@
+{% load i18n fontawesome_5 %}
+{% comment %}
+  user_menu (#2644): the navbar's account corner. Signed in, one menu under the
+  user's name (Dashboard, Settings, Sign out); signed out, Sign in as a nav link
+  and Sign up as the bar's one light button. Styles:
+  theming/scss/components/_user_menu.scss; catalogue entry:
+  styleguide/entries/user_menu.html.
+
+  user   the signed-in user (anything with pk, name and is_authenticated), or
+         anyone else for the signed-out corner
+  id     the menu toggle's id, "navbarDropdownUser" unless given (a second
+         corner on one page, the catalogue's, needs its own)
+
+  Placed last inside the navbar's .navbar-collapse. Below lg the collapsed menu
+  shows the same items as its own section instead of a menu in a menu.
+{% endcomment %}
+<ul class="navbar-nav ms-lg-auto align-items-lg-center user-menu">
+  {% if user.is_authenticated %}
+    {% url 'login:profile' user.pk as dashboard_url %}
+    {% url 'login:settings' user.pk as settings_url %}
+    {% url 'account_logout' as logout_url %}
+    {% firstof id "navbarDropdownUser" as toggle_id %}
+    <li class="nav-item dropdown d-none d-lg-block">
+      <a class="nav-link dropdown-toggle"
+         href="#"
+         id="{{ toggle_id }}"
+         role="button"
+         data-bs-toggle="dropdown"
+         aria-haspopup="true"
+         aria-expanded="false">{% fa5_icon 'user' 'fas' %} {{ user.name }}</a>
+      <ul class="dropdown-menu dropdown-menu-end"
+          aria-labelledby="{{ toggle_id }}">
+        <li>
+          <a class="dropdown-item"
+             href="{{ dashboard_url }}">{% translate "Dashboard" %}</a>
+        </li>
+        <li>
+          <a class="dropdown-item"
+             href="{{ settings_url }}">{% translate "Settings" %}</a>
+        </li>
+        <li>
+          <hr class="dropdown-divider" />
+        </li>
+        <li>
+          <form method="post" action="{{ logout_url }}">
+            {% csrf_token %}
+            <button type="submit"
+                    class="dropdown-item">{% translate "Sign out" %}</button>
+          </form>
+        </li>
+      </ul>
+    </li>
+    <li class="nav-item d-lg-none">
+      <span class="navbar-text user-menu__name">{% fa5_icon 'user' 'fas' %} {{ user.name }}</span>
+    </li>
+    <li class="nav-item d-lg-none">
+      <a class="nav-link"
+         href="{{ dashboard_url }}">{% translate "Dashboard" %}</a>
+    </li>
+    <li class="nav-item d-lg-none">
+      <a class="nav-link"
+         href="{{ settings_url }}">{% translate "Settings" %}</a>
+    </li>
+    <li class="nav-item d-lg-none">
+      <form method="post" action="{{ logout_url }}">
+        {% csrf_token %}
+        <button type="submit"
+                class="nav-link">{% translate "Sign out" %}</button>
+      </form>
+    </li>
+  {% else %}
+    {# URLs provided by django-allauth/account/urls.py #}
+    <li class="nav-item">
+      <a class="nav-link"
+         href="{% url 'account_login' %}">{% translate "Sign in" %}</a>
+    </li>
+    {% if ACCOUNT_ALLOW_REGISTRATION %}
+      <li class="nav-item">
+        <a class="btn btn-on-strong btn-sm user-menu__sign-up"
+           href="{% url 'account_signup' %}">{% translate "Sign up" %}</a>
+      </li>
+    {% endif %}
+  {% endif %}
+</ul>

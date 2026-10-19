@@ -1,0 +1,9 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+The gate hint: an empty cell on a draft that the Publish gate needs filled.
+``what`` names what is missing ("tables", "topics"). On one line, muted, never
+an error tone; a screen reader hears the whole sentence.
+{% endcomment %}
+<span class="dash-muted dash-needed" aria-hidden="true">– needed to publish</span><span class="visually-hidden">No {{ what }}. At least one is needed to publish.</span>

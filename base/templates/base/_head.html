@@ -1,0 +1,24 @@
+{% load static fontawesome_5 compress django_vite %}
+{% comment %}
+  What every shell's head shares (#2637), so it is written once: the shells
+  add their title and their blocks around it, and close the head with
+  base/_instance_stylesheets.html, after every platform stylesheet.
+
+  The stylesheets go through compress in every shell: the bundle's name
+  changes with its content, so a browser cannot keep serving last release's
+  base-style.css. The vite HMR client renders nothing unless Vite's dev mode
+  is on.
+{% endcomment %}
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+<link rel="shortcut icon"
+      href="{% static 'favicon.ico' %}"
+      type="image/x-icon" />
+{% fontawesome_5_static %}
+{% compress css %}
+  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/jquery-ui.min.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/base-style.css' %}" />
+{% endcompress %}
+{% vite_hmr_client %}

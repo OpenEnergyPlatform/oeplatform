@@ -23,8 +23,8 @@ services:
       ADMIN_PASSWORD: "admin"
       FUSEKI_DATASET_1: "ds"
     volumes:
-      - fuseki_databases:/home/fuseki/databases
-      # - ./fuseki/config:/home/fuseki/configuration
+      # FUSEKI_BASE of the image: datasets, registry and shiro.ini
+      - fuseki_databases:/fuseki
     restart: unless-stopped
     ports:
       - "${OEP_DEV_PORT_FUSEKI:-3030}:3030"

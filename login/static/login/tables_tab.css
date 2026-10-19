@@ -1,0 +1,485 @@
+/*
+ * SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
+ * The profile dashboard's tables tab (spec #2551): its columns and Table
+ * cells, the access drawer, and the column collapse by the list's own width
+ * (#2555), the container queries at the end of this file. Everything a list
+ * has whatever it lists is in dash_list.css, which the page loads first.
+ */
+
+.c-table {
+  min-width: 13rem;
+}
+
+/* technical names are unbreakable snake_case; letting them break anywhere
+   is what keeps the Table column from holding the row wide */
+.dash-tname {
+  font: 0.75rem ui-monospace, Consolas, monospace;
+  color: var(--oep-text-muted);
+  overflow-wrap: anywhere;
+}
+
+/* An Organization's name may be 150 characters; capped, so that the Access
+   column is bounded and the thresholds below hold for any name. The full
+   name is in the chip's title, and every holder in the link's label. */
+.dash-achip {
+  display: inline-block;
+  max-width: 11rem;
+  margin: 1px 2px 1px 0;
+  padding: 0 0.45rem;
+  overflow: hidden;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+  /* not the semibold the cell's link button gives its text */
+  font-weight: normal;
+  color: var(--bs-primary);
+  background: var(--oep-surface-subtle);
+  border: 1px solid var(--oep-border-strong);
+  border-radius: var(--bs-border-radius-pill);
+}
+
+.dash-achip--you {
+  color: var(--oep-on-strong);
+  background: var(--bs-primary);
+  border-color: var(--bs-primary);
+}
+
+.dash-role {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: normal;
+  color: var(--oep-text-muted);
+}
+
+/* Publishable: the Publish gate's result, a link button tightened to the
+   cell. Only its mark is in the verdict's status colour: a status colour
+   is never a button's (theming/scss/components/_button.scss). */
+.dash-gate {
+  --bs-btn-padding-x: 0.3rem;
+  --bs-btn-padding-y: 0.1rem;
+  --bs-btn-border-width: 0;
+  --bs-btn-hover-bg: var(--oep-surface-hover);
+  white-space: nowrap;
+}
+
+.dash-gate--ok {
+  color: var(--bs-success);
+}
+
+.dash-gate--bad {
+  color: var(--bs-danger);
+}
+
+/* Review: a badge that links to the finished review */
+.dash-review {
+  text-decoration: none;
+}
+
+.dash-review:hover,
+.dash-review:focus {
+  text-decoration: underline;
+}
+
+/* Access: the whole cell opens the access drawer */
+.dash-access {
+  --bs-btn-padding-x: 0;
+  --bs-btn-padding-y: 0;
+  --bs-btn-border-width: 0;
+  --bs-btn-hover-bg: var(--oep-surface-hover);
+  display: inline-block;
+  text-align: left;
+}
+
+/* the select column (#2564): a checkbox per row, the page's in the header */
+.c-select {
+  width: 2.25rem;
+  padding-right: 0;
+}
+
+/* the row's ⋯ slot stays at the right edge while the list scrolls sideways */
+.c-menu {
+  position: sticky;
+  right: 0;
+  width: 3rem;
+  background: var(--oep-surface);
+}
+
+.dash-table thead .c-menu {
+  background: var(--oep-surface-subtle);
+}
+
+/* the row's ⋯ menu (#2561). A sticky cell is a stacking context of its
+   own, so the later rows' ⋯ cells would paint over an open menu: the cell
+   holding it is raised above them. */
+.c-menu:focus-within,
+.c-menu:has(.dropdown-menu.show) {
+  z-index: 2;
+}
+
+/* The access drawer (#2566). Its body is a wrapper the drawer's contents
+   are swapped into, so it carries the offcanvas' column layout on. */
+.dash-access-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+/* the list's .dash-muted keeps a cell on one line; prose here wraps */
+.dash-access-drawer .dash-muted {
+  font-size: 0.8125rem;
+  color: var(--oep-text-muted);
+  white-space: normal;
+}
+
+.dash-holders {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dash-holder {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+  padding: 0.35rem 0.4rem;
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+/* the viewer's own entries */
+.dash-holder--you {
+  background: var(--oep-surface-subtle);
+  box-shadow: inset 3px 0 0 var(--bs-primary);
+}
+
+.dash-holder__name {
+  flex: 1 1 10rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.dash-holder__you,
+.dash-holder__members {
+  margin-left: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--oep-text-muted);
+}
+
+.dash-holder__you {
+  font-weight: 600;
+  color: var(--bs-primary);
+}
+
+/* the role choice and Remove stay together, and wrap below the name as one */
+.dash-holder__controls {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+  margin-left: auto;
+}
+
+.dash-holder__role .form-select {
+  width: auto;
+}
+
+.dash-holder__rolename {
+  font-size: 0.875rem;
+}
+
+.dash-access-add__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.dash-access-add__row .form-control {
+  flex: 1 1 9rem;
+  width: auto;
+}
+
+.dash-access-add__row .form-select {
+  flex: 0 1 auto;
+  width: auto;
+}
+
+.dash-roles dt {
+  font-size: 0.875rem;
+}
+
+.dash-roles dd {
+  margin-bottom: 0.4rem;
+  font-size: 0.8125rem;
+  color: var(--oep-text-muted);
+}
+
+/* The Table's Admins for someone who cannot change access: small round
+   avatars, named on hover AND on focus, so the name also reaches keyboard
+   and touch users. The name is drawn below the avatar, inside the drawer,
+   so the drawer's own scrolling cannot clip it. */
+.dash-avatars {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding-bottom: 1.6rem;
+}
+
+.dash-avatar {
+  position: relative;
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+.dash-avatar img,
+.dash-avatar svg {
+  display: block;
+  width: 24px;
+  height: 24px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.dash-avatar:focus-visible {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 2px;
+}
+
+.dash-avatar:hover::after,
+.dash-avatar:focus::after {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 1;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.75rem;
+  color: var(--oep-on-strong);
+  white-space: nowrap;
+  content: attr(data-tip);
+  background: var(--bs-body-color);
+  border-radius: var(--bs-border-radius);
+}
+
+/* ------------------------------------------------------------------------
+ * Columns collapse by the list's own width (container queries on `.dash`),
+ * not the viewport's: the profile sidebar takes a different share of each
+ * screen. Drop order: Topics and Created, then Review and
+ * Datasets, then the rows stack. The filter bar folds by its own width.
+ *
+ * Every rule here is scoped to the tables tab (`#tables-tab`, which is the
+ * `.dash` container itself), because the queries hide columns by their
+ * class and the widths are this tab's: another list with a column called
+ * `c-topics` or `c-created` would otherwise collapse at these widths
+ * (#2617). The scope raises each rule's specificity, which only makes it
+ * win where it already did. A structural test holds the scope
+ * (login/tests/test_list_styles.py).
+ *
+ * Measured 2026-10-02 (#2555) in headless Chrome 152: the narrowest list
+ * each set of columns fits without scrolling, worst of the first six pages
+ * of accounts with 130 and 2,068 Tables (benchmarks/tables_tab, which holds
+ * the measuring script). Taken in DejaVu Sans, the widest font the system
+ * stack falls back to. The thresholds sit about 2 % above the row.
+ *
+ * Re-measured 2026-10-02 (#2557) with the Modified column (111 px: its
+ * header, "Modified ↓", is wider than any date), on the default sort it
+ * brings, newest first. #2555's numbers for the row before it, in brackets.
+ *
+ *                          DejaVu        Segoe UI   threshold
+ *   every column           1,133 (1,030)   1,033    1,160 (1,050)
+ *   without Topics         1,024   (913)     933    1,045   (930)
+ *   also without Review,
+ *     Datasets               812   (701)     747      830   (720)
+ *   the filter bar on
+ *     one line               958   (958)     902      960   (960)
+ *
+ * With the sidebar the list is 1,392 px wide at a 1920 px screen (every
+ * column), 976 at 1440, 896 at 1280 (both without Topics, Review and
+ * Datasets) and 640 at 1024 (stacked); the bar folds at 1280 and below.
+ * So since Modified, a 1440 px screen loses Review and Datasets too: the
+ * row is 48 px too wide for it. Keeping them there needs those 48 px
+ * trimmed from the row (the Table column's 13rem minimum is the largest
+ * candidate), a design call this measurement does not make.
+ *
+ * Re-measured 2026-10-03 (#2564) with ☐ (30 px), the same way, on a
+ * worktree's throwaway database. #2557's numbers in brackets.
+ *
+ *                          DejaVu          threshold
+ *   every column           1,155 (1,133)   1,180 (1,160)
+ *   without Topics         1,046 (1,024)   1,070 (1,045)
+ *   also without Review,
+ *     Datasets               834   (812)     850   (830)
+ *   the filter bar on
+ *     one line               958   (958)     960   (960)
+ *
+ * The screens keep their column sets: every column at 1920, without Topics,
+ * Review and Datasets at 1440 and 1280, stacked at 1024 and below. In the
+ * stacked row ☐ takes only its own width, so 390 px fits without scrolling
+ * (360 px scrolls by 25 px).
+ *
+ * Re-measured 2026-10-05 (#2559) with Created (129 px: "before Nov 2025",
+ * muted, is wider than a date and than its header), the same way, with
+ * Created seeded as production holds it. #2564's numbers in brackets.
+ *
+ *                          DejaVu          threshold
+ *   every column           1,285 (1,155)   1,310 (1,180)
+ *   without Topics and
+ *     Created              1,046 (1,046)   1,070 (1,070)
+ *   also without Review,
+ *     Datasets               834   (834)     850   (850)
+ *   the filter bar on
+ *     one line               958   (958)     960   (960)
+ *
+ * Created drops with Topics, so only the first threshold moves, and the
+ * screens keep their column sets: every column at 1920 (the list is 1,392),
+ * without Topics, Created, Review and Datasets at 1440 and 1280, stacked at
+ * 1024 and below. Every column the spec names is now in the row; a slice
+ * that adds one re-runs the measurement and moves these numbers.
+ *
+ * Re-measured 2026-10-13 (#2659) on the house components, the same way:
+ * Topics as house tags (149 px, from 109: a tag is a body-size pill), the
+ * statuses and the review as house badges, Access chips beside a link
+ * button. #2559's numbers in brackets.
+ *
+ *                          DejaVu          threshold
+ *   every column           1,335 (1,285)   1,340 (1,310)
+ *   without Topics and
+ *     Created              1,067 (1,046)   1,070 (1,070)
+ *   also without Review,
+ *     Datasets               855   (834)     860   (850)
+ *   the filter bar on
+ *     one line               958   (958)     960   (960)
+ *
+ * The screens keep their column sets (every column at 1920, the list
+ * 1,392; without Topics, Created, Review and Datasets at 1440 and 1280;
+ * stacked at 1024 and below).
+ * ---------------------------------------------------------------------- */
+
+@container (width < 1340px) {
+  #tables-tab .c-created,
+  #tables-tab .c-topics {
+    display: none;
+  }
+}
+
+@container (width < 1070px) {
+  #tables-tab .c-review,
+  #tables-tab .c-ds {
+    display: none;
+  }
+}
+
+/* Too narrow for the bar on one line: everything but Search folds behind
+   "Filters (n)", which shows it below as a block of its own. */
+@container (width < 960px) {
+  #tables-tab .dash-fold-toggle {
+    display: inline-block;
+  }
+
+  #tables-tab .dash-fold {
+    display: none;
+  }
+
+  #tables-tab .dash-fold-toggle[aria-expanded="true"] ~ .dash-fold {
+    display: flex;
+    flex: 1 0 100%;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+  }
+
+  #tables-tab .dash-search {
+    max-width: none;
+  }
+}
+
+/* A row stacks into two lines: ☐, title and ⋯, then Status, Publishable
+   and Modified. Every other cell is hidden, so a column added later has to
+   say here where it goes. The headers go with the columns, so "Sort by"
+   and "Select this page" take their place. */
+@container (width < 860px) {
+  #tables-tab .dash-sortby,
+  #tables-tab .dash-selectpage {
+    display: flex;
+  }
+
+  #tables-tab .dash-bulk__actions {
+    display: none;
+  }
+
+  #tables-tab .dash-bulk__menu {
+    display: block;
+  }
+
+  #tables-tab .dash-table,
+  #tables-tab .dash-table tbody {
+    display: block;
+  }
+
+  #tables-tab .dash-table thead {
+    display: none;
+  }
+
+  #tables-tab .dash-table tr {
+    display: grid;
+    grid-template-columns: auto auto auto 1fr auto;
+    align-items: center;
+    padding: 0.3rem 0;
+    border-bottom: 1px solid var(--bs-border-color);
+  }
+
+  #tables-tab .dash-table tr:last-child {
+    border-bottom: 0;
+  }
+
+  #tables-tab .dash-table td {
+    display: none;
+    padding: 0.15rem 0.5rem;
+    border: 0;
+  }
+
+  #tables-tab .dash-table td.c-select {
+    display: block;
+    grid-row: 1 / span 2;
+    grid-column: 1;
+    width: auto;
+    padding-right: 0;
+    padding-left: 0.25rem;
+  }
+
+  #tables-tab .dash-table td.c-table {
+    display: block;
+    grid-row: 1;
+    grid-column: 2 / 5;
+    min-width: 0;
+  }
+
+  #tables-tab .dash-table td.c-menu {
+    display: block;
+    grid-row: 1;
+    grid-column: 5;
+    position: static;
+    width: auto;
+  }
+
+  #tables-tab .dash-table td.c-status {
+    display: block;
+    grid-row: 2;
+    grid-column: 2;
+  }
+
+  #tables-tab .dash-table td.c-pub {
+    display: block;
+    grid-row: 2;
+    grid-column: 3;
+  }
+
+  #tables-tab .dash-table td.c-modified {
+    display: block;
+    grid-row: 2;
+    grid-column: 4;
+  }
+}

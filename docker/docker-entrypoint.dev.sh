@@ -5,6 +5,28 @@ set -euo pipefail
 sleep 5
 
 # ----------------------------------------------------------------
+# Ownership of bind-mounted paths.
+# We use the *numeric* uid:gid of the current process rather than the
+# `appuser:appgroup` names: on macOS the host GID (e.g. 20) already exists in
+# the base image, so no group literally named `appgroup` is created and
+# `chown appuser:appgroup` fails with "invalid group".
+OWNER="$(id -u):$(id -g)"
+
+# own MODE PATH... - give PATH to the container user and set MODE on it.
+# The container runs as a non-root user (compose's `user:`), so chown only
+# succeeds where it is a no-op and chmod only on files we already own. Neither
+# is fatal: files created on the host may refuse both, and the container can
+# usually still read them. A path we could not fix is reported, then the boot
+# goes on.
+own() {
+  local mode="$1"
+  shift
+  chown -R "$OWNER" "$@" 2>/dev/null || true
+  chmod -R "$mode" "$@" 2>/dev/null \
+    || echo "WARNING: could not set permissions on $*; continuing" >&2
+}
+
+# ----------------------------------------------------------------
 # Bootstrap permissions on bind-mounted dirs so appuser can write
 # ----------------------------------------------------------------
 for d in ontologies media/oeo_ext static; do
@@ -13,12 +35,9 @@ for d in ontologies media/oeo_ext static; do
   # ensure the directory exists
   mkdir -p "$TARGET"
 
-  # make appuser own it
-  chown -R appuser:appgroup "$TARGET"
-
   # owner & group: read/write + conditional-exec (dirs executable,
   # files only if already marked) ; others: read + conditional-exec
-  chmod -R u+rwX,g+rwX,o+rX "$TARGET"
+  own u+rwX,g+rwX,o+rX "$TARGET"
 done
 
 # ————————————————————
@@ -35,8 +54,7 @@ if [ ! -d "$ONT_DIR/oeo" ]; then
   unzip -q /tmp/ont.zip -d "$ONT_DIR"
   rm /tmp/ont.zip
 
-  chown -R appuser:appgroup "$ONT_DIR"
-  chmod -R u+rwX,g+rwX,o+rX "$ONT_DIR"
+  own u+rwX,g+rwX,o+rX "$ONT_DIR"
 fi
 
 MEDIA_DIR=/home/appuser/app/media/oeo_ext
@@ -47,8 +65,7 @@ if [ ! -f "${MEDIA_DIR}/oeo_ext.owl" ]; then
      "$MEDIA_DIR/oeo_ext.owl"
 
   # fix perms on the new file
-  chown appuser:appgroup "$MEDIA_DIR/oeo_ext.owl"
-  chmod u+rw,g+rw,o+rX "$MEDIA_DIR"
+  own u+rwX,g+rwX,o+rX "$MEDIA_DIR"
 fi
 
 # ————————————————————
@@ -59,8 +76,7 @@ SEC_DEF=/home/appuser/app/oeplatform/securitysettings.py.default
 if [ ! -f "$SEC" ]; then
   echo "Copying default securitysettings…"
   cp "$SEC_DEF" "$SEC"
-  chown appuser:appgroup "$SEC"
-  chmod u+rw,g+rw,o+rX "$SEC"
+  own u+rwX,g+rwX,o+rX "$SEC"
 fi
 
 # ————————————————————
@@ -77,8 +93,7 @@ if [ ! -f "$SHAPES_DIR/oekg_shapes.ttl" ]; then
   echo "Fetching OEKG shape artifacts…"
   python manage.py fetch_oekg_shapes
 
-  chown -R appuser:appgroup "$SHAPES_DIR"
-  chmod -R u+rwX,g+rwX,o+rX "$SHAPES_DIR"
+  own u+rwX,g+rwX,o+rX "$SHAPES_DIR"
 fi
 
 # ————————————————————

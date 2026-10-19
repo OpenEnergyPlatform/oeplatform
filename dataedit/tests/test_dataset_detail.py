@@ -7,6 +7,7 @@ from unittest import mock
 
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from dataedit.models import Dataset, Table, Topic
 from login.models import myuser
@@ -40,6 +41,7 @@ class DatasetDetailTests(TestCase):
                 "description": "Everything about heat",
             },
             creator=self.creator,
+            published_at=timezone.now(),
         )
         self.dataset.topics.add(self.topic)
         self.published = Table.objects.create(
@@ -129,21 +131,23 @@ class DatasetDetailTests(TestCase):
         )
 
     def test_created_dataset_document_conforms_to_oemetadata_spec(self):
-        # end to end: dashboard create -> metadata endpoint -> omi
-        # validation (license check off: datasets carry no own license yet,
-        # licenses live on the resources)
+        # end to end: API create -> metadata endpoint -> omi validation
+        # (license check off: datasets carry no own license yet, licenses
+        # live on the resources). The dashboard creates nothing until its
+        # Create dialog lands (#2624), so this goes through the API.
         from omi.validation import validate_metadata
 
-        # the create view derives the name from the title
-        # ("Spec Valid Dataset" -> "spec_valid_dataset")
         self.client.force_login(self.creator)
-        self.client.post(
-            reverse("login:datasets", args=[self.creator.id]),
+        created = self.client.post(
+            "/api/v0/datasets/",
             {
+                "name": "spec_valid_dataset",
                 "title": "Spec Valid Dataset",
                 "description": "Checked against the oemetadata v2 spec",
             },
+            content_type="application/json",
         )
+        self.assertEqual(created.status_code, 201)
 
         response = self.client.get(
             reverse(

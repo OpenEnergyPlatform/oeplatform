@@ -7,7 +7,6 @@
 import { check_if_review_finished } from "../roles/opr_reviewer_logic.js";
 import {
   renderSummaryPageFields,
-  updateSubmitButtonColor,
   updateTabProgressIndicatorClasses,
 } from "../ui/summary.js";
 import { selectNextField, updatePercentageDisplay } from "../ui/navigation.js";
@@ -103,23 +102,14 @@ export function initializeEventBindings(saveEntrancesFn) {
   $("#peer_review-save").off("click").on("click", savePeerReview);
   $("#peer_review-cancel").off("click").on("click", cancelPeerReview);
 
-  // Button State Toggles (Visual)
+  // State buttons
   $("#suggestion-button")
     .off("click")
-    .on("click", () => {
-      selectState("suggestion");
-      updateSubmitButtonColor();
-    });
+    .on("click", () => selectState("suggestion"));
   $("#rejected-button")
     .off("click")
-    .on("click", () => {
-      selectState("rejected");
-      updateSubmitButtonColor();
-    });
-  $("#ok-button").on("click", () => {
-    selectState("ok");
-    updateSubmitButtonColor();
-  });
+    .on("click", () => selectState("rejected"));
+  $("#ok-button").on("click", () => selectState("ok"));
 
   $(".nav-link").click(clearInputFields);
 }
@@ -197,7 +187,7 @@ export function savePeerReview() {
     })
     .catch(function (err) {
       $("#peer_review-save").addClass("d-none");
-      alert(getErrorMsg(err));
+      showToast("Not saved", getErrorMsg(err), "error");
     });
 }
 
@@ -209,7 +199,7 @@ export function submitPeerReview() {
     })
     .catch(function (err) {
       $("#peer_review-submitting").addClass("d-none");
-      alert(getErrorMsg(err));
+      showToast("Not submitted", getErrorMsg(err), "error");
     });
 }
 
@@ -265,14 +255,10 @@ export function getCategoryToTabIdMapping() {
   };
 }
 
+// The shell's toast region (base/static/base/dialogs.js).
 export function showToast(title, message, type) {
-  var toast = document.getElementById("liveToast");
-  var toastTitle = document.getElementById("toastTitle");
-  var toastBody = document.getElementById("toastBody");
-
-  toast.className = `toast hide ${type === "error" ? "bg-danger" : "bg-success"}`;
-  toastTitle.textContent = title;
-  toastBody.textContent = message;
-
-  new bootstrap.Toast(toast).show();
+  window.oep.toast(message, {
+    title,
+    status: type === "error" ? "danger" : "success",
+  });
 }

@@ -1,0 +1,64 @@
+{% load dataedit.taghandler %}
+{% comment %}
+  tag (#2645): one Tag as a pill in its own colour. Styles:
+  theming/scss/components/_tag.scss; catalogue entry: styleguide/entries/tag.html.
+
+  name      the tag's name (required)
+  color     its colour as hex (`t.color_hex`); without one the pill is neutral
+  title     optional tooltip
+
+  One variant at a time:
+  href      link: an <a> to that address -- the list filtered by the tag, or
+            where a tag is administered (the tag overview) its editor;
+            hx_get, hx_target and hx_swap load it in place with htmx
+  remove    removable: a close button carrying data-tag-remove="<remove>",
+            for a picker's current selection; the picker's script does the removing
+  toggle_name, toggle_value, toggle_id, checked
+            toggle: a label around a checkbox of that name and value, for a pick list
+  (none of these) static: a span
+
+  The text colour comes from `readable_text_color`, the one place that decides
+  contrast; both colours are custom properties, so no tag carries an inline
+  background.
+{% endcomment %}
+{% if color %}
+  {% readable_text_color color as text_color %}
+{% endif %}
+{% if href %}
+  <a class="tag tag--link"
+     href="{{ href }}"
+     {% if hx_get %}hx-get="{{ hx_get }}"{% endif %}
+     {% if hx_target %}hx-target="{{ hx_target }}"{% endif %}
+     {% if hx_swap %}hx-swap="{{ hx_swap }}"{% endif %}
+     {% if title %}title="{{ title }}"{% endif %}
+     {% if color %}style="--tag-color: {{ color }}; --tag-text-color: {{ text_color }}"{% endif %}>{{ name }}</a>
+{% elif toggle_name %}
+  <label class="tag tag--toggle"
+         {% if title %}title="{{ title }}"{% endif %}
+         {% if color %}style="--tag-color: {{ color }}; --tag-text-color: {{ text_color }}"{% endif %}>
+    <input type="checkbox"
+           class="tag__check"
+           name="{{ toggle_name }}"
+           value="{{ toggle_value }}"
+           {% if toggle_id %}id="{{ toggle_id }}"{% endif %}
+           {% if checked %}checked{% endif %} />
+    <span class="tag__name">{{ name }}</span>
+    <span class="tag__tick fas fa-check" aria-hidden="true"></span>
+  </label>
+{% elif remove %}
+  <span class="tag tag--removable"
+        {% if title %}title="{{ title }}"{% endif %}
+        {% if color %}style="--tag-color: {{ color }}; --tag-text-color: {{ text_color }}"{% endif %}>
+    <span class="tag__name">{{ name }}</span>
+    <button type="button"
+            class="tag__remove"
+            data-tag-remove="{{ remove }}"
+            aria-label="Remove {{ name }}">
+      <span aria-hidden="true">×</span>
+    </button>
+  </span>
+{% else %}
+  <span class="tag"
+        {% if title %}title="{{ title }}"{% endif %}
+        {% if color %}style="--tag-color: {{ color }}; --tag-text-color: {{ text_color }}"{% endif %}>{{ name }}</span>
+{% endif %}

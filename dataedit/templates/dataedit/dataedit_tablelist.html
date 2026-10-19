@@ -3,21 +3,8 @@
 {% load django_vite %}
 {% block title %}- {{ topic }}{% endblock %}
 {% block site-header %}
-  <div class="main-header">
-    <h1 class="main-header__title">
-      <svg width="20"
-           height="20"
-           viewBox="0 0 16 16"
-           fill="none"
-           xmlns="http://www.w3.org/2000/svg">
-        <path fill-rule="evenodd" clip-rule="evenodd" d="M4.31781 2.68742C3.35608 3.12457 3 3.62628 3 4C3 4.37372 3.35608 4.87543 4.31781 5.31258C5.23441 5.72922 6.53579 6 8 6C9.46421 6 10.7656 5.72922 11.6822 5.31258C12.6439 4.87543 13 4.37372 13 4C13 3.62628 12.6439 3.12457 11.6822 2.68742C10.7656 2.27078 9.46421 2 8 2C6.53579 2 5.23441 2.27078 4.31781 2.68742ZM13 5.69813C12.729 5.90046 12.4201 6.07563 12.096 6.22295C11.022 6.71114 9.57336 7 8 7C6.42664 7 4.97802 6.71114 3.90401 6.22295C3.5799 6.07563 3.27105 5.90046 3 5.69813V7C3 7.37372 3.35608 7.87543 4.31781 8.31258C5.23441 8.72922 6.53579 9 8 9C9.46421 9 10.7656 8.72922 11.6822 8.31258C12.6439 7.87543 13 7.37372 13 7V5.69813ZM14 4C14 2.993 13.1249 2.24472 12.096 1.77705C11.022 1.28886 9.57336 1 8 1C6.42664 1 4.97802 1.28886 3.90401 1.77705C2.87513 2.24472 2 2.993 2 4V13C2 14.007 2.87513 14.7553 3.90401 15.2229C4.97802 15.7111 6.42664 16 8 16C9.57336 16 11.022 15.7111 12.096 15.2229C13.1249 14.7553 14 14.007 14 13V4ZM13 8.69813C12.729 8.90046 12.4201 9.07563 12.096 9.22295C11.022 9.71114 9.57336 10 8 10C6.42664 10 4.97802 9.71114 3.90401 9.22295C3.5799 9.07563 3.27105 8.90046 3 8.69813V10C3 10.3737 3.35608 10.8754 4.31781 11.3126C5.23441 11.7292 6.53579 12 8 12C9.46421 12 10.7656 11.7292 11.6822 11.3126C12.6439 10.8754 13 10.3737 13 10V8.69813ZM13 11.6981C12.729 11.9005 12.4201 12.0756 12.096 12.2229C11.022 12.7111 9.57336 13 8 13C6.42664 13 4.97802 12.7111 3.90401 12.2229C3.5799 12.0756 3.27105 11.9005 3 11.6981V13C3 13.3737 3.35608 13.8754 4.31781 14.3126C5.23441 14.7292 6.53579 15 8 15C9.46421 15 10.7656 14.7292 11.6822 14.3126C12.6439 13.8754 13 13.3737 13 13V11.6981Z" fill="#293B46" />
-      </svg>
-      Database
-    </h1>
-    <div class="main-header__wizard">
-      <a href="{% url 'dataedit:topic-list' %}">Topics</a> / {{ topic }}
-    </div>
-  </div>
+  {% url 'dataedit:topic-list' as topics_url %}
+  {% include "components/page_header.html" with area="Database" icon="icons/area_database.html" crumb_label="Topics" crumb_url=topics_url title=topic %}
 {% endblock site-header %}
 {% block data_content %}
   {% load dataedit.taghandler %}
@@ -49,24 +36,24 @@
         {% endif %}
         {% if tables_paginated.has_other_pages %}
           <nav aria-label="Table navigation top">
-            <ul class="pagination pagination-sm mb-0">
+            <ul class="pagination mb-0">
               {% if tables_paginated.has_previous %}
                 <li class="page-item">
-                  <a class="page-link shadow-sm ajax-pagination"
+                  <a class="page-link ajax-pagination"
                      href="?{{ params_wo_page }}&page={{ tables_paginated.previous_page_number }}"
-                     aria-label="Previous">
+                     aria-label="Previous page">
                     <span aria-hidden="true">«</span>
                   </a>
                 </li>
               {% endif %}
-              <li class="page-item active">
-                <span class="page-link shadow-sm">{{ tables_paginated.number }} / {{ tables_paginated.paginator.num_pages }}</span>
+              <li class="page-item active" aria-current="page">
+                <span class="page-link">{{ tables_paginated.number }} / {{ tables_paginated.paginator.num_pages }}</span>
               </li>
               {% if tables_paginated.has_next %}
                 <li class="page-item">
-                  <a class="page-link shadow-sm ajax-pagination"
+                  <a class="page-link ajax-pagination"
                      href="?{{ params_wo_page }}&page={{ tables_paginated.next_page_number }}"
-                     aria-label="Next">
+                     aria-label="Next page">
                     <span aria-hidden="true">»</span>
                   </a>
                 </li>
@@ -76,15 +63,17 @@
         {% endif %}
       </div>
     </div>
+    {# A tag links to this topic's list, filtered by it. #}
+    {% url 'dataedit:tables-in-topic' topic=topic as topic_url %}
     <div class="oep-resource-list d-flex flex-column gap-3">
       {% for table in tables_paginated %}
-        <div class="card border-0 shadow-sm resource-card w-100"
+        <div class="card resource-card w-100"
              data-table-name="{{ table.name }}"
              data-meta-url="{% url 'api:api_table_meta' table=table.name %}">
-          <div class="card-body p-3">
+          <div class="card-body">
             <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start mb-3 gap-3">
               <div class="text-break pe-sm-2">
-                <h5 class="card-title mb-1">
+                <h2 class="card-title mb-1">
                   <a href="{% url 'dataedit:view' table=table.name %}"
                      target="_blank"
                      rel="noopener noreferrer"
@@ -95,7 +84,7 @@
                       {{ table.name }}
                     {% endif %}
                   </a>
-                </h5>
+                </h2>
                 <div class="text-muted small">
                   <i class="fas fa-table me-1"></i> Table •
                   <span class="font-monospace text-secondary">{{ table.name }}</span>
@@ -105,7 +94,7 @@
                 <a href="{% url 'dataedit:view' table=table.name %}"
                    target="_blank"
                    rel="noopener noreferrer"
-                   class="btn btn-sm btn-outline-primary rounded-pill px-4">View</a>
+                   class="btn btn-sm btn-secondary px-4">View</a>
                 {% if table.date_updated %}
                   <span class="text-secondary small fw-medium bg-light border rounded px-2 py-1 text-nowrap"
                         data-bs-toggle="tooltip"
@@ -115,17 +104,13 @@
                 {% endif %}
               </div>
             </div>
-            <div class="mb-3">
+            <div class="tag-group mb-3">
               {% for tag in table.tags.all %}
-                <a href="{% url 'dataedit:tables-in-topic' topic=topic %}?query=&tags={{ tag.pk }}"
-                   class="badge bg-light text-dark text-decoration-none border fw-normal me-1 tag-badge"
-                   style="border-color: #dee2e6 !important">
-                  <span class="d-inline-block rounded-circle me-1 align-middle"
-                        style="width: 8px;
-                               height: 8px;
-                               background-color: {{ tag.color_hex }}"></span>
-                  {{ tag.name }}
-                </a>
+                {% with pk=tag.pk|urlencode %}
+                  {% with filtered=topic_url|add:"?query=&tags="|add:pk %}
+                    {% include "components/tag.html" with name=tag.name color=tag.color_hex href=filtered title="Filter by "|add:tag.name %}
+                  {% endwith %}
+                {% endwith %}
               {% endfor %}
             </div>
             <div class="metadata-injection-zone">
@@ -142,9 +127,7 @@
           </div>
         </div>
       {% empty %}
-        <div class="alert alert-info border-0 shadow-sm">
-          <i class="fas fa-info-circle me-2"></i> No tables found in this topic matching your filters.
-        </div>
+        {% include "components/empty_state.html" with icon="fas fa-table" text="No tables found in this topic matching your filters." %}
       {% endfor %}
       {% if tables_paginated.paginator.count > 0 %}
         <div class="d-flex flex-column align-items-center mt-4 mb-5">
@@ -153,16 +136,16 @@
               <ul class="pagination justify-content-center mb-2">
                 {% if tables_paginated.has_previous %}
                   <li class="page-item">
-                    <a class="page-link shadow-sm ajax-pagination"
+                    <a class="page-link ajax-pagination"
                        href="?{{ params_wo_page }}&page={{ tables_paginated.previous_page_number }}">Previous</a>
                   </li>
                 {% endif %}
-                <li class="page-item active">
-                  <span class="page-link shadow-sm">{{ tables_paginated.number }} of {{ tables_paginated.paginator.num_pages }}</span>
+                <li class="page-item active" aria-current="page">
+                  <span class="page-link">{{ tables_paginated.number }} of {{ tables_paginated.paginator.num_pages }}</span>
                 </li>
                 {% if tables_paginated.has_next %}
                   <li class="page-item">
-                    <a class="page-link shadow-sm ajax-pagination"
+                    <a class="page-link ajax-pagination"
                        href="?{{ params_wo_page }}&page={{ tables_paginated.next_page_number }}">Next</a>
                   </li>
                 {% endif %}

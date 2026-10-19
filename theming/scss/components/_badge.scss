@@ -1,0 +1,38 @@
+// badge: a status ("Published", "Draft", "Early Access", "You can edit this
+// table"), never a tag (#2645). Bootstrap's `.badge` plus one status modifier:
+// a light status background, text and border in a darker shade of the same
+// status colour, the small radius, never a pill. Pure CSS, no include.
+// Catalogue entry: base/templates/styleguide/entries/badge.html.
+//
+// Every colour is mixed by the browser from tokens: the status colour with the
+// surface (background, border) and with the body colour (text), as Bootstrap
+// 5.3's "subtle" and "emphasis" colours are mixed by Sass. So an instance that
+// sets `--bs-success` recolours every badge of that status.
+@use '../base/' as *;
+
+$badge-statuses: success, info, warning, danger;
+
+%badge-house {
+    --bs-badge-font-size: var(--oep-font-size-dense);
+    --bs-badge-font-weight: #{$font-weight-semibold};
+    --bs-badge-border-radius: var(--bs-border-radius-sm);
+    border-width: 1px;
+    border-style: solid;
+}
+
+@each $status in $badge-statuses {
+    .badge--#{$status} {
+        @extend %badge-house;
+        --bs-badge-color: color-mix(in srgb, var(--bs-#{$status}) 30%, var(--bs-body-color));
+        background-color: color-mix(in srgb, var(--bs-#{$status}) 15%, var(--oep-surface));
+        border-color: color-mix(in srgb, var(--bs-#{$status}) 45%, var(--oep-surface));
+    }
+}
+
+// Not a status: a count or a label beside a heading.
+.badge--neutral {
+    @extend %badge-house;
+    --bs-badge-color: var(--oep-text-muted);
+    background-color: var(--oep-surface-subtle);
+    border-color: var(--oep-border-strong);
+}

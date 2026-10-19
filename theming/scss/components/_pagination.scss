@@ -1,0 +1,48 @@
+// pagination: a pager under a list (#2647). Bootstrap's `.pagination`, laid
+// out like the dashboard's pager: separate buttons with a small gap, each
+// with its own corners, dense, the current page solid primary. A muted
+// `.pagination__range` ("1-25 of 2,068") may follow inside the same nav.
+// Pure CSS, no include; DataTables' Bootstrap 5 pager is the same markup.
+// Catalogue entry: base/templates/styleguide/entries/pagination.html.
+//
+// The active colours, focus ring and radii come from the re-map layer
+// (tokens/_remap.scss); the border, hover and disabled colours here are the
+// house look, from tokens.
+@use '../base/' as *;
+
+.pagination {
+    --bs-pagination-padding-x: 0.5rem;
+    --bs-pagination-padding-y: 0.25rem;
+    --bs-pagination-font-size: var(--oep-font-size-dense);
+    --bs-pagination-border-color: var(--oep-border-strong);
+    --bs-pagination-hover-bg: var(--oep-surface-hover);
+    --bs-pagination-hover-border-color: var(--oep-border-strong);
+    --bs-pagination-disabled-color: var(--oep-text-muted);
+    --bs-pagination-disabled-border-color: var(--bs-border-color);
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.page-link {
+    min-width: 2.2rem;
+    text-align: center;
+}
+
+// Bootstrap joins the buttons into one bar; the house pager keeps them apart.
+.page-item:not(:first-child) .page-link {
+    margin-left: 0;
+}
+
+.page-item .page-link {
+    border-top-left-radius: var(--bs-pagination-border-radius);
+    border-top-right-radius: var(--bs-pagination-border-radius);
+    border-bottom-right-radius: var(--bs-pagination-border-radius);
+    border-bottom-left-radius: var(--bs-pagination-border-radius);
+}
+
+.pagination__range {
+    margin-left: 0.5rem;
+    font-size: var(--oep-font-size-dense);
+    color: var(--oep-text-muted);
+}

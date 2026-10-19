@@ -525,8 +525,18 @@ function load_view(table, csrftoken, current_view) {
           searching: false,
           search: {},
         });
+        // The vendored builder defaults to Bootstrap 3's glyphicons, which
+        // the platform does not load; its buttons get their roles in
+        // theming/scss/layouts/_database.scss.
         query_builder = $("#builder").queryBuilder({
           filters: filters,
+          icons: {
+            add_group: "fas fa-plus-circle",
+            add_rule: "fas fa-plus",
+            remove_group: "fas fa-times",
+            remove_rule: "fas fa-times",
+            error: "fas fa-exclamation-triangle",
+          },
         });
         $("#btn-set").on("click", apply_filters);
         $("#btn-download-view").on("click", parse_download);
@@ -545,7 +555,10 @@ function parse_download() {
   };
   var rules = $("#builder").queryBuilder("getRules");
   if (rules == null) {
-    window.alert("Please check for invalid Rules");
+    window.oep.toast("A filter rule is incomplete or invalid; fix it first.", {
+      status: "warning",
+      title: "Invalid filter",
+    });
     return;
   }
   base_query.where = parse_filter(rules);
@@ -765,8 +778,8 @@ function showMessage(message, level) {
   div.innerHTML = `
     <div class="alert alert-${level} alert-dismissible fade show" role="alert">
     ${message}
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    <div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
   `;
   container.appendChild(div);
 }

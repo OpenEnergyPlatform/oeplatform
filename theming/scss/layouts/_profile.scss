@@ -1,21 +1,23 @@
 @use '../base/' as *;
 @use '../base/mixins' as *;
-@use '../components/buttons' as *;
-@use '../components/cards' as *;
-@use '../components/empty_states' as *;
+@use '../components/button' as *;
+// `.profile-category__input` extends the field classes: their house look.
+@use '../components/field';
 
-main.main .content .content__container.content__container--profile {
-    .content {
-        &__side {
-            @extend .py-5;
-            @extend .pe-4;
-        }
-        &__main {
-            @extend .py-5;
-            @extend .pe-0;
+// The profile shell puts its side column (the profile sidebar) on the left.
+// The column's text box keeps the width it had beside the 1.5rem gap; the
+// space above both columns is the content area's own, as on every page.
+.content__container--profile {
+    gap: $C--padding-large $C--padding-standard;
+
+    > .content__side {
+        @include media-breakpoint-up(md) {
+            flex-basis: calc(#{$C--db-side-width} - #{$C--padding-standard});
         }
     }
+}
 
+main.main .content .content__container.content__container--profile {
     .profile-sidebar {
         &__img {
             @extend .d-flex;
@@ -76,12 +78,6 @@ main.main .content .content__container.content__container--profile {
         }
     }
 
-    .header {
-        @extend .pt-2;
-        @extend .fs-4;
-        @extend .fw-semibold;
-        @extend .text-secondary;
-    }
 }
 
 .profile {
@@ -168,34 +164,9 @@ main.main .content .content__container.content__container--profile {
             }
         }
 
-        &__item-status {
-            @extend .rounded-pill;
-            @extend .border;
-            @extend .border-secondary;
-            @extend .text-secondary;
-            @extend .text-lowercase;
-            @extend .px-2;
-            height: fit-content;
-
-            &--done {
-                @extend .text-muted;
-                border-color: $text-muted !important;
-            }
-        }
-
         &__item-name a {
             @extend .text-decoration-none;
             @extend .fw-semibold;
-        }
-
-        &__item-history {
-            @extend .dropdown;
-
-            button {
-                @extend .btn;
-                @extend .btn-light;
-                @extend .dropdown-toggle;
-            }
         }
 
         &__list {
@@ -216,24 +187,6 @@ main.main .content .content__container.content__container--profile {
 .profile-category {
     @extend .pb-3;
 
-    &__heading {
-        @extend .py-2;
-        @extend .fs-6;
-        @extend .fw-bold;
-        @extend .text-body;
-        @extend .d-inline-block;
-
-        &--sm {
-            @extend .fs-7;
-            @extend .fw-light;
-        }
-
-        &--border-btm {
-            @extend .border-bottom;
-            @extend .mb-3;
-        }
-    }
-
     &__input {
         @extend .pb-3;
 
@@ -245,6 +198,11 @@ main.main .content .content__container.content__container--profile {
         textarea {
             @extend .form-control;
         }
+    }
+
+    &__image {
+        width: 200px;
+        margin-left: auto;
     }
 
     &__btns {
@@ -274,15 +232,6 @@ main.main .content .content__container.content__container--profile {
             @extend .btn-danger;
             min-width: 10rem;
         }
-
-        &--add {
-            @include translateY(-3px);
-            @extend .btn-link;
-        }
-    }
-
-    &__empty-state {
-        @include empty-state;
     }
 
     &__members {
@@ -334,138 +283,65 @@ main.main .content .content__container.content__container--profile {
     }
 }
 
-.group-management {
-    @extend .mb-4;
+// The link back to the organizations list, above an organization's page.
+.backlink {
+    @extend .pb-2;
 
-    @include cards-layout {
-        &__col {
-            margin-bottom: 0.75rem !important;
-        }
+    a {
+        @extend .text-decoration-none;
+        @extend .fw-semibold;
     }
 
-    .group-card {
-        @include card-container {
-            &__header-top {
-                @extend .align-items-center;
-                padding-bottom: 0;
-            }
-
-            &__tag {
-                @extend .border;
-                @extend .fw-normal;
-                @extend .py-0;
-                @extend .ms-1;
-                margin-bottom: 0;
-
-                &--admin {
-                    background-color: $purple-100;
-                    border-color: $purple-200 !important;
-                    color: $purple-700;
-                }
-
-                &--member {
-                    background-color: $yellow-100;
-                    border-color: $yellow-300 !important;
-                    color: $yellow-800;
-                }
-            }
-
-            &__top-end {
-                @extend .d-flex;
-                @extend .flex-row;
-                @extend .justify-content-end;
-            }
-
-            &__members {
-                @extend .d-flex;
-                @extend .flex-row;
-                @extend .align-items-center;
-                @extend .fs-7;
-                @extend .fw-normal;
-
-                svg {
-                    @extend .me-2;
-                }
-
-                @include media-breakpoint-down(lg) {
-                    font-size: 0.75rem !important;
-
-                    svg {
-                        display: none !important;
-                    }
-                }
-            }
-
-            &__btn {
-                @extend .btn;
-                @extend .btn--xs;
-                @extend .ms-3;
-
-                @include media-breakpoint-down(lg) {
-                    margin-left: 0.5rem !important;
-                    font-size: 0.75rem !important;
-
-                    svg {
-                        display: none !important;
-                    }
-                }
-            }
-
-            &__btn--invite {
-                @extend .btn-link;
-                @extend .text-decoration-none;
-
-                svg {
-                    @extend .me-1;
-                }
-            }
-
-            &__btn--edit {
-                @extend .btn-outline-info;
-            }
-
-            &__btn--accept {
-                @extend .btn-primary;
-            }
-        }
+    svg {
+        @extend .me-1;
+        @include translateY(-2px);
     }
 }
 
-.profile-tables {
-    @include cards-layout {
-        &__col {
-            margin-bottom: 0.75rem !important;
-        }
+// The organizations tab's cards (login/partials/organizations.html). Each is
+// a house card (components/_card.scss); this is only what sits inside one:
+// the name with its role badge, beside the member count and Edit.
+.organization-card {
+    &__head {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.5rem 1rem;
     }
 
-    .profile-table-card {
-        @include card-simple-container {
-            margin-bottom: 0.75rem !important;
-
-            .profile-table-card__tag {
-                @extend .mb-0;
-            }
-
-            .profile-table-card__tag.profile-table-card__tag--warning,
-            .profile-table-card__tag.profile-table-card__tag--success {
-                @extend .ms-0;
-                @extend .me-3;
-                @extend .px-1;
-                @extend .text-center;
-            }
-
-            &__btn {
-                @extend .btn;
-                @extend .btn-primary;
-                @extend .fw-semibold;
-                @extend .py-0;
-                @extend .px-4;
-                @extend .ms-3;
-            }
-
-            &__btn--sm {
-                height: 1.5rem;
-            }
-        }
+    &__title {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0;
     }
+
+    &__meta {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    &__members {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: var(--oep-font-size-dense);
+        color: var(--oep-text-muted);
+    }
+
+    .card-text {
+        margin-top: 0.75rem;
+    }
+}
+
+// Settings, the account page (#2653): its cards in one column at the reading
+// width, not spread across the content area.
+.account-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-width: var(--oep-measure);
 }

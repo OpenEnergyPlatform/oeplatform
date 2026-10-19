@@ -1,0 +1,9 @@
+{% comment %}
+  One field of an account form, written by hand so the page renders as it
+  always has (#2642): the label above, the field, its errors below.
+{% endcomment %}
+<div class="login__field">
+  <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+  {{ field }}
+  {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+</div>

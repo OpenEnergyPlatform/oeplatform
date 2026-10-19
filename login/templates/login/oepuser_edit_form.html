@@ -1,17 +1,14 @@
 {% extends "base/base.html" %}
+{% block site-header %}
+  {% url 'login:profile' user.pk as dashboard_url %}
+  {% url 'login:settings' user.pk as settings_url %}
+  {% include "components/page_header.html" with area="Account" icon="icons/area_account.html" crumb_label="Dashboard" crumb_url=dashboard_url crumb2_label="Settings" crumb2_url=settings_url title="Update account profile" %}
+{% endblock site-header %}
 {% block main-content-body %}
-  <h3>Update account profile</h3>
-  <form action="" method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {% for field in form %}
-      <div class="mb-3">
-        {{ field.label_tag }}
-        {% for error in field.errors %}
-          <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-        {{ field }}
-      </div>
-    {% endfor %}
-    <input type="submit" class="btn btn-success" value="Submit" />
-  </form>
-{% endblock %}
+  {# The same card Settings swaps in place (#2654), for a reader without JavaScript. #}
+  <div class="account-cards">
+    <section class="card" aria-labelledby="profile-heading">
+      {% include "login/partials/profile_card.html" %}
+    </section>
+  </div>
+{% endblock main-content-body %}

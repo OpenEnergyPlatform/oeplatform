@@ -1,0 +1,29 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+What the Create form says about the name its title gives
+(login.datasets_tab.name_preview): the contents of #dataset-form-name. Its
+states: nothing typed yet, no letter or number to make a name from, the name
+taken (by anyone's Dataset, a stranger's draft included, and nothing more is
+said about it), or the web address the Dataset will have.
+
+Asked for by the title's input (login:dataset-name-preview), it also
+replaces the Create button out of band, enabled only for an available name;
+inside the form (``in_form``) the form renders the button itself.
+{% endcomment %}
+<span id="dataset-form-name-state"
+      {% if preview.state == "missing" or preview.state == "taken" %}class="text-danger"{% endif %}>
+  {% if preview.state == "available" %}
+    Web address: <code>…/datasets/{{ preview.name }}</code>. <span class="text-muted">Fixed once created.</span>
+  {% elif preview.state == "taken" %}
+    Web address <code>…/datasets/{{ preview.name }}</code> is already taken. Change the title.
+  {% elif preview.state == "missing" %}
+    The title needs a letter or number to make a web address from.
+  {% else %}
+    The web address is made from the title.
+  {% endif %}
+</span>
+{% if not in_form %}
+  {% include "login/partials/dataset_form_submit.html" with label="Create" enabled=preview.available oob=True %}
+{% endif %}

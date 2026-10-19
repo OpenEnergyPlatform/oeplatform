@@ -24,47 +24,34 @@ logger = logging.getLogger("oeplatform")
 SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
 
 
+CHANGELOG_DIR = os.path.join(SITE_ROOT, "..", "versions", "changelogs")
+RELEASED_CHANGELOG = re.compile(r"(\d+)_(\d+)_(\d+)\.md")
+HIGHLIGHTS = re.compile(r"^## Highlights[ \t]*\n(.*?)(?=^## |\Z)", re.M | re.S)
+COMMENT = re.compile(r"<!--.*?-->", re.S)
+
+
 @lru_cache(maxsize=None)
-def read_version_changes() -> dict:
-    """read version and changes from changelog markdown
+def latest_release_highlights(directory=CHANGELOG_DIR) -> str:
+    """HTML of the newest released changelog's `## Highlights`, or "".
 
-    We use cache so it can stay in process memory and we dont have to read files
-    in every request. this only changes on a new release anyway, in which case
-    the process is restarted.
-
-    Returns:
-       dict: {"version": (major, minor, patch), "changes": changes}
+    A released changelog is named `<major>_<minor>_<patch>.md` (`current.md` is
+    the next release, not yet out). A release without highlights, as a patch
+    release usually is, is skipped. The version is deliberately not returned:
+    the platform's pages do not say which release it runs. Cached for the
+    process: changelogs only change with a release, which restarts it.
     """
-    os.path.dirname(os.path.realpath(__file__))
-    version_expr = r"^(?P<major>\d+)\.(?P<minor>\d+)+\.(?P<patch>\d+)$"
-    markdowner = markdown2.Markdown()
-
-    logger.info("READING VERSION file.")
-    try:
-        with open(
-            os.path.join(SITE_ROOT, "..", "VERSION"), encoding="utf-8"
-        ) as version_file:
-            text = version_file.read()
-            match = re.match(version_expr, text)
-            if not match:
-                raise ValueError(text)
-            major, minor, patch = match.groups()
-        with open(
-            os.path.join(
-                SITE_ROOT,
-                "..",
-                "versions/changelogs/%s_%s_%s.md" % (major, minor, patch),
-            ),
-            encoding="utf-8",
-        ) as change_file:
-            changes = markdowner.convert(
-                "\n".join(line for line in change_file.readlines())
-            )
-    except Exception:
-        logger.error("READING VERSION file.")
-        # probably because change_file is missing
-        major, minor, patch, changes = "", "", "", ""
-    return {"version": (major, minor, patch), "changes": changes}
+    released = []
+    for name in os.listdir(directory):
+        match = RELEASED_CHANGELOG.fullmatch(name)
+        if match:
+            released.append((tuple(int(part) for part in match.groups()), name))
+    for _version, name in sorted(released, reverse=True):
+        with open(os.path.join(directory, name), encoding="utf-8") as file:
+            section = HIGHLIGHTS.search(file.read())
+        text = COMMENT.sub("", section.group(1)).strip() if section else ""
+        if text:
+            return markdown2.markdown(text)
+    return ""
 
 
 def get_json_content(path, json_id=None):
@@ -80,12 +67,16 @@ def get_json_content(path, json_id=None):
     Returns:
         list[object]: List of all deserialized json files in path
         or
-        object: single json python object
+        object: single json python object, None if no json carries that id
     """
 
     if path is not None:
         all_jsons = []
         for _json in os.listdir(path=path):
+            # only the project pages: the directory is bind-mounted in the docker
+            # dev setup and can hold other files, such as macOS' .DS_Store
+            if not _json.endswith(".json"):
+                continue
             with open(os.path.join(path, _json), "r", encoding="utf-8") as json_content:
                 content = json.load(json_content)
                 all_jsons.append(content)
@@ -93,10 +84,10 @@ def get_json_content(path, json_id=None):
         if json_id is None:
             return all_jsons
         else:
-            content_by_id = [
-                i for i in all_jsons if json_id == i["id"] and "template" != i["id"]
-            ]
-            return content_by_id[0]
+            return next(
+                (i for i in all_jsons if json_id == i["id"] and "template" != i["id"]),
+                None,
+            )
     # TODO: catch the exception if path is none
     else:
         return {

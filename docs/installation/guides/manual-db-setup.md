@@ -209,7 +209,8 @@ DATABASES = {
         'NAME': os.environ.get("OEP_DJANGO_NAME", "oep_django"),
      'USER': os.environ.get("OEP_DJANGO_USER", "postgres"),
      'PASSWORD': os.environ.get("OEP_DJANGO_PW", "postgres"),
-     'HOST': os.environ.get("OEP_DJANGO_HOST", "localhost")
+     'HOST': os.environ.get("OEP_DJANGO_HOST", "localhost"),
+     'PORT': os.environ.get("OEP_DJANGO_PORT", "5432"),
  }
 }
 
@@ -224,6 +225,7 @@ DATABASES = {
     | OEP_DJANGO_USER      | yes      |
     | OEP_DJANGO_PW        | yes      |
     | OEP_DJANGO_HOST      | no       |
+    | OEP_DJANGO_PORT      | no       |
     | OEP_DJANGO_NAME      | no       |
 
     For default settings, you can type the following commands

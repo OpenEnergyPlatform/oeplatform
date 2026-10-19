@@ -1,13 +1,12 @@
 {% load modelview_extras %}
 <tr>
   <td class="sheetlabel">
-    {% assign_field_attr model field 'help_text' as vname %}
+    {% assign_field_attr model field 'help_text' as help %}
     {% assign_field model field as val %}
-    {% get_field_attr model field 'verbose_name' fieldNameOverride %}
-    {% if vname %}
-      <i data-bs-toggle="tooltip" title="{{ vname }}">
-        <span class="fas fa-question"></span>
-      </i>
+    {% get_field_attr model field 'verbose_name' fieldNameOverride as label %}
+    {{ label }}
+    {% if help %}
+      {% include "components/field_help.html" with label=label text=help %}
     {% endif %}
   </td>
   <td>

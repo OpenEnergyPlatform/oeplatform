@@ -237,6 +237,10 @@ system like GitHub.
 - copy the file `securitysettings.py.default` and rename it to
   `securitysettings.py`
 
+!!! note
+
+    Third-party sign-in through the NFDI RegApp is off unless `OEP_REGAPP_CLIENT_ID`, `OEP_REGAPP_SECRET` and `OEP_REGAPP_SERVER_URL` are set in the environment. Never add an app with an empty `provider_id` to `SOCIALACCOUNT_PROVIDERS`: the sign-in and sign-up pages then fail.
+
 ??? note "How to configure securitysettings.py"
 
     The security settings provide information to django to connect to your databases, relevant for step 5, below. You can provide the access credentials directly in the script or import them using environment variables. For detailed instructions see section [3. of the manual database setup guide](./manual-db-setup.md#3-connect-database-to-the-django-project).
@@ -246,6 +250,14 @@ then run:
 
     python manage.py collectstatic
     python manage.py compress
+
+Run them in this order, and run `compress` under the same `DEBUG` setting as the
+server that will serve the pages. With `DEBUG` off, static files are named after
+their content (`css/base-style.<hash>.css`), so a browser never keeps last
+release's copy after a deploy. `compress` keys its output on those names, so a
+`compress` run under `DEBUG = True` leaves a server running `DEBUG = False`
+unable to render any page. `collectstatic` also refuses a stylesheet whose
+`url()` points at a file that does not exist; the error names both.
 
 Then fetch the two artifacts the OEKG API validates scenario bundles against:
 
