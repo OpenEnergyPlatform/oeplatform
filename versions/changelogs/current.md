@@ -25,4 +25,9 @@ the previous release's highlights.
 
 ## Documentation updates
 
+- The documentation Home now says what the OEP is and guides every visitor to
+  the right resource: understanding the OEP and the Open Energy Family, using
+  the platform, using the API, or installing and developing. The Installation
+  page guides between the development and the production install
+
 ## Code Quality

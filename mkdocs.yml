@@ -44,6 +44,8 @@ theme:
 markdown_extensions:
   - admonition
   - attr_list
+  # Material grid cards on the Home page
+  - md_in_html
   - pymdownx.details
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
@@ -81,9 +83,9 @@ nav:
   - Home: index.md
   - Getting Started:
       - installation/index.md
-      - Installation Guide: installation/guides/installation-docker-dev.md
+      - Development install (Docker): installation/guides/installation-docker-dev.md
       - Development setup: installation/guides/development-setup.md
-      - Manual Installation Guide: installation/guides/installation.md
+      - Development install (manual): installation/guides/installation.md
       - Theming an instance: installation/guides/instance-theming.md
       - Production deployment (Podman):
           - installation/production-podman/index.md

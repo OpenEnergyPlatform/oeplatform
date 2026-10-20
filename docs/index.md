@@ -1,5 +1,7 @@
 ---
 title: Home
+hide:
+  - toc
 ---
 
 <!--
@@ -9,61 +11,78 @@ SPDX-FileCopyrightText: 2025 Christian Winger <https://github.com/wingechr> © �
 SPDX-License-Identifier: CC0-1.0
 -->
 
-# Developer documentation of the Open Energy Platform (OEP)
+# Open Energy Platform documentation
 
-Welcome to the Open Energy Platform Documentation. This site provides the
-developer documentation for the Open Energy Platform (OEP).
+The Open Energy Platform (OEP) is an open research data infrastructure for
+energy system research. Researchers publish openly licensed data on it, from
+scenario projections to model inputs and results, described with FAIR metadata
+(OEMetadata) and annotated with the Open Energy Ontology (OEO), so others can
+find, compare and reuse it. Beside the database, the OEP hosts scenario bundles,
+which link a scenario's data, studies and models in the Open Energy Knowledge
+Graph, and factsheets that describe energy system models and frameworks.
+Everything is available in the browser and through a REST API. The OEP is the
+web interface of the Open Energy Family: openly developed tools, standards and
+an ontology, built by universities and research institutes.
 
-!!! Info "State of the documentation"
+## What do you want to do?
 
-    The documentation already provides helpful information but is not yet complete. As only parts of it were maintained during the long-term development, we have to catch up. This is a task that we cannot complete in one go. We have therefore decided to complete it step by step. This means that we will update the documentation of the missing code as soon as we have to work on the corresponding code again. Documentation for the Community area will be added continuously and in a timely manner.
+<div class="grid cards" markdown>
 
-!!! Info "Compendium"
+- :material-lightbulb-on-outline:{ .lg .middle } **Understand the OEP and the
+  Open Energy Family**
 
-    If you want to get an overview about the complete Open Energy Family Framework please have a look at our [Compendium](https://openenergyplatform.github.io/organisation/).
+  ***
 
-## Structure of the documentation
+  What the platform is for, how it works together with the ontology, the
+  metadata standard and the knowledge graph, and who builds it.
 
-It consists of two parts:
+  [:octicons-arrow-right-24: Compendium](https://openenergyplatform.github.io/organisation/)
+  · [About the OEP](https://openenergyplatform.org/about/)
 
-- The "Development" pages provide an overview of our methods and procedures used
-  during development and also provides context about the Open Energy Platform
-  Software to be able to understand the Use Cases and the general scope better.
+- :material-database-search-outline:{ .lg .middle } **Use the platform**
 
-- The "Installation & Code Documentation" pages will help you to install and set
-  up the Open Energy Platform software system if you wish to use the software
-  for your own purposes or contribute to its development. The "Code
-  Documentation" section provides technical information relevant to
-  understanding the infrastructure elements and architecture of the software.
-  You will also find information about the structure of the oeplatform code
-  project on GitHub. Of course, you will also find documentation about the code
-  itself. This part is divided into two sections describing the web APIs
-  provided by the platform and the documentation about the implemented
-  functions. To structure this part, we group the code documentation according
-  to the features that the code implements and we hope to create an easier
-  understanding of the codebase with this structured approach.
+  ***
 
-## What do we want to archive with the OEP-Website
+  Find and download data, upload and describe your own, and take part in
+  reviews, all in the browser.
 
-The Open Energy Platform is a website that has three main targets:
+  The Academy's courses and tutorials guide you through it step by step.
 
-1. Provide a language-independent interface that is a thin layer on top of the
-   Open Energy Database (oedb)
-2. Implement an intuitive and easy-to use web interface on top of the database
-3. Improve the visibility, communication, and transparency of results from
-   energy system modeling
+  [:octicons-arrow-right-24: Academy](https://openenergyplatform.github.io/academy/)
+  ·
+  [Describe data with OEMetadata](https://openenergyplatform.github.io/academy/tutorials/99_other/oemetadata/)
+  ·
+  [Upload with the wizard](https://openenergyplatform.github.io/academy/tutorials/99_other/wizard/)
 
-## Mission statement
+- :material-api:{ .lg .middle } **Use the API**
 
-The transition to renewable energy sources is one of the huge goals of the last
-few decades. Whilst conventional energy generation provides a constant,
-generally available source of electricity, heat, and so on, our environment pays
-a toll. Contrary, renewable energy generation is less environmentally demanding
-but more financially expensive or just locally or inconsistently available.
-Guaranteeing a steady and reliable, yet sustainable supply of energy requires
-still a lot of thorough research.
+  ***
 
-Expansion of the energy grid might imply measures that must be communicable in a
-transparent way. Hence, results from research of energy system studies should be
-publicly available and reproducible. This raises the need for publicly available
-data sources.
+  Read and write tables, metadata and scenario bundles from your own code.
+
+  [:octicons-arrow-right-24: Web API overview](oeplatform-code/web-api/index.md)
+  · [API Reference](oeplatform-code/web-api/api-reference.md) ·
+  [Academy API tutorials](https://openenergyplatform.github.io/academy/tutorials/01_api/01_api_download/)
+
+- :material-code-braces:{ .lg .middle } **Install or develop**
+
+  ***
+
+  Run your own instance, set up a development environment, or contribute to the
+  code.
+
+  This developer documentation is not complete yet: we fill it in as we work on
+  each part of the code.
+
+  [:octicons-arrow-right-24: Installation](installation/index.md) ·
+  [Contribute](dev/index.md) · [Code documentation](oeplatform-code/index.md)
+
+</div>
+
+## About this site
+
+This site is the documentation of the oeplatform software. The tabs at the top,
+_Getting Started_, _Development_ and _Documentation_, are written for
+developers. Questions and ideas are welcome in the
+[GitHub discussions](https://github.com/OpenEnergyPlatform/oeplatform/discussions)
+or through the [contact form](https://openenergyplatform.org/contact/).
