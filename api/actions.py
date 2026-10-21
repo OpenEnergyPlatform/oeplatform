@@ -2502,13 +2502,22 @@ def commit_raw_connection(request: dict, context: dict) -> dict:
     return __response_success()
 
 
+# Ending a session this server no longer holds is already done, so neither of
+# these rebuilds one: a rebuilt session would take a place in the connection
+# limit, and a client at its limit could then free nothing.
+
+
 def rollback_raw_connection(request: dict, context: dict) -> dict:
-    load_session_from_context(context).rollback()
+    session = load_session_from_context(context, rebuild=False)
+    if session:
+        session.rollback()
     return __response_success()
 
 
 def close_raw_connection(request: dict, context: dict) -> dict:
-    load_session_from_context(context).close()
+    session = load_session_from_context(context, rebuild=False)
+    if session:
+        session.close()
     return __response_success()
 
 

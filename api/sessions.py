@@ -7,6 +7,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 import itertools
+import logging
 import sys
 import threading
 import time
@@ -14,12 +15,20 @@ from random import randrange
 from typing import NamedTuple
 
 from django.contrib.auth.models import AbstractUser
+from django.core.signals import request_finished
 from django.urls import reverse
 
 from api.error import APIError
 from api.utils import get_or_403
 from oedb.connection import AbstractCursor, DBAPIConnection, _get_engine
-from oeplatform.settings import ANON_CONNECTION_LIMIT, TIME_OUT, USER_CONNECTION_LIMIT
+from oeplatform.settings import (
+    ANON_CONNECTION_LIMIT,
+    CURSOR_TIME_OUT,
+    TIME_OUT,
+    USER_CONNECTION_LIMIT,
+)
+
+logger = logging.getLogger("oeplatform")
 
 # Finished sessions, by connection id. Every reader expects a finished object.
 _SESSION_CONTEXTS = {}
@@ -69,6 +78,12 @@ class _Pending(NamedTuple):
 # shared state and is not built.
 _LOCK = threading.Lock()
 
+# The sessions the request running on this thread has loaded. Each holds one
+# place in that session's `in_use` until the request has finished, which for a
+# streamed response is when the server closes it -- also when the client went
+# away halfway through.
+_LOADED = threading.local()
+
 
 class SessionContext:
     # A half-built session must still answer for an owner. The constructor
@@ -78,6 +93,9 @@ class SessionContext:
     # attribute would reach the caller as a 500.
     owner: AbstractUser | None = None
     counted: bool = True
+    # How many requests are using this session right now; never swept while
+    # any is. Read and written under `_LOCK`.
+    in_use: int = 0
 
     def __init__(
         self,
@@ -98,7 +116,12 @@ class SessionContext:
         self.session_context = self
         self.cursors = {}
 
-        _close_sessions(_take_expired(self.last_activity))
+        # Whatever goes wrong closing somebody else's expired session is no
+        # reason to refuse this one.
+        try:
+            _close_sessions(_take_expired(self.last_activity), with_cursors=True)
+        except Exception:
+            logger.exception("closing an expired advanced API session failed")
 
         # Counting and reserving happen under the lock; opening the connection
         # does not. A reservation holds its place in the count and its id, so
@@ -178,21 +201,61 @@ def load_cursor_from_context(context: dict) -> AbstractCursor:
     return session.get_cursor(cursor_id)
 
 
-def load_session_from_context(context: dict) -> SessionContext:
+def load_session_from_context(
+    context: dict, rebuild: bool = True
+) -> SessionContext | None:
+    """The session `context` names, marked in use by the running request.
+
+    An id this server no longer holds is rebuilt as a new, empty session under
+    the same id, which `oedialect` relies on. `rebuild=False` answers `None`
+    instead, for a caller that only wants to end the session anyway.
+    """
     connection_id = get_or_403(context, "connection_id")
     user = context.get("user")
     with _LOCK:
         sess = _SESSION_CONTEXTS.get(connection_id)
     if sess is None:
-        return SessionContext(connection_id=connection_id, owner=user)
-    sess.last_activity = time.time()
-    if user and sess.owner != user:
+        if not rebuild:
+            return None
+        sess = SessionContext(connection_id=connection_id, owner=user)
+    elif user and sess.owner != user:
         raise PermissionError
+    sess.last_activity = time.time()
+    _mark_in_use(sess)
     return sess
+
+
+def _mark_in_use(sess: SessionContext) -> None:
+    loaded = _LOADED.__dict__.setdefault("sessions", set())
+    if sess not in loaded:
+        loaded.add(sess)
+        with _LOCK:
+            sess.in_use += 1
+
+
+def _release_loaded(**kwargs) -> None:
+    """Give back what the finished request had loaded; idle counts from now."""
+    loaded = _LOADED.__dict__.pop("sessions", ())
+    now = time.time()
+    with _LOCK:
+        for sess in loaded:
+            sess.in_use -= 1
+            sess.last_activity = now
+
+
+request_finished.connect(_release_loaded)
 
 
 def _take_expired(now: float) -> list[SessionContext]:
     """Unregister the idle sessions, for the caller to close outside the lock.
+
+    Idle means no request has used the session for `TIME_OUT`, or for
+    `CURSOR_TIME_OUT` when it has open cursors. That one is longer, because a
+    client may pause between the fetches of a result, but it is a limit: a
+    client that died with a cursor open would otherwise hold its place in the
+    connection limit until the process restarts. Its open transaction is lost.
+    A session a request is still using -- a stream can run far longer than
+    either limit without touching `last_activity` -- is never idle.
 
     Only explicit sessions expire. An artificial connection keeps the
     `last_activity` of its creation while its request streams, so one serving a
@@ -205,7 +268,10 @@ def _take_expired(now: float) -> list[SessionContext]:
         expired = [
             sess
             for sess in _SESSION_CONTEXTS.values()
-            if sess.counted and now - sess.last_activity > TIME_OUT and not sess.cursors
+            if sess.counted
+            and not sess.in_use
+            and now - sess.last_activity
+            > (CURSOR_TIME_OUT if sess.cursors else TIME_OUT)
         ]
         for sess in expired:
             del _SESSION_CONTEXTS[sess.connection._id]
@@ -275,10 +341,12 @@ def _close_sessions(sessions: list[SessionContext], with_cursors=False) -> None:
     failure = None
     for sess in sessions:
         try:
-            if with_cursors:
-                for cursor in list(sess.cursors.values()):
-                    cursor.close()
-            sess.close()
+            try:
+                if with_cursors:
+                    for cursor in list(sess.cursors.values()):
+                        cursor.close()
+            finally:
+                sess.close()
         except Exception as error:
             failure = failure or error
     if failure is not None:
