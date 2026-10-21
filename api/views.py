@@ -2560,13 +2560,13 @@ AdvancedConnectionOpenAPIView = extend_schema_view(
 )(create_ajax_handler(open_raw_connection, refusals=OPENS_SESSION))
 AdvancedConnectionCloseAPIView = extend_schema_view(
     post=extend_schema(tags=[ADVANCED_CONNECTION])
-)(create_ajax_handler(close_raw_connection, refusals=OPENS_SESSION))
+)(create_ajax_handler(close_raw_connection))
 AdvancedConnectionCommitAPIView = extend_schema_view(
     post=extend_schema(tags=[ADVANCED_CONNECTION])
 )(create_ajax_handler(commit_raw_connection, refusals=OPENS_SESSION))
 AdvancedConnectionRollbackAPIView = extend_schema_view(
     post=extend_schema(tags=[ADVANCED_CONNECTION])
-)(create_ajax_handler(rollback_raw_connection, refusals=OPENS_SESSION))
+)(create_ajax_handler(rollback_raw_connection))
 
 AdvancedCursorOpenAPIView = extend_schema_view(
     post=extend_schema(tags=[ADVANCED_CURSOR])
