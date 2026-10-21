@@ -92,7 +92,7 @@
     "happy-dom": "^20.13.2",
     "prettier": "^3.3.2",
     "sass": "1.77.0",
-    "vite": "8.0.13",
+    "vite": "8.3.5",
     "vite-plugin-eslint": "^1.8.1",
     "vitest": "^5.0.0"
   }
