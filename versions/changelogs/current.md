@@ -23,6 +23,12 @@ the previous release's highlights.
 
 ## Bugs
 
+- A table download through the API (`.../rows/`) that the client stops reading
+  gives its database connection back straight away. It used to hold the
+  connection, a transaction and a lock on the table until Python's garbage
+  collector next ran, which on production took up to an hour and more
+  [(#2735)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2735)
+
 ## Documentation updates
 
 - The documentation Home now says what the OEP is and guides every visitor to

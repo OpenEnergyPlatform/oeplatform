@@ -104,9 +104,16 @@ class OEPStream(StreamingHttpResponse):
         self.session = session
         super(OEPStream, self).__init__(*args, **kwargs)
 
-    def __del__(self):
-        if self.session:
-            self.session.close()
+    def close(self):
+        # Not __del__: the response sits in a reference cycle, so __del__ waits
+        # for a full garbage collection, and a client that aborts the stream
+        # would hold the connection, its lock and its snapshot until then. The
+        # server calls close() on completion and on abort alike.
+        try:
+            if self.session:
+                self.session.close()
+        finally:
+            super().close()
 
 
 def load_cursor(named=False):
