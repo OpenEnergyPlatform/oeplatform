@@ -29,7 +29,7 @@ the previous release's highlights.
   request is still using, a long download included, is never closed. Closing or
   rolling back a session that is already gone now answers success instead of
   being refused at the connection limit. The 10 minutes are the new optional
-  setting `CURSOR_TIME_OUT`
+  setting `CURSOR_TIME_OUT` (#2734)
 
 ## Documentation updates
 
