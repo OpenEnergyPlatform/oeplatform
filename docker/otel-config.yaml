@@ -26,7 +26,6 @@ exporters:
     tls:
       insecure: true
 
-
 service:
   pipelines:
     traces:

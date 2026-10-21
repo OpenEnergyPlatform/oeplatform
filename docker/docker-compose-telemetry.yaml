@@ -151,7 +151,7 @@ services:
       - COLLECTOR_OTLP_ENABLED=true
     ports:
       - "16686:16686" # Jaeger Web UI
-      - "4317"        # Internal OTLP gRPC port
+      - "4317" # Internal OTLP gRPC port
     networks:
       - default
 
