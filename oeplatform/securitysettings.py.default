@@ -38,6 +38,10 @@ else:
     ALLOWED_HOSTS = [] if DEBUG else ['localhost']
 
 TIME_OUT = 30
+# Optional: how long a session WITH open cursors may go without a request before
+# it is closed, cursors and open transaction included. Default 600 (10 minutes).
+# CURSOR_TIME_OUT = 600
+
 # Both connection limits are counted per server process (see _LOCK in
 # api/sessions.py), so one account's real ceiling is processes x the limit.
 # They are a real ceiling while the daemon group serving /api/v0/advanced runs
