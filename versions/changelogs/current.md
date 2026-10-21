@@ -27,6 +27,7 @@ the previous release's highlights.
   gives its database connection back straight away. It used to hold the
   connection, a transaction and a lock on the table until Python's garbage
   collector next ran, which on production took up to an hour and more
+  [(#2735)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2735)
 
 ## Documentation updates
 
