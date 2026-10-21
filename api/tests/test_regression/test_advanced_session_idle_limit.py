@@ -3,8 +3,7 @@
 The idle sweep freed a session only when it had no open cursor. A client that
 died, timed out at the web server or left a result half-read kept its cursor
 open, and its session then held its place in the connection limit until the
-server process restarted. For anonymous clients, who share one limit, a few
-such sessions refused every other anonymous client.
+server process restarted.
 
 Now a session that no request has used for `CURSOR_TIME_OUT` is closed whether
 or not it has cursors. That longer limit also covers a session holding an open
@@ -22,6 +21,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
 import json
+import threading
 import time
 from unittest import mock
 
@@ -35,6 +35,7 @@ from api.tests.test_regression.test_issue_2491_commit_after_release import (
     AdvancedAPICase,
 )
 from api.tests.test_regression.test_issue_2492_exact_connection_count import (
+    TIMEOUT,
     RendezvousEngine,
     SessionRegistryTestCase,
 )
@@ -177,6 +178,38 @@ class IdleLimitTest(SessionRegistryTestCase):
             self.explicit(self.anonymous)
 
         self.assertNotIn(stuck, self.registered_for(self.owner))
+
+    def test_a_sweep_cannot_close_a_session_a_request_is_loading(self):
+        """Finding a session and marking it in use are one step.
+
+        A sweep on another thread is released the moment the request has found
+        the expired session. Had it run then, it would have closed the session
+        under the request, which would have gone on with a closed connection.
+        """
+        sess, cursor = self.with_cursor(idle=sessions.CURSOR_TIME_OUT + 1)
+        sweep = threading.Thread(
+            target=lambda: sessions._close_sessions(
+                sessions._take_expired(time.time()), with_cursors=True
+            ),
+            daemon=True,
+        )
+
+        def found_it():
+            if sweep.ident is None:
+                sweep.start()
+                sweep.join(0.5)  # it runs now, unless the request holds the lock
+            return time.time()
+
+        with mock.patch.object(sessions, "time", mock.Mock(time=found_it)):
+            loaded = self.loaded(sess)
+        sweep.join(TIMEOUT)
+
+        self.assertIsNotNone(sweep.ident, "the request never reached the hook")
+        self.assertFalse(sweep.is_alive())
+        self.assertIn(loaded, self.registered_for(self.owner))
+        self.assertFalse(loaded.connection.closed)
+        if loaded is sess:
+            self.assertFalse(cursor.closed)
 
     def test_a_failing_cursor_close_still_closes_the_connection(self):
         """And the open that ran the sweep is not refused for it."""
