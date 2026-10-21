@@ -27,15 +27,3 @@
   -ms-transform: translateX($translateX-value);
   -o-transform: translateX($translateX-value);
 }
-
-// User-select
-@mixin user-select-none {
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-
-// Buttons
-.btn-secondary {
-  @include button-variant($gray-300, $gray-300);
-}

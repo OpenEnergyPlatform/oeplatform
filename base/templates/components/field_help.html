@@ -1,0 +1,18 @@
+{% comment %}
+  field_help (#2655): the "?" beside a field's label. A button, so it takes
+  keyboard focus; its help text opens as a Bootstrap tooltip on hover and on
+  focus (the shell initialises every .field-help, base/_feedback.html) and is
+  the native title without script. Styles:
+  theming/scss/components/_field_help.scss; catalogue entry:
+  styleguide/entries/field_help.html.
+
+  text   the help text
+  label  the field's label, named in the button's accessible name
+{% endcomment %}
+<button type="button"
+        class="field-help"
+        data-bs-toggle="tooltip"
+        title="{{ text }}"
+        aria-label="Help on {{ label }}">
+  {% include "icons/question_circle.html" %}
+</button>

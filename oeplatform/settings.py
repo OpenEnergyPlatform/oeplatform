@@ -39,6 +39,17 @@ import sys
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 from pathlib import Path
 
+# Data only, and imported here for that reason: the reference's tag list has to
+# be in the settings the generator reads, and nothing that touches Django can
+# be imported at this point.
+from api.api_tags import TAGS as API_REFERENCE_TAGS
+from oeplatform import securitysettings as _local_settings
+from oeplatform.oedb_for_tests import (
+    TEST_NAME_VARIABLE,
+    oedb_name_for_tests,
+    running_tests,
+)
+from oeplatform.oeo_search import oeo_search_url
 from oeplatform.securitysettings import (
     ALLOWED_HOSTS,
     ANON_CONNECTION_LIMIT,
@@ -121,6 +132,16 @@ __all__ = [  # mark imports as "used"
     "dbuser",
 ]
 
+# A test run gets its own data database (OEDB), as Django gives it its own
+# Django database: never the one configured above, which on a developer's
+# machine holds their dev data. See oeplatform/oedb_for_tests.py; the test
+# runner creates and migrates it.
+OEDB_CONFIGURED_NAME = dbname
+OEDB_TEST_NAME = oedb_name_for_tests(dbname, os.environ.get(TEST_NAME_VARIABLE))
+if running_tests(sys.argv, os.environ):
+    dbname = OEDB_TEST_NAME
+TEST_RUNNER = "oeplatform.runner.OepTestRunner"
+
 
 # ── Reverse proxy / HTTPS ─────────────────────────────────────────────────────
 # When the platform runs behind a TLS-terminating reverse proxy (e.g. nginx on
@@ -196,6 +217,7 @@ INSTALLED_APPS = (
     "owlready2",
     "compressor",
     "oekg",
+    "drf_spectacular",
 )
 
 MIDDLEWARE = (
@@ -217,6 +239,16 @@ ROOT_URLCONF = "oeplatform.urls"
 
 EXTERNAL_URLS = {
     "oekg_chat": "https://oekg-chat.openenergyplatform.org/",
+    "academy_courses_introduction": "https://openenergyplatform.github.io/academy/courses/01_introduction/",  # noqa E501
+    "academy_course_upload": "https://openenergyplatform.github.io/academy/courses/04_upload/",  # noqa E501
+    "academy_course_scenario_bundle": "https://openenergyplatform.github.io/academy/courses/10_scenario_bundle/",  # noqa E501
+    "academy_course_enable_comparisons": "https://openenergyplatform.github.io/academy/courses/06_enable_comparisons/",  # noqa E501
+    # Tools linked from the homepage's Integrated Workflows section
+    "academy_course_peer_review": "https://openenergyplatform.github.io/academy/courses/09_peer_review/",  # noqa E501
+    "github_openenergyplatform_oedb_compliance_manager": "https://github.com/OpenEnergyPlatform/open-energy-database-compliance-manager",  # noqa E501
+    "github_openenergyplatform_oem2orm": "https://github.com/OpenEnergyPlatform/oem2orm",  # noqa E501
+    "github_openenergyplatform_omi": "https://github.com/OpenEnergyPlatform/omi",  # noqa E501
+    "github_jh_rli_oep_upload": "https://github.com/jh-RLI/oep-upload",  # noqa E501
     "tutorials_index": "https://openenergyplatform.github.io/academy/",
     "tutorials_faq": "https://openenergyplatform.github.io/academy/questions/",
     "tutorials_api1": "https://openenergyplatform.github.io/academy/tutorials/01_api/01_api_download/",  # noqa E501
@@ -226,40 +258,21 @@ EXTERNAL_URLS = {
     "tutorials_create_database_conform_data": "https://openenergyplatform.github.io/academy/tutorials/99_other/database_data/",  # noqa E501
     "tutorials_oemetadata": "https://openenergyplatform.github.io/academy/tutorials/99_other/getting_started_with_OEMetadata/",  # noqa E501
     "tutorials_oemetabuilder": "https://openenergyplatform.github.io/academy/tutorials/99_other/oemetadata/",  # noqa E501
-    "readthedocs": "https://openenergyplatform.github.io/oeplatform/oeplatform-code/web-api/oedb-rest-api/",  # noqa E501
+    "rest_api_docs": "https://openenergyplatform.github.io/oeplatform/oeplatform-code/web-api/",  # noqa E501
+    "oekg_api_scenario_bundles": "https://openenergyplatform.github.io/oeplatform/oeplatform-code/web-api/oekg-api/scenario-bundles/",  # noqa E501
     "mkdocs": "https://openenergyplatform.github.io/oeplatform/",
     "compendium": "https://openenergyplatform.github.io/organisation/",
     "tib_terminology_service": "https://terminology.tib.eu/ts/collections",
     "tib_ts_oeo": "https://terminology.tib.eu/ts/ontologies/oeo",
     "spdx_licenses": "https://spdx.github.io/license-list-data/",
     "oemetadata_key_description": "https://github.com/OpenEnergyPlatform/oemetadata/blob/develop/oemetadata/latest/metadata_key_description.md",  # noqa E501
+    "oemetadata_latest": "https://openenergyplatform.github.io/oemetadata/latest/",
     "oeo_extended_github": "https://github.com/OpenEnergyPlatform/oeo-extended",  # noqa E501
     "oedatamodel": "https://github.com/OpenEnergyPlatform/oedatamodel",
     "github_openenergyplatform": "https://github.com/OpenEnergyPlatform",
-    "ORKG": "https://academy.orkg.org/orkg-academy/main/index.html",
+    "ORKG": "https://academy.orkg.org/index.html",
     "open_plan": "https://open-plan-tool.org/",
     "open_egon": "https://rego-n.org/",
-    "open_mastr": "https://open-mastr.readthedocs.io/en/latest/",
-    "tutorials_index": "https://openenergyplatform.github.io/academy/",
-    "tutorials_faq": "https://openenergyplatform.github.io/academy/questions/",
-    "tutorials_api1": "https://openenergyplatform.github.io/academy/tutorials/01_api/01_api_download/",  # noqa E501
-    "tutorials_api_upload": "https://openenergyplatform.github.io/academy/tutorials/01_api/02_api_upload/",  # noqa E501
-    "tutorials_licenses": "https://openenergyplatform.github.io/academy/tutorials/metadata/tutorial_open-data-licenses/",  # noqa E501
-    "tutorials_wizard": "https://openenergyplatform.github.io/academy/tutorials/99_other/wizard/",  # noqa E501
-    "tutorials_create_database_conform_data": "https://openenergyplatform.github.io/academy/tutorials/99_other/database_data/",  # noqa E501
-    "tutorials_oemetadata": "https://openenergyplatform.github.io/academy/tutorials/99_other/getting_started_with_OEMetadata/",  # noqa E501
-    "tutorials_oemetabuilder": "https://openenergyplatform.github.io/academy/tutorials/99_other/oemetadata/",  # noqa E501
-    "readthedocs": "https://openenergyplatform.github.io/oeplatform/oeplatform-code/web-api/oedb-rest-api/",  # noqa E501
-    "mkdocs": "https://openenergyplatform.github.io/oeplatform/",
-    "compendium": "https://openenergyplatform.github.io/organisation/",
-    "tib_terminology_service": "https://terminology.tib.eu/ts/collections",
-    "tib_ts_oeo": "https://terminology.tib.eu/ts/ontologies/oeo",
-    "spdx_licenses": "https://spdx.github.io/license-list-data/",
-    "oemetadata_key_description": "https://github.com/OpenEnergyPlatform/oemetadata/blob/develop/oemetadata/latest/metadata_key_description.md",  # noqa E501
-    "oeo_extended_github": "https://github.com/OpenEnergyPlatform/oeo-extended",  # noqa E501
-    "oedatamodel": "https://github.com/OpenEnergyPlatform/oedatamodel",
-    "ORKG": "https://academy.orkg.org/orkg-academy/main/index.html",
-    "open_plan": "https://open-plan-tool.org/",
     "open_mastr": "https://open-mastr.readthedocs.io/en/latest/",
     "creativecommons_licenses_by_3_0_de": "http://creativecommons.org/licenses/by/3.0/de/",  # noqa:E501
     "iks_cs_ovgu_iks": "http://iks.cs.ovgu.de/IKS.html",
@@ -334,10 +347,25 @@ DOCUMENTATION_LINKS = {
 
 SITE_ID = 1
 
+# The instance theming contract (#2637, docs/installation/guides/instance-theming.md).
+# Both are read from securitysettings.py and optional there (hence getattr
+# rather than the import list above, which every local settings file must
+# satisfy), so an instance that sets neither looks exactly like the platform.
+#
+# INSTANCE_STYLESHEETS: static paths, linked after every platform stylesheet
+# on every page (base/templates/base/_instance_stylesheets.html), so an
+# instance's token values win.
+INSTANCE_STYLESHEETS = list(getattr(_local_settings, "INSTANCE_STYLESHEETS", []))
+# INSTANCE_TEMPLATE_DIRS: searched before every app's templates, so a template
+# there replaces the platform's of the same name (brand/, the legal pages).
+INSTANCE_TEMPLATE_DIRS = [
+    str(path) for path in getattr(_local_settings, "INSTANCE_TEMPLATE_DIRS", [])
+]
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": list(INSTANCE_TEMPLATE_DIRS),
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -351,6 +379,16 @@ TEMPLATES = [
         },
     }
 ]
+
+# base/messages.html renders a message as a Bootstrap alert of its level's
+# tag; Bootstrap calls the error level "danger". 40 is
+# django.contrib.messages.ERROR, written as its number because nothing that
+# touches Django is imported here.
+MESSAGE_TAGS = {40: "danger"}
+
+# The house field (#2642): a field that passed validation is not marked green
+# beside the one that failed.
+BOOTSTRAP5 = {"field_renderers": {"default": "base.forms.HouseFieldRenderer"}}
 
 CORS_ORIGIN_WHITELIST = ["http://localhost:3000", "http://127.0.0.1:3000"]
 
@@ -366,6 +404,29 @@ OEO_EXT_PATH = Path(MEDIA_ROOT) / "oeo_ext"
 OEO_EXT_NAME = "oeox"
 OEO_EXT_OWL_NAME = "oeo_ext.owl"
 OEO_EXT_OWL_PATH = OEO_EXT_PATH / OEO_EXT_OWL_NAME
+
+# The canonical SHACL shape for OEKG scenario bundles, and the small rdfs:label
+# subset validation needs, are build-time artifacts. They are fetched/generated
+# by exactly one seam -- "python manage.py fetch_oekg_shapes" -- and land in a
+# gitignored directory, the way the OEO release does. Nothing else in the
+# platform obtains either file.
+#
+# The source revision is PINNED on purpose: an unpinned fetch would change the
+# validator without a deploy. The command refuses a branch or a "latest" ref.
+OEKG_SHAPES_FOLDER = "shapes"
+OEKG_SHAPES_ROOT = Path(BASE_DIR, OEKG_SHAPES_FOLDER)
+OEKG_SHAPES_PATH = OEKG_SHAPES_ROOT / "oekg_shapes.ttl"
+OEKG_SHAPE_LABELS_PATH = OEKG_SHAPES_ROOT / "oeo_labels.ttl"
+OEKG_SHAPES_SOURCE_REPO = "OpenEnergyPlatform/oekg"
+OEKG_SHAPES_SOURCE_FILE = "oekg/shapes/oekg_shapes.ttl"
+# The oekg repo carries no version tags yet (one unrelated tag), so the interim
+# pin is a commit sha. Bump this line to move the validator.
+OEKG_SHAPES_PINNED_COMMIT = "b4604e02060624b381bdbe2f872df94cfd0f5630"
+
+# The named graph the OEKG API reads and writes. None is the default graph,
+# which is where the platform's bundles live today; a test overrides it to work
+# in isolation.
+OEKG_GRAPH = None
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
@@ -395,7 +456,30 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.BasicAuthentication",
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.TokenAuthentication",
-    )
+    ),
+    # The OEKG bundle API reads publicly, so it carries its own ceiling rather
+    # than relying on there being one somewhere else.
+    "DEFAULT_THROTTLE_RATES": {
+        "oekg_bundles_anon": "60/minute",
+        "oekg_bundles_user": "600/minute",
+    },
+    # Use drf-spectacular's AutoSchema for generating OpenAPI schema
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Open Energy Platform API",
+    "DESCRIPTION": "OpenAPI schema for the Open Energy Platform REST API.",
+    "VERSION": "v0",
+    # The reference's groups, named and ordered rather than derived from the
+    # first path segment. `api.api_tags` imports nothing, which is what makes
+    # it safe to read here: this runs before the app registry exists.
+    "TAGS": API_REFERENCE_TAGS,
+    "POSTPROCESSING_HOOKS": [
+        "drf_spectacular.hooks.postprocess_schema_enums",
+        # The legacy schema-qualified table addresses cannot be repaired at
+        # the route, because one view serves both spellings. See the hook.
+        "api.api_description.name_the_legacy_table_routes",
+    ],
 }
 
 AUTHENTICATION_BACKENDS = [
@@ -409,10 +493,22 @@ AUTHENTICATION_BACKENDS = [
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
-STATICFILES_FINDERS = {
+# A list, because the first finder that has a path serves it.
+STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
     "compressor.finders.CompressorFinder",
+]
+
+# Static files are named after their content (#2604). A deploy runs
+# `collectstatic`, then `compress` under the server's DEBUG; see "Loading and
+# compressing static assets" in docs/installation/guides/installation.md. The
+# test runner serves plain names, refusing the same ones (oeplatform/runner.py).
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
+    },
 }
 
 
@@ -435,19 +531,26 @@ COMPRESS_FILTERS = {
 ACCOUNT_USER_MODEL_USERNAME_FIELD = "name"
 ACCOUNT_USER_MODEL_EMAIL_FIELD = "email"
 # https://django-allauth.readthedocs.io/en/latest/configuration.html
-ACCOUNT_EMAIL_VERIFICATION = "mandatory"  # requires ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"  # requires "email*" in ACCOUNT_SIGNUP_FIELDS
 # https://django-allauth.readthedocs.io/en/latest/configuration.html
 ACCOUNT_ADAPTER = "login.adapters.AccountAdapter"
 # https://django-allauth.readthedocs.io/en/latest/forms.html
 ACCOUNT_FORMS = {"signup": "login.forms.CreateUserForm"}
-ACCOUNT_EMAIL_REQUIRED = True
-# ACCOUNT_USERNAME_REQUIRED = False
-# ACCOUNT_AUTHENTICATION_METHOD = 'email'
+# "*" marks a required field. This is what ACCOUNT_EMAIL_REQUIRED = True meant
+# before allauth 65.4 deprecated it.
+ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
 ACCOUNT_ALLOW_REGISTRATION = True
-ACCOUNT_FORMS = {"signup": "login.forms.CreateUserForm"}
-# ACCOUNT_SIGNUP_FORM_CLASS = {"login.forms.CreateUserForm"}
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 ACCOUNT_LOGOUT_ON_PASSWORD_CHANGE = True
+# The address an account signs in and resets its password with is managed at
+# /accounts/email/. Changing it asks for the password again (as changing the
+# password already does), the previous address is told, and an account keeps one
+# address: a new one replaces it once confirmed. allauth asks no password of an
+# account that signs in only through a provider, because it has none; for those
+# the mail to the previous address is what remains.
+ACCOUNT_REAUTHENTICATION_REQUIRED = True
+ACCOUNT_EMAIL_NOTIFICATIONS = True
+ACCOUNT_CHANGE_EMAIL = True
 
 
 # https://django-allauth.readthedocs.io/en/latest/configuration.html
@@ -499,6 +602,11 @@ SCHEMA_DEFAULT = SCHEMA_DEFAULT_TEST_SANDBOX if IS_SANDBOX else SCHEMA_DATA
 
 USE_ONTOP = bool(ONTOP_SPARQL_ENDPOINT_URL)
 USE_LOEP = bool(DBPEDIA_LOOKUP_SPARQL_ENDPOINT_URL)
+
+# Term search of the metadata editor and the oeo_ext unit picker (#2292):
+# this instance's own search if it has one, else the public endpoint;
+# OEO_SEARCH_URL in the environment overrides both.
+EXTERNAL_URLS["oeo_search"] = oeo_search_url(USE_LOEP, os.environ)
 
 
 # when running approximate (fast) row count: if number is below this

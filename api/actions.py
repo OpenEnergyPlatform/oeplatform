@@ -40,6 +40,7 @@ import geoalchemy2  # noqa: Although this import seems unused is has to be here
 import psycopg2
 from django.conf import settings as django_conf_settings
 from django.db.models import Func, Value
+from django.utils import timezone
 from omi.base import get_metadata_version
 from omi.conversion import convert_metadata
 from omi.validation import ValidationError, parse_metadata, validate_metadata
@@ -69,7 +70,6 @@ from api.parser import (
     read_bool,
     read_pgid,
     read_pgvalue,
-    replace_None_with_NULL,
     set_meta_info,
 )
 from api.sessions import (
@@ -84,6 +84,7 @@ from api.utils import (
     table_or_404_from_dict,
 )
 from dataedit.models import BulkLoadEvent, Embargo, PeerReview, Table
+from dataedit.publish_gate import is_publishable
 from login.models import myuser as User
 from login.permissions import DELETE_PERM, WRITE_PERM
 from oedb.connection import (
@@ -93,8 +94,8 @@ from oedb.connection import (
     Engine,
     ResultProxy,
     Session,
-    _create_oedb_session,
     _get_engine,
+    oedb_session,
 )
 from oedb.utils import ID_COLUMN_NAME
 from oeplatform.settings import SCHEMA_DATA, SCHEMA_DEFAULT_TEST_SANDBOX
@@ -315,45 +316,44 @@ def describe_columns(table_obj: Table):
     identified by their column names
     """
 
-    session = _create_oedb_session()
-    query = (
-        "select column_name, "
-        "c.ordinal_position, c.column_default, c.is_nullable, c.data_type, "
-        "c.character_maximum_length, c.character_octet_length, "
-        "c.numeric_precision, c.numeric_precision_radix, c.numeric_scale, "
-        "c.datetime_precision, c.interval_type, c.interval_precision, "
-        "c.maximum_cardinality, c.dtd_identifier, c.udt_name, c.is_updatable, e.data_type as element_type "  # noqa
-        "from INFORMATION_SCHEMA.COLUMNS  c "
-        "LEFT JOIN information_schema.element_types e "
-        "ON ((c.table_catalog, c.table_schema, c.table_name, 'TABLE', c.dtd_identifier) "  # noqa
-        "= (e.object_catalog, e.object_schema, e.object_name, e.object_type, e.collection_type_identifier)) where table_name = "  # noqa
-        "'{table}' and table_schema='{schema}' ORDER BY c.ordinal_position;".format(
-            table=table_obj.name, schema=table_obj.oedb_schema
+    with oedb_session() as session:
+        query = (
+            "select column_name, "
+            "c.ordinal_position, c.column_default, c.is_nullable, c.data_type, "
+            "c.character_maximum_length, c.character_octet_length, "
+            "c.numeric_precision, c.numeric_precision_radix, c.numeric_scale, "
+            "c.datetime_precision, c.interval_type, c.interval_precision, "
+            "c.maximum_cardinality, c.dtd_identifier, c.udt_name, c.is_updatable, e.data_type as element_type "  # noqa
+            "from INFORMATION_SCHEMA.COLUMNS  c "
+            "LEFT JOIN information_schema.element_types e "
+            "ON ((c.table_catalog, c.table_schema, c.table_name, 'TABLE', c.dtd_identifier) "  # noqa
+            "= (e.object_catalog, e.object_schema, e.object_name, e.object_type, e.collection_type_identifier)) where table_name = "  # noqa
+            "'{table}' and table_schema='{schema}' ORDER BY c.ordinal_position;".format(
+                table=table_obj.name, schema=table_obj.oedb_schema
+            )
         )
-    )
-    response = _execute(session, query)
-    session.close()
+        response = _execute(session, query)
 
-    return {
-        column.column_name: {
-            "ordinal_position": column.ordinal_position,
-            "column_default": column.column_default,
-            "is_nullable": column.is_nullable == "YES",
-            "data_type": _translate_sqla_type(column),
-            "character_maximum_length": column.character_maximum_length,
-            "character_octet_length": column.character_octet_length,
-            "numeric_precision": column.numeric_precision,
-            "numeric_precision_radix": column.numeric_precision_radix,
-            "numeric_scale": column.numeric_scale,
-            "datetime_precision": column.datetime_precision,
-            "interval_type": column.interval_type,
-            "interval_precision": column.interval_precision,
-            "maximum_cardinality": column.maximum_cardinality,
-            "dtd_identifier": column.dtd_identifier,
-            "is_updatable": column.is_updatable == "YES",
+        return {
+            column.column_name: {
+                "ordinal_position": column.ordinal_position,
+                "column_default": column.column_default,
+                "is_nullable": column.is_nullable == "YES",
+                "data_type": _translate_sqla_type(column),
+                "character_maximum_length": column.character_maximum_length,
+                "character_octet_length": column.character_octet_length,
+                "numeric_precision": column.numeric_precision,
+                "numeric_precision_radix": column.numeric_precision_radix,
+                "numeric_scale": column.numeric_scale,
+                "datetime_precision": column.datetime_precision,
+                "interval_type": column.interval_type,
+                "interval_precision": column.interval_precision,
+                "maximum_cardinality": column.maximum_cardinality,
+                "dtd_identifier": column.dtd_identifier,
+                "is_updatable": column.is_updatable == "YES",
+            }
+            for column in response
         }
-        for column in response
-    }
 
 
 def describe_indexes(table_obj: Table):
@@ -370,19 +370,18 @@ def describe_indexes(table_obj: Table):
     :return: A dictionary of describing dictionaries representing the indexed
     identified by their column names
     """
-    session = _create_oedb_session()
-    query = (
-        "select indexname, indexdef from pg_indexes where tablename = "
-        "'{table}' and schemaname='{schema}';".format(
-            table=table_obj.name, schema=table_obj.oedb_schema
+    with oedb_session() as session:
+        query = (
+            "select indexname, indexdef from pg_indexes where tablename = "
+            "'{table}' and schemaname='{schema}';".format(
+                table=table_obj.name, schema=table_obj.oedb_schema
+            )
         )
-    )
-    response = _execute(session, query)
-    session.close()
+        response = _execute(session, query)
 
-    # Use a single-value dictionary to allow future extension with downward
-    # compatibility
-    return {column.indexname: {"indexdef": column.indexdef} for column in response}
+        # Use a single-value dictionary to allow future extension with downward
+        # compatibility
+        return {column.indexname: {"indexdef": column.indexdef} for column in response}
 
 
 def describe_constraints(table_obj: Table):
@@ -404,21 +403,20 @@ def describe_constraints(table_obj: Table):
     identified by their column names
     """
 
-    session = _create_oedb_session()
-    query = "select constraint_name, constraint_type, is_deferrable, initially_deferred, pg_get_constraintdef(c.oid) as definition from information_schema.table_constraints JOIN pg_constraint AS c  ON c.conname=constraint_name where table_name='{table}' AND constraint_schema='{schema}';".format(  # noqa
-        table=table_obj.name, schema=table_obj.oedb_schema
-    )
-    response = _execute(session, query)
-    session.close()
-    return {
-        column.constraint_name: {
-            "constraint_type": column.constraint_type,
-            "is_deferrable": column.is_deferrable,
-            "initially_deferred": column.initially_deferred,
-            "definition": column.definition,
+    with oedb_session() as session:
+        query = "select constraint_name, constraint_type, is_deferrable, initially_deferred, pg_get_constraintdef(c.oid) as definition from information_schema.table_constraints JOIN pg_constraint AS c  ON c.conname=constraint_name where table_name='{table}' AND constraint_schema='{schema}';".format(  # noqa
+            table=table_obj.name, schema=table_obj.oedb_schema
+        )
+        response = _execute(session, query)
+        return {
+            column.constraint_name: {
+                "constraint_type": column.constraint_type,
+                "is_deferrable": column.is_deferrable,
+                "initially_deferred": column.initially_deferred,
+                "definition": column.definition,
+            }
+            for column in response
         }
-        for column in response
-    }
 
 
 def perform_sql(sql_statement, parameter: dict | None = None) -> dict:
@@ -431,27 +429,25 @@ def perform_sql(sql_statement, parameter: dict | None = None) -> dict:
     if not parameter:
         parameter = {}
 
-    session = _create_oedb_session()
+    with oedb_session() as session:
 
-    # Statement built and no changes required, so statement is empty.
-    if not sql_statement or sql_statement.isspace():
-        return get_response_dict(success=True)
+        # Statement built and no changes required, so statement is empty.
+        if not sql_statement or sql_statement.isspace():
+            return get_response_dict(success=True)
 
-    try:
-        result = _execute(session, sql_statement, parameter)
-    except Exception as e:
-        logger.error("SQL Action failed. \n Error:\n" + str(e))
-        session.rollback()
-        raise APIError(str(e))
-    else:
-        # Why is commit() not part of close() ?
-        # I have to commit the changes before closing session.
-        # Otherwise the changes are not persistent.
-        session.commit()
-    finally:
-        session.close()
+        try:
+            result = _execute(session, sql_statement, parameter)
+        except Exception as e:
+            logger.error("SQL Action failed. \n Error:\n" + str(e))
+            session.rollback()
+            raise APIError(str(e))
+        else:
+            # Why is commit() not part of close() ?
+            # I have to commit the changes before closing session.
+            # Otherwise the changes are not persistent.
+            session.commit()
 
-    return get_response_dict(success=True, result=result)
+        return get_response_dict(success=True, result=result)
 
 
 def remove_queued_column(id):
@@ -461,8 +457,7 @@ def remove_queued_column(id):
     :return: Nothing
     """
 
-    sql = "UPDATE api_columns SET reviewed=True WHERE id='{id}'".format(id=id)
-    perform_sql(sql)
+    perform_sql("UPDATE api_columns SET reviewed=True WHERE id=:id", {"id": id})
 
 
 def apply_queued_column(id):
@@ -475,19 +470,15 @@ def apply_queued_column(id):
     column_description = get_column_change(id)
     res = table_change_column(column_description)
 
+    # The id is bound, never interpolated (#2490). The failure branch used to
+    # write `exception=<text>` unquoted into a column the table does not have,
+    # so it could never succeed; it now records only what the table can hold.
     if res.get("success") is True:
-        sql = (
-            "UPDATE api_columns SET reviewed=True, changed=True WHERE id='{id}'".format(
-                id=id
-            )
-        )
+        sql = "UPDATE api_columns SET reviewed=True, changed=True WHERE id=:id"
     else:
-        ex_str = str(res.get("exception"))
-        sql = "UPDATE api_columns SET reviewed=False, changed=False, exception={ex_str} WHERE id='{id}'".format(  # noqa
-            id=id, ex_str=ex_str
-        )
+        sql = "UPDATE api_columns SET reviewed=False, changed=False WHERE id=:id"
 
-    perform_sql(sql)
+    perform_sql(sql, {"id": id})
     return res
 
 
@@ -501,16 +492,13 @@ def apply_queued_constraint(id):
     constraint_description = get_constraint_change(id)
     res = table_change_constraint(constraint_description)
 
+    # Bound, and without the nonexistent `exception` column; see
+    # apply_queued_column.
     if res.get("success") is True:
-        sql = "UPDATE api_constraints SET reviewed=True, changed=True WHERE id='{id}'".format(  # noqa
-            id=id
-        )
+        sql = "UPDATE api_constraints SET reviewed=True, changed=True WHERE id=:id"
     else:
-        ex_str = str(res.get("exception"))
-        sql = "UPDATE api_constraints SET reviewed=False, changed=False, exception={ex_str} WHERE id='{id}'".format(  # noqa
-            id=id, ex_str=ex_str
-        )
-    perform_sql(sql)
+        sql = "UPDATE api_constraints SET reviewed=False, changed=False WHERE id=:id"
+    perform_sql(sql, {"id": id})
     return res
 
 
@@ -521,8 +509,7 @@ def remove_queued_constraint(id):
     :return:
     """
 
-    sql = "UPDATE api_constraints SET reviewed=True WHERE id='{id}'".format(id=id)
-    perform_sql(sql)
+    perform_sql("UPDATE api_constraints SET reviewed=True WHERE id=:id", {"id": id})
 
 
 def get_response_dict(
@@ -562,25 +549,22 @@ def queue_constraint_change(table_obj: Table, constraint_def: dict):
     :return: Result of database command
     """
 
-    cd = replace_None_with_NULL(constraint_def)
-
-    sql_string = (
+    return perform_sql(
         "INSERT INTO public.api_constraints (action, constraint_type"
         ", constraint_name, constraint_parameter, reference_table, reference_column, c_schema, c_table) "  # noqa
-        "VALUES ('{action}', '{c_type}', '{c_name}', '{c_parameter}', '{r_table}', '{r_column}' , '{c_schema}' "  # noqa
-        ", '{c_table}');".format(
-            action=get_or_403(cd, "action"),
-            c_type=get_or_403(cd, "constraint_type"),
-            c_name=get_or_403(cd, "constraint_name"),
-            c_parameter=get_or_403(cd, "constraint_parameter"),
-            r_table=get_or_403(cd, "reference_table"),
-            r_column=get_or_403(cd, "reference_column"),
-            c_schema=table_obj.oedb_schema,
-            c_table=table_obj.name,
-        ).replace("'NULL'", "NULL")
+        "VALUES (:action, :constraint_type, :constraint_name, :constraint_parameter"
+        ", :reference_table, :reference_column, :c_schema, :c_table);",
+        {
+            "action": get_or_403(constraint_def, "action"),
+            "constraint_type": get_or_403(constraint_def, "constraint_type"),
+            "constraint_name": get_or_403(constraint_def, "constraint_name"),
+            "constraint_parameter": get_or_403(constraint_def, "constraint_parameter"),
+            "reference_table": get_or_403(constraint_def, "reference_table"),
+            "reference_column": get_or_403(constraint_def, "reference_column"),
+            "c_schema": table_obj.oedb_schema,
+            "c_table": table_obj.name,
+        },
     )
-
-    return perform_sql(sql_string)
 
 
 def queue_column_change(table_obj: Table, column_definition: dict) -> dict:
@@ -591,20 +575,19 @@ def queue_column_change(table_obj: Table, column_definition: dict) -> dict:
     :return: Result of database command
     """
 
-    column_definition = replace_None_with_NULL(column_definition)
-
-    sql_string = "INSERT INTO public.api_columns (column_name, not_null, data_type, new_name, c_schema, c_table) " "VALUES ('{name}','{not_null}','{data_type}','{new_name}','{c_schema}','{c_table}');".format(  # noqa
-        name=get_or_403(column_definition, "column_name"),
-        not_null=get_or_403(column_definition, "not_null"),
-        data_type=get_or_403(column_definition, "data_type"),
-        new_name=get_or_403(column_definition, "new_name"),
-        c_schema=table_obj.oedb_schema,
-        c_table=table_obj.name,
-    ).replace(
-        "'NULL'", "NULL"
+    return perform_sql(
+        "INSERT INTO public.api_columns "
+        "(column_name, not_null, data_type, new_name, c_schema, c_table) "
+        "VALUES (:column_name, :not_null, :data_type, :new_name, :c_schema, :c_table);",
+        {
+            "column_name": get_or_403(column_definition, "column_name"),
+            "not_null": get_or_403(column_definition, "not_null"),
+            "data_type": get_or_403(column_definition, "data_type"),
+            "new_name": get_or_403(column_definition, "new_name"),
+            "c_schema": table_obj.oedb_schema,
+            "c_table": table_obj.name,
+        },
     )
-
-    return perform_sql(sql_string)
 
 
 def get_column_change(i_id):
@@ -644,47 +627,46 @@ def get_column_changes(reviewed=None, changed=None, table_obj: Table | None = No
     :return: List with Column Definitions
     """
 
-    session = _create_oedb_session()
-    query = ["SELECT * FROM public.api_columns"]
+    with oedb_session() as session:
+        query = ["SELECT * FROM public.api_columns"]
 
-    if reviewed is not None or changed is not None or table_obj is not None:
-        query.append(" WHERE ")
+        if reviewed is not None or changed is not None or table_obj is not None:
+            query.append(" WHERE ")
 
-        where = []
+            where = []
 
-        if reviewed is not None:
-            where.append("reviewed = " + str(reviewed))
+            if reviewed is not None:
+                where.append("reviewed = " + str(reviewed))
 
-        if changed is not None:
-            where.append("changed = " + str(changed))
+            if changed is not None:
+                where.append("changed = " + str(changed))
 
-        if table_obj is not None:
-            where.append("c_table = '{table}'".format(table=table_obj.name))
+            if table_obj is not None:
+                where.append("c_table = '{table}'".format(table=table_obj.name))
 
-        query.append(" AND ".join(where))
+            query.append(" AND ".join(where))
 
-    query.append(";")
+        query.append(";")
 
-    sql = "".join(query)
+        sql = "".join(query)
 
-    response = _execute(session, sql)
-    session.close()
+        response = _execute(session, sql)
 
-    return [
-        {
-            "column_name": column.column_name,
-            "not_null": column.not_null,
-            "data_type": column.data_type,
-            "new_name": column.new_name,
-            "reviewed": column.reviewed,
-            "changed": column.changed,
-            "c_schema": column.c_schema,
-            "c_table": column.c_table,
-            "id": column.id,
-            "exception": column.exception,
-        }
-        for column in response
-    ]
+        return [
+            {
+                "column_name": column.column_name,
+                "not_null": column.not_null,
+                "data_type": column.data_type,
+                "new_name": column.new_name,
+                "reviewed": column.reviewed,
+                "changed": column.changed,
+                "c_schema": column.c_schema,
+                "c_table": column.c_table,
+                "id": column.id,
+                "exception": column.exception,
+            }
+            for column in response
+        ]
 
 
 def get_constraints_changes(
@@ -697,49 +679,48 @@ def get_constraints_changes(
     :return: List with Column Definitons
     """
 
-    session = _create_oedb_session()
-    query = ["SELECT * FROM public.api_constraints"]
+    with oedb_session() as session:
+        query = ["SELECT * FROM public.api_constraints"]
 
-    if reviewed is not None or changed is not None or table_obj is not None:
-        query.append(" WHERE ")
+        if reviewed is not None or changed is not None or table_obj is not None:
+            query.append(" WHERE ")
 
-        where = []
+            where = []
 
-        if reviewed is not None:
-            where.append("reviewed = " + str(reviewed))
+            if reviewed is not None:
+                where.append("reviewed = " + str(reviewed))
 
-        if changed is not None:
-            where.append("changed = " + str(changed))
+            if changed is not None:
+                where.append("changed = " + str(changed))
 
-        if table_obj is not None:
-            where.append("c_table = '{table}'".format(table=table_obj.name))
+            if table_obj is not None:
+                where.append("c_table = '{table}'".format(table=table_obj.name))
 
-        query.append(" AND ".join(where))
+            query.append(" AND ".join(where))
 
-    query.append(";")
+        query.append(";")
 
-    sql = "".join(query)
+        sql = "".join(query)
 
-    response = _execute(session, sql)
-    session.close()
+        response = _execute(session, sql)
 
-    return [
-        {
-            "action": column.action,
-            "constraint_type": column.constraint_type,
-            "constraint_name": column.constraint_name,
-            "constraint_parameter": column.constraint_parameter,
-            "reference_table": column.reference_table,
-            "reference_column": column.reference_column,
-            "reviewed": column.reviewed,
-            "changed": column.changed,
-            "c_schema": column.c_schema,
-            "c_table": column.c_table,
-            "id": column.id,
-            "exception": column.exception,
-        }
-        for column in response
-    ]
+        return [
+            {
+                "action": column.action,
+                "constraint_type": column.constraint_type,
+                "constraint_name": column.constraint_name,
+                "constraint_parameter": column.constraint_parameter,
+                "reference_table": column.reference_table,
+                "reference_column": column.reference_column,
+                "reviewed": column.reviewed,
+                "changed": column.changed,
+                "c_schema": column.c_schema,
+                "c_table": column.c_table,
+                "id": column.id,
+                "exception": column.exception,
+            }
+            for column in response
+        ]
 
 
 def get_column(d):
@@ -775,6 +756,8 @@ def column_alter(query, table_obj: Table, column):
             + read_pgid(query["name"])
         ).format(schema=table_obj.oedb_schema, table=table_obj.name, column=column)
         perform_sql(sql)
+    if {"data_type", "is_nullable", "column_default", "name"} & set(query):
+        table_obj.stamp_data_modified()
     return get_response_dict(success=True)
 
 
@@ -799,6 +782,7 @@ def column_add(table_obj: Table, column, description):
     perform_sql(s.format(schema=edit_sa_table.schema, table=edit_sa_table.name))
     perform_sql(s.format(schema=insert_sa_table.schema, table=insert_sa_table.name))
 
+    table_obj.stamp_data_modified()
     return get_response_dict(success=True)
 
 
@@ -896,7 +880,10 @@ def table_change_column(column_definition):
 
     sql_string = "".join(sql)
 
-    return perform_sql(sql_string)
+    result = perform_sql(sql_string)
+    if sql:
+        table_obj.stamp_data_modified()
+    return result
 
 
 def table_change_constraint(constraint_definition):
@@ -917,6 +904,7 @@ def table_change_constraint(constraint_definition):
 
     # There is a table named schema.table.
     sql = []
+    changed = False
 
     if "ADD" in get_or_403(constraint_definition, "action"):
         ctype = get_or_403(constraint_definition, "constraint_type").lower()
@@ -945,6 +933,7 @@ def table_change_constraint(constraint_definition):
             raise APIError("Not supported")
         # FIXME: check permissions
         constraint.create(_get_engine())
+        changed = True
     elif "DROP" in constraint_definition["action"]:
         sql.append(
             'ALTER TABLE "{schema}"."{table}" DROP CONSTRAINT "{constraint_name}"'.format(  # noqa
@@ -956,7 +945,10 @@ def table_change_constraint(constraint_definition):
 
     sql_string = "".join(sql)
 
-    return perform_sql(sql_string)
+    result = perform_sql(sql_string)
+    if changed or sql:
+        table_obj.stamp_data_modified()
+    return result
 
 
 """
@@ -966,7 +958,10 @@ ACTIONS FROM OLD API
 
 def __internal_select(query, context):
     context2 = dict(user=context.get("user"))
-    context2.update(open_raw_connection({}, context2))
+    # Opened and closed within this call, so it is not counted -- which also
+    # matters because it runs beside the request's own connection, and a row
+    # update would otherwise take two places in the limit for one request.
+    context2.update(open_request_connection(context2))
     try:
         context2.update(open_cursor({}, context2))
         try:
@@ -1065,95 +1060,69 @@ def _drop_not_null_constraints_from_delete_meta_table(
 
 
 def data_insert_check(table_obj: Table, values, context):
-    session = _create_oedb_session()
-    query = (
-        "SELECT array_agg(column_name::text) as columns, conname, "
-        "   contype AS type "
-        "FROM pg_constraint AS conkeys "
-        "JOIN information_schema.constraint_column_usage AS ccu "
-        "   ON ccu.constraint_name = conname "
-        "WHERE table_name='{table}' "
-        "   AND table_schema='{schema}' "
-        "   AND conrelid='{schema}.{table}'::regclass::oid "
-        "GROUP BY conname, contype;".format(
-            table=table_obj.name, schema=table_obj.oedb_schema
+    with oedb_session() as session:
+        query = (
+            "SELECT array_agg(column_name::text) as columns, conname, "
+            "   contype AS type "
+            "FROM pg_constraint AS conkeys "
+            "JOIN information_schema.constraint_column_usage AS ccu "
+            "   ON ccu.constraint_name = conname "
+            "WHERE table_name='{table}' "
+            "   AND table_schema='{schema}' "
+            "   AND conrelid='{schema}.{table}'::regclass::oid "
+            "GROUP BY conname, contype;".format(
+                table=table_obj.name, schema=table_obj.oedb_schema
+            )
         )
-    )
-    response = _execute(session, query)
-    session.close()
+        response = _execute(session, query)
 
-    for constraint in response:
-        columns = constraint.columns
-        if constraint.type.lower() == "c":
-            pass
-        elif constraint.type.lower() == "f":
-            pass
-        elif constraint.type.lower() in ["u", "p"]:
-            # Load data selected by the from_select-clause
-            # TODO: I guess this should not be done this way.
-            #       Use joins instead to avoid piping your results through
-            #       python.
-            if isinstance(values, Select):
-                values = _execute(_get_engine(), values)
-            for row in values:
-                # TODO: This is horribly inefficient!
-                query = {
-                    "from": {
-                        "type": "table",
-                        "table": table_obj.name,
-                    },
-                    "where": {
-                        "type": "operator",
-                        "operator": "AND",
-                        "operands": [
-                            {
-                                "operands": [
-                                    {"type": "column", "column": c},
-                                    (
-                                        {"type": "value", "value": row[c]}
-                                        if c in row
-                                        else {"type": "value"}
-                                    ),
-                                ],
-                                "operator": "=",
-                                "type": "operator",
-                            }
-                            for c in columns
-                        ],
-                    },
-                    "fields": [{"type": "column", "column": f} for f in columns],
-                }
-                rows = __internal_select(query, context)
-                if rows["data"]:
-                    raise APIError(
-                        "Action violates constraint {cn}. Failing row was {row}".format(
-                            cn=constraint.conname,
-                            row="("
-                            + (
-                                ", ".join(
-                                    str(row[c]) for c in row if not c.startswith("_")
-                                )
-                            ),
-                        )
-                        + ")"
-                    )
-
-    for column_name, column in describe_columns(table_obj).items():
-        if not column.get("is_nullable", True):
-            for row in values:
-                val = row.get(column_name, None)
-                if val is None or (isinstance(val, str) and val.lower() == "null"):
-                    if column_name in row or not column.get("column_default", None):
-                        # TODO: this error message is not clear to users. It is for
-                        # example shown if the user attempts to upload a csv data
-                        # and some id values from the csv are already available
-                        # in the table.
+        for constraint in response:
+            columns = constraint.columns
+            if constraint.type.lower() == "c":
+                pass
+            elif constraint.type.lower() == "f":
+                pass
+            elif constraint.type.lower() in ["u", "p"]:
+                # Load data selected by the from_select-clause
+                # TODO: I guess this should not be done this way.
+                #       Use joins instead to avoid piping your results through
+                #       python.
+                if isinstance(values, Select):
+                    values = _execute(_get_engine(), values)
+                for row in values:
+                    # TODO: This is horribly inefficient!
+                    query = {
+                        "from": {
+                            "type": "table",
+                            "table": table_obj.name,
+                        },
+                        "where": {
+                            "type": "operator",
+                            "operator": "AND",
+                            "operands": [
+                                {
+                                    "operands": [
+                                        {"type": "column", "column": c},
+                                        (
+                                            {"type": "value", "value": row[c]}
+                                            if c in row
+                                            else {"type": "value"}
+                                        ),
+                                    ],
+                                    "operator": "=",
+                                    "type": "operator",
+                                }
+                                for c in columns
+                            ],
+                        },
+                        "fields": [{"type": "column", "column": f} for f in columns],
+                    }
+                    rows = __internal_select(query, context)
+                    if rows["data"]:
                         raise APIError(
-                            "Action violates not-null constraint on {col}. "
-                            "Failing row was {row}. Please check if there are "
-                            "id values in your upload data that are already "
-                            "exist in the table. Primary key's cant be duplicated".format(  # noqa
-                                col=column_name,
+                            "Action violates constraint {cn}. "
+                            "Failing row was {row}".format(
+                                cn=constraint.conname,
                                 row="("
                                 + (
                                     ", ".join(
@@ -1165,6 +1134,34 @@ def data_insert_check(table_obj: Table, values, context):
                             )
                             + ")"
                         )
+
+        for column_name, column in describe_columns(table_obj).items():
+            if not column.get("is_nullable", True):
+                for row in values:
+                    val = row.get(column_name, None)
+                    if val is None or (isinstance(val, str) and val.lower() == "null"):
+                        if column_name in row or not column.get("column_default", None):
+                            # TODO: this error message is not clear to users. It is for
+                            # example shown if the user attempts to upload a csv data
+                            # and some id values from the csv are already available
+                            # in the table.
+                            raise APIError(
+                                "Action violates not-null constraint on {col}. "
+                                "Failing row was {row}. Please check if there are "
+                                "id values in your upload data that are already "
+                                "exist in the table. Primary key's cant be duplicated".format(  # noqa
+                                    col=column_name,
+                                    row="("
+                                    + (
+                                        ", ".join(
+                                            str(row[c])
+                                            for c in row
+                                            if not c.startswith("_")
+                                        )
+                                    ),
+                                )
+                                + ")"
+                            )
 
 
 def execute_sqla(query, cursor: AbstractCursor | Session) -> None:
@@ -1308,7 +1305,11 @@ def fetchmany(request: dict, context):
     return cursor.fetchmany(int(request["size"]))
 
 
-def apply_changes(table_obj: Table, cursor: AbstractCursor | None = None):
+def apply_changes(
+    table_obj: Table,
+    cursor: AbstractCursor | None = None,
+    change_types: tuple = ("insert", "update", "delete"),
+):
     """Apply changes from the meta tables to the actual table.
 
     Meta tables are :
@@ -1316,6 +1317,9 @@ def apply_changes(table_obj: Table, cursor: AbstractCursor | None = None):
     * _<NAME>_update
     * _<NAME>_delete
 
+    Only the meta tables named in `change_types` are scanned, so callers that
+    know which operation they just performed (e.g. a pure insert) don't pay
+    for scanning the other meta tables.
     """
 
     def add_type(d, type):
@@ -1339,64 +1343,34 @@ def apply_changes(table_obj: Table, cursor: AbstractCursor | None = None):
         # so we pass user=None
         oedb_table = table_obj.get_oedb_table_proxy(user=None)
 
-        insert_sa_table = oedb_table._insert_table.get_sa_table()
-        _execute(
-            cursor,
-            'select * from "{schema}"."{table}" where _applied = FALSE;'.format(
-                schema=insert_sa_table.schema, table=insert_sa_table.name
-            ),
-        )
-        changes = [
-            add_type(
-                {
-                    c.name: v
-                    for c, v in zip(cursor.description, row)
-                    if c.name in extended_columns
-                },
-                "insert",
-            )
-            for row in cursor.fetchall()
-        ]
+        meta_tables = {
+            "insert": (oedb_table._insert_table, extended_columns),
+            "update": (oedb_table._edit_table, extended_columns),
+            "delete": (oedb_table._delete_table, ["_id", "id", "_submitted"]),
+        }
 
-        update_sa_table = oedb_table._edit_table.get_sa_table()
-        _execute(
-            cursor,
-            'select * from "{schema}"."{table}" where _applied = FALSE;'.format(
-                schema=update_sa_table.schema, table=update_sa_table.name
-            ),
-        )
-        changes += [
-            add_type(
-                {
-                    c.name: v
-                    for c, v in zip(cursor.description, row)
-                    if c.name in extended_columns
-                },
-                "update",
+        changes = []
+        for change_type in change_types:
+            meta_table, relevant_columns = meta_tables[change_type]
+            meta_sa_table = meta_table.get_sa_table()
+            _execute(
+                cursor,
+                'select * from "{schema}"."{table}" where _applied = FALSE;'.format(
+                    schema=meta_sa_table.schema, table=meta_sa_table.name
+                ),
             )
-            for row in cursor.fetchall()
-        ]
+            changes += [
+                add_type(
+                    {
+                        c.name: v
+                        for c, v in zip(cursor.description, row)
+                        if c.name in relevant_columns
+                    },
+                    change_type,
+                )
+                for row in cursor.fetchall()
+            ]
 
-        delete_sa_table = oedb_table._delete_table.get_sa_table()
-        _execute(
-            cursor,
-            'select * from "{schema}"."{table}" where _applied = FALSE;'.format(
-                schema=delete_sa_table.schema, table=delete_sa_table.name
-            ),
-        )
-        changes += [
-            add_type(
-                {
-                    c.name: v
-                    for c, v in zip(cursor.description, row)
-                    if c.name in ["_id", "id", "_submitted"]
-                },
-                "delete",
-            )
-            for row in cursor.fetchall()
-        ]
-
-        changes = list(changes)
         sa_table = oedb_table._main_table.get_sa_table()
 
         # ToDo: This may require some kind of dependency tree resolution
@@ -1407,13 +1381,14 @@ def apply_changes(table_obj: Table, cursor: AbstractCursor | None = None):
             if prev_type and change["_type"] != prev_type:
                 _apply_stack(cursor, sa_table, change_batch, prev_type)
                 change_batch = []
-            else:
-                change_batch.append((distilled_change, change["_id"]))
+            change_batch.append((distilled_change, change["_id"]))
             prev_type = change["_type"]
-        if prev_type:
+        if change_batch:
             _apply_stack(cursor, sa_table, change_batch, prev_type)
         if artificial_connection:
             connection.commit()
+        if changes:
+            table_obj.stamp_data_modified()
     except Exception:
         if artificial_connection:
             connection.rollback()
@@ -1450,15 +1425,16 @@ def set_applied(
     else:
         raise NotImplementedError
 
+    # Set-based comparison instead of an N-term OR chain; the extra
+    # `_applied = FALSE` condition lets the partial index on unapplied
+    # rows serve this update.
     update_query = (
         meta_sa_table.update()
-        .where(sql.or_(*(meta_sa_table.c._id == i for i in rids)))
+        .where(meta_sa_table.c._id.in_(list(rids)))
+        .where(meta_sa_table.c._applied == sql.false())
         .values(_applied=True)
-        .compile()
     )
-
-    query = str(update_query)
-    _execute(session, query, update_query.params)
+    execute_sqla(update_query, session)
 
 
 def apply_insert(session: AbstractCursor | Session, sa_table: "SATable", rows, rids):
@@ -1470,23 +1446,23 @@ def apply_insert(session: AbstractCursor | Session, sa_table: "SATable", rows, r
 
 def apply_update(session: AbstractCursor | Session, sa_table, rows, rids):
     logger.debug("apply updates (%d)", len(rids))
-    for row, rid in zip(rows, rids):
+    for row in rows:
         pks = [c.name for c in sa_table.columns if c.primary_key]
         query = sa_table.update(
             *[getattr(sa_table.c, pk) == row[pk] for pk in pks]
         ).values(row)
         execute_sqla(query, session)
-        set_applied(session, sa_table, [rid], __UPDATE)
+    set_applied(session, sa_table, list(rids), __UPDATE)
 
 
 def apply_deletion(session: AbstractCursor | Session, sa_table: "SATable", rows, rids):
     logger.debug("apply deletion (%d)", len(rids))
-    for row, rid in zip(rows, rids):
+    for row in rows:
         query = sa_table.delete().where(
             *[getattr(sa_table.c, col) == row[col] for col in row]
         )
         execute_sqla(query, session)
-        set_applied(session, sa_table, [rid], __DELETE)
+    set_applied(session, sa_table, list(rids), __DELETE)
 
 
 def update_meta_search(table: str) -> None:
@@ -1510,6 +1486,10 @@ def update_meta_search(table: str) -> None:
 
 def set_table_metadata(table: str, metadata):
     """saves metadata as json string on table comment.
+
+    The one metadata write path: it also recomputes the stored Publish gate
+    verdict (``Table.publishable``) and stamps ``Table.metadata_modified``,
+    both in the same save.
 
     Args:
         table(str): name of table
@@ -1537,6 +1517,10 @@ def set_table_metadata(table: str, metadata):
 
     django_table_obj = Table.objects.get(name=table)
     django_table_obj.oemetadata = metadata_obj  # type: ignore
+    # the Publish gate's verdict on the metadata just written, and when it
+    # was written, saved with it
+    django_table_obj.publishable = is_publishable(django_table_obj)
+    django_table_obj.metadata_modified = timezone.now()
     django_table_obj.save()
 
     # ---------------------------------------
@@ -1573,8 +1557,7 @@ def get_single_table_size(table_obj: Table) -> dict | None:
             pg_size_pretty(pg_total_relation_size(format('%I.%I', :schema, :table))) AS total_pretty
     """)  # noqa: E501
 
-    sess = _create_oedb_session()
-    try:
+    with oedb_session() as sess:
         res = _execute(
             sess, sql, {"schema": table_obj.oedb_schema, "table": table_obj.name}
         )
@@ -1585,8 +1568,6 @@ def get_single_table_size(table_obj: Table) -> dict | None:
         for k in ("table_bytes", "index_bytes", "total_bytes"):
             d[k] = int(d[k])
         return d
-    finally:
-        sess.close()
 
 
 def list_table_sizes() -> list[dict]:
@@ -1608,8 +1589,7 @@ def list_table_sizes() -> list[dict]:
         ORDER BY pg_total_relation_size(format('%I.%I', table_schema, table_name)) DESC
     """)  # noqa: E501
 
-    sess = _create_oedb_session()
-    try:
+    with oedb_session() as sess:
         res = _execute(sess, sql)
         rows = res.fetchall() or []
         out = []
@@ -1619,8 +1599,6 @@ def list_table_sizes() -> list[dict]:
                 m[k] = int(m[k])
             out.append(m)
         return out
-    finally:
-        sess.close()
 
 
 def table_has_row_with_id(table: Table, id: int | str, id_col: str = "id") -> bool:
@@ -1776,7 +1754,7 @@ def data_insert(request: dict, context: dict) -> dict:
         ]
     response["rowcount"] = cursor.rowcount
 
-    apply_changes(table_obj, cursor)
+    apply_changes(table_obj, cursor, change_types=("insert",))
 
     return response
 
@@ -1801,7 +1779,7 @@ def data_delete(request: dict, context: dict) -> dict:
     )
 
     result = __change_rows(table_obj, request, context, sa_table_delete, setter, ["id"])
-    apply_changes(table_obj, cursor)
+    apply_changes(table_obj, cursor, change_types=("delete",))
     return result
 
 
@@ -1825,7 +1803,7 @@ def data_update(request: dict, context: dict) -> dict:
         setter = dict(zip(field_names, setter))
     cursor = load_cursor_from_context(context)  # TODO:
     result = __change_rows(table_obj, request, context, sa_table_edit, setter)
-    apply_changes(table_obj, cursor)
+    apply_changes(table_obj, cursor, change_types=("update",))
     return result
 
 
@@ -2504,6 +2482,17 @@ def do_recover_twophase(request: dict, context: dict) -> dict:
 
 def open_raw_connection(request: dict, context: dict) -> dict:
     session_context = SessionContext(owner=context.get("user"))
+    return {"connection_id": session_context.connection._id}
+
+
+def open_request_connection(context: dict) -> dict:
+    """Open a connection for one request that brought none of its own.
+
+    Unlike `open_raw_connection`, which serves `advanced/connection/open`, this
+    one is closed when the request ends, so it does not count against the
+    connection limits -- see `api/sessions.py` and issue #2492.
+    """
+    session_context = SessionContext(owner=context.get("user"), counted=False)
     return {"connection_id": session_context.connection._id}
 
 

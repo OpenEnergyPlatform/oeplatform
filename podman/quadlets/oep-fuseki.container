@@ -10,7 +10,9 @@ After=network-online.target
 Image=docker.io/stain/jena-fuseki:5.1.0
 ContainerName=fuseki
 EnvironmentFile=%h/.config/oeplatform/oep.env
-Volume=fuseki-databases.volume:/home/fuseki/databases
+# The image keeps everything (datasets, registry, shiro.ini) under
+# FUSEKI_BASE=/fuseki; anything not mounted there is lost on restart.
+Volume=fuseki-databases.volume:/fuseki
 PublishPort=3030:3030
 Network=oep.network
 

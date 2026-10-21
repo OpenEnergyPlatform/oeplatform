@@ -9,6 +9,12 @@ import BundleScenariosGridItem from "../styles/oep-theme/components/editBundleSc
 import { getCheckedWithParents } from './scenarioBundleUtilityComponents/treeUtils';
 import axios from "axios";
 import CSRFToken from "./csrfToken.js";
+import uuid from "react-uuid";
+import {
+  mergeSelection,
+  unlistedLinks,
+  visibleSelection,
+} from "./datasetSelection.js";
 import conf from "../conf.json";
 import LCC from "../data/countries.json";
 
@@ -61,12 +67,12 @@ export default function Scenario(props) {
   // Helper to handle multiselect changes for input/output datasets
   // It converts the simple array from Autocomplete back to your { key, value } structure
   const handleMultiselectChange = (newValue, type) => {
-    // 1. Convert the Autocomplete array back to your app's structure
-    const updatedStructure = newValue.map((item, index) => ({
-      key: item.id ? `dataset_${item.id}` : `new_${Date.now()}_${index}`, // Maintain stable keys if possible
-      idx: index, // Ensure idx is set
-      value: item
-    }));
+    // 1. Merge the selection into the stored links: a link the field cannot
+    // show is kept, a kept link keeps its key, a new one gets a fresh uuid.
+    // The save replaces the whole bundle, so anything dropped here is deleted
+    // from the graph (#2522).
+    const stored = type === 'input' ? scenariosInputDatasetsObj : scenariosOutputDatasetsObj;
+    const updatedStructure = mergeSelection(stored, newValue, dataTableList, uuid);
 
     // 2. Update Local State AND Call the Backend/Parent Handler
     if (type === 'input') {
@@ -87,6 +93,16 @@ export default function Scenario(props) {
         scenariosOutputDatasetsHandler(updatedStructure, data.id);
       }
     }
+  };
+
+  // Links the dataset field cannot show are still stored and still saved;
+  // say so under the field rather than letting them look deleted.
+  const unlistedHint = (stored) => {
+    if (dataTableList.length === 0) return undefined; // list not loaded yet
+    const rest = unlistedLinks(stored, dataTableList);
+    if (rest.length === 0) return undefined;
+    const names = rest.map((link) => link.value?.label || link.value?.url).join(", ");
+    return `Also linked, not in this list (kept when you save): ${names}`;
   };
 
   // Sorted country list
@@ -316,10 +332,7 @@ export default function Scenario(props) {
               getOptionLabel={(option) => option.label || ""}
 
               // 1. We transform your state {key, value} into a simple array [value, value] for MUI
-              value={scenariosInputDatasetsObj
-                .map((item) => dataTableList.find((o) => o.label === item.value.label))
-                .filter(Boolean) // Filter out undefined to prevent crashes
-              }
+              value={visibleSelection(scenariosInputDatasetsObj, dataTableList)}
 
               // 2. When selection changes, we rebuild your state structure
               onChange={(_, newValue) => handleMultiselectChange(newValue, 'input')}
@@ -329,6 +342,7 @@ export default function Scenario(props) {
                   {...params}
                   variant="outlined"
                   label="Select Input Datasets"
+                  helperText={unlistedHint(scenariosInputDatasetsObj)}
                   placeholder="Search datasets..."
                   size="small"
                   fullWidth // corrected lowercase 'fullwidth' warning
@@ -357,10 +371,7 @@ export default function Scenario(props) {
               getOptionLabel={(option) => option.label || ""}
 
               // 1. Transform State -> View
-              value={scenariosOutputDatasetsObj
-                .map((item) => dataTableList.find((o) => o.label === item.value.label))
-                .filter(Boolean)
-              }
+              value={visibleSelection(scenariosOutputDatasetsObj, dataTableList)}
 
               // 2. Transform View -> State
               onChange={(_, newValue) => handleMultiselectChange(newValue, 'output')}
@@ -370,6 +381,7 @@ export default function Scenario(props) {
                   {...params}
                   variant="outlined"
                   label="Select Output Datasets"
+                  helperText={unlistedHint(scenariosOutputDatasetsObj)}
                   placeholder="Search datasets..."
                   size="small"
                   fullWidth

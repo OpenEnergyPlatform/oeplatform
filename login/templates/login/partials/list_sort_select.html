@@ -1,0 +1,24 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+A list's "Sort by" select, from ``ListPage.sort_options``: what a list too
+narrow for its column headers sorts with (its CSS shows it only then). It
+sits in the swapped region, so it always shows the sort on screen. The
+page's module rewrites its request from the address bar, so a change keeps
+every filter and returns to page 1, as a click on a column header does.
+{% endcomment %}
+<div class="dash-sortby">
+  <label class="dash-sortby__label" for="sort-select">Sort by</label>
+  <select id="sort-select"
+          name="sort"
+          class="form-select form-select-sm"
+          hx-get="{{ page.path }}"
+          hx-trigger="change"
+          data-list-sort>
+    {% for option in page.sort_options %}
+      <option value="{{ option.value }}"
+              {% if option.selected %}selected{% endif %}>{{ option.label }}</option>
+    {% endfor %}
+  </select>
+</div>

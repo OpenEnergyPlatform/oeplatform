@@ -1,0 +1,5 @@
+@use '../base/' as *;
+
+.collapse .card {
+  @extend .mb-3;
+}

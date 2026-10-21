@@ -1,196 +1,96 @@
+// tabs: a row of underline tabs (#2648). The active tab is primary with a
+// primary bar under it, the others muted; one thin line runs under the row.
+// It replaces Bootstrap's boxed tabs and the theme's three older tab rows
+// (the table page's, the peer review pages' and the dashboard's). Pure CSS,
+// no include.
+// Catalogue entry: base/templates/styleguide/entries/tabs.html.
+//
+// Markup: `nav tabs` on the row, `nav-link` on each tab, `active` on the
+// current one (Bootstrap's tab script sets it for in-page panes; a row of
+// links to other pages renders it, with `aria-current="page"`). A row of
+// panes is a `ul[role=tablist]`; a row of pages is a `nav` with an
+// `aria-label`.
+//
+// A row holds tabs and at most one aside link at its end (`tabs__aside`): an
+// icon link to somewhere that is not a tab (the dashboard's Settings gear),
+// never active. An action never sits in a tab row; it goes beside or above.
+//
+// On a narrow screen the row scrolls sideways instead of wrapping. The aside
+// link stays pinned at the right edge with a fade in front of it, which is
+// also the hint that more tabs lie underneath. The fade blends into
+// `--tabs-bg`: a row on a band (the page header's) sets it to the band's
+// surface.
+//
+// A dropdown inside a row must be positioned against the window
+// (`data-bs-popper-config='{"strategy": "fixed"}'` on its toggle), or the
+// row's scrolling cuts it off.
 @use '../base/' as *;
-@use '../base/mixins' as *;
 
-.table-tabs {
-    @extend .fs-7;
-    @include flex-row;
-    padding-top: $C--padding-standard;
-    padding-bottom: $C--padding-standard;
+.tabs {
+    --tabs-bg: var(--oep-surface);
+    --bs-nav-link-padding-x: 0.25rem;
+    --bs-nav-link-padding-y: 0.625rem;
+    --bs-nav-link-font-weight: #{$font-weight-semibold};
+    --bs-nav-link-color: var(--oep-text-muted);
+    --bs-nav-link-hover-color: var(--bs-primary);
+    --bs-nav-link-disabled-color: var(--oep-text-muted);
+    display: flex;
+    flex-wrap: nowrap;
+    column-gap: 1.75rem;
+    // Inside a flex bar beside other things, the row takes the room left
+    // and scrolls rather than pushing them out.
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-bottom: 0;
+    padding-left: 0;
+    list-style: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+    // The line under the row, drawn inside it so that the active bar, drawn
+    // inside the tab, covers it.
+    box-shadow: inset 0 -1px 0 var(--bs-border-color);
 
-    @include media-breakpoint-up(md) {
-        justify-content: center;
+    .nav-item {
+        flex: 0 0 auto;
     }
 
-    &__container {
-        @include flex-row;
-        position: relative;
-        width: 100%;
-        margin: 0 $C--padding-standard;
+    .nav-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        white-space: nowrap;
+        background-color: transparent;
+        border-width: 0;
+        border-radius: 0;
 
-        @include media-breakpoint-up(md) {
-            max-width: $C--container-width;
-            padding-right: calc(#{$C--db-side-width} + #{$C--padding-standard} * 2);
+        &:hover {
+            box-shadow: inset 0 -2px 0 var(--oep-border-strong);
         }
-
-        @include media-breakpoint-up(x3l) {
-            max-width: $C--container-width-x3l;
-        }
-
-        @include media-breakpoint-up(x4l) {
-            max-width: $C--container-width-x4l;
-        }
-
-        @include media-breakpoint-up(x5l) {
-            max-width: $C--container-width-x5l;
-        }
-
-        &.table-tabs__container--100w {
-            @extend .w-100;
-            @extend .pe-0;
-        }
-    }
-
-    .nav-tabs {
-        width: 100%;
-
-        .nav-item {
-            @extend .fw-semibold;
-            @extend .border-bottom;
-        }
-
-        .nav-link {
-            @extend .position-relative;
-            color: $gray-600;
-            border: none;
-            border-bottom: 4px solid $white;
-        }
-
-        .nav-link.active {
-            color: $secondary;
-            border-bottom-color: $secondary;
-        }
-
-        .nav-link svg {
-            @extend .me-1;
-            fill: $black;
-        }
-
-        .nav-link.active svg {
-            fill: $secondary;
-        }
-
-        .nav-link.status::after {
-            content: "";
-            @extend .position-absolute;
-            @extend .rounded-circle;
-            @extend .bg-danger;
-            top: 10px;
-            right: 6px;
-            width: 6px;
-            height: 6px;
-        }
-
-        .nav-link.status.status--done::after {
-            @extend .bg-success;
-        }
-    }
-}
-
-.fullwidth-tabs {
-    @extend .table-tabs;
-    @extend .px-4;
-    width: 100%;
-
-    &__container {
-        @include flex-row;
-        @extend .justify-content-between;
-        @extend .border-bottom;
-        width: 100%;
-
-        @include media-breakpoint-up(md) {
-            padding-right: 0!important;
-        }
-
-        @include media-breakpoint-up(xxl) {
-            max-width: $C--container-width;
-        }
-
-        @include media-breakpoint-up(x3l) {
-            max-width: $C--container-width-x3l;
-        }
-
-        @include media-breakpoint-up(x4l) {
-            max-width: $C--container-width-x4l;
-        }
-
-        @include media-breakpoint-up(x5l) {
-            max-width: $C--container-width-x5l;
-        }
-    }
-
-    .nav {
-        &.nav-tabs {
-            @extend .border-0;
-            @extend .w-auto;
-
-            .nav-item {
-                @extend .border-0;
-            }
-        }
-    }
-
-    &__save-btns {
-        @extend .d-flex;
-        @extend .flex-row;
-        @extend .pb-3;
-    }
-
-    &__save-btn {
-        @extend .ps-2;
-
-        &--summary button {
-            @extend .btn;
-            @extend .btn-primary;
-        }
-
-        &--save button,
-        &--save a {
-            @extend .btn;
-            @extend .btn-outline-primary;
-        }
-
-        &--quit button {
-            @extend .btn;
-            @extend .btn-light;
-
-        }
-    }
-}
-
-.pages-nav-tabs {
-    @extend .pb-2;
-    @extend .mb-4;
-    @extend .border-bottom;
-
-    a {
-        @extend .pb-2;
-        @extend .text-secondary;
-        @extend .fw-bold;
-        @extend .fs-6;
-        @extend .text-decoration-none;
-        @extend .px-4;
 
         &.active {
-            @extend .border-bottom;
-            @extend .border-secondary;
-            @extend .border-4;
+            color: var(--bs-primary);
+            box-shadow: inset 0 -3px 0 var(--bs-primary);
         }
     }
 
-    svg {
-        @extend .me-1;
-        vertical-align: text-bottom;
-    }
+    &__aside {
+        position: sticky;
+        right: 0;
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        margin-left: auto;
+        padding: var(--bs-nav-link-padding-y) 0 var(--bs-nav-link-padding-y) 1.5rem;
+        color: var(--oep-text-muted);
+        font-size: 1.125rem;
+        text-decoration: none;
+        background: linear-gradient(to right, transparent, var(--tabs-bg) 1.25rem);
+        box-shadow: inset 0 -1px 0 var(--bs-border-color);
 
-    @include media-breakpoint-down(lg) {
-        a {
-            font-size: 1rem !important;
-            padding-right: 0.75rem !important;
-            padding-left: 0.75rem !important;
-        }
-
-        svg {
-            display: none !important;
+        &:hover,
+        &:focus-visible {
+            color: var(--bs-primary);
         }
     }
 }

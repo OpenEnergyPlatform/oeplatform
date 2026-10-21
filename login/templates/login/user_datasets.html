@@ -1,37 +1,53 @@
-{% extends "base/base-profile.html" %}
-{% load compress %}
-{% load static %}
-{% block main-content-body %}
-  {% if profile_user == request.user %}
-    {% include "login/user_nav.html" %}
-    {% include "login/partials/datasets_sections.html" %}
-  {% endif %}
-{% endblock %}
-{% block main-right-sidebar-content %}
-  {% include "login/sidebar_user.html" %}
-{% endblock main-right-sidebar-content %}
-{% block after-body-bottom-js %}
-  {% compress js %}
-    <script src="{% static 'ontology/htmx.js' %}"></script>
-  {% endcompress %}
-  <script type="text/javascript">
-    function getCookie(name) {
-      let cookieValue = null;
-      if (document.cookie && document.cookie !== "") {
-        const cookies = document.cookie.split(";");
-        for (let i = 0; i < cookies.length; i++) {
-          const cookie = cookies[i].trim();
-          if (cookie.startsWith(name + "=")) {
-            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-            break;
-          }
-        }
-      }
-      return cookieValue;
-    }
+{% extends "login/list_tab.html" %}
+{% comment %}
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
 
-    document.body.addEventListener("htmx:configRequest", function (event) {
-      event.detail.headers["X-CSRFToken"] = getCookie("csrftoken");
-    });
+The datasets tab (list_tab.html), where the profile opens. The filter row is
+Search, Topic and Tag; "More filters (n)" holds Created and Modified. The
+bar folds behind "Filters (n)" only where the rows already stack (measured,
+``datasets_tab.css``). It keeps the profile sidebar, like the tables tab. The
+members drawer (#dataset-members) sits beside the action dialog.
+{% endcomment %}
+{% load static %}
+{% block list-styles %}
+  <link rel="stylesheet" href="{% static 'login/datasets_tab.css' %}" />
+{% endblock list-styles %}
+{% block region %}
+  {% include "login/partials/datasets_region.html" %}
+{% endblock region %}
+{% block drawers %}
+  {% comment %}
+  The members drawer, outside the tab for the same reason as the dialog. Its
+  contents come from login:dataset-members and every change in it replaces
+  them, so it stays open; datasets_tab.js opens it once "Manage tables…", a
+  Tables popover's "and n more" or the publish dialog's "Manage tables…" has
+  filled it. ``data-url-template`` is that address for any Dataset
+  (``__key__`` stands for its name), which the script uses to open the
+  drawer by itself: on a load or history restore whose ``?members=`` names
+  one of the user's own Datasets (``data-open``, with the Dataset's ⋯ as where
+  focus returns), and after a Create. The live region outside the swapped
+  contents says what each change did.
+  {% endcomment %}
+  {% url 'login:dataset-members' profile_user.pk "__key__" as members_template %}
+  <div id="dataset-members"
+       class="offcanvas offcanvas-end dash-members-offcanvas"
+       tabindex="-1"
+       aria-labelledby="dataset-members-title"
+       data-url-template="{{ members_template }}"
+       {% if members_open %}data-open="{{ members_open.name }}" data-open-origin="menu-{{ members_open.pk }}"{% endif %}>
+    <div id="dataset-members-live"
+         class="visually-hidden"
+         aria-live="polite"
+         aria-atomic="true"></div>
+    <div id="dataset-members-body" class="dash-members-body"></div>
+  </div>
+{% endblock drawers %}
+{% block list-script %}
+  <script type="module">
+    import { bindDatasetsTab } from "{% static 'login/datasets_tab.js' %}";
+
+    bindDatasetsTab(document);
   </script>
-{% endblock after-body-bottom-js %}
+{% endblock list-script %}

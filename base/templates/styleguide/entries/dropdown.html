@@ -1,0 +1,44 @@
+{# use: A short list of choices or actions behind one button or tab; every dropdown looks like the navbar's, with no class of its own. #}
+<div class="d-flex flex-wrap gap-4 align-items-start">
+  <div class="dropdown">
+    <button class="btn btn-link dropdown-toggle"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false">Metadata options</button>
+    <ul class="dropdown-menu">
+      <li>
+        <h6 class="dropdown-header">Download</h6>
+      </li>
+      <li>
+        <a class="dropdown-item" href="#dropdown">JSON</a>
+      </li>
+      <li>
+        <a class="dropdown-item" href="#dropdown">Open the metadata API page</a>
+      </li>
+      <li>
+        <hr class="dropdown-divider" />
+      </li>
+      <li>
+        <a class="dropdown-item" href="#dropdown">Edit</a>
+      </li>
+    </ul>
+  </div>
+  <ul class="dropdown-menu d-block position-static"
+      aria-label="The same menu, shown open">
+    <li>
+      <h6 class="dropdown-header">Download</h6>
+    </li>
+    <li>
+      <a class="dropdown-item" href="#dropdown">JSON</a>
+    </li>
+    <li>
+      <a class="dropdown-item" href="#dropdown">Open the metadata API page</a>
+    </li>
+    <li>
+      <hr class="dropdown-divider" />
+    </li>
+    <li>
+      <a class="dropdown-item" href="#dropdown">Edit</a>
+    </li>
+  </ul>
+</div>

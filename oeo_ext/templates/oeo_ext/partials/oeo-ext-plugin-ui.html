@@ -13,7 +13,7 @@
     provide the link shortly.
   </div>
   <br />
-  <span class="early-access">Early Access</span>
+  <span class="badge badge--info">Early Access</span>
   <div>
     This feature is still a research prototype and offers only a minimal user
     experience. After you successfully create a new composed unit, you need to
@@ -67,12 +67,13 @@
     {% endif %}
     {% if form.definition.value %}
       <div class="mb-2">
-        <label for="definition" class="form-label">Optional - Definition:</label>
+        <label for="definition"
+               class="form-label">Optional - Definition:</label>
         {{ form.definition }}
         <div class="invalid-feedback">{{ form.definition.errors }}</div>
       </div>
     {% endif %}
-    <button type="submit" class="btn btn-success">Save</button>
+    <button type="submit" class="btn btn-primary">Save</button>
   </form>
 </div>
 <script>

@@ -1,0 +1,69 @@
+// button: every action on the platform, in one of four roles (#2641).
+//
+// - primary (`btn-primary`): solid, the one main action of a view or dialog;
+// - secondary (`btn-secondary`, or `btn-outline-secondary`, which looks the
+//   same): a grey outline, every less important action;
+// - danger: `btn-outline-danger` on the button that opens a confirmation,
+//   solid `btn-danger` only inside it;
+// - link (`btn-link`).
+//
+// Plus one style for a light button on a blue band (`btn-on-strong`), the
+// homepage hero's, for the navbar's Sign up. Green, cyan, yellow and black are
+// status colours, never a button. Primary, danger and link are Bootstrap's own
+// classes pointed at the tokens in scss/tokens/_remap.scss; this file holds
+// what the house adds to them: the secondary role's look, which is not
+// Bootstrap's, and the light button. A partial that `@extend`s
+// `.btn-secondary` must `@use` this file to get that look.
+// Catalogue entry: base/templates/styleguide/entries/button.html.
+@use '../base/' as *;
+
+.btn {
+    letter-spacing: 0.03rem;
+
+    &-link {
+        @extend .text-decoration-none;
+        @extend .fw-semibold;
+    }
+
+    &__icon {
+        @extend .me-1;
+    }
+}
+
+// The secondary role is a grey outline on the surface, not Bootstrap's solid
+// grey. `btn-outline-secondary`, Bootstrap's own name for an outline in the
+// secondary colour, is the same role and looks the same.
+.btn-secondary,
+.btn-outline-secondary {
+    --bs-btn-color: var(--bs-secondary);
+    --bs-btn-bg: var(--oep-surface);
+    --bs-btn-border-color: var(--oep-border-strong);
+    --bs-btn-hover-color: var(--bs-body-color);
+    --bs-btn-hover-bg: var(--oep-surface-subtle);
+    --bs-btn-hover-border-color: var(--bs-secondary);
+    --bs-btn-focus-box-shadow: 0 0 0 #{$input-btn-focus-width} color-mix(in srgb, var(--bs-secondary) 50%, transparent);
+    --bs-btn-active-color: var(--bs-body-color);
+    --bs-btn-active-bg: var(--oep-surface-hover);
+    --bs-btn-active-border-color: var(--bs-secondary);
+    --bs-btn-disabled-color: var(--bs-secondary);
+    --bs-btn-disabled-bg: var(--oep-surface);
+    --bs-btn-disabled-border-color: var(--oep-border-strong);
+}
+
+// The light button on a `--oep-surface-strong` band (the hero's light button,
+// which keeps its own classes on the homepage).
+.btn-on-strong {
+    --bs-btn-color: var(--bs-primary);
+    --bs-btn-bg: var(--oep-surface-subtle);
+    --bs-btn-border-color: var(--oep-surface-subtle);
+    --bs-btn-hover-color: var(--bs-primary);
+    --bs-btn-hover-bg: var(--oep-surface);
+    --bs-btn-hover-border-color: var(--oep-surface);
+    --bs-btn-focus-box-shadow: 0 0 0 #{$input-btn-focus-width} color-mix(in srgb, var(--oep-on-strong) 50%, transparent);
+    --bs-btn-active-color: var(--bs-primary);
+    --bs-btn-active-bg: var(--oep-surface);
+    --bs-btn-active-border-color: var(--oep-surface);
+    --bs-btn-disabled-color: var(--bs-primary);
+    --bs-btn-disabled-bg: var(--oep-surface-subtle);
+    --bs-btn-disabled-border-color: var(--oep-surface-subtle);
+}

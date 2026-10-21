@@ -1,16 +1,14 @@
-{% extends "account/base.html" %}
+{% extends "allauth/layouts/base.html" %}
 {% load i18n %}
 {% load allauth %}
 {% block head_title %}
   {% trans "Verify Your Email Address" %}
 {% endblock head_title %}
 {% block content %}
-  {% element h1 %}
-  {% trans "Verify Your Email Address" %}
-{% endelement %}
-{% url 'account_email' as email_url %}
-{% element p %}
-{% blocktrans %}
+  <h1 class="login__heading">{% trans "Verify Your Email Address" %}</h1>
+  {% url 'account_email' as email_url %}
+  {% element p %}
+  {% blocktrans %}
       This part of the site requires us to verify that you are who you claim to
       be. For this purpose, we require that you verify ownership of your email
       address.

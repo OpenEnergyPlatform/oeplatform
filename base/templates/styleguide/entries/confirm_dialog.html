@@ -1,0 +1,26 @@
+{# use: Before an action the user may regret: a title naming the action, what will happen, Cancel and the verb (solid red when it cannot be undone; typed for a high bar). Never the browser's confirm(); a template asks with hx-confirm or data-confirm, a script with window.oep.confirm. #}
+<div class="d-grid gap-4">
+  {% include "components/confirm_dialog.html" with as_example=True title="Publish table?" text="Everyone can then find and read the table." verb="Publish" %}
+  {% include "components/confirm_dialog.html" with as_example=True title="Remove member?" text="Ada Lovelace leaves Grid research and loses every permission the organization gave her." verb="Remove member" danger=True %}
+  {% include "components/confirm_dialog.html" with as_example=True title="Delete table?" text="The table, its data and its metadata are deleted. This cannot be undone." verb="Delete table" danger=True typed="wind_farms" %}
+  <div class="d-flex flex-wrap gap-2">
+    <button type="button"
+            class="btn btn-secondary"
+            data-confirm="Everyone can then find and read the table."
+            data-confirm-title="Publish table?"
+            data-confirm-verb="Publish">Try plain</button>
+    <button type="button"
+            class="btn btn-outline-danger"
+            data-confirm="Ada Lovelace leaves Grid research and loses every permission the organization gave her."
+            data-confirm-title="Remove member?"
+            data-confirm-verb="Remove member"
+            data-confirm-danger>Try danger</button>
+    <button type="button"
+            class="btn btn-outline-danger"
+            data-confirm="The table, its data and its metadata are deleted. This cannot be undone."
+            data-confirm-title="Delete table?"
+            data-confirm-verb="Delete table"
+            data-confirm-danger
+            data-confirm-typed="wind_farms">Try typed</button>
+  </div>
+</div>

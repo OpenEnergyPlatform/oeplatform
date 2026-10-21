@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Connections by state, database sizes. Logs in as the read-only role
+# oep_monitoring (pg_monitor); its password is DATA_SOURCE_PASS in monitoring.env.
+
+[Unit]
+Description=OEP monitoring: database metrics (postgres exporter)
+After=oep-postgres.service
+
+[Container]
+Image=quay.io/prometheuscommunity/postgres-exporter:v0.20.1
+ContainerName=oep-mon-postgres
+EnvironmentFile=%h/.config/oeplatform/monitoring.env
+Environment=DATA_SOURCE_URI=postgres:5432/postgres?sslmode=disable
+Environment=DATA_SOURCE_USER=oep_monitoring
+Network=oep.network
+
+[Service]
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

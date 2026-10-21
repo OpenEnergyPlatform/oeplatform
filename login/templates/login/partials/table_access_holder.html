@@ -1,0 +1,69 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+One Holder in the access drawer: a user or an Organization (with its member
+count) and its role, the viewer's own entries marked. A Table admin gets a
+role choice, which posts on change, and Remove; anyone else reads the role.
+The role choice offers ``holder.roles``: an Organization stops at Data
+maintainer, and one holding Admin from before that rule can only be lowered.
+Expects ``holder``, ``access`` and ``access_url``. A grant below every
+role (stored as "None") shows as "No role" until it is changed.
+{% endcomment %}
+{% with key=holder.dom_id %}
+  <li id="holder-{{ key }}"
+      class="dash-holder{% if holder.you %} dash-holder--you{% endif %}">
+    <span class="dash-holder__name">
+      {{ holder.name }}
+      {% if holder.you %}
+        <span class="dash-holder__you">{% if holder.kind == "user" %}you{% else %}your organization{% endif %}</span>
+      {% endif %}
+      {% if holder.kind == "org" %}
+        <span class="dash-holder__members">{{ holder.members }} member{{ holder.members|pluralize }}</span>
+      {% endif %}
+    </span>
+    {% if access.can_manage %}
+      <div class="dash-holder__controls">
+        <form class="dash-holder__role"
+              hx-post="{{ access_url }}"
+              hx-target="#table-access-body"
+              hx-swap="innerHTML"
+              hx-trigger="change">
+          {% csrf_token %}
+          <input type="hidden" name="op" value="change" />
+          <input type="hidden" name="holder" value="{{ holder.key }}" />
+          <label class="visually-hidden"
+                 for="access-role-{{ key }}">Role of {{ holder.name }}</label>
+          <select id="access-role-{{ key }}"
+                  name="level"
+                  class="form-select form-select-sm">
+            {% if not holder.has_role %}
+              <option value="{{ holder.level }}"
+                      selected
+                      disabled>{{ holder.role }}</option>
+            {% endif %}
+            {% for role in holder.roles %}
+              <option value="{{ role.level }}"
+                      {% if role.level == holder.level %}selected{% endif %}>
+                {{ role.label }}
+              </option>
+            {% endfor %}
+          </select>
+        </form>
+        <form hx-post="{{ access_url }}"
+              hx-target="#table-access-body"
+              hx-swap="innerHTML">
+          {% csrf_token %}
+          <input type="hidden" name="op" value="remove" />
+          <input type="hidden" name="holder" value="{{ holder.key }}" />
+          <button type="submit"
+                  id="access-remove-{{ key }}"
+                  class="btn btn-sm btn-outline-danger dash-holder__remove"
+                  aria-label="Remove {{ holder.name }}">Remove</button>
+        </form>
+      </div>
+    {% else %}
+      <span class="dash-holder__rolename">{{ holder.role }}</span>
+    {% endif %}
+  </li>
+{% endwith %}

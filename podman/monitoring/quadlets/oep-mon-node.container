@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Host CPU, memory, load and disks, read through the host's root mounted
+# read-only. Also exports the usage figures oep-mon-usage writes to textfile/.
+
+[Unit]
+Description=OEP monitoring: host metrics (node exporter)
+
+[Container]
+Image=quay.io/prometheus/node-exporter:v1.12.1
+ContainerName=oep-mon-node
+PodmanArgs=--pid=host
+SecurityLabelDisable=true
+Volume=/:/host:ro,rslave
+Volume=%h/.local/state/oep-monitoring/textfile:/textfile:ro
+Exec=--path.rootfs=/host --collector.textfile.directory=/textfile
+Network=oep.network
+
+[Service]
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

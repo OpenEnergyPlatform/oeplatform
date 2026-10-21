@@ -22,7 +22,8 @@ DATABASES = {
         'NAME': os.environ.get("OEP_DJANGO_NAME", "oep_django"),
 	    'USER': os.environ.get("OEP_DJANGO_USER", "postgres"),
 	    'PASSWORD': os.environ.get("OEP_DB_PW", "postgres"),
-	    'HOST': os.environ.get("OEP_DJANGO_HOST", "localhost")
+	    'HOST': os.environ.get("OEP_DJANGO_HOST", "localhost"),
+	    'PORT': os.environ.get("OEP_DJANGO_PORT", "5432"),
 	}
 }
 
@@ -37,8 +38,18 @@ else:
     ALLOWED_HOSTS = [] if DEBUG else ['localhost']
 
 TIME_OUT = 30
+# Both connection limits are counted per server process (see _LOCK in
+# api/sessions.py), so one account's real ceiling is processes x the limit.
+# They are a real ceiling while the daemon group serving /api/v0/advanced runs
+# one process, which that group's Apache configuration sets -- issue #2492.
 USER_CONNECTION_LIMIT = 4
-ANON_CONNECTION_LIMIT = 40
+# Shared by ALL anonymous clients together, not per visitor, and it counts only
+# explicit sessions (advanced/connection/open): each one holds a pooled
+# connection across requests. Kept well below the pool's per-process ceiling
+# (OEDB_POOL_SIZE + OEDB_MAX_OVERFLOW in oedb/connection.py, currently 17) so
+# that anonymous sessions cannot crowd out the one-request connections the
+# table view and the REST API need -- issues #2495 and #2492.
+ANON_CONNECTION_LIMIT = 4
 
 # This database connection is used for the actual data interfaces (App: dataedit)
 # This should not be linked with a potential user account of the OpenEnergyDatabase !!!
@@ -64,6 +75,22 @@ EMAIL_PORT = 25
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = [Path(BASE_DIR, "assets")]
+
+# Theming an instance without forking the platform: see "Theming an instance"
+# in the docs (docs/installation/guides/instance-theming.md). Both are optional
+# and comma-separated, so a container sets them as environment variables, the
+# same at image build and at run time.
+# Static paths of your stylesheets, linked after every platform stylesheet on
+# every page; collectstatic must find each, e.g. in STATICFILES_DIRS
+# ("instance/theme.css" for assets/instance/theme.css):
+INSTANCE_STYLESHEETS = [
+    p.strip() for p in os.environ.get("OEP_INSTANCE_STYLESHEETS", "").split(",") if p.strip()
+]
+# Template directories searched before the platform's, for brand/logo.html,
+# brand/name.html, brand/title_prefix.html and the legal pages:
+INSTANCE_TEMPLATE_DIRS = [
+    p.strip() for p in os.environ.get("OEP_INSTANCE_TEMPLATE_DIRS", "").split(",") if p.strip()
+]
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -111,20 +138,28 @@ CORS_ORIGIN_ALLOW_ALL = True
 DJANGO_VITE = {"default": {"dev_mode": os.environ.get("VITE_DEV_MODE", DEBUG), "manifest_path": Path(BASE_DIR, "assets", "manifest.json")}}
 VITE_DEV_SERVER_URL = os.environ.get("VITE_DEV_SERVER_URL" "http://vite:5173")
 
+# Sign-in through the NFDI RegApp AAI (OpenID Connect). Offered only when
+# OEP_REGAPP_CLIENT_ID is set; register
+# https://<OEP_URL>/accounts/oidc/RegApp/login/callback/ as the redirect URI.
+# OEP_REGAPP_SERVER_URL is "<issuer>/.well-known/openid-configuration".
+# Never list an app with an empty "provider_id": no login URL can be built for
+# it, and the sign-in and sign-up pages fail.
 SOCIALACCOUNT_PROVIDERS = {
     "openid_connect": {
-        # For each OAuth based provider, either add a ``SocialApp``
-        # (``socialaccount`` app) containing the required client
-        # credentials, or list them here:
-        "APPS": [{
-            "provider_id": "",
-            "name": "",
-            "client_id": "",
-            "secret": "",
-            "VERIFIED_EMAIL": True,
-            "EMAIL_AUTHENTICATION": True,
-            "settings": {"server_url": ""},
-        }]
+        "APPS": [
+            {
+                "provider_id": "RegApp",
+                "name": "NFDI-RegApp AAI",
+                "client_id": os.environ["OEP_REGAPP_CLIENT_ID"],
+                "secret": os.environ["OEP_REGAPP_SECRET"],
+                # No "verified_email": an address counts as verified only when
+                # the provider says so (its email_verified claim).
+                # Email authentication is on for every provider in settings.py.
+                "settings": {"server_url": os.environ["OEP_REGAPP_SERVER_URL"]},
+            }
+        ]
+        if os.environ.get("OEP_REGAPP_CLIENT_ID")
+        else [],
     }
 }
 
@@ -145,7 +180,15 @@ LOGGING = {
     },
     "root": {
         "handlers": ["console"],
-        "level": "DEBUG",
+        "level": "INFO",
+    },
+    "loggers": {
+        # Pinned rather than left to the root level, so turning the root back
+        # up to DEBUG to trace our own code does not also reinstate this. The
+        # test suite talks to a real Fuseki over HTTP, so at DEBUG urllib3
+        # writes one line per SPARQL query and update -- tens of thousands of
+        # lines per run, in which anything worth reading is lost.
+        "urllib3": {"level": "WARNING"},
     },
 }
 

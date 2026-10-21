@@ -1,0 +1,23 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+The Dataset select of the action dialog's Dataset choice
+(table_action_dataset.html), by title; the only choice is chosen already.
+{% endcomment %}
+<label class="form-label" for="action-dataset">Dataset</label>
+<select id="action-dataset"
+        name="dataset"
+        class="form-select{% if errors.dataset %} is-invalid{% endif %}"
+        required
+        {% if errors.dataset %}aria-describedby="action-dataset-error" aria-invalid="true"{% endif %}>
+  {% if check.datasets|length > 1 %}<option value="">Choose a dataset</option>{% endif %}
+  {% for dataset in check.datasets %}
+    <option value="{{ dataset.name }}"
+            {% if check.dataset.name == dataset.name or values.dataset == dataset.name %}selected{% endif %}>
+      {{ dataset.title }}
+    </option>
+  {% endfor %}
+</select>
+{% if errors.dataset %}<div id="action-dataset-error"
+     class="invalid-feedback">{{ errors.dataset }}</div>{% endif %}

@@ -1,50 +1,63 @@
 {% load modelview_extras %}
 {% load django_bootstrap5 %}
 {% if field|fieldtype == "CheckboxInput" and add %}
-  {% include 'modelview/editmodel_snippet_depend.html' with field=field.name add=add.name %}
+  {% include "modelview/editmodel_snippet_depend.html" with field=field.name add=add.name %}
 {% elif field|fieldtype == "Select" and add %}
-  {% include 'modelview/editmodel_snippet_depend.html' with field=field.name add=add.name condition='value != "Other"' %}
+  {% include "modelview/editmodel_snippet_depend.html" with field=field.name add=add.name condition='value != "Other"' %}
 {% endif %}
-<tr {% if class %}class="{{ class }}"{% endif %}
-    {% if visible %}style="display:{{ visible }}"{% endif %}>
-  <th class="formlabel">
-    {% bootstrap_label field.label %}
-    {% if field.field.required and field|fieldtype != 'CheckboxInput' %}
-      *
-    {% endif %}
-    {% if field.help_text and field.help_text != "" %}
-      <i data-bs-toggle="tooltip" title="{{ field.help_text }}">
-        <span class="fas fa-question"></span>
-      </i>
-    {% endif %}
-  </th>
-  <td>
-    {% if field|isArray %}
-      {% include 'modelview/array_snippet.html' with form=form %}
-    {% else %}
-      {% if not field|fieldtype == 'CheckboxInput' and not field|fieldtype == 'Select' or not add %}
-        {% if event %}
-          {% bootstrap_field field|addEvent:event show_label=False show_help=False set_required=False %}
-        {% else %}
-          {% if field|fieldtype == "CheckboxInput" %}
-            {{ field }}
-          {% else %}
-            {% bootstrap_field field show_label=False show_help=False set_required=False %}
-          {% endif %}
-        {% endif %}
+{# One field, label above. A checkbox is written out as a form-check rather #}
+{# than through bootstrap_field, so that its help sits beside its label. #}
+<div class="factsheet-field{% if class %} {{ class }}{% endif %}"
+     {% if visible %}style="display:{{ visible }}"{% endif %}>
+  {% if field|fieldtype == "CheckboxInput" %}
+    <div class="form-check">
+      {% assignClass field "form-check-input" as checkbox %}
+      {% if event %}
+        {{ checkbox|addEvent:event }}
+      {% elif add %}
+        {{ checkbox|addEvent:"onclick" }}
       {% else %}
-        {% if field|fieldtype == "CheckboxInput" %}
-          {{ field|addEvent:'onclick' }}
-        {% elif field|fieldtype == "Select" %}
-          {% bootstrap_field field|addEvent:'onchange' show_label=False show_help=False set_required=False %}
-        {% endif %}
+        {{ checkbox }}
       {% endif %}
+      <label class="form-check-label"
+             for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {% if field.help_text %}
+        {% include "components/field_help.html" with label=field.label text=field.help_text %}
+      {% endif %}
+      {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+    </div>
+  {% else %}
+    {% if field|isArray %}
+      {# An array has no one input to point at, so its label names the group. #}
+      <span class="form-label" id="{{ field.name }}_label">
+        {{ field.label }}
+        {% if field.field.required %}*{% endif %}
+      </span>
+    {% else %}
+      <label class="form-label" for="{{ field.id_for_label }}">
+        {{ field.label }}
+        {% if field.field.required %}*{% endif %}
+      </label>
     {% endif %}
-    {% if add %}
-      <div id="{{ add.name }}_container"
-           {% if field|fieldtype == "CheckboxInput" and not field.value or field|fieldtype == "Select" and not field.value == "Other" %} style="display:none" {% else %} style="display:inline" {% endif %}>
-        {% bootstrap_field add show_label=False show_help=False set_required=False placeholder="" %}
-      </div>
+    {% if field.help_text %}
+      {% include "components/field_help.html" with label=field.label text=field.help_text %}
     {% endif %}
-  </td>
-</tr>
+    {# show_label="skip": the label above is the field's only one. #}
+    {% if field|isArray %}
+      {% include "modelview/array_snippet.html" with form=form %}
+    {% elif event %}
+      {% bootstrap_field field|addEvent:event show_label="skip" show_help=False set_required=False wrapper_class="" %}
+    {% elif field|fieldtype == "Select" and add %}
+      {% bootstrap_field field|addEvent:"onchange" show_label="skip" show_help=False set_required=False wrapper_class="" %}
+    {% else %}
+      {% bootstrap_field field show_label="skip" show_help=False set_required=False wrapper_class="" %}
+    {% endif %}
+  {% endif %}
+  {% if add %}
+    <div id="{{ add.name }}_container"
+         class="factsheet-field__other"
+         {% if field|fieldtype == "CheckboxInput" and not field.value or field|fieldtype == "Select" and not field.value == "Other" %}style="display:none"{% endif %}>
+      {% bootstrap_field add show_label=False show_help=False set_required=False placeholder="" wrapper_class="" %}
+    </div>
+  {% endif %}
+</div>

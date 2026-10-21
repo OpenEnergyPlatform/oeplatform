@@ -1,0 +1,67 @@
+{% comment %}
+  page_header (#2639): the band under the navbar, in the platform's area/trail
+  form. Styles: theming/scss/components/_page_header.scss; catalogue entry:
+  styleguide/entries/page_header.html. Fill a shell's `site-header` block with
+  it.
+
+  area         the part of the platform the page belongs to (required), on a
+               light line of its own; labels come from the navbar and footer
+  icon         that area's icon, a template name under icons/ (area_*.html)
+  crumb_label, crumb_url
+  crumb2_label, crumb2_url
+               up to two links back, in order (the area's overview first)
+  title        the page's subject (required): the trail's last part and the
+               page's one h1
+  description  optional, one muted line under the trail
+
+  as_example   renders the title without its h1, for showing the band inside
+               a page that has its own (the catalogue); never on a real page
+
+  Markup slots are template names, since an include has no slots:
+  actions      the page's actions, at the band's right (at most one primary)
+  tabs         a tab row on the band's lower edge
+
+  The trail's separators are drawn after each item but the last, so a wrapped
+  trail never starts a line with one. Account pages and error pages have no
+  band.
+{% endcomment %}
+<header class="page-header{% if tabs %} page-header--tabs{% endif %}">
+  <div class="page-header__inner">
+    <div class="page-header__text">
+      <p class="page-header__area">
+        {% if icon %}
+          {% include icon %}
+        {% endif %}
+        {{ area }}
+      </p>
+      <nav aria-label="Breadcrumb">
+        <ol class="page-header__trail">
+          {% if crumb_label %}
+            <li>
+              <a href="{{ crumb_url }}">{{ crumb_label }}</a>
+            </li>
+          {% endif %}
+          {% if crumb2_label %}
+            <li>
+              <a href="{{ crumb2_url }}">{{ crumb2_label }}</a>
+            </li>
+          {% endif %}
+          <li aria-current="page">
+            {% if as_example %}
+              <span class="page-header__title">{{ title }}</span>
+            {% else %}
+              <h1 class="page-header__title">{{ title }}</h1>
+            {% endif %}
+          </li>
+        </ol>
+      </nav>
+      {% if description %}<p class="page-header__description">{{ description }}</p>{% endif %}
+    </div>
+    {% if actions %}
+      <div class="page-header__actions">{% include actions %}</div>
+    {% endif %}
+    {% if tabs %}
+      <div class="page-header__tabs">{% include tabs %}</div>
+    {% endif %}
+  </div>
+</header>

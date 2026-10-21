@@ -1,0 +1,132 @@
+// tag: one Tag, drawn the same way wherever it appears (#2645). A pill in the
+// tag's own solid colour, dense size, its text colour from the one helper that
+// decides contrast (`readable_text_color` in dataedit's taghandler). The
+// include base/templates/components/tag.html writes both colours as
+// `--tag-color` and `--tag-text-color` on the element; a tag without a colour
+// falls back to the neutral surface. Catalogue entry:
+// base/templates/styleguide/entries/tag.html.
+//
+// Variants (all from the include): static (a span), link (an <a>, filters by
+// the tag), removable (a close button inside, for the pickers' current
+// selection) and toggle (a label around a visually hidden checkbox, for the
+// pick lists). A tag carries no margin; `.tag-group` spaces a run of them.
+@use '../base/' as *;
+
+.tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    max-width: 100%;
+    padding: 0.125rem 0.625rem;
+    font-size: var(--oep-font-size-dense);
+    font-weight: $font-weight-normal;
+    line-height: 1.5;
+    white-space: nowrap;
+    vertical-align: middle;
+    color: var(--tag-text-color, var(--bs-body-color));
+    background-color: var(--tag-color, var(--oep-surface-subtle));
+    border: 1px solid var(--tag-color, var(--oep-border-strong));
+    border-radius: var(--bs-border-radius-pill);
+    text-decoration: none;
+
+    &__name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &--link {
+        cursor: pointer;
+
+        &:hover {
+            color: var(--tag-text-color, var(--bs-body-color));
+            filter: brightness(0.92);
+        }
+    }
+
+    &--link:focus-visible,
+    &--toggle:has(.tag__check:focus-visible) {
+        outline: 2px solid var(--bs-primary);
+        outline-offset: 2px;
+    }
+
+    &__remove {
+        display: inline-flex;
+        padding: 0;
+        margin-inline-end: -0.25rem;
+        font-size: 1.1em;
+        line-height: 1;
+        color: inherit;
+        background: none;
+        border: 0;
+        border-radius: var(--bs-border-radius-pill);
+        opacity: 0.75;
+        cursor: pointer;
+
+        &:hover {
+            opacity: 1;
+        }
+
+        &:focus-visible {
+            opacity: 1;
+            outline: 2px solid var(--bs-primary);
+            outline-offset: 1px;
+        }
+    }
+
+    // Positioned, so the hidden checkbox sits inside its own label: placed
+    // against the page instead, focusing it would scroll to the top.
+    &--toggle {
+        position: relative;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    // The checkbox stays in the page for the keyboard and the form; the
+    // label is what is seen.
+    &__check {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    &__tick {
+        display: none;
+        font-size: 0.75em;
+    }
+
+    &__check:checked ~ &__tick {
+        display: inline-block;
+    }
+
+    // Without `:has()` the ring above cannot reach the label; the name
+    // carries it instead, so a keyboard user still sees where focus is.
+    @supports not selector(:has(*)) {
+        &__check:focus-visible ~ &__name {
+            outline: 2px solid var(--bs-primary);
+            outline-offset: 2px;
+        }
+    }
+
+    &--toggle:has(.tag__check:checked) {
+        font-weight: $font-weight-semibold;
+        box-shadow: inset 0 0 0 2px currentColor;
+    }
+}
+
+.tag-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .tag--link {
+        transition: filter var(--oep-transition);
+    }
+}

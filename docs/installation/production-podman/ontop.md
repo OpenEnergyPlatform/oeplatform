@@ -34,7 +34,7 @@ bakes in everything it needs, so there are **no files to place by hand**:
 
   ```sh
   podman build --build-arg JDBC_VERSION=42.7.3 \
-    -t localhost/oep-ontop:latest \
+    -t ghcr.io/openenergyplatform/oeplatform-ontop:latest \
     -f docker/Dockerfile.ontop docker/
   ```
 
@@ -100,7 +100,7 @@ Choose one of two ways to apply it:
     `docker/serviceConfigs/ontop/mapping.obda`, rebuild, and restart:
 
     ```sh
-    podman build -t localhost/oep-ontop:latest -f docker/Dockerfile.ontop docker/
+    podman build -t ghcr.io/openenergyplatform/oeplatform-ontop:latest -f docker/Dockerfile.ontop docker/
     systemctl --user restart oep-ontop
     ```
 

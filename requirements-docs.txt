@@ -5,7 +5,7 @@
 # does not run in (productive py3.6) but that's ok
 # because doc build should only runs on newer python on github
 mkdocs-material~=9.1
-mkdocstrings~=0.22
+mkdocstrings~=1.0
 mkdocstrings-python
 mike
 

@@ -1,0 +1,61 @@
+{% extends "login/partials/list_region.html" %}
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+The tables tab's results region (list_region.html): its empty state and its
+columns. Each cell type is its own partial under ``cells/``; the container
+queries that collapse the columns are in ``tables_tab.css``.
+{% endcomment %}
+{% block empty %}
+  {% include "components/empty_state.html" with icon="fas fa-table" title="You have no tables yet" text_template="login/partials/tables_empty_text.html" action_template="login/partials/tables_empty_action.html" %}
+{% endblock empty %}
+{% block head_cells %}
+  {% include "login/partials/list_sort_header.html" with link=page.sort_links.table cell="c-table" %}
+  {% include "login/partials/list_sort_header.html" with link=page.sort_links.status cell="c-status" %}
+  {% include "login/partials/list_sort_header.html" with link=page.sort_links.publishable cell="c-pub" %}
+  {% include "login/partials/list_sort_header.html" with link=page.sort_links.review cell="c-review" %}
+  <th class="c-access" scope="col">Access</th>
+  {% include "login/partials/list_sort_header.html" with link=page.sort_links.datasets cell="c-ds" %}
+  <th class="c-topics" scope="col">Topics</th>
+  {% include "login/partials/list_sort_header.html" with link=page.sort_links.modified cell="c-modified" %}
+  {% include "login/partials/list_sort_header.html" with link=page.sort_links.created cell="c-created" %}
+  <th class="c-menu" scope="col">
+    <span class="visually-hidden">Actions</span>
+  </th>
+{% endblock head_cells %}
+{% block row_cells %}
+  <td class="c-table">
+    <a id="title-{{ row.key }}"
+       class="dash-title"
+       href="{% url 'dataedit:view' table=row.table.name %}"
+       hx-boost="false">{{ row.title }}</a>
+    {% if row.has_title %}<div class="dash-tname">{{ row.table.name }}</div>{% endif %}
+  </td>
+  <td class="c-status">
+    {% include "login/partials/cells/status.html" with status=row.status until=row.embargo_until %}
+  </td>
+  <td class="c-pub">{% include "login/partials/cells/gate.html" %}</td>
+  <td class="c-review">{% include "login/partials/cells/review.html" %}</td>
+  <td class="c-access">
+    {% comment %}Opens the access drawer (#table-access), outside the tab, so its request is synced only with itself.{% endcomment %}
+    <button type="button"
+            id="acc-{{ row.key }}"
+            class="btn btn-link btn-sm dash-access"
+            hx-get="{% url 'login:table-access' user_id=profile_user.pk table_name=row.table.name %}"
+            hx-target="#table-access-body"
+            hx-swap="innerHTML"
+            hx-sync="this:replace"
+            data-access-origin="acc-{{ row.key }}"
+            aria-label="{{ row.access_label }}">
+      {% if row.direct %}<span class="dash-achip dash-achip--you">You</span>{% endif %}
+      {% for organization in row.organizations %}<span class="dash-achip" title="{{ organization }}">{{ organization }}</span>{% endfor %}
+      {% if row.role_label %}<span class="dash-role">{{ row.role_label }}</span>{% endif %}
+    </button>
+  </td>
+  <td class="c-ds">{% include "login/partials/cells/datasets.html" %}</td>
+  <td class="c-topics">{% include "login/partials/cells/chips.html" %}</td>
+  <td class="c-modified">{% include "login/partials/cells/modified.html" %}</td>
+  <td class="c-created">{% include "login/partials/cells/created.html" %}</td>
+  <td class="c-menu">{% include "login/partials/cells/menu.html" %}</td>
+{% endblock row_cells %}

@@ -6,39 +6,43 @@ SPDX-License-Identifier: CC0-1.0
 
 # Installation
 
-This section provides detailed information on how to install for development
-purposes. We will also provide a more detailed guide on how to operate the
-oeplatform for production use cases in the future. The guide covers the full
-oeplatform software and its infrastructure which is composed of the website,
-various databases, a lookup service and the ontop-vkg service (see
-[Infrastructure](../oeplatform-code/architecture/infrastructure.md)). You will
-find two main options to install everything:
+The oeplatform is more than the website: it runs with several databases, a
+lookup service and the ontop service (see
+[Infrastructure](../oeplatform-code/architecture/infrastructure.md)). There are
+two ways to install all of it, depending on what you want to do.
 
-1. A docker based deployment setup for local deployment (and soon for production
-   deployment setups)
-2. A "manual" step by step installation guide for the oeplatform-website and its
-   main features. The guide is mainly for development and documents the details
-   of the installation.
+<div class="grid cards" markdown>
 
-Production deployments without containerization solutions like docker tend to be
-very specific and depend on your infrastructure.
+- :material-laptop:{ .lg .middle } **Develop on your own computer**
 
-You will also find additional setup steps to help you troubleshoot common
-issues, write well-formatted, quality-checked code, and easily start
-contributing to the oeplatform.
+  ***
 
-## Guides
+  Run the whole platform locally with Docker Compose, with test data and a test
+  user ready to use. Not for production.
 
-### Installation for development purposes
+  [:octicons-arrow-right-24: Development install (Docker)](guides/installation-docker-dev.md)
 
-[Automated Docker based installation guide for development](./guides/installation-docker-dev.md)
+  Then set up git, your editor and the code checks:
+  [Development setup](guides/development-setup.md)
 
-[Manual installation guide](./guides/installation.md)
+- :material-server:{ .lg .middle } **Run the platform on a server**
 
-[Details on the database infrastructure setup](./guides/manual-db-setup.md)
+  ***
 
-### Next steps to get started with development
+  Deploy your own instance in production with rootless Podman and systemd
+  Quadlets. This is the supported production path.
 
-[Good practice and guidelines to participate in the development of the oeplatform](./guides/development-setup.md)
+  [:octicons-arrow-right-24: Production deployment (Podman)](production-podman/index.md)
 
-[Understand the nodejs integration and asset bundler for optimized javascript app deployments](./guides/nodejs.md)
+  Then give it your name, colours and logo:
+  [Theming an instance](guides/instance-theming.md)
+
+</div>
+
+## Other guides
+
+- [Development install (manual)](guides/installation.md), without Docker, step
+  by step, if you want to see every part of the setup. It links the
+  [detailed database setup](guides/manual-db-setup.md).
+- [JavaScript integration](guides/nodejs.md): how the JavaScript apps are
+  bundled.

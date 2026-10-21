@@ -1,0 +1,46 @@
+// The design tokens Bootstrap has no name for, emitted at :root.
+//
+// Bootstrap emits its own tokens (--bs-primary, --bs-body-color,
+// --bs-border-color, --bs-border-radius*, ...) from the variables in
+// _variables.scss; this adds the --oep-* set beside them. A house component
+// reads only tokens, never a literal colour, radius or shadow, so that an
+// instance's stylesheet restyles it by setting tokens. The full list, with
+// what each is for, is the token table in the component catalogue.
+@use '../base/' as *;
+@use '../../variables' as v;
+
+:root {
+  --oep-text-muted: #{v.$oep-text-muted};
+  --oep-heading-color: #{v.$oep-heading-color};
+  --oep-border-strong: #{v.$oep-border-strong};
+  --oep-surface: #{v.$oep-surface};
+  --oep-surface-subtle: #{v.$oep-surface-subtle};
+  --oep-surface-strong: #{v.$oep-surface-strong};
+  --oep-surface-hover: #{v.$oep-surface-hover};
+  --oep-on-strong: #{v.$oep-on-strong};
+  --oep-on-strong-muted: #{v.$oep-on-strong-muted};
+  --oep-shadow-rgb: #{v.$oep-shadow-rgb};
+  --oep-shadow-sm: #{v.$oep-shadow-sm};
+  --oep-shadow-lg: #{v.$oep-shadow-lg};
+  --oep-font-size-dense: #{v.$oep-font-size-dense};
+  --oep-heading-weight: #{v.$oep-heading-weight};
+  --oep-measure: #{v.$oep-measure};
+  --oep-transition: #{v.$oep-transition};
+
+  // One width for the content column and the header band above it, so
+  // their edges meet at every screen width. The steps are the ones the
+  // content container takes today (layouts/_main.scss).
+  --oep-content-width: #{$C--container-width};
+
+  @include media-breakpoint-up(x3l) {
+    --oep-content-width: #{$C--container-width-x3l};
+  }
+
+  @include media-breakpoint-up(x4l) {
+    --oep-content-width: #{$C--container-width-x4l};
+  }
+
+  @include media-breakpoint-up(x5l) {
+    --oep-content-width: #{$C--container-width-x5l};
+  }
+}

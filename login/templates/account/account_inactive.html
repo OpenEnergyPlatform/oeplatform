@@ -1,0 +1,12 @@
+{% extends "allauth/layouts/base.html" %}
+{% load i18n %}
+{% block head_title %}
+  {% trans "Account inactive" %}
+{% endblock head_title %}
+{% block content %}
+  <h1 class="login__heading">{% trans "Account inactive" %}</h1>
+  <p>
+    {% url 'base:contact' as contact_url %}
+    {% blocktrans %}This account has been deactivated, so you cannot sign in with it. If you think this is a mistake, please <a href="{{ contact_url }}">contact us</a>.{% endblocktrans %}
+  </p>
+{% endblock content %}

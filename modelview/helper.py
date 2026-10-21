@@ -26,6 +26,15 @@ from django.shortcuts import get_object_or_404
 from modelview.forms import EnergyframeworkForm, EnergymodelForm
 from modelview.models import Energyframework, Energymodel
 
+#: The factsheet types there are, with the model and form class of each. The
+#: URLs accept nothing else, so an unknown type is a 404 on every route under
+#: `/factsheets/<type>s/`.
+SHEET_CLASSES = {
+    "model": (Energymodel, EnergymodelForm),
+    "framework": (Energyframework, EnergyframeworkForm),
+}
+SHEET_TYPES = tuple(SHEET_CLASSES)
+
 BASE_VIEW_PROPS = OrderedDict(
     [
         (
@@ -432,6 +441,19 @@ FRAMEWORK_DEFAULT_COLUMNS = {
 }
 
 
+def view_props(sheettype: str):
+    """The view properties and default columns for a sheet type.
+
+    Two returns rather than two ternaries, because they always travel
+    together and were being paired by copy-paste at every call site -- which
+    is how a list page and the endpoint that completes it could quietly come
+    to disagree about what a row contains.
+    """
+    if sheettype == "framework":
+        return FRAMEWORK_VIEW_PROPS, FRAMEWORK_DEFAULT_COLUMNS
+    return MODEL_VIEW_PROPS, MODEL_DEFAULT_COLUMNS
+
+
 def getClasses(
     sheettype: str,
 ) -> tuple[
@@ -441,53 +463,53 @@ def getClasses(
     """
     Returns the model and form class w.r.t sheettype.
     """
-    allowed_sheet_types = ["model", "framework"]
-    cls = None
-    frm = None
-
-    if isinstance(sheettype, str):
-        if sheettype in allowed_sheet_types:
-            if sheettype == "model":
-                cls = Energymodel
-                frm = EnergymodelForm
-            elif sheettype == "framework":
-                cls = Energyframework
-                frm = EnergyframeworkForm
-
-    return cls, frm
+    return SHEET_CLASSES.get(sheettype, (None, None))
 
 
 def printable(model, field):
     return getattr(model, field)
 
 
-def processPost(post, c, f, files=None, pk=None, key=None):
+def processPost(post, c, f, files=None, pk=None):
+    """Bind the factsheet form `f` to a submitted factsheet.
+
+    The one translation this does is the array-field contract: `ArrayField`s
+    are edited by `array_snippet.html`, which renders one text input per entry
+    named `<field>_1`, `<field>_2`, ... . Django's `SimpleArrayField` expects a
+    single comma-separated value, so the numbered inputs are collected, ordered
+    by their index and joined here. A comma inside an entry becomes a
+    semicolon, because the delimiter carries no escape.
+
+    `post` stays a `QueryDict`. It used to be flattened to a plain `dict`,
+    which silently destroyed `getlist` and so made *every* multi-value widget
+    arrive empty -- that is why `tags` could never work as the real form field
+    it always was, and why 12 lines of hand-rolled `tag_<pk>` code existed
+    beside it. `tags` is the only such field today; a plain copy keeps the next
+    one working too.
     """
-    Returns the form according to a post request
-    """
-    fields = {k: post[k] for k in post}
-    if "new" in fields and fields["new"] == "True":
-        fields["study"] = key
+    fields = post.copy()  # a mutable QueryDict: multi-value semantics survive
+
     for field in c._meta.get_fields():
-        if type(field) == ArrayField:  # noqa
-            parts = []
-            for fi in fields.keys():
-                if (
-                    re.match(r"^{}_\d+$".format(field.name), str(fi))
-                    and fields[fi]  # noqa
-                ):
-                    parts.append(fi)
-            parts.sort(key=lambda k: int(k.rsplit("_", 1)[1]))
-            fields[field.name] = ",".join(
-                fields[k].replace(",", ";") for k in parts
-            )  # noqa
-            for fi in parts:
-                del fields[fi]
-        else:
-            if field.name in fields:
-                fields[field.name] = fields[field.name]
+        if not isinstance(field, ArrayField):
+            continue
+        pattern = re.compile(r"^{}_(\d+)$".format(re.escape(field.name)))
+        parts = sorted(
+            (
+                (int(match.group(1)), name)
+                for name, match in ((n, pattern.match(n)) for n in fields)
+                if match and fields[name]
+            )
+        )
+        # Set unconditionally, including to "" when nothing was submitted: an
+        # array field with every input removed means an empty array, and the
+        # widget posts no key at all in that case.
+        fields.setlist(
+            field.name, [",".join(fields[name].replace(",", ";") for _, name in parts)]
+        )
+        for _, name in parts:
+            del fields[name]
+
     if pk:
         model = get_object_or_404(c, pk=pk)
         return f(fields, files, instance=model)
-    else:
-        return f(fields, files)
+    return f(fields, files)

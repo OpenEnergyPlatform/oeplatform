@@ -42,22 +42,60 @@ podman exec -it oeplatform bash
     version, or the lazy-init behaviour, see **[Ontop](ontop.md)** — that procedure
     is not repeated here.
 
+## Access log
+
+The app container's Apache writes one line per request to stdout, so it lands in
+the journal next to the error log. The line is Common Log Format with two fields
+appended at the end:
+
+```text
+10.0.2.100 - - [07/Oct/2026:15:37:20 +0000] "GET /database/ HTTP/1.1" 200 5120 "Mozilla/5.0 ..." 882
+```
+
+| Field (awk) | Meaning                                                  |
+| ----------- | -------------------------------------------------------- |
+| `$1`        | client address (behind the reverse proxy: the proxy's)   |
+| `$4 $5`     | time                                                     |
+| `$7`        | path, with query string                                  |
+| `$9`        | HTTP status                                              |
+| `$10`       | response size in bytes, `-` for an empty body (e.g. 304) |
+| quoted      | user agent                                               |
+| **`$NF`**   | **time to serve the request, in microseconds**           |
+
+Referer, cookies and the `Authorization` header are deliberately not logged.
+
+Total server time per path today, the most useful ranking when the platform is
+slow (a path called often can cost more than a slow one called rarely):
+
+```sh
+journalctl --user -u oep-oeplatform --since today -o cat \
+  | awk '$9 ~ /^[0-9][0-9][0-9]$/ && $NF ~ /^[0-9]+$/ {p=$7; sub(/\?.*/, "", p); t[p]+=$NF; n[p]++}
+         END {for (p in t) printf "%9.1fs %6d  %s\n", t[p]/1e6, n[p], p}' \
+  | sort -rn | head -15
+```
+
+Columns: total seconds, number of requests, path. The filter on `$9` and `$NF`
+skips error-log lines, which share the journal.
+
 ## Backups
 
 Persistent state is in named volumes (physically under the service user's home).
-At minimum, back up the **Postgres** data and the **media** volume regularly,
-and always before a release that runs migrations. List volumes and their
-locations:
+At minimum, back up the **Postgres** data, the **Fuseki** volume (the OEKG) and
+the **media** volume regularly, and always before a release that runs
+migrations. List volumes and their locations:
 
 ```sh
 podman volume ls
-podman volume inspect pgdata
+podman volume inspect systemd-pgdata
 ```
 
+Quadlet prefixes every volume name with `systemd-`.
+
 Use `pg_dump` from inside/against the postgres container for logical database
-backups, and snapshot the media volume for uploaded files. (Physical volume
-placement per server is a separate storage-configuration concern, out of scope
-for this generic guide.)
+backups, and snapshot the media and Fuseki volumes. Stop `oep-oeplatform`, the
+only writer, while copying the Fuseki volume, so the copy is consistent.
+(Physical volume placement per server is a separate storage-configuration
+concern, out of scope for this generic guide.)
 
 ## Reset the database (destructive)
 
@@ -65,7 +103,7 @@ This **deletes all database data**. Only for a throwaway/dev-like environment.
 
 ```sh
 systemctl --user stop oep-oeplatform oep-postgres
-podman volume rm pgdata        # confirm the exact name with: podman volume ls
+podman volume rm systemd-pgdata   # confirm the exact name with: podman volume ls
 systemctl --user start oep-postgres oep-oeplatform
 ```
 
@@ -174,5 +212,6 @@ are `enable`d (`systemctl --user enable oep-*`).
 
 That's the full production deployment path: **[Overview](index.md) →
 [Install](install.md) → [Ontop](ontop.md) → [Update](update.md) → Maintenance**.
-For the OEP team's concrete server values, see the internal runbook (kept
-outside this public documentation).
+Optional next: **[Monitoring](monitoring.md)**. For the OEP team's concrete
+server values, see the internal runbook (kept outside this public
+documentation).

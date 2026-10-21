@@ -18,7 +18,8 @@ Params:
   <div class="accordion" id="{{ acc }}Accordion">
     {% for group_key, group in cat.grouped.items %}
       <div class="accordion-item">
-        <h2 class="accordion-header" id="heading-{{ acc }}-{{ forloop.counter }}">
+        <h2 class="accordion-header"
+            id="heading-{{ acc }}-{{ forloop.counter }}">
           <button class="accordion-button collapsed"
                   type="button"
                   data-bs-toggle="collapse"
@@ -33,7 +34,8 @@ Params:
               {% include "partials/review_item_snippet.html" with item=item category=category only %}
             {% endfor %}
             {% if group.grouped %}
-              <div class="accordion" id="{{ acc }}Inner-{{ group_key|slugify }}">
+              <div class="accordion"
+                   id="{{ acc }}Inner-{{ group_key|slugify }}">
                 {% for sub_key, sub_items in group.grouped.items %}
                   <div class="accordion-item">
                     <h2 class="accordion-header"

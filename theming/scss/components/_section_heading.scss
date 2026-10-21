@@ -1,0 +1,72 @@
+// section_heading: a plain h2 or h3, no class, spaced by one rhythm (#2638).
+// Catalogue entry: base/templates/styleguide/entries/section_heading.html.
+//
+// The platform's heading typography. Every heading takes the heading colour;
+// inside a page's content (the .content of the Bootstrap shells, so not the
+// homepage, the header band or the React apps) h1-h6 also take one size scale,
+// the heading weight and, for h2-h4, the rhythm above and below. Element
+// specificity only, inside :where(), so a class on a heading wins: Bootstrap's
+// .h1-.h6, a component's own heading class, a margin utility.
+@use '../base/' as *;
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--oep-heading-color);
+}
+
+// The heading scale (spec #2632). Its own map rather than Bootstrap's
+// $h1-font-size..$h6-font-size: those also size the .fs-1..6 utilities used
+// across the platform and the homepage, which must not move. So .h4 and .h6
+// keep Bootstrap's sizes (1.25rem, 1rem) while <h4> and <h6> in a page's
+// content are 1.125rem and 0.875rem.
+$heading-sizes: (
+    h1: 2rem,
+    h2: 1.5rem,
+    h3: 1.25rem,
+    h4: 1.125rem,
+    h5: 1rem,
+    h6: 0.875rem
+);
+
+// Space above and below; the space above only after a sibling, so a heading
+// that opens its container (a page, a card) has none. A heading that opens a
+// <section> takes it when the section follows a sibling, as if the section
+// were not there.
+$heading-rhythm: (
+    h2: (2.5rem, 0.75rem),
+    h3: (1.75rem, 0.5rem),
+    h4: (1.25rem, 0.5rem)
+);
+
+:where(.content) {
+    @each $heading, $size in $heading-sizes {
+        #{$heading} {
+            // Bootstrap's responsive size: h1 and h2 scale down on narrow
+            // screens and reach these sizes from 1200px up, as before.
+            @include font-size($size);
+            font-weight: var(--oep-heading-weight);
+        }
+    }
+
+    @each $heading, $space in $heading-rhythm {
+        #{$heading} {
+            margin-top: 0;
+            margin-bottom: nth($space, 2);
+        }
+
+        * + #{$heading},
+        :where(* + section) > #{$heading}:where(:first-child) {
+            margin-top: nth($space, 1);
+        }
+    }
+
+    // The messages region is always rendered, empty or not, so the heading
+    // after it still opens the page.
+    :where(#uiMessages) + :is(h2, h3, h4) {
+        margin-top: 0;
+    }
+}

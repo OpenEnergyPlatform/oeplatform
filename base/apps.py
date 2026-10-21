@@ -9,3 +9,6 @@ from django.apps import AppConfig
 
 class BaseConfig(AppConfig):
     name = "base"
+
+    def ready(self):
+        from base import checks  # noqa: F401 (registers the checks)

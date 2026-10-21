@@ -1,0 +1,60 @@
+// toast: short feedback in the corner that does not move the page (#2643).
+// One toast region in every shell (base/_feedback.html); a script shows a
+// toast with window.oep.toast (base/static/base/dialogs.js), which clones the
+// include base/templates/components/toast.html. Catalogue entry:
+// base/templates/styleguide/entries/toast.html.
+//
+// The modal's large radius and shadow, and a 4px bar in the status colour on
+// the left, as the alert has. Bootstrap's own `.toast` variables hold
+// literals (a translucent white, a translucent border), so each is pointed
+// at a token here.
+@use '../base/' as *;
+
+$toast-statuses: success, info, warning, danger;
+
+.toast {
+    --oep-status: var(--bs-info);
+    --bs-toast-bg: var(--oep-surface);
+    --bs-toast-border-color: var(--bs-border-color);
+    --bs-toast-border-radius: var(--bs-border-radius-lg);
+    --bs-toast-box-shadow: var(--oep-shadow-lg);
+    --bs-toast-font-size: var(--oep-font-size-dense);
+    border-left: 4px solid var(--oep-status);
+
+    .btn-close {
+        margin: 0.5rem 0.5rem 0 auto;
+        color: inherit;
+    }
+}
+
+@each $status in $toast-statuses {
+    .toast--#{$status} {
+        --oep-status: var(--bs-#{$status});
+    }
+}
+
+.toast__title {
+    display: block;
+    font-weight: var(--oep-heading-weight);
+}
+
+// The region: bottom right, above dialogs' backdrops (Bootstrap's toast
+// layer), newest at the bottom. It lets clicks through between its toasts.
+.toast-region {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    z-index: 1090; // Bootstrap's $zindex-toast
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-width: 100%;
+    padding: 1rem;
+    pointer-events: none;
+
+    > div {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}

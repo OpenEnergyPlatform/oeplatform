@@ -1,0 +1,64 @@
+{% load allauth %}
+{% comment %}
+  One allauth field, as the house field (#2642): label above, help and error
+  below. allauth passes the parts, not a Django field, so this writes the
+  markup django-bootstrap5 writes for one.
+{% endcomment %}
+{% if attrs.type == "checkbox" or attrs.type == "radio" %}
+  <div class="form-check mb-3">
+    <input class="form-check-input{% if attrs.errors %} is-invalid{% endif %}"
+           type="{{ attrs.type }}"
+           {% if attrs.name %}name="{{ attrs.name }}"{% endif %}
+           {% if attrs.id %}id="{{ attrs.id }}"{% endif %}
+           {% if attrs.value is not None %}value="{{ attrs.value }}"{% endif %}
+           {% if attrs.required %}required{% endif %}
+           {% if attrs.disabled %}disabled{% endif %}
+           {% if attrs.checked %}checked{% endif %} />
+    <label class="form-check-label" for="{{ attrs.id }}">
+      {% slot label %}
+{% endslot %}
+</label>
+{% for error in attrs.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+{% if slots.help_text %}
+  <div class="form-text">
+    {% slot help_text %}
+{% endslot %}
+</div>
+{% endif %}
+</div>
+{% else %}
+<div class="mb-3">
+  <label class="form-label" for="{{ attrs.id }}">
+    {% slot label %}
+  {% endslot %}
+</label>
+{% if attrs.type == "textarea" %}
+  <textarea class="form-control{% if attrs.errors %} is-invalid{% endif %}"
+            {% if attrs.name %}name="{{ attrs.name }}"{% endif %}
+            {% if attrs.id %}id="{{ attrs.id }}"{% endif %}
+            {% if attrs.rows %}rows="{{ attrs.rows }}"{% endif %}
+            {% if attrs.placeholder %}placeholder="{{ attrs.placeholder }}"{% endif %}
+            {% if attrs.required %}required{% endif %}
+            {% if attrs.disabled %}disabled{% endif %}
+            {% if attrs.readonly %}readonly{% endif %}>{% slot value %}{% endslot %}</textarea>
+{% else %}
+<input class="form-control{% if attrs.errors %} is-invalid{% endif %}"
+       type="{{ attrs.type }}"
+       {% if attrs.name %}name="{{ attrs.name }}"{% endif %}
+       {% if attrs.id %}id="{{ attrs.id }}"{% endif %}
+       {% if attrs.value is not None %}value="{{ attrs.value }}"{% endif %}
+       {% if attrs.placeholder %}placeholder="{{ attrs.placeholder }}"{% endif %}
+       {% if attrs.autocomplete %}autocomplete="{{ attrs.autocomplete }}"{% endif %}
+       {% if attrs.required %}required{% endif %}
+       {% if attrs.disabled %}disabled{% endif %}
+       {% if attrs.readonly %}readonly{% endif %} />
+{% endif %}
+{% for error in attrs.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+{% if slots.help_text %}
+  <div class="form-text">
+    {% slot help_text %}
+{% endslot %}
+</div>
+{% endif %}
+</div>
+{% endif %}

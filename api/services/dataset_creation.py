@@ -6,6 +6,7 @@ import re
 from copy import deepcopy
 from typing import Any
 
+from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.utils import timezone
 from oemetadata.v2.v20.example import OEMETADATA_V20_EXAMPLE
@@ -20,6 +21,22 @@ class DatasetNameTaken(Exception):
     """Raised when creating a dataset under a name that already exists."""
 
 
+def name_taken_message(name: str) -> str:
+    """What a create under the taken ``name`` is told."""
+    return (
+        f"A dataset named '{name}' already exists. Names are permanent "
+        "identifiers and can not be reused."
+    )
+
+
+def dataset_name_taken(name: str) -> bool:
+    """Whether a Dataset already has ``name``: any Dataset, whoever created
+    it and whether published or not, because the name is a permanent
+    identifier. What a create is refused on, and what the dashboard's name
+    preview says before it. One query."""
+    return Dataset.objects.filter(name=name).exists()
+
+
 def normalize_dataset_name(title: str) -> str | None:
     """Derive the permanent URL name from a human-styled title: lowercase,
     every run of non-alphanumeric characters becomes one underscore. The
@@ -29,6 +46,12 @@ def normalize_dataset_name(title: str) -> str | None:
     name = re.sub(r"[^a-z0-9]+", "_", name).strip("_")
     name = name[:60].strip("_")
     return name or None
+
+
+def dataset_title(dataset: Dataset) -> str:
+    """What a Dataset is called where a user reads it: its title, or its
+    name when it has none."""
+    return (dataset.metadata or {}).get("title") or dataset.name
 
 
 def assemble_dataset_metadata(
@@ -55,61 +78,78 @@ def create_dataset(validated_data: dict[str, Any], creator) -> Dataset:
     Shared by the JSON API and the dashboard UI so both enforce the same
     rules. Raises DatasetNameTaken on a name collision (the name is the
     permanent identifier, so it must be unique).
+
+    A new Dataset is a draft, and its first Modification is its creation:
+    ``modified_at`` is ``created_at``, to the microsecond.
     """
     name = validated_data["name"]
-    if Dataset.objects.filter(name=name).exists():
-        raise DatasetNameTaken(
-            f"A dataset named '{name}' already exists. Names are permanent "
-            "identifiers and can not be reused."
-        )
+    if dataset_name_taken(name):
+        raise DatasetNameTaken(name_taken_message(name))
 
     metadata = assemble_dataset_metadata(validated_data)
-    return Dataset.objects.create(metadata=metadata, name=name, creator=creator)
+    dataset = Dataset.objects.create(metadata=metadata, name=name, creator=creator)
+    # ``created_at`` is ``auto_now_add``, which overwrites any value given to
+    # ``create``, so the copy follows it
+    Dataset.objects.filter(pk=dataset.pk).update(modified_at=dataset.created_at)
+    dataset.modified_at = dataset.created_at
+    return dataset
+
+
+def assignable_tables(user) -> QuerySet[Table]:
+    """Every Table ``user`` may assign to a Dataset of their own: the one
+    curation rule, which the dashboard's row actions, the Dataset tab's
+    picker and the dataset assign API all read.
+
+    Curation model: anyone may assign a published Table that is not under an
+    active embargo; its holders have no say. A draft, or a Table under an
+    active embargo, only a user holding Data editor or above on it, directly
+    or through an Organization they are a member of (owners staging a
+    release). There is no platform-admin exemption: only grants count, so a
+    Table offered anywhere is a Table this rule accepts.
+    """
+    writable = user.get_tables_queryset(min_permission_level=WRITE_PERM)
+    freely_assignable = Q(is_publish=True) & ~Q(embargos__date_ended__gt=timezone.now())
+    return Table.objects.filter(
+        freely_assignable | Q(id__in=writable.values("id"))
+    ).distinct()
 
 
 def user_may_assign_table(user, table: Table) -> bool:
-    """Curation model: any published table may be assigned to a dataset;
-    draft tables and tables under an active embargo only by users holding
-    write permission on the table (owners staging a release)."""
-    from api.helper import check_embargo
-
-    if table.is_publish and not check_embargo(table):
-        return True
-    return user.has_write_permissions(table.name)
+    """Whether ``user`` may assign ``table`` to a Dataset of their own, under
+    ``assignable_tables``. One query."""
+    return assignable_tables(user).filter(pk=table.pk).exists()
 
 
 def assignable_tables_for(user, dataset: Dataset, search: str = "") -> QuerySet[Table]:
     """Tables the user may assign to the dataset under the curation rules,
-    excluding tables already assigned. Queryset twin of
-    user_may_assign_table for the dashboard picker."""
-    now = timezone.now()
-    writable_ids = user.get_tables_queryset(
-        min_permission_level=WRITE_PERM
-    ).values_list("id", flat=True)
-
-    freely_assignable = Q(is_publish=True) & ~Q(embargos__date_ended__gt=now)
-    tables = Table.objects.filter(freely_assignable | Q(id__in=writable_ids))
-    tables = tables.exclude(id__in=dataset.tables.values_list("id", flat=True))
+    excluding tables already assigned: the dashboard picker."""
+    tables = assignable_tables(user).exclude(
+        id__in=dataset.tables.values_list("id", flat=True)
+    )
 
     if search:
         tables = tables.filter(
             Q(name__icontains=search) | Q(human_readable_name__icontains=search)
         )
 
-    return tables.distinct().order_by("name").prefetch_related("topics")
+    return tables.order_by("name").prefetch_related("topics")
 
 
+@transaction.atomic
 def assign_table(dataset: Dataset, table: Table) -> None:
     """Add a table to a dataset and seed the dataset's topics additively:
     the table's topics are added (except the draft pseudo-topic), existing
-    topics are never removed, so creator-curated removals survive."""
+    topics are never removed, so creator-curated removals survive. Both
+    writes, or neither."""
     dataset.tables.add(table)
     dataset.topics.add(*table.topics.exclude(name=PSEUDO_TOPIC_DRAFT))
 
 
 def set_dataset_topics(dataset: Dataset, topic_names: list[str]) -> None:
     """Replace the creator-curated topic set. Unknown names are ignored and
-    the draft pseudo-topic can never become a dataset topic."""
+    the draft pseudo-topic can never become a dataset topic: the Dataset
+    action service, every caller's way here, refuses both by name before it
+    calls this (``dataset_actions.validated_topics``)."""
     topics = Topic.objects.filter(name__in=topic_names).exclude(name=PSEUDO_TOPIC_DRAFT)
     dataset.topics.set(topics)
 

@@ -4,6 +4,7 @@
 
 from copy import deepcopy
 from datetime import timedelta
+from unittest import mock
 
 from django.utils import timezone
 from oemetadata.latest.template import OEMETADATA_LATEST_TEMPLATE
@@ -11,7 +12,14 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from dataedit.models import Dataset, Embargo, Table, Topic
-from login.models import WRITE_PERM, UserPermission, myuser
+from login.models import (
+    WRITE_PERM,
+    GroupPermission,
+    Membership,
+    Organization,
+    UserPermission,
+    myuser,
+)
 
 
 class DatasetOwnershipTests(APITestCase):
@@ -33,10 +41,13 @@ class DatasetOwnershipTests(APITestCase):
         )
 
     def create_owned_dataset(self, name="owned_dataset"):
+        # published: another user may read it, so a write by them is 403
+        # (a foreign draft is 404, see test_dataset_lifecycle_api)
         return Dataset.objects.create(
             name=name,
             metadata={"name": name, "resources": []},
             creator=self.creator,
+            published_at=timezone.now(),
         )
 
     def test_anonymous_cannot_create_dataset(self):
@@ -51,12 +62,8 @@ class DatasetOwnershipTests(APITestCase):
 
     def test_anonymous_cannot_update_dataset(self):
         self.create_owned_dataset()
-        payload = {
-            "name": "owned_dataset",
-            "title": "Changed",
-            "description": "Changed",
-        }
-        response = self.client.put(
+        payload = {"title": "Changed", "description": "Changed"}
+        response = self.client.patch(
             "/api/v0/datasets/owned_dataset/", payload, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -91,12 +98,8 @@ class DatasetOwnershipTests(APITestCase):
     def test_non_creator_cannot_update_dataset(self):
         self.create_owned_dataset()
         self.client.force_authenticate(user=self.other_user)
-        payload = {
-            "name": "owned_dataset",
-            "title": "Hijacked",
-            "description": "Should be rejected",
-        }
-        response = self.client.put(
+        payload = {"title": "Hijacked", "description": "Should be rejected"}
+        response = self.client.patch(
             "/api/v0/datasets/owned_dataset/", payload, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -119,7 +122,7 @@ class DatasetOwnershipTests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_read_endpoints_stay_public(self):
+    def test_read_endpoints_are_public_for_a_published_dataset(self):
         dataset = self.create_owned_dataset()
         table = Table.objects.create(
             name="t_public", oemetadata={"resources": [{"name": "t_public"}]}
@@ -239,6 +242,8 @@ class DatasetCurationRulesTests(APITestCase):
         self.assertTrue(Table.objects.filter(name="t_member").exists())
 
     def test_unassign_requires_dataset_ownership(self):
+        # published, so the other user may read it and the refusal is 403
+        Dataset.objects.filter(pk=self.dataset.pk).update(published_at=timezone.now())
         table = self.make_table("t_member")
         self.dataset.tables.add(table)
         self.client.force_authenticate(user=self.table_owner)
@@ -296,6 +301,85 @@ class DatasetCurationRulesTests(APITestCase):
         response = self.assign("t_own_embargoed")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(self.dataset.tables.count(), 1)
+
+    def test_a_data_editor_through_an_organization_may_assign_a_draft(self):
+        """The widened rule (#2563): write through an Organization counts,
+        as it does in the dashboard that lists the Table."""
+        organization = Organization.objects.create(name="Curator's team")
+        Membership.objects.create(user=self.curator, group=organization)
+        table = self.make_table("t_group_draft", published=False)
+        GroupPermission.objects.create(
+            holder=organization, table=table, level=WRITE_PERM
+        )
+
+        response = self.assign("t_group_draft")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(self.dataset.tables.count(), 1)
+
+    def test_an_organization_the_user_left_gives_nothing(self):
+        organization = Organization.objects.create(name="Former team")
+        table = self.make_table("t_former_group_draft", published=False)
+        GroupPermission.objects.create(
+            holder=organization, table=table, level=WRITE_PERM
+        )
+
+        response = self.assign("t_former_group_draft")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_a_platform_admin_has_no_exemption_for_a_draft(self):
+        self.curator.is_admin = True
+        self.curator.save()
+        self.make_table("t_admins_draft", published=False, owner=self.table_owner)
+
+        response = self.assign("t_admins_draft")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(self.dataset.tables.count(), 0)
+
+    def test_assign_is_all_or_nothing(self):
+        from api.services import dataset_actions
+
+        self.make_table("t_first")
+        self.make_table("t_second")
+        real = dataset_actions.assign_table
+
+        def fail_on_second(dataset, table):
+            if table.name == "t_second":
+                raise RuntimeError("the database went away")
+            real(dataset, table)
+
+        self.client.raise_request_exception = False
+        with self.assertLogs("django.request", "ERROR"):
+            with mock.patch.object(dataset_actions, "assign_table", fail_on_second):
+                response = self.client.post(
+                    "/api/v0/datasets/curated_dataset/assign-tables/",
+                    {"tables": [{"name": "t_first"}, {"name": "t_second"}]},
+                    format="json",
+                )
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(self.dataset.tables.count(), 0)
+
+    def test_unassign_is_all_or_nothing(self):
+        first = self.make_table("t_member_a")
+        second = self.make_table("t_member_b")
+        self.dataset.tables.add(first, second)
+        manager = type(self.dataset.tables)
+        real = manager.remove
+
+        def fail_on_second(related, *tables, **kwargs):
+            if any(table.name == "t_member_b" for table in tables):
+                raise RuntimeError("the database went away")
+            return real(related, *tables, **kwargs)
+
+        self.client.raise_request_exception = False
+        with self.assertLogs("django.request", "ERROR"):
+            with mock.patch.object(manager, "remove", fail_on_second):
+                response = self.client.post(
+                    "/api/v0/datasets/curated_dataset/unassign-tables/",
+                    {"tables": [{"name": "t_member_a"}, {"name": "t_member_b"}]},
+                    format="json",
+                )
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(self.dataset.tables.count(), 2)
 
     def test_assign_mix_of_known_and_unknown_tables(self):
         self.make_table("t_known", published=True)
@@ -378,12 +462,8 @@ class DatasetDerivedResourcesTests(APITestCase):
         self.assertEqual(resources[0]["title"], "Corrected")
 
     def test_dataset_update_does_not_change_resources(self):
-        payload = {
-            "name": "derived_dataset",
-            "title": "New Title",
-            "description": "New description",
-        }
-        response = self.client.put(
+        payload = {"title": "New Title", "description": "New description"}
+        response = self.client.patch(
             "/api/v0/datasets/derived_dataset/", payload, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -398,10 +478,11 @@ class DatasetDerivedResourcesTests(APITestCase):
             "title": "New Title",
             "description": "New description",
         }
-        response = self.client.put(
+        response = self.client.patch(
             "/api/v0/datasets/derived_dataset/", payload, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("name", response.json())
         self.assertTrue(Dataset.objects.filter(name="derived_dataset").exists())
         self.assertFalse(Dataset.objects.filter(name="renamed_dataset").exists())
 
@@ -478,11 +559,15 @@ class DatasetAPITests(APITestCase):
         self.assertEqual(response.data["metadata"]["name"], "test_dataset")
 
     def test_list_datasets(self):
-        Dataset.objects.create(name="ds1", metadata=self.setUpDatasetMetadata("ds1"))
-        Dataset.objects.create(name="ds2", metadata=self.setUpDatasetMetadata("ds2"))
+        for name in ("ds1", "ds2"):
+            Dataset.objects.create(
+                name=name,
+                metadata=self.setUpDatasetMetadata(name),
+                published_at=timezone.now(),
+            )
         response = self.client.get("/api/v0/datasets/")  # fixed
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 2)
+        self.assertEqual(response.data["count"], 2)
 
     def test_assign_tables_to_dataset(self):
         # schema = Topic.objects.create(name="test_schema")
@@ -521,7 +606,9 @@ class DatasetAPITests(APITestCase):
         )
         table.topics.add(schema)
         dataset = Dataset.objects.create(
-            name="test_dataset", metadata=self.setUpDatasetMetadata("test_dataset")
+            name="test_dataset",
+            metadata=self.setUpDatasetMetadata("test_dataset"),
+            published_at=timezone.now(),
         )
         dataset.tables.add(table)
 
@@ -529,8 +616,8 @@ class DatasetAPITests(APITestCase):
             f"/api/v0/datasets/{dataset.name}/resources/"
         )  # fixed
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]["name"], "t1")
+        self.assertEqual(response.data["count"], 1)
+        self.assertEqual(response.data["results"][0]["name"], "t1")
 
     def test_assign_missing_table(self):
         Dataset.objects.create(
@@ -587,13 +674,12 @@ class DatasetManagerAPITests(APITestCase):
 
     def test_update_dataset(self):
         updated_data = {
-            "name": "test_dataset",  # must match existing name
             "title": "Updated Title",
             "description": "Updated Description",
             "at_id": "https://example.org/dataset/test_dataset",
         }
 
-        response = self.client.put(self.detail_url, updated_data, format="json")
+        response = self.client.patch(self.detail_url, updated_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.dataset.refresh_from_db()
         self.assertEqual(self.dataset.metadata["title"], "Updated Title")
@@ -611,16 +697,24 @@ class DatasetManagerAPITests(APITestCase):
         response = self.client.get("/api/v0/datasets/nonexistent_dataset/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_put_nonexistent_dataset(self):
-        payload = {
-            "name": "nonexistent_dataset",
-            "title": "Does Not Exist",
-            "description": "Should return 404",
-        }
-        response = self.client.put(
+    def test_patch_nonexistent_dataset(self):
+        payload = {"title": "Does Not Exist", "description": "Should return 404"}
+        response = self.client.patch(
             "/api/v0/datasets/nonexistent_dataset/", payload, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_put_is_not_offered(self):
+        payload = {
+            "name": "test_dataset",
+            "title": "Replaced",
+            "description": "Replaced",
+        }
+        response = self.client.put(self.detail_url, payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertIn("detail", response.json())
+        self.dataset.refresh_from_db()
+        self.assertEqual(self.dataset.metadata["title"], "Test Title")
 
     def test_delete_nonexistent_dataset(self):
         response = self.client.delete("/api/v0/datasets/nonexistent_dataset/")

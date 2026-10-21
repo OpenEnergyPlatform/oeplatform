@@ -22,8 +22,12 @@ write path runs, otherwise an ongoing review's earlier history (which lived only
 in the old ``review`` blob) is not yet represented as rounds.
 """  # noqa: E501
 
+from django.db import transaction
+
+from api.actions import set_table_metadata
+from api.error import APIError
 from dataedit.helper import recursive_update
-from dataedit.metadata import load_metadata_from_db, save_metadata_to_db
+from dataedit.metadata import load_metadata_from_db
 from dataedit.models import (
     PeerReview,
     PeerReviewManager,
@@ -50,6 +54,14 @@ class ReviewFinishedError(Exception):
 
 class NotYourTurnError(Exception):
     """It is the other party's turn; this actor cannot edit right now."""
+
+
+class MetadataRefusedError(Exception):
+    """Finishing would write metadata the platform refuses (parse/validation).
+
+    Raised from inside the submit transaction, so the refused finish leaves
+    nothing behind: no round, no finished flag, no badge, no live metadata.
+    """
 
 
 def _ensure_not_finished(review_id) -> None:
@@ -126,6 +138,7 @@ class ReviewService:
     # ------------------------------------------------------------------ #
     # reviewer side
     # ------------------------------------------------------------------ #
+    @transaction.atomic
     def submit_reviewer_review(self, payload: dict, review_id=None) -> None:
         _ensure_not_finished(review_id)
         review_datamodel = payload.get("reviewData") or {}
@@ -198,6 +211,7 @@ class ReviewService:
     # ------------------------------------------------------------------ #
     # contributor side
     # ------------------------------------------------------------------ #
+    @transaction.atomic
     def submit_contributor_review(self, payload: dict, review_id) -> None:
         _ensure_not_finished(review_id)
         review_datamodel = payload.get("reviewData") or {}
@@ -229,20 +243,24 @@ class ReviewService:
     # finish: merge accepted values back into metadata
     # ------------------------------------------------------------------ #
     def _apply_finished(self, opr, reviewer_choice=None) -> None:
-        """Mark the table reviewed, merge the (projected) accepted values into the
-        live table metadata and the pinned snapshot, and award the badge.
+        """Merge the (projected) accepted values into the live table metadata,
+        then mark the table reviewed, update the pinned snapshot and award the
+        badge.
+
+        The live write goes through ``set_table_metadata``, the one metadata
+        write path, so the merge is validated and the displayed title and the
+        search index follow it. It runs first: if it refuses, nothing else here
+        is applied, and the caller's transaction rolls back the round and the
+        finished flag as well.
 
         The badge is the reviewer's explicit choice if given, else the
         auto-suggestion (see ``BadgeService`` for the swappable policy)."""
-        review_table = Table.load(name=self.table_name)
-        review_table.set_is_reviewed()
-
         envelope = {"reviewData": opr.review}
 
-        # Apply accepted values to the live metadata, then award the badge. The
-        # badge is computed from the review datamodel (per-field 'ok' states), so
-        # pass opr.review — not live_metadata — or the strategy falls through to
-        # its legacy metadata-presence path (see cumulative_tier_strategy).
+        # The badge is computed from the review datamodel (per-field 'ok'
+        # states), so pass opr.review — not live_metadata — or the strategy falls
+        # through to its legacy metadata-presence path (see
+        # cumulative_tier_strategy).
         live_metadata = recursive_update(
             load_metadata_from_db(table=self.table_name), envelope
         )
@@ -250,9 +268,20 @@ class ReviewService:
             opr.review, reviewer_choice=reviewer_choice
         )
         apply_badge_to_metadata(live_metadata, badge)
-        save_metadata_to_db(self.table_name, live_metadata)
+        try:
+            set_table_metadata(table=self.table_name, metadata=live_metadata)
+        except APIError as exc:
+            raise MetadataRefusedError(
+                "The review cannot be finished, because the merged metadata "
+                f"is invalid: {exc.message}"
+            ) from exc
 
-        # Mirror the merged values + badge into the pinned snapshot.
+        # Loaded after the write: an instance from before it would save the old
+        # metadata and title back over the new ones.
+        Table.load(name=self.table_name).set_is_reviewed()
+
+        # Mirror the merged values + badge into the pinned snapshot. The snapshot
+        # is not live metadata, so it keeps its own write.
         opr.oemetadata = apply_badge_to_metadata(
             recursive_update(opr.oemetadata or {}, envelope), badge
         )
