@@ -140,8 +140,14 @@ function initializeEmptyFields() {
   });
 }
 
-function deletePeerReview() {
-  if (!confirm("Are you sure?")) return;
+async function deletePeerReview() {
+  const confirmed = await window.oep.confirm({
+    title: "Delete review?",
+    text: "The review and every comment in it are deleted. This cannot be undone.",
+    verb: "Delete review",
+    danger: true,
+  });
+  if (!confirmed) return;
   const reviewId = current_review.review_id || config.review_id;
 
   $("#peer_review-delete").addClass("d-none");
@@ -149,7 +155,7 @@ function deletePeerReview() {
     .then(() => (window.location = config.url_table))
     .catch((err) => {
       $("#peer_review-delete").removeClass("d-none");
-      alert(getErrorMsg(err));
+      showToast("Not deleted", getErrorMsg(err), "error");
     });
 }
 

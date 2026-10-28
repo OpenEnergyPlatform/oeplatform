@@ -16,7 +16,7 @@ from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.forms import PasswordChangeForm, UserChangeForm
 
-from login.models import UserGroup
+from login.models import Organization
 from login.models import myuser as OepUser
 
 
@@ -86,22 +86,22 @@ class ChangeEmailForm(forms.Form):
         user.send_activation_mail(reset_token=True)
 
 
-class GroupForm(forms.ModelForm):
+class OrganizationForm(forms.ModelForm):
     class Meta:
-        model = UserGroup
-        fields = ("name", "description")
+        model = Organization
+        fields = ("name", "acronym", "description", "image", "homepage")
 
 
-class GroupUserForm(forms.ModelForm):
+class OrganizationUserForm(forms.ModelForm):
     """
-    A form for setting members of a group.
+    A form for setting members of an organization.
     """
 
     class Meta:
         model = OepUser
-        fields = ("groupmembers",)
+        fields = ("members",)
 
-    groupmembers = forms.ModelMultipleChoiceField(
+    members = forms.ModelMultipleChoiceField(
         queryset=OepUser.objects,
         widget=FilteredSelectMultiple("Members", is_stacked=False),
         required=False,
@@ -109,9 +109,9 @@ class GroupUserForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         # group_id is the parameter passed from views.py
-        group_id = kwargs.pop("group_id")
-        super(GroupUserForm, self).__init__(*args, **kwargs)
-        if group_id != "":
-            self.fields["groupmembers"].initial = OepUser.objects.filter(
-                groups__id=group_id
+        organization_id = kwargs.pop("organization_id")
+        super(OrganizationUserForm, self).__init__(*args, **kwargs)
+        if organization_id != "":
+            self.fields["members"].initial = OepUser.objects.filter(
+                groups__id=organization_id
             )

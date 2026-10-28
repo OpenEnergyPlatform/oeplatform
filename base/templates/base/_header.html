@@ -1,4 +1,4 @@
-{% load static i18n fontawesome_5 django_bootstrap5 %}
+{% load instance_theming %}
 <button class="navbar-toggler"
         type="button"
         data-bs-toggle="collapse"
@@ -9,10 +9,8 @@
   <span class="navbar-toggler-icon"></span>
 </button>
 <a class="navbar-brand" href="{% url 'base:home' %}">
-  <img width="45"
-       height="45"
-       alt="logo"
-       src="{% static 'OpenEnergyFamily_Logo_OpenEnergyPlatform_untitled_white.svg' %}" />
+  {% brand_name as name %}
+  {% include "brand/logo.html" with size=45 alt=name|add:" home" %}
 </a>
 <div class="collapse navbar-collapse" id="navbarSupportedContent">
   <ul class="navbar-nav">
@@ -163,7 +161,8 @@
          data-bs-toggle="dropdown"
          aria-haspopup="true"
          aria-expanded="false">About</a>
-      <div class="dropdown-menu" aria-labelledby="navbarDropdownAbout">
+      <div class="dropdown-menu dropdown-menu-end"
+           aria-labelledby="navbarDropdownAbout">
         <a class="dropdown-item" href="{% url 'base:about' %}">Overview</a>
         <a class="dropdown-item"
            href="{% url 'base:oefamily-sc' %}">Open Energy Family Steering Committee</a>
@@ -179,25 +178,5 @@
       </div>
     </li>
   </ul>
-</div>
-<div class="ms-auto">
-  {% if request.user.is_authenticated %}
-    <!-- Profile Link -->
-    <a class="btn btn-link text-white p-0"
-       href="{% url 'login:settings' user.pk %} ">
-      {% fa5_icon 'user' 'fas' %} {{ user }}
-    </a>
-    {# URL provided by django-allauth/account/urls.py #}
-    <a href="{% url 'account_logout' %}" class="btn btn-danger btn-sm m-1">
-    {% fa5_icon 'arrow-right' 'fas' %} {% translate "Sign Out" %}</a>
-  {% else %}
-    {% if ACCOUNT_ALLOW_REGISTRATION %}
-      {# URL provided by django-allauth/account/urls.py #}
-      <a href="{% url 'account_signup' %}"
-         class="btn btn-info btn-sm m-1">{% translate "Sign Up" %}</a>
-    {% endif %}
-    {# URL provided by django-allauth/account/urls.py #}
-    <a class="btn btn-info btn-sm m-1"
-       href="{% url 'account_login' %}">{% translate "Sign In" %}</a>
-  {% endif %}
+  {% include "components/user_menu.html" with user=request.user %}
 </div>

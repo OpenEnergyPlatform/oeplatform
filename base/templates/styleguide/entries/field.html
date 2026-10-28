@@ -1,0 +1,68 @@
+{# use: Every form field: Bootstrap's form-control, form-select and form-check, label above, muted help and the error below, never a table. Render a Django form with django-bootstrap5 ({% bootstrap_field %}); allauth's forms get it from their element overrides. On these classes set longhands only: a padding shorthand on a select deletes the room for its arrow. #}
+<div class="row g-4">
+  <div class="col-md-6">
+    <div class="mb-3">
+      <label class="form-label" for="field-name">Table name</label>
+      <input class="form-control"
+             type="text"
+             id="field-name"
+             placeholder="e.g. wind_farms_2024"
+             aria-describedby="field-name-help" />
+      <div class="form-text"
+           id="field-name-help">Lower case letters, digits and underscores.</div>
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="field-email">E-Mail</label>
+      <input class="form-control is-invalid"
+             type="email"
+             id="field-email"
+             value="not-an-address"
+             aria-describedby="field-email-error" />
+      <div class="invalid-feedback"
+           id="field-email-error">Enter a valid email address.</div>
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="field-description">Description</label>
+      <textarea class="form-control" id="field-description" rows="3"></textarea>
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="field-disabled">Current address</label>
+      <input class="form-control"
+             type="email"
+             id="field-disabled"
+             value="owner@example.org"
+             disabled />
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="mb-3" style="max-width: 12rem">
+      <label class="form-label" for="field-narrow">The license under which the data of this table is published</label>
+      <select class="form-select" id="field-narrow">
+        <option>Creative Commons Attribution 4.0 International</option>
+        <option>Open Data Commons Open Database License</option>
+      </select>
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="field-small">Rows per page</label>
+      <select class="form-select form-select-sm" id="field-small">
+        <option>25</option>
+        <option>100</option>
+      </select>
+    </div>
+    <div class="form-check">
+      <input class="form-check-input"
+             type="checkbox"
+             id="field-check"
+             checked />
+      <label class="form-check-label"
+             for="field-check">Notify me about reviews</label>
+    </div>
+    <div class="form-check mb-3">
+      <input class="form-check-input"
+             type="radio"
+             name="field-radio"
+             id="field-radio" />
+      <label class="form-check-label" for="field-radio">Only this table</label>
+    </div>
+  </div>
+</div>

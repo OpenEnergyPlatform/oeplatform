@@ -1,61 +1,54 @@
-.formtable {
-  border-collapse: separate;
-  border-spacing: 0.5em;
-  width: 100%;
+/* The factsheet editors: one field per block, label above it, and groups of
+   checkboxes as fieldsets whose choices flow into columns. */
+
+.factsheet-form .tab-content {
+  padding-top: 1.25rem;
 }
 
-.formtable tr {
-  padding-bottom: 2em;
+.factsheet-field {
+  margin-bottom: 1rem;
 }
 
-.formtable th {
-  font-weight: bold;
-  padding-right: 2em;
-  width: 20%;
-  vertical-align: top;
+.factsheet-field__other {
+  margin-top: 0.25rem;
 }
 
-.checktable {
-  float: left;
-  padding: 0;
+.factsheet-group {
+  margin-bottom: 1.5rem;
 }
 
-.checktable th {
+.factsheet-group legend {
+  font-size: 1rem;
+  font-weight: var(--oep-heading-weight);
+  margin-bottom: 0.5rem;
 }
 
-.checktable td {
+.factsheet-group legend.factsheet-group__sub {
+  color: var(--oep-text-muted);
 }
 
-.right {
-  top: 0px;
-  right: 0px;
-  display: inline;
+.factsheet-choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  column-gap: 1.5rem;
+  margin-bottom: 0.75rem;
 }
 
-.hidden {
-  display: none;
+.factsheet-choices .factsheet-field {
+  margin-bottom: 0.25rem;
 }
 
-.visible {
-  display: inline;
+.factsheet-array__entry {
+  margin-bottom: 0.25rem;
 }
-.arraywrapper {
-  width: 100%;
-  margin-bottom: 2px;
-  required: 0;
-}
-.removeicon {
-  position: absolute;
-  right: 5px;
-  top: 0;
+
+/* Sticks to the bottom of the screen while the form is on it, so the save
+   action is in reach from any tab, however long. */
+.factsheet-form__actions {
+  position: sticky;
   bottom: 0;
-  height: 14px;
-  margin: auto;
-  font-size: 14px;
-  cursor: pointer;
-  color: red;
-}
-
-.modeledTec th {
-  vertical-align: inherit;
+  z-index: 1;
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--bs-border-color);
+  background: var(--oep-surface);
 }

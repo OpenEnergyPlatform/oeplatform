@@ -509,8 +509,8 @@ function renderSchemaTab(metadata) {
           <input type="text" id="field-search-${resourceIndex}" class="form-control" placeholder="Search fields...">
         </div>
         
-        <div class="metadata-table-container">
-          <table class="table table-striped metadata-table" id="fields-table-${resourceIndex}">
+        <div class="table-container metadata-table-container">
+          <table class="table table-hover" id="fields-table-${resourceIndex}">
             <thead>
               <tr>
                 <th>Name ${createInfoIcon(
@@ -1462,9 +1462,9 @@ function renderMetadataViewer(metadata, container) {
     <div class="metadata-container">
       <!-- Header with title and download button -->
       <div class="d-flex justify-content-between align-items-center metadata-header">
-        <h1>Dataset: ${
+        <h2>Dataset: ${
           metadata.title || metadata.name || "Metadata Specification"
-        }</h1>
+        }</h2>
         <!-- 
         <button id="download-json" class="btn btn-primary">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download me-2" viewBox="0 0 16 16">
@@ -1477,7 +1477,7 @@ function renderMetadataViewer(metadata, container) {
       </div>
       
       <!-- Tabs -->
-      <ul class="nav nav-tabs mb-4" id="metadataTabs" role="tablist">
+      <ul class="nav tabs mb-4" id="metadataTabs" role="tablist">
         <li class="nav-item" role="presentation">
           <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab" aria-controls="overview" aria-selected="true">Overview</button>
         </li>

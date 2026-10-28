@@ -1,0 +1,53 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+A list's compact pager, ``‹ 1 2 … 7 [8] 9 … 83 ›  176–200 of 2,068``.
+Hidden when everything fits on one page. The house pagination (#2647).
+{% endcomment %}
+{% if page.num_pages > 1 %}
+  <nav class="dash-pager" aria-label="Pages">
+    <ul class="pagination mb-0">
+      {% if page.previous_url %}
+        <li class="page-item">
+          <a id="pg-prev"
+             class="page-link"
+             href="{{ page.previous_url }}"
+             aria-label="Previous page">‹</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled">
+          <span class="page-link" aria-hidden="true">‹</span>
+        </li>
+      {% endif %}
+      {% for item in page.pager %}
+        {% if item.number is None %}
+          <li class="page-item disabled">
+            <span class="page-link" aria-hidden="true">…</span>
+          </li>
+        {% else %}
+          <li class="page-item{% if item.current %} active{% endif %}"
+              {% if item.current %}aria-current="page"{% endif %}>
+            <a id="pg-{{ item.number }}"
+               class="page-link"
+               href="{{ item.url }}"
+               aria-label="Page {{ item.number }}">{{ item.number }}</a>
+          </li>
+        {% endif %}
+      {% endfor %}
+      {% if page.next_url %}
+        <li class="page-item">
+          <a id="pg-next"
+             class="page-link"
+             href="{{ page.next_url }}"
+             aria-label="Next page">›</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled">
+          <span class="page-link" aria-hidden="true">›</span>
+        </li>
+      {% endif %}
+      <li class="pagination__range">{{ page.range_text }}</li>
+    </ul>
+  </nav>
+{% endif %}

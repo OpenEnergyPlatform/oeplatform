@@ -1,164 +1,46 @@
-{% extends "base/base-profile.html" %}
-{% load compress %}
-{% load django_bootstrap5 %}
+{% extends "login/list_tab.html" %}
+{% comment %}
+SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+The tables tab (list_tab.html). The primary filter row is Search,
+Publishable, Review, Access and Dataset; "More filters (n)" holds the rest.
+The bar folds behind "Filters (n)" below 960 px of list (measured,
+``tables_tab.css``). The bulk bar (#2564) sends the selection as
+``tables`` to TableActionCheckView.
+
+The tab keeps the profile sidebar, like every other profile tab. The spec
+decided on a slim identity strip instead, to give the list the width
+(measured on the prototype: 928 px of list at 1440 px with the sidebar,
+against about 1,340 px for all nine columns); the maintainer chose the
+sidebar on 2026-10-02, so the column collapse (#2555) works with that width.
+{% endcomment %}
 {% load static %}
-{% block main-content-body %}
-  {% if profile_user == request.user %}
-    {% include "login/user_nav.html" %}
-    <!-- ====== search field ====== -->
-    <div class="profile-category_search"
-         style="margin-bottom: 0;
-                max-width: 300px">
-      <input type="text"
-             id="table-search"
-             name="search"
-             class="form-control"
-             placeholder="Search your tables..."
-             value="{{ search_query }}"
-             hx-get="{% url 'login:tables' user_id=profile_user.id %}"
-             hx-trigger="keyup changed delay:300ms"
-             hx-target="#tables-container"
-             hx-select="#tables-container"
-             hx-include="this"
-             hx-push-url="true"
-             hx-swap="outerHTML" />
-    </div>
-    <div id="tables-container">
-      {% include "login/partials/tables_sections.html" %}
-    </div>
-  {% endif %}
-  <div id="topics" style="display: none">{{ topics|json_script:"topics" }}</div>
-  <!-- Modal for publishing functionality (after pressing publish button) -->
-  {% include "login/modals/table_publish.html" %}
-{% endblock %}
-{% block main-right-sidebar-content %}
-  {% include "login/sidebar_user.html" %}
-{% endblock main-right-sidebar-content %}
-{% block after-body-bottom-js %}
-  {% compress js %}
-    <script src="{% static 'ontology/htmx.js' %}"></script>
-  {% endcompress %}
-  <script>
-    $(function () {
-      $('[data-bs-toggle="tooltip"]').tooltip();
-    });
+{% block list-styles %}
+  <link rel="stylesheet" href="{% static 'login/tables_tab.css' %}" />
+{% endblock list-styles %}
+{% block region %}
+  {% include "login/partials/tables_region.html" %}
+{% endblock region %}
+{% block drawers %}
+  {% comment %}
+  The access drawer, outside the tab for the same reason as the dialog. Its
+  contents come from the drawer endpoint (login:table-access) and every
+  write in it replaces them, so it stays open; tables_tab.js opens it once
+  an Access cell or "Manage access" has filled it.
+  {% endcomment %}
+  <div id="table-access"
+       class="offcanvas offcanvas-end dash-access-offcanvas"
+       tabindex="-1"
+       aria-labelledby="table-access-title">
+    <div id="table-access-body" class="dash-access-body"></div>
+  </div>
+{% endblock drawers %}
+{% block list-script %}
+  <script type="module">
+    import { bindTablesTab } from "{% static 'login/tables_tab.js' %}";
 
-    function getCookie(name) {
-      let cookieValue = null;
-      if (document.cookie && document.cookie !== "") {
-        const cookies = document.cookie.split(";");
-        for (let i = 0; i < cookies.length; i++) {
-          const cookie = cookies[i].trim();
-          if (cookie.startsWith(name + "=")) {
-            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-            break;
-          }
-        }
-      }
-      return cookieValue;
-    }
-
-    function publishTable(tableName, topic, embargoPeriod) {
-      const data = embargoPeriod
-        ? { embargo: { duration: embargoPeriod } }
-        : {};
-
-      /* dynamically reverse url */
-      return window
-        .reverseUrl("api:move_publish", {
-          table: tableName,
-          topic: topic,
-        })
-        .then((apiUrl) => {
-          return fetch(apiUrl, {
-            method: "POST",
-            headers: {
-              "X-CSRFToken": getCookie("csrftoken"),
-              "Content-Type": "application/json",
-              Accept: "application/json",
-            },
-            body: JSON.stringify(data),
-          });
-        })
-        .then((response) => {
-          if (response.ok) {
-            alert("Table moved successfully.");
-            window.location.reload();
-          } else {
-            response.text().then((text) => {
-              alert(`Error moving table: ${text}`);
-            });
-          }
-        });
-    }
-
-    document.body.addEventListener("htmx:configRequest", function (event) {
-      event.detail.headers["X-CSRFToken"] = getCookie("csrftoken");
-    });
-
-    // Refresh the page after any htmx request ... keep until partials are
-    // implemented for the draft & published tables
-    document.addEventListener("htmx:afterRequest", function (event) {
-      if (event.detail.successful && event.detail.elt.id !== 'table-search') {
-          window.location.reload();
-      }
-    });
-
-    document.addEventListener("DOMContentLoaded", function () {
-      let topics = [];
-      let relatedButton;
-      let publishModalInstance; // Declare publishModalInstance in a higher scope
-
-      const topicsDiv = document.querySelector("#topics");
-      if (topicsDiv) {
-        topics = JSON.parse(topicsDiv.textContent);
-      }
-
-      // Event listener for modal show event
-      var publishModal = new bootstrap.Modal(
-        document.getElementById("publishModal")
-      );
-      publishModalInstance = bootstrap.Modal.getInstance(publishModal._element);
-
-      publishModalInstance._element.addEventListener(
-        "show.bs.modal",
-        function (event) {
-          relatedButton = event.relatedTarget;
-          const dropdown = this.querySelector(".topic-dropdown");
-          dropdown.innerHTML = "";
-          topics.forEach((topic) => {
-            dropdown.innerHTML += `<option value="${topic}">${topic}</option>`;
-          });
-        }
-      );
-
-      // Event listener for Confirm button click inside the modal
-      document
-        .querySelector(".confirm-publish")
-        .addEventListener("click", function () {
-          const topic_dropdown = document.querySelector(".topic-dropdown");
-          const embargo_dropdown = document.querySelector(".embargo-dropdown");
-          if (relatedButton) {
-            const tableName = relatedButton.getAttribute("data-tableName");
-            const topic = topic_dropdown.value;
-            const embargoPeriod = embargo_dropdown.value;
-
-            publishTable(tableName, topic, embargoPeriod);
-          } else {
-            console.error("relatedButton is not defined.");
-          }
-        });
-    });
-
-    var tooltipTriggerList = [].slice.call(
-      document.querySelectorAll('[data-bs-toggle="tooltip"]')
-    );
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-      return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-
-    function open_wizzard() {
-      location.href = "{% url 'dataedit:wizard_create' %}";
-    }
+    bindTablesTab(document);
   </script>
-{% endblock after-body-bottom-js %}
+{% endblock list-script %}

@@ -26,7 +26,7 @@ SHEETTYPES = ("model", "framework")
 
 #: The sidebar's tag inputs. The Fields section of the same sidebar
 #: legitimately renders `checked` for the default columns.
-TAG_CHECKBOX = "tag-checkbox"
+TAG_CHECKBOX = "tag__check"
 
 #: Every `select_` in the page must be part of an `id`. The prefix survives as
 #: a DOM id and nowhere else -- not in a submitted value, not in a query

@@ -1,0 +1,26 @@
+{% comment %}
+  toast (#2643): short feedback that appears in the corner and does not move
+  the page: "Saved", "The delete failed". Styles:
+  theming/scss/components/_toast.scss; catalogue entry: styleguide/entries/toast.html.
+
+  A page does not include it. Every shell has one toast region
+  (base/_feedback.html), holding this include as a <template>, and a script
+  shows a toast with `window.oep.toast(text, {status, title})`
+  (base/static/base/dialogs.js), which clones it. A success or an info goes
+  away by itself; a warning or an error stays until it is closed.
+
+  status  success | info | warning | danger (default info)
+  title   optional, a few words above the text
+  text    the message; escaped
+{% endcomment %}
+<div class="toast show toast--{{ status|default:'info' }}">
+  <div class="d-flex">
+    <div class="toast-body">
+      <strong class="toast__title"
+              {% if not title %}hidden{% endif %}>{{ title }}</strong>
+      <span class="toast__text">{{ text }}</span>
+    </div>
+    <button type="button" class="btn-close" aria-label="Close" data-toast-close>
+    </button>
+  </div>
+</div>

@@ -1,0 +1,28 @@
+{% comment %}
+  Platform notice: one band above the navbar, included by all five shells.
+  It shows on the first page of a visit (per browser tab) and can be closed;
+  the script below removes it on every later page. To retire a notice, empty
+  this file; the includes stay as the slot for the next one.
+{% endcomment %}
+<aside id="platform-notice"
+       class="alert alert-info alert-dismissible fade show rounded-0 mb-0 py-2"
+       aria-label="Platform notice">
+  Noticed problems with the platform recently? Please let us know via the
+  <a href="{% url 'base:contact' %}">contact form</a>.
+  <button type="button"
+          class="btn-close py-2"
+          data-bs-dismiss="alert"
+          aria-label="Close notice"></button>
+</aside>
+<script>
+  // Runs before the page paints, so a later page never flashes the band.
+  try {
+    if (sessionStorage.getItem("oep-notice-seen")) {
+      document.getElementById("platform-notice").remove();
+    } else {
+      sessionStorage.setItem("oep-notice-seen", "1");
+    }
+  } catch (e) {
+    // No storage (private mode, blocked): keep showing it, closable.
+  }
+</script>

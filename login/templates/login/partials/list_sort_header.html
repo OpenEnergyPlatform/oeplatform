@@ -1,0 +1,24 @@
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+A sortable column header: ``link`` from ``ListPage.sort_links``, ``cell``
+the column's class. A click sorts by the column, or toggles its direction.
+{% endcomment %}
+<th class="{{ cell }}"
+    scope="col"
+    {% if link.aria_sort %}aria-sort="{{ link.aria_sort }}"{% endif %}>
+  <a id="{{ link.id }}"
+     href="{{ link.url }}"
+     class="dash-sort{% if link.active %} dash-sort--active{% endif %}">{{ link.label }}
+    <span aria-hidden="true">
+      {% if not link.active %}
+        ↕
+      {% elif link.descending %}
+        ↓
+      {% else %}
+        ↑
+      {% endif %}
+    </span>
+  </a>
+</th>

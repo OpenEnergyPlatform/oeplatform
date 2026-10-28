@@ -1,0 +1,27 @@
+{% extends "base/base-full.html" %}
+{% comment %}
+  Every account page renders inside this layout: the OEP header and
+  messages, the centred account column with the brand's logo, and none of
+  allauth's own menu. allauth's own pages get it as their layout; the pages
+  under account/ and socialaccount/ that the OEP writes itself extend it.
+{% endcomment %}
+{% load instance_theming %}
+{% block title %}
+  - {% block head_title %}{% endblock head_title %}
+{% endblock title %}
+{% block main-content-body %}
+  <div class="login">
+    <div class="login__wrap">
+      <div class="login__logo">
+        {% brand_name as name %}
+        {% include "brand/logo.html" with size=72 alt=name on_light=True %}
+      </div>
+      {% block content %}
+      {% endblock content %}
+    </div>
+  </div>
+{% endblock main-content-body %}
+{% block after-body-bottom-js %}
+  {% block extra_body %}
+  {% endblock extra_body %}
+{% endblock after-body-bottom-js %}

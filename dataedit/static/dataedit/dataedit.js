@@ -24,7 +24,6 @@ var DataEdit = function (table) {
    * delete table
    */
   function deleteTable() {
-    $("#dataview-confirm-delete").modal("hide");
     setStatusCreate("primary", true, "deleting table...");
     var tablename = table;
 
@@ -45,14 +44,9 @@ var DataEdit = function (table) {
   }
 
   // bind buttons
-  /* delete table */
-  $("#dataview-table-delete").bind("click", function () {
-    $("#dataview-confirm-delete").modal("show");
-  });
-  $("#dataview-confirm-delete-cancel").bind("click", function () {
-    $("#dataview-confirm-delete").modal("hide");
-  });
-  $("#dataview-confirm-delete-delete").bind("click", deleteTable);
+  /* delete table: the button's data-confirm asks first (base/dialogs.js), so
+     this click arrives only once the deletion is confirmed */
+  $("#dataview-table-delete").bind("click", deleteTable);
 
   /** *************************************
    * Helper functions to use the API

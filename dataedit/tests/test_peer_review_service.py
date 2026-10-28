@@ -5,9 +5,8 @@ SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 
 The contributor path is OEDB-free (get_opr_by_id / round write / projection /
-update), so it is tested here with plain ORM rows. The reviewer create + finish
-paths reach the live OEDB (Table.load / load_metadata_from_db / save_metadata_to_db)
-and are validated by running the app, not here.
+update), so it is tested here with plain ORM rows. Finishing a review is tested
+end to end through the review endpoints in ``test_peer_review_finish``.
 """  # noqa: E501
 
 from django.test import TestCase

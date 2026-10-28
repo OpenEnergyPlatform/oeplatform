@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Probes the app containers by name. Its config is rendered by install.sh,
+# because the app only answers requests carrying its own host name.
+
+[Unit]
+Description=OEP monitoring: service probes (blackbox exporter)
+
+[Container]
+Image=quay.io/prometheus/blackbox-exporter:v0.29.0
+ContainerName=oep-mon-blackbox
+Volume=%h/.config/oeplatform/blackbox.yml:/etc/blackbox_exporter/config.yml:ro
+Network=oep.network
+
+[Service]
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

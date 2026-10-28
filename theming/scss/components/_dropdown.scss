@@ -1,0 +1,36 @@
+// dropdown: every menu that opens from a button or a tab takes the navbar
+// dropdown's look (#2648): the large radius, the large shadow, the dense size,
+// items with a small radius and the hover tint. Bootstrap's `.dropdown-menu`
+// and `.dropdown-item`, restyled here, so every in-page dropdown gets it
+// without a class of its own (the table page's menus, peer review history,
+// bootstrap-select's tag picker). Pure CSS, no include.
+// Catalogue entry: base/templates/styleguide/entries/dropdown.html.
+//
+// The navbar's own menus are sized by `--navbar-rem` (base-style.css), so
+// their rules there stay and win; this is the same look in plain rem. The
+// colours that only point Bootstrap's variables at tokens are in
+// scss/tokens/_remap.scss; what is restyled is here.
+@use '../base/' as *;
+
+.dropdown-menu {
+    --bs-dropdown-padding-x: 0.5rem;
+    --bs-dropdown-padding-y: 0.5rem;
+    --bs-dropdown-font-size: var(--oep-font-size-dense);
+    --bs-dropdown-border-color: var(--bs-border-color);
+    --bs-dropdown-border-radius: var(--bs-border-radius-lg);
+    --bs-dropdown-inner-border-radius: calc(var(--bs-border-radius-lg) - 1px);
+    --bs-dropdown-divider-bg: var(--bs-border-color);
+    --bs-dropdown-link-color: var(--bs-body-color);
+    --bs-dropdown-link-hover-color: var(--bs-primary);
+    --bs-dropdown-link-hover-bg: var(--oep-surface-hover);
+    --bs-dropdown-link-disabled-color: var(--oep-text-muted);
+    --bs-dropdown-item-padding-x: 0.75rem;
+    --bs-dropdown-item-padding-y: 0.625rem;
+    --bs-dropdown-header-color: var(--oep-text-muted);
+    --bs-dropdown-header-padding-x: 0.75rem;
+    box-shadow: var(--oep-shadow-lg);
+}
+
+.dropdown-item {
+    border-radius: var(--bs-border-radius);
+}

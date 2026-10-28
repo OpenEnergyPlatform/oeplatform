@@ -10,9 +10,12 @@ If you need or wish to work on the visual part of the platform, here are some
 resources to help you started with.
 
 Be sure to know the existing OEP styling, in order to keep the visual consistent
-throughout the platform. You can double-check by reviewing the website or going
-through the the [design system](design-system.md). Try to keep
-[accessibility](accessibility.md) in mind as well.
+throughout the platform. Every house component and design token is shown, live,
+in the component catalogue at
+[`/styleguide/` :fontawesome-solid-arrow-up-right-from-square:](https://openenergyplatform.org/styleguide/){:target="\_blank"}
+(locally `http://localhost:8000/styleguide/`); use what is there, or add a
+component with its catalogue entry, as the [design system](design-system.md)
+describes. Try to keep [accessibility](accessibility.md) in mind as well.
 
 ## Main workflow
 
@@ -22,14 +25,14 @@ need to work with the factsheets, you can directly check the content below about
 
 ### Theming module
 
-Since we use
+We use
 [Bootstrap v5.2.0 :fontawesome-solid-arrow-up-right-from-square:](https://getbootstrap.com/docs/5.2/getting-started/introduction/){:target="\_blank"}
-as a front-end library, you first need to have it installed in order to be able
-to use it. See
-[documentation :fontawesome-solid-arrow-up-right-from-square:](https://github.com/OpenEnergyPlatform/oeplatform/tree/develop/theming){:target="\_blank"}.
-
-Once installed, you can view the content of the Bootstrap library's content
-inside `/theming/bootstrap`.
+as a front-end library, themed by the SCSS in `/theming` and compiled into the
+committed `base/static/css/bootstrap.min.css`. After `npm install`, the
+Bootstrap sources are in `node_modules/bootstrap/scss`. After changing anything
+in `/theming`, run `npm run build:theme` and commit the rebuilt stylesheet with
+your change. See the
+[theming README :fontawesome-solid-arrow-up-right-from-square:](https://github.com/OpenEnergyPlatform/oeplatform/tree/develop/theming){:target="\_blank"}.
 
 ### BEM approach
 
@@ -97,7 +100,7 @@ styling.
 ### Overwrite a Bootstrap variable
 
 Try as much as possible to use the existing Bootstrap variables
-(`/theming/bootstrap/scss/_variables.scss`) or the ones that are already
+(`node_modules/bootstrap/scss/_variables.scss`) or the ones that are already
 overwritten (`/theming/_variables.scss`), but if you still need to
 change/overwrite a variable, you need to do it in 2 places:
 

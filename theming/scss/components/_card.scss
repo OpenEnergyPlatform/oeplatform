@@ -1,0 +1,56 @@
+// card: Bootstrap's .card on tokens (#2646). Pure CSS, no include. Catalogue
+// entry: base/templates/styleguide/entries/card.html.
+//
+// Every .card on the platform is the house card: the in-page radius, the
+// border colour, the small shadow and 1.5rem of padding in its body and its
+// header. Its title (.card-title) has one size and no space above, whatever
+// heading level the page gives it. The homepage's cards are not .card; they
+// keep their own classes and read the same tokens (index-style.css).
+//
+// A clickable card (.card--clickable) is one link: its title link carries
+// Bootstrap's .stretched-link, so the whole card is the target, and the card
+// shows that with a primary border on hover and while the link has focus.
+// It does not lift. A control inside a clickable card that must stay
+// clickable on its own (the draft topic's "Add data set") carries
+// .card__control, which lifts it above the stretched link.
+@use '../base/' as *;
+
+.card {
+    --bs-card-border-color: var(--bs-border-color);
+    --bs-card-spacer-y: 1.5rem;
+    --bs-card-spacer-x: 1.5rem;
+    --bs-card-cap-padding-x: 1.5rem;
+    --bs-card-cap-bg: var(--oep-surface-subtle);
+    box-shadow: var(--oep-shadow-sm);
+}
+
+.card-title {
+    margin-top: 0;
+    font-size: 1.125rem;
+    font-weight: var(--oep-heading-weight);
+
+    // A title that is a link reads as a title; it underlines on hover.
+    a {
+        text-decoration: none;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+}
+
+.card__control {
+    position: relative;
+    z-index: 2;
+}
+
+.card--clickable:hover,
+.card--clickable:focus-within {
+    border-color: var(--bs-primary);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .card--clickable {
+        transition: border-color var(--oep-transition);
+    }
+}

@@ -1,0 +1,45 @@
+{% load django_bootstrap5 %}
+{% comment %}
+SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+SPDX-License-Identifier: AGPL-3.0-or-later
+
+  The Manage Profile card: an edit-in-place card (#2654). Reading without a
+  `form` in the context, editing with one. htmx swaps the whole card body
+  (the hx-target/select/swap below are inherited by Edit, the form and
+  Cancel), so the URL never changes; without JavaScript Edit and Cancel are
+  plain links and the form posts to the standalone page.
+  base/static/base/edit_in_place.js moves the focus and shows the toast.
+{% endcomment %}
+{% url 'login:edit' request.user.id as edit_url %}
+{% url 'login:settings' request.user.id as settings_url %}
+<div id="profile-card"
+     class="card-body"
+     hx-target="#profile-card"
+     hx-select="#profile-card"
+     hx-swap="outerHTML"
+     data-edit-in-place
+     data-edit-in-place-saved="Profile saved.">
+  <h2 class="card-title" id="profile-heading">Manage Profile</h2>
+  {% if form %}
+    <form action="{{ edit_url }}"
+          method="post"
+          enctype="multipart/form-data"
+          hx-post="{{ edit_url }}">
+      {% csrf_token %}
+      {% for field in form %}
+        {% bootstrap_field field %}
+      {% endfor %}
+      <div class="d-flex justify-content-end gap-2">
+        <a class="btn btn-secondary"
+           href="{{ settings_url }}"
+           hx-get="{{ settings_url }}">Cancel</a>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </div>
+    </form>
+  {% else %}
+    <a href="{{ edit_url }}"
+       class="btn btn-primary"
+       hx-get="{{ edit_url }}"
+       data-edit-in-place-trigger>Edit</a>
+  {% endif %}
+</div>

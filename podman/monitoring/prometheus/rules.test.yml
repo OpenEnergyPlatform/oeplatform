@@ -1,0 +1,37 @@
+# SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Unit test of rules.yml. Run from this directory:
+#   podman run --rm -v "$PWD:/t:ro" -w /t --entrypoint promtool \
+#     docker.io/prom/prometheus:v3.15.0 test rules rules.test.yml
+
+rule_files: [rules.yml]
+evaluation_interval: 1m
+tests:
+  - interval: 1m
+    input_series:
+      - series: 'oep_usage_failed_logins_last_minute{instance="a"}'
+        values: "15x5"
+      - series: 'oep_usage_failed_logins_last_minute{instance="b"}'
+        values: "5x5"
+      - series: 'probe_success{instance="lookup:8082"}'
+        values: "1 1 0 0 0 0"
+    alert_rule_test:
+      - eval_time: 4m
+        alertname: FailedLoginWave
+        exp_alerts:
+          - exp_labels: { severity: warning, instance: a }
+            exp_annotations:
+              {
+                summary:
+                  "More than 10 failed logins per minute (password guessing?)",
+              }
+      - eval_time: 5m
+        alertname: ServiceDown
+        exp_alerts:
+          - exp_labels: { severity: critical, instance: "lookup:8082" }
+            exp_annotations: { summary: "lookup:8082 does not answer" }
+      - eval_time: 3m
+        alertname: ServiceDown
+        exp_alerts: []

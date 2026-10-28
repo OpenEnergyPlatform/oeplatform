@@ -164,6 +164,23 @@ now have the following containers running:
 - SOON: ontop (quantitative data comparison)
 - SOON: Docs (mkdocs based documentation website)
 
+!!! warning "Fuseki's data moved to the `fuseki_databases` volume"
+
+    Older versions of `docker-compose.dev.yaml` mounted the volume at a path
+    Fuseki never uses, so your local OEKG sits in an anonymous volume of the
+    `fuseki` container. The next `up` with the new file starts Fuseki on the
+    (empty) named volume. To keep your data, copy it over first:
+
+        docker compose -f docker/docker-compose.dev.yaml stop web
+        docker run --name fuseki-copy --user root --volumes-from fuseki \
+          -v docker_fuseki_databases:/new --entrypoint sh stain/jena-fuseki:5.1.0 \
+          -c 'cp -a /fuseki/. /new/ && find /new -name tdb.lock -delete'
+        docker rm fuseki-copy
+        docker compose -f docker/docker-compose.dev.yaml up -d
+
+    The volume name carries the compose project as prefix; check it with
+    `docker volume ls | grep fuseki_databases`.
+
 ### Restart, rebuild and cleanup containers to apply changes
 
 While developing and adding changes you might want to rebuild your docker

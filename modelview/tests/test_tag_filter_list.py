@@ -12,7 +12,7 @@ from modelview.tests.html import checked_values, offered_values
 #: The sidebar's tag inputs. The Fields section of the same sidebar
 #: legitimately renders `checked` for the default columns, so scoping by this
 #: class is what keeps these assertions about tags.
-TAG_CHECKBOX = "tag-checkbox"
+TAG_CHECKBOX = "tag__check"
 
 
 class TagFilterListTestCase(TestViewsTestCase):

@@ -15,6 +15,7 @@ SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner L
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: E501
 
+from django.template.loader import render_to_string
 from django.urls import reverse
 
 from base.tests import TestViewsTestCase
@@ -69,7 +70,7 @@ class TestTheTwoPagesAreOneFlow(TagPageTestCase):
         """Every other page in this app has one; the editor had none, which is
         what made it look like it belonged to a different site."""
         for html in (self.overview(), self.editor(), self.editor(self.tag)):
-            self.assertIn("main-header", html)
+            self.assertIn('class="page-header"', html)
 
     def test_the_editor_says_which_of_the_two_things_it_is_doing(self):
         self.assertIn("Create Tag", self.editor())
@@ -488,13 +489,13 @@ class TestTheListDoesNotRunAwayWithThePage(TagPageTestCase):
             cls.make_tag(name="Tag %02d" % i)
 
     def test_the_list_is_boxed_and_scrollable(self):
-        self.assertIn("tag-list--scroll", self.overview())
+        self.assertIn("tag-group--scroll", self.overview())
 
     def test_the_actions_come_before_the_list(self):
         html = self.overview()
 
         create = html.index(reverse("dataedit:tags-new"))
-        listing = html.index("tag-list--scroll")
+        listing = html.index("tag-group--scroll")
 
         self.assertLess(create, listing)
 
@@ -552,3 +553,17 @@ class TestTheDatabasePagesLinkToTheTagManager(TagPageTestCase):
         page, _ = self.actions()
 
         self.assertEqual(1, page.count(f'href="{reverse("dataedit:tags")}"'))
+
+    def test_the_table_pages_edit_button_opens_the_tag_manager(self):
+        # It linked to the topic list, which edits no tag.
+        form = render_to_string(
+            "dataedit/taggable_setting.html",
+            {"is_admin": True, "selected": [], "table": "a_table"},
+        )
+        edit = form[
+            form.index('href="', form.index("btn btn-secondary", form.index("Apply"))) :
+        ]
+
+        self.assertTrue(
+            edit.startswith(f'href="{reverse("dataedit:tags")}"'), edit[:80]
+        )

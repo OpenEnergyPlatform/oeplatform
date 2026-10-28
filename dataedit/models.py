@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING, Literal, Mapping, Union
 
 from django.contrib.postgres.search import SearchVectorField
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 from django.db.models import (
     BooleanField,
     CharField,
@@ -35,8 +35,10 @@ from django.db.models import (
     IntegerField,
     JSONField,
     PositiveIntegerField,
+    Q,
     QuerySet,
 )
+from django.http import Http404
 from django.urls import reverse
 from django.utils import timezone
 from omi.license import LicenseError, validate_oemetadata_licenses
@@ -190,6 +192,31 @@ class Table(Tagable):
     # For now, we only set it on creation
     date_updated = DateTimeField(auto_now_add=True, null=True)
 
+    # The Publish gate's verdict (dataedit.publish_gate), stored so a list can
+    # filter and sort on it. Recomputed on every write through
+    # api.actions.set_table_metadata and by the recompute_publish_gate
+    # command; NULL until that command first ran. Publishing never reads it.
+    publishable = BooleanField(null=True)
+
+    # When the Table's content last changed, in two halves: its rows or
+    # structure, and its metadata. Each is stamped explicitly by the write
+    # that changes it, never by auto_now, which would fire on every save
+    # (publishing included) and miss every data write, since none saves the
+    # Table. The data half through ``stamp_data_modified``, the metadata half
+    # by api.actions.set_table_metadata in the save it does anyway. Publish,
+    # unpublish, embargo and role changes stamp neither. NULL: no change
+    # recorded since the fields were added.
+    data_modified = DateTimeField(null=True)
+    metadata_modified = DateTimeField(null=True)
+
+    # When the Table was created. ``date_updated`` holds that only for Tables
+    # created after migration 0044 (2025-10-30), which filled it for every
+    # older one from dates declared in its metadata; for those the creation
+    # time was never recorded anywhere, so this is NULL ("before Nov 2025").
+    # Migration 0057 drew the line. ``date_updated`` stays as it is, because
+    # the public topic list reads it.
+    created = DateTimeField(auto_now_add=True, null=True)
+
     embargos: QuerySet["Embargo"]  # related_name, for static type checking
     userpermission_set: QuerySet[
         "UserPermission"  # TODO: import
@@ -202,11 +229,45 @@ class Table(Tagable):
         unique_together = (("name",),)
 
     def delete(self, *args, **kwargs):
-        super().delete(*args, **kwargs)
+        self.delete_record(*args, **kwargs)
+        self.drop_oedb_table()
+
+    def delete_record(self, *args, **kwargs):
+        """Delete the Django rows only (this Table, everything that cascades
+        from it, and its peer reviews), leaving the OEDB table in place. For
+        a caller that drops it once its own transaction has committed, as
+        the table action service does: the two databases share no
+        transaction.
+
+        A peer review names its Table by ``PeerReview.table``, a name rather
+        than a foreign key, so nothing cascades to it: left behind, it would
+        pass to the next Table created under that name, review state and
+        badge included. Deleting the reviews deletes their
+        ``PeerReviewManager`` and ``ReviewRound`` rows with them (both
+        ``on_delete=CASCADE``, which Django's collector follows for a
+        queryset delete too).
+
+        Every Dataset holding this Table loses a member, which is a
+        Modification of it (``DatasetQuerySet.stamp_modified``), whoever
+        created it: a stranger's draft included, which the deleter is never
+        told of."""
+        with transaction.atomic():
+            Dataset.objects.filter(tables=self).stamp_modified()
+            PeerReview.objects.filter(table=self.name).delete()
+            return super().delete(*args, **kwargs)
+
+    def drop_oedb_table(self, lock_timeout=None):
+        """Drop the OEDB table and its meta tables, if they exist. Needs
+        only the name and the schema, so it works once the Django row is
+        gone. With ``lock_timeout`` (a Postgres duration) it gives up on a
+        lock held elsewhere after that long and raises, and the tables after
+        the one it gave up on are not tried; without, it waits as long as it
+        takes. A request bounds it (``table_actions.DROP_LOCK_TIMEOUT``); a
+        management command such as ``clear_sandbox`` does not."""
         # ensure oedb tables are deleted, so we use ADMIN_PERM
         self._get_oeb_table_proxy_w_permission(
             permission_level=ADMIN_PERM
-        ).drop_if_exists()
+        ).drop_if_exists(lock_timeout=lock_timeout)
 
     def save(self, *args, **kwargs):
         # validate name on first save, never change name again
@@ -218,6 +279,22 @@ class Table(Tagable):
             if not is_valid_name(self.name):
                 raise ValidationError(f"Invalid name: {self.name}")
         super().save(*args, **kwargs)
+
+    def stamp_data_modified(self):
+        """Record that this Table's rows or structure changed just now.
+
+        One UPDATE of the one field, not ``save()``: it skips save's name
+        check and leaves every other field as the database holds it. Called
+        by every data write: Apply of the Edit Journal, a Bulk Upload that
+        succeeded, and column and constraint DDL. The stamp commits on its
+        own, so a row write inside a client's transaction that is later
+        rolled back still leaves one: "someone wrote here at T".
+
+        The time is the application's clock, the one the metadata half is
+        stamped with, so the two halves can be compared. The database's
+        ``now()`` would be the start of the surrounding transaction.
+        """
+        Table.objects.filter(pk=self.pk).update(data_modified=timezone.now())
 
     def get_absolute_url(self):
         return reverse("dataedit:view", kwargs={"pk": self.pk})
@@ -464,11 +541,67 @@ class Table(Tagable):
         )
 
 
+# What every reader says about a Dataset it will not show: the same words for
+# another user's draft as for a name that never existed, so a read cannot tell
+# the two apart.
+DATASET_NOT_FOUND = "No dataset by that name."
+
+
+class DatasetQuerySet(models.QuerySet):
+    """The Dataset lifecycle rule (spec #2613): who may see a Dataset.
+
+    A Dataset is a draft (``published_at`` null) or published. A published
+    Dataset is visible to everyone, a draft only to its creator. There is no
+    platform-admin exemption, and an ownerless draft is visible to nobody.
+    Every reader goes through one of these, or ``Dataset.readable_by`` for an
+    object already loaded, so the rule is stated once.
+    """
+
+    def published(self):
+        """Published Datasets only, whoever asks: the public catalogue and
+        OEKG resolution, where not even the creator sees their draft."""
+        return self.filter(published_at__isnull=False)
+
+    def visible_to(self, user):
+        """Published Datasets plus ``user``'s own drafts; published only for
+        an anonymous user. For lists beside the viewer's own work."""
+        if not getattr(user, "is_authenticated", False):
+            return self.published()
+        return self.filter(Q(published_at__isnull=False) | Q(creator=user))
+
+    def readable_or_404(self, user, name):
+        """The Dataset called ``name`` if ``user`` may read it
+        (``Dataset.readable_by``), else Http404 with ``DATASET_NOT_FOUND``.
+        One query; a foreign draft and an unknown name raise the same."""
+        dataset = self.filter(name=name).first()
+        if dataset is None or not dataset.readable_by(user):
+            raise Http404(DATASET_NOT_FOUND)
+        return dataset
+
+    def stamp_modified(self):
+        """Record a Modification of these Datasets just now
+        (``modified_at``): a change to their title, description, Topics or
+        membership, never one inside a member Table, nor publishing or
+        unpublishing. Called only on a real change, by the paths that make
+        one: today the membership writes of the Dataset action service and
+        of the tables tab's Dataset actions, and ``Table.delete_record``.
+        (A new Dataset's stamp is its ``created_at``, set by
+        ``create_dataset``; edits stamp once they go through the service.)
+
+        One UPDATE of the one field, not ``save()``, so every other field
+        stays as the database holds it; the application's clock, as
+        ``Table.stamp_data_modified`` uses, not the database's ``now()``,
+        which would be the start of the surrounding transaction."""
+        return self.update(modified_at=timezone.now())
+
+
 class Dataset(models.Model):
     """Represents a dataset in the database.
 
     Datasets are implemented according to oemetadata specification.
     """
+
+    objects = DatasetQuerySet.as_manager()
 
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, unique=True)
@@ -486,6 +619,27 @@ class Dataset(models.Model):
         null=True,
         blank=True,
     )
+    # null = draft, a value = published since then. Null is the default, so
+    # a bare create is a draft. Republishing overwrites it.
+    published_at = models.DateTimeField(null=True, blank=True)
+    # The last change to the Dataset itself (title, description, Topics,
+    # membership), never to its member Tables. Null until something stamps it.
+    modified_at = models.DateTimeField(null=True, blank=True)
+
+    @property
+    def is_published(self) -> bool:
+        return self.published_at is not None
+
+    def readable_by(self, user) -> bool:
+        """``DatasetQuerySet.visible_to`` for one loaded Dataset: published,
+        or ``user``'s own draft. No platform-admin exemption."""
+        if self.is_published:
+            return True
+        return (
+            getattr(user, "is_authenticated", False)
+            and self.creator_id is not None
+            and self.creator_id == user.pk
+        )
 
     def resource_entries(self):
         """Assemble the oemetadata `resources` list live from member tables.
@@ -555,8 +709,38 @@ class View(models.Model):
 
     filter: QuerySet["Filter"]  # related_name, for static type checking
 
+    class Meta:
+        unique_together = [("table", "type", "name")]
+
     def __str__(self):
         return '{}--"{}"({})'.format(self.table, self.name, self.type.upper())
+
+    @classmethod
+    def get_or_create_default(cls, table: str) -> "View":
+        """The table page's default view, created on first use.
+
+        The page asks for this on every visit, so the steady state must be one
+        SELECT: before #2217 it inserted a fresh view each time. Only a table
+        view qualifies - the graph form can mark a graph default, and that must
+        not take over the page's Table tab.
+        """
+        view = (
+            cls.objects.filter(table=table, type="table", is_default=True)
+            .order_by("pk")
+            .last()
+        )
+        if view is not None:
+            return view
+        # get_or_create rather than create: two first visits at the same time
+        # would otherwise both insert and the second hit the unique constraint.
+        view, created = cls.objects.get_or_create(
+            table=table, type="table", name="default", defaults={"is_default": True}
+        )
+        if not created and not view.is_default:
+            # a view named "default" that is not marked as such: mark it, once
+            view.is_default = True
+            view.save(update_fields=["is_default"])
+        return view
 
 
 class Filter(models.Model):
@@ -603,6 +787,18 @@ class PeerReview(models.Model):
 
     review_id: QuerySet["PeerReviewManager"]  # related_name, for static type checking
     rounds: QuerySet["ReviewRound"]  # related_name, for static type checking
+
+    def deletable_by(self, user) -> bool:
+        """Whether `user` may delete this peer review.
+
+        Its reviewer and platform admins may, whether or not the review is
+        finished; nobody else.
+        """
+        if not getattr(user, "is_authenticated", False):
+            return False
+        if getattr(user, "is_admin", False):
+            return True
+        return self.reviewer_id is not None and self.reviewer_id == user.pk
 
     # laden
     @classmethod

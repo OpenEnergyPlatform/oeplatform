@@ -1,11 +1,13 @@
 {% extends "base/base.html" %}
 {% load django_bootstrap5 %}
+{% block site-header %}
+  {% url 'base:about' as about_url %}
+  {% include "components/page_header.html" with area="About" icon="icons/area_about.html" crumb_label="Overview" crumb_url=about_url title="Discussion" %}
+{% endblock site-header %}
 {% block main-content-body %}
   {% load static %}
   {# Important for using the *static* tag #}
   <ul>
-    <h3>Discussion</h3>
-    <br />
     <li>
       The OpenEnergy Platform is a collaborative project and is continuously
       under development. The discussion about new features or improvements is

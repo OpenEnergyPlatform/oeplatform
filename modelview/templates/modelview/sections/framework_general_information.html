@@ -1,0 +1,48 @@
+{% load modelview_extras %}
+<table class="table table-pairs">
+  {% include "modelview/model_snippet.html" with model=model field="model_name" fieldNameOverride="Framework Name" %}
+  {% include "modelview/model_snippet.html" with model=model field="acronym" %}
+  {% include "modelview/model_snippet.html" with model=model field="contact_email" %}
+  {% include "modelview/model_snippet.html" with model=model field="current_contact_person" %}
+  {% include "modelview/model_snippet.html" with model=model field="website" %}
+  {% include "modelview/model_snippet.html" with model=model field="institutions" %}
+  <tr>
+    <td class="sheetlabel">Geographical Scope</td>
+    <td>
+      <table>
+        {% checklist model "gs_global,gs_regional,gs_national,gs_local,gs_single_project,gs_other=gs_other" %}
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td class="sheetlabel">Sectoral Scope</td>
+    <td>
+      <table>
+        {% checklist model "ss_electricity,ss_heat,ss_transport,ss_other,ss_overall,ss_other_text=ss_other_text" %}
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td class="sheetlabel">General Problem Scope</td>
+    <td>
+      <table>
+        {% checklist model "gps_forecast,gps_explore,gps_backcast,gps_other=gps_other" %}
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td class="sheetlabel">Specific Problem Scope</td>
+    <td>
+      <table>
+        {% checklist model "sps_energydemand,sps_energysupply,sps_impacts,sps_environmental,sps_appraisal,sps_integrated_approach,sps_modular_buildup,sps_energy_dispatch,sps_capacity_expansion,sps_unit_commitment,sps_rule_based,sps_sector_coupling,sps_other=sps_other" %}
+      </table>
+    </td>
+  </tr>
+  {% include "modelview/model_snippet.html" with model=model field="inital_purpose" %}
+  {% include "modelview/model_snippet.html" with model=model field="inital_purpose_change" %}
+  {% include "modelview/model_snippet.html" with model=model field="research_questions" %}
+  {% include "modelview/model_snippet.html" with model=model field="inital_release_date" %}
+  {% include "modelview/model_snippet.html" with model=model field="parent_framework" %}
+  {% include "modelview/model_snippet.html" with model=model field="version" %}
+  {% include "modelview/model_snippet.html" with model=model field="source_of_funding" %}
+</table>

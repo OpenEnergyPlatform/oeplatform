@@ -13,69 +13,25 @@ the API, against a real graph store -- and validates it against the schema the
 committed artifact declares for exactly that operation and status code. It is
 the seam that turns a response schema from a claim into a checked fact.
 
-Two details of how it validates:
-
-- **OpenAPI 3.0 is not quite JSON Schema.** Its `nullable: true` is its own,
-  and a plain validator would reject every `null` this API legitimately sends.
-  `_as_json_schema` translates that one keyword and leaves the rest alone,
-  rather than adding a dependency for it.
-- **A schema names what is always there, not everything there is.** `_meta`
-  gains keys on request (`labels`) and on trouble (`history_recorded`), so
-  these schemas are deliberately not closed and a response carrying more than
-  was declared passes. What fails is a response missing something declared, or
-  carrying a declared key with the wrong type -- which is what actually goes
-  wrong when a body changes.
+How it validates -- `nullable` translated, schemas deliberately open -- is
+shared with the dataset half of the API and lives in
+`api/tests/response_schema.py`. Open matters here in particular: `_meta`
+gains keys on request (`labels`) and on trouble (`history_recorded`).
 
 SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 SPDX-License-Identifier: AGPL-3.0-or-later
 """  # noqa: 501
 
-import json
-
-import yaml
-from jsonschema import Draft202012Validator
-from jsonschema.exceptions import best_match
-
-from api.tests.test_openapi_schema import ARTIFACT, REGENERATE
+from api.tests.response_schema import ResponseSchemaAssertions
 from oekg.serializers import READ_ONLY_CONTAINER
 from oekg.tests.test_bundle_replace import ReplaceTestCase
 from oekg.tests.test_dataset_link_api import DatasetLinkTestCase
 from oekg.tests.test_study_report_api import VALID_REPORT, StudyReportTestCase
 
 
-def _document():
-    return yaml.safe_load(ARTIFACT.read_text(encoding="utf-8"))
-
-
-def _as_json_schema(node):
-    """OpenAPI 3.0's `nullable`, rendered as the union it means.
-
-    Nothing else is translated: `$ref`, `allOf`, `oneOf`, `required` and the
-    type keywords mean the same thing in both dialects, and leaving them alone
-    keeps this a translation rather than a reimplementation.
-    """
-    if isinstance(node, list):
-        return [_as_json_schema(entry) for entry in node]
-    if not isinstance(node, dict):
-        return node
-    translated = {
-        key: _as_json_schema(value) for key, value in node.items() if key != "nullable"
-    }
-    if node.get("nullable"):
-        if "type" in translated:
-            translated["type"] = [translated["type"], "null"]
-        elif "$ref" in translated or "allOf" in translated:
-            # A nullable reference: the reference or nothing.
-            translated = {"anyOf": [translated, {"type": "null"}]}
-    return translated
-
-
-def _where(error):
-    """Where in the body the mismatch was, in a form a reader can follow."""
-    return "/".join(str(part) for part in error.absolute_path) or "(root)"
-
-
-class ResponseSchemaTestCase(DatasetLinkTestCase, StudyReportTestCase):
+class ResponseSchemaTestCase(
+    ResponseSchemaAssertions, DatasetLinkTestCase, StudyReportTestCase
+):
     """One bundle with one of everything on it, and a validator over it.
 
     Both fixture bases, because this is the one place that needs a bundle
@@ -83,47 +39,7 @@ class ResponseSchemaTestCase(DatasetLinkTestCase, StudyReportTestCase):
     schema come apart most easily.
     """
 
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        document = _document()
-        cls.document = _as_json_schema(document)
-
-    def schema_for(self, path, method, code):
-        """The schema the description declares for this exact answer."""
-        operation = self.document["paths"][path][method]
-        response = operation["responses"][str(code)]
-        content = response.get("content", {})
-        self.assertIn(
-            "application/json",
-            content,
-            f"{method.upper()} {path} declares no JSON body for {code}. "
-            f"If that changed, regenerate:\n    {REGENERATE}",
-        )
-        return content["application/json"]["schema"]
-
-    def assertMatchesSchema(self, response, path, method, code):
-        """The body this endpoint just sent is the body it says it sends."""
-        self.assertEqual(response.status_code, code, response.data)
-        schema = {
-            **self.schema_for(path, method, code),
-            "components": self.document["components"],
-        }
-        # Through JSON rather than on `response.data`: that still holds
-        # `datetime` objects and DRF's own wrappers, and what a client receives
-        # is what came out of the renderer.
-        body = json.loads(response.content)
-        error = best_match(Draft202012Validator(schema).iter_errors(body))
-        if error is not None:
-            self.fail(
-                f"The body of {method.upper()} {path} is not what the "
-                f"description says it is.\n"
-                f"  at: {_where(error)}\n"
-                f"  problem: {error.message}\n"
-                f"The schema comes from the serializers in "
-                f"oekg/read_serializers.py; fix whichever of the two is wrong "
-                f"and regenerate:\n    {REGENERATE}"
-            )
+    SCHEMA_SOURCE = "the serializers in oekg/read_serializers.py"
 
 
 class BundleResponseSchemaTest(ResponseSchemaTestCase):

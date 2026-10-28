@@ -25,9 +25,10 @@ only part that needs root.
 - Outbound network access for the first image build (downloads the OEO release,
   the JDBC driver, and base images).
 
-!!! note "Podman 4.x assumed"
+!!! note "Podman 4.4 or newer"
 
-    This guide targets Podman 4.x (netavark backend, native DNS). Quadlets attach
+    This guide targets Podman 4.4 or newer (netavark backend, native DNS) and is
+    tested with Podman 5.4. Quadlets attach
     each container to the `oep` network explicitly, so the older podman-compose
     networking workarounds do not apply here.
 
@@ -52,16 +53,17 @@ $EDITOR ~/.config/oeplatform/oep.env
 For a first bring-up you only need the database and Fuseki credentials; the
 HTTPS block comes later in this page.
 
-| Variable                                               | Description                                                   |
-| ------------------------------------------------------ | ------------------------------------------------------------- |
-| `POSTGRES_USER` / `POSTGRES_PASSWORD`                  | PostgreSQL superuser credentials.                             |
-| `OEP_DJANGO_USER` / `OEP_DB_PW`                        | DB user Django connects as (often the same as the superuser). |
-| `OEP_DJANGO_HOST` / `OEP_DJANGO_NAME`                  | Keep as `postgres` / `oep_django`.                            |
-| `LOCAL_DB_USER` / `LOCAL_DB_PASSWORD`                  | Credentials for the OEDB (`oedb`) database.                   |
-| `LOCAL_DB_HOST` / `LOCAL_DB_NAME`                      | Keep as `postgres` / `oedb`.                                  |
-| `FUSEKI_ADMIN_PASSWORD`                                | Fuseki web UI admin password.                                 |
-| `FUSEKI_DATASET_1`                                     | Fuseki dataset name — keep as `ds`.                           |
-| `ONTOP_DB_URL` / `ONTOP_DB_USER` / `ONTOP_DB_PASSWORD` | Ontop's connection to the OEDB — see **Ontop**.               |
+| Variable                                               | Description                                                                                                       |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `POSTGRES_USER` / `POSTGRES_PASSWORD`                  | PostgreSQL superuser credentials.                                                                                 |
+| `OEP_DJANGO_USER` / `OEP_DB_PW`                        | DB user Django connects as (often the same as the superuser).                                                     |
+| `OEP_DJANGO_HOST` / `OEP_DJANGO_NAME`                  | Keep as `postgres` / `oep_django`.                                                                                |
+| `LOCAL_DB_USER` / `LOCAL_DB_PASSWORD`                  | Credentials for the OEDB (`oedb`) database.                                                                       |
+| `LOCAL_DB_HOST` / `LOCAL_DB_NAME`                      | Keep as `postgres` / `oedb`.                                                                                      |
+| `RDF_DATABASE_HOST`                                    | Keep as `fuseki`; without it every OEKG read answers `503`.                                                       |
+| `FUSEKI_ADMIN_PASSWORD`                                | Not read yet: the Fuseki image expects `ADMIN_PASSWORD` and generates a random admin password on its first start. |
+| `FUSEKI_DATASET_1`                                     | Fuseki dataset name — keep as `ds`.                                                                               |
+| `ONTOP_DB_URL` / `ONTOP_DB_USER` / `ONTOP_DB_PASSWORD` | Ontop's connection to the OEDB — see **Ontop**.                                                                   |
 
 !!! warning "The CSRF origin needs a scheme"
 
@@ -200,6 +202,22 @@ re-run it after changing the domain or config. To override the domain:
     If containers run under one user and you `sudo` as another, run the container
     steps (1–5) as the service user and only this nginx step via `sudo`. The script
     handles being run as root.
+
+### 6c. Sign-in through the NFDI RegApp (optional)
+
+Register the platform as a client at the RegApp with the redirect URI
+`https://your-domain.org/accounts/oidc/RegApp/login/callback/`, then fill in the
+three keys in `~/.config/oeplatform/oep.env`:
+
+```sh
+OEP_REGAPP_CLIENT_ID=<client id>
+OEP_REGAPP_SECRET=<secret>
+OEP_REGAPP_SERVER_URL=<issuer>/.well-known/openid-configuration
+```
+
+Restart the app (`systemctl --user restart oep-oeplatform`). The sign-in page
+then offers "NFDI-RegApp AAI"; with `OEP_REGAPP_CLIENT_ID` empty it offers no
+third-party sign-in.
 
 ## 7. Make services survive logout and reboot
 

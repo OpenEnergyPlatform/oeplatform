@@ -1,6 +1,6 @@
 @use '../../variables' as *;
 
-@forward '../../bootstrap/scss/bootstrap.scss' with(
+@forward 'bootstrap/scss/bootstrap' with(
     $gray-100: $gray-100,
     $gray-200: $gray-200,
     $gray-300: $gray-300,
@@ -71,8 +71,17 @@
     $cyan-900: $cyan-900,
     $cyan: $cyan,
     $black: $black,
+    $primary: $primary,
     $secondary: $secondary,
+    $success: $success,
+    $info: $info,
+    $warning: $warning,
+    $danger: $danger,
+    $light: $light,
+    $dark: $dark,
+    $theme-colors: $theme-colors,
     $body-color: $body-color,
+    $border-color: $border-color,
     $text-muted:  $text-muted,
     $grid-breakpoints: $grid-breakpoints,
     $font-size-base: $font-size-base,
@@ -83,18 +92,14 @@
     $h5-font-size: $h5-font-size,
     $h6-font-size: $h6-font-size,
     $font-sizes: $font-sizes,
-    $card-border-radius: $card-border-radius,
     $input-border-radius: $input-border-radius,
     $input-border-radius-lg: $input-border-radius-lg,
-    $dropdown-inner-border-radius: $dropdown-inner-border-radius,
     $modal-content-border-radius: $modal-content-border-radius,
     $breadcrumb-border-radius: $breadcrumb-border-radius,
     $list-group-border-radius: $list-group-border-radius,
-    $card-inner-border-radius: $card-inner-border-radius,
     $thumbnail-border-radius: $thumbnail-border-radius,
     $nav-pills-border-radius: $nav-pills-border-radius,
     $progress-border-radius: $progress-border-radius,
-    $dropdown-border-radius: $dropdown-border-radius,
     $nav-tabs-border-color: $nav-tabs-border-color,
     $nav-tabs-border-radius: $nav-tabs-border-radius,
     $popover-border-radius: $popover-border-radius,
@@ -114,11 +119,13 @@
     $input-border-color: $input-border-color,
     $btn-font-weight: $btn-font-weight,
     $border-radius: $border-radius,
-    $border-radius-lg: $border-radius,
+    $border-radius-lg: $border-radius-lg,
     $border-radius-sm: $border-radius-sm,
-    $card-border-color: $card-border-color,
     $card-cap-padding-y: $card-cap-padding-y,
     $alert-bg-scale: $alert-bg-scale
 );
 
 @forward 'custom_variables';
+
+// After Bootstrap and upstream of every partial, see the file.
+@use '../tokens/remap';

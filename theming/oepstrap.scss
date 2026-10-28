@@ -1,15 +1,31 @@
-@use 'scss/components/alerts';
-@use 'scss/components/buttons';
-@use 'scss/components/cards';
-@use 'scss/components/collapses';
-@use 'scss/components/controls';
-@use 'scss/components/empty_states';
-@use 'scss/components/headers';
-@use 'scss/components/sidebars';
-@use 'scss/components/paginations';
-@use 'scss/components/tables';
+@use 'scss/tokens/root';
+// Before the components on purpose: moving these two would reorder the
+// compiled theme's rules.
+@use 'scss/layouts/collapses';
+@use 'scss/layouts/sidebars';
+// House components: one partial per component, named as its catalogue entry
+// (base/templates/styleguide/entries/<name>.html). `manage.py check_catalogue`
+// fails for a partial here without an entry.
+@use 'scss/components/alert';
+@use 'scss/components/badge';
+@use 'scss/components/button';
+@use 'scss/components/card';
+@use 'scss/components/confirm_dialog';
+@use 'scss/components/dropdown';
+@use 'scss/components/empty_state';
+@use 'scss/components/field';
+@use 'scss/components/field_help';
+@use 'scss/components/link_with_arrow';
+@use 'scss/components/pagination';
+@use 'scss/components/page_header';
+@use 'scss/components/section_card';
+@use 'scss/components/section_heading';
+@use 'scss/components/table';
 @use 'scss/components/tabs';
-@use 'scss/components/tags';
+@use 'scss/components/tag';
+@use 'scss/components/toast';
+@use 'scss/components/toc';
+@use 'scss/components/user_menu';
 @use 'scss/layouts/login';
 @use 'scss/layouts/database';
 @use 'scss/layouts/main';

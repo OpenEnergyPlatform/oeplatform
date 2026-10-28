@@ -1,0 +1,29 @@
+# SPDX-FileCopyrightText: 2026 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# State, CPU, memory and restarts of every container of this user. It gets the
+# user's Podman socket, which is full control over these containers: it is the
+# only unit that does, and it publishes no port.
+
+[Unit]
+Description=OEP monitoring: container metrics (podman exporter)
+Requires=podman.socket
+After=podman.socket
+
+[Container]
+Image=quay.io/navidys/prometheus-podman-exporter:v1.21.2
+ContainerName=oep-mon-podman
+Environment=CONTAINER_HOST=unix:///run/podman/podman.sock
+Volume=%t/podman/podman.sock:/run/podman/podman.sock
+# Puts the container name on every series, so queries need no join.
+Exec=--collector.enhance-metrics
+UserNS=keep-id:uid=65534
+SecurityLabelType=container_runtime_t
+Network=oep.network
+
+[Service]
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

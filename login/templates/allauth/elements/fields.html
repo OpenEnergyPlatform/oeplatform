@@ -1,0 +1,7 @@
+{% load django_bootstrap5 %}
+{% comment %}
+  allauth's form fields, as the house field (#2642): label above, help and
+  error below, through django-bootstrap5 like every other Django form.
+  allauth's `unlabeled` is not followed: the label stays above the field.
+{% endcomment %}
+{% bootstrap_form attrs.form %}

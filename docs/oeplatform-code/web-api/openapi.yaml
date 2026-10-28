@@ -2008,10 +2008,53 @@ paths:
   /api/v0/datasets/:
     get:
       operationId: datasets_list
-      description: Every dataset on the platform, each with its metadata. The `resources`
-        of a dataset are assembled from its member tables at read time rather than
-        stored, so this never reports a resource the dataset no longer holds. Public.
+      description: 'Every published dataset on the platform, plus the caller''s own
+        drafts, by name, a page at a time. `mine` and `published` narrow that and
+        never widen it: `mine=true&published=false` lists the caller''s drafts. Each
+        item is a summary: the dataset''s read body without `metadata.resources`,
+        plus `resource_count`. The resources themselves are on the dataset''s own
+        read and its `resources/`. **Public.** A draft is visible only to its creator;
+        nobody else finds it listed.'
       summary: List datasets
+      parameters:
+      - in: query
+        name: mine
+        schema:
+          enum:
+          - 'true'
+          - 'false'
+          type: string
+          minLength: 1
+        description: |-
+          `true`: only the caller's own datasets, drafts included. Needs a login: asked anonymously it is a 401.
+
+          * `true` - true
+          * `false` - false
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: 'How many per page: 20 if left out, at most 100.'
+        schema:
+          type: integer
+      - in: query
+        name: published
+        schema:
+          enum:
+          - 'true'
+          - 'false'
+          type: string
+          minLength: 1
+        description: |-
+          `true`: published datasets only. `false`: drafts only, which are only ever the caller's own, so none for an anonymous caller.
+
+          * `true` - true
+          * `false` - false
       tags:
       - Datasets
       security:
@@ -2020,18 +2063,41 @@ paths:
       - tokenAuth: []
       - {}
       responses:
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'A filter holds something other than `true` or `false`: DRF''s
+            map names the parameter.'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: '`mine=true`, asked without a login.'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: 'No such page: `page` is past the last one, or not a number.'
         '200':
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/DatasetRead'
+                $ref: '#/components/schemas/PaginatedDatasetSummaryList'
           description: ''
     post:
       operationId: datasets_create
-      description: Creates a new dataset.
-      summary: Create dataset
+      description: Creates a catalogue entry that tables can then be assigned to.
+        The name must be free; a taken one is refused naming the field. `topics` must
+        name existing topics, and never the draft pseudo-topic; a 400 names any that
+        do not. **Requires authentication.** The account that creates a dataset is
+        its creator, the one who may change it. A new dataset is a draft, visible
+        only to its creator until it is published.
+      summary: Create a dataset
       tags:
       - Datasets
       requestBody:
@@ -2046,9 +2112,12 @@ paths:
                   title: Wind Power Dataset Germany
                   description: Contains hourly wind generation data for Germany.
                   at_id: https://example.org/datasets/test_dataset
+                  topics:
+                  - energy
                 summary: Example request body for creating a dataset
                 description: Use this JSON object to create a new dataset. The `at_id`
-                  field is optional and can contain a persistent identifier.
+                  field is optional and can contain a persistent identifier; `topics`
+                  is optional too.
           application/x-www-form-urlencoded:
             schema:
               $ref: '#/components/schemas/DatasetCreate'
@@ -2061,20 +2130,42 @@ paths:
       - cookieAuth: []
       - tokenAuth: []
       responses:
-        '201':
-          description: Dataset created
         '400':
-          description: The payload was rejected.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'The request could not be carried out as sent: DRF''s map of
+            each field to what is wrong with it -- an unknown topic or a taken name
+            among them -- or `{"detail": ...}` when the body is not JSON. Nothing
+            was written.'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: No credentials, or credentials this platform does not know.
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatasetRead'
+          description: ''
   /api/v0/datasets/{dataset_name}/:
     get:
       operationId: datasets_retrieve
-      description: Returns metadata for a single dataset.
+      description: Returns a single dataset with its metadata. **Public.** A draft
+        is visible only to its creator; anyone else gets 404, as for a name that does
+        not exist.
       summary: Get dataset
       parameters:
       - in: path
         name: dataset_name
         schema:
           type: string
+        description: 'The dataset''s name: its permanent identifier, fixed at creation.
+          Names are global and are never reused.'
         required: true
       tags:
       - Datasets
@@ -2084,21 +2175,38 @@ paths:
       - tokenAuth: []
       - {}
       responses:
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: 'No dataset of that name, or another user''s draft: the two
+            answer alike, word for word.'
         '200':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DatasetRead'
           description: ''
-    put:
-      operationId: datasets_update
-      description: Updates metadata for an existing dataset.
+    patch:
+      operationId: datasets_partial_update
+      description: 'Changes the dataset''s title, description, `at_id` or topics.
+        A key left out is left as it is: `topics` replaces the whole set (`[]` empties
+        it), and an omitted `at_id` keeps the stored one. `name` is fixed at creation,
+        so sending it is a 400, even unchanged. Topics must exist and may not be the
+        draft pseudo-topic; a 400 names any that do not. An update that changes nothing
+        writes nothing and leaves `modified_at` as it was. Answers with the dataset
+        as it now is. `PUT` is not offered and answers 405. **Requires authentication**,
+        and only the dataset''s creator may change it. A draft is visible only to
+        its creator; anyone else gets 404, as for a name that does not exist.'
       summary: Update dataset
       parameters:
       - in: path
         name: dataset_name
         schema:
           type: string
+        description: 'The dataset''s name: its permanent identifier, fixed at creation.
+          Names are global and are never reused.'
         required: true
       tags:
       - Datasets
@@ -2106,38 +2214,76 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DatasetCreate'
+              $ref: '#/components/schemas/PatchedDatasetPatch'
             examples:
               UpdateDatasetExample:
                 value:
-                  name: test_dataset
                   title: Updated Wind Power Dataset Germany
-                  description: Updated description with more details.
-                  at_id: https://example.org/datasets/test_dataset
-                summary: Example request body for updating a dataset
+                  topics:
+                  - energy
+                summary: Change the title and replace the topics
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/DatasetCreate'
+              $ref: '#/components/schemas/PatchedDatasetPatch'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/DatasetCreate'
-        required: true
+              $ref: '#/components/schemas/PatchedDatasetPatch'
       security:
       - basicAuth: []
       - cookieAuth: []
       - tokenAuth: []
       responses:
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'The request could not be carried out as sent: DRF''s map of
+            each field to what is wrong with it -- an unknown topic or a taken name
+            among them -- or `{"detail": ...}` when the body is not JSON. Nothing
+            was written.'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: No credentials, or credentials this platform does not know.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: 'Authenticated, but the dataset is somebody else''s: only its
+            creator may change it.'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: 'No dataset of that name, or another user''s draft: the two
+            answer alike, word for word.'
         '200':
-          description: Dataset updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatasetRead'
+          description: ''
     delete:
       operationId: datasets_destroy
-      description: Deletes the specified dataset.
+      description: Deletes the dataset. Its member tables are not deleted; they only
+        leave it. The address is the confirmation a published dataset asks for, and
+        a repeated delete is a 404. **Requires authentication**, and only the dataset's
+        creator may change it. A draft is visible only to its creator; anyone else
+        gets 404, as for a name that does not exist.
       summary: Delete dataset
       parameters:
       - in: path
         name: dataset_name
         schema:
           type: string
+        description: 'The dataset''s name: its permanent identifier, fixed at creation.
+          Names are global and are never reused.'
         required: true
       tags:
       - Datasets
@@ -2146,22 +2292,47 @@ paths:
       - cookieAuth: []
       - tokenAuth: []
       responses:
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: No credentials, or credentials this platform does not know.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: 'Authenticated, but the dataset is somebody else''s: only its
+            creator may change it.'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: 'No dataset of that name, or another user''s draft: the two
+            answer alike, word for word.'
         '204':
-          description: Dataset deleted
+          description: Deleted. The body is empty.
   /api/v0/datasets/{dataset_name}/assign-tables/:
     post:
       operationId: datasets_assign_tables_create
-      description: Assigns existing OEP tables to an existing dataset. The dataset
-        must already exist and the referenced tables must already exist. After assignment,
-        the dataset resources are updated from the table metadata.
+      description: Assigns existing OEP tables to an existing dataset; the tables'
+        topics are added to the dataset's. Any published table not under embargo may
+        be assigned; a draft or embargoed table needs Data editor on it, and one that
+        does not qualify refuses the whole request. A name that is no table is reported
+        in `missing` rather than refused. At most 2,500 tables in one call. **Requires
+        authentication**, and only the dataset's creator may change it. A draft is
+        visible only to its creator; anyone else gets 404, as for a name that does
+        not exist.
       summary: Assign tables to dataset
       parameters:
       - in: path
         name: dataset_name
         schema:
           type: string
-        description: 'Name of the dataset to which the tables should be assigned.
-          Example: `test_dataset`.'
+        description: 'The dataset''s name: its permanent identifier, fixed at creation.
+          Names are global and are never reused.'
         required: true
       tags:
       - Datasets
@@ -2189,21 +2360,128 @@ paths:
       - cookieAuth: []
       - tokenAuth: []
       responses:
-        '200':
-          description: Tables were assigned to the dataset.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: No credentials, or credentials this platform does not know.
         '404':
-          description: Dataset was not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: 'No dataset of that name, or another user''s draft: the two
+            answer alike, word for word.'
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatasetAssigned'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'The table list is unusable, or names more than 2,500: DRF''s
+            map of each field to what is wrong with it.'
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: Authenticated, but the dataset is somebody else's, or a table
+            named is a draft or under embargo and the account holds no Data editor
+            on it. Nothing was assigned.
+  /api/v0/datasets/{dataset_name}/publish/:
+    post:
+      operationId: datasets_publish_create
+      description: 'Publishes the dataset: it enters the catalogue and anyone may
+        read it. The publish gate runs now and needs at least one member table and
+        at least one topic; a dataset failing it is a 409 listing the failed checks
+        in `failed`, and nothing is written. Members may be drafts or under embargo.
+        Publishing a published dataset republishes it: the gate runs again and `published_at`
+        becomes now. Never moves `modified_at`. No request body. **Requires authentication**,
+        and only the dataset''s creator may change it. A draft is visible only to
+        its creator; anyone else gets 404, as for a name that does not exist.'
+      summary: Publish a dataset
+      parameters:
+      - in: path
+        name: dataset_name
+        schema:
+          type: string
+        description: 'The dataset''s name: its permanent identifier, fixed at creation.
+          Names are global and are never reused.'
+        required: true
+      tags:
+      - Datasets
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: No credentials, or credentials this platform does not know.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: 'Authenticated, but the dataset is somebody else''s: only its
+            creator may change it.'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: 'No dataset of that name, or another user''s draft: the two
+            answer alike, word for word.'
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublishGateRefusal'
+          description: The dataset does not pass the publish gate, which needs at
+            least one member table and at least one topic. Nothing was written.
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatasetRead'
+          description: ''
   /api/v0/datasets/{dataset_name}/resources/:
     get:
       operationId: datasets_resources_list
-      description: Returns the tables/resources that belong to a dataset.
+      description: Returns the tables/resources that belong to a dataset, by name,
+        a page at a time. **Public.** A draft is visible only to its creator; anyone
+        else gets 404, as for a name that does not exist.
       summary: List dataset resources
       parameters:
       - in: path
         name: dataset_name
         schema:
           type: string
+        description: 'The dataset''s name: its permanent identifier, fixed at creation.
+          Names are global and are never reused.'
         required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: 'How many per page: 20 if left out, at most 100.'
+        schema:
+          type: integer
       tags:
       - Datasets
       security:
@@ -2212,13 +2490,19 @@ paths:
       - tokenAuth: []
       - {}
       responses:
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: 'No dataset of that name, or another user''s draft: the two
+            answer alike, word for word. No such page: `page` is past the last one,
+            or not a number.'
         '200':
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/DatasetResource'
+                $ref: '#/components/schemas/PaginatedDatasetResourceList'
           description: ''
   /api/v0/datasets/{dataset_name}/unassign-tables/:
     post:
@@ -2226,14 +2510,18 @@ paths:
       description: Removes the named tables from the dataset. The tables are not deleted
         -- a dataset is a catalogue entry, and leaving it is not leaving the platform.
         A name the dataset does not hold is reported in `missing` rather than refused,
-        so a repeated call is safe.
+        so a repeated call is safe. The dataset's topics stay as they are. At most
+        2,500 tables in one call. **Requires authentication**, and only the dataset's
+        creator may change it. A draft is visible only to its creator; anyone else
+        gets 404, as for a name that does not exist.
       summary: Unassign tables from a dataset
       parameters:
       - in: path
         name: dataset_name
         schema:
           type: string
-        description: The dataset's name.
+        description: 'The dataset''s name: its permanent identifier, fixed at creation.
+          Names are global and are never reused.'
         required: true
       tags:
       - Datasets
@@ -2254,47 +2542,91 @@ paths:
       - cookieAuth: []
       - tokenAuth: []
       responses:
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: No credentials, or credentials this platform does not know.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: 'Authenticated, but the dataset is somebody else''s: only its
+            creator may change it.'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refusal'
+          description: 'No dataset of that name, or another user''s draft: the two
+            answer alike, word for word.'
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatasetUnassigned'
+          description: ''
         '400':
           content:
             application/json:
               schema:
                 type: object
                 additionalProperties: {}
-          description: 'The request could not be carried out as sent: a payload key
-            missing or holding something this endpoint cannot use, a column name that
-            is not a Postgres identifier, or a query the database refused. The body
-            carries `reason` or `error` naming which.'
+          description: 'The table list is unusable, or names more than 2,500: DRF''s
+            map of each field to what is wrong with it.'
+  /api/v0/datasets/{dataset_name}/unpublish/:
+    post:
+      operationId: datasets_unpublish_create
+      description: 'Returns the dataset to draft: it leaves the catalogue, other users
+        get 404 for it, and scenario citations of it stop resolving. Always allowed
+        for the creator; unpublishing a draft succeeds and writes nothing. Never moves
+        `modified_at`. No request body. **Requires authentication**, and only the
+        dataset''s creator may change it. A draft is visible only to its creator;
+        anyone else gets 404, as for a name that does not exist.'
+      summary: Unpublish a dataset
+      parameters:
+      - in: path
+        name: dataset_name
+        schema:
+          type: string
+        description: 'The dataset''s name: its permanent identifier, fixed at creation.
+          Names are global and are never reused.'
+        required: true
+      tags:
+      - Datasets
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      responses:
         '401':
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: {}
+                $ref: '#/components/schemas/Refusal'
           description: No credentials, or credentials this platform does not know.
         '403':
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: {}
-          description: 'Authenticated, but not permitted: the table belongs to somebody
-            else, or is under embargo, or the operation needs a level of permission
-            on it that this account does not hold.'
+                $ref: '#/components/schemas/Refusal'
+          description: 'Authenticated, but the dataset is somebody else''s: only its
+            creator may change it.'
         '404':
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: {}
-          description: No table of that name on this platform.
+                $ref: '#/components/schemas/Refusal'
+          description: 'No dataset of that name, or another user''s draft: the two
+            answer alike, word for word.'
         '200':
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: {}
-          description: '`removed` names what was detached and `missing` what the dataset
-            did not hold.'
+                $ref: '#/components/schemas/DatasetRead'
+          description: ''
   /api/v0/datasets/list_all/scenario/:
     get:
       operationId: datasets_list_all_scenario_list
@@ -2444,6 +2776,172 @@ paths:
                 type: object
                 additionalProperties: {}
           description: The store's answer, in the format asked for.
+  /api/v0/organizations/{organization}/table-permissions/remove/:
+    post:
+      operationId: organizations_table_permissions_remove
+      description: 'Takes the organization''s role away on every Table named, in one
+        transaction: all of them or none. A Table where it holds no role is listed
+        under `unchanged`, so sending the same request again succeeds. Refused when
+        the organization''s old Admin grant is a Table''s only Admin; asks for `confirm`
+        first when the caller would lose their own access to, or Admin on, a Table.
+        Needs no membership of the organization, but Table admin on every Table: Admin,
+        directly or through an organization, or platform admin. At most 2,500 Tables
+        per request.'
+      summary: Remove an organization from many tables
+      parameters:
+      - in: path
+        name: organization
+        schema:
+          type: integer
+        description: The organization, by id.
+        required: true
+      tags:
+      - 'Tables: permissions'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkRemove'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BulkRemove'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BulkRemove'
+        required: true
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No credentials, or credentials this platform does not know.
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkResult'
+          description: What was written.
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Nothing was written. `tables` was not a list of table names,
+            named more tables than one request takes (`reason` gives the limit), or
+            `level` is not a role an organization may be given; or, for a share, the
+            caller is not a member of the organization. `field` names the input.
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Not a Table admin on every Table named. `tables` lists those
+            it is not; nothing was written.
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No organization of that id, or a named Table does not exist
+            (`tables` lists them). Nothing was written.
+        '409':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'Nothing was written, and `code` says why; `tables` names the
+            Tables. `last_admin`: the organization''s old Admin grant is the only
+            Admin there -- give someone Admin first; confirming does not change this
+            answer. `confirmation_needed`: the removal would take the caller''s own
+            access to, or Admin on, these Tables; send the same request again with
+            `confirm` holding those `tables`.'
+  /api/v0/organizations/{organization}/table-permissions/share/:
+    post:
+      operationId: organizations_table_permissions_share
+      description: 'Gives the organization the role on every Table named, in one transaction:
+        all of them or none. A share only ever raises a role: where the organization
+        holds that role or more already (an old Admin grant included), the Table is
+        left as it is and listed under `unchanged`. The caller must be a member of
+        the organization and a Table admin on every Table: Admin, directly or through
+        an organization, or platform admin. At most 2,500 Tables per request.'
+      summary: Share many tables with an organization
+      parameters:
+      - in: path
+        name: organization
+        schema:
+          type: integer
+        description: The organization, by id.
+        required: true
+      tags:
+      - 'Tables: permissions'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkShare'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BulkShare'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BulkShare'
+        required: true
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No credentials, or credentials this platform does not know.
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkResult'
+          description: What was written.
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Nothing was written. `tables` was not a list of table names,
+            named more tables than one request takes (`reason` gives the limit), or
+            `level` is not a role an organization may be given; or, for a share, the
+            caller is not a member of the organization. `field` names the input.
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Not a Table admin on every Table named. `tables` lists those
+            it is not; nothing was written.
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No organization of that id, or a named Table does not exist
+            (`tables` lists them). Nothing was written.
   /api/v0/scenario-bundle/scenario/manage-datasets/:
     post:
       operationId: scenario_bundle_scenario_manage_datasets_create
@@ -6435,6 +6933,296 @@ paths:
                 type: object
                 additionalProperties: {}
           description: Published. The body is empty.
+  /api/v0/tables/{table}/permissions/:
+    get:
+      operationId: tables_permissions_list
+      description: 'The users and organizations holding a role on the table, each
+        with its level and the levels it may be changed to, plus every role a Holder
+        can be given. Needs a login and no role: the table''s permission page shows
+        the same list to anyone. `can_manage` says whether the caller may write.'
+      summary: List a table's Holders
+      parameters:
+      - in: path
+        name: table
+        schema:
+          type: string
+        description: 'The table''s name on this platform. **Names are global**: a
+          table is addressed by name alone and no two tables share one, whichever
+          topic they are published under.'
+        required: true
+      tags:
+      - 'Tables: permissions'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No credentials, or credentials this platform does not know.
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No table of that name on this platform.
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HolderList'
+          description: The table's Holders.
+    post:
+      operationId: tables_permissions_create
+      description: 'Adds a Holder: a user by name, at any role, or an organization
+        the caller is a member of, at Data maintainer at most -- Admin is given to
+        users only. A Holder the table already has is refused; change its role instead.
+        Needs a login and Table admin on the table: Admin, directly or through an
+        organization, or platform admin. The same rules hold as in the table''s access
+        drawer and permission page.'
+      summary: Give a user or an organization a role on a table
+      parameters:
+      - in: path
+        name: table
+        schema:
+          type: string
+        description: 'The table''s name on this platform. **Names are global**: a
+          table is addressed by name alone and no two tables share one, whichever
+          topic they are published under.'
+        required: true
+      tags:
+      - 'Tables: permissions'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HolderAdd'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/HolderAdd'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/HolderAdd'
+        required: true
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No credentials, or credentials this platform does not know.
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No table of that name on this platform.
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Holder'
+          description: The new Holder.
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'The request cannot be carried out as sent: a level outside
+            the offered roles, Admin for an organization, an organization the caller
+            is not a member of, or a user that does not exist. `reason` says which
+            and `field` names the input. Nothing was written.'
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Not a Table admin on this table. Nothing was written.
+  /api/v0/tables/{table}/permissions/{holder}/:
+    patch:
+      operationId: tables_permissions_partial_update
+      description: 'Gives the Holder another of its `roles`. The role it already holds
+        changes nothing and answers 200. A change that would leave the table without
+        a user holding direct Admin, or without any Admin at all, is refused; one
+        that takes the caller''s own Admin away asks for `confirm` first. Needs a
+        login and Table admin on the table: Admin, directly or through an organization,
+        or platform admin. The same rules hold as in the table''s access drawer and
+        permission page.'
+      summary: Change a Holder's role on a table
+      parameters:
+      - in: path
+        name: holder
+        schema:
+          type: string
+        description: 'The Holder''s key as the list gives it: `user:<id>` or `org:<id>`.'
+        required: true
+      - in: path
+        name: table
+        schema:
+          type: string
+        description: 'The table''s name on this platform. **Names are global**: a
+          table is addressed by name alone and no two tables share one, whichever
+          topic they are published under.'
+        required: true
+      tags:
+      - 'Tables: permissions'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedHolderChange'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedHolderChange'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedHolderChange'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No credentials, or credentials this platform does not know.
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Holder'
+          description: The Holder as it now stands.
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'The request cannot be carried out as sent: a level outside
+            the offered roles, Admin for an organization, an organization the caller
+            is not a member of, or a user that does not exist. `reason` says which
+            and `field` names the input. Nothing was written.'
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Not a Table admin on this table. Nothing was written.
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No table of that name, or the table has no such Holder -- which
+            a repeated delete also meets.
+        '409':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'Nothing was written, and `code` says why. `last_admin`: the
+            table must keep a user with direct Admin, or, where it has none, its last
+            Admin grant of any kind -- give someone else Admin first; confirming does
+            not change this answer. `confirmation_needed`: the change would take the
+            caller''s own Admin, or all their access, away. `reason` says which; send
+            the same request again with `confirm` to make it.'
+    delete:
+      operationId: tables_permissions_destroy
+      description: 'Takes the Holder''s role away; removal is the only way to no access.
+        The last user holding direct Admin cannot be removed, nor the last Admin grant
+        of a table no user holds Admin on. Removing the caller''s own Admin, or all
+        their access, asks for `confirm` first -- as a query parameter here, because
+        a client cannot rely on a DELETE''s body being sent. Needs a login and Table
+        admin on the table: Admin, directly or through an organization, or platform
+        admin. The same rules hold as in the table''s access drawer and permission
+        page.'
+      summary: Remove a Holder from a table
+      parameters:
+      - in: query
+        name: confirm
+        schema:
+          type: boolean
+        description: '`true` after a 409 with `code: confirmation_needed`.'
+      - in: path
+        name: holder
+        schema:
+          type: string
+        description: 'The Holder''s key as the list gives it: `user:<id>` or `org:<id>`.'
+        required: true
+      - in: path
+        name: table
+        schema:
+          type: string
+        description: 'The table''s name on this platform. **Names are global**: a
+          table is addressed by name alone and no two tables share one, whichever
+          topic they are published under.'
+        required: true
+      tags:
+      - 'Tables: permissions'
+      security:
+      - basicAuth: []
+      - cookieAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No credentials, or credentials this platform does not know.
+        '204':
+          description: Removed. No body.
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Not a Table admin on this table. Nothing was written.
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: No table of that name, or the table has no such Holder -- which
+            a repeated delete also meets.
+        '409':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: 'Nothing was written, and `code` says why. `last_admin`: the
+            table must keep a user with direct Admin, or, where it has none, its last
+            Admin grant of any kind -- give someone else Admin first; confirming does
+            not change this answer. `confirmation_needed`: the change would take the
+            caller''s own Admin, or all their access, away. `reason` says which; send
+            the same request again with `confirm` to make it.'
   /api/v0/tables/{table}/rows/{row_id}:
     get:
       operationId: tables_rows_retrieve
@@ -9108,6 +9896,88 @@ components:
           type: string
       required:
       - content
+    BulkChange:
+      type: object
+      properties:
+        table:
+          type: string
+        before:
+          type: integer
+          nullable: true
+          description: The level before; null for no grant.
+        after:
+          type: integer
+          nullable: true
+          description: The level now; null for no grant.
+      required:
+      - after
+      - before
+      - table
+    BulkOrganization:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        members:
+          type: integer
+          description: 'How many members it has: each gains or loses what it holds.'
+      required:
+      - id
+      - members
+      - name
+    BulkRemove:
+      type: object
+      properties:
+        tables:
+          type: array
+          items:
+            type: string
+          description: The Tables, by name. The caller must be a Table admin on every
+            one of them.
+        confirm:
+          description: 'After a 409 with `code: confirmation_needed`: the `tables`
+            it named, to confirm exactly those (a Table added to that list since is
+            asked about again), or `true` for any.'
+      required:
+      - tables
+    BulkResult:
+      type: object
+      properties:
+        organization:
+          $ref: '#/components/schemas/BulkOrganization'
+        changed:
+          type: array
+          items:
+            $ref: '#/components/schemas/BulkChange'
+          description: One entry per Table written, as it was logged.
+        unchanged:
+          type: array
+          items:
+            type: string
+          description: 'The Tables left as they were: a share where the organization
+            holds that role or more already, a removal where it holds no role.'
+      required:
+      - changed
+      - organization
+      - unchanged
+    BulkShare:
+      type: object
+      properties:
+        tables:
+          type: array
+          items:
+            type: string
+          description: The Tables, by name. The caller must be a Table admin on every
+            one of them.
+        level:
+          type: integer
+          description: 'The role: Data editor or Data maintainer, as the levels under
+            `roles` of the Holder list give them. Admin is given to users only.'
+      required:
+      - level
+      - tables
     BundleHistoryEntry:
       type: object
       properties:
@@ -9341,6 +10211,29 @@ components:
           minItems: 1
       required:
       - tables
+    DatasetAssigned:
+      type: object
+      description: What `assign-tables/` answers.
+      properties:
+        message:
+          type: string
+        added:
+          type: array
+          items:
+            type: string
+          description: Every table sent that the dataset holds after the call, those
+            it held already included, so a repeated call answers as the first.
+        missing:
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              type: string
+          description: The references sent that name no table, as sent.
+      required:
+      - added
+      - message
+      - missing
     DatasetCreate:
       type: object
       properties:
@@ -9358,6 +10251,13 @@ components:
           type: string
           format: uri
           description: 'Optional: persistent identifier or URL for the dataset'
+        topics:
+          type: array
+          items:
+            type: string
+          description: 'Names of existing topics, the dataset''s own set. An unknown
+            name, or the draft pseudo-topic, is refused naming it. Optional: a new
+            dataset has none without it.'
       required:
       - description
       - name
@@ -9548,6 +10448,9 @@ components:
       - results
     DatasetRead:
       type: object
+      description: |-
+        A Dataset as every read of the API sends it. Every field is read-only:
+        no write accepts one of them back.
       properties:
         uuid:
           type: string
@@ -9555,7 +10458,7 @@ components:
           readOnly: true
         name:
           type: string
-          maxLength: 255
+          readOnly: true
         metadata:
           type: object
           additionalProperties: {}
@@ -9564,19 +10467,49 @@ components:
           type: string
           format: date-time
           readOnly: true
+        modified_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          description: 'The last Modification of the dataset itself: a change to its
+            title, description, topics or member tables. Never moved by publishing
+            or unpublishing, nor by changes inside a member table; null for a dataset
+            older than the field.'
+        published_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          description: When the dataset was last published; null for a draft. A republish
+            overwrites it.
+        creator:
+          type: string
+          title: Username
+          readOnly: true
+          nullable: true
+          description: The username of the account that created the dataset, the one
+            who may change it; null for a dataset older than ownership.
+        topics:
+          type: array
+          items:
+            type: string
+          readOnly: true
+          description: The names of the dataset's own topics, sorted.
       required:
       - created_at
+      - creator
       - metadata
+      - modified_at
       - name
+      - published_at
+      - topics
       - uuid
     DatasetResource:
       type: object
       properties:
         id:
           type: integer
-          readOnly: true
-        schema:
-          type: string
           readOnly: true
         name:
           type: string
@@ -9590,7 +10523,97 @@ components:
       required:
       - id
       - name
-      - schema
+    DatasetSummary:
+      type: object
+      description: |-
+        A Dataset as a list sends it: the read body without the assembled
+        `metadata.resources`, plus how many members there are. A member's
+        resource entry is its whole schema, so a page of full bodies would run to
+        megabytes; the entries stay on the dataset's own read and its paged
+        `resources/`.
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        metadata:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        modified_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          description: 'The last Modification of the dataset itself: a change to its
+            title, description, topics or member tables. Never moved by publishing
+            or unpublishing, nor by changes inside a member table; null for a dataset
+            older than the field.'
+        published_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          description: When the dataset was last published; null for a draft. A republish
+            overwrites it.
+        creator:
+          type: string
+          title: Username
+          readOnly: true
+          nullable: true
+          description: The username of the account that created the dataset, the one
+            who may change it; null for a dataset older than ownership.
+        topics:
+          type: array
+          items:
+            type: string
+          readOnly: true
+          description: The names of the dataset's own topics, sorted.
+        resource_count:
+          type: integer
+          readOnly: true
+          description: 'How many member tables the dataset holds: the `count` its
+            `resources/` pages through. A member whose metadata describes no resource
+            counts here but has no entry in the dataset''s `metadata.resources`.'
+      required:
+      - created_at
+      - creator
+      - metadata
+      - modified_at
+      - name
+      - published_at
+      - resource_count
+      - topics
+      - uuid
+    DatasetUnassigned:
+      type: object
+      description: What `unassign-tables/` answers.
+      properties:
+        message:
+          type: string
+        removed:
+          type: array
+          items:
+            type: string
+          description: The tables detached.
+        missing:
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              type: string
+          description: The references sent that the dataset did not hold, as sent.
+      required:
+      - message
+      - missing
+      - removed
     Energyframework:
       type: object
       properties:
@@ -9735,6 +10758,14 @@ components:
       - id
       - model_name
       - url
+    FailedEnum:
+      enum:
+      - members
+      - topics
+      type: string
+      description: |-
+        * `members` - members
+        * `topics` - topics
     HistoryChange:
       type: object
       description: One field's worth of a write, rendered at read time from the triples.
@@ -9762,6 +10793,84 @@ components:
       - field
       - predicate
       - removed
+    Holder:
+      type: object
+      properties:
+        holder:
+          type: string
+          description: 'The Holder''s key, `user:<id>` or `org:<id>`: its address
+            below `permissions/`.'
+        kind:
+          $ref: '#/components/schemas/KindEnum'
+        id:
+          type: integer
+        name:
+          type: string
+        level:
+          type: integer
+        role:
+          type: string
+          description: The level's name.
+        roles:
+          type: array
+          items:
+            type: integer
+          description: The levels this Holder may be changed to. An organization stops
+            at Data maintainer; one holding Admin from before that rule keeps it in
+            this list, and can only be lowered.
+        you:
+          type: boolean
+          description: Whether this is the caller, or an organization they belong
+            to.
+        members:
+          type: integer
+          description: An organization's member count.
+      required:
+      - holder
+      - id
+      - kind
+      - level
+      - name
+      - role
+      - roles
+      - you
+    HolderAdd:
+      type: object
+      properties:
+        user:
+          type: string
+          description: A user, by name. Give this or `organization`.
+        organization:
+          type: integer
+          description: An organization the caller is a member of, by id.
+        level:
+          type: integer
+          description: One of the levels under `roles`.
+      required:
+      - level
+    HolderList:
+      type: object
+      properties:
+        table:
+          type: string
+        can_manage:
+          type: boolean
+          description: Whether the caller is a Table admin here and may write.
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Role'
+          description: Every role a Holder can be given.
+        holders:
+          type: array
+          items:
+            $ref: '#/components/schemas/Holder'
+          description: Users first, then organizations.
+      required:
+      - can_manage
+      - holders
+      - roles
+      - table
     IdentifiedDatasetLink:
       type: object
       description: A dataset link that may name the one it already is.
@@ -9841,6 +10950,14 @@ components:
       - authors
       - label
       - publication_date
+    KindEnum:
+      enum:
+      - user
+      - org
+      type: string
+      description: |-
+        * `user` - user
+        * `org` - org
     LicenseEnum:
       enum:
       - Academic Free License v3.0
@@ -10025,6 +11142,52 @@ components:
     NullEnum:
       enum:
       - null
+    PaginatedDatasetResourceList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DatasetResource'
+    PaginatedDatasetSummaryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DatasetSummary'
     Part:
       type: object
       description: 'A framework or model factsheet: bundle-local, with a link out.'
@@ -10036,6 +11199,37 @@ components:
           nullable: true
       required:
       - label
+    PatchedDatasetPatch:
+      type: object
+      description: |-
+        `PATCH /datasets/<name>/`: every key optional, and a key left out is
+        left as it is. `name` is refused even when equal, so a client learns the
+        name is fixed instead of seeing it ignored.
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        at_id:
+          type: string
+          format: uri
+          description: Left out, the stored identifier is kept.
+        topics:
+          type: array
+          items:
+            type: string
+          description: Names of existing topics, the dataset's own set. An unknown
+            name, or the draft pseudo-topic, is refused naming it. Replaces the whole
+            set; `[]` empties it.
+    PatchedHolderChange:
+      type: object
+      properties:
+        level:
+          type: integer
+          description: 'Required: one of the Holder''s `roles`.'
+        confirm:
+          type: boolean
+          description: '`true` after a 409 with `code: confirmation_needed`.'
     PatchedScenario:
       type: object
       description: |-
@@ -10157,6 +11351,23 @@ components:
       description: |-
         * `finished` - finished
         * `in_progress` - in_progress
+    PublishGateRefusal:
+      type: object
+      description: 'A publish the dataset''s state refused: the request was fine.'
+      properties:
+        detail:
+          type: string
+          description: What was refused, and why.
+        failed:
+          type: array
+          items:
+            $ref: '#/components/schemas/FailedEnum'
+          description: 'The publish gate''s checks the dataset failed, by name: `members`
+            (it holds no table) and `topics` (it has no topic). The names are stable;
+            a client may branch on them.'
+      required:
+      - detail
+      - failed
     QueryWrapped:
       type: object
       description: A payload this endpoint reads out of a `query` key.
@@ -10174,6 +11385,15 @@ components:
         * `table` - table
         * `dataset` - dataset
         * `external` - external
+    Refusal:
+      type: object
+      description: DRF's own refusal body, which every dataset refusal but a 400 is.
+      properties:
+        detail:
+          type: string
+          description: What was refused, and why.
+      required:
+      - detail
     Removal:
       type: object
       description: |-
@@ -10263,6 +11483,20 @@ components:
       required:
       - type
       - uid
+    Role:
+      type: object
+      properties:
+        level:
+          type: integer
+          description: The stored level, as sent in writes.
+        label:
+          type: string
+        description:
+          type: string
+      required:
+      - description
+      - label
+      - level
     Row:
       type: object
       description: |-
@@ -11015,10 +12249,18 @@ tags:
   description: The OEMetadata document a table carries. Writing it never changes a
     row, and a table created without one is given a minimal document generated from
     its columns.
+- name: 'Tables: permissions'
+  description: 'Who holds which role on a table: users and organizations at Data editor,
+    Data maintainer or Admin. A Table admin adds, changes and removes them under the
+    same rules as the table''s access drawer and permission page -- Admin goes to
+    users only, by name; an organization stops at Data maintainer and is shared only
+    by its members; and a table always keeps a user with direct Admin.'
 - name: Datasets
   description: The catalogue entries that group tables. A dataset's `resources` are
     assembled from its member tables when it is read rather than stored, so a dataset
-    never reports a resource it no longer holds.
+    never reports a resource it no longer holds. A new dataset is a draft, visible
+    only to its creator, until the creator publishes it; publishing needs at least
+    one member table and at least one topic, and unpublishing makes it a draft again.
 - name: Scenario Bundles
   description: 'The OEKG scenario bundles as a REST API: a bundle, the scenarios and
     study reports below it, the datasets a scenario cites, and the record of every

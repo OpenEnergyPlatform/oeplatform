@@ -31,6 +31,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 from django.db import connection
 from django.test import SimpleTestCase
 from django.test.utils import CaptureQueriesContext
+from django.utils import timezone
 from rdflib import RDF, RDFS, Graph, Literal, URIRef
 
 from dataedit.models import Dataset, PeerReview, Table
@@ -78,9 +79,13 @@ class ResolutionTestCase(DatasetLinkTestCase):
             )
         return self._reviewers
 
-    def a_dataset_with(self, *table_names):
+    def a_dataset_with(self, *table_names, published=True, creator=None):
         """A catalogue entry grouping these tables, each of them new."""
-        dataset = Dataset.objects.create(name="my_dataset")
+        dataset = Dataset.objects.create(
+            name="my_dataset",
+            creator=creator,
+            published_at=timezone.now() if published else None,
+        )
         for name in table_names:
             dataset.tables.add(Table.objects.create(name=name))
         return dataset
@@ -238,6 +243,49 @@ class DatasetReferenceResolutionTest(ResolutionTestCase):
         self.assertIs(self.meta_of(uid, sid, did)["resolvable"], True)
 
 
+class DraftDatasetReferenceTest(ResolutionTestCase):
+    """A link to a draft Dataset reads "this server cannot say" for every
+    reader, its creator included (spec #2613): not `false`, which would claim
+    the Dataset was deleted, and never its members, which would let anyone who
+    can write a link read what somebody else is preparing."""
+
+    def readers(self):
+        other = myuser.objects.create_user(
+            name="other_reader", email="other_reader@example.org", affiliation=""
+        )
+        admin = myuser.objects.create_user(
+            name="admin_reader", email="admin_reader@example.org", affiliation=""
+        )
+        admin.is_admin = True
+        admin.save()
+        return {"creator": self.user, "other": other, "admin": admin, "anonymous": None}
+
+    def test_a_link_to_a_draft_is_unknowable_to_everyone(self):
+        self.a_dataset_with("t_secret", published=False, creator=self.user)
+        uid, sid, did, _ = self.with_one_link(DATASET_LINK)
+
+        for who, user in self.readers().items():
+            with self.subTest(who):
+                if user is None:
+                    self.client.logout()
+                else:
+                    self.client.force_login(user)
+                meta = self.meta_of(uid, sid, did)
+                self.assertIsNone(meta["resolvable"])
+                self.assertIsNone(meta["tables"])
+
+    def test_the_same_link_resolves_once_the_dataset_is_published(self):
+        dataset = self.a_dataset_with("t_one", published=False, creator=self.user)
+        uid, sid, did, _ = self.with_one_link(DATASET_LINK)
+        self.assertIsNone(self.meta_of(uid, sid, did)["resolvable"])
+
+        Dataset.objects.filter(pk=dataset.pk).update(published_at=timezone.now())
+
+        meta = self.meta_of(uid, sid, did)
+        self.assertIs(meta["resolvable"], True)
+        self.assertEqual([row["name"] for row in meta["tables"]], ["t_one"])
+
+
 class PeerReviewIndicatorTest(ResolutionTestCase):
     """Three-valued on purpose: absent is not failed."""
 
@@ -336,7 +384,9 @@ class ResolutionCostTest(ResolutionTestCase):
         sid, etag = response.data[READ_ONLY_CONTAINER]["uid"], response["ETag"]
         for index in range(count):
             Table.objects.create(name=f"t{tag}_{index}")
-            dataset = Dataset.objects.create(name=f"d{tag}_{index}")
+            dataset = Dataset.objects.create(
+                name=f"d{tag}_{index}", published_at=timezone.now()
+            )
             dataset.tables.add(Table.objects.create(name=f"m{tag}_{index}"))
             etag = self.add_link(
                 uid, sid, etag, {**TABLE_LINK, "name": f"t{tag}_{index}"}
