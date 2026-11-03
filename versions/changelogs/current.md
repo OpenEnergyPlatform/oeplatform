@@ -32,7 +32,7 @@ the previous release's highlights.
   setting `CURSOR_TIME_OUT` (#2734)
 - Advanced API: a session holding an open transaction but no cursor now also
   gets the 10 minutes instead of 30 seconds, so a client that pauses before its
-  `commit` no longer loses its uncommitted work (PR_NUMBER)
+  `commit` no longer loses its uncommitted work (#2748)
 
 ## Documentation updates
 
