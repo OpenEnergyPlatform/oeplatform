@@ -19,6 +19,14 @@ the previous release's highlights.
 
 ## Changes
 
+- Django REST framework is updated from 3.17.2 to 3.18.2, which brings three
+  security fixes. One effect is visible in the scenario bundle API: a validation
+  error inside a list (scenarios, study reports, dataset links, authors,
+  regions, ...) now names the entry it belongs to by its position,
+  `{"scenarios": {"1": {...}}}`, instead of a list holding an empty object for
+  every valid entry
+  [(#2737)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2737)
+
 - Table downloads through the API (`.../rows/`) and the advanced API's streamed
   results fetch rows from the database in batches of 100 instead of one at a
   time. A CSV download is about 29 times faster, JSON about 8 times
