@@ -10,10 +10,18 @@ repos:
     rev: 26.10.1
     hooks:
       - id: black
-  - repo: https://github.com/pycqa/isort
-    rev: 10.0.0b2
+  # isort is a local hook so that pre-commit.ci's autoupdate cannot move it:
+  # isort 10 needs Python >= 3.11, and the platform stays on 3.10 until the
+  # server move, so a newer rev cannot be installed from the project's venv.
+  - repo: local
     hooks:
       - id: isort
+        name: isort
+        entry: isort
+        language: python
+        additional_dependencies: ["isort==9.0.2"]
+        types_or: [cython, pyi, python]
+        require_serial: true
         args: ["--profile", "black", "--filter-files"]
   - repo: https://github.com/pycqa/flake8
     rev: 7.5.0
