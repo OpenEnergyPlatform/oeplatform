@@ -7,7 +7,10 @@ server process restarted. For anonymous clients, who share one limit, a few
 such sessions refused every other anonymous client.
 
 Now a session that no request has used for `CURSOR_TIME_OUT` is closed whether
-or not it has cursors. "No request has used it" is a marker, not a time
+or not it has cursors. That longer limit also covers a session holding an open
+transaction and no cursor, so a client that pauses between `cursor/close` and
+`commit` does not lose its work after `TIME_OUT`; only a session holding
+nothing goes after the short limit. "No request has used it" is a marker, not a time
 argument: a session stays busy from the moment a request loads it until that
 request has finished, streaming included, and a busy session is never swept.
 And closing or rolling back an id the server no longer holds answers success
@@ -23,6 +26,7 @@ import time
 from unittest import mock
 
 from django.contrib.auth.models import AnonymousUser
+from psycopg2.extensions import TRANSACTION_STATUS_INERROR, TRANSACTION_STATUS_INTRANS
 
 from api import actions, sessions
 from api.error import APIError
@@ -61,6 +65,12 @@ class IdleLimitTest(SessionRegistryTestCase):
         sess.last_activity = time.time() - idle
         return sess, cursor
 
+    def with_transaction(self, status=TRANSACTION_STATUS_INTRANS, idle=0):
+        sess = self.explicit()
+        sess.connection.transaction_status = status
+        sess.last_activity = time.time() - idle
+        return sess
+
     def loaded(self, sess):
         """Load `sess` as a request would, and leave that request running."""
         self.addCleanup(sessions._release_loaded)
@@ -95,6 +105,45 @@ class IdleLimitTest(SessionRegistryTestCase):
 
         self.assertIn(kept, self.registered_for(self.owner))
         self.assertFalse(cursor.closed)
+
+    def test_an_open_transaction_keeps_a_session_past_the_short_limit(self):
+        """A client pausing between `cursor/close` and `commit` keeps its work."""
+        for status in (TRANSACTION_STATUS_INTRANS, TRANSACTION_STATUS_INERROR):
+            with self.subTest(status=status):
+                kept = self.with_transaction(status, idle=sessions.TIME_OUT + 1)
+
+                self.explicit()
+
+                self.assertIn(kept, self.registered_for(self.owner))
+                self.assertFalse(kept.connection.closed)
+
+    def test_an_open_transaction_idle_past_the_long_limit_is_closed(self):
+        stuck = self.with_transaction(idle=sessions.CURSOR_TIME_OUT + 1)
+
+        self.explicit()
+
+        self.assertNotIn(stuck, self.registered_for(self.owner))
+        self.assertTrue(stuck.connection.closed)
+
+    def test_a_session_holding_nothing_is_closed_past_the_short_limit(self):
+        empty = self.with_transaction(status=0, idle=sessions.TIME_OUT + 1)
+
+        self.explicit()
+
+        self.assertNotIn(empty, self.registered_for(self.owner))
+
+    def test_a_connection_that_cannot_tell_its_status_is_closed(self):
+        """And it does not stop the sweep for the sessions after it."""
+        broken = self.with_transaction(idle=sessions.TIME_OUT + 1)
+        broken.connection.get_transaction_status = mock.Mock(
+            side_effect=RuntimeError("connection already closed")
+        )
+        stuck, _ = self.with_cursor(idle=sessions.CURSOR_TIME_OUT + 1)
+
+        self.explicit()
+
+        self.assertNotIn(broken, self.registered_for(self.owner))
+        self.assertNotIn(stuck, self.registered_for(self.owner))
 
     def test_a_session_a_request_is_using_is_never_closed(self):
         """However long ago it was loaded: a stream does not touch it."""
@@ -208,6 +257,17 @@ class ThroughTheViewsTest(AdvancedAPICase):
 
         self.assertEqual(200, status, body)
         self.assertEqual(0, sessions._SESSION_CONTEXTS[connection_id].in_use)
+
+    def test_a_new_session_holds_no_transaction(self):
+        """The pool's pre-ping would otherwise make every session look busy."""
+        sess = sessions._SESSION_CONTEXTS[self.open()]
+        self.assertFalse(sessions._holds_work(sess))
+
+        cursor = sess.connection.cursor()
+        cursor.execute("SELECT 1")
+        cursor.close()
+
+        self.assertTrue(sessions._holds_work(sess))
 
     def test_a_session_is_busy_until_its_stream_has_been_read(self):
         connection_id = self.open()

@@ -27,6 +27,11 @@ the previous release's highlights.
   every valid entry
   [(#2737)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2737)
 
+- Table downloads through the API (`.../rows/`) and the advanced API's streamed
+  results fetch rows from the database in batches of 100 instead of one at a
+  time. A CSV download is about 29 times faster, JSON about 8 times
+  [(#2747)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2747)
+
 ## Features
 
 ## Bugs
@@ -44,6 +49,9 @@ the previous release's highlights.
   rolling back a session that is already gone now answers success instead of
   being refused at the connection limit. The 10 minutes are the new optional
   setting `CURSOR_TIME_OUT` (#2734)
+- Advanced API: a session holding an open transaction but no cursor now also
+  gets the 10 minutes instead of 30 seconds, so a client that pauses before its
+  `commit` no longer loses its uncommitted work (#2748)
 
 ## Documentation updates
 
