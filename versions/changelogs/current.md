@@ -29,6 +29,14 @@ the previous release's highlights.
   collector next ran, which on production took up to an hour and more
   [(#2735)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2735)
 
+- Advanced API: a session that no request has used for 10 minutes is now closed
+  even when it still has an open cursor, so an abandoned session no longer holds
+  its place in the connection limit until the server restarts. A session a
+  request is still using, a long download included, is never closed. Closing or
+  rolling back a session that is already gone now answers success instead of
+  being refused at the connection limit. The 10 minutes are the new optional
+  setting `CURSOR_TIME_OUT` (#2734)
+
 ## Documentation updates
 
 - The documentation Home now says what the OEP is and guides every visitor to

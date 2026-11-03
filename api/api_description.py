@@ -307,9 +307,11 @@ USES_POOL = {503: _POOL_TIMEOUT}
 #: For an action that can open or rebuild an explicit session --
 #: `connection/open`, and every action that resolves a `connection_id`, because
 #: an id this server no longer holds is rebuilt as a new session, and that
-#: counts. An action that touches neither the pool nor a session (a constant,
-#: or a Django-side lookup such as `has_table`) declares neither, so the
-#: document does not promise refusals the endpoint cannot give.
+#: counts. `connection/close` and `connection/rollback` are the exception: on
+#: such an id they answer success and rebuild nothing. An action that touches
+#: neither the pool nor a session (a constant, or a Django-side lookup such as
+#: `has_table`) declares neither, so the document does not promise refusals the
+#: endpoint cannot give.
 OPENS_SESSION = {
     429: describes(
         "This account (or, without a login, all anonymous clients together) "
@@ -328,7 +330,11 @@ ADVANCED_SESSION_NOTE = (
     "hand. A call carrying no `connection_id` runs and commits on its own; one "
     "carrying the pair from `connection/open` and `cursor/open` joins that "
     "transaction, which is what lets several calls be committed or rolled back "
-    "together."
+    "together. A session no call has used for a while is closed, with its "
+    "cursors and its uncommitted transaction: by default after 30 seconds, or "
+    "10 minutes while it has an open cursor. A call that is still running "
+    "keeps its session open however long it takes. A later call under a "
+    "closed session's id starts a new, empty session under that id."
 )
 
 
