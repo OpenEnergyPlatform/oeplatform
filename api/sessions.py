@@ -216,25 +216,32 @@ def load_session_from_context(
     """
     connection_id = get_or_403(context, "connection_id")
     user = context.get("user")
+    loaded = _LOADED.__dict__.setdefault("sessions", set())
+    # Finding the session and marking it in use are one step: in between, a
+    # sweep on another thread would see it idle and close it under this request.
     with _LOCK:
         sess = _SESSION_CONTEXTS.get(connection_id)
+        if sess is not None:
+            if user and sess.owner != user:
+                raise PermissionError
+            _mark_in_use(sess, loaded)
     if sess is None:
         if not rebuild:
             return None
+        # Published with a fresh `last_activity`, so no sweep takes it before
+        # it is marked.
         sess = SessionContext(connection_id=connection_id, owner=user)
-    elif user and sess.owner != user:
-        raise PermissionError
-    sess.last_activity = time.time()
-    _mark_in_use(sess)
+        with _LOCK:
+            _mark_in_use(sess, loaded)
+    loaded.add(sess)
     return sess
 
 
-def _mark_in_use(sess: SessionContext) -> None:
-    loaded = _LOADED.__dict__.setdefault("sessions", set())
+def _mark_in_use(sess: SessionContext, loaded: set) -> None:
+    """Count this request once in `sess.in_use`. The caller holds `_LOCK`."""
+    sess.last_activity = time.time()
     if sess not in loaded:
-        loaded.add(sess)
-        with _LOCK:
-            sess.in_use += 1
+        sess.in_use += 1
 
 
 def _release_loaded(**kwargs) -> None:
