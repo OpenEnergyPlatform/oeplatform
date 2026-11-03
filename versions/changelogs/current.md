@@ -23,6 +23,12 @@ the previous release's highlights.
 
 ## Bugs
 
+- A table download through the API (`.../rows/`) that the client stops reading
+  gives its database connection back straight away. It used to hold the
+  connection, a transaction and a lock on the table until Python's garbage
+  collector next ran, which on production took up to an hour and more
+  [(#2735)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2735)
+
 - Advanced API: a session that no request has used for 10 minutes is now closed
   even when it still has an open cursor, so an abandoned session no longer holds
   its place in the connection limit until the server restarts. A session a
