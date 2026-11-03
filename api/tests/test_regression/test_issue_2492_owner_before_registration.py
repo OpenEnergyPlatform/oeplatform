@@ -48,6 +48,15 @@ class FakeDBAPIConnection:
     def close(self):
         self.closed = True
 
+    # psycopg2's TRANSACTION_STATUS_IDLE; a test may set another status
+    transaction_status = 0
+
+    def rollback(self):
+        self.transaction_status = 0
+
+    def get_transaction_status(self):
+        return self.transaction_status
+
 
 class FakeEngine:
     def connect(self):

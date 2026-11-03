@@ -347,9 +347,9 @@ DOCUMENTATION_LINKS = {
 
 SITE_ID = 1
 
-# Seconds an advanced API session with open cursors may go without a request
-# before it is closed (api/sessions.py, _take_expired). Optional in
-# securitysettings.py, so a host that predates it needs no edit.
+# Seconds an advanced API session with open cursors or an open transaction may
+# go without a request before it is closed (api/sessions.py, _take_expired).
+# Optional in securitysettings.py, so a host that predates it needs no edit.
 CURSOR_TIME_OUT = getattr(_local_settings, "CURSOR_TIME_OUT", 600)
 
 # The instance theming contract (#2637, docs/installation/guides/instance-theming.md).

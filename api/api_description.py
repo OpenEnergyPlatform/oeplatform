@@ -332,9 +332,10 @@ ADVANCED_SESSION_NOTE = (
     "transaction, which is what lets several calls be committed or rolled back "
     "together. A session no call has used for a while is closed, with its "
     "cursors and its uncommitted transaction: by default after 30 seconds, or "
-    "10 minutes while it has an open cursor. A call that is still running "
-    "keeps its session open however long it takes. A later call under a "
-    "closed session's id starts a new, empty session under that id."
+    "10 minutes while it has an open cursor or uncommitted work. A call that "
+    "is still running keeps its session open however long it takes. A later "
+    "call under a closed session's id starts a new, empty session under that "
+    "id."
 )
 
 

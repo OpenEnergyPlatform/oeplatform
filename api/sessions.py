@@ -17,6 +17,7 @@ from typing import NamedTuple
 from django.contrib.auth.models import AbstractUser
 from django.core.signals import request_finished
 from django.urls import reverse
+from psycopg2.extensions import TRANSACTION_STATUS_INERROR, TRANSACTION_STATUS_INTRANS
 
 from api.error import APIError
 from api.utils import get_or_403
@@ -131,6 +132,9 @@ class SessionContext:
             engine = _get_engine()
             connection = engine.connect()
             self.connection: DBAPIConnection = connection.connection  # type: ignore
+            # The pool's pre-ping leaves its `SELECT 1` open as a transaction. A
+            # new session holds nothing yet, and the idle sweep must see that.
+            self.connection.rollback()
 
             # FIXME: is this a good idea, to add a custom attribute?
             setattr(self.connection, "_id", connection_id)
@@ -250,10 +254,11 @@ def _take_expired(now: float) -> list[SessionContext]:
     """Unregister the idle sessions, for the caller to close outside the lock.
 
     Idle means no request has used the session for `TIME_OUT`, or for
-    `CURSOR_TIME_OUT` when it has open cursors. That one is longer, because a
-    client may pause between the fetches of a result, but it is a limit: a
-    client that died with a cursor open would otherwise hold its place in the
-    connection limit until the process restarts. Its open transaction is lost.
+    `CURSOR_TIME_OUT` when it holds an open cursor or an open transaction. That
+    one is longer, because a client may pause between the fetches of a result
+    or before its commit, but it is a limit: a client that died holding either
+    would otherwise keep its place in the connection limit until the process
+    restarts. Its open transaction is lost.
     A session a request is still using -- a stream can run far longer than
     either limit without touching `last_activity` -- is never idle.
 
@@ -271,11 +276,24 @@ def _take_expired(now: float) -> list[SessionContext]:
             if sess.counted
             and not sess.in_use
             and now - sess.last_activity
-            > (CURSOR_TIME_OUT if sess.cursors else TIME_OUT)
+            > (CURSOR_TIME_OUT if _holds_work(sess) else TIME_OUT)
         ]
         for sess in expired:
             del _SESSION_CONTEXTS[sess.connection._id]
     return expired
+
+
+def _holds_work(sess: SessionContext) -> bool:
+    """Whether closing `sess` would lose a client's work: a cursor or a transaction."""
+    if sess.cursors:
+        return True
+    try:
+        status = sess.connection.get_transaction_status()
+    except Exception:
+        # A connection that cannot tell is broken; closing it loses nothing, and
+        # raising here would stop the sweep for every other session.
+        return False
+    return status in (TRANSACTION_STATUS_INTRANS, TRANSACTION_STATUS_INERROR)
 
 
 def _reserve(connection_id, owner: AbstractUser | None, counted: bool):

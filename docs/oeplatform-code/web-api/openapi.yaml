@@ -10,7 +10,7 @@ paths:
       description: |-
         Runs `close_raw_connection` against the OEDB.
 
-        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
+        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor or uncommitted work. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
       tags:
       - 'Advanced: Connection'
       requestBody:
@@ -61,7 +61,7 @@ paths:
       description: |-
         Closes all of this account's open database connections. The way out of a session left open by a client that stopped without closing it.
 
-        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
+        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor or uncommitted work. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
       summary: Close every connection this account holds
       tags:
       - 'Advanced: Connection'
@@ -93,7 +93,7 @@ paths:
       description: |-
         Runs `commit_raw_connection` against the OEDB.
 
-        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
+        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor or uncommitted work. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
       tags:
       - 'Advanced: Connection'
       requestBody:
@@ -163,7 +163,7 @@ paths:
       description: |-
         Runs `open_raw_connection` against the OEDB.
 
-        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
+        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor or uncommitted work. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
       tags:
       - 'Advanced: Connection'
       requestBody:
@@ -233,7 +233,7 @@ paths:
       description: |-
         Runs `rollback_raw_connection` against the OEDB.
 
-        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
+        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor or uncommitted work. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
       tags:
       - 'Advanced: Connection'
       requestBody:
@@ -284,7 +284,7 @@ paths:
       description: |-
         Runs `close_cursor` against the OEDB.
 
-        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
+        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor or uncommitted work. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
       tags:
       - 'Advanced: Cursor'
       requestBody:
@@ -354,7 +354,7 @@ paths:
       description: |-
         Streams rows from a cursor opened by `advanced/cursor/open`, one JSON array per line rather than one document -- so a large result can be read without holding it whole.
 
-        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
+        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor or uncommitted work. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
       summary: Fetch rows from an open cursor
       tags:
       - 'Advanced: Cursor'
@@ -408,7 +408,7 @@ paths:
       description: |-
         Streams rows from a cursor opened by `advanced/cursor/open`, one JSON array per line rather than one document -- so a large result can be read without holding it whole.
 
-        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
+        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor or uncommitted work. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
       summary: Fetch rows from an open cursor
       tags:
       - 'Advanced: Cursor'
@@ -462,7 +462,7 @@ paths:
       description: |-
         Runs `fetchone` against the OEDB.
 
-        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
+        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor or uncommitted work. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
       tags:
       - 'Advanced: Cursor'
       requestBody:
@@ -532,7 +532,7 @@ paths:
       description: |-
         Runs `open_cursor` against the OEDB.
 
-        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
+        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor or uncommitted work. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
       tags:
       - 'Advanced: Cursor'
       requestBody:
@@ -602,7 +602,7 @@ paths:
       description: |-
         Runs `data_delete` against the OEDB.
 
-        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
+        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor or uncommitted work. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
       tags:
       - Advanced
       requestBody:
@@ -672,7 +672,7 @@ paths:
       description: |-
         Runs `do_begin_twophase` against the OEDB.
 
-        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
+        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor or uncommitted work. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
       tags:
       - 'Advanced: Two phase'
       requestBody:
@@ -742,7 +742,7 @@ paths:
       description: |-
         Runs `do_commit_twophase` against the OEDB.
 
-        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
+        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor or uncommitted work. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
       tags:
       - 'Advanced: Two phase'
       requestBody:
@@ -812,7 +812,7 @@ paths:
       description: |-
         Runs `do_prepare_twophase` against the OEDB.
 
-        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
+        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor or uncommitted work. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
       tags:
       - 'Advanced: Two phase'
       requestBody:
@@ -882,7 +882,7 @@ paths:
       description: |-
         Runs `do_recover_twophase` against the OEDB.
 
-        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
+        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor or uncommitted work. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
       tags:
       - 'Advanced: Two phase'
       requestBody:
@@ -952,7 +952,7 @@ paths:
       description: |-
         Runs `do_rollback_twophase` against the OEDB.
 
-        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
+        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor or uncommitted work. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
       tags:
       - 'Advanced: Two phase'
       requestBody:
@@ -1022,7 +1022,7 @@ paths:
       description: |-
         Runs `get_columns` against the OEDB.
 
-        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
+        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor or uncommitted work. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
       tags:
       - Advanced
       requestBody:
@@ -1081,7 +1081,7 @@ paths:
       description: |-
         Runs `get_foreign_keys` against the OEDB.
 
-        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
+        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor or uncommitted work. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
       tags:
       - Advanced
       requestBody:
@@ -1140,7 +1140,7 @@ paths:
       description: |-
         Runs `get_indexes` against the OEDB.
 
-        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
+        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor or uncommitted work. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
       tags:
       - Advanced
       requestBody:
@@ -1199,7 +1199,7 @@ paths:
       description: |-
         Runs `get_isolation_level` against the OEDB.
 
-        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
+        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor or uncommitted work. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
       tags:
       - Advanced
       requestBody:
@@ -1269,7 +1269,7 @@ paths:
       description: |-
         Runs `get_pk_constraint` against the OEDB.
 
-        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
+        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor or uncommitted work. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
       tags:
       - Advanced
       requestBody:
@@ -1328,7 +1328,7 @@ paths:
       description: |-
         Runs `get_schema_names` against the OEDB.
 
-        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
+        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor or uncommitted work. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
       tags:
       - Advanced
       requestBody:
@@ -1379,7 +1379,7 @@ paths:
       description: |-
         Runs `get_table_names` against the OEDB.
 
-        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
+        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor or uncommitted work. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
       tags:
       - Advanced
       requestBody:
@@ -1430,7 +1430,7 @@ paths:
       description: |-
         Runs `get_unique_constraints` against the OEDB.
 
-        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
+        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor or uncommitted work. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
       tags:
       - Advanced
       requestBody:
@@ -1489,7 +1489,7 @@ paths:
       description: |-
         Runs `get_view_definition` against the OEDB.
 
-        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
+        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor or uncommitted work. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
       tags:
       - Advanced
       requestBody:
@@ -1540,7 +1540,7 @@ paths:
       description: |-
         Runs `get_view_names` against the OEDB.
 
-        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
+        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor or uncommitted work. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
       tags:
       - Advanced
       requestBody:
@@ -1591,7 +1591,7 @@ paths:
       description: |-
         Runs `has_schema` against the OEDB.
 
-        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
+        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor or uncommitted work. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
       tags:
       - Advanced
       requestBody:
@@ -1642,7 +1642,7 @@ paths:
       description: |-
         Runs `has_table` against the OEDB.
 
-        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
+        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor or uncommitted work. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
       tags:
       - Advanced
       requestBody:
@@ -1693,7 +1693,7 @@ paths:
       description: |-
         Runs `data_insert` against the OEDB.
 
-        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
+        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor or uncommitted work. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
       tags:
       - Advanced
       requestBody:
@@ -1763,7 +1763,7 @@ paths:
       description: |-
         Runs `data_search` against the OEDB.
 
-        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
+        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor or uncommitted work. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
       tags:
       - Advanced
       requestBody:
@@ -1833,7 +1833,7 @@ paths:
       description: |-
         Runs `set_isolation_level` against the OEDB.
 
-        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
+        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor or uncommitted work. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
       tags:
       - Advanced
       requestBody:
@@ -1903,7 +1903,7 @@ paths:
       description: |-
         Runs `data_update` against the OEDB.
 
-        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
+        Part of the **advanced** interface: a thin, authenticated passthrough to the database that exists to be driven by a client library rather than by hand. A call carrying no `connection_id` runs and commits on its own; one carrying the pair from `connection/open` and `cursor/open` joins that transaction, which is what lets several calls be committed or rolled back together. A session no call has used for a while is closed, with its cursors and its uncommitted transaction: by default after 30 seconds, or 10 minutes while it has an open cursor or uncommitted work. A call that is still running keeps its session open however long it takes. A later call under a closed session's id starts a new, empty session under that id.
       tags:
       - Advanced
       requestBody:
