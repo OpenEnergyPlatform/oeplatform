@@ -26,6 +26,9 @@ from sqlalchemy import (
     PrimaryKeyConstraint,
     UniqueConstraint,
     and_,
+)
+from sqlalchemy import case as sa_case
+from sqlalchemy import (
     cast,
     column,
     func,
@@ -35,10 +38,9 @@ from sqlalchemy import (
     null,
     or_,
     select,
-    util,
 )
-from sqlalchemy import case as sa_case
 from sqlalchemy import types as sa_types
+from sqlalchemy import util
 from sqlalchemy.dialects.postgresql.base import INTERVAL
 from sqlalchemy.exc import ArgumentError
 from sqlalchemy.schema import Sequence
