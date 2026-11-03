@@ -19,6 +19,11 @@ the previous release's highlights.
 
 ## Changes
 
+- Table downloads through the API (`.../rows/`) and the advanced API's streamed
+  results fetch rows from the database in batches of 100 instead of one at a
+  time. A CSV download is about 29 times faster, JSON about 8 times
+  [(#2747)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2747)
+
 ## Features
 
 ## Bugs
