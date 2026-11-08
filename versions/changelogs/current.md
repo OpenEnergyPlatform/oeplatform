@@ -19,21 +19,9 @@ the previous release's highlights.
 
 ## Changes
 
-- Table downloads through the API (`.../rows/`) and the advanced API's streamed
-  results fetch rows from the database in batches of 100 instead of one at a
-  time. A CSV download is about 29 times faster, JSON about 8 times
-
 ## Features
 
 ## Bugs
-
-- Advanced API: a session that no request has used for 10 minutes is now closed
-  even when it still has an open cursor, so an abandoned session no longer holds
-  its place in the connection limit until the server restarts. A session a
-  request is still using, a long download included, is never closed. Closing or
-  rolling back a session that is already gone now answers success instead of
-  being refused at the connection limit. The 10 minutes are the new optional
-  setting `CURSOR_TIME_OUT`
 
 ## Documentation updates
 
