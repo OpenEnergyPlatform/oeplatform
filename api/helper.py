@@ -90,11 +90,18 @@ class ModJsonResponse(JsonResponse):
             super().__init__({}, status=dictionary["http_status"])
 
 
+#: Rows per fetch on a streamed read. On a server-side cursor every fetch is a
+#: round trip, so one row at a time spent most of a download waiting; a batch
+#: is also what the stream holds in memory, so it stays small.
+ROWS_PER_FETCH = 100
+
+
 def transform_results(cursor, triggers, trigger_args):
-    row = cursor.fetchone() if not cursor.closed else None
-    while row is not None:
-        yield list(map(translate_fetched_cell, row))
-        row = cursor.fetchone()
+    rows = cursor.fetchmany(ROWS_PER_FETCH) if not cursor.closed else []
+    while rows:
+        for row in rows:
+            yield list(map(translate_fetched_cell, row))
+        rows = cursor.fetchmany(ROWS_PER_FETCH)
     for t, targs in zip(triggers, trigger_args):
         t(*targs)
 
@@ -104,9 +111,16 @@ class OEPStream(StreamingHttpResponse):
         self.session = session
         super(OEPStream, self).__init__(*args, **kwargs)
 
-    def __del__(self):
-        if self.session:
-            self.session.close()
+    def close(self):
+        # Not __del__: the response sits in a reference cycle, so __del__ waits
+        # for a full garbage collection, and a client that aborts the stream
+        # would hold the connection, its lock and its snapshot until then. The
+        # server calls close() on completion and on abort alike.
+        try:
+            if self.session:
+                self.session.close()
+        finally:
+            super().close()
 
 
 def load_cursor(named=False):
