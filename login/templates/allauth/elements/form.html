@@ -6,9 +6,9 @@
 <form method="{{ attrs.method }}"
       {% if attrs.action %}action="{{ attrs.action }}"{% endif %}>
   {% slot body %}
-{% endslot %}
-<div class="d-grid gap-2 mb-3">
-  {% slot actions %}
-{% endslot %}
-</div>
+  {% endslot %}
+  <div class="d-grid gap-2 mb-3">
+    {% slot actions %}
+    {% endslot %}
+  </div>
 </form>
