@@ -41,7 +41,11 @@ selection slot (empty until the tab offers bulk actions) and the row's ⋯ menu
   <td class="c-topics">
     {% include "login/partials/cells/chips.html" with needed=row.is_draft %}
   </td>
-  <td class="c-modified">{% include "login/partials/cells/modified.html" %}</td>
+  <td class="c-modified">
+    {% include "login/partials/cells/modified.html" %}
+  </td>
   <td class="c-created">{% include "login/partials/cells/created.html" %}</td>
-  <td class="c-menu">{% include "login/partials/cells/dataset_menu.html" %}</td>
+  <td class="c-menu">
+    {% include "login/partials/cells/dataset_menu.html" %}
+  </td>
 {% endblock row_cells %}
