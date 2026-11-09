@@ -53,7 +53,7 @@ repos:
         exclude: ^docs/oeplatform-code/web-api/openapi\.yaml$
   - repo: https://github.com/djlint/djLint
     # see https://djlint.com/docs/integrations/
-    rev: v1.49.2
+    rev: v1.49.10
     hooks:
       - id: djlint-reformat-django
         files: .*templates/.*\.html$
