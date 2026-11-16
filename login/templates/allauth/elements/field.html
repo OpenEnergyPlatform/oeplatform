@@ -30,34 +30,34 @@
 <div class="mb-3">
   <label class="form-label" for="{{ attrs.id }}">
     {% slot label %}
-  {% endslot %}
-</label>
-{% if attrs.type == "textarea" %}
-  <textarea class="form-control{% if attrs.errors %} is-invalid{% endif %}"
-            {% if attrs.name %}name="{{ attrs.name }}"{% endif %}
-            {% if attrs.id %}id="{{ attrs.id }}"{% endif %}
-            {% if attrs.rows %}rows="{{ attrs.rows }}"{% endif %}
-            {% if attrs.placeholder %}placeholder="{{ attrs.placeholder }}"{% endif %}
-            {% if attrs.required %}required{% endif %}
-            {% if attrs.disabled %}disabled{% endif %}
-            {% if attrs.readonly %}readonly{% endif %}>{% slot value %}{% endslot %}</textarea>
+    {% endslot %}
+  </label>
+  {% if attrs.type == "textarea" %}
+    <textarea class="form-control{% if attrs.errors %} is-invalid{% endif %}"
+              {% if attrs.name %}name="{{ attrs.name }}"{% endif %}
+              {% if attrs.id %}id="{{ attrs.id }}"{% endif %}
+              {% if attrs.rows %}rows="{{ attrs.rows }}"{% endif %}
+              {% if attrs.placeholder %}placeholder="{{ attrs.placeholder }}"{% endif %}
+              {% if attrs.required %}required{% endif %}
+              {% if attrs.disabled %}disabled{% endif %}
+              {% if attrs.readonly %}readonly{% endif %}>{% slot value %}{% endslot %}</textarea>
 {% else %}
-<input class="form-control{% if attrs.errors %} is-invalid{% endif %}"
-       type="{{ attrs.type }}"
-       {% if attrs.name %}name="{{ attrs.name }}"{% endif %}
-       {% if attrs.id %}id="{{ attrs.id }}"{% endif %}
-       {% if attrs.value is not None %}value="{{ attrs.value }}"{% endif %}
-       {% if attrs.placeholder %}placeholder="{{ attrs.placeholder }}"{% endif %}
-       {% if attrs.autocomplete %}autocomplete="{{ attrs.autocomplete }}"{% endif %}
-       {% if attrs.required %}required{% endif %}
-       {% if attrs.disabled %}disabled{% endif %}
-       {% if attrs.readonly %}readonly{% endif %} />
-{% endif %}
-{% for error in attrs.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
-{% if slots.help_text %}
-  <div class="form-text">
-    {% slot help_text %}
-{% endslot %}
+  <input class="form-control{% if attrs.errors %} is-invalid{% endif %}"
+         type="{{ attrs.type }}"
+         {% if attrs.name %}name="{{ attrs.name }}"{% endif %}
+         {% if attrs.id %}id="{{ attrs.id }}"{% endif %}
+         {% if attrs.value is not None %}value="{{ attrs.value }}"{% endif %}
+         {% if attrs.placeholder %}placeholder="{{ attrs.placeholder }}"{% endif %}
+         {% if attrs.autocomplete %}autocomplete="{{ attrs.autocomplete }}"{% endif %}
+         {% if attrs.required %}required{% endif %}
+         {% if attrs.disabled %}disabled{% endif %}
+         {% if attrs.readonly %}readonly{% endif %} />
+  {% endif %}
+  {% for error in attrs.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+  {% if slots.help_text %}
+    <div class="form-text">
+      {% slot help_text %}
+  {% endslot %}
 </div>
 {% endif %}
 </div>
