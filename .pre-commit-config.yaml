@@ -29,7 +29,7 @@ repos:
       - id: flake8
         args: ["--max-line-length=88", "--ignore=E20,W503"] # black compatible
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v10.14.0
+    rev: v10.15.0
     hooks:
       - id: eslint
         additional_dependencies:
@@ -53,7 +53,7 @@ repos:
         exclude: ^docs/oeplatform-code/web-api/openapi\.yaml$
   - repo: https://github.com/djlint/djLint
     # see https://djlint.com/docs/integrations/
-    rev: v1.49.2
+    rev: v1.50.4
     hooks:
       - id: djlint-reformat-django
         files: .*templates/.*\.html$
