@@ -38,7 +38,7 @@ the previous release's highlights.
   name or an acronym; the API still requires both when it creates or replaces a
   bundle, because bundles are found by their acronym and listed by their name.
   Deploying needs `fetch_oekg_shapes` run again with OEO 2.14.0
-  [(#PR)](https://github.com/OpenEnergyPlatform/oeplatform/pull/PR)
+  [(#2763)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2763)
 
 ## Features
 
