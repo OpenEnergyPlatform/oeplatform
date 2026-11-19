@@ -105,13 +105,12 @@ def confirmation_refusal(request, acronym: str) -> Optional[Response]:
     and the bundle is exactly as the caller last read it.
     """
     if acronym is None:
-        # Not reachable for a bundle this API created -- the shape requires an
-        # acronym -- but the browser wrote most of the bundles in the graph and
-        # the API judges a write by what it introduces, not by what it found.
-        # Refusing here rather than inventing a substitute token keeps the
-        # check meaning what it says; the way out is to give the bundle an
-        # acronym with a `PATCH`, which is allowed precisely because the
-        # missing one is a violation this caller did not introduce.
+        # Not reachable for a bundle this API created -- its create and replace
+        # require an acronym -- but the browser wrote most of the bundles in
+        # the graph, and since oekg#68 the shape itself is content with a name
+        # instead. Refusing here rather than inventing a substitute token keeps
+        # the check meaning what it says; the way out is to give the bundle an
+        # acronym with a `PATCH`, which adds no violation.
         return _bad_request(
             "This scenario bundle has no acronym, so there is nothing to "
             "confirm a delete with. Give it one with a PATCH first, then "

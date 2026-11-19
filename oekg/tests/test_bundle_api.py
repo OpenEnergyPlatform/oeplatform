@@ -32,6 +32,13 @@ from oekg.serializers import READ_ONLY_CONTAINER, ScenarioBundleSerializer
 from oekg.shape import enumeration, shape_graph
 from oekg.tests import RequiresShapeArtifactsMixin
 from oekg.tests.bundle_fixtures import VALID_PAYLOAD, BundleApiTestCase
+from oekg.validation import validate_post_state
+
+UID = "11111111-2222-3333-4444-555555555555"
+
+
+def _without(*keys) -> dict:
+    return {k: v for k, v in VALID_PAYLOAD.items() if k not in keys}
 
 
 class CreateBundleTest(BundleApiTestCase):
@@ -252,6 +259,43 @@ class ShapeValidationTest(BundleApiTestCase):
         for node_class in [OEO.OEO_00000107, OEO.OEO_00030022, OEO.OEO_00090001]:
             with self.subTest(node_class=node_class):
                 self.assertTrue(self.store.ask("ASK { ?node a %s }" % node_class.n3()))
+
+
+class NameOrAcronymShapeTest(RequiresShapeArtifactsMixin, SimpleTestCase):
+    """The shape needs a name or an acronym (oekg#68); see NameOrAcronymApiTest."""
+
+    def test_the_shape_accepts_either_one(self):
+        for missing in ("label", "acronym"):
+            with self.subTest(missing=missing):
+                graph = build_bundle_graph(UID, _without(missing))
+                self.assertEqual(validate_post_state(graph), [])
+
+    def test_the_shape_refuses_neither_in_its_own_words(self):
+        graph = build_bundle_graph(UID, _without("label", "acronym"))
+
+        messages = [v.message for v in validate_post_state(graph)]
+
+        self.assertEqual(
+            messages,
+            ["Study target: This should have a name or an acronym (or both)."],
+        )
+
+
+class NameOrAcronymApiTest(BundleApiTestCase):
+    """This API keeps needing both, although the shape needs only one.
+
+    The acronym is what `?acronym=` finds a bundle by and what a delete is
+    confirmed with; the label is what every listing shows.
+    """
+
+    def test_a_create_still_needs_both(self):
+        for missing in ("label", "acronym"):
+            with self.subTest(missing=missing):
+                response = self.create(_without(missing))
+
+                self.assertEqual(response.status_code, 400)
+                self.assertIn(missing, response.data)
+        self.assertFalse(self.store.ask("ASK { ?s ?p ?o }"))
 
 
 class RoundTripTest(BundleApiTestCase):
