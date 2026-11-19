@@ -426,7 +426,7 @@ OEKG_SHAPES_SOURCE_REPO = "OpenEnergyPlatform/oekg"
 OEKG_SHAPES_SOURCE_FILE = "oekg/shapes/oekg_shapes.ttl"
 # The oekg repo carries no version tags yet (one unrelated tag), so the interim
 # pin is a commit sha. Bump this line to move the validator.
-OEKG_SHAPES_PINNED_COMMIT = "b4604e02060624b381bdbe2f872df94cfd0f5630"
+OEKG_SHAPES_PINNED_COMMIT = "a34fb6854eb5fff6900da473d20cbfdb3396b057"
 
 # The named graph the OEKG API reads and writes. None is the default graph,
 # which is where the platform's bundles live today; a test overrides it to work

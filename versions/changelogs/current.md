@@ -32,6 +32,14 @@ the previous release's highlights.
   time. A CSV download is about 29 times faster, JSON about 8 times
   [(#2747)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2747)
 
+- The scenario bundle API validates against the current OEKG shape (oekg#68). A
+  scenario may now have the type "integrated assessment modeling scenario"
+  (`OEO_00020517`, new in OEO 2.14.0). The shape now accepts a bundle with a
+  name or an acronym; the API still requires both when it creates or replaces a
+  bundle, because bundles are found by their acronym and listed by their name.
+  Deploying needs `fetch_oekg_shapes` run again with OEO 2.14.0
+  [(#PR)](https://github.com/OpenEnergyPlatform/oeplatform/pull/PR)
+
 ## Features
 
 ## Bugs

@@ -604,6 +604,20 @@ class ScenarioShapeTest(ScenarioTestCase):
         self.assertEqual(response.status_code, 400, response.data)
         self.assertIn("scenario_types", response.data)
 
+    def test_an_integrated_assessment_scenario_is_accepted(self):
+        # OEO_00020517 is new in OEO 2.14.0 and in the shape since oekg#68.
+        # Every mhp-harvest scenario carries it, so without it no harvest
+        # bundle could be written through this API.
+        uid, etag = self.created()
+        iam = str(OEO.OEO_00020517)
+
+        response = self.add_scenario(
+            uid, etag, {**VALID_SCENARIO, "scenario_types": [iam]}
+        )
+
+        self.assertEqual(response.status_code, 201, response.data)
+        self.assertEqual(response.data["scenario_types"], [iam])
+
 
 class ScenarioShapeConformanceTest(RequiresShapeArtifactsMixin, SimpleTestCase):
     """Every property the shape validates on a scenario is accounted for.
