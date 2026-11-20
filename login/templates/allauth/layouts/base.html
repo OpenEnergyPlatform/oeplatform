@@ -5,7 +5,7 @@
   allauth's own menu. allauth's own pages get it as their layout; the pages
   under account/ and socialaccount/ that the OEP writes itself extend it.
 {% endcomment %}
-{% load instance_theming %}
+{% load instance_theming static %}
 {% block title %}
   - {% block head_title %}{% endblock head_title %}
 {% endblock title %}
@@ -22,6 +22,11 @@
   </div>
 {% endblock main-content-body %}
 {% block after-body-bottom-js %}
+  <script type="module">
+    import { bindPasswordReveal } from "{% static 'login/password_reveal.js' %}";
+
+    bindPasswordReveal(document.querySelector(".login"));
+  </script>
   {% block extra_body %}
   {% endblock extra_body %}
 {% endblock after-body-bottom-js %}
