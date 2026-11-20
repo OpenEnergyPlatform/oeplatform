@@ -571,6 +571,9 @@ AXES_ENABLED = not DEBUG
 AXES_FAILURE_LIMIT = 5  # Number of allowed attempts
 AXES_COOLOFF_TIME = 1  # Lockout period in hours
 AXES_ONLY_USER_FAILURES = True  # Only track failures per user
+# A page in the account layout instead of a bare 403 text; it points to the
+# password reset, which lifts the lockout (login.models.lift_login_lockout).
+AXES_LOCKOUT_TEMPLATE = "account/lockout.html"
 
 CAPTCHA_IMAGE_SIZE = (300, 80)  # width, height in pixels
 CAPTCHA_FONT_SIZE = 52

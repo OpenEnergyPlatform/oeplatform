@@ -29,7 +29,15 @@ the previous release's highlights.
 
 ## Features
 
+- Password fields on the log-in, sign-up and password pages have a button that
+  shows the typed password
+
 ## Bugs
+
+- A password reset now lifts the log-in lockout after too many failed attempts.
+  Before, a user who had typed the user name stayed locked out for up to an hour
+  despite the new password. The lockout itself is now a page that explains it
+  and links to the password reset, instead of a bare error text
 
 ## Documentation updates
 

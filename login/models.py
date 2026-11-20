@@ -19,6 +19,7 @@ import itertools
 from typing import TYPE_CHECKING
 
 import requests
+from allauth.account.signals import password_reset
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, Group, UserManager
 from django.core.exceptions import ObjectDoesNotExist
@@ -402,3 +403,25 @@ class UserBackend(object):
 def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
         Token.objects.create(user=instance)
+
+
+@receiver(password_reset)
+def lift_login_lockout(sender, request, user, **kwargs):
+    """Lift both login throttles once the password is reset.
+
+    Without this, a user who typed the user name into the login field is
+    still refused after a reset: axes locks the name for AXES_COOLOFF_TIME,
+    and allauth's own `login_failed` rate limit, which allauth clears on a
+    reset only under the email addresses, blocks it for five minutes.
+    """
+    from allauth.account.adapter import get_adapter
+    from axes.utils import reset
+
+    for typed in (user.name, user.email):
+        if typed:
+            reset(username=typed)
+    # shortcut: allauth's private helper (65.14.1, the one allauth calls for
+    # each email); recheck it on an allauth upgrade.
+    get_adapter(request)._delete_login_attempts_cached_email(
+        request, username=user.name
+    )

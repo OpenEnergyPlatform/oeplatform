@@ -1,0 +1,22 @@
+{% extends "allauth/layouts/base.html" %}
+{% comment %}
+  Shown by django-axes (AXES_LOCKOUT_TEMPLATE) after too many failed log-ins
+  for one account. Resetting the password lifts the lockout at once
+  (login.models.lift_login_lockout).
+{% endcomment %}
+{% block head_title %}
+  Account temporarily locked
+{% endblock head_title %}
+{% block content %}
+  <h1 class="login__heading">Account temporarily locked</h1>
+  {% include "components/alert.html" with status="warning" text="There were too many failed log-in attempts for this account, so logging in is paused for a while." %}
+  <p>
+    If you are unsure of your password, reset it. Once you have set a new one,
+    you can log in with it straight away.
+  </p>
+  <a class="btn btn-primary w-100 mb-3"
+     href="{% url 'account_reset_password' %}">Reset password</a>
+  <div class="login__alternative">
+    <a href="{% url 'account_login' %}">Back to log in</a>
+  </div>
+{% endblock content %}
