@@ -31,6 +31,7 @@ the previous release's highlights.
 
 - Password fields on the log-in, sign-up and password pages have a button that
   shows the typed password
+  [(#2765)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2765)
 
 ## Bugs
 
