@@ -39,6 +39,7 @@ the previous release's highlights.
   Before, a user who had typed the user name stayed locked out for up to an hour
   despite the new password. The lockout itself is now a page that explains it
   and links to the password reset, instead of a bare error text
+  [(#2765)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2765)
 
 ## Documentation updates
 
