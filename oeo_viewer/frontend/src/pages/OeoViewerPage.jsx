@@ -76,7 +76,7 @@ export default function OeoViewerPage() {
       setSelectedEntity({
         iri: decodedIri,
         type: decodedType,
-      });setHierarchyTargetIri(decodedIri);
+      }); setHierarchyTargetIri(decodedIri);
 
       // 2. Clear URL parameters after delay to ensure widgets initialize
       setTimeout(() => {
@@ -150,23 +150,23 @@ export default function OeoViewerPage() {
   };
 
   const handleAutocompleteChange = (sel) => {
-  if (!sel) {
-    setSelectedEntity({ iri: "", type: "class" });
-    setHierarchyTargetIri("");
-    return;
-  }
+    if (!sel) {
+      setSelectedEntity({ iri: "", type: "class" });
+      setHierarchyTargetIri("");
+      return;
+    }
 
-  const item = Array.isArray(sel) ? sel[0] : sel;
-  const iri = item?.iri || "";
-  const type = item?.type || "class";
+    const item = Array.isArray(sel) ? sel[0] : sel;
+    const iri = item?.iri || "";
+    const type = item?.type || "class";
 
-  setSelectedEntity({
-    iri,
-    type,
-  });
+    setSelectedEntity({
+      iri,
+      type,
+    });
 
-  setHierarchyTargetIri(iri);
-};
+    setHierarchyTargetIri(iri);
+  };
 
   const handleHierarchyClick = (...args) => {
     let iri = "";
@@ -222,8 +222,54 @@ export default function OeoViewerPage() {
 
       <EuiPageTemplate.Section grow={false}>
         <HowToUseViewer />
+
         <EuiSpacer size="m" />
 
+        {/* Zentrale Suchleiste mit Buttons */}
+        <div
+          className="oeo-central-search"
+          style={{
+            width: "100%",
+            maxWidth: "1400px",
+            margin: "0 auto",
+          }}
+        >
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem>
+              <TssAutocomplete onChange={handleAutocompleteChange} />
+            </EuiFlexItem>
+
+            {/* Copy Term IRI */}
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content="Copy Term IRI (Permalink)">
+                <EuiButtonIcon
+                  display="base"
+                  iconType="link"
+                  size="m"
+                  aria-label="Copy Term IRI"
+                  onClick={copyTermIri}
+                  isDisabled={!selectedEntity.iri}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+
+            {/* Share View */}
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content="Share link to this view">
+                <EuiButtonIcon
+                  display="base"
+                  iconType="share"
+                  size="m"
+                  aria-label="Share view"
+                  onClick={shareCurrentView}
+                  isDisabled={!selectedEntity.iri}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+
+        <EuiSpacer size="l" />
         {isMobile ? (
           /* --- MOBILE LAYOUT --- */
           <EuiPanel hasShadow={false} color="transparent" paddingSize="s">
@@ -238,33 +284,6 @@ export default function OeoViewerPage() {
             <AccordionShim id={mobileInfoId} title="About Open Energy Ontology" initialIsOpen={false}>
               <TssOeoInfo />
             </AccordionShim>
-
-            <EuiSpacer size="m" />
-
-            {/* Search + Buttons (Mobile) */}
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem>
-                <TssAutocomplete onChange={handleAutocompleteChange} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  display="base"
-                  iconType="link"
-                  aria-label="Copy Term IRI"
-                  onClick={copyTermIri}
-                  isDisabled={!selectedEntity.iri}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  display="base"
-                  iconType="share"
-                  aria-label="Share current view"
-                  onClick={shareCurrentView}
-                  isDisabled={!selectedEntity.iri}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
 
             <EuiSpacer size="m" />
 
@@ -292,12 +311,29 @@ export default function OeoViewerPage() {
             {(EuiResizablePanel) => (
               <>
                 <EuiResizablePanel initialSize={35} minSize="25%" paddingSize="none">
-                  <div style={{ position: "sticky", top: 16, maxHeight: "calc(100vh - 160px)", overflow: "auto" }}>
+                  <div
+                    style={{
+                      position: "sticky",
+                      top: 16,
+                      maxHeight: "calc(100vh - 160px)",
+                      overflow: "auto",
+                    }}
+                  >
                     <EuiPanel hasShadow={false} color="subdued" paddingSize="s">
                       <EuiText size="s">
                         <h3 style={{ marginTop: 0 }}>Ontology Hierarchy</h3>
                       </EuiText>
+
                       <EuiSpacer size="m" />
+
+                      <EuiText size="s">
+                        <p>
+                          Browse the ontology structure. More specific terms appear further down the tree.
+                        </p>
+                      </EuiText>
+
+                      <EuiSpacer size="s" />
+
                       {hierarchyComponent}
                     </EuiPanel>
                   </div>
@@ -308,43 +344,6 @@ export default function OeoViewerPage() {
                     <AccordionShim id={desktopInfoId} title="About Open Energy Ontology" initialIsOpen={false}>
                       <TssOeoInfo />
                     </AccordionShim>
-
-                    <EuiSpacer size="l" />
-
-                    {/* Search + Buttons (Desktop) */}
-                    <EuiFlexGroup alignItems="center" gutterSize="s">
-                      <EuiFlexItem>
-                        <TssAutocomplete onChange={handleAutocompleteChange} />
-                      </EuiFlexItem>
-
-                      {/* Button 1: Copy Term IRI */}
-                      <EuiFlexItem grow={false}>
-                        <EuiToolTip content="Copy Term IRI (Permalink)">
-                          <EuiButtonIcon
-                            display="base"
-                            iconType="link"
-                            size="m"
-                            aria-label="Copy Term IRI"
-                            onClick={copyTermIri}
-                            isDisabled={!selectedEntity.iri}
-                          />
-                        </EuiToolTip>
-                      </EuiFlexItem>
-
-                      {/* Button 2: Share View */}
-                      <EuiFlexItem grow={false}>
-                        <EuiToolTip content="Share link to this view">
-                          <EuiButtonIcon
-                            display="base"
-                            iconType="share"
-                            size="m"
-                            aria-label="Share view"
-                            onClick={shareCurrentView}
-                            isDisabled={!selectedEntity.iri}
-                          />
-                        </EuiToolTip>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
 
                     <EuiSpacer size="l" />
 

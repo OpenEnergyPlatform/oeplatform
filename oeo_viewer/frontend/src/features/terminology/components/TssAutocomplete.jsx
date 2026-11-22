@@ -8,7 +8,7 @@ import { useTssConfig } from "../hooks/useTssConfig";
 
 export default function TssAutocomplete({
   api,                 // optional override
-  placeholder = "Type to search...",
+  placeholder = "Search for an ontology term by name, synonym or IRI...",
   onChange = () => { },
   ontology,            // optional override
 }) {
