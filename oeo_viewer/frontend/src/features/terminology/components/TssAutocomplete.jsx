@@ -33,7 +33,7 @@ export default function TssAutocomplete({
       initialSearchQuery=""
       preselected={[]}
       selectionChangedEvent={onChange}
-      showApiSource
+      showApiSource={false}
       singleSelection
       useLegacy
     />

@@ -18,6 +18,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiGlobalToastList,
+  EuiPopover,
+  EuiButton,
 } from "@elastic/eui";
 
 import TssAutocomplete from "../features/terminology/components/TssAutocomplete";
@@ -49,6 +51,7 @@ function AccordionShim({ id, title, initialIsOpen = false, children }) {
 
 export default function OeoViewerPage() {
   const { euiTheme } = useEuiTheme();
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const bp = useCurrentEuiBreakpoint();
   const isMobile = bp === "xs" || bp === "s";
 
@@ -221,11 +224,8 @@ export default function OeoViewerPage() {
       />
 
       <EuiPageTemplate.Section grow={false}>
-        <HowToUseViewer />
 
-        <EuiSpacer size="m" />
-
-        {/* Zentrale Suchleiste mit Buttons */}
+        {/* Zentrale Suchleiste mit Buttons (new) */}
         <div
           className="oeo-central-search"
           style={{
@@ -265,6 +265,29 @@ export default function OeoViewerPage() {
                   isDisabled={!selectedEntity.iri}
                 />
               </EuiToolTip>
+            </EuiFlexItem>
+
+            {/* Help Button */}
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                button={
+                  <EuiButton
+                    iconType="questionInCircle"
+                    size="s"
+                    onClick={() => setIsHelpOpen(!isHelpOpen)}
+                  >
+                    Help
+                  </EuiButton>
+                }
+                isOpen={isHelpOpen}
+                closePopover={() => setIsHelpOpen(false)}
+                anchorPosition="downRight"
+                panelPaddingSize="m"
+              >
+                <div style={{ width: "650px", maxWidth: "calc(100vw - 48px)" }}>
+                  <HowToUseViewer />
+                </div>
+              </EuiPopover>
             </EuiFlexItem>
           </EuiFlexGroup>
         </div>
@@ -341,12 +364,6 @@ export default function OeoViewerPage() {
 
                 <EuiResizablePanel initialSize={65} minSize="40%" paddingSize="none">
                   <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
-                    <AccordionShim id={desktopInfoId} title="About Open Energy Ontology" initialIsOpen={false}>
-                      <TssOeoInfo />
-                    </AccordionShim>
-
-                    <EuiSpacer size="l" />
-
                     <EuiPanel paddingSize="m">
                       <EuiText>
                         <div style={{ marginTop: 0 }}>Entity Metadata</div>
@@ -368,8 +385,26 @@ export default function OeoViewerPage() {
                 </EuiResizablePanel>
               </>
             )}
+
           </EuiResizableContainer>
         )}
+        {/* NEU: About the Open Energy Ontology ganz unten */}
+        <EuiSpacer size="l" />
+
+        <EuiPanel
+          color="subdued"
+          hasBorder
+          hasShadow={false}
+          paddingSize="s"
+        >
+          <AccordionShim
+            id={desktopInfoId}
+            title="About the Open Energy Ontology"
+            initialIsOpen={false}
+          >
+            <TssOeoInfo />
+          </AccordionShim>
+        </EuiPanel>
       </EuiPageTemplate.Section>
     </EuiPageTemplate>
   );

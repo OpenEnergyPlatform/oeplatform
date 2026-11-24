@@ -1,18 +1,17 @@
 // SPDX-FileCopyrightText: 2025 Jonas Huber <https://github.com/jh-RLI> © Reiner Lemoine Institut
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-import React, { useState } from "react";
+import React from "react";
 import {
     EuiPanel,
     EuiText,
-    EuiButtonEmpty,
     EuiIcon,
     EuiSpacer,
 } from "@elastic/eui";
 
 /** A collapsible, top-of-page banner explaining how to use the viewer. */
 export default function TopInfoBanner() {
-    const [open, setOpen] = useState(false);
+
 
     return (
         <EuiPanel color="subdued" hasBorder paddingSize="m">
@@ -23,27 +22,17 @@ export default function TopInfoBanner() {
                         <strong>How to use the OEO Viewer</strong>
                     </EuiText>
                 </div>
-                <EuiButtonEmpty
-                    size="s"
-                    iconType={open ? "arrowUp" : "arrowDown"}
-                    iconSide="right"
-                    onClick={() => setOpen((o) => !o)}
-                    aria-expanded={open}
-                >
-                    {open ? "Hide" : "Show"}
-                </EuiButtonEmpty>
             </div>
 
-            {open && (
-                <>
-                    <EuiSpacer size="s" />
-                    <div
-                        style={{
-                            display: "grid",
-                            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-                            gap: 24,
-                        }}
-                    >
+            <EuiSpacer size="s" />
+
+<div
+    style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+        gap: 24,
+    }}
+>
                         <EuiText size="s">
                             <p><strong>1. Browse & Navigate</strong></p>
                             <ul>
@@ -70,8 +59,8 @@ export default function TopInfoBanner() {
                             </ul>
                         </EuiText>
                     </div>
-                </>
-            )}
+
+
         </EuiPanel>
     );
 }
