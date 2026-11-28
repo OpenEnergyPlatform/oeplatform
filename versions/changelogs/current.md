@@ -31,6 +31,10 @@ the previous release's highlights.
 
 ## Bugs
 
+- A table page naming a table that does not exist (a deleted table, an old link)
+  answers 404 instead of 500
+  [(#2767)](https://github.com/OpenEnergyPlatform/oeplatform/pull/2767)
+
 ## Documentation updates
 
 - The documentation Home now says what the OEP is and guides every visitor to
