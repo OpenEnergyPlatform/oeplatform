@@ -63,7 +63,7 @@ from api.actions import (
 )
 from api.error import APIError
 from api.helper import get_column_description
-from api.utils import table_or_404, table_or_404_from_dict
+from api.utils import table_or_none
 from dataedit.forms import GeomViewForm, GraphViewForm, LatLonViewForm
 from dataedit.helper import (
     add_tag,
@@ -82,7 +82,7 @@ from dataedit.metadata import has_valid_filled_metadata, load_metadata_from_db
 from dataedit.metadata.widget import MetaDataWidget
 from dataedit.models import Dataset, Embargo
 from dataedit.models import Filter as DBFilter
-from dataedit.models import PeerReview, PeerReviewManager, Tag, Topic
+from dataedit.models import PeerReview, PeerReviewManager, Table, Tag, Topic
 from dataedit.models import View as DBView
 from dataedit.models import View as DataViewModel
 from dataedit.peer_review.metadata_serializer import (
@@ -107,6 +107,22 @@ from oeplatform.settings import (
 )
 
 ITEMS_PER_PAGE = 50  # how many tabled per page should be displayed
+
+
+def table_or_404(table: str) -> Table:
+    """The table a page names, or Django's 404 page.
+
+    Not `api.utils.table_or_404`: that raises an `APIError`, which only the API
+    turns into a 404, so on a page a missing table answered 500.
+    """
+    table_obj = table_or_none(table)
+    if table_obj is None:
+        raise Http404("Table does not exist")
+    return table_obj
+
+
+def table_or_404_from_dict(dct) -> Table:
+    return table_or_404(dct.get("table", ""))
 
 
 class StandaloneMetaEditView(View):
@@ -933,8 +949,6 @@ class TableDataView(View):
 
         table_obj = table_or_404(table=table)
         metadata = load_metadata_from_db(table=table)
-        if table_obj is None:
-            raise Http404("Table object could not be loaded")
 
         # TODO: Adapt this stuff to v2
         from dataedit.metadata import TEMPLATE_V1_5
